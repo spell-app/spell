@@ -1,3 +1,6 @@
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { StoragePlace } from "spell/util/persist/StoragePlace"
 import {
   REVIEW_ACTIONS,
   REVIEW_API,
@@ -758,25 +761,19 @@ export class ReviewClient {
     this.writeBackups(backups)
   }
 
-  /** This page's backups, `{ [id]: text }`;  `{}` for none, bad JSON, or storage that throws. */
+  /** This page's backups, `{ [id]: text }`;  `{}` for none, or a value that isn't one. */
   readBackups(): Record<string, string> {
-    try {
-      const value = JSON.parse(this.options.storage?.getItem(this.backupKey) ?? "{}") as unknown
-      return value && typeof value === "object" ? (value as Record<string, string>) : {}
-    } catch {
-      return {}
-    }
+    const value = PrefStore.getAt(this.backupKey, this.backupsKept)
+    return value && typeof value === "object" ? (value as Record<string, string>) : {}
   }
 
-  /** Save `backups`;  a browser that blocks storage just doesn't remember. */
+  /** Save `backups`, as JSON;  none forgets the key.  A browser that blocks storage keeps them for the visit. */
   private writeBackups(backups: Record<string, string>) {
-    try {
-      if (Object.keys(backups).length) this.options.storage?.setItem(this.backupKey, JSON.stringify(backups))
-      else this.options.storage?.removeItem(this.backupKey)
-    } catch {
-      // private window:  not remembered
-    }
+    PrefStore.setAt(this.backupKey, Object.keys(backups).length ? backups : undefined, this.backupsKept)
   }
+
+  /** Where the backups are kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
+  private backupsKept = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
 
   /** The page's backup key:  the old runtime's, so its backups are found. */
   private get backupKey(): string {

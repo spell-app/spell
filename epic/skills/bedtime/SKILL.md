@@ -10,7 +10,7 @@ Owen is going to sleep.
 Ask everything NOW, then get it all done:  run the chosen phases to the end without him.
 
 The EPIC PAGE is the record, as on any day:
-- every judgement call, problem and todo is an item in it
+- every judgement call, problem and loose end is an item in it (a loose end:  a caveat, `#C`)
 - each phase gets its Done list and Commits
 - the night's judgement calls and issues show RED there, until he reviews them
 - So no morning report (D5 of `review-review`):  in the morning, `/epic review <name>` goes through what's red.
@@ -110,7 +110,7 @@ Until the run ends (step 6), these OVERRIDE the root rules and memory:
   - merge into `main`, or push
   - `/isolate done`, or `ExitWorktree`
   - delete anything outside the worktree
-  - Something needing those:  `add <name>#T`, and go on.
+  - Something needing those:  `add <name>#C` (a caveat:  work still to do), and go on.
 
 Owen writing in this session mid-run means he's awake:  bedtime mode ends there.
 - Say which phase it was on.
@@ -195,7 +195,7 @@ Everything else stands:
 ```
 bedtime <name> start "P3-P6"            bedtime mode on;  logs "Bedtime started"
 phase <name>#P<N> active|done           each phase;  done --done "<ul>...</ul>" writes its Done list
-add <name>#J|#I|#T ...                  every call, problem, loose end:  an item (--calm unless it'd surprise Owen)
+add <name>#J|#I|#C ...                  every call, problem, loose end:  an item (--calm unless it'd surprise Owen)
 commit <name>#P<N> <sha> "..."          the phase's commit, under its Commits
 log <name> "P<n> done|WIP|skipped ..."  what happened, timestamped
 bedtime <name> done "summary"           bedtime mode off;  logs "Bedtime done"

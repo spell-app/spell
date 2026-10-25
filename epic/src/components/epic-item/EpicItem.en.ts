@@ -56,12 +56,20 @@ export const epicItemVocabulary = {
     {
       name: "state",
       kind: "enum",
-      values: ["attention", "replied", "progress", "open", "recent", "old"],
+      values: ["attention", "replied", "progress", "open", "recent", "handled", "old"],
       description:
         "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs Owen), `replied` " +
         "(orange:  Claude answered with options, Owen's turn to pick), `progress` (blue:  Claude is working on it), " +
         "`open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), " +
-        "`old` (grey:  no longer relevant, canceled)."
+        "`handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+    },
+    {
+      name: "handled",
+      kind: "string",
+      description:
+        "HANDLED IN A PHASE (epic `epic-engine` P31):  the phase whose text took its answer (`p-retry-logic`), set " +
+        "when a change mark naming it is first stamped there;  grey and quiet, its line linking the phase.  Reopen " +
+        "on the mark takes it off."
     },
     {
       name: "changed",
@@ -99,6 +107,13 @@ export const epicItemVocabulary = {
     },
     { name: "work", kind: "string", description: "The queued work, in a few words (`Skip short sections`)." },
     { name: "working", kind: "boolean", description: "Work on it is under way." },
+    {
+      name: "limit",
+      kind: "boolean",
+      description:
+        "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered " +
+        "for the next phase;  a caveat without it is work still to do (a todo, before P32)."
+    },
     {
       name: "bedtime",
       kind: "boolean",
@@ -231,6 +246,12 @@ export const epicItemVocabulary = {
         "`epic-engine` P4)."
     },
     {
+      name: "handled",
+      description:
+        "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
+        "`epic-engine` P31)."
+    },
+    {
       name: "git",
       description:
         "With commits (`commits`, or `<epic-commit>` children):  a git icon at the line's end that shows or hides " +
@@ -282,6 +303,17 @@ export const epicItemVocabulary = {
     { key: "stateOpen", text: "Open, still undecided", description: "Id chip tooltip, `state=open`." },
     { key: "stateRecent", text: "Decided or done", description: "Id chip tooltip, `state=recent`." },
     { key: "stateOld", text: "No longer relevant", description: "Id chip tooltip, `state=old`." },
+    {
+      key: "stateHandled",
+      text: "Handled in a phase:  its answer is in that phase's text now",
+      description: "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
+    },
+    { key: "handledIn", text: "in {phase}", description: "Its line's link to the phase that handled it:  `in P4`." },
+    {
+      key: "handledTip",
+      text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
+      description: "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+    },
     { key: "tipTodo", text: "to do:  {work}", description: "Id chip and review label tooltip:  the queued work." },
     { key: "tipReviewed", text: "reviewed {date}", description: "Id chip tooltip:  reviewed." },
     { key: "tipDeferred", text: "deferred {date}", description: "Id chip and review label tooltip:  deferred." },

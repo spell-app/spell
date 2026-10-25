@@ -552,23 +552,23 @@ describe("ReviewClient's test runs", () => {
   test("answerTest():  a `test` mark, read back by testAnswerOf();  another mark is no answer", async () => {
     const { client, server } = await started()
     expect(
-      await client.answerTest("v1", { result: "failed", note: "cut short", shot: "tests/v1-20261019-1432.png" })
+      await client.answerTest("t1", { result: "failed", note: "cut short", shot: "tests/t1-20261019-1432.png" })
     ).toBe(true)
     expect(server.posts.at(-1)).toEqual([
       "mark",
       {
         page: PAGE,
-        id: "v1",
-        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/v1-20261019-1432.png" }
+        id: "t1",
+        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/t1-20261019-1432.png" }
       }
     ])
-    expect(client.testAnswerOf("v1")).toEqual({
+    expect(client.testAnswerOf("t1")).toEqual({
       result: "failed",
       note: "cut short",
-      shot: "tests/v1-20261019-1432.png"
+      shot: "tests/t1-20261019-1432.png"
     })
-    await client.answerTest("v1", { result: "passed" })
-    expect(client.testAnswerOf("v1")).toEqual({ result: "passed" })
+    await client.answerTest("t1", { result: "passed" })
+    expect(client.testAnswerOf("t1")).toEqual({ result: "passed" })
     await client.save("q1", { action: "approve" })
     expect(client.testAnswerOf("q1")).toBeUndefined()
   })
@@ -577,10 +577,10 @@ describe("ReviewClient's test runs", () => {
     const { client, server } = await started()
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    expect(await client.saveShot("v2", "data:image/png;base64,AAAA")).toBe("tests/v2-20261019-1432.png")
-    expect(server.posts.at(-1)).toEqual(["shot", { page: PAGE, id: "v2", png: "data:image/png;base64,AAAA" }])
+    expect(await client.saveShot("t2", "data:image/png;base64,AAAA")).toBe("tests/t2-20261019-1432.png")
+    expect(server.posts.at(-1)).toEqual(["shot", { page: PAGE, id: "t2", png: "data:image/png;base64,AAAA" }])
     server.failures.set("shot", { status: 413, error: "over 8 MB" })
-    expect(await client.saveShot("v2", "data:image/png;base64,AAAA")).toBeUndefined()
+    expect(await client.saveShot("t2", "data:image/png;base64,AAAA")).toBeUndefined()
     expect(notices).toEqual(["Over 8 MB."])
   })
 

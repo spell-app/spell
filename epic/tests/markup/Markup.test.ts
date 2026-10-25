@@ -418,8 +418,8 @@ describe("Markup.validate()", () => {
   test("reports an epic element inside prose, unless it's a `flow` one (`<epic-update>`)", () => {
     const document = documentOf(`
       <epic-page epic="demo" title="Demo"><epic-overview id="overview"></epic-overview>
-        <epic-section id="todos" kind="todos">
-          <epic-item id="t1" title="x" status="open">
+        <epic-section id="caveats" kind="caveats">
+          <epic-item id="c1" title="x" status="open">
             <p>Text <epic-update phase="2"></epic-update> and <epic-reply>no</epic-reply></p>
           </epic-item>
         </epic-section>

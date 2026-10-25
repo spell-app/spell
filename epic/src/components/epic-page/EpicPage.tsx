@@ -1,6 +1,8 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell-ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
 import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell-epic/list/EpicState"
@@ -1201,7 +1203,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     E.afterSolidUpdate(() => window.scrollTo({ top: 0, behavior: "instant" }))
   }
 
-  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#v3` off the address. */
+  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#t3` off the address. */
   @E.on(TEST_DONE, { target: "renderRoot" })
   protected onTestDone(event: Event) {
     event.stopPropagation()
@@ -1221,7 +1223,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return value === TEST_ALL || query.has(ALL_QUERY) ? TEST_ALL : "1"
   }
 
-  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#v3`), replacing it. */
+  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#t3`), replacing it. */
   private static markTestQuery(value: string | undefined) {
     const url = new URL(location.href)
     if (value) url.searchParams.set(TEST_QUERY, value)
@@ -1241,11 +1243,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private readonly toggleCommits = () => {
     const on = !this.showCommits
     this.showCommits = on
-    try {
-      localStorage.setItem(COMMITS_KEY + location.pathname, on ? "1" : "")
-    } catch {
-      // private mode:  the choice lasts the visit
-    }
+    // storage blocked:  the choice lasts the visit
+    PrefStore.setAt(COMMITS_KEY + location.pathname, on ? COMMITS_ON : undefined)
   }
 
   /**
@@ -1393,13 +1392,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /** Is the git toggle on for this page, as last left?  `false` without storage. */
   private static savedCommits(): boolean {
-    try {
-      return localStorage.getItem(COMMITS_KEY + location.pathname) === "1"
-    } catch {
-      return false
-    }
+    return PrefStore.getAt(COMMITS_KEY + location.pathname) === COMMITS_ON
   }
 }
+
+/** The commits toggle on, as kept:  `1`, as it always was. */
+const COMMITS_ON = 1
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}

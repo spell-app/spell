@@ -190,7 +190,6 @@ export const SECTION_LOOKS = {
   questions: { icon: "file circle question", title: "questionsTitle" },
   judgements: { icon: "gavel", title: "judgementsTitle" },
   caveats: { icon: "triangle exclamation", title: "caveatsTitle" },
-  todos: { icon: "list check", title: "todosTitle" },
   issues: { icon: "bug", title: "issuesTitle" },
   tests: { icon: "flask", title: "testsTitle" },
   log: { icon: "clock rotate left", title: "logTitle" }
@@ -209,7 +208,7 @@ export const REPORT = "report"
 export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"])`
 
 /** The kinds that hold items:  an empty one says "none yet". */
-export const ITEM_KINDS = ["questions", "judgements", "caveats", "todos", "issues", "tests"] as const
+export const ITEM_KINDS = ["questions", "judgements", "caveats", "issues", "tests"] as const
 
 /** The Phases section's toggles:  which fields each shows, its icon, its texts, the custom property it sets. */
 export const PHASE_TOGGLES = [
@@ -246,9 +245,19 @@ export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 /** The attributes of a counted child that change its count or its state:  a change re-counts. */
 export const COUNT_ATTRIBUTES = ["status", "state"]
 
+/** Its items, by themselves:  their runs (`EpicSection.runEnds`). */
+export const ITEMS = ":scope > epic-item"
+
+/**
+ * The attributes of an item that change where its list's runs start and end (`EpicSection.runEnds`):
+ * - `open`:  unfolded, its details between its line and the next item's
+ * - `hidden`:  not drawn at all
+ */
+export const RUN_ATTRIBUTES = ["open", "hidden"]
+
 /**
  * Where an item stands, in the filter's order:  its state, its chip's colour, its texts' keys (the tooltip's words).
- * - the same six as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
+ * - the same seven as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
  *   `replied` (Owen's turn to pick, 2026-10-09) beside `attention`:  both wait on Owen
  */
 export const FILTER_STATES = [
@@ -257,6 +266,8 @@ export const FILTER_STATES = [
   { state: "replied", color: "orange", words: "stateReplied" },
   { state: "open", color: "yellow", words: "stateOpen" },
   { state: "recent", color: "green", words: "stateRecent" },
+  // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart
+  { state: "handled", color: "grey", words: "stateHandled" },
   { state: "old", color: "grey", words: "stateOld" }
 ] as const
 
@@ -288,6 +299,11 @@ export const FILTER_TEXTS = [
   },
   { key: "stateOpen", text: "open, still undecided", description: "A state chip's words:  `open` (yellow)." },
   { key: "stateRecent", text: "decided or done", description: "A state chip's words:  `recent` (green)." },
+  {
+    key: "stateHandled",
+    text: "handled in a phase",
+    description: "A state chip's words:  `handled` (grey:  its answer is in a phase's text now)."
+  },
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." }
 ] as const
 

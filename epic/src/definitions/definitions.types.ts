@@ -123,7 +123,7 @@ export type AttributeTest = {
  * - `date` -- `2026-10-07`
  * - `time` -- a date, or a date and time:  `2026-10-07 14:30`, or ISO with seconds and offset
  *   (`2026-10-06T09:28:23-04:00`), as the script stamps them
- * - `item id` -- `q7`, `j3`, `c1`, `i2`, `t4`, `v1`:  its letter is its kind (`ItemLetters`)
+ * - `item id` -- `q7`, `j3`, `c1`, `i2`, `t4`:  its letter is its kind (`ItemLetters`)
  * - `phase id` -- `p-epic-migrate`:  stable, made from its name (`PhaseIds`, epic `epic-workflow` P15);
  *   an older page's `p3`, until the migration `stable-phase-ids`
  * - `anchor` -- any id a link may land on (`d7`, an old decision's, kept on its answer)
@@ -169,7 +169,6 @@ export const SectionIds = {
   questions: "decisions",
   judgements: "judgements",
   caveats: "caveats",
-  todos: "todos",
   issues: "issues",
   tests: "tests",
   log: "log"
@@ -198,15 +197,16 @@ export const OVERVIEW_ID = "overview"
 
 /**
  * The sections that hold `<epic-item>`s => their items' id letter:  ONE element for every kind of item, its kind
- * its id's letter (Q11).  `v` is a test ("verify":  `t` is taken).
+ * its id's letter (Q11).
+ * - Caveats hold the todos too (epic `epic-engine` P32, Q16):  work still to do, or (`<epic-item limit>`) a limit to
+ *   know about;  tests are `t`, freed by the todos (`v`, "verify", before)
  */
 export const ItemLetters = {
   questions: "q",
   judgements: "j",
   caveats: "c",
-  todos: "t",
   issues: "i",
-  tests: "v"
+  tests: "t"
 } as const satisfies Partial<Record<PageSectionKind, string>>
 
 /** A section kind that holds items:  a key of `ItemLetters`. */

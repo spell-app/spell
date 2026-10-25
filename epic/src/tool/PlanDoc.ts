@@ -587,7 +587,8 @@ export class PlanDoc extends PlanReader {
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
       awaitsPick: PlanItem.awaitsPick(item),
-      reviewAs: data.reviewAs
+      reviewAs: data.reviewAs,
+      handled: data.handled
     }
   }
 
@@ -637,6 +638,7 @@ export class PlanDoc extends PlanReader {
       status: spec.live,
       phase: this.activePhase,
       answered: kind === "decision",
+      ...((spec as { limit?: boolean }).limit && { limit: true }),
       ...(this.bedtime && { overnight: true }),
       ...(calm && { calm: true })
     }
@@ -650,13 +652,16 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its kind, `v4`.
+   * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its LETTER, `t4`.
+   * - a caveat and a todo share theirs (`c`, epic `epic-engine` P32)
    * - throws on a kind not in `KINDS`
    */
   nextId(kind: string): string {
     if (!isItemKind(kind)) throw new PlanDocError(`kind must be ${Object.keys(KINDS).join(" / ")}, not "${kind}"`)
-    const spec = KINDS[kind]
-    return `${spec.prefix}${Math.max(0, ...this.items(kind).map((item) => PlanItem.idNumber(item.id))) + 1}`
+    const { prefix } = KINDS[kind]
+    const pattern = new RegExp(`^${prefix}\\d+$`)
+    const ids = this.sectionChildren(kind).filter((item) => pattern.test(item.id))
+    return `${prefix}${Math.max(0, ...ids.map((item) => PlanItem.idNumber(item.id))) + 1}`
   }
 
   /**
@@ -989,7 +994,7 @@ export class PlanDoc extends PlanReader {
     const item = this.findItem(mark.id)
     if (!item) return { applied: false, gone: true, left: "no such item:  mark dropped" }
     // skipping a todo IS dropping it (its own note box's x is Drop It;  a skip comes from a page drawn before)
-    const todoSkip = mark.action === "skip" && PlanItem.kindOf(item.id) === "todo"
+    const todoSkip = mark.action === "skip" && PlanItem.kindOfItem(item) === "todo"
     const applied = todoSkip ? { ...mark, action: "drop" as const } : mark
     const result = this.applyAction(item, applied)
     if (result.applied) {
@@ -1013,7 +1018,7 @@ export class PlanDoc extends PlanReader {
 
   /** `applyMark()`'s work on `item`, the log line aside. */
   applyAction(item: Element, { action, pick, choices, when, note, at, result, shot }: PlanMark): MarkResult {
-    const kind = PlanItem.kindOf(item.id)
+    const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
       case "approve": {
@@ -1032,7 +1037,7 @@ export class PlanDoc extends PlanReader {
         const todo = this.followUp(from, note)
         this.review(item.id)
         this.noteStatus(item.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
@@ -1066,7 +1071,7 @@ export class PlanDoc extends PlanReader {
   /**
    * A test's answer from Owen's TEST RUN on the page (epic `epic-engine` P4):  `result`, maybe his `note` and `shot`.
    * - `passed`:  closed (done), reviewed;  a `failed` from an earlier run goes
-   * - `failed`:  a NEW issue, "V3 failed:  <test title>", linking the test, with his note and his screenshot
+   * - `failed`:  a NEW issue, "T3 failed:  <test title>", linking the test, with his note and his screenshot
    *   (an `<img>`, its path from the epic page's folder, as the page's own) (`fileFailure()`)
    *   - the test stays open (a closed one reopens), reviewed, `failed="i42"`,
    *     and a Noted card linking the issue:  linked both ways
@@ -1121,7 +1126,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * File test `item`'s failure as a new issue, "V3 failed:  <test title>";  its id (`i42`).
+   * File test `item`'s failure as a new issue, "T3 failed:  <test title>";  its id (`i42`).
    * - its details:  the run and a link back to the test, Owen's note in his words, his screenshot (`shot`, from the
    *   epic page's folder:  the page's own relative path, so it shows in the page and its part alike)
    */
@@ -1600,6 +1605,8 @@ export class PlanDoc extends PlanReader {
       Markup.set(page, { recentSince: this.recentSince ?? undefined })
       if (before !== page.getAttribute("recent-since")) changed++
     }
+    // first:  a new mark in a phase's text marks its item handled, which its state reads
+    changed += this.updateChanges()
     for (const item of this.allItems) {
       const state = this.itemState(item)
       if (item.getAttribute("state") === state) continue
@@ -1608,7 +1615,6 @@ export class PlanDoc extends PlanReader {
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
     if (this.updateChangeCounts()) changed++
-    changed += this.updateChanges()
     return changed
   }
 
@@ -2018,7 +2024,7 @@ export class PlanDoc extends PlanReader {
       case "todo": {
         const todo = this.followUp(part, note)
         this.noteStatus(part.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
@@ -2056,6 +2062,7 @@ export class PlanDoc extends PlanReader {
    * - `accept`:  the change stands.  It's `accepted` now:  the orange goes, the words and the Q&A chip stay for good.
    * - `reopen`:  the question it names opens again (red, Owen's to talk over), and the mark stays orange until
    *   it's answered again and the words rewritten
+   *   - no longer handled in a phase (`handled`, P31):  it's back in the lists, to be talked over
    * - the mark gone from the doc (rewritten meanwhile):  dropped (`gone`);  accepted already:  nothing more to do
    * - logs it (`CH3 accepted:  Q13's change stands`)
    */
@@ -2075,6 +2082,10 @@ export class PlanDoc extends PlanReader {
       const question = this.findItem(item)
       if (!question) return { applied: false, left: `${label}:  its question ${item} isn't on the page` }
       const was = question.getAttribute("status") ?? "open"
+      if (question.hasAttribute("handled")) {
+        Markup.set<"epic-item">(question, { handled: undefined })
+        this.stamp(question)
+      }
       if (was !== "open") {
         // open, red, Owen's to answer again:  `setItem()` would keep an answered question decided.
         // Its answer stays, readable, until he answers again
@@ -2114,6 +2125,9 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
+   *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
+   *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
    * - each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting
    *   for Accept, in `to-accept` (`ch3 ch5`;  none:  no attribute)
    *   - the SKELETON's, as `part-ids` is:  the page counts and finds them, and the review routes take their marks
@@ -2126,7 +2140,10 @@ export class PlanDoc extends PlanReader {
     const now = PlanTime.clockTime(this.now)
     for (const change of changes) {
       const data: Partial<EpicData<"epic-change">> = {}
-      if (!CHANGE_ID.test(change.id)) data.id = `ch${next++}`
+      if (!CHANGE_ID.test(change.id)) {
+        data.id = `ch${next++}`
+        if (this.markHandled(change)) changed++
+      }
       if (!change.hasAttribute("at")) data.at = now
       const answer = change.hasAttribute("answer") ? undefined : this.answerOf(change.getAttribute("item") ?? "")
       if (answer) data.answer = answer
@@ -2147,6 +2164,21 @@ export class PlanDoc extends PlanReader {
       changed++
     }
     return changed
+  }
+
+  /**
+   * Change mark `change`, just stamped:  inside a phase's text, its item is HANDLED IN that phase (`handled`, epic
+   * `epic-engine` P31), logged (`Q13 handled in P4`);  changed?
+   * - an item already handled there, or a mark outside a phase, or naming no item:  nothing
+   */
+  private markHandled(change: Element): boolean {
+    const phase = change.closest("epic-section[kind='phases'] > epic-phase")
+    const item = phase ? this.findItem(change.getAttribute("item") ?? "") : null
+    if (!phase || !item || item.localName !== "epic-item" || item.getAttribute("handled") === phase.id) return false
+    Markup.set<"epic-item">(item, { handled: phase.id })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} handled in P${PhaseIds.numberOf(phase)}`)
+    return true
   }
 
   /** Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none. */
@@ -2198,9 +2230,11 @@ export class PlanDoc extends PlanReader {
     const details = `${promptHTML(note)}${about}`
     const id = this.addItem(kind, title, { details: details || undefined })
     const written = at ? `, written ${PlanTime.clockTime(new Date(at))}` : ""
-    this.noteStatus(id, `Made from the page:  Owen's new ${kind}${written}.`)
-    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${kind} (${String(key).toUpperCase()})`)
-    return { applied: true, did: `made ${kind} ${id.toUpperCase()}:  ${title}` }
+    // a todo is a caveat now, work still to do (epic `epic-engine` P32)
+    const word = kind === "todo" ? "caveat" : kind
+    this.noteStatus(id, `Made from the page:  Owen's new ${word}${written}.`)
+    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${word} (${String(key).toUpperCase()})`)
+    return { applied: true, did: `made ${word} ${id.toUpperCase()}:  ${title}` }
   }
 
   /** A link to `id` (an item, a phase, an Overview sub-section, `summary`) as HTML;  its id alone when it's gone. */
@@ -2262,7 +2296,7 @@ function textNodes(node: Node): Node[] {
 /** `PlanItem.asProse()`'s option for text as a reader sees it:  every element's heading, at any depth. */
 const PLAIN = { plain: true }
 
-/** Who a test answer's log line names (epic `epic-engine` P4):  `V3 passed (Owen's run)`. */
+/** Who a test answer's log line names (epic `epic-engine` P4):  `T3 passed (Owen's run)`. */
 const OWENS_RUN = "Owen's run"
 
 /** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
@@ -2309,9 +2343,9 @@ type ReviewPart = {
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 
-/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
+/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made caveat C23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
-  return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
+  return `Made caveat <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
 }
 
 /**

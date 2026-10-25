@@ -72,6 +72,7 @@
  * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the person).
  */
 
+import { PrefStore } from "spell/util/persist"
 import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
@@ -189,8 +190,9 @@ const PAGE_TITLE = ":scope > ui-sticky.spell-h1 > .spell-page-head > h1"
 const EPIC_LAND_GAP = 8
 
 /**
- * `localStorage` key prefix of a page's card filter, unless its input names a key (`data-spell-filter="..."`).
+ * `localStorage` key prefix of a page's card filter:  then its path, or the name its input gives (`data-spell-filter`).
  * - per page:  every `file://` page shares one origin, so one key would leak a filter between cheat sheets
+ * - a named one was kept under its name alone before epic `prefs-and-undo` P4:  moved over once (`wireFilter()`)
  */
 const FILTER_KEY_PREFIX = "spell-filter:"
 
@@ -201,7 +203,8 @@ const FOLD_KEY_PREFIX = "spell-folds:"
 const KEPT_FOLDS_KEY_PREFIX = "spell-doc:kept-folds:"
 
 /**
- * `localStorage` key prefix of a page's item filters (`{ [section id]: "all" | state }`), per page.
+ * `localStorage` key prefix of a page's item filters (`{ [section id]: [states shown] }`), per page:
+ *   `<epic-section>`'s own key too (its `FILTER_KEY`), the same shape.
  * - NOTE: not `spell-item-filter:`, Open | All's before P3 of `review-review`:  its saved "open" meant "not done"
  */
 const ITEM_FILTER_KEY_PREFIX = "spell-item-state:"
@@ -2430,11 +2433,8 @@ function keepFoldsForReload(main) {
       if (block.id) folds[block.id] = !isCollapsed(block)
     for (const heading of main.querySelectorAll(".spell-foldable[id]"))
       folds[heading.id] = !heading.parentElement.parentElement.classList.contains("spell-folded")
-    try {
-      sessionStorage.setItem(`${KEPT_FOLDS_KEY_PREFIX}${location.pathname}`, JSON.stringify(folds))
-    } catch {
-      // storage blocked:  a live reload starts from the saved folds
-    }
+    // storage blocked:  kept for this page only, so a live reload starts from the saved folds
+    PrefStore.setAt(`${KEPT_FOLDS_KEY_PREFIX}${location.pathname}`, folds, "session")
   })
 }
 
@@ -2444,13 +2444,9 @@ function keepFoldsForReload(main) {
  */
 function takeKeptFolds(live) {
   const key = `${KEPT_FOLDS_KEY_PREFIX}${location.pathname}`
-  try {
-    const kept = live ? JSON.parse(sessionStorage.getItem(key) ?? "null") : null
-    sessionStorage.removeItem(key)
-    return kept ?? undefined
-  } catch {
-    return undefined
-  }
+  const kept = live ? PrefStore.getAt(key, "session") : undefined
+  PrefStore.setAt(key, undefined, "session")
+  return kept && typeof kept === "object" ? kept : undefined
 }
 
 /**
@@ -3085,7 +3081,10 @@ function wireFilter(main) {
   const input = document.querySelector("ui-input[data-spell-filter]")
   const badge = document.querySelector("ui-select[data-spell-filter-badge]")
   if (!input && !badge) return
-  const key = input?.dataset.spellFilter || `${FILTER_KEY_PREFIX}${location.pathname}`
+  const named = input?.dataset.spellFilter
+  const key = `${FILTER_KEY_PREFIX}${named || location.pathname}`
+  // TODO:  drop the move once every browser has opened the page since epic `prefs-and-undo` P4
+  if (named) PrefStore.moveOldKey(named, key)
   const cards = Array.from(main.querySelectorAll("ui-card"))
   // HEADINGS' `section`s, or `<ui-section>`s (`:host([hidden])` hides one)
   const sections = Array.from(main.querySelectorAll("section, ui-section")).filter((section) =>
@@ -3109,11 +3108,7 @@ function wireFilter(main) {
   function onType(event) {
     typed = String(event.detail?.value ?? input.value ?? "")
     apply()
-    try {
-      localStorage.setItem(key, typed)
-    } catch {
-      // private window:  the filter just isn't remembered
-    }
+    PrefStore.setAt(key, typed)
   }
 
   /**
@@ -3151,13 +3146,12 @@ function wireFilter(main) {
   }
 }
 
-/** The filter saved under `key`, or "" (storage can throw, e.g. blocked site data). */
+/** The filter saved under `key`, or "":  none, or storage blocked. */
 function readSaved(key) {
-  try {
-    return localStorage.getItem(key) ?? ""
-  } catch {
-    return ""
-  }
+  const saved = PrefStore.getAt(key)
+  if (typeof saved === "string") return saved
+  // typed before P4 of epic `prefs-and-undo` as plain digits (`123`), it reads back as a number
+  return typeof saved === "number" ? `${saved}` : ""
 }
 
 ////////////////
@@ -3226,7 +3220,10 @@ function wireEpicSort(main) {
 const NEW_EPIC_API = "/api/epics/new"
 
 /** `localStorage` key of the New epic box's unsaved text (`{ title, prompt }`), one for every Epics page. */
-const NEW_EPIC_DRAFT_KEY = "spell-new-epic-draft"
+const NEW_EPIC_DRAFT_KEY = "spell-epics:new-epic-draft"
+
+/** Its key before epic `prefs-and-undo` P4, with no store:  moved to `NEW_EPIC_DRAFT_KEY` once. */
+const OLD_NEW_EPIC_DRAFT_KEY = "spell-new-epic-draft"
 
 /**
  * NEW EPIC (epic `airplane` P7):  on the Epics page (`epics/index.html`), a New epic pill in the page header.
@@ -3256,6 +3253,8 @@ function wireNewEpic(main) {
 /** Open the New epic box, with the draft typed so far. */
 function openNewEpicBox() {
   const box = newEpicBox()
+  // TODO:  drop the move once every browser has opened the Epics page since epic `prefs-and-undo` P4
+  PrefStore.moveOldKey(OLD_NEW_EPIC_DRAFT_KEY, NEW_EPIC_DRAFT_KEY)
   const draft = readJSON(NEW_EPIC_DRAFT_KEY)
   const [title, prompt] = box.querySelectorAll("input, textarea")
   title.value = typeof draft.title === "string" ? draft.title : ""

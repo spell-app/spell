@@ -216,10 +216,9 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 | phase | one step of the plan, built and committed on its own:  `P1 · Short Name` | `P1` |
 | question | something only you can decide;  answered, it's a decision | `Q1` |
 | judgement call | a choice the agent made without you, open until you review it | `J1` |
-| caveat | a limit or risk the plan accepts | `C1` |
-| todo | later work that isn't a caveat or an issue | `T1` |
+| caveat | a loose end:  work still to do, or (marked `limit`) a limit the plan accepts | `C1` |
 | issue | a problem found, open until fixed | `I1` |
-| test | something you check by hand before merging:  a step, and what should happen | `V1` |
+| test | something you check by hand before merging:  a step, and what should happen | `T1` |
 | comment | a note you leave on any block of a page, answered in a thread under it | `M1` |
 
 - The epic page is shared content:  `main` and every worktree see ONE file, in the content folder,
@@ -232,14 +231,14 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 
 A wiki page is read;  this one has buttons.
 Open an item and three sit at its right:  Approve (the check), Revisit, which opens a box for your note,
-and Make Todo, with Do Now's wand set apart.
-A question's option cards each have Choose, and a todo's three are its own:
+and Make Caveat, with Do Now's wand set apart.
+A question's option cards each have Choose, and a caveat that's work has three of its own:
 the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
-![A judgement call's line on an epic page:  its yellow J4 chip and title, the Approve, Revisit and Make Todo buttons, the Do Now wand apart, and the note box open under it](docs/images/epic-item.png)
+![A judgement call's line on an epic page:  its yellow J4 chip and title, the Approve, Revisit and Make Caveat buttons, the Do Now wand apart, and the note box open under it](docs/images/epic-item.png)
 
 _A judgement call on a real epic page, its note box open:  the yellow chip says it's open, and calm;
-Approve, Revisit and Make Todo sit together, Do Now's wand apart._
+Approve, Revisit and Make Caveat sit together, Do Now's wand apart._
 
 Nothing you press goes anywhere until Send, in the page's header, hands it all over:
 - you press the paper plane, or
@@ -437,7 +436,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | Page | What's on it |
 | --- | --- |
 | [README.md](README.md) | <ul><li>this page:  a decision made and kept, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
-| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  nine sections whose ids never change</li><li>a review round, comments and test runs;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
+| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and test runs;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
 | [README-skills.md](README-skills.md) | <ul><li>nineteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |

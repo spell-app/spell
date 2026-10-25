@@ -587,7 +587,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const client = this.review.client
     if (!client) return
     const id = this.review.id()
-    const doIt = !note && DO_IT_ID.test(id) && !client.typedOf(id).trim() && !client.markOf(id)?.note
+    const limit = this.domElement.closest("epic-item")?.hasAttribute("limit") ?? false
+    const doIt = !note && DO_IT_ID.test(id) && !limit && !client.typedOf(id).trim() && !client.markOf(id)?.note
     if (note && !client.typedOf(id)) client.type(id, note)
     client.openBox(id)
     this.send(SHOW_NOTE, { of: id })

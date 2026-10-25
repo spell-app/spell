@@ -129,7 +129,7 @@ test("apply:  a sent todo gets a status card born NOTED, saying what was recorde
   const card = plan.findItem("j1")!.querySelector(':scope > epic-status[slot="status"]')!
   expect([card.getAttribute("state"), card.innerHTML]).toEqual([
     "noted",
-    '<p>Made todo <a href="#t1">T1</a> to follow this up.</p>'
+    '<p>Made caveat <a href="#c1">C1</a> to follow this up.</p>'
   ])
   expect(plan.findItem("j2")!.querySelector("epic-status")).toBeNull()
 })
@@ -144,13 +144,13 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
   plan.updateStates()
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("t1", { action: "next", note: "after the merge" }, T1)
-    inbox.setMark("t2", { action: "drop" }, T1)
+    inbox.setMark("c1", { action: "next", note: "after the merge" }, T1)
+    inbox.setMark("c2", { action: "drop" }, T1)
     inbox.markSent(T2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  const t1 = after.findItem("t1")!
+  const t1 = after.findItem("c1")!
   expect([t1.getAttribute("queued"), t1.getAttribute("work"), t1.getAttribute("review-as")]).toEqual([
     after.today,
     "P2 · Fold Into Elements",
@@ -160,16 +160,16 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
   expect([card.getAttribute("state"), card.textContent]).toEqual(["noted", "Queued for P2 · Fold Into Elements"])
   // Owen's note kept, as his reply
   expect(t1.querySelector('epic-reply[from="Owen"]')?.textContent).toBe("after the merge")
-  const t2 = after.findItem("t2")!
+  const t2 = after.findItem("c2")!
   expect([t2.getAttribute("status"), t2.getAttribute("state"), t2.getAttribute("review-as")]).toEqual([
     "canceled",
     "old",
     "drop"
   ])
   const out = printed.join("\n")
-  expect(out).toContain("T1  queued for P2 · Fold Into Elements")
-  expect(out).toContain("T2  canceled:  dropped by Owen in review")
-  expect(after.toString()).toMatch(/T2 canceled:\s+dropped by Owen in review/)
+  expect(out).toContain("C1  queued for P2 · Fold Into Elements")
+  expect(out).toContain("C2  canceled:  dropped by Owen in review")
+  expect(after.toString()).toMatch(/C2 canceled:\s+dropped by Owen in review/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -178,16 +178,16 @@ test("apply:  a todo's plane with no phase still to do:  queued for the next pha
   plan.addItem("todo", "later")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("t1", { action: "next" }, T1)
+    inbox.setMark("c1", { action: "next" }, T1)
     inbox.markSent(T2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
-  const t1 = PlanDoc.parse(readFileSync(file, "utf8")).findItem("t1")!
+  const t1 = PlanDoc.parse(readFileSync(file, "utf8")).findItem("c1")!
   expect(t1.getAttribute("work")).toBe("the next phase")
   expect(t1.querySelector("epic-status")!.textContent).toMatch(
     /^Queued for the next phase:\s+there's no phase to do yet$/
   )
-  expect(printed.join("\n")).toContain("T1  queued for the next phase (no phase to do yet)")
+  expect(printed.join("\n")).toContain("C1  queued for the next phase (no phase to do yet)")
 })
 
 test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  a todo dropped;  a phase noted", async () => {
@@ -200,7 +200,7 @@ test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  
   ReviewInbox.update(inboxFile, (inbox) => {
     inbox.setMark("j1", { action: "skip", note: "covered by P3" }, T1)
     inbox.setMark("q1", { action: "skip" }, T1)
-    inbox.setMark("t1", { action: "skip" }, T1)
+    inbox.setMark("c1", { action: "skip" }, T1)
     inbox.setMark("p1", { action: "skip", note: "fine as planned" }, T1)
     inbox.markSent(T2)
   })
@@ -217,14 +217,14 @@ test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  
   expect(after.findItem("j1")!.getAttribute("state")).not.toBe("attention")
   expect(after.findItem("j1")!.querySelector('epic-reply[from="Owen"][re="skip"]')?.textContent).toBe("covered by P3")
   // a todo:  skipping it IS dropping it
-  expect(facts("t1")).toEqual(["canceled", after.today, "drop"])
+  expect(facts("c1")).toEqual(["canceled", after.today, "drop"])
   expect(after.document.getElementById("p-bring-it-in")!.querySelector('epic-reply[from="Owen"]')?.textContent).toBe(
     "fine as planned"
   )
   const out = printed.join("\n")
   expect(out).toContain("J1  skipped:  nothing to do, reviewed (his note kept)")
   expect(out).toContain("Q1  skipped:  nothing to do, reviewed")
-  expect(out).toContain("T1  canceled:  dropped by Owen in review")
+  expect(out).toContain("C1  canceled:  dropped by Owen in review")
   expect(out).toContain("P1  skipped:  nothing to do (his note kept)")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
@@ -471,14 +471,14 @@ test("apply:  sent new items are made, a phase's and the summary's todos filed; 
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n")).toBe(
-    ["NEW1  made question Q1:  window or aisle?", "P1  to todo T1", "SUMMARY  to todo T2"].join("\n")
+    ["NEW1  made question Q1:  window or aisle?", "P1  to caveat C1", "SUMMARY  to caveat C2"].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   // `near` the phase by its old id (`p1`):  linked by its stable one
   expect(after.findItem("q1")!.querySelector('a[href="#p-offline-pages"]')).not.toBeNull()
   expect(after.findItem("q1")!.querySelector('epic-status[state="noted"]')).not.toBeNull()
-  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
-  expect(after.findItem("t2")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("c1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
+  expect(after.findItem("c2")!.getAttribute("title")).toBe("Follow up:  the summary")
   expect(Object.keys(ReviewInbox.read(inboxFile).marks)).toEqual(["new2"])
 })
 
@@ -515,14 +515,14 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
   for (const title of ["one", "two", "three", "four"]) plan.addItem("test", title)
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("v1", { action: "test", result: "passed" }, T1)
-    inbox.setMark("v2", { action: "test", result: "failed", note: "grey", shot: "tests/v2-20261007-1000.png" }, T1)
-    inbox.setMark("v3", { action: "test", result: "skip" }, T1)
-    inbox.setMark("v4", { action: "test", result: "notnow" }, T1)
+    inbox.setMark("t1", { action: "test", result: "passed" }, T1)
+    inbox.setMark("t2", { action: "test", result: "failed", note: "grey", shot: "tests/t2-20261007-1000.png" }, T1)
+    inbox.setMark("t3", { action: "test", result: "skip" }, T1)
+    inbox.setMark("t4", { action: "test", result: "notnow" }, T1)
     inbox.markSent(T2)
   })
   await commands().inbox.run("x", file, [], {})
-  expect(printed.join("\n")).toContain('V2  two  · FAILED · comment "grey" · screenshot tests/v2-20261007-1000.png')
+  expect(printed.join("\n")).toContain('T2  two  · FAILED · comment "grey" · screenshot tests/t2-20261007-1000.png')
   printed = []
   await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
   const work = printed.join("\n")
@@ -530,27 +530,27 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
   )
   expect(work).toMatch(
-    /V2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/v2-20261007-1000\.png/
+    /T2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/t2-20261007-1000\.png/
   )
   expect(work).toContain("test results")
   printed = []
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n").split("\n")).toEqual([
-    "V1  passed (Owen's run)",
-    "V2  failed (Owen's run):  filed I1",
-    "V3  canceled:  no longer applies (Owen's run)",
-    "V4  not now:  deferred (Owen's run)",
+    "T1  passed (Owen's run)",
+    "T2  failed (Owen's run):  filed I1",
+    "T3  canceled:  no longer applies (Owen's run)",
+    "T4  not now:  deferred (Owen's run)",
     `failed tests (1):  tell Owen one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
-    "  V2 -> I1"
+    "  T2 -> I1"
   ])
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  expect(["v1", "v2", "v3", "v4"].map((id) => after.findItem(id)!.getAttribute("status"))).toEqual([
+  expect(["t1", "t2", "t3", "t4"].map((id) => after.findItem(id)!.getAttribute("status"))).toEqual([
     "done",
     "open",
     "canceled",
     "open"
   ])
-  expect(after.findItem("v2")!.getAttribute("failed")).toBe("i1")
+  expect(after.findItem("t2")!.getAttribute("failed")).toBe("i1")
   expect(ReviewInbox.read(inboxFile).marks).toEqual({})
 })
 
@@ -561,14 +561,14 @@ test("a failed test's issue on a split page:  its screenshot written into the pa
   plan.addItem("test", "one", { details: "<p>Do it.</p>" })
   await files.writeDoc(file, plan, true)
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("v1", { action: "test", result: "failed", note: "no", shot: "tests/v1-20261007-1000.png" }, T1)
+    inbox.setMark("t1", { action: "test", result: "failed", note: "no", shot: "tests/t1-20261007-1000.png" }, T1)
     inbox.markSent(T2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(readFileSync(join(root, "epics", "x", "parts", "i1.html"), "utf8")).toContain(
-    'src="../tests/v1-20261007-1000.png"'
+    'src="../tests/t1-20261007-1000.png"'
   )
-  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/v1-20261007-1000.png")
+  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/t1-20261007-1000.png")
   rmSync(join(root, "epics", "x", "parts"), { recursive: true, force: true })
 })
 
@@ -695,6 +695,49 @@ test("apply:  a change's sent Accept makes it accepted (no longer to accept), it
   expect(after.findItem("q1")!.getAttribute("status")).toBe("open")
   expect(after.findChange("ch1")!.hasAttribute("accepted")).toBe(false)
   expect(printed.join("\n")).toContain("CH1  reopened Q1, was decided;  the change waits")
+})
+
+////////////////
+// ## Handled in a phase (epic `epic-engine` P31)
+////////////////
+
+test("a change mark in a PHASE's text marks its item handled there:  grey, logged;  one in the Overview doesn't", () => {
+  const plan = docWithChange()
+  const q = plan.addItem("question", "How many retries?")
+  plan.decide(q, "Three")
+  plan.addPhase("Retry Logic", {
+    goal: `<ul><li><epic-change item="${q}">three retries, then give up</epic-change></li></ul>`
+  })
+  plan.updateStates()
+  const item = plan.findItem(q)!
+  expect([item.getAttribute("handled"), item.getAttribute("state")]).toEqual(["p-retry-logic", "handled"])
+  expect(plan.toString()).toMatch(new RegExp(`${q.toUpperCase()} handled in P1`))
+  // the Overview's mark (Q1's) is a change to accept, not a phase taking the answer
+  expect(plan.findItem("q1")!.hasAttribute("handled")).toBe(false)
+  expect(plan.findItem("q1")!.getAttribute("state")).toBe("recent")
+})
+
+test("apply:  Reopen on a phase's change mark takes `handled` off:  its question is back, red;  the next edit leaves it so", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const q = plan.addItem("question", "How many retries?")
+  plan.decide(q, "Three")
+  plan.addPhase("Retry Logic", { goal: `<ul><li><epic-change item="${q}">three retries</epic-change></li></ul>` })
+  plan.updateStates()
+  const change = plan.document.querySelector("epic-change")!.id
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark(change, { action: "reopen" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  after.updateStates()
+  const item = after.findItem(q)!
+  expect([item.hasAttribute("handled"), item.getAttribute("status"), item.getAttribute("state")]).toEqual([
+    false,
+    "open",
+    "attention"
+  ])
 })
 
 test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere else;  the stage's Accept still needs its stage", () => {

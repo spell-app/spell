@@ -120,7 +120,7 @@ describe("<epic-page>", () => {
     const host = await render(
       `<epic-page kind="saga" saga="epics" title="Epic Tooling" started="2026-10-14" updated="2026-10-14">` +
         `<epic-overview id="overview"><epic-summary>Epics.</epic-summary></epic-overview>` +
-        `<epic-section id="todos" kind="todos"></epic-section></epic-page>`
+        `<epic-section id="caveats" kind="caveats"></epic-section></epic-page>`
     )
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
@@ -267,7 +267,7 @@ describe("<epic-page>", () => {
       `<epic-section id="decisions" kind="questions">` +
       `<epic-item id="q1" title="One" status="open" state="attention"></epic-item>` +
       `<epic-item id="q2" title="Two" status="decided" state="recent"></epic-item></epic-section>` +
-      `<epic-section id="todos" kind="todos"><epic-item id="t1" title="Later" status="open" state="open"></epic-item></epic-section>`
+      `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open" state="open"></epic-item></epic-section>`
     const mark = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>('[part~="state"]')
     // between phases, items open, touched today:  in progress (it used to sleep)
     const busy = await render(page(`updated="${today}"`, ["done", "todo"], items))
@@ -637,13 +637,13 @@ describe("<epic-page> Send and its countdown", () => {
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await adoptClient(routes)
-    const host = await render(page("", ["todo"], `<epic-section id="todos" kind="todos"></epic-section>`))
-    const todos = host.querySelector<E.DOMElement>("#todos")!
+    const host = await render(page("", ["todo"], `<epic-section id="caveats" kind="caveats"></epic-section>`))
+    const todos = host.querySelector<E.DOMElement>("#caveats")!
     await vi.waitFor(() => expect(todos.shadowRoot!.querySelector('[part~="new-button"]')).not.toBeNull())
     expect(host.shadowRoot!.querySelector('[part~="new-button"]')).toBeNull()
     expect(host.shadowRoot!.querySelector('[part~="expand-all"]')).not.toBeNull()
     const button = todos.shadowRoot!.querySelector<HTMLButtonElement>('[part~="new-button"]')!
-    expect(button.title).toBe("New Todo")
+    expect(button.title).toBe("New Caveat")
     expect(button.closest('[part~="tools"]')).not.toBeNull()
     expect(button.querySelector("ui-icon")!.getAttribute("name")).toBe("comment dots")
     // nothing waiting:  there, grey (so it's always in the same place), and no pill
@@ -679,7 +679,7 @@ describe("<epic-page> Send and its countdown", () => {
 // ## The toolbar's state filter and collapse-all (epic `airplane` P8)
 ////////////////
 
-/** A page with a Questions and a Todos section, items in `states` each. */
+/** A page with a Questions and a Caveats section, items in `states` each. */
 function filterPage(questions: string[], todos: string[]): string {
   const items = (letter: string, states: string[]) =>
     states
@@ -691,7 +691,7 @@ function filterPage(questions: string[], todos: string[]): string {
   return (
     `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
     `<epic-section id="decisions" kind="questions">${items("q", questions)}</epic-section>` +
-    `<epic-section id="todos" kind="todos">${items("t", todos)}</epic-section></epic-page>`
+    `<epic-section id="caveats" kind="caveats">${items("c", todos)}</epic-section></epic-page>`
   )
 }
 
@@ -740,10 +740,10 @@ describe("<epic-page> toolbar", () => {
     // a hidden one:  shows too
     await pickPageState(host, "open")
     expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent-3"])
-    expect(shownItems(host)).toEqual(["q1", "q2", "t1"])
+    expect(shownItems(host)).toEqual(["q1", "q2", "c1"])
     // a shown one, others too:  hides
     await pickPageState(host, "attention")
-    expect(shownItems(host)).toEqual(["q2", "t1"])
+    expect(shownItems(host)).toEqual(["q2", "c1"])
     // the only one showing:  everything again
     await pickPageState(host, "open")
     expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent+3"])
@@ -759,7 +759,7 @@ describe("<epic-page> toolbar", () => {
       .click()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    // Questions shows only open;  Todos still everything
+    // Questions shows only open;  Caveats still everything
     expect(pageChips(host)).toEqual(["open+2", "recent-1"])
   })
 
@@ -1054,7 +1054,7 @@ function stagedPage(stage: string): string {
     `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Which?" status="open"></epic-item>` +
     `<epic-item id="q2" title="That?" status="open"></epic-item></epic-section>` +
     `<epic-section id="judgements" kind="judgements"><epic-item id="j1" title="Kept" status="open"></epic-item></epic-section>` +
-    `<epic-section id="todos" kind="todos"><epic-item id="t1" title="Later" status="open"></epic-item></epic-section>` +
+    `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open"></epic-item></epic-section>` +
     `<epic-section id="log" kind="log"><epic-event at="2026-10-24T10:00">made</epic-event></epic-section>` +
     `</epic-page>`
   )
@@ -1080,9 +1080,9 @@ describe("<epic-page> stages", () => {
     ReviewClient.adopt(undefined)
   })
 
-  test("overview:  only the Overview, Questions and Todos show, numbered as they show;  the toolbar's chips count only them", async () => {
+  test("overview:  only the Overview, Questions and Caveats show, numbered as they show;  the toolbar's chips count only them", async () => {
     const host = await render(stagedPage("overview"))
-    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Todos"]))
+    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Caveats"]))
     // the step label says the stage, not a phase that doesn't show
     expect(step(host)?.words).toBe("OVERVIEW")
     // the file still holds them:  only a view
@@ -1095,7 +1095,7 @@ describe("<epic-page> stages", () => {
   test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
     const phases = await render(stagedPage("phases"))
     await vi.waitFor(() =>
-      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Todos"])
+      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Caveats"])
     )
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {

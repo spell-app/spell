@@ -40,10 +40,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
- *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`v3`) only:
+ *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`t3`) only:
  *       `{ action: "test", result, note?, shot? }`
  *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
- *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/v3-20261019-1432.png`,
+ *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/t3-20261019-1432.png`,
  *         from the epic page's folder (written by the review routes' `POST shot`)
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
  *     - the page header's STAGE BUTTON (epic `epic-engine` P29), Accept Overview or Accept Phases:
@@ -755,14 +755,17 @@ export class ReviewInbox {
    * - marks, drafts, urgency, agents at work, called-off requests:  their key;  an immediate request:  its `id`
    * - a new item about one (`near`), and a comment's anchor on one:  `p7`, `p7#field-1`
    * - an entry already under the new id wins:  the old one goes
+   * - ALL AT ONCE:  a rename may free an id another takes (epic `epic-engine` P32:  `t3` => `c55`, `v3` => `t3`)
    */
   renameIds(renames: Record<string, string>): number {
     let moved = 0
     const rename = (entries: Record<string, unknown>) => {
-      for (const [from, to] of Object.entries(renames)) {
-        if (!(from in entries)) continue
-        if (!(to in entries)) entries[to] = entries[from]!
-        delete entries[from]
+      const taken = Object.entries(renames)
+        .filter(([from]) => from in entries)
+        .map(([from, to]) => [to, entries[from]] as const)
+      for (const from of Object.keys(renames)) delete entries[from]
+      for (const [to, value] of taken) {
+        if (!(to in entries)) entries[to] = value
         moved++
       }
     }
@@ -805,7 +808,7 @@ export class ReviewInbox {
    * - `reopen` (a change mark's Reopen, P30):  the action alone
    * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
    *   `note` trimmed, kept only when there is one;  `shot` kept when given, a screenshot in the epic's `tests/`
-   *   (`tests/v3-20261019-1432.png`:  `TEST_SHOT`)
+   *   (`tests/t3-20261019-1432.png`:  `TEST_SHOT`)
    * - `new` (a new item, `setNew()`):
    *   - `kind`:  one of `NEW_KINDS`
    *   - `title`:  trimmed, never empty, at most `MAX_TITLE` characters
@@ -966,7 +969,7 @@ export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: strin
 /**
  * A test answer's fields (`action: "test"`, epic `epic-engine` P4):
  * - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
- * - `shot`:  Owen's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png`
+ * - `shot`:  Owen's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png`
  */
 export type TestFields = { result?: TestResult; shot?: string }
 
@@ -1171,13 +1174,14 @@ const NEW_PREFIX = "new"
 const NEW_ID = /^new\d+$/
 
 /** A test item's id:  only a test takes a test answer. */
-const TEST_ID = /^v\d+$/
+const TEST_ID = /^t\d+$/
 
 /**
- * A test answer's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png`
+ * A test answer's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png` (`v3-`, a test's letter before epic
+ * `epic-engine` P32)
  * (`-2` ... when two land in one minute), as the review routes' `POST shot` writes it.
  */
-export const TEST_SHOT = /^tests\/v\d+-\d{8}-\d{4}(?:-\d+)?\.png$/
+export const TEST_SHOT = /^tests\/[tv]\d+-\d{8}-\d{4}(?:-\d+)?\.png$/
 
 /** The longest a test answer's note may be:  a few paragraphs, not a log. */
 const MAX_TEST_NOTE = 20_000
@@ -1266,7 +1270,7 @@ function toTestAnswer({ result, note = "", shot }: Record<string, unknown>): Che
   if (note.length > MAX_TEST_NOTE) throw new InboxError(`a test answer's note:  ${MAX_TEST_NOTE} characters at most`)
   const given = shot !== undefined && shot !== null && shot !== ""
   if (given && (typeof shot !== "string" || !TEST_SHOT.test(shot)))
-    throw new InboxError(`not a test's screenshot:  ${JSON.stringify(shot)} (tests/v3-20261019-1432.png)`)
+    throw new InboxError(`not a test's screenshot:  ${JSON.stringify(shot)} (tests/t3-20261019-1432.png)`)
   return {
     action: "test",
     result: result as TestResult,

@@ -242,7 +242,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
     const ids = this.chips.map((chip) => chip.id)
     const next = StateFilter.nextShown(ids, [...this.shownSagas], id)
     this.chosenSagas = next
-    save(SAGAS_SHOWN_KEY, JSON.stringify(next))
+    save(SAGAS_SHOWN_KEY, next)
   }
 
   /** A card's star, answered by the page server:  every card starred as it says (another window may have starred). */

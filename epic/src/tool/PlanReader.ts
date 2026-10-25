@@ -145,10 +145,16 @@ export abstract class PlanReader {
     return this.bedtimeRun !== null
   }
 
-  /** Items of `kind` in its section, in order:  the elements whose id has the kind's letter (`q7`, never `d7`). */
+  /**
+   * Items of `kind` in its section, in order:  the elements whose id has the kind's letter (`q7`, never `d7`).
+   * - a `caveat` (a limit, `<epic-item limit>`) or a `todo` (work):  only those (epic `epic-engine` P32);  both are `c`
+   */
   itemsOf(kind: ItemKind): Element[] {
-    const pattern = new RegExp(`^${KINDS[kind].prefix}\\d+$`)
-    return this.sectionChildren(kind).filter((item) => pattern.test(item.id))
+    const spec: { prefix: string; limit?: boolean } = KINDS[kind]
+    const pattern = new RegExp(`^${spec.prefix}\\d+$`)
+    return this.sectionChildren(kind).filter(
+      (item) => pattern.test(item.id) && (spec.limit === undefined || item.hasAttribute("limit") === spec.limit)
+    )
   }
 
   /** Items of `kind`, in order:  `{ id, title, status }`. */
@@ -207,6 +213,7 @@ export abstract class PlanReader {
    * - Claude is working on it (an underway status card, or `working`):  `progress`, closed or not (a revisit of a
    *   decided question is work too)
    * - canceled (made moot, struck through):  `old`, grey -- the ONE "no longer relevant"
+   * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
    * - work a review queued, not started (`queued`):  `open`, still to do (Q20:  no longer `progress`)
@@ -221,6 +228,8 @@ export abstract class PlanReader {
     const facts = this.facts(item)
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
+    // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
+    if (facts.handled) return "handled"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
     if (facts.queued !== undefined) return "open"
     if (facts.awaitsPick) return "replied"

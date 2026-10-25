@@ -134,7 +134,7 @@ type TranscriptEntry = {
 /** Where Claude Code keeps transcripts:  one folder per project, `<slug>/<session id>.jsonl`. */
 const PROJECTS = join(homedir(), ".claude", "projects")
 
-/** Item ids in text:  `I7`, `q12`, `V3`, never `P2` (phases) or `D4`-in-a-word. */
+/** Item ids in text:  `I7`, `q12`, `T3`, never `P2` (phases) or `D4`-in-a-word. */
 const ITEM_ID = /\b([qcitvd])(\d+)\b/gi
 
 /**

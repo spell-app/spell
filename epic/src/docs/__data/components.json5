@@ -1829,9 +1829,15 @@
             "progress",
             "open",
             "recent",
+            "handled",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs Owen), `replied` (orange:  Claude answered with options, Owen's turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs Owen), `replied` (orange:  Claude answered with options, Owen's turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+        },
+        {
+          "name": "handled",
+          "kind": "string",
+          "description": "HANDLED IN A PHASE (epic `epic-engine` P31):  the phase whose text took its answer (`p-retry-logic`), set when a change mark naming it is first stamped there;  grey and quiet, its line linking the phase.  Reopen on the mark takes it off."
         },
         {
           "name": "changed",
@@ -1886,6 +1892,11 @@
           "name": "working",
           "kind": "boolean",
           "description": "Work on it is under way."
+        },
+        {
+          "name": "limit",
+          "kind": "boolean",
+          "description": "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered for the next phase;  a caveat without it is work still to do (a todo, before P32)."
         },
         {
           "name": "bedtime",
@@ -2017,6 +2028,10 @@
         {
           "name": "failed",
           "description": "With `failed`:  a red \"failed → I42\" at its line's end, linking the issue the failure was filed as (epic `epic-engine` P4)."
+        },
+        {
+          "name": "handled",
+          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31)."
         },
         {
           "name": "git",
@@ -2151,6 +2166,21 @@
           "description": "Id chip tooltip, `state=old`."
         },
         {
+          "key": "stateHandled",
+          "text": "Handled in a phase:  its answer is in that phase's text now",
+          "description": "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
+        },
+        {
+          "key": "handledIn",
+          "text": "in {phase}",
+          "description": "Its line's link to the phase that handled it:  `in P4`."
+        },
+        {
+          "key": "handledTip",
+          "text": "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
+          "description": "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+        },
+        {
           "key": "tipTodo",
           "text": "to do:  {work}",
           "description": "Id chip and review label tooltip:  the queued work."
@@ -2252,8 +2282,8 @@
         },
         {
           "key": "todo",
-          "text": "Make Todo",
-          "description": "Review button:  its name."
+          "text": "Make Caveat",
+          "description": "Review button:  its name (a todo, before epic `epic-engine` P32)."
         },
         {
           "key": "revisit",
@@ -3695,7 +3725,7 @@
         },
         {
           "key": "stageOverviewTip",
-          "text": "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+          "text": "Agreeing the Overview:  only it, the questions and caveats show until Accept Overview",
           "description": "The step label's tooltip, Overview stage."
         },
         {
@@ -4803,7 +4833,6 @@
             "questions",
             "judgements",
             "caveats",
-            "todos",
             "issues",
             "tests",
             "log",
@@ -5030,10 +5059,6 @@
           "text": "Caveats"
         },
         {
-          "key": "todosTitle",
-          "text": "Todos"
-        },
-        {
           "key": "issuesTitle",
           "text": "Issues"
         },
@@ -5092,8 +5117,8 @@
         },
         {
           "key": "newTodo",
-          "text": "Todo",
-          "description": "Kind:  a todo."
+          "text": "Caveat",
+          "description": "Kind:  a caveat, work still to do (a todo, before epic `epic-engine` P32)."
         },
         {
           "key": "newQuestion",
@@ -5529,6 +5554,11 @@
           "key": "stateRecent",
           "text": "decided or done",
           "description": "A state chip's words:  `recent` (green)."
+        },
+        {
+          "key": "stateHandled",
+          "text": "handled in a phase",
+          "description": "A state chip's words:  `handled` (grey:  its answer is in a phase's text now)."
         },
         {
           "key": "stateOld",

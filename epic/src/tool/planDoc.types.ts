@@ -97,17 +97,22 @@ export type Duration = {
  * and its status while it counts:  a question waits (`open`), an answered one is in force (`decided`).
  * - a decision is an answered question (D13 of `review-review`):
  *   `decision` makes a question born answered (`q` id, `decided`, `answered`), in Questions
- * - `test`:  something Owen checks by hand before merging (`V1`, "verify":  `t` is taken);  `close` it once it passes
+ * - `test`:  something Owen checks by hand before merging (`T1`);  `close` it once it passes
+ * - a `caveat` and a `todo` are both CAVEATS (`c` ids, one section:  epic `epic-engine` P32, Q16), told apart by
+ *   `limit` (`<epic-item limit>`):  a caveat is a LIMIT to know about, a todo is work still to do
  */
 export const KINDS = {
   question: { prefix: "q", section: "questions", live: "open" },
-  caveat: { prefix: "c", section: "caveats", live: "open" },
+  caveat: { prefix: "c", section: "caveats", live: "open", limit: true },
   issue: { prefix: "i", section: "issues", live: "open" },
-  todo: { prefix: "t", section: "todos", live: "open" },
-  test: { prefix: "v", section: "tests", live: "open" },
+  todo: { prefix: "c", section: "caveats", live: "open", limit: false },
+  test: { prefix: "t", section: "tests", live: "open" },
   decision: { prefix: "q", section: "questions", live: "decided" },
   judgement: { prefix: "j", section: "judgements", live: "open" }
-} as const satisfies Record<string, { prefix: string; section: ItemSectionKind; live: "open" | "decided" }>
+} as const satisfies Record<
+  string,
+  { prefix: string; section: ItemSectionKind; live: "open" | "decided"; limit?: boolean }
+>
 
 /** An item's kind, `KINDS`':  `question`, `caveat` ... */
 export type ItemKind = keyof typeof KINDS
@@ -209,6 +214,8 @@ export type ItemFacts = {
   awaitsPick: boolean
   /** how Claude handled Owen's last review mark (`<epic-item review-as>`, `REVIEW_AS`), or `undefined` */
   reviewAs: string | undefined
+  /** the phase whose text took its answer (`<epic-item handled>`, epic `epic-engine` P31), or `undefined` */
+  handled: string | undefined
 }
 
 /** One item (or an Overview sub-section), as `PlanReader.describeItem()` says it for `epic inbox`. */
@@ -316,6 +323,7 @@ export type OptionCard = {
  *   a revisit or Do Now Claude answered, the item still open)
  * - `recent` (green):  decided or done, however long ago (Owen, 2026-10-08:  "green across the board is good"):
  *   closed, or open and settled by a review (`SETTLED_AS`)
+ * - `handled` (grey):  handled in a phase, its answer that phase's text now (`handled`, epic `epic-engine` P31)
  * - `old` (grey):  no longer relevant:  canceled (made moot, struck through)
  */
 export const STATE_COLORS = {
@@ -324,6 +332,7 @@ export const STATE_COLORS = {
   progress: "blue",
   open: "yellow",
   recent: "green",
+  handled: "grey",
   old: "grey"
 } as const
 
@@ -382,8 +391,8 @@ export type ReviewState = "queued" | "reviewed" | "deferred" | "outstanding"
 export const REVIEW_SECTIONS: { kind: ItemKind; label: string }[] = [
   { kind: "question", label: "Questions" },
   { kind: "judgement", label: "Judgement calls" },
-  { kind: "caveat", label: "Caveats" },
-  { kind: "todo", label: "Todos" },
+  { kind: "todo", label: "Caveats (to do)" },
+  { kind: "caveat", label: "Caveats (limits)" },
   { kind: "issue", label: "Issues" },
   { kind: "test", label: "To test" }
 ]
@@ -503,7 +512,7 @@ export type PlanMark = {
   near?: string
   /** a test answer's (`action: "test"`, epic `epic-engine` P4):  `passed`, `failed`, `skip`, `notnow` */
   result?: string
-  /** a test answer's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png` */
+  /** a test answer's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png` */
   shot?: string
   /** the stage a stage button's mark ends (`action: "accept"`, epic `epic-engine` P29):  `overview`, `phases` */
   stage?: string

@@ -202,7 +202,7 @@ describe("<epic-item> review controls", () => {
 
   test("a todo:  the plane (next phase), Revisit, the x (drop), one group;  no Approve, Make Todo or Do Now", async () => {
     await adoptClient()
-    const host = await render(`<epic-item id="t4" title="A todo" status="open"><p>Text</p></epic-item>`)
+    const host = await render(`<epic-item id="c4" title="A todo" status="open"><p>Text</p></epic-item>`)
     expect(actions(host)).toEqual(["next", "revisit", "drop"])
     expect(
       Array.from(deep(host).querySelectorAll<HTMLElement>("ui-buttons > ui-button"), (it) => it.dataset.action)
@@ -225,7 +225,7 @@ describe("<epic-item> review controls", () => {
     // the plane marks it, dashed green, and so does its chip;  again, cleared
     button(host, "next").click()
     await settle()
-    expect(routes.inbox.marks.t4?.action).toBe("next")
+    expect(routes.inbox.marks.c4?.action).toBe("next")
     const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
     // the chip keeps its state's colour, the mark's fill (2026-10-11)
     expect([button(host, "next").dataset.fill, chip.dataset.color, chip.dataset.fill]).toEqual([
@@ -236,7 +236,7 @@ describe("<epic-item> review controls", () => {
     // the x:  the latest mark wins
     button(host, "drop").click()
     await settle()
-    expect(routes.inbox.marks.t4?.action).toBe("drop")
+    expect(routes.inbox.marks.c4?.action).toBe("drop")
     expect([button(host, "next").dataset.fill, button(host, "drop").dataset.fill, chip.dataset.color]).toEqual([
       "none",
       "dashed",
@@ -244,7 +244,7 @@ describe("<epic-item> review controls", () => {
     ])
     button(host, "drop").click()
     await settle()
-    expect(routes.inbox.marks.t4).toBeUndefined()
+    expect(routes.inbox.marks.c4).toBeUndefined()
     // other kinds keep theirs
     const call = await render(`<epic-item id="j4" title="A call" status="open"></epic-item>`)
     expect(actions(call)).toEqual(["approve", "revisit", "todo", "details"])
@@ -252,7 +252,7 @@ describe("<epic-item> review controls", () => {
 
   test("a todo's note box:  the plane, Revisit Later, the x;  the plane takes the note along, as does the line's x", async () => {
     await adoptClient()
-    const host = await render(`<epic-item id="t5" title="A todo" status="open" open><p>Text</p></epic-item>`)
+    const host = await render(`<epic-item id="c5" title="A todo" status="open" open><p>Text</p></epic-item>`)
     const how = () =>
       Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => [
         it.dataset.how,
@@ -268,18 +268,18 @@ describe("<epic-item> review controls", () => {
     note.dispatchEvent(new InputEvent("input", { bubbles: true }))
     deep(host).querySelector<HTMLButtonElement>('button[data-how="next"]')!.click()
     await settle()
-    expect(routes.inbox.marks.t5).toMatchObject({ action: "next", note: "after the merge" })
+    expect(routes.inbox.marks.c5).toMatchObject({ action: "next", note: "after the merge" })
     expect(deep(host).querySelector("[part~='said'] >>> [part~='base']")!.textContent).toContain(
       "next phase · not sent yet"
     )
     // the line's x, with words in the box:  they go along
-    const other = await render(`<epic-item id="t6" title="Another" status="open" open><p>Text</p></epic-item>`)
+    const other = await render(`<epic-item id="c6" title="Another" status="open" open><p>Text</p></epic-item>`)
     const box = deep(other).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
     box.value = "moot since P3"
     box.dispatchEvent(new InputEvent("input", { bubbles: true }))
     button(other, "drop").click()
     await settle()
-    expect(routes.inbox.marks.t6).toMatchObject({ action: "drop", note: "moot since P3" })
+    expect(routes.inbox.marks.c6).toMatchObject({ action: "drop", note: "moot since P3" })
   })
 
   test("the fill:  a mark dashed until sent, then outlined;  Claude on it, its icon turns;  handled, they CLEAR", async () => {
@@ -305,7 +305,7 @@ describe("<epic-item> review controls", () => {
 
   test("a mark in flight:  the id chip keeps its STATE's colour, with the mark's fill;  no mark, solid;  light and dark", async () => {
     const before = new Date(Date.now() - 60_000).toISOString()
-    routes.inbox.marks.v2 = { action: "approve", at: new Date().toISOString() }
+    routes.inbox.marks.t2 = { action: "approve", at: new Date().toISOString() }
     routes.inbox.marks.j8 = { action: "revisit", when: "soon", note: "why?", at: before }
     routes.inbox.marks.q9 = { action: "pick", pick: "B", at: before }
     routes.inbox.sent = new Date(Date.now() - 30_000).toISOString()
@@ -318,7 +318,7 @@ describe("<epic-item> review controls", () => {
       const style = getComputedStyle(chip)
       return { box, chip, button, fill: chip.dataset.fill, color: chip.dataset.color, border: style.borderTopStyle }
     }
-    const approved = await look(`<epic-item id="v2" title="Picked" status="open" state="open"></epic-item>`)
+    const approved = await look(`<epic-item id="t2" title="Picked" status="open" state="open"></epic-item>`)
     // Owen, 2026-10-11 (J3 of epic-workflow):  the chip keeps the state the section's counts count, not the button's colour
     expect([approved.fill, approved.color, approved.border]).toEqual(["dashed", undefined, "dashed"])
     expect([approved.button?.dataset.fill, approved.button?.dataset.color]).toEqual(["dashed", "green"])
@@ -342,7 +342,7 @@ describe("<epic-item> review controls", () => {
     expect([plain.fill, plain.color, plain.border, plain.button]).toEqual([undefined, undefined, "none", null])
     for (const scheme of ["color-scheme: light", "color-scheme: dark; background: #1b1c1d; color: CanvasText"]) {
       const { box } = await look(`<div style="${scheme}; padding: 4px">
-        <epic-item id="v2" title="Picked" status="open" state="open"></epic-item>
+        <epic-item id="t2" title="Picked" status="open" state="open"></epic-item>
         <epic-item id="j8" title="Talk" status="open" state="attention"></epic-item>
       </div>`)
       await expectAccessible(box)
@@ -426,7 +426,7 @@ describe("<epic-item> review controls", () => {
   test('Revisit on a judgement call or a todo:  an EMPTY box gets "do it", selected, and Revisit turns ON with it (Owen, 2026-10-19)', async () => {
     await adoptClient()
     const host = await render(`<div><epic-item id="j3" title="A call" status="open" open><p>Text</p></epic-item>
-      <epic-item id="t9" title="A bare todo" status="open"></epic-item></div>`)
+      <epic-item id="c9" title="A bare todo" status="open"></epic-item></div>`)
     const [call, todo] = Array.from(host.querySelectorAll("epic-item"))
     // a call with details:  its docked box
     button(call!, "revisit").click()
@@ -448,18 +448,18 @@ describe("<epic-item> review controls", () => {
     await settle()
     const bare = deep(todo!).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> textarea")!
     await vi.waitFor(() => expect(bare.value).toBe("do it"))
-    await vi.waitFor(() => expect(routes.inbox.marks.t9?.note).toBe("do it"))
+    await vi.waitFor(() => expect(routes.inbox.marks.c9?.note).toBe("do it"))
     deep(todo!).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
     await settle()
-    expect(routes.inbox.marks.t9).toMatchObject({ action: "revisit", when: "soon", note: "do it" })
+    expect(routes.inbox.marks.c9).toMatchObject({ action: "revisit", when: "soon", note: "do it" })
   })
 
   test('"do it" never over his words:  a draft, or an earlier note, stays;  a question gets nothing', async () => {
     routes.inbox.drafts.j4 = { action: "revisit", note: "my own words", at: "2026-10-19T10:00:00.000Z" }
-    routes.inbox.marks.t3 = { action: "skip", note: "moot since P3", at: "2026-10-19T10:00:00.000Z" }
+    routes.inbox.marks.c3 = { action: "skip", note: "moot since P3", at: "2026-10-19T10:00:00.000Z" }
     await adoptClient()
     const host = await render(`<div><epic-item id="j4" title="A call" status="open" open><p>Text</p></epic-item>
-      <epic-item id="t3" title="A todo" status="open" open><p>Text</p></epic-item>
+      <epic-item id="c3" title="A todo" status="open" open><p>Text</p></epic-item>
       <epic-item id="q5" title="A question" status="open" open><p>Text</p></epic-item>
       <epic-item id="i6" title="An issue" status="open" open><p>Text</p></epic-item></div>`)
     const [call, todo, question, issue] = Array.from(host.querySelectorAll("epic-item"))
@@ -484,8 +484,8 @@ describe("<epic-item> review controls", () => {
   test("an item without details:  its box lines up where details start;  its chevron shows, and folds the box away", async () => {
     await adoptClient()
     const host =
-      await render(`<div style="width: 360px"><epic-item id="t7" title="A bare todo" status="open"></epic-item>
-      <epic-item id="t8" title="With text" status="open" open><p>Text</p></epic-item></div>`)
+      await render(`<div style="width: 360px"><epic-item id="c7" title="A bare todo" status="open"></epic-item>
+      <epic-item id="c8" title="With text" status="open" open><p>Text</p></epic-item></div>`)
     const [bare, full] = Array.from(host.querySelectorAll("epic-item"))
     const toggle = () => deep(bare!).querySelector<HTMLButtonElement>("[part~='toggle']")
     expect(toggle()).toBeNull()
@@ -564,11 +564,11 @@ describe("<epic-item> review controls", () => {
   test("answered, the work still due (Owen, 2026-10-10):  the chip OUTLINED -- green queued, blue Claude on it;  done, solid", async () => {
     await adoptClient()
     const queued = await render(
-      `<epic-item id="t4" title="Tidy" status="open" state="open" queued="2026-10-10" work="P9 · Build" review-as="next"></epic-item>`
+      `<epic-item id="c4" title="Tidy" status="open" state="open" queued="2026-10-10" work="P9 · Build" review-as="next"></epic-item>`
     )
     const onIt = await render(`<epic-item id="j6" title="A call" status="open" state="progress"></epic-item>`)
     const doneTodo = await render(
-      `<epic-item id="t5" title="Tidied" status="done" state="recent" queued="2026-10-10"></epic-item>`
+      `<epic-item id="c5" title="Tidied" status="done" state="recent" queued="2026-10-10"></epic-item>`
     )
     await settle()
     const look = (host: Element) => {
@@ -617,7 +617,7 @@ describe("<epic-item> review controls", () => {
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
     expect(button(host, "todo").getAttribute("title")).toBe(
-      "Make Todo:  Follow it up later, as a todo · reviewed 10/7/26"
+      "Make Caveat:  Follow it up later, as a caveat:  work still to do · reviewed 10/7/26"
     )
   })
 
@@ -654,7 +654,7 @@ describe("<epic-item> review controls", () => {
     button(approved, "approve").click()
     const asked = await item(`id="j2" title="A call"`)
     button(asked, "details").click()
-    const dropped = await item(`id="t1" title="A todo"`)
+    const dropped = await item(`id="c1" title="A todo"`)
     button(dropped, "drop").click()
     const noted = await item(`id="j3" title="Another call"`)
     deep(noted).querySelector<HTMLButtonElement>("[part~='note-box'] >>> button[data-how='skip']")!.click()
@@ -736,7 +736,7 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 
   test("other kinds of section draw no review controls", async () => {
     await adoptClient()
-    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
+    const host = await render(`<epic-section id="caveats" kind="caveats" open></epic-section>`)
     expect(actions(host)).toEqual([])
   })
 })
@@ -806,7 +806,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
 })
 
 // epic `airplane` P2:  new todos and questions from the page
-describe("<epic-section kind=todos | questions> new items", () => {
+describe("<epic-section kind=caveats | questions> new items", () => {
   /** `host`'s waiting cards:  `[title, fill]` each. */
   function cards(host: Element) {
     return Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='new-list'] li"), (card) => [
@@ -841,7 +841,7 @@ describe("<epic-section kind=todos | questions> new items", () => {
 
   test("no title:  nothing saved, the title takes the focus;  Escape cancels", async () => {
     await adoptClient()
-    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
+    const host = await render(`<epic-section id="caveats" kind="caveats" open></epic-section>`)
     deep(host).querySelector<HTMLButtonElement>("[part~='new-item'] >>> [part~='button']")!.click()
     await ElementFixture.tick()
     const form = deep(host).querySelector<HTMLFormElement>("[part~='new-item'] >>> [part~='form']")!
@@ -862,7 +862,7 @@ describe("<epic-section kind=todos | questions> new items", () => {
       new2: { action: "new", kind: "question", title: "aisle?", at }
     }
     await adoptClient()
-    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
+    const host = await render(`<epic-section id="caveats" kind="caveats" open></epic-section>`)
     expect(cards(host)).toEqual([["pack", "dashed"]])
     deep(host).querySelector<HTMLButtonElement>("[part~='new-list'] button[title='Edit']")!.click()
     await ElementFixture.tick()

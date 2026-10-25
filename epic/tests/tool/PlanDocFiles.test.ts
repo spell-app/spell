@@ -120,19 +120,19 @@ describe("PlanDocFiles", () => {
     const now = stamps()
     expect(Object.keys(now).filter((name) => now[name] !== after[name])).toEqual(["c1.html"])
     after = now
-    await FILES.edit(file, (plan) => plan.setItem("t1", "done"))
+    await FILES.edit(file, (plan) => plan.setItem("c2", "done"))
     const last = stamps()
     expect(Object.keys(last).filter((name) => last[name] !== after[name])).toEqual([])
-    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t1"\s+title="bare line"\s+status="done"/)
+    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="c2"\s+title="bare line"\s+status="done"/)
     expect(FILES.read(file).item("c1").textContent).toContain("rewritten")
   })
 
   test("an item that gets details later gets a part on the next write", async () => {
     const file = await oneFile()
     await FILES.edit(file, () => {}, { split: true })
-    await FILES.edit(file, (plan) => plan.setDetails("t1", "<p>now with details</p>"))
-    expect(readFileSync(join(file, "..", "parts", "t1.html"), "utf8")).toContain("now with details")
-    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t1"[^>]*source="parts\/t1.html"/)
+    await FILES.edit(file, (plan) => plan.setDetails("c2", "<p>now with details</p>"))
+    expect(readFileSync(join(file, "..", "parts", "c2.html"), "utf8")).toContain("now with details")
+    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="c2"[^>]*source="parts\/c2.html"/)
   })
 
   test("an old-markup doc (restored from an old backup):  refused, read or edited, writing nothing", async () => {
@@ -149,7 +149,7 @@ describe("PlanDocFiles", () => {
     const file = await oneFile()
     const before = readFileSync(file, "utf8")
     await expect(
-      FILES.edit(file, (plan) => plan.findSection("todos")!.append(plan.make("epic-event", { at: "2026-10-01" })))
+      FILES.edit(file, (plan) => plan.findSection("caveats")!.append(plan.make("epic-event", { at: "2026-10-01" })))
     ).rejects.toThrow(/nothing written:  the edit would break the doc/)
     expect(readFileSync(file, "utf8")).toBe(before)
   })

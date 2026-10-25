@@ -41,6 +41,16 @@ export class PlanItem {
     return Object.entries(KINDS).find(([kind, spec]) => kind !== "decision" && spec.prefix === prefix)?.[0] ?? "item"
   }
 
+  /**
+   * Item `item`'s kind, as `kindOf()`, but a caveat's from its markup (epic `epic-engine` P32):  `caveat` for a
+   * LIMIT (`<epic-item limit>`), `todo` for work still to do;  both are `c` ids.
+   */
+  static kindOfItem(item: Element): string {
+    const kind = PlanItem.kindOf(item.id)
+    if (kind !== "caveat") return kind
+    return item.hasAttribute("limit") ? "caveat" : "todo"
+  }
+
   /** `q12` -> `12`;  0 for an id without a number. */
   static idNumber(id: string): number {
     return Number(id.match(/\d+$/)?.[0]) || 0

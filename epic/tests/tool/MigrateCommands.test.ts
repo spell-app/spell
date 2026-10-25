@@ -122,7 +122,7 @@ describe("migrate:  the runner", () => {
       "epic pages:  1 of 2 changed (links-agree 1)"
     ])
     const plan = FILES.read(docOf("old"))
-    expect(plan.item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
+    expect(plan.item("c1").querySelector("a")!.textContent).toBe("P2 · Two")
     expect(plan.document.querySelector("#log > epic-event:last-of-type")!.textContent).toMatch(
       /migrated:\s+links-agree/
     )
@@ -190,6 +190,7 @@ describe("migrate:  the runner", () => {
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
       "epic 2026-10-11 links-agree",
       "epic 2026-10-24 more-requests-first",
+      "epic 2026-10-24 caveats-and-tests",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/)
     ])
@@ -229,7 +230,7 @@ describe("migrate --notify", () => {
       `  to 🚧 busy:  ${MigrateCommands.message("busy", ["links-agree"])}`
     ])
     expect(readFileSync(docOf("busy"), "utf8")).toBe(before)
-    expect(FILES.read(docOf("old")).item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
+    expect(FILES.read(docOf("old")).item("c1").querySelector("a")!.textContent).toBe("P2 · Two")
   })
 
   test("the message:  one line, what to run, when, and that it may commit it", () => {

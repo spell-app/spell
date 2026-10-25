@@ -69,7 +69,7 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       // its own verbs and arguments (`saga set seo epics`):  no epic page to aim at
       return [["saga", ...args]]
     case "test":
-      // `test seo#V3`:  the run, landing on V3;  `test --all`:  no epic
+      // `test seo#T3`:  the run, landing on T3;  `test --all`:  no epic
       return [["test", ...around([]), ...(ref === undefined ? [] : ["--at", ref])]]
     default:
       if (ITEM_VERBS.includes(verb)) return [[verb, ...around(ref === undefined ? [] : [ref])]]
@@ -440,25 +440,26 @@ const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/
 /**
  * The item kinds' letters, for `add seo#J`:  each kind's id prefix (the `epic` tool's `KINDS`),
  * plus `d` for a decision (whose ids are questions')
+ * - `c`:  a caveat that's work still to do (the tool's `todo`, epic `epic-engine` P32);  `--limit` makes it a limit
+ *   to know about (the tool's `caveat`), as does the word `caveat`
  * - a private copy:  importing `spell-epic/tool/planDoc.types` here would load the tool's types into every call
  */
 const KIND_LETTERS: Record<string, string> = {
   q: "question",
-  c: "caveat",
+  c: "todo",
   i: "issue",
-  t: "todo",
+  t: "test",
+  // a test's letter before epic `epic-engine` P32:  old skills and habits still say it
   v: "test",
   d: "decision",
   j: "judgement"
 }
 
 /** The item kinds' words, which `add seo#judgement` takes too. */
-const KIND_WORDS = Object.values(KIND_LETTERS)
+const KIND_WORDS = [...Object.values(KIND_LETTERS), "caveat"]
 
 /** The kinds, for a message:  `J judgement, Q question ...`. */
-const KIND_HELP = Object.entries(KIND_LETTERS)
-  .map(([letter, word]) => `${letter.toUpperCase()} ${word}`)
-  .join(", ")
+const KIND_HELP = "J judgement, Q question, I issue, C caveat (--limit:  a limit, not work), T test, D decision"
 
 /** A phase's body fields, `phase-body`'s flags. */
 const PHASE_BODY = ["symptom", "changes", "goal", "files", "verify"]

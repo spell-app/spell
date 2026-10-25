@@ -122,7 +122,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           `epic-engine` I55;  `<epic-summary>` drew them under its lede before)
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Accept and Reopen, keyed by its id (`ch3`),
         its own `<epic-review buttons="change">` under its chip
-      - `<epic-new-item>`:  the page's toolbar button, and the Todos and Questions sections' New todo / question
+      - `<epic-new-item>`:  the page's toolbar button, and the Caveats and Questions sections' New caveat / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
         and the epics left to test (`openTests()`)
@@ -330,7 +330,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its file:  `sagas/<id>/<id>.saga.html`, marked `<epic-page kind="saga" saga="<id>">`
       - named `SAGA:/<id>` (`PlanDocFiles.findDoc()`)
       - made by `epic saga page <id> [--force]` (`SagaPage`) from [saga.html](tool/templates/saga.html):
-        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Todos, Log;  one file
+        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Log;  one file
+        (its Todos went with epic `epic-engine` P32:  no Caveats there yet)
       - its Epics:  `<epic-cards saga>`, the epics whose page names the saga, drawn from the page server
         (`GET /api/epics/saga`, `SagaEpics`), asked again as epic pages change
         - as the Epics page's own list and cards (epic `epic-engine` I39):  an `<epic-list no-favorites>` of
@@ -423,6 +424,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     add it to Spell UI's `packModules` AND to `PACK_MODULES`, in the kit's
     [packModules.ts](../../src/element-tools/packModules.ts).
 - Every tag starts `epic-`:  `<ui-root>` knows the pack's tags by that prefix.
+- What an element, a form or the docs runtime keeps in the browser goes through the kit's `PrefStore`
+  (epic `prefs-and-undo` P4):  `spell/util/persist/PrefStore`, by file, never the persist barrel.
+  - Keys named whole (`spell-folds:<path>`), byte for byte:  `PrefStore.getAt()` / `setAt()`;  a class handed a
+    `Storage` for its tests keeps it, through a `StoragePlace` over it.
+  - A key needs a store's name before its first colon:  the four that had none were renamed, their old values moved
+    once (`PrefStore.moveOldKey()`):  `spell-epics:sort`, `spell-epics:sagas`, `spell-epics:new-epic-draft`,
+    `spell-epics:send-countdown`;  a page-named filter is under `spell-filter:` too.
+  - Stays raw:  [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle, and
+    [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright.
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -638,7 +648,7 @@ The shared folders:
     - Each group is a small heading with its count;  cards are alphabetical by title within each.
     - Or newest first:  the page header's sort buttons, A–Z and Date (`<epic-sort>`;  Owen, 2026-10-13).
       - They sort the cards inside each group by title, or by when each was last worked on.
-      - Remembered in this browser (`spell-epics-sort`).
+      - Remembered in this browser (`spell-epics:sort`;  `spell-epics-sort` before epic `prefs-and-undo` P4, moved once).
     - A group with no card showing isn't drawn (hidden by a saga chip, or by the runtime's state chips).
     - On the page server, the running epics' route module adds the running epics' cards
       ([runningRoutes.ts](list/runningRoutes.ts), `RunningEpics`), and marks every card `running` and `favorite`
@@ -676,7 +686,7 @@ The shared folders:
         then "No saga", each with its count.
         - A saga no epic names gets no chip (epic `epic-engine` P3:  its chip could only show nothing).
       - A click shows only that saga's epics, by the state chips' rule (`StateFilter.nextShown()`).
-        - remembered in this browser (`spell-epics-sagas`), for every Epics page
+        - remembered in this browser (`spell-epics:sagas`), for every Epics page
       - The groups count only the cards that show.
       - each card carries its saga in attributes (`saga`, `saga-title`, `saga-purpose`), for the list and the page
         server
@@ -1309,7 +1319,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ### Review inbox
 
-- Owen marks an epic page's items ON the page:  approve, todo, Add Details, revisit, pick an option card.
+- Owen marks an epic page's items ON the page:  approve, Make Caveat (`todo` in the inbox), Add Details, revisit, pick an option card.
   - The marks wait in its INBOX FILE until a Claude session takes them.
     It's `<name>.inbox.json5`, beside the doc in `epics/<name>/`.
   - Absent until the first mark;  deleted once empty.
@@ -1340,19 +1350,19 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
     - `epic inbox apply` makes Accept `accepted` (the orange goes, the chip stays) and reopens the question for
       Reopen:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
-  - A new todo or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
+  - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.
   - A TEST's answer from Owen's test run (epic `epic-engine` P4):  `{ action: "test", result, note?, shot? }`,
     on a test only
-    - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`);  `shot`:  his screenshot, `tests/v3-<stamp>.png`
+    - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`);  `shot`:  his screenshot, `tests/t3-<stamp>.png`
       from the page's folder (`POST shot`, below)
     - sent with Send;  `epic inbox apply <name>` applies it (`PlanDoc.applyMark()`:  passed closes, failed files a
       new issue with the note and screenshot, skip cancels, not now defers):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
     - the run itself is `<epic-page>`'s test mode (`?test=1`), drawn by `<epic-test-run>` (Epic UI's page says how):
       one card per test from its `<epic-field label="Step">` ... (an older test's prose as its Step), the answers
       P / F / S / N, a COMMENT box on every card (the mark's `note`, with any answer;  before one, the inbox's draft;
-      `apply` keeps it on the test as Owen's reply), its place in the address (`#v3`), kept there against the runtime's scroll-follow
+      `apply` keeps it on the test as Owen's reply), its place in the address (`#t3`), kept there against the runtime's scroll-follow
       (`spell-doc:place`);  `epic test <name>` opens it, `epic test --all` the
       first epic with open tests, the run's last card leading to the next (`GET /api/epics/tests`,
       [epicRoutes.ts](tool/epicRoutes.ts), `EpicTests.waiting()`)
@@ -1417,7 +1427,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - a Send on a docs page the epic owns (epic `epic-workflow` P13, see "Comments"):  each comment under its page
     - exits 2 on timeout
   - `epic inbox <name>` lists the comments waiting on the pages the epic owns too (`guides` in its JSON)
-  - `apply [ids]`:  the sent approve / pick / todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
+  - `apply [ids]`:  the sent approve / pick / Make Caveat marks and test answers, into the doc (`PlanDoc.applyMark()`),
     then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
     - A revisit with a pick is left, "to talk over".
   - `<name>#<id> working on|off`
@@ -2139,7 +2149,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - Airplane mode is off for it, whatever the machine's switch says.
   - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
-      Approve, Make Todo, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
+      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
       Add Details Now, Send, the countdown's send.
     - No control past the window, or over a title, at 280 / 900px, light and dark.
     - It refuses while the copy's inbox file exists.

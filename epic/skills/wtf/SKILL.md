@@ -45,7 +45,7 @@ Owen has lost the thread:  hand it back in one screen.
   - ONE shared doc, in `epics/<name>/` of every checkout (a link into the content folder).
   - A branch from before 2026-10-02 still has it under `plans/<name>/`.
   - `epic summary <name> --json`:
-    phases with status, next phase, open questions / issues / caveats / todos
+    phases with status, next phase, open questions / issues / caveats / tests
   - its links:  `epic pages link <ABSOLUTE path> --hash <id>`:  the side bar link, then `• 🌐` (browser)
 - A `/bedtime` run:  the summary's `bedtime` field (`epic summary`, above).
   - The phases it's running (`P3-P6`) while it goes;  `null` once it's over.

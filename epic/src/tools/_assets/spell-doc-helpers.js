@@ -4,7 +4,9 @@
  * (`spell-comments.js`).
  * - Plain DOM, no Spell UI imports:  the comments' own script runs beside the page's Spell UI, never with a second one
  *   (a toast goes through the page's `window.SpellUI`)
+ * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
+import { PrefStore } from "spell/util/persist"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -14,23 +16,18 @@ export async function nextFrames(count) {
   for (let left = count; left > 0; left--) await new Promise((resolve) => requestAnimationFrame(resolve))
 }
 
-/** The object saved as JSON under `key`, or `{}` (nothing saved, bad JSON, or storage that throws). */
+/**
+ * The object kept as JSON under `key`, a key named whole (`spell-folds:/x.html`), or `{}`:  nothing kept, or not one.
+ * - NEVER throws:  storage blocked or a value it can't read is `{}`, logged (`PrefStore`).
+ */
 export function readJSON(key) {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) ?? "{}")
-    return value && typeof value === "object" ? value : {}
-  } catch {
-    return {}
-  }
+  const value = PrefStore.getAt(key)
+  return value && typeof value === "object" ? value : {}
 }
 
-/** Save `value` as JSON under `key`;  a browser that blocks storage just doesn't remember. */
+/** Keep `value` as JSON under `key`;  a browser that blocks storage keeps it for this page only. */
 export function writeJSON(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    // private window:  not remembered
-  }
+  PrefStore.setAt(key, value)
 }
 
 /** Add `pill` to the page header `head`, before its toolbar (`buildPageToolbar()`):  the toolbar stays its last row. */

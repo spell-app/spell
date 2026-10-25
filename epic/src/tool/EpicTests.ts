@@ -15,7 +15,7 @@ import { Sagas } from "./Sagas"
  * - which epics have open tests, in Owen's saga order (`waiting()`):  `epic test --all`, and the page server's
  *   `GET /api/epics/tests` (`epicRoutes.ts`), which the run's summary card asks for the next epic
  * - his screenshots:  `TestShots`
- * - a test's markup, as `epic add <epic>#V --step ...` writes it (`fieldsHTML()`):  Step, Should, Example, If not,
+ * - a test's markup, as `epic add <epic>#T --step ...` writes it (`fieldsHTML()`):  Step, Should, Example, If not,
  *   each an `<epic-field label>` (`TEST_FIELDS`);  an older test has only prose, which the run shows as its Step
  * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
@@ -127,11 +127,11 @@ export class EpicTests {
   }
 
   /**
-   * A test's markup from `epic add <epic>#V` / `epic details <epic>#V3`'s flags, as HTML:  the fields in their order,
+   * A test's markup from `epic add <epic>#T` / `epic details <epic>#T3`'s flags, as HTML:  the fields in their order,
    * Step, Should, Example, If not (`TEST_FIELDS`);  `""` when none is given.
    * - each value is HTML, as `--details` is:  a Step may hold ACTION links,
    *   `<a class="epic-test-action" href="...">Open the Epics page</a>`, shown as buttons in the run
-   * - `example`:  `{ image?, text? }`:  the image's path from the epic page's folder (`tests/v3.png`), a line of text
+   * - `example`:  `{ image?, text? }`:  the image's path from the epic page's folder (`tests/t3.png`), a line of text
    * - throws a `TypeError` for a Should without a Step, or the reverse:  a test says both
    */
   static fieldsHTML({ step, should, example, ifNot }: TestFieldValues): string {
@@ -266,7 +266,7 @@ export type EpicTestCount = {
 
 /** An open test, as the run shows it (`EpicTests.openIn()`, `epic test <epic> --list --json`). */
 export type OpenTest = {
-  /** its id, upper case:  `V3` */
+  /** its id, upper case:  `T3` */
   id: string
   /** its title */
   title: string
@@ -282,7 +282,7 @@ export type OpenTest = {
   should?: string
   /** the Example's text */
   example?: string
-  /** the Example's screenshot, from the epic page's folder:  `tests/v3.png` */
+  /** the Example's screenshot, from the epic page's folder:  `tests/t3.png` */
   image?: string
   /** what to tell Claude when it doesn't */
   ifNot?: string
@@ -318,7 +318,7 @@ export const TESTS_API = "/api/epics/tests"
 export const TEST_ACTION = "epic-test-action"
 
 /** A test item's id. */
-const TEST_ID = /^v\d+$/
+const TEST_ID = /^t\d+$/
 
 ////////////////
 // ## Helpers

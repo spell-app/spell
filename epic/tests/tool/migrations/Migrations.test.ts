@@ -21,7 +21,7 @@ function upToDateDoc(): Document {
 
 describe("Migrations", () => {
   test("every step by name, in order;  `named()` finds one", () => {
-    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree", "more-requests-first"])
+    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree", "more-requests-first", "caveats-and-tests"])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
   })

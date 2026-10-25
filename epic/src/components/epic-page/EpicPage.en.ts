@@ -368,7 +368,7 @@ export const epicPageVocabulary = {
     },
     {
       key: "stageOverviewTip",
-      text: "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+      text: "Agreeing the Overview:  only it, the questions and caveats show until Accept Overview",
       description: "The step label's tooltip, Overview stage."
     },
     {
@@ -474,11 +474,16 @@ export const epicPageVocabulary = {
       max: 1,
       description: "4. Judgement calls."
     },
-    { tag: "epic-section", where: { attribute: "kind", values: ["caveats"] }, max: 1, description: "5. Caveats." },
-    { tag: "epic-section", where: { attribute: "kind", values: ["todos"] }, max: 1, description: "6. Todos." },
-    { tag: "epic-section", where: { attribute: "kind", values: ["issues"] }, max: 1, description: "7. Issues." },
-    { tag: "epic-section", where: { attribute: "kind", values: ["tests"] }, max: 1, description: "8. To test." },
-    { tag: "epic-section", where: { attribute: "kind", values: ["log"] }, max: 1, description: "9. Log." }
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["caveats"] },
+      max: 1,
+      description:
+        "5. Caveats:  work still to do, and limits to know about (`limit`;  the todos too, epic `epic-engine` P32)."
+    },
+    { tag: "epic-section", where: { attribute: "kind", values: ["issues"] }, max: 1, description: "6. Issues." },
+    { tag: "epic-section", where: { attribute: "kind", values: ["tests"] }, max: 1, description: "7. To test." },
+    { tag: "epic-section", where: { attribute: "kind", values: ["log"] }, max: 1, description: "8. Log." }
   ],
   childOrder: "listed"
 } as const satisfies EpicVocabulary

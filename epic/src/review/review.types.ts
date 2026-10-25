@@ -78,7 +78,10 @@ export const COUNTDOWN_TICK_MS = 1000
  * localStorage key of countdown mode, for every page this browser shows:  `"off"` while it's off;
  * anything else, or nothing, on (decision Q6:  on by default, remembered per viewer).
  */
-export const COUNTDOWN_KEY = "epic-send-countdown"
+export const COUNTDOWN_KEY = "spell-epics:send-countdown"
+
+/** Its key before epic `prefs-and-undo` P4, with no store:  moved to `COUNTDOWN_KEY` once. */
+export const OLD_COUNTDOWN_KEY = "epic-send-countdown"
 
 /** What counts as Owen at work on the page, so the countdown starts again:  typing, clicking, scrolling. */
 export const ACTIVITY_EVENTS = ["keydown", "pointerdown", "wheel", "input", "scroll"] as const

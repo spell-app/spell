@@ -467,6 +467,73 @@ function firstLineTop(element: Element): number {
   return range.getBoundingClientRect().top
 }
 
+/** Which corners of each item's line in `host` are rounded:  `{ q1: "top", q2: "", q4: "top bottom" ... }`. */
+function roundedEnds(host: Element): Record<string, string> {
+  const ends: Record<string, string> = {}
+  for (const item of host.querySelectorAll("epic-item")) {
+    if (getComputedStyle(item).display === "none") continue
+    const line = getComputedStyle(item.shadowRoot!.querySelector("[part~='line']")!)
+    const top = parseFloat(line.borderTopLeftRadius) > 0 && parseFloat(line.borderTopRightRadius) > 0
+    const bottom = parseFloat(line.borderBottomLeftRadius) > 0 && parseFloat(line.borderBottomRightRadius) > 0
+    ends[item.id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
+  }
+  return ends
+}
+
+// Owen, 2026-10-24:  "With lists like this, tops and bottoms should always be rounded"
+describe("<epic-section> runs of item lines, rounded at their ends", () => {
+  afterEach(() => {
+    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+  })
+
+  /** Owen's 7 questions, each with details;  `open` ones unfolded. */
+  function seven(open: number[], states?: string[]): string {
+    const items = Array.from({ length: 7 }, (_, at) => {
+      const n = at + 1
+      const state = states?.[at] ?? "open"
+      return `<epic-item id="q${n}" title="Q ${n}" status="open" state="${state}"${open.includes(n) ? " open" : ""}><p>Q ${n}'s details.</p></epic-item>`
+    })
+    return `<epic-section id="decisions" kind="questions" open>${items.join("")}</epic-section>`
+  }
+
+  test("Owen's example, Q3 and Q4 unfolded:  Q1 top, Q3 bottom, Q4 both, Q5 top, Q7 bottom", async () => {
+    const host = await render(seven([3, 4]))
+    expect(roundedEnds(host)).toEqual({
+      q1: "top",
+      q2: "",
+      q3: "bottom",
+      q4: "top bottom",
+      q5: "top",
+      q6: "",
+      q7: "bottom"
+    })
+    // no rule above a run's rounded top (Owen, 2026-10-24);  the rules between lines inside a run stay
+    const ruled = Array.from(host.querySelectorAll("epic-item"))
+      .filter((item) => getComputedStyle(item).borderTopStyle !== "none")
+      .map((item) => item.id)
+    expect(ruled).toEqual(["q2", "q3", "q6", "q7"])
+  })
+
+  test("follows folding:  all folded is one run;  a click on a line splits it there", async () => {
+    const host = await render(seven([]))
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "", q4: "", q5: "", q6: "", q7: "bottom" })
+    host.querySelector<HTMLElement>("#q5")!.shadowRoot!.querySelector<HTMLElement>("[part~='line']")!.click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(host.querySelector("#q5")!.hasAttribute("open")).toBe(true)
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "", q4: "", q5: "bottom", q6: "top", q7: "bottom" })
+  })
+
+  test("only the lines showing count:  a run ends at the last one the filter leaves", async () => {
+    // q6 and q7 red;  showing only yellow, q5 is the list's last line
+    const host = await render(seven([3], ["open", "open", "open", "open", "open", "attention", "attention"]))
+    chip(host, "open").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "bottom", q4: "top", q5: "bottom" })
+  })
+})
+
 // Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-section> title, folded and open", () => {

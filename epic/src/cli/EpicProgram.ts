@@ -268,11 +268,10 @@ export class EpicProgram {
 
     epic.commandsGroup("Epic page:  items:")
 
-    this.page(
-      epic.command("add"),
-      "add an item (J judgement, Q question, I issue, C caveat, T todo, V test, D decision)"
-    )
-      .usage('<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#V "Title" --step <html> --should <html> ...')
+    this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, C caveat, T test, D decision)")
+      .usage(
+        '<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#C "Title" [--limit]  |  <epic>#T "Title" --step <html> ...'
+      )
       .addHelpText("after", ADD_HELP)
     this.page(
       epic.command("calm"),
@@ -301,7 +300,7 @@ export class EpicProgram {
       epic.command("details"),
       "write an agent's details or reply into an item;  --append adds it, --more under it",
       "epic details seo#J3 --file reply.html"
-    ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#V3 --step <html> --should <html> ...")
+    ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#T3 --step <html> --should <html> ...")
     this.page(
       epic.command("summarize"),
       "condense an item after a lot of back and forth:  the file replaces what it shows;  its text and every reply " +
@@ -347,7 +346,7 @@ export class EpicProgram {
       "Owen's test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
         "epic's;  --list:  the open tests"
     )
-      .usage("<epic>[#V3] [--list [--json]]  |  --all [--list] [--json]")
+      .usage("<epic>[#T3] [--list [--json]]  |  --all [--list] [--json]")
       .addHelpText("after", TEST_HELP)
 
     ////////////////
@@ -944,10 +943,11 @@ Example:
 /** After `epic add --help`. */
 const ADD_HELP = `
 Prints the new item's id.  The letter after # is its kind:
-  J judgement   Q question   I issue   C caveat   T todo   V test (checked by hand)   D decision (a question born answered)
+  J judgement   Q question   I issue   C caveat   T test (checked by hand)   D decision (a question born answered)
+A caveat (C) is work still to do (a todo, before epic-engine P32);  --limit:  a limit to know about, not work.
 --calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
-A test (V) Owen's test run steps him through, its fields HTML, or plain text:  steps as "1. ... 2. ..." become a
-numbered list, "- " lines bullets (epic details seo#V3 takes them too):
+A test (T;  V, its old letter, still works) Owen's test run steps him through, its fields HTML, or plain text:
+steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#T3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run;
                       the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
                       fenced block in plain text), which the run shows with a Copy button;  a wait its own step
@@ -957,7 +957,9 @@ numbered list, "- " lines bullets (epic details seo#V3 takes them too):
 
 Examples:
   epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
-  epic add seo#V "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
+  epic add seo#C "Retry the upload once it's online"
+  epic add seo#C "Find-in-page misses folded text" --limit
+  epic add seo#T "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
 
 /** After `epic test --help`. */
 const TEST_HELP = `
@@ -966,7 +968,7 @@ and a screenshot), Skip or Not now, and Send hands them to the session listening
 
 Examples:
   epic test seo                   the run, in the Review tab (the page with ?test=1)
-  epic test seo#V3                ... at V3
+  epic test seo#T3                ... at T3
   epic test seo --list [--json]   its open tests, in the run's order:  page order, Not now ones last
   epic test --all [--list]        every epic with open tests, in Owen's saga order;  the first one opened,
                                   its last card leading to the next`

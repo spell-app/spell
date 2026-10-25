@@ -54,7 +54,6 @@ export const epicSectionVocabulary = {
         "questions",
         "judgements",
         "caveats",
-        "todos",
         "issues",
         "tests",
         "log",
@@ -178,7 +177,6 @@ export const epicSectionVocabulary = {
     { key: "questionsTitle", text: "Questions" },
     { key: "judgementsTitle", text: "Judgement calls" },
     { key: "caveatsTitle", text: "Caveats" },
-    { key: "todosTitle", text: "Todos" },
     { key: "issuesTitle", text: "Issues" },
     { key: "testsTitle", text: "To test" },
     { key: "logTitle", text: "Log" },
@@ -231,7 +229,7 @@ export const epicSectionVocabulary = {
     { tag: "epic-phase", when: { attribute: "kind", values: ["phases"] }, description: "The phases, in order." },
     {
       tag: "epic-item",
-      when: { attribute: "kind", values: ["questions", "judgements", "caveats", "todos", "issues", "tests"] },
+      when: { attribute: "kind", values: ["questions", "judgements", "caveats", "issues", "tests"] },
       description: "The items, their id's letter the section's (`q` in Questions)."
     },
     { tag: "epic-event", when: { attribute: "kind", values: ["log"] }, description: "The log, oldest first." },
