@@ -10,7 +10,8 @@ import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spe
 
 /**
  * An IF-CHAIN INSIDE MARKUP, drawn (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
- * every branch stays on the page, each hidden (`hidden="until-found"`) while it isn't the one.
+ * every branch stays on the page, each hidden while it isn't the one:  text `hidden="until-found"`, a Spell UI element
+ * by its own `hidden`.
  * - So a flip keeps each element, the same DOM node with whatever it holds, and only `hidden` changes.
  * - The same tags in code spell and spellx:  the same program.
  * - Compiled, then run on `core`'s source, into a fake page (linkedom), as `drawing.test.ts` draws.
@@ -99,9 +100,10 @@ describe("an <if> inside markup", () => {
     drawnCard("/Card.spellx", SPELLX)
     expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
     const [text, span] = [...element.firstElementChild!.children]
-    expect(text!.getAttribute("hidden")).toBe("until-found")
-    // its text, wrapped in a span of its own to be hidden too
+    // a Spell UI element by its own `hidden`;  text, in a span of its own, until found
+    expect(text!.getAttribute("hidden")).toBe("")
     expect(span!.textContent).toBe("Ace down")
+    expect(span!.getAttribute("hidden")).toBe("until-found")
   })
 
   test("a flip keeps every element, the same node with what it holds:  only `hidden` changes", () => {

@@ -180,7 +180,7 @@ describe("spellx:  a third style of spell", () => {
         "</spell-view>"
       ])
       expect(errors).toEqual([])
-      expect(code).toContain('h("ui-text", { hidden: () => this instanceof Card ? undefined : "until-found" }, "a")')
+      expect(code).toContain('h("ui-text", { hidden: () => this instanceof Card ? undefined : true }, "a")')
       expect(code).toContain('h("span", { hidden: () => !(this instanceof Card) ? undefined : "until-found" }, "b")')
     })
 

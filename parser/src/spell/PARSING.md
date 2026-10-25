@@ -1206,9 +1206,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a
     `JSXElementToken` with its `chain` kind and its `phrase` (a `JSXExpressionToken`, as if written `{...}`);
     a branch ends where the next starts, and ONE closer, `</>` or `</if>`, ends the chain.
-  - `SpellJSX` keeps every branch on the page:  each branch's elements get `hidden="until-found"` while it isn't
-    the one, its text and holes a `<span>` each (`childASTs()`).  So it compiles the same from both forms:
-    code spell writes the same tags.
+  - `SpellJSX` keeps every branch on the page, each branch hidden while it isn't the one (`childASTs()`):
+    - the web's own elements, and each run of text and holes (in a `<span>` of its own):  `hidden="until-found"`
+    - a custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by (its host has no box of its own)
+  - So it compiles the same from both forms:  code spell writes the same tags.
   - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  spellx's tag
     line, code spell's `if` lines.  A branch in no element is `chain-outside-markup`.
   - Code spell's drawings are untouched;  so are a `<spell>` chunk's, in a spellx file (J83):  the tokenizer marks

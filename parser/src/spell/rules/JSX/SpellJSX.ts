@@ -34,9 +34,12 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   - Except in a `<spell>` chunk, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
  * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
  *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in code spell and spellx.
- *   - Every branch stays on the page:  each one's elements get `hidden="until-found"` while it isn't the one, so a
- *     flip keeps the element (its DOM node, its state and focus) and find-in-page still reaches it.
- *   - Its text and `{holes}` are wrapped in a `<span>` each, to be hidden too.
+ *   - Every branch stays on the page, each one's elements hidden while it isn't the one:  a flip keeps the element
+ *     (its DOM node, its state and focus), and changes only its `hidden`.
+ *     - The web's own elements and text:  `hidden="until-found"`, so find-in-page still reaches them.
+ *     - A custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by.  Its host takes no box of its own
+ *       (`display: contents`), where the browser's until-found would draw it all the same.
+ *   - Each run of its text and `{holes}` is wrapped in a `<span>`, to be hidden too.
  *   - Branch k shows while no branch before it holds, and its own phrase does:  `hidden` is
  *     `() => !c1 && c2 ? undefined : "until-found"`.
  *   - The tokenizer reads the chain (`P.Tokenizer.chainTags`):  each branch a `JSXElementToken` with its `chain`
@@ -265,7 +268,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * `children`, each hidden while `shown` isn't true (`hidden="until-found"`):  an element by an attribute of its
-   * own, text and a `{hole}` in a `<span>` of their own.
+   * own, each run of text and `{holes}` in a `<span>` of its own.
    * - `shown` none:  always shown, as an `<otherwise>` alone would be.
    */
   private static hiddenUnless(
@@ -274,24 +277,40 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     children: P.ASTJSXElementProps["children"]
   ): P.ASTJSXElementProps["children"] {
     if (!shown) return children
-    const hidden = () =>
+    // a custom element (`<ui-label>`) by its own `hidden`, Spell UI's:  its host takes no box of its own, where the
+    // browser's until-found would draw it all the same;  the web's own elements and text, until found
+    const hidden = (tagName = "span") =>
       new P.ASTJSXAttribute(match, {
         name: "hidden",
         value: new P.ASTTernaryExpression(match, {
           condition: shown,
           trueValue: new P.ASTNothingLiteral(match),
-          falseValue: new P.ASTStringLiteral(match, { value: UNTIL_FOUND, quote: '"' })
+          falseValue: tagName.includes("-")
+            ? new P.ASTBooleanLiteral(match, true)
+            : new P.ASTStringLiteral(match, { value: UNTIL_FOUND, quote: '"' })
         })
       })
-    return children.flatMap((child): P.ASTJSXElementProps["children"] => {
-      if (child instanceof P.ASTJSXEndTag) return []
-      if (child instanceof P.ASTJSXFragment) return SpellJSX.hiddenUnless(match, shown, child.children)
-      if (child instanceof P.ASTJSXElement) {
+    const out: P.ASTJSXElementProps["children"] = []
+    // a run of text and holes, `{its count} to do`:  ONE span
+    let run: P.ASTJSXElementProps["children"] = []
+    const endRun = () => {
+      if (run.length)
+        out.push(new P.ASTJSXElement(run[0]!.match, { tagName: "span", attrs: [hidden()], children: run }))
+      run = []
+    }
+    for (const child of children) {
+      if (child instanceof P.ASTJSXEndTag) continue
+      if (child instanceof P.ASTJSXFragment) {
+        endRun()
+        out.push(...SpellJSX.hiddenUnless(match, shown, child.children))
+      } else if (child instanceof P.ASTJSXElement) {
+        endRun()
         const { tagName, attrs = [], children: inside } = child
-        return [new P.ASTJSXElement(child.match, { tagName, attrs: [...attrs, hidden()], children: inside })]
-      }
-      return [new P.ASTJSXElement(child.match, { tagName: "span", attrs: [hidden()], children: [child] })]
-    })
+        out.push(new P.ASTJSXElement(child.match, { tagName, attrs: [...attrs, hidden(tagName)], children: inside }))
+      } else run.push(child)
+    }
+    endRun()
+    return out
   }
 
   /**
