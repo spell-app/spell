@@ -26,7 +26,7 @@ import { SOURCE_LOADER_TAG, SOURCE_MESSAGE_TAG } from "./elements.types"
  *   - `:state(loading)`:  a `<ui-loader>` shows
  *   - `:state(error)`:  a `<ui-message>` says why, unless the cancelable `ui-error` was cancelled
  *   - `:state(saving)`, `:state(dirty)`
- * - Saving (`save()`):  the cancelable `ui-save` first, then `UI.sources.save()` through the page's saver;
+ * - Saving (`save()`):  the cancelable `ui-saving` first, then `UI.sources.save()` through the page's saver;
  *   `ui-saved` or `ui-error` after.
  *   - A save failure never replaces the content with a message.
  * - The vocabulary MUST spread the names used here:
@@ -102,7 +102,7 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
     return untrack(() => this.textToShow)
   }
 
-  /** Show `text` instead (`isDirty` until saved);  sends `ui-change`. */
+  /** Show `text` instead (`isDirty` until saved);  sends `ui-changed`. */
   set content(text: string) {
     if (text === this.content) return
     this.wasEdited = text
@@ -224,7 +224,7 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
   }
 
   /**
-   * Content arrived:  settle `domElement.loaded`, then `ui-load`.
+   * Content arrived:  settle `domElement.loaded`, then `ui-loaded`.
    * - An edit, when there is one, wins as the content.
    */
   @untracked
@@ -307,7 +307,7 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
   /**
    * Save `text` (default the content) back to `source`;  resolves `true` once saved HERE.
    * - `text` given:  shown first, as setting `content`.
-   * - The cancelable `ui-save` first:  cancelled -> `false` (the listener saves).
+   * - The cancelable `ui-saving` first:  cancelled -> `false` (the listener saves).
    * - No `source`:  nothing to write -- the content stays, `ui-saved`, `true`.
    * - Else `UI.sources.save()` (`fragment`:  `saveFragment()`), then
    *   - `ui-saved` with the new `etag`

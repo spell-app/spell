@@ -61,17 +61,17 @@ export const transitionVocabulary = {
   ],
   events: [
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ visible: true, animation: string }",
       description: "Shown, its animation finished (Fomantic's `onVisible`)."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ visible: false, animation: string }",
       description: "Hidden, its animation finished (Fomantic's `onHidden`)."
     },
     {
-      name: "ui-complete",
+      name: "ui-animated",
       detail: "{ visible: boolean, animation: string }",
       description: "Any animation finished, attention ones included (Fomantic's `onComplete`)."
     }

@@ -148,10 +148,10 @@ describe("<ui-label> content", () => {
 ////////////////
 
 describe("<ui-label> remove", () => {
-  it("dispatches a cancelable, composed ui-remove from the delete button", async () => {
+  it("dispatches a cancelable, composed ui-removing from the delete button", async () => {
     const { host, root } = await label(`<ui-label removable>Tag</ui-label>`)
     const events: CustomEvent[] = []
-    document.addEventListener("ui-remove", (event) => events.push(event as CustomEvent), { once: true })
+    document.addEventListener("ui-removing", (event) => events.push(event as CustomEvent), { once: true })
     root.querySelector("button")!.click()
     expect(events).toHaveLength(1)
     const [event] = events
@@ -165,10 +165,10 @@ describe("<ui-label> remove", () => {
     expect(host.isConnected).toBe(true)
   })
 
-  it("reports a cancelled ui-remove", async () => {
+  it("reports a cancelled ui-removing", async () => {
     const { host, root } = await label(`<ui-label removable>Tag</ui-label>`)
     let prevented = false
-    host.addEventListener("ui-remove", (event) => {
+    host.addEventListener("ui-removing", (event) => {
       event.preventDefault()
       queueMicrotask(() => (prevented = event.defaultPrevented))
     })
@@ -181,7 +181,7 @@ describe("<ui-label> remove", () => {
   it("doesn't fire while disabled", async () => {
     const { host, root } = await label(`<ui-label removable disabled>Tag</ui-label>`)
     let fired = 0
-    host.addEventListener("ui-remove", () => fired++)
+    host.addEventListener("ui-removing", () => fired++)
     root.querySelector("button")!.click()
     expect(fired).toBe(0)
     expect((root.querySelector("button") as HTMLButtonElement).disabled).toBe(true)

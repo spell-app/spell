@@ -425,7 +425,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-input` fires on every keystroke, with `event.detail.value`.
-                  - `ui-change` fires when the user commits (blur, **Enter**, picking a file).
+                  - `ui-changed` fires when the user commits (blur, **Enter**, picking a file).
                   - Setting `value` from a `ui-input` handler wins over what was typed, so a handler can reformat or reject input.
                 </script>
               </ui-markdown>
@@ -436,7 +436,7 @@
                   input.addEventListener("ui-input", (event) => {
                     input.value = event.detail.value.toLowerCase()
                   })
-                  input.addEventListener("ui-change", (event) => console.log(event.detail.value, input.validity.valid))
+                  input.addEventListener("ui-changed", (event) => console.log(event.detail.value, input.validity.valid))
                 </script>
               </ui-code>
             </ui-section>
@@ -465,7 +465,7 @@
                   - The `icon` and the `corner` label are decoration; they are hidden from assistive technology, so don't put
                     meaning in them alone.
                   - If the element fails to render, its native fallback keeps the same box with a plain native control:
-                    it still submits, validates its native constraints and fires `ui-input` / `ui-change`. It drops the
+                    it still submits, validates its native constraints and fires `ui-input` / `ui-changed`. It drops the
                     icon glyph, the `icon`, `label` and `action` slots, corner labels, `rules`, the invalid state, reset
                     to the starting value, **Enter** to submit,
                     and naming through `<label for>` (only `aria-label` or `placeholder` name the control).
@@ -476,7 +476,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `rules` as a property and listen for `ui-input` / `ui-change`. Bind `value` as a property to control the
+                  Set `rules` as a property and listen for `ui-input` / `ui-changed`. Bind `value` as a property to control the
                   field.
                 </script>
               </ui-markdown>
@@ -502,7 +502,7 @@
                     type="email"
                     value={email()}
                     rules={["email"]}
-                    on-ui-input={(e) => setEmail(e.detail.value)}
+                    on-ui-typed={(e) => setEmail(e.detail.value)}
                   />
                 </script>
               </ui-code>

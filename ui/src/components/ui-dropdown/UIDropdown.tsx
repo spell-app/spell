@@ -158,12 +158,12 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     if (this.multiple) {
       if (!this.hasRoomForMore) return
       const next = [...values, option.value]
-      this.commit(next, originalEvent, () => this.send("ui-add", { value: option.value, originalEvent }))
+      this.commit(next, originalEvent, () => this.send("ui-added", { value: option.value, originalEvent }))
       this.query = ""
       this.highlightedIndex = 0
     } else {
       this.commit([option.value], originalEvent, () => {
-        if (isAddition) this.send("ui-add", { value: option.value, originalEvent })
+        if (isAddition) this.send("ui-added", { value: option.value, originalEvent })
       })
       this.requestOpen(false, originalEvent)
     }
@@ -175,18 +175,18 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   remove(value: string, originalEvent?: Event) {
     if (this.readonly || this.isDisabled) return
     const next = this.chosenValues.filter((item) => item !== value)
-    this.commit(next, originalEvent, () => this.send("ui-remove", { value, originalEvent }))
+    this.commit(next, originalEvent, () => this.send("ui-removed", { value, originalEvent }))
   }
 
   /**
-   * Change the value to `next` through `requestChange()`:  `announce()` (ui-add / ui-remove) and `ui-change` first.
+   * Change the value to `next` through `requestChange()`:  `announce()` (ui-added / ui-removed) and `ui-changed` first.
    * - Returns true when applied.
    */
   private commit(next: readonly string[], originalEvent: Event | undefined, announce?: () => void): boolean {
     const value = this.multiple ? [...next] : (next[0] ?? "")
     return this.requestChange("value", value, () => {
       announce?.()
-      this.send("ui-change", { value, originalEvent })
+      this.send("ui-changed", { value, originalEvent })
       return true
     })
   }
@@ -332,7 +332,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   }
 
   /**
-   * Open or close, dispatching the cancelable `ui-open` / `ui-close` first.
+   * Open or close, dispatching the cancelable `ui-opening` / `ui-closing` first.
    * - Opening highlights the chosen option, else the first enabled one.
    * - Returns true when it changed.
    */
@@ -341,7 +341,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     if (open === this.isOpen) return false
     if (open && (this.isDisabled || this.readonly)) return false
     const done = this.requestChange("isOpen", open, () =>
-      this.send(open ? "ui-open" : "ui-close", { open, originalEvent })
+      this.send(open ? "ui-opening" : "ui-closing", { open, originalEvent })
     )
     if (done && open) {
       const options = this.visibleOptions
@@ -740,13 +740,13 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     this.commit([], event)
   }
 
-  /** Search typing:  filter, open, highlight the first match, `ui-search`. */
+  /** Search typing:  filter, open, highlight the first match, `ui-searched`. */
   private readonly onInput = (event: InputEvent) => {
     const query = (event.currentTarget as HTMLInputElement).value
     this.query = query
     this.requestOpen(true, event)
     this.highlightedIndex = 0
-    this.send("ui-search", { query, originalEvent: event })
+    this.send("ui-searched", { query, originalEvent: event })
   }
 
   /**

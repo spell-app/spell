@@ -32,7 +32,7 @@ import iconPickerCSS from "./UIIconPicker.css?inline"
  *   - arrows move the highlight through the grid, Enter picks it
  *   - Escape closes, back on the field;  Tab closes and moves on
  *   - on the field:  Enter, Space, Down or Up open it;  typing a letter opens it searching for that letter
- * - Picking sets `value` and sends `ui-change` first:  a handler that sets `el.value` again wins.
+ * - Picking sends the cancelable `ui-changing` first (a handler that sets `el.value` again wins), then `ui-changed`.
  *   Then the panel closes, the focus back on the field.
  * - `value` is controlled (`@controlled`);  the ATTRIBUTE is the starting (and reset) value.
  * - `readonly`:  focusable, but never opens.  `disabled`:  a disabled field, out of the tab order and the form.
@@ -65,14 +65,17 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   }
 
   /**
-   * A person picked `name` (`""`:  none):  send `ui-change`, then set the DOM element's property,
-   * unless a handler set it first.  Then close, back on the field.
+   * A person picked `name` (`""`:  none):  send the cancelable `ui-changing`, then set the DOM element's property,
+   * unless a handler set it first;  then `ui-changed`, once it's in.  Then close, back on the field.
    * - Returns true when applied.
    */
   @E.untracked
   choose(name: string, originalEvent?: Event): boolean {
     this.isTouched = true
-    const applied = this.requestChange("value", name, () => this.send("ui-change", { value: name, originalEvent }))
+    const detail = { value: name, originalEvent }
+    const applied = this.requestChange("value", name, () => this.send("ui-changing", detail))
+    // Then the -ed half, once the value is in (epic elemental-spell P9:  a form reads `ui-changed`)
+    if (applied) this.send("ui-changed", detail)
     this.close({ refocus: true })
     return applied
   }

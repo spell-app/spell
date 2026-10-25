@@ -146,26 +146,26 @@ export const formVocabulary = {
       description: "A field failed validation;  `errors` are its prompts."
     },
     {
-      name: "ui-success",
+      name: "ui-saving",
       detail: "{ values: Record<string, FieldValue>, originalEvent?: Event }",
       cancelable: true,
       description:
         "A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch)."
     },
     {
-      name: "ui-failure",
+      name: "ui-save-failed",
       detail: "{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }",
       description: "A submit failed validation (the native submission is stopped);  `errors` by field."
     },
     {
-      name: "ui-saving",
+      name: "ui-applying",
       detail: "{ changes: FormChange[], value: unknown }",
       cancelable: true,
       description:
         '`save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.'
     },
     {
-      name: "ui-saved",
+      name: "ui-applied",
       detail: "{ changes: FormChange[], value: unknown }",
       description: "The held edits landed in the bound `value`."
     },

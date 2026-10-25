@@ -156,8 +156,8 @@ describe("<ui-search> markup", () => {
 describe("<ui-search> local", () => {
   it("shows the matches of what's typed, with ui-search and a live count", async () => {
     const { host, input, results, status, titles } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
-    const searches = record(host, "ui-search")
-    const opens = record(host, "ui-open")
+    const searches = record(host, "ui-searched")
+    const opens = record(host, "ui-opening")
     await userEvent.type(input, "ap")
     await ElementFixture.tick()
     expect(results.matches(":popover-open")).toBe(true)
@@ -239,8 +239,8 @@ describe("<ui-search> local", () => {
 describe("<ui-search> keyboard", () => {
   it("moves with the arrows (stopping at the ends), chooses with Enter", async () => {
     const { host, input, results, highlighted } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
-    const selects = record(host, "ui-select")
-    const changes = record(host, "ui-change")
+    const selects = record(host, "ui-choosing")
+    const changes = record(host, "ui-changed")
     await userEvent.type(input, "ap")
     await ElementFixture.tick()
     expect(highlighted()).toBeUndefined()
@@ -303,7 +303,7 @@ describe("<ui-search> keyboard", () => {
 
   it("keeps everything when ui-select is cancelled;  a cancelled link click doesn't navigate", async () => {
     const { host, input, results } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
-    host.addEventListener("ui-select", (event) => event.preventDefault())
+    host.addEventListener("ui-choosing", (event) => event.preventDefault())
     await userEvent.type(input, "gra")
     await ElementFixture.tick()
     const link = results.querySelector<HTMLAnchorElement>("a.result")!
@@ -335,9 +335,9 @@ describe("<ui-search> keyboard", () => {
     expect(results.matches(":popover-open")).toBe(false)
   })
 
-  it("stays hidden when ui-open is cancelled", async () => {
+  it("stays hidden when ui-opening is cancelled", async () => {
     const { host, input, results } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     await userEvent.type(input, "ap")
     await ElementFixture.tick()
     expect(results.matches(":popover-open")).toBe(false)
@@ -345,7 +345,7 @@ describe("<ui-search> keyboard", () => {
 
   it("reverts the text when the host re-sets the old value while typing", async () => {
     const { host, input } = await search(`<ui-search aria-label="Fruit" value="x"></ui-search>`, FRUIT)
-    host.addEventListener("ui-search", () => (host.value = "x"))
+    host.addEventListener("ui-searched", () => (host.value = "x"))
     await userEvent.type(input, "y")
     await ElementFixture.tick()
     expect(host.value).toBe("x")
@@ -367,7 +367,7 @@ describe("<ui-search> remote", () => {
     const { host, root, input, titles } = await search(
       `<ui-search url="/api/fruit?q={query}" search-delay="0" aria-label="Fruit"></ui-search>`
     )
-    const answers = record(host, "ui-results")
+    const answers = record(host, "ui-replied")
     await userEvent.type(input, "ban")
     expect(host.matches(":state(loading)") || titles().length > 0).toBe(true)
     await expect.poll(() => titles()).toEqual(["Banana"])
@@ -472,10 +472,10 @@ describe("<ui-search> forms", () => {
     expect(host.matches(":state(disabled)")).toBe(true)
   })
 
-  it("commits an edited text with ui-change when it's left", async () => {
+  it("commits an edited text with ui-changed when it's left", async () => {
     const page = await ElementFixture.render(`<div><ui-search aria-label="Q"></ui-search><button>next</button></div>`)
     const host = page.querySelector<Search>("ui-search")!
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changed")
     await userEvent.type(host.shadowRoot!.querySelector("input")!, "hello")
     await userEvent.click(page.querySelector("button")!)
     await ElementFixture.tick()

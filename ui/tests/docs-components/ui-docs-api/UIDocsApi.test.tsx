@@ -287,16 +287,16 @@ describe("<ui-docs-api tag>", () => {
     expect(parts.querySelector("code")!.textContent).toBe("::part()")
   })
 
-  it("fires `ui-render` with the tags drawn", async () => {
+  it("fires `ui-drawn` with the tags drawn", async () => {
     SiteData.url = DATA_URL
     const tags: string[][] = []
-    document.addEventListener("ui-render", record)
+    document.addEventListener("ui-drawn", record)
     try {
       const host = await ElementFixture.render<DOMElement>(`<ui-docs-api tag="x-or"></ui-docs-api>`)
       await drawn(host)
       await ElementFixture.tick()
     } finally {
-      document.removeEventListener("ui-render", record)
+      document.removeEventListener("ui-drawn", record)
     }
     expect(tags).toEqual([["x-or"]])
 

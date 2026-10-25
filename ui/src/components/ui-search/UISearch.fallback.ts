@@ -12,7 +12,7 @@ import { INPUT, PROMPT, type Vocabulary } from "./UISearch.types"
  *   whose suggestions are a native `<datalist>` of the local `source` titles.
  * - The input is a native search field (`type="search"`):  typing narrows the browser's own suggestion list.
  * - Its text is the DOM element's form value (with `required` validity), and `domElement.value` follows it;
- *   the native `change` sends `ui-change`.
+ *   the native `change` sends `ui-changed`.
  * - `readonly`:  the input's own `readonly`, as the component's;  its text can't be changed.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
  ****************/
@@ -22,7 +22,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     "remote results (`url`):  no suggestions",
     "result descriptions, images, prices and categories (titles only, as the browser's suggestions)",
     "Fomantic's matching (`full-text-search`, `search-fields`, `max-results`):  the browser's own",
-    "`ui-search`, `ui-select`, `ui-results`, `ui-open`, `ui-close`;  following a result's `url`",
+    "`ui-search`, `ui-select`, `ui-replied`, `ui-opening`, `ui-closing`;  following a result's `url`",
     "the magnifying glass and the loading spinner"
   ]
 
@@ -98,7 +98,7 @@ type SearchDOMElement = HTMLElement & {
 }
 
 /** The event the input's `change` becomes. */
-const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-change"
+const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-changed"
 
 /** The part of the box around the input (the input itself is `prompt`, through `decorate()`). */
 const INPUT_PART: E.PartName<Vocabulary> = "input"

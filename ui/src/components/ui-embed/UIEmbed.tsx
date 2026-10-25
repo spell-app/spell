@@ -19,7 +19,7 @@ import embedCSS from "./UIEmbed.css?inline"
  ****************/
 export class DOMEmbedElement extends E.DOMElement<UIEmbed> {
   /**
-   * Load the frame as the play button would (the cancelable `ui-activate` first);
+   * Load the frame as the play button would (the cancelable `ui-loading` first);
    * true when it loads (Fomantic's `show`).
    */
   activate(): boolean {
@@ -42,7 +42,7 @@ export class DOMEmbedElement extends E.DOMElement<UIEmbed> {
  *   only the page's own placeholder image.  (Fomantic loaded the frame at once when there was no placeholder.)
  *
  * - Activation:  a click, Enter or Space on the button (a native `<button>`), or `domElement.activate()`.
- *   - The cancelable `ui-activate` (with the frame's `url`) comes first, then `active`.
+ *   - The cancelable `ui-loading` (with the frame's `url`) comes first, then `active`.
  *   - Focus moves into the frame, so someone on the keyboard carries on in the player.
  *   - Writing `active` loads / unloads without an event;  `domElement.reset()` unloads, with `ui-reset`.
  *
@@ -73,14 +73,14 @@ export class UIEmbed extends E.UIComponent<Vocabulary> {
   /** Move focus into the next frame (it was activated from the keyboard / a click). */
   private shouldFocusFrame = false
 
-  /** Load the frame as an action of the page's reader:  the cancelable `ui-activate` first.  True when it loads. */
+  /** Load the frame as an action of the page's reader:  the cancelable `ui-loading` first.  True when it loads. */
   @E.untracked
   activate(originalEvent?: Event): boolean {
     if (this.isActive) return false
     const url = this.frameUrl
     if (!url) return false
     const detail: UIT.EmbedActivateDetail = { url, originalEvent }
-    const isApplied = this.requestChange("isActive", true, () => this.send("ui-activate", detail))
+    const isApplied = this.requestChange("isActive", true, () => this.send("ui-loading", detail))
     if (isApplied) this.shouldFocusFrame = true
     return isApplied
   }

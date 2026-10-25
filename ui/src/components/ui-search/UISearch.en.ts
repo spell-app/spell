@@ -103,7 +103,7 @@ export const searchVocabulary = {
       group: "states",
       kind: "boolean",
       description:
-        "The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show."
+        "The results are showing.  Controlled:  `ui-opening` / `ui-closing` can veto;  shown only with something to show."
     },
     { name: "placeholder", group: "form", kind: "string", description: "Placeholder text of the input." },
     {
@@ -189,34 +189,34 @@ export const searchVocabulary = {
   ],
   events: [
     {
-      name: "ui-search",
+      name: "ui-searched",
       detail: "{ query: string, originalEvent?: Event }",
       description: "Someone typed a query at least `min-characters` long;  it's about to run."
     },
     {
-      name: "ui-select",
+      name: "ui-choosing",
       detail: "{ result: SearchResult, originalEvent?: Event }",
       cancelable: true,
       description: "A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page."
     },
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "The text was committed:  a result chosen, the input cleared with Escape, or left after an edit."
     },
     {
-      name: "ui-results",
+      name: "ui-replied",
       detail: "{ query: string, results: SearchResult[] }",
       description: "A remote query answered."
     },
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ open: true, originalEvent?: Event }",
       cancelable: true,
       description: "The results are about to show;  `preventDefault()` keeps them hidden."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ open: false, originalEvent?: Event }",
       cancelable: true,
       description: "The results are about to hide;  `preventDefault()` keeps them showing."

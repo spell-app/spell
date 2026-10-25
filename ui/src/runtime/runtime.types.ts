@@ -139,7 +139,7 @@ export type OverlayKind = "modal" | "flyout" | "popover" | "toast" | "dimmer" | 
  * - `escape`:  Escape key or `CloseWatcher` close request (Android back button)
  * - `outside`:  click that both started and ended outside the overlay
  * - `close-all`:  `Overlays.closeAll()`
- * - NOTE: kebab-case, not English words:  pages read them, as `ui-close`'s `detail.reason` (`UIT.ModalCloseReason`).
+ * - NOTE: kebab-case, not English words:  pages read them, as `ui-closing`'s `detail.reason` (`UIT.ModalCloseReason`).
  */
 export type DismissReason = "escape" | "outside" | "close-all"
 
@@ -172,7 +172,7 @@ export type OverlayEntry = {
   /** also counts as inside, e.g. the button that toggles a dropdown, so clicking it doesn't dismiss-then-reopen */
   anchor?: Element
   /**
-   * Asked to dismiss.  The entry decides:  usually fire a cancelable `ui-close`, then `Overlays.close(entry)`.
+   * Asked to dismiss.  The entry decides:  usually fire a cancelable `ui-closing`, then `Overlays.close(entry)`.
    * - NOTE: `Overlays` never closes an entry by itself;  it only asks.
    */
   onDismiss: (reason: DismissReason) => void | Promise<void>
@@ -675,7 +675,7 @@ SourceError.prototype.name = "SourceError"
 ////////////////
 
 /** Event on `document` after `UI.code.register()`:  a `<ui-code>` waiting for that language highlights again. */
-export const CODE_LANGUAGES_EVENT = "ui-code-languages"
+export const CODE_LANGUAGES_EVENT = "ui-languages-changed"
 
 /**
  * A highlight.js language definition:  `(hljs) => Language` (highlight.js's own "language function").

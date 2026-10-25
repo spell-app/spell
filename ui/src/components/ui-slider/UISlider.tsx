@@ -31,9 +31,9 @@ import sliderCSS from "./UISlider.css?inline"
  *     as Fomantic's (so a `reversed` or `vertical` slider's arrows follow the thumb, not "right / up increases")
  *   - PageUp / PageDown take 2 steps (Fomantic's `pageMultiplier`)
  *   - Home / End go to the thumb's lowest / highest value
- *   - each key sends `ui-input`, then `ui-change`.
+ *   - each key sends `ui-input`, then `ui-changed`.
  * - Pointer:  pressing the track moves the nearest thumb there, and dragging follows (pointer capture).
- *   - `ui-input` for each new value, `ui-change` once when the drag ends somewhere new.
+ *   - `ui-input` for each new value, `ui-changed` once when the drag ends somewhere new.
  *   - `smooth` lets the thumb glide between steps.
  *
  * - `value` / `end` are controlled (`@controlled`):  a `ui-input` handler that sets them again wins.
@@ -127,7 +127,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     const next = Math.min(high, Math.max(low, value))
     if (next === this.thumbValue(thumb)) return false
     return this.requestChange(thumb === SECOND ? "end" : "value", next, () =>
-      this.send("ui-input", this.detail(thumb, next, originalEvent))
+      this.send("ui-moved", this.detail(thumb, next, originalEvent))
     )
   }
 
@@ -388,7 +388,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     this.drag(thumb, this.pointerRatio(event), event)
   }
 
-  /** Release:  `ui-change` when the drag moved anything. */
+  /** Release:  `ui-changed` when the drag moved anything. */
   @E.untracked
   private readonly onPointerUp = (event: PointerEvent) => {
     if (this.draggedThumb === undefined) return
@@ -399,7 +399,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     this.valuesAtDragStart = undefined
     E.afterSolidUpdate(() => {
       if (this.snappedValue !== value || this.snappedEnd !== end) {
-        this.send("ui-change", this.detail(undefined, undefined, event))
+        this.send("ui-changed", this.detail(undefined, undefined, event))
       }
     })
   }
@@ -471,7 +471,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     event.preventDefault()
     if (!this.isInteractive) return
     const value = next
-    if (this.move(thumb, value, event)) this.send("ui-change", this.detail(thumb, value, event))
+    if (this.move(thumb, value, event)) this.send("ui-changed", this.detail(thumb, value, event))
   }
 
   /** Steps key `key` takes:  arrows the way they point (Fomantic's `keyMovement`), pages 2;  `0` for other keys. */

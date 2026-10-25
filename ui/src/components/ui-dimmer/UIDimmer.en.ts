@@ -87,25 +87,25 @@ export const dimmerVocabulary = {
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ visible: true, originalEvent?: Event }",
       cancelable: true,
       description:
         "About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden."
     },
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ visible: true }",
       description: "Shown, its transition finished (Fomantic's `onVisible`)."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ visible: false, reason: DimmerCloseReason, originalEvent?: Event }",
       cancelable: true,
       description: "About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ visible: false }",
       description: "Hidden, its transition finished (Fomantic's `onHidden`)."
     }

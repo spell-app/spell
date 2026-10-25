@@ -36,7 +36,7 @@ export class DOMIncludeElement extends E.DOMLoadableElement<UIInclude> {
  *   so the page's CSS stays out, while inherited values (fonts, colours, `--ui-*` tokens) come in.
  *   `page-styles` puts it in the LIGHT DOM instead, where the page's CSS (and `<ui-root>`) see it.
  * - Scripts in the included markup do NOT run (it's parsed by `DOMParser`).
- * - `ui-insert` fires just before the markup goes in, with the fragment:  a listener may read or change it.
+ * - `ui-drawing` fires just before the markup goes in, with the fragment:  a listener may read or change it.
  * - `ui-*` tags inside are loaded on demand, as `<ui-root>` loads them (`RootLoader`):
  *   a shadow root is out of a root's sight.
  * - Relative `href` / `src` / `action` / `poster` / `source` are rewritten against `source`,
@@ -129,7 +129,7 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
   /**
    * Put `text`'s markup in place:  parsed, `select`ed, URLs rewritten;  then load the `ui-*` families it uses.
    * - `pageStyles`:  into the DOM element's light DOM, else the shadow box.
-   * - SIDE EFFECT:  `ui-insert` first, with the fragment, while it's still out of the page.
+   * - SIDE EFFECT:  `ui-drawing` first, with the fragment, while it's still out of the page.
    * - A selector that's invalid or matches nothing is a `render` failure.
    */
   private insert({ text, select, pageStyles }: { text: string; select?: string; pageStyles: boolean }) {
@@ -143,7 +143,7 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
       return
     }
     if (this.root && this.root !== target) this.root.replaceChildren()
-    this.send("ui-insert", { fragment: markup, source: this.source || undefined } satisfies IncludeInsertDetail)
+    this.send("ui-drawing", { fragment: markup, source: this.source || undefined } satisfies IncludeInsertDetail)
     target.replaceChildren(markup)
     this.root = target
     this.selected = select ? (target.firstElementChild ?? undefined) : undefined
@@ -255,7 +255,7 @@ const BODY_OPEN = /<body\b[^>]*>/i
 /** The `</body>` closing tag of a page, as `BODY_OPEN`. */
 const BODY_CLOSE = /<\/body\s*>/i
 
-/** The `detail` of `ui-insert`. */
+/** The `detail` of `ui-drawing`. */
 export type IncludeInsertDetail = {
   /** The markup about to go in:  parsed, `select`ed, URLs rewritten;  not yet in the page. */
   fragment: DocumentFragment

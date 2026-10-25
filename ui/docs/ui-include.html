@@ -158,7 +158,7 @@
                   - `content` is the FILE: the source as fetched while the markup is untouched; once edited, the live markup spliced
                     back into the file's `<body>` (byte-exact outside it). With `select`, the matched element alone, saved by its
                     `id`.
-                  - Saving goes through `UI.sources.saver`, which the page registers (`ui` ships none). The cancelable `ui-save`
+                  - Saving goes through `UI.sources.saver`, which the page registers (`ui` ships none). The cancelable `ui-saving`
                     goes first, so an editor can save elsewhere; then `ui-saved` with the file's new `etag`, or `ui-error`.
                   - `<ui-code>` and `<ui-markdown>` save the same way: all three show a text file.
                 </script>
@@ -168,9 +168,9 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-load` -- the page arrived: `{ source, content }`.
-                  - `ui-change` -- `content` was set: `{ content }`; the include is `:state(dirty)` until saved.
-                  - `ui-save` (cancelable) -- `save()` is about to save: `{ source, content, etag }`.
+                  - `ui-loaded` -- the page arrived: `{ source, content }`.
+                  - `ui-changed` -- `content` was set: `{ content }`; the include is `:state(dirty)` until saved.
+                  - `ui-saving` (cancelable) -- `save()` is about to save: `{ source, content, etag }`.
                   - `ui-saved` -- saved: `{ source, etag }`.
                   - `ui-error` (cancelable) -- loading, showing or saving failed: `{ kind, source, error }`, `kind` one of `load`,
                     `cross-origin`, `file-protocol`, `save`, `conflict`, `no-saver`, `render`. Cancel a load error to skip the
@@ -180,7 +180,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const notes = document.querySelector("ui-include")
-                  notes.addEventListener("ui-save", (event) => {
+                  notes.addEventListener("ui-saving", (event) => {
                     event.preventDefault() // save it ourselves
                     fetch("/api/pages", { method: "PUT", body: event.detail.content })
                   })

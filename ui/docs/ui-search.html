@@ -421,14 +421,14 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-search` -- `{ query }`: the user typed a query at least `min-characters` long; it's about to run.
-                  - `ui-results` -- `{ query, results }`: a remote query answered.
+                  - `ui-replied` -- `{ query, results }`: a remote query answered.
                   - `ui-select` -- `{ result }`, cancelable: a result is about to be chosen (Fomantic's `onSelect`).
                     `preventDefault()` keeps the text, the results and the page.
-                  - `ui-change` -- `{ value }`: the text was committed: a result chosen, the input cleared with Escape, or left
+                  - `ui-changed` -- `{ value }`: the text was committed: a result chosen, the input cleared with Escape, or left
                     after an edit.
-                  - `ui-open` / `ui-close` -- `{ open }`, cancelable: the results are about to show / hide.
+                  - `ui-opening` / `ui-closing` -- `{ open }`, cancelable: the results are about to show / hide.
 
-                  Choosing a result fires `ui-select` first; then its title goes into the input (`ui-change`), the results close,
+                  Choosing a result fires `ui-select` first; then its title goes into the input (`ui-changed`), the results close,
                   and a result with a `url` is followed.
                 </script>
               </ui-markdown>
@@ -499,7 +499,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `source` as a property, not an attribute, and listen for `ui-select` or `ui-change`.
+                  Set `source` as a property, not an attribute, and listen for `ui-select` or `ui-changed`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -522,7 +522,7 @@
                   <ui-search
                     name="country"
                     source={countries}
-                    on-ui-select={(event) => setCountry(event.detail.result)}
+                    on-ui-choosing={(event) => setCountry(event.detail.result)}
                   />
                 </script>
               </ui-code>

@@ -59,8 +59,8 @@ describe("<ui-root> loading on demand", () => {
     expect(select.matches(":state(pending)")).toBe(true)
     const heard: unknown[] = []
     const options = [{ value: "a", text: "Apple" }]
-    // as Solid sets plain props:  `on-ui-change={f}`, `options={options}`
-    select.setAttribute("on-ui-change", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
+    // as Solid sets plain props:  `on-ui-changed={f}`, `options={options}`
+    select.setAttribute("on-ui-changed", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
     select.setAttribute("options", options as unknown as string)
     host.append(select)
     await component.settled
@@ -68,7 +68,7 @@ describe("<ui-root> loading on demand", () => {
     expect(select.matches(":state(pending)")).toBe(false)
     expect(select.matches(":state(ready)")).toBe(true)
     expect(select.options).toEqual(options)
-    select.dispatchEvent(new CustomEvent("ui-change", { detail: "picked" }))
+    select.dispatchEvent(new CustomEvent("ui-changed", { detail: "picked" }))
     expect(heard).toEqual(["picked"])
   })
 

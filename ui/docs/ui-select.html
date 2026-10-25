@@ -336,7 +336,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` fires when the user picks, with `{ value }` (a `string[]` with `multiple`). Setting `value` from code
+                  `ui-changed` fires when the user picks, with `{ value }` (a `string[]` with `multiple`). Setting `value` from code
                   fires nothing.
                 </script>
               </ui-markdown>
@@ -344,7 +344,7 @@
                 <script type="text/plain">
                   const select = document.querySelector("ui-select")
                   select.options = [{ value: "xl", text: "Extra large" }]
-                  select.addEventListener("ui-change", (event) => console.log(event.detail.value))
+                  select.addEventListener("ui-changed", (event) => console.log(event.detail.value))
                 </script>
               </ui-code>
             </ui-section>
@@ -398,20 +398,20 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `options` as a property, not an attribute, and listen for `ui-change`.
+                  Set `options` as a property, not an attribute, and listen for `ui-changed`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-select name="size" options={sizes} value={size} onui-change={(e) => setSize(e.detail.value)} />
+                  <ui-select name="size" options={sizes} value={size} onui-changed={(e) => setSize(e.detail.value)} />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-select name="size" :options="sizes" :value="size" @ui-change="(e) => (size = e.detail.value)" />
+                  <ui-select name="size" :options="sizes" :value="size" @ui-changed="(e) => (size = e.detail.value)" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -422,7 +422,7 @@
                     name="size"
                     options={sizes}
                     value={size()}
-                    on-ui-change={(e) => setSize(e.detail.value)}
+                    on-ui-changed={(e) => setSize(e.detail.value)}
                   />
                 </script>
               </ui-code>

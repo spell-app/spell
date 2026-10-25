@@ -989,7 +989,7 @@
               <!-- GAP I53:  no actionable items (an item that runs a callback instead of being chosen). -->
               <ui-message size="small" class="site-not-ported"
                 >Actionable (an item that runs a callback instead of being chosen) can't be built yet: every item is
-                an option (plan issue I53). Listen for <code>ui-change</code> and set the value back.</ui-message
+                an option (plan issue I53). Listen for <code>ui-changed</code> and set the value back.</ui-message
               >
             </ui-section>
 
@@ -2111,7 +2111,7 @@
                     { value: "solid", text: "Solid", description: "2.0" },
                     { value: "svelte", text: "Svelte", disabled: true }
                   ]
-                  dropdown.addEventListener("ui-change", (event) => console.log(event.detail.value))
+                  dropdown.addEventListener("ui-changed", (event) => console.log(event.detail.value))
                 </script>
               </ui-code>
             </ui-section>
@@ -2128,17 +2128,17 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-change` (`{ value }`): the user chose, added, removed or cleared a value.
-                  - `ui-open` / `ui-close` (`{ open }`): the menu is about to open / close; cancelable.
+                  - `ui-changed` (`{ value }`): the user chose, added, removed or cleared a value.
+                  - `ui-opening` / `ui-closing` (`{ open }`): the menu is about to open / close; cancelable.
                   - `ui-search` (`{ query }`): a `search` dropdown's query changed.
-                  - `ui-add` / `ui-remove` (`{ value }`): a `multiple` dropdown gained or lost a value (`ui-add` also for an
+                  - `ui-added` / `ui-removed` (`{ value }`): a `multiple` dropdown gained or lost a value (`ui-added` also for an
                     `allow-additions` addition).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const tags = document.querySelector("ui-dropdown[name=tags]")
-                  tags.addEventListener("ui-add", (event) => console.log("added", event.detail.value))
+                  tags.addEventListener("ui-added", (event) => console.log("added", event.detail.value))
                   tags.addEventListener("ui-search", async (event) => {
                     tags.options = await fetch(`/tags?q=${encodeURIComponent(event.detail.query)}`).then((r) => r.json())
                   })
@@ -2150,7 +2150,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   A button with `commandfor="id"` and `command="--toggle"` (or `--show` / `--close`) opens and closes the menu with
-                  no script, as a user action (the cancelable `ui-open` / `ui-close` first), and focuses the dropdown so the arrow
+                  no script, as a user action (the cancelable `ui-opening` / `ui-closing` first), and focuses the dropdown so the arrow
                   keys work. A disabled or read-only dropdown ignores commands. Live: "Invoker commands" on the Examples tab.
                 </script>
               </ui-markdown>
@@ -2186,7 +2186,7 @@
                   - Escape and outside clicks close the menu; leaving the dropdown with Tab closes it too.
                   - If the element fails to render, its native fallback is a real `<select>`
                     (`multiple` when `multiple`), built from the same `<ui-item>`s or `options`.
-                    It keeps the value, the form submission, `ui-change`, and the browser's own keyboard pattern;
+                    It keeps the value, the form submission, `ui-changed`, and the browser's own keyboard pattern;
                     it drops search, additions, clearable, option icons and images, and the open / close events.
                 </script>
               </ui-markdown>
@@ -2195,20 +2195,20 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `options` as a property, not an attribute, and listen for `ui-change`.
+                  Set `options` as a property, not an attribute, and listen for `ui-changed`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-dropdown selection options={options} value="x" onui-change={(e) => setValue(e.detail.value)} />
+                  <ui-dropdown selection options={options} value="x" onui-changed={(e) => setValue(e.detail.value)} />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-dropdown selection :options="options" value="x" @ui-change="(e) => (value = e.detail.value)" />
+                  <ui-dropdown selection :options="options" value="x" @ui-changed="(e) => (value = e.detail.value)" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -2219,7 +2219,7 @@
                     selection
                     options={options}
                     value="x"
-                    on-ui-change={(e) => setValue(e.detail.value)}
+                    on-ui-changed={(e) => setValue(e.detail.value)}
                   />
                 </script>
               </ui-code>

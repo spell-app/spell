@@ -97,10 +97,10 @@ describe("<ui-docs-example> code pane", () => {
     expect(toggleOf(host).getAttribute("aria-expanded")).toBe("true")
   })
 
-  it("toggles with the code button:  `ui-toggle`, the reflected `code`, frame on and off, the code rolling closed", async () => {
+  it("toggles with the code button:  `ui-opened` / `ui-closed`, the reflected `code`, frame on and off, the code rolling closed", async () => {
     const { host } = await render(`<ui-docs-example><ui-button>A</ui-button></ui-docs-example>`)
     const events: boolean[] = []
-    host.addEventListener("ui-toggle", (event) => events.push((event as CustomEvent<{ open: boolean }>).detail.open))
+    for (const type of ["ui-opened", "ui-closed"]) host.addEventListener(type, (event) => events.push((event as CustomEvent<{ open: boolean }>).detail.open))
     const demo = host.shadowRoot!.querySelector("[part~=demo]")!
     expect(demo.hasAttribute("basic")).toBe(true)
 

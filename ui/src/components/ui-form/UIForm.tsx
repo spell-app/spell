@@ -43,7 +43,7 @@ export class DOMFormElement extends E.DOMElement<UIForm> {
 
   /**
    * `apply="on save"`:  the held edits land in the bound `value`, after every field validates.
-   * - `ui-saving` (cancelable), then `ui-saved`.
+   * - `ui-applying` (cancelable), then `ui-applied`.
    * - True when they landed.
    */
   save(): boolean {
@@ -90,10 +90,10 @@ export class DOMFormElement extends E.DOMElement<UIForm> {
  *   constraint validation still counts (see `FormFields.errors()`).
  *
  * - Submit (in the capture phase, on the form):  every field validates.
- *   - Invalid:  the prompts, the `error` state, `ui-failure`, and focus on the first invalid field (`error-focus`);
+ *   - Invalid:  the prompts, the `error` state, `ui-save-failed`, and focus on the first invalid field (`error-focus`);
  *     plus `preventDefault()` and `stopImmediatePropagation()`,
  *     so the page's own submit handlers never see an invalid form, as natively.
- *   - Valid:  the cancelable `ui-success` (cancelled => no native submission).
+ *   - Valid:  the cancelable `ui-saving` (cancelled => no native submission).
  *
  * - Prompts:  each field's first control's `<ui-field>` (`:state(field)`) gets `showErrors()`.
  *   - Failing controls get `aria-invalid="true"` (removed when they pass).
@@ -433,9 +433,9 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
     this.binding.flushWaiting()
     if (!this.validateFields()) return false
     const detail: UIT.FormSaveDetail = { changes: this.binding.changes, value: this.value }
-    if (!this.send("ui-saving", detail)) return false
+    if (!this.send("ui-applying", detail)) return false
     this.binding.saveHeld()
-    this.send("ui-saved", detail)
+    this.send("ui-applied", detail)
     this.onSucceeded()
     E.afterSolidUpdate(() => this.saveValues())
     return true
@@ -565,7 +565,7 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
   /** A submit or a save passed validation:  for a subclass (the property editor tells its groups);  nothing here. */
   protected onSucceeded() {}
 
-  /** A control's value was written to its things:  for a subclass (`ui-change`, "on change" rules);  nothing here. */
+  /** A control's value was written to its things:  for a subclass (`ui-changed`, "on change" rules);  nothing here. */
   protected onWritten(_write: { control: Element; name: string; value: unknown; things: readonly object[] }) {}
 
   /** Forget every prompt, `aria-invalid` and the failed state. */
@@ -615,12 +615,12 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
       event.preventDefault()
       event.stopImmediatePropagation()
       const detail: UIT.FormFailureDetail = { values: this.values, errors, originalEvent: event }
-      this.send("ui-failure", detail)
+      this.send("ui-save-failed", detail)
       if (this.errorFocus) this.focusFirst(Object.keys(errors))
       return
     }
     const detail: UIT.FormSuccessDetail = { values: this.values, originalEvent: event }
-    if (!this.send("ui-success", detail)) event.preventDefault()
+    if (!this.send("ui-saving", detail)) event.preventDefault()
     else {
       this.saveValues()
       this.onSucceeded()
@@ -636,13 +636,13 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
   }
 
   /**
-   * A control changed (a light-DOM control's native `change` / `input`, an element's `ui-change`):
+   * A control changed (a light-DOM control's native `change` / `input`, an element's `ui-changed`):
    * - write it back to `value` and redraw `debug`, both a microtask later
    * - validate it for `validate="immediately"`, or while it shows an error
    */
   @E.on("change")
   @E.on("input")
-  @E.on("ui-change")
+  @E.on("ui-changed")
   protected onControlChanged(event: Event) {
     this.binding.onChange(event)
     E.afterSolidUpdate(() => this.changeCount++)

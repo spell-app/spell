@@ -43,7 +43,7 @@ export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
  *   - `readonly`:  every property in it is readonly (each reads it as it connects)
  *   - `:state(changed)`:  a property in it holds an edit not saved yet
  * - The editor tells it about its properties (`markFieldFailed()`, `markChanged()`),
- *   and sends it `ui-invalid` and `ui-success`.
+ *   and sends it `ui-invalid` and `ui-saved`.
  ****************/
 export class UIPropertyGroup extends UISection {
   // the section's names under the group's tag, and its own:  TypeScript only knows the section's literals

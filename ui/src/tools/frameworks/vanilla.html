@@ -22,7 +22,7 @@
       const dropdown = document.querySelector("ui-dropdown")
       const output = document.querySelector("#value")
       dropdown.options = OPTIONS
-      dropdown.addEventListener("ui-change", (event) => (output.textContent = event.detail.value))
+      dropdown.addEventListener("ui-changed", (event) => (output.textContent = event.detail.value))
       document.querySelector("#set").addEventListener("click", () => (dropdown.value = output.textContent = "c"))
       document.querySelector("#open").addEventListener("click", () => (dropdown.open = true))
       await import("spell-ui")

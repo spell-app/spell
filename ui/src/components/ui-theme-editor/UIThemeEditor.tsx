@@ -61,8 +61,8 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
  * - Use this theme keeps it in this browser (`SavedTheme.save()`):
  *   the Spell editor, and any page that calls `SavedTheme.restore()`, starts in it.
  *   - `:state(saved)` while the theme shown is the one kept.
- * - Events:  `ui-change` on every choice, `ui-copy` from Copy CSS, `ui-save` from Use this theme / Stop using.
- *   - The events of the elements it's built of stop at its shadow root:  their `ui-change`'s detail isn't ours.
+ * - Events:  `ui-changed` on every choice, `ui-copied` from Copy CSS, `ui-saved` from Use this theme / Stop using.
+ *   - The events of the elements it's built of stop at its shadow root:  their `ui-changed`'s detail isn't ours.
  * - Its families (panel, property editor, select, slider, menu, card ...) are imported by its barrel.
  ****************/
 export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
@@ -105,7 +105,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   }
 
   /**
-   * Make `changes`:  `undefined` takes a choice back to the base's own.  Sends `ui-change`.
+   * Make `changes`:  `undefined` takes a choice back to the base's own.  Sends `ui-changed`.
    * - The page follows (`onSheetChanged()`).
    */
   @E.untracked
@@ -113,15 +113,15 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     const next: Record<string, unknown> = { ...this.theme, ...changes }
     for (const [key, value] of Object.entries(changes)) if (value === undefined) delete next[key]
     this.edited = next as UIT.ThemeChoices
-    this.send("ui-change", { value: this.edited, css: this.sheet.css })
+    this.send("ui-changed", { value: this.edited, css: this.sheet.css })
   }
 
-  /** Drop every change but the name and the base.  Sends `ui-change`. */
+  /** Drop every change but the name and the base.  Sends `ui-changed`. */
   @E.untracked
   startOver(): void {
     const { name, base } = this.theme
     this.edited = { name, base }
-    this.send("ui-change", { value: this.edited, css: this.sheet.css })
+    this.send("ui-changed", { value: this.edited, css: this.sheet.css })
   }
 
   ////////////////
@@ -169,21 +169,21 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return this.savedCss !== undefined && this.savedCss === this.sheet.css
   }
 
-  /** Keep the theme in this browser (`SavedTheme.save()`).  Sends `ui-save`. */
+  /** Keep the theme in this browser (`SavedTheme.save()`).  Sends `ui-saved`. */
   @E.untracked
   use(): void {
     const { css } = this.sheet
     SavedTheme.save(this.theme, css)
     this.savedCss = css
-    this.send("ui-save", { value: this.theme, css })
+    this.send("ui-saved", { value: this.theme, css })
   }
 
-  /** Forget the kept theme (`SavedTheme.forget()`).  Sends `ui-save` with no `value`. */
+  /** Forget the kept theme (`SavedTheme.forget()`).  Sends `ui-saved` with no `value`. */
   @E.untracked
   forget(): void {
     SavedTheme.forget()
     this.savedCss = undefined
-    this.send("ui-save", { css: "" })
+    this.send("ui-saved", { css: "" })
   }
 
   /** Copy CSS just copied:  the button says so for a moment. */
@@ -193,7 +193,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   private copiedTimer?: E.CancelablePromise<unknown>
 
   /**
-   * Put the stylesheet on the clipboard, and say so.  Sends `ui-copy`.
+   * Put the stylesheet on the clipboard, and say so.  Sends `ui-copied`.
    * - NEVER throws:  a clipboard that refuses (no permission) warns.
    */
   @E.untracked
@@ -208,7 +208,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     this.isCopied = true
     this.copiedTimer?.cancel()
     this.copiedTimer = E.after(COPIED_SECONDS, () => (this.isCopied = false))
-    this.send("ui-copy", { css })
+    this.send("ui-copied", { css })
   }
 
   ////////////////
@@ -253,7 +253,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
               placeholder={t("defaultName")}
               aria-label={t("name")}
               fluid=""
-              on-ui-input={(event: CustomEvent<{ value: string }>) => this.choose({ name: event.detail.value })}
+              on-ui-typed={(event: CustomEvent<{ value: string }>) => this.choose({ name: event.detail.value })}
             ></ui-input>
           </ui-property>
           <ui-property name="base" label={t("base")} description={t("baseTip")}>
@@ -261,7 +261,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
               value={this.theme.base}
               aria-label={t("base")}
               fluid=""
-              on-ui-change={(event: CustomEvent<{ value: string | string[] }>) =>
+              on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) =>
                 this.choose({ base: String(event.detail.value) })
               }
             >
@@ -377,7 +377,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           value={chosen() ?? OWN}
           aria-label={t(key)}
           fluid=""
-          on-ui-change={(event: CustomEvent<{ value: string | string[] }>) => {
+          on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => {
             const value = String(event.detail.value)
             this.choose({ [key]: value === OWN ? undefined : (value as UIT.ThemeFont) })
           }}
@@ -419,7 +419,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           step={TEXT_SIZES.step}
           value={size()}
           aria-label={t("textSize")}
-          on-ui-input={(event: CustomEvent<{ value: number }>) => this.choose({ textSize: event.detail.value })}
+          on-ui-moved={(event: CustomEvent<{ value: number }>) => this.choose({ textSize: event.detail.value })}
         ></ui-slider>
       </ui-property>
     )
@@ -458,7 +458,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           link=""
           size="small"
           aria-label={t(key)}
-          on-ui-select={(event: CustomEvent<{ value: string }>) => this.choose({ [key]: event.detail.value })}
+          on-ui-choosing={(event: CustomEvent<{ value: string }>) => this.choose({ [key]: event.detail.value })}
         >
           <For each={values}>
             {(value) => (
@@ -483,7 +483,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           link=""
           size="mini"
           aria-label={t("previewMode")}
-          on-ui-select={(event: CustomEvent<{ value: string }>) =>
+          on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
             (this.previewScheme = event.detail.value as PreviewScheme)
           }
         >
@@ -637,10 +637,10 @@ const SWATCH_KEYS: Readonly<Record<string, number>> = {
 }
 
 /**
- * The events of the elements it's built of, stopped at its shadow root:  `ui-change` from its select isn't its own.
+ * The events of the elements it's built of, stopped at its shadow root:  `ui-changed` from its select isn't its own.
  * - Its own handlers sit on those elements, so they run first.
  */
-const INNER_EVENTS = ["ui-change", "ui-input", "ui-select", "ui-copy", "ui-save", "ui-opening", "ui-closing"]
+const INNER_EVENTS = ["ui-changed", "ui-typed", "ui-moved", "ui-choosing", "ui-copied", "ui-saved", "ui-opening", "ui-closing"]
 
 /** A ref stopping `INNER_EVENTS` on the editor's box. */
 function stopInner(box: HTMLElement): void {

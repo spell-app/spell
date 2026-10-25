@@ -144,14 +144,14 @@ export const popupVocabulary = {
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ visible: true, originalEvent?: Event }",
       cancelable: true,
       description:
         "About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ visible: false, originalEvent?: Event }",
       cancelable: true,
       description:

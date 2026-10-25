@@ -81,12 +81,12 @@ describe("SelectFallback", () => {
     expect(new FormData(form).get("n")).toBe("B")
   })
 
-  it("follows a change into the form, host.value and ui-change", () => {
+  it("follows a change into the form, host.value and ui-changed", () => {
     const { form, host, native } = select(
       `<x-fb-select name="fruit" placeholder="Fruit"><ui-item value="a">A</ui-item><ui-item value="b">B</ui-item></x-fb-select>`
     )
     const changes: SelectChangeDetail[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<SelectChangeDetail>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<SelectChangeDetail>).detail))
     expect(new FormData(form).has("fruit")).toBe(false)
     choose(native(), "b")
     expect(new FormData(form).get("fruit")).toBe("b")
@@ -99,7 +99,7 @@ describe("SelectFallback", () => {
       `<x-fb-select name="fruit" readonly value="a"><ui-item value="a">A</ui-item><ui-item value="b">B</ui-item></x-fb-select>`
     )
     const changes: SelectChangeDetail[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<SelectChangeDetail>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<SelectChangeDetail>).detail))
     choose(native(), "b")
     expect({
       ariaReadOnly: native().getAttribute("aria-readonly"),

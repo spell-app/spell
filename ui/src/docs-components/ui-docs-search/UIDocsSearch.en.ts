@@ -61,12 +61,12 @@ export const docsSearchVocabulary = {
   ],
   events: [
     {
-      name: "ui-input",
+      name: "ui-typed",
       detail: "{ value: string, originalEvent: Event }",
       description: "The text changed (every keystroke, and clearing):  what a list beside the field filters by."
     },
     {
-      name: "ui-navigate",
+      name: "ui-navigating",
       detail: "{ href: string, kind: string, originalEvent: Event }",
       cancelable: true,
       description:

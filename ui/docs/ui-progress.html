@@ -435,7 +435,7 @@
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic
                 <code>label: 'ratio'</code> switch. One <code>label</code> template covers both:  swap it on
-                <code>ui-complete</code> when the finished bar should say something else.</ui-message
+                <code>ui-completed</code> when the finished bar should say something else.</ui-message
               >
             </ui-section>
 
@@ -444,16 +444,16 @@
                 <script type="text/markdown">
                   Both fire after the first render, whatever wrote the numbers (there is no user input).
 
-                  - `ui-change` -- the percentage changed; `detail` is `{ percent, percents, value?, total? }` (`percents` holds
+                  - `ui-changed` -- the percentage changed; `detail` is `{ percent, percents, value?, total? }` (`percents` holds
                     one entry per bar).
-                  - `ui-complete` -- the percentage reached 100; `detail` is `{ value?, total? }`.
+                  - `ui-completed` -- the percentage reached 100; `detail` is `{ value?, total? }`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const progress = document.querySelector("ui-progress")
-                  progress.addEventListener("ui-change", (event) => console.log(event.detail.percent))
-                  progress.addEventListener("ui-complete", () => console.log("done"))
+                  progress.addEventListener("ui-changed", (event) => console.log(event.detail.percent))
+                  progress.addEventListener("ui-completed", () => console.log("done"))
                   for (let done = 0; done <= 20; done++) progress.value = String(done) // with total="20"
                 </script>
               </ui-code>
@@ -498,7 +498,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Numbers are plain attributes; listen for `ui-change` / `ui-complete` like any custom event.
+                  Numbers are plain attributes; listen for `ui-changed` / `ui-completed` like any custom event.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -511,7 +511,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-progress :value="done" total="20" bar-text="ratio" @ui-complete="finished = true" />
+                  <ui-progress :value="done" total="20" bar-text="ratio" @ui-completed="finished = true" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -522,7 +522,7 @@
                     value={done()}
                     total="20"
                     bar-text="ratio"
-                    on-ui-complete={() => setFinished(true)}
+                    on-ui-completed={() => setFinished(true)}
                   />
                 </script>
               </ui-code>

@@ -28,14 +28,14 @@ describe("CheckboxFallback", () => {
     await expectAccessible(host, AXE)
   })
 
-  it("is still a form control:  value while chosen, validity, ui-change", () => {
+  it("is still a form control:  value while chosen, validity, ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-checkbox name="terms" value="yes" required>Terms</x-fb-checkbox></form>`
     )
     const host = form.querySelector<StubHost & { selected?: boolean }>("x-fb-checkbox")!
     expect(form.checkValidity()).toBe(false)
     const details: unknown[] = []
-    host.addEventListener("ui-change", (event) => details.push((event as CustomEvent).detail.selected))
+    host.addEventListener("ui-changed", (event) => details.push((event as CustomEvent).detail.selected))
     FallbackStub.shadow(host).querySelector("input")!.click()
     expect(new FormData(form).get("terms")).toBe("yes")
     expect(form.checkValidity()).toBe(true)
@@ -43,13 +43,13 @@ describe("CheckboxFallback", () => {
     expect(details).toEqual([true])
   })
 
-  it("submits `off-value` while unchosen, and says which value in ui-change", () => {
+  it("submits `off-value` while unchosen, and says which value in ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-checkbox name="panel" value="open" off-value="closed">Open</x-fb-checkbox></form>`
     )
     const host = form.querySelector<StubHost>("x-fb-checkbox")!
     const values: unknown[] = []
-    host.addEventListener("ui-change", (event) => values.push((event as CustomEvent).detail.value))
+    host.addEventListener("ui-changed", (event) => values.push((event as CustomEvent).detail.value))
     expect(new FormData(form).get("panel")).toBe("closed")
     const input = FallbackStub.shadow(host).querySelector("input")!
     input.click()

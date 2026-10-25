@@ -9,7 +9,7 @@ import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
  * `@solidjs/web` EXTERNAL:  the page's import map decides which copy runs.
  * - The plain "Solid 2 app consuming custom elements" round trip, all plain props:
  *   - an app signal drives `value` and `open` (`hostSetsValue`, `hostOpens`)
- *   - `on-ui-change` writes the signal (`pickUpdatesHost`);  `on-ui-open` / `on-ui-close` follow `open`
+ *   - `on-ui-changed` writes the signal (`pickUpdatesHost`);  `on-ui-opening` / `on-ui-closing` follow `open`
  *   - `options` is an array, set as the property;  `appContext` the same, on `<ui-root>`
  *   - the app's own context works (`appContext`), and unmounting releases the runtime's overlay entry
  *     (`unmount`, `overlaysAfterUnmount`)
@@ -43,9 +43,9 @@ export function mount(root: HTMLElement, options: readonly Option[]): MountedApp
               options={options}
               value={value()}
               open={open()}
-              on-ui-change={(event: CustomEvent<{ value: unknown }>) => setValue(String(event.detail.value))}
-              on-ui-open={() => setOpen(true)}
-              on-ui-close={() => setOpen(false)}
+              on-ui-changed={(event: CustomEvent<{ value: unknown }>) => setValue(String(event.detail.value))}
+              on-ui-opening={() => setOpen(true)}
+              on-ui-closing={() => setOpen(false)}
             />
           </Show>
         </ui-root>

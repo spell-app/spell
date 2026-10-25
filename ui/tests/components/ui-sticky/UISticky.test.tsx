@@ -99,10 +99,10 @@ describe("<ui-sticky> classes and markup", () => {
 ////////////////
 
 describe("<ui-sticky> stuck state", () => {
-  it("reports sticking to the top:  :state(stuck), ui-stick;  and leaving:  ui-unstick", async () => {
+  it("reports sticking to the top:  :state(stuck), ui-stuck;  and leaving:  ui-unstuck", async () => {
     const { scroller, host, box } = await frame()
-    const sticks = record(host, "ui-stick")
-    const unsticks = record(host, "ui-unstick")
+    const sticks = record(host, "ui-stuck")
+    const unsticks = record(host, "ui-unstuck")
     await nextFrame()
     expect(host.matches(":state(stuck)")).toBe(false)
     scroller.scrollTop = 150
@@ -118,7 +118,7 @@ describe("<ui-sticky> stuck state", () => {
     const { scroller, host } = await frame()
     scroller.scrollTop = 150
     await expect.poll(() => host.matches(":state(stuck)")).toBe(true)
-    const unsticks = record(host, "ui-unstick")
+    const unsticks = record(host, "ui-unstuck")
     scroller.scrollTop = 700
     await expect.poll(() => host.matches(":state(bound)")).toBe(true)
     expect(host.matches(":state(stuck)")).toBe(false)
@@ -144,11 +144,11 @@ describe("<ui-sticky> stuck state", () => {
     const host = scroller.querySelector<DOMElement>("ui-sticky")!
     await ElementFixture.settle(host)
     const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=sticky]")!
-    const sticks = record(host, "ui-stick")
+    const sticks = record(host, "ui-stuck")
     await expect.poll(() => host.matches(":state(stuck)")).toBe(true)
     expect(box.getBoundingClientRect().bottom).toBeCloseTo(scroller.getBoundingClientRect().bottom - 5, 0)
     expect(sticks.at(-1)).toEqual({ edge: "bottom" })
-    const unsticks = record(host, "ui-unstick")
+    const unsticks = record(host, "ui-unstuck")
     scroller.scrollTop = 300
     await expect.poll(() => host.matches(":state(stuck)")).toBe(false)
     expect(unsticks).toEqual([{ edge: "bottom" }])

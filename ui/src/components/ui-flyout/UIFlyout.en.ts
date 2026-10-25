@@ -92,30 +92,30 @@ export const flyoutVocabulary = {
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ visible: true, originalEvent?: Event }",
       cancelable: true,
       description: "About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden."
     },
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ visible: true }",
       description: "Shown, its entry transition finished (Fomantic's `onVisible`)."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ visible: false, reason: ModalCloseReason, originalEvent?: Event }",
       cancelable: true,
       description:
         "About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ visible: false }",
       description: "Hidden, its exit transition finished (Fomantic's `onHidden`)."
     },
     {
-      name: "ui-approve",
+      name: "ui-approving",
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -123,7 +123,7 @@ export const flyoutVocabulary = {
         "`preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`)."
     },
     {
-      name: "ui-deny",
+      name: "ui-denying",
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:

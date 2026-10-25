@@ -206,7 +206,7 @@ describe("<ui-docs-search>", () => {
   it("fires `ui-input` on every keystroke, and clearing", async () => {
     const { field } = await render()
     const values: string[] = []
-    field.addEventListener("ui-input", (event) => values.push((event as CustomEvent<{ value: string }>).detail.value))
+    field.addEventListener("ui-typed", (event) => values.push((event as CustomEvent<{ value: string }>).detail.value))
     await type(field, "b")
     await type(field, "bu")
     find(field, ".clear").click()
@@ -270,10 +270,10 @@ describe("<ui-docs-search> keyboard", () => {
     expect(open(field)).toBe(true)
   })
 
-  it("Enter picks the active result:  a cancelable `ui-navigate`;  vetoed, the page stays;  the field empties", async () => {
+  it("Enter picks the active result:  a cancelable `ui-navigating`;  vetoed, the page stays;  the field empties", async () => {
     const { field } = await render()
     const picked: { href: string; kind: string }[] = []
-    field.addEventListener("ui-navigate", (event) => {
+    field.addEventListener("ui-navigating", (event) => {
       picked.push((event as CustomEvent<{ href: string; kind: string }>).detail)
       event.preventDefault()
     })
@@ -307,7 +307,7 @@ describe("<ui-docs-search> keyboard", () => {
   it("a click on an option picks it;  hovering highlights", async () => {
     const { field } = await render()
     const picked: string[] = []
-    field.addEventListener("ui-navigate", (event) => {
+    field.addEventListener("ui-navigating", (event) => {
       picked.push((event as CustomEvent<{ kind: string }>).detail.kind)
       event.preventDefault()
     })

@@ -77,7 +77,7 @@ export const ratingVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: number, originalEvent?: Event }",
       description: "The person rated (`0` when cleared).  A handler that re-sets `value` wins."
     }

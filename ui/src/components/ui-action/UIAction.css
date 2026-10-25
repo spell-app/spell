@@ -1,0 +1,28 @@
+/*
+ * The style sheet of `<ui-action>`:  its title and its shortcut's key caps, inside the item box its owner styles
+ * (`UIItem.css`, then the owner's:  `UIMenu.css` ...).
+ * - Shadow markup contract:  the item's box holding the icon box, then `<span class="title" part="title">` and
+ *   `<span class="shortcut" part="shortcut">` of one `<kbd>` per key.
+ * - The key caps sit at the box's end, quieter than the title.
+ */
+
+@layer ui.components.action.content;
+
+@layer ui.components.action.content {
+  .item > .title {
+    flex: 1 1 auto;
+  }
+
+  .item > .shortcut {
+    display: inline-flex;
+    gap: 0.125em;
+    margin-inline-start: 1.5em;
+    opacity: 0.6;
+    font-size: 0.875em;
+    white-space: nowrap;
+  }
+
+  .item > .shortcut > kbd {
+    font: inherit;
+  }
+}

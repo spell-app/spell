@@ -74,7 +74,7 @@ describe("UIComponent.define(tag, dictionary)", () => {
   it("dispatches translated events", async () => {
     const button = await ElementFixture.render<DOMElement>(`<ie-boton alternable>Votar</ie-boton>`)
     const toggles: unknown[] = []
-    button.addEventListener("ie-alternar", (event) => toggles.push((event as CustomEvent).detail.active))
+    button.addEventListener("ie-seleccionado", (event) => toggles.push((event as CustomEvent).detail.active))
     button.shadowRoot!.querySelector("button")!.click()
     expect(toggles).toEqual([true])
 
@@ -82,7 +82,7 @@ describe("UIComponent.define(tag, dictionary)", () => {
       <ui-item value="f">Femenino</ui-item><ui-item value="m">Masculino</ui-item>
     </ie-desplegable>`)
     const changes: unknown[] = []
-    dropdown.addEventListener("ie-cambio", (event) => changes.push((event as CustomEvent).detail.value))
+    dropdown.addEventListener("ie-cambiado", (event) => changes.push((event as CustomEvent).detail.value))
     const root = dropdown.shadowRoot!.firstElementChild!
     expect(root.className).toBe("ui selection dropdown")
     root.querySelector<HTMLElement>("[role=combobox]")!.click()

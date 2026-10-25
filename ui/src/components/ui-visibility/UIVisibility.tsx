@@ -10,7 +10,7 @@ import visibilityCSS from "./UIVisibility.css?inline"
  * The component behind `<ui-visibility>`:  a block around content that reports where it is against the screen,
  * `<div class="ui visibility" part="visibility">` around the slot.
  *
- * - Fomantic's visibility callbacks become `ui-*` events (`ui-visible`, `ui-hidden`, `ui-top-passed` …),
+ * - Fomantic's visibility callbacks become `ui-*` events (`ui-in-view`, `ui-out-of-view`, `ui-top-passed` …),
  *   through `UI.observeVisibility()`:  an `IntersectionObserver`, no scroll listener.
  *
  * - It watches while connected;
@@ -18,7 +18,7 @@ import visibilityCSS from "./UIVisibility.css?inline"
  * - `:state(visible)`:  on screen as of the last check.
  * - `type="image"`:  each `<img data-src>` inside (found now and as the content changes)
  *   goes through `UI.visibility.lazyImage()`:
- *   its source is set once it's on screen, then it fades in and `ui-load` fires.
+ *   its source is set once it's on screen, then it fades in and `ui-loaded` fires.
  * - Measured against the viewport (Fomantic's default `context`).
  ****************/
 export class UIVisibility extends E.UIComponent<VisibilityVocabulary> {
@@ -84,10 +84,10 @@ export class UIVisibility extends E.UIComponent<VisibilityVocabulary> {
       once: config.once,
       continuous: config.continuous,
       offset: config.offset,
-      onOnScreen: emit("ui-visible"),
-      onOffScreen: emit("ui-hidden"),
-      onTopVisible: emit("ui-top-visible"),
-      onBottomVisible: emit("ui-bottom-visible"),
+      onOnScreen: emit("ui-in-view"),
+      onOffScreen: emit("ui-out-of-view"),
+      onTopVisible: emit("ui-top-in-view"),
+      onBottomVisible: emit("ui-bottom-in-view"),
       onTopPassed: emit("ui-top-passed"),
       onBottomPassed: emit("ui-bottom-passed"),
       onPassing: emit("ui-passing"),
@@ -128,7 +128,7 @@ export class UIVisibility extends E.UIComponent<VisibilityVocabulary> {
 
   /** A lazy image has its `src`. */
   private readonly onImageLoad = (image: HTMLImageElement) => {
-    this.send("ui-load", { image })
+    this.send("ui-loaded", { image })
   }
 
   /**

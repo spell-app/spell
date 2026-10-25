@@ -134,15 +134,15 @@ describe("<ui-property-editor> schema", () => {
     expect((family.querySelector("ui-input") as HTMLElement & { value: unknown }).value).toBe("Lora")
   })
 
-  it("writes what the person types back to the thing, and sends `ui-change` from the editor and the property", async () => {
+  it("writes what the person types back to the thing, and sends `ui-changed` from the editor and the property", async () => {
     const thing = { title: "Spell" }
     const host = await editor(`<ui-property name="title"></ui-property>`, thing)
     const changes: unknown[] = []
-    host.addEventListener("ui-change", (event) => {
+    host.addEventListener("ui-changed", (event) => {
       if (event.target === host) changes.push((event as CustomEvent).detail.value)
     })
     let propertyHeard = false
-    host.querySelector("ui-property")!.addEventListener("ui-change", () => (propertyHeard = true))
+    host.querySelector("ui-property")!.addEventListener("ui-changed", () => (propertyHeard = true))
     await userEvent.type(inner(control(host, "title")), "!")
     await settle(host)
     expect(thing.title).toBe("Spell!")

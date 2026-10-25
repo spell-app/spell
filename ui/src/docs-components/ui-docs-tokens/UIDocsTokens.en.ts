@@ -96,7 +96,7 @@ export const docsTokensVocabulary = {
   ],
   events: [
     {
-      name: "ui-input",
+      name: "ui-changed",
       detail: "{ token: string, value: string, originalEvent?: Event }",
       description: 'A playground input set a token;  `value` `""`:  removed (back to its default).'
     },

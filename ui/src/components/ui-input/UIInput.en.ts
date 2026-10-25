@@ -212,12 +212,12 @@ export const inputVocabulary = {
   ],
   events: [
     {
-      name: "ui-input",
+      name: "ui-typed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "The value changed as someone typed (every keystroke)."
     },
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "Someone committed a change (blur, Enter, picking a file)."
     }

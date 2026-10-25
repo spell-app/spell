@@ -26,7 +26,7 @@ import selectCSS from "./UISelect.css?inline"
  *
  * - Its options:  the slotted `<ui-item>`s (`SlottedItems`, shared with the dropdown), then the `options` property.
  *   A `header` item opens an `<optgroup>`;  a `divider` item is an `<hr>`.
- * - `value` is controlled (`@controlled`):  a person's change sends `ui-change` first;
+ * - `value` is controlled (`@controlled`):  a person's change sends `ui-changed` first;
  *   a handler that sets `el.value` again wins, and the select shows that value.
  * - A single select shows an empty first option (the `placeholder`) while nothing is chosen,
  *   so the browser never silently chooses the first option.
@@ -124,7 +124,7 @@ export class UISelect extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * Someone changed the selection:  `ui-change` through `requestChange()`, then re-sync.
+   * Someone changed the selection:  `ui-changed` through `requestChange()`, then re-sync.
    * - `readonly`:  the change is undone (a native `<select>` has no `readonly` of its own).
    */
   private readonly onChange = (event: Event) => {
@@ -136,7 +136,7 @@ export class UISelect extends F.FormComponent<Vocabulary> {
     const chosen = [...select.selectedOptions].map((option) => option.value).filter((value) => value !== "")
     const value = this.multiple ? chosen : (chosen[0] ?? "")
     this.requestChange("value", value, () => {
-      this.send("ui-change", { value, originalEvent: event })
+      this.send("ui-changed", { value, originalEvent: event })
       return true
     })
     this.selectRevision++

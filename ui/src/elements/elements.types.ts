@@ -508,17 +508,17 @@ export const SOURCE_ATTRIBUTE = "source"
  *   `error` only).
  */
 export const SourceEvent = {
-  load: "ui-load",
+  load: "ui-loaded",
   /** A section's body is on its way (epic `property-editor` P10):  `LoadableBody` only. */
   loading: "ui-loading",
-  /** A section's body is in place:  `LoadableBody` only (a `LoadableComponent` sends `ui-load`). */
+  /** A section's body is in place:  `LoadableBody` only (a `LoadableComponent` sends `ui-loaded`). */
   loaded: "ui-loaded",
-  change: "ui-change",
-  save: "ui-save",
+  change: "ui-changed",
+  save: "ui-saving",
   saved: "ui-saved",
   error: ERROR_EVENT
 } as const
-/** One of `SourceEvent`'s names, e.g. `"ui-load"`. */
+/** One of `SourceEvent`'s names, e.g. `"ui-loaded"`. */
 export type SourceEventName = (typeof SourceEvent)[keyof typeof SourceEvent]
 
 ////////////////

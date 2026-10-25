@@ -252,27 +252,27 @@
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings.
                 The nag stays where it is written:  store the dismissal on a server from
-                <code>ui-hide</code>.</ui-message
+                <code>ui-closed</code>.</ui-message
               >
             </ui-section>
 
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-show` -- shown, its entry animation finished (Fomantic's `onVisible`); `detail` is `{}`.
-                  - `ui-close` -- about to close, cancelable; `detail.reason` is `close` (the icon), `timeout` (`display-time`)
+                  - `ui-opening` -- shown, its entry animation finished (Fomantic's `onVisible`); `detail` is `{}`.
+                  - `ui-closing` -- about to close, cancelable; `detail.reason` is `close` (the icon), `timeout` (`display-time`)
                     or `dismiss` (`host.close()`, an invoker command). `preventDefault()` keeps it and stores nothing
                     (Fomantic's `onHide` returning `false`).
-                  - `ui-hide` -- closed, its exit animation finished (Fomantic's `onHidden`); the host is `hidden` now.
+                  - `ui-closed` -- closed, its exit animation finished (Fomantic's `onHidden`); the host is `hidden` now.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const nag = document.querySelector("ui-nag[key=cookies]")
-                  nag.addEventListener("ui-close", (event) => {
+                  nag.addEventListener("ui-closing", (event) => {
                     if (!consentSaved) event.preventDefault() // keep it up, store nothing
                   })
-                  nag.addEventListener("ui-hide", (event) => console.log(event.detail.reason))
+                  nag.addEventListener("ui-closed", (event) => console.log(event.detail.reason))
                   if (nag.dismissed) loadAnalytics()
                 </script>
               </ui-code>
@@ -310,7 +310,7 @@
                     else closes it.
                   - A `fixed` nag covers the page's edge: leave room for it (padding on the body), so it never hides content.
                   - If the element fails to render, it shows its text through a bare `<slot>`, with no close button:
-                    hiding, `ui-hide`, remembering, `display-time` and the vetoes go.
+                    hiding, `ui-closed`, remembering, `display-time` and the vetoes go.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -318,7 +318,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A nag manages itself: put it in the template with a `key`, and listen for `ui-hide` if you track it.
+                  A nag manages itself: put it in the template with a `key`, and listen for `ui-closed` if you track it.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -333,14 +333,14 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-nag key="cookies" storage="local" @ui-hide="consent = true">We use cookies.</ui-nag>
+                  <ui-nag key="cookies" storage="local" @ui-closed="consent = true">We use cookies.</ui-nag>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
-                  <ui-nag key="cookies" storage="local" on-ui-hide={() => setConsent(true)}>
+                  <ui-nag key="cookies" storage="local" on-ui-closed={() => setConsent(true)}>
                     We use cookies.
                   </ui-nag>
                 </script>

@@ -14,7 +14,7 @@ import flyoutCSS from "./UIFlyout.css?inline"
  *
  * - Its behaviour is `<ui-modal>`'s, through the shared `DialogComponent` (modal family):
  *   `visible` / `hidden`, `closedby`, the `closable` icon, approve / deny, `--show` / `--close` invoker commands,
- *   `ui-open` / `ui-close` / `ui-show` / `ui-hide`, its name (`aria-label`, `header` or a slotted `<ui-header>`),
+ *   `ui-opening` / `ui-closing` / `ui-opened` / `ui-closed`, its name (`aria-label`, `header` or a slotted `<ui-header>`),
  *   `UI.overlays` (kind `flyout`:  scroll lock, keyboard scope, focus restore).
  * - This class adds its names, its looks and the word widths (`thin`, `very wide`, as `<ui-sidebar>` has).
  * - A flyout is always page-level (the top layer);  it never pushes content:

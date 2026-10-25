@@ -32,7 +32,7 @@ import tabCSS from "./UITab.css?inline"
  * - The owner of the panes (`ownsParts:  tab`, `TabOwner`):  each asks `paneState()` whether it shows,
  *   which edge it joins, and how it looks.
  * - Selection:  `value` is controlled.
- *   - A click (or, `automatic`, an arrow key) dispatches the cancelable `ui-change` first.
+ *   - A click (or, `automatic`, an arrow key) dispatches the cancelable `ui-changing` first.
  *   - Without a `value`:  the first `selected` pane, else the first enabled one;
  *     a `value` that names no pane falls back the same way.
  * - Keyboard (APG):  ONE Tab stop, the selected tab (`UI.focus.roving`);
@@ -163,7 +163,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
 
   /**
    * Select `pane` as a person would:
-   * the cancelable `ui-change` first, then `value` (and, with `history`, a new history entry).
+   * the cancelable `ui-changing` first, then `value` (and, with `history`, a new history entry).
    * - True when applied;  false for a disabled or already selected pane, or a veto.
    */
   @E.untracked
@@ -173,7 +173,9 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     const value = this.valueFor(pane)
     if (value === this.selectedValue) return false
     const detail: UIT.TabChangeDetail = { value, tab: pane, originalEvent }
-    const applied = this.requestChange("value", value, () => this.send("ui-change", detail))
+    const applied = this.requestChange("value", value, () => this.send("ui-changing", detail))
+    // Then the -ed half, once the pane is selected (epic elemental-spell P9)
+    if (applied) this.send("ui-changed", detail)
     if (applied && this.history) UITabs.pushHash(value, this.view)
     return applied
   }

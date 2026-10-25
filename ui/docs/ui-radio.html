@@ -318,7 +318,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` fires on the newly chosen radio only, when the user chooses it, with `{ selected, value,
+                  `ui-changed` fires on the newly chosen radio only, when the user chooses it, with `{ selected, value,
                   originalEvent }`. It fires BEFORE the change, so a handler that sets `selected` back vetoes it (see the
                   checkbox page's [Vetoing a change](ui-checkbox.html#usage-vetoing-a-change)). Setting `selected` from code
                   fires nothing -- Fomantic's `set checked`.
@@ -327,7 +327,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const form = document.querySelector("form")
-                  form.addEventListener("ui-change", (event) => {
+                  form.addEventListener("ui-changed", (event) => {
                     if (event.target.localName === "ui-radio") console.log(event.target.name, event.detail.value)
                   })
                   document.querySelector("ui-radio[value=day]").checked = true // same as .selected = true;  no event
@@ -359,8 +359,8 @@
                   - Only the chosen radio of a group (else the first enabled one) is a tab stop, as with native radios.
                   - A required group the user left empty gets `aria-invalid="true"` once they have interacted.
                   - If the element fails to render, its native fallback keeps the same markup with a plain native radio:
-                    it still submits, validates `required` and fires `ui-change`. It drops grouping across elements
-                    (each fallback radio stands alone, with no arrow keys), vetoing `ui-change`, the invalid state and
+                    it still submits, validates `required` and fires `ui-changed`. It drops grouping across elements
+                    (each fallback radio stands alone, with no arrow keys), vetoing `ui-changed`, the invalid state and
                     reset to the starting state.
                 </script>
               </ui-markdown>
@@ -369,14 +369,14 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `selected` as a property on each radio, and listen for `ui-change` on the group.
+                  Bind `selected` as a property on each radio, and listen for `ui-changed` on the group.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
                   {sizes.map((size) => (
-                    <ui-radio key={size} name="size" value={size} selected={chosen === size} onui-change={() => setChosen(size)}>
+                    <ui-radio key={size} name="size" value={size} selected={chosen === size} onui-changed={() => setChosen(size)}>
                       {size}
                     </ui-radio>
                   ))}
@@ -386,7 +386,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-radio v-for="size in sizes" name="size" :value="size" :selected="chosen === size" @ui-change="chosen = size">
+                  <ui-radio v-for="size in sizes" name="size" :value="size" :selected="chosen === size" @ui-changed="chosen = size">
                     {{ size }}
                   </ui-radio>
                 </script>
@@ -401,7 +401,7 @@
                         name="size"
                         value={size()}
                         selected={chosen() === size()}
-                        on-ui-change={() => setChosen(size())}
+                        on-ui-changed={() => setChosen(size())}
                       >
                         {size()}
                       </ui-radio>

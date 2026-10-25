@@ -417,12 +417,12 @@
                   <p slot="description">
                     A <code>lazy</code> pane stamps its <code>&lt;template&gt;</code> into itself the first time it's
                     shown, so hidden panes cost nothing up front. To fetch content instead, listen for
-                    <code>ui-show</code> and fill the pane when <code>event.detail.first</code> is true (see Usage).
+                    <code>ui-opened</code> and fill the pane when <code>event.detail.first</code> is true (see Usage).
                   </p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported:  settings that fetch a pane's content from a URL and cache it (<code>auto</code>,
                     <code>apiSettings</code>, <code>cache</code>) -- a fetch is a few lines in a
-                    <code>ui-show</code> listener, and the pane's <code>loading</code> shows the spinner
+                    <code>ui-opened</code> listener, and the pane's <code>loading</code> shows the spinner
                     meanwhile.</ui-message
                   >
                   <ui-tabs pointing secondary aria-label="Lazy demo">
@@ -511,21 +511,21 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-change` on `<ui-tabs>` (`{ value, tab }`, cancelable): the user is about to pick a tab
+                  - `ui-changing` on `<ui-tabs>` (`{ value, tab }`, cancelable): the user is about to pick a tab
                     (click, key, or the URL hash with `history`); `preventDefault()` keeps the current one.
-                  - `ui-show` on `<ui-tab>` (`{ value, first }`): the pane was shown; `first` is true the first
+                  - `ui-opened` on `<ui-tab>` (`{ value, first }`): the pane was shown; `first` is true the first
                     time, the moment to fill a pane yourself.
-                  - Writing `value` from code switches panes and fires no `ui-change`.
+                  - Writing `value` from code switches panes and fires no `ui-changing`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const tabs = document.querySelector("ui-tabs")
-                  tabs.addEventListener("ui-change", (event) => {
+                  tabs.addEventListener("ui-changing", (event) => {
                     if (form.dirty && !confirm("Leave unsaved changes?")) event.preventDefault()
                   })
                   tabs.value = "photos" // switch from code:  no event
-                  document.querySelector("ui-tab[value=stats]").addEventListener("ui-show", async (event) => {
+                  document.querySelector("ui-tab[value=stats]").addEventListener("ui-opened", async (event) => {
                     if (!event.detail.first) return
                     const pane = event.target
                     pane.toggleAttribute("loading", true)
@@ -587,7 +587,7 @@
                     `role="tabpanel"`, named by its `label`.
                   - Disabled tabs stay in the list (announced as unavailable), but the arrow keys skip them.
                   - If the element fails to render, it shows its children through a bare `<slot>`, so the content stays;
-                    the tab list, selecting a pane, the arrow keys, `ui-change`, `history`, `lazy` templates
+                    the tab list, selecting a pane, the arrow keys, `ui-changing`, `history`, `lazy` templates
                     and tab icons go.
                 </script>
               </ui-markdown>
@@ -596,13 +596,13 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `value` and listen for `ui-change`.
+                  Bind `value` and listen for `ui-changing`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-tabs tabular attached value={tab} onui-change={(e) => setTab(e.detail.value)}>
+                  <ui-tabs tabular attached value={tab} onui-changed={(e) => setTab(e.detail.value)}>
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -611,7 +611,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-tabs tabular attached :value="tab" @ui-change="(e) => (tab = e.detail.value)">
+                  <ui-tabs tabular attached :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -624,7 +624,7 @@
                     tabular
                     attached
                     value={tab()}
-                    on-ui-change={(e) => setTab(e.detail.value)}
+                    on-ui-changing={(e) => setTab(e.detail.value)}
                   >
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>

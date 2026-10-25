@@ -1376,8 +1376,8 @@
                   - An invalid submit is stopped before the page's own submit handlers run:
                     - the failing fields show a prompt inside their `<ui-field>`
                     - the form goes into the `error` state, showing its error `<ui-message>`s
-                    - `ui-failure` fires, and the first invalid field is focused
-                  - A valid submit fires `ui-success`, which is cancelable:
+                    - `ui-save-failed` fires, and the first invalid field is focused
+                  - A valid submit fires `ui-saving`, which is cancelable:
                     `preventDefault()` stops the native submission, e.g. to send it with `fetch()` instead.
                   - `validate="on leave"` or `validate="immediately"` also validates each field as the person leaves or
                     changes it. A field showing an error always validates again as it changes.
@@ -1439,11 +1439,11 @@
                     password: ["notEmpty", "minLength[6]"],
                     terms: "checked"
                   }
-                  form.addEventListener("ui-success", (event) => {
+                  form.addEventListener("ui-saving", (event) => {
                     event.preventDefault() // no native submission
                     console.log(event.detail.values)
                   })
-                  form.addEventListener("ui-failure", (event) => console.log(event.detail.errors))
+                  form.addEventListener("ui-save-failed", (event) => console.log(event.detail.errors))
                 </script>
               </ui-code>
               <ui-markdown>
@@ -1540,7 +1540,7 @@
               </ui-section>
               <ui-section id="usage-binding-save-and-cancel" label="Save and Cancel" sticky collapsible dividing>
                 <ui-docs-example
-                  description="`apply=&quot;on save&quot;` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-saving` / `ui-saved`, `ui-cancelling` / `ui-cancelled`."
+                  description="`apply=&quot;on save&quot;` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-applying` / `ui-applied`, `ui-cancelling` / `ui-cancelled`."
                 >
                   <ui-form debug apply="on save" value='{"name": "Ada", "role": "Engineer"}'>
                     <form method="dialog">
@@ -1651,8 +1651,8 @@
                 <script type="text/markdown">
                   - `ui-valid` / `ui-invalid`: a field passed / failed validation (`{ field, value, values }`, plus `errors` when
                     it failed).
-                  - `ui-success`: a submit passed validation (`{ values }`); cancelable, to stop the native submission.
-                  - `ui-failure`: a submit failed validation (`{ values, errors }`, errors by field); the native submission is
+                  - `ui-saving`: a submit passed validation (`{ values }`); cancelable, to stop the native submission.
+                  - `ui-save-failed`: a submit failed validation (`{ values, errors }`, errors by field); the native submission is
                     stopped.
                 </script>
               </ui-markdown>
@@ -1694,7 +1694,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Keep the native `<form>` in your template, set `rules` as a property, and handle `ui-success` (cancel it to
+                  Keep the native `<form>` in your template, set `rules` as a property, and handle `ui-saving` (cancel it to
                   submit with `fetch()`).
                 </script>
               </ui-markdown>
@@ -1716,7 +1716,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-form :rules="rules" @ui-success.prevent="(event) => save(event.detail.values)">
+                  <ui-form :rules="rules" @ui-saving.prevent="(event) => save(event.detail.values)">
                     <form>...</form>
                   </ui-form>
                 </script>
@@ -1727,7 +1727,7 @@
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-form
                     rules={rules}
-                    on-ui-success={(event) => {
+                    on-ui-saving={(event) => {
                       event.preventDefault()
                       save(event.detail.values)
                     }}

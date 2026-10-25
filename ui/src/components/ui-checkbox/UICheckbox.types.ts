@@ -49,7 +49,7 @@ export const SHARED_ATTRIBUTES = [
   {
     name: "selected",
     kind: "boolean",
-    description: "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`."
+    description: "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`."
   },
   {
     name: "value",
@@ -65,7 +65,7 @@ export const SHARED_ATTRIBUTES = [
 /** Events both elements share. */
 export const SHARED_EVENTS = [
   {
-    name: "ui-change",
+    name: "ui-changed",
     detail: "{ selected: boolean, value: string, originalEvent?: Event }",
     description:
       "Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen."

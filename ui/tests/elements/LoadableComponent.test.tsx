@@ -114,11 +114,11 @@ describe("<ui-test-source> inline content", () => {
 ////////////////
 
 describe("<ui-test-source source>", () => {
-  it("loads the file:  `ui-load`, `loaded`, the text shown", async () => {
+  it("loads the file:  `ui-loaded`, `loaded`, the text shown", async () => {
     const onLoad = vi.fn()
-    document.addEventListener("ui-load", onLoad)
+    document.addEventListener("ui-loaded", onLoad)
     const host = await renderLoaded(`<ui-test-source source="${HELLO}">inline</ui-test-source>`)
-    document.removeEventListener("ui-load", onLoad)
+    document.removeEventListener("ui-loaded", onLoad)
     expect(shown(host)).toBe("Hello, source!\n")
     expect(await host.loaded).toBe("Hello, source!\n")
     expect(onLoad.mock.calls.at(-1)![0].detail).toEqual({ source: HELLO, content: "Hello, source!\n" })
@@ -183,10 +183,10 @@ describe("<ui-test-source source>", () => {
 ////////////////
 
 describe("<ui-test-source> content / save() / reload()", () => {
-  it("`content` shows other text, `dirty` until saved, with `ui-change`", async () => {
+  it("`content` shows other text, `dirty` until saved, with `ui-changed`", async () => {
     const host = await renderLoaded(`<ui-test-source source="${HELLO}"></ui-test-source>`)
     const onChange = vi.fn()
-    host.addEventListener("ui-change", onChange)
+    host.addEventListener("ui-changed", onChange)
     host.content = "edited"
     expect(host.content).toBe("edited")
     expect(host.dirty).toBe(true)
@@ -219,11 +219,11 @@ describe("<ui-test-source> content / save() / reload()", () => {
     expect(onSaved.mock.calls[0][0].detail).toEqual({ source: HELLO, etag: '"v2"' })
   })
 
-  it("a cancelled `ui-save` leaves the saving to the listener", async () => {
+  it("a cancelled `ui-saving` leaves the saving to the listener", async () => {
     const saver = vi.fn<SourceSaver>(async () => ({}))
     UI.sources.saver = saver
     const host = await renderLoaded(`<ui-test-source source="${HELLO}"></ui-test-source>`)
-    host.addEventListener("ui-save", (event) => event.preventDefault())
+    host.addEventListener("ui-saving", (event) => event.preventDefault())
     expect(await host.save("mine")).toBe(false)
     expect(saver).not.toHaveBeenCalled()
   })

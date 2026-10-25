@@ -170,10 +170,10 @@ describe("<ui-button> padding and text", () => {
 ////////////////
 
 describe("<ui-button> behaviour", () => {
-  it("toggles `active` with aria-pressed and ui-toggle", async () => {
+  it("toggles `active` with aria-pressed and ui-selected / ui-deselected", async () => {
     const { host, control } = await button(`<ui-button toggle>Vote</ui-button>`)
     const events: boolean[] = []
-    host.addEventListener("ui-toggle", (event) => events.push((event as CustomEvent).detail.active))
+    for (const type of ["ui-selected", "ui-deselected"]) host.addEventListener(type, (event) => events.push((event as CustomEvent).detail.active))
     expect(control.getAttribute("aria-pressed")).toBe("false")
     control.click()
     await ElementFixture.tick()
@@ -185,7 +185,7 @@ describe("<ui-button> behaviour", () => {
 
   it("lets a controlling host veto the toggle from its handler", async () => {
     const { host, control } = await button(`<ui-button toggle active>Vote</ui-button>`)
-    host.addEventListener("ui-toggle", () => ((host as unknown as { active: boolean }).active = true))
+    host.addEventListener("ui-deselected", () => ((host as unknown as { active: boolean }).active = true))
     control.click()
     await ElementFixture.tick()
     expect(control.getAttribute("aria-pressed")).toBe("true")
@@ -196,7 +196,7 @@ describe("<ui-button> behaviour", () => {
       `<ui-button toggle inactive-text="Follow" active-text="Following">Ignored</ui-button>`
     )
     const events: boolean[] = []
-    host.addEventListener("ui-toggle", (event) => events.push((event as CustomEvent).detail.active))
+    for (const type of ["ui-selected", "ui-deselected"]) host.addEventListener(type, (event) => events.push((event as CustomEvent).detail.active))
     expect(control.textContent).toBe("Follow")
     expect(control.querySelector("slot")).toBeNull()
     expect(control.hasAttribute("aria-pressed")).toBe(false)

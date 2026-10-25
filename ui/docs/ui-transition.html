@@ -525,10 +525,10 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-show` (`{ visible: true, animation }`): shown, its animation finished (Fomantic's
+                  - `ui-opened` (`{ visible: true, animation }`): shown, its animation finished (Fomantic's
                     `onVisible`).
-                  - `ui-hide` (`{ visible: false, animation }`): hidden, its animation finished (`onHidden`).
-                  - `ui-complete` (`{ visible, animation }`): any animation finished, attention ones included
+                  - `ui-closed` (`{ visible: false, animation }`): hidden, its animation finished (`onHidden`).
+                  - `ui-animated` (`{ visible, animation }`): any animation finished, attention ones included
                     (`onComplete`).
                 </script>
               </ui-markdown>
@@ -537,7 +537,7 @@
                   const notice = document.querySelector("#notice")
                   await notice.hide() // resolves once animated out
                   await notice.transition("shake") // attention:  in place
-                  notice.addEventListener("ui-show", (event) => console.log(event.detail.animation))
+                  notice.addEventListener("ui-opened", (event) => console.log(event.detail.animation))
                 </script>
               </ui-code>
             </ui-section>
@@ -570,7 +570,7 @@
                     a live region or move focus to it.
                   - Under `prefers-reduced-motion` the element jumps straight to its end state, with the same events.
                   - If the element fails to render, it shows its children through a bare `<slot>` and no longer follows
-                    `visible`: no showing or hiding, no animation, and no `ui-show` / `ui-hide` or `ui-complete`.
+                    `visible`: no showing or hiding, no animation, and no `ui-opened` / `ui-closed` or `ui-animated`.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -594,7 +594,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-transition ref="box" animation="fade up" :visible="shown" @ui-hide="gone = true">...</ui-transition>
+                  <ui-transition ref="box" animation="fade up" :visible="shown" @ui-closed="gone = true">...</ui-transition>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -604,7 +604,7 @@
                   <ui-transition
                     animation="fade up"
                     visible={shown()}
-                    on-ui-hide={() => setGone(true)}
+                    on-ui-closed={() => setGone(true)}
                   >
                     ...
                   </ui-transition>

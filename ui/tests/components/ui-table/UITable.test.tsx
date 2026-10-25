@@ -78,10 +78,10 @@ function column(tableElement: HTMLTableElement, index: number): string[] {
   return [...tableElement.tBodies[0]!.rows].map((row) => row.cells[index]!.textContent!)
 }
 
-/** Collect `ui-sort` details;  `cancel` vetoes them. */
+/** Collect `ui-sorting` details;  `cancel` vetoes them. */
 function sorts(host: Element, cancel = false): TableSortDetail[] {
   const seen: TableSortDetail[] = []
-  host.addEventListener("ui-sort", (event) => {
+  host.addEventListener("ui-sorting", (event) => {
     seen.push((event as CustomEvent<TableSortDetail>).detail)
     if (cancel) event.preventDefault()
   })
@@ -383,7 +383,7 @@ describe("<ui-table> tokens from outside", () => {
 ////////////////
 
 describe("<ui-table sortable>", () => {
-  it("sorts by a header's button:  ui-sort, aria-sort, reflected state, direction flips", async () => {
+  it("sorts by a header's button:  ui-sorting, aria-sort, reflected state, direction flips", async () => {
     const { host, table: element } = await table("sortable")
     const seen = sorts(host)
     const [name, count] = element.tHead!.rows[0]!.cells
@@ -453,7 +453,7 @@ describe("<ui-table sortable>", () => {
     expect(seen).toHaveLength(4)
   })
 
-  it("keeps the sort when ui-sort is cancelled", async () => {
+  it("keeps the sort when ui-sorting is cancelled", async () => {
     const { host, table: element } = await table("sortable client-sort")
     const seen = sorts(host, true)
     const count = element.tHead!.rows[0]!.cells[1]!
@@ -560,7 +560,7 @@ describe("<ui-table> data mode", () => {
     expect(element.tHead!.rows[0]!.cells[1]!.getAttribute("aria-sort")).toBe("descending")
   })
 
-  it("keeps row order when ui-sort is cancelled", async () => {
+  it("keeps row order when ui-sorting is cancelled", async () => {
     const host = await ElementFixture.render<TableDOMElement>(`<ui-table sortable></ui-table>`)
     host.rows = ROWS
     await settle()

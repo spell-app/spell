@@ -26,7 +26,7 @@ import accordionCSS from "./UIAccordion.css?inline"
  *   - Plain HTML with the same classes works without JS (see `UIAccordion.css`).
  * - `open` (the open panels' indexes) is auto-controlled:
  *   - a click on a title is intercepted (`preventDefault()` stops the native toggle),
- *     the cancelable `ui-open` / `ui-close` go first, then `open` changes and the `<details>` follow
+ *     the cancelable `ui-opening` / `ui-closing` go first, then `open` changes and the `<details>` follow
  *   - a change the browser makes itself (find-in-page) is announced after the fact, and adopted.
  * - Keyboard:  Tab between titles;  Enter / Space toggle (native);
  *   ArrowDown / ArrowUp / Home / End move between this accordion's titles (APG's optional keys).
@@ -118,7 +118,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
   }
 
   /**
-   * Open or close panel `index` as people do:  the cancelable `ui-open` / `ui-close` first, then `open`.
+   * Open or close panel `index` as people do:  the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - An `exclusive` open also closes the open panel, announcing it.
    * - A `collapsible="no"` accordion never closes its open panel this way.
    * - Returns true when applied.
@@ -132,14 +132,14 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
     const closing = opening ? (exclusive ? current : []) : [index]
     const next = opening ? (exclusive ? [index] : [...current, index]) : current.filter((open) => open !== index)
     return this.requestChange("openText", AccordionPanels.format(next.sort((a, b) => a - b)), () => {
-      if (opening && !this.send("ui-open", this.detail({ index, open: true, originalEvent }))) return false
+      if (opening && !this.send("ui-opening", this.detail({ index, open: true, originalEvent }))) return false
       return closing.every((closed) =>
-        this.send("ui-close", this.detail({ index: closed, open: false, originalEvent }))
+        this.send("ui-closing", this.detail({ index: closed, open: false, originalEvent }))
       )
     })
   }
 
-  /** `detail` of `ui-open` / `ui-close` for panel `index`:  its title and content added. */
+  /** `detail` of `ui-opening` / `ui-closing` for panel `index`:  its title and content added. */
   @E.untracked
   private detail({ index, open, originalEvent }: AccordionDetailParams): UIT.AccordionToggleDetail {
     const panel = this.panels[index]
@@ -176,10 +176,10 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
     const now = panels.flatMap((details, index) => (details.open || held(index) ? [index] : []))
     if (AccordionPanels.format(now) === AccordionPanels.format(before)) return
     for (const index of now) {
-      if (!before.includes(index)) this.send("ui-open", this.detail({ index, open: true, originalEvent: event }))
+      if (!before.includes(index)) this.send("ui-opening", this.detail({ index, open: true, originalEvent: event }))
     }
     for (const index of before) {
-      if (!now.includes(index)) this.send("ui-close", this.detail({ index, open: false, originalEvent: event }))
+      if (!now.includes(index)) this.send("ui-closing", this.detail({ index, open: false, originalEvent: event }))
     }
     this.openText = AccordionPanels.format(now)
   }
@@ -370,7 +370,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UIAccordion extends E.AttributeValues<typeof accordionVocabulary> {}
 
-/** What `UIAccordion.detail()` builds a `ui-open` / `ui-close` detail from. */
+/** What `UIAccordion.detail()` builds a `ui-opening` / `ui-closing` detail from. */
 type AccordionDetailParams = {
   /** Panel index (0-based). */
   index: number

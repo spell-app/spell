@@ -12,7 +12,7 @@ import { ratingVocabulary } from "./UIRating.en"
  * - Still a form control.  `change`:
  *   - sets the DOM element's form value to the chosen number, and its validity (`required`)
  *   - sets `domElement.value`
- *   - sends a composed `ui-change`.
+ *   - sends a composed `ui-changed`.
  * - Its starting value is the DOM element's `value` PROPERTY, else its attribute;  a fraction chooses nothing.
  * - Named by the DOM element's `aria-*` (copied onto the group).
  ****************/
@@ -20,7 +20,7 @@ export class RatingFallback extends E.NativeFallback<typeof ratingVocabulary> {
   @E.proto static vocabulary = ratingVocabulary
   @E.proto static degraded = [
     "icon glyphs (numbered radios instead), colours, sizes, hover preview, partial icons",
-    "`clearable`, Home / End, `ui-change` cannot be vetoed by re-setting `value`",
+    "`clearable`, Home / End, `ui-changed` cannot be vetoed by re-setting `value`",
     "`:state(invalid)`, form reset of the value, labels from `<label for>`"
   ]
 
