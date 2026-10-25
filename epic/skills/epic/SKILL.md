@@ -382,8 +382,11 @@ than just being able to move on").
   - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
   - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept Phase and Revisit
     (`<epic-phase plan="waiting">`).
-- Before showing them, ONE coherence review over ALL the plans (epic `coherence` P4, its Q3):  a `coherence` agent,
-  `<name>-coherence`, as in "3. Plan", step 1, but on the plans.
+- ONE coherence review over ALL of them (epic `coherence` P4, its Q3):  a `coherence` agent, `<name>-coherence`,
+  as in "3. Plan", step 1.
+  - Started AS the drafting starts, not after it (Owen, 2026-10-25:  so it overlaps the writing):  it reads the
+    accepted phases (their goals and files) while the plans are written, then the plans as they land.
+  - Before showing them, its findings are worked into the plans:  the wait is only what's left of it.
   - The build plan is where "write a new X" shows:  each finding changes its plan to use what exists, or becomes a
     question, "(coherence)".
   - A plan that adds nothing new (a rename, docs, a test) is left out of it, in one line.
