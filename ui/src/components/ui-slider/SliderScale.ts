@@ -1,7 +1,9 @@
+import { E } from "spell-ui/core"
+
 /****************
  * ### `SliderScale`
  * The number line of a slider:  `min` ... `max` in `step`s -- snapping, ratios along the track, and which steps get
- * a label.  Pure arithmetic (no DOM, no Solid), so it's tested on its own.
+ * a label.  Pure arithmetic (no DOM;  of the core, only `E.clamp()`), so it's tested on its own.
  * - Snapping keeps to the step grid from `min`, like a native `<input type=range>`:  a `max` off the grid is never
  *   reached (the last step below it is).  `step` `0` allows any value.
  * - Floating point:  results are rounded to the step's own decimals, so `0.1` steps give `0.3`, not
@@ -40,7 +42,7 @@ export class SliderScale {
   snap(value: number): number {
     const { min, max, step } = this
     if (!Number.isFinite(value)) return min
-    const clamped = Math.min(max, Math.max(min, value))
+    const clamped = E.clamp(value, min, max)
     if (!step) return clamped
     let snapped = min + Math.round((clamped - min) / step) * step
     if (snapped > max) snapped -= step
@@ -50,12 +52,12 @@ export class SliderScale {
   /** Where `value` lies along the track, `0` ... `1`. */
   ratio(value: number): number {
     const span = this.max - this.min
-    return span ? Math.min(1, Math.max(0, (value - this.min) / span)) : 0
+    return span ? E.clamp((value - this.min) / span, 0, 1) : 0
   }
 
   /** The snapped value at `ratio` (`0` ... `1`) along the track. */
   valueAt(ratio: number): number {
-    return this.snap(this.min + Math.min(1, Math.max(0, ratio)) * (this.max - this.min))
+    return this.snap(this.min + E.clamp(ratio, 0, 1) * (this.max - this.min))
   }
 
   /** `value` moved by `steps` steps (a percent of the span when `step` is `0`), snapped. */

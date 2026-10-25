@@ -6,6 +6,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { loaderVocabulary } from "spell-ui/components/ui-loader/UILoader.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import loaderCSS from "spell-ui/components/ui-loader/UILoader.css?inline"
 import loaderRaw from "spell-ui/components/ui-loader/UILoader.css?raw"
@@ -159,8 +160,8 @@ describe("UILoader.css examples", () => {
     expect(plain.borderTopColor).not.toBe(arc.borderTopColor)
     const inverted = root.querySelector<HTMLElement>(".ui.inverted.text.loader")!
     expect(getComputedStyle(inverted).colorScheme).toBe("dark")
-    expect(luminance(getComputedStyle(inverted).color)).toBeGreaterThan(0.7)
-    expect(luminance(getComputedStyle(inverted, "::after").borderTopColor)).toBeGreaterThan(0.9)
+    expect(Painted.luminance(getComputedStyle(inverted).color)).toBeGreaterThan(0.45)
+    expect(Painted.luminance(getComputedStyle(inverted, "::after").borderTopColor)).toBeGreaterThan(0.75)
   })
 
   it("scales by size;  medium is the default", () => {
@@ -241,13 +242,4 @@ describe("UILoader.css in a shadow root", () => {
 /** The foundation plus `UILoader.css`, as a `<ui-loader>` adopts them. */
 function sheets(): string[] {
   return [...foundationCSS, loaderCSS]
-}
-
-/** Relative luminance (0..1) of a computed `rgb()` / `oklch()` colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }

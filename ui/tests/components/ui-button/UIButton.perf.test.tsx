@@ -2,6 +2,7 @@ import { expect, it } from "vite-plus/test"
 import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
+import { localDate } from "spell/util/time"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-button"
@@ -29,7 +30,7 @@ it("builds 1,000 <ui-button>s", async () => {
   const median = sorted[Math.floor(RUNS / 2)]!
   await commands.writeFile(
     "results/build-perf.json",
-    `${JSON.stringify({ count: COUNT, runs: times, median, date: new Date().toISOString().slice(0, 10) }, null, 2)}\n`
+    `${JSON.stringify({ count: COUNT, runs: times, median, date: localDate() }, null, 2)}\n`
   )
   expect(median).toBeGreaterThan(0)
 })

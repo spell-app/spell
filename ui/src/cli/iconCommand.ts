@@ -2,6 +2,7 @@ import { styleText } from "node:util"
 
 import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
+import { escapeHTML } from "spell/util/string"
 
 import type { IconsOptions } from "./cli.types"
 import { type IconInfo, loadIcons, searchIcons } from "./iconSearch"
@@ -67,11 +68,11 @@ export function galleryPage(icons: IconInfo[], query: string): string {
   const cards = icons
     .map((icon, index) => {
       const words = [icon.name, icon.pack, ...icon.aliases, ...icon.keywords].join(" ")
-      const title = icon.aliases.length ? ` title="also ${escape(icon.aliases.join(", "))}"` : ""
+      const title = icon.aliases.length ? ` title="also ${escapeHTML(icon.aliases.join(", "))}"` : ""
       return (
-        `<figure data-words="${escape(words.toLowerCase())}"${title}>` +
+        `<figure data-words="${escapeHTML(words.toLowerCase())}"${title}>` +
         `<img src="svg/${index}.svg" alt="" loading="lazy">` +
-        `<figcaption>${escape(icon.name)}<small>${escape(icon.pack)}</small></figcaption></figure>`
+        `<figcaption>${escapeHTML(icon.name)}<small>${escapeHTML(icon.pack)}</small></figcaption></figure>`
       )
     })
     .join("\n")
@@ -80,7 +81,7 @@ export function galleryPage(icons: IconInfo[], query: string): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>spell icon${query ? ` · ${escape(query)}` : ""}</title>
+<title>spell icon${query ? ` · ${escapeHTML(query)}` : ""}</title>
 <style>
   body { font: 14px system-ui, sans-serif; margin: 0; padding: 16px; background: #fff; color: #222; }
   header { position: sticky; top: 0; background: #fff; padding-bottom: 12px; }
@@ -97,7 +98,7 @@ export function galleryPage(icons: IconInfo[], query: string): string {
 </head>
 <body>
 <header>
-  <input id="filter" placeholder="filter, e.g. bell" value="${escape(query)}" autofocus>
+  <input id="filter" placeholder="filter, e.g. bell" value="${escapeHTML(query)}" autofocus>
   <span id="count"></span>
   <div><small>click an icon to copy its name</small></div>
 </header>
@@ -130,11 +131,6 @@ ${cards}
 </body>
 </html>
 `
-}
-
-/** `text` safe inside HTML text or a double-quoted attribute. */
-function escape(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 }
 
 /** `text` dimmed, when `stream` shows colour (node's `styleText()`:  no colour into a pipe, or with `NO_COLOR`). */

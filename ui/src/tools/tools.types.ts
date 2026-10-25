@@ -117,10 +117,8 @@ export type Size = {
   gzip: number
 }
 
-/** `bytes` as kB (1000 bytes), two decimals:  how every report and summary prints a `Size`. */
-export function kB(bytes: number): string {
-  return (bytes / 1000).toFixed(2)
-}
+/** How every report and summary prints a `Size`:  `kb(bytes, REPORT_DIGITS)` (`spell/util/number`), `12.34 KB`. */
+export const REPORT_DIGITS = { digits: 2 } as const
 
 /** One family's own cost:  the whole, then split by kind (`OwnKinds`). */
 export type OwnSize = Size &

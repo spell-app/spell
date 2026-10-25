@@ -33,12 +33,13 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { escapeHTML } from "spell/util/string"
 
 import type { SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
+import { spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */
@@ -88,15 +89,15 @@ class KitchenSinkWriter {
       if (index === 0) {
         const page = `${family.mainTag}.html`
         lines.push(
-          `${indent}<ui-docs-example header="${escapeHtml(family.title)}">`,
+          `${indent}<ui-docs-example header="${escapeHTML(family.title)}">`,
           `${indent}  <p slot="description">`,
-          `${indent}    ${escapeHtml(withoutTicks(family.summary))}`,
-          `${indent}    <a href="${page}">${escapeHtml(family.title)} page</a>`,
+          `${indent}    ${escapeHTML(withoutTicks(family.summary))}`,
+          `${indent}    <a href="${page}">${escapeHTML(family.title)} page</a>`,
           ...KitchenSinkWriter.ownPages(family).map((line) => `${indent}    ${line}`),
           `${indent}  </p>`
         )
       } else {
-        lines.push(`${indent}<ui-docs-example description="${escapeHtml(section.title)}">`)
+        lines.push(`${indent}<ui-docs-example description="${escapeHTML(section.title)}">`)
       }
       const body = section.className
         ? [`<div class="${section.className}">`, ...section.body.map((line) => `  ${line}`), "</div>"]
@@ -116,7 +117,7 @@ class KitchenSinkWriter {
    */
   private static ownPages(family: SiteFamily): string[] {
     return Object.entries(family.pages ?? {}).map(
-      ([tag, page]) => `&middot; <a href="${tag}.html">${escapeHtml(page.title)} page</a>`
+      ([tag, page]) => `&middot; <a href="${tag}.html">${escapeHTML(page.title)} page</a>`
     )
   }
 

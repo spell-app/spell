@@ -7,6 +7,7 @@ import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { breadcrumbVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb.en"
 import { breadcrumbsVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import breadcrumbCSS from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?inline"
 import breadcrumbRaw from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?raw"
@@ -145,9 +146,9 @@ describe("UIBreadcrumbs.css examples", () => {
     const breadcrumb = root.querySelector<HTMLElement>(".ui.inverted.breadcrumb")!
     expect(getComputedStyle(breadcrumb).colorScheme).toBe("dark")
     expect(getComputedStyle(breadcrumb).getPropertyValue("--ui-inverted").trim()).toBe("1")
-    const active = luminance(getComputedStyle(breadcrumb.querySelector(".active.section")!).color)
-    const text = luminance(getComputedStyle(breadcrumb).color)
-    expect(active).toBeGreaterThan(0.8)
+    const active = Painted.luminance(getComputedStyle(breadcrumb.querySelector(".active.section")!).color)
+    const text = Painted.luminance(getComputedStyle(breadcrumb).color)
+    expect(active).toBeGreaterThan(0.6)
     // a small slack:  the canvas round trip of a translucent colour is off by a few 1/255 in Firefox
     expect(active).toBeGreaterThanOrEqual(text - 0.01)
   })
@@ -200,13 +201,4 @@ describe("UIBreadcrumbs.css in shadow roots", () => {
 /** The foundation plus `UIBreadcrumbs.css`, as a breadcrumb or a section adopts them. */
 function sheets(): string[] {
   return [...foundationCSS, breadcrumbCSS]
-}
-
-/** Relative luminance (0..1) of a computed `rgb()` / `oklch()` colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }

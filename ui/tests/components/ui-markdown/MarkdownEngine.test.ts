@@ -5,17 +5,15 @@ import { MarkdownEngine } from "spell-ui/components/ui-markdown/MarkdownEngine"
 /** Render options:  no line breaks, no offset, unsanitized. */
 const PLAIN = { breaks: false, headingOffset: 0, sanitized: false }
 
-describe("MarkdownEngine.slug()", () => {
+describe("MarkdownEngine.render()", () => {
   test.each([
     ["Getting started!", "getting-started"],
-    ["  API:  `load()` & more ", "api--load--more"],
+    ["API:  `load()` & more", "api--load--more"],
     ["Ünïcode wörds", "ünïcode-wörds"]
-  ])("%s => %s", (text, slug) => {
-    expect(MarkdownEngine.slug(text)).toBe(slug)
+  ])("gives heading %s GitHub's id, %s", (text, id) => {
+    expect(MarkdownEngine.instance.render(`# ${text}`, PLAIN).headings[0]!.id).toBe(id)
   })
-})
 
-describe("MarkdownEngine.render()", () => {
   test("numbers a repeated heading's id, as GitHub does", () => {
     const { headings } = MarkdownEngine.instance.render("# Setup\n\n## Setup\n\n### Setup", PLAIN)
     expect(headings.map(({ id }) => id)).toEqual(["setup", "setup-1", "setup-2"])

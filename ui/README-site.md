@@ -289,6 +289,8 @@ The other three panes:
   `<ui-docs-api family="ui-button">` draws every table from the vocabularies,
   and `yarn site:sections` splits it into one section per kind the family has (Attributes, Events ...),
   each holding `<ui-docs-api family="ui-button" only="attributes">`.
+  - A family of 2+ tags gets a Tags section first:  each tag with its one-line summary,
+    its name a link to its first table below (`<ui-docs-api family="ui-button" only="tags">`).
   - So the API tab gets the same row of section buttons as Examples.
   - Its "On this page" list names every attribute, event, slot ... under its section;
     a click lands on the row (`#api-attributes-size`), which flashes.
@@ -481,7 +483,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
 | [DesignExport.ts](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts` | `yarn design:build`, also `spell design build`:  the claude.ai design system's files in `<dir>/project/`:  `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  it leaves the design bundle's `components/bundle.js` and `bundle.css` alone |
 | [environment.ts](src/tools/environment.ts) | the environment variables ([below](#environment-variables)), parsed once |
-| [generatedFiles.ts](src/tools/generatedFiles.ts) | what the scripts that write generated files share:  write-or-`--check`, `vp fmt`, splicing between markers, markup escaping |
+| [generatedFiles.ts](src/tools/generatedFiles.ts) | what the scripts that write generated files share:  write-or-`--check`, `vp fmt`, splicing between markers (escaping markup:  the kit's `escapeHTML()`) |
 | [hmr.e2e.ts](src/tools/hmr.e2e.ts) | `yarn test:hmr`:  8 scenarios, as a plain `node:test` script |
 | [screenshots.ts](src/tools/screenshots.ts) | `yarn screenshots`:  one PNG per example pair of `demo/index.html`, into `.cache/screenshots/` |
 | tests | in [tests/tools/](tests/tools/):  `DesignExport`, `IconPackBuilder`, `SiteDataBuilder` (fails while `docs/__data/` is stale), `SiteSearchBuilder` ...;  in the `ssr` project |

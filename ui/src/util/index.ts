@@ -6,7 +6,9 @@
  *   that also flattens in `spell/util/spell` (lodash, `chalk`, `pluralize`, fetch, tasks ...),
  *   which would land in `ui`'s `core` bundle and published declarations.
  *   - An allowed exception to "import another package's barrel only".
- *   - Add a file here when `util` gains a GENERIC one.
+ *   - Add a file here when `util` gains a GENERIC one that components use (`number`:  `clamp()`).
+ *     NOT `time` or `color`:  the few files that need them import them by file (`spell/util/color`),
+ *     so they stay out of `core`.
  *     NOT `persist/` (`PrefStore` ...):  in `core` it cost every page 1.9 kB (`yarn measure`, 2026-10-24),
  *     so the few files that keep preferences import it by file (`spell/util/persist/PrefStore`).
  *   - `yarn measure` and `yarn smoke` catch a leak.
@@ -26,6 +28,7 @@
 export * from "spell/util/class"
 export * from "spell/util/decorators"
 export * from "spell/util/dom"
+export * from "spell/util/number"
 export * from "spell/util/string"
 export * from "spell/util/util.types"
 

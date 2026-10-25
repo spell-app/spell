@@ -245,14 +245,9 @@
           "description": "URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again."
         },
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
+          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content."
         },
         {
           "name": "disabled",
@@ -1501,14 +1496,9 @@
           "description": "Image URL;  renders the `<img>` (or slot one)."
         },
         {
-          "name": "tooltip",
+          "name": "alt",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "alt"
-            }
-          ],
-          "description": "Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`."
+          "description": "Alternative text;  default `\"\"` (decorative, the name is nearby)."
         },
         {
           "name": "disabled",
@@ -1605,6 +1595,12 @@
           "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
         },
         {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
           "name": "label",
           "kind": "string",
           "shared": true,
@@ -1687,7 +1683,230 @@
     {
       "tag": "ui-breadcrumb",
       "name": "Breadcrumb",
-      "folder": "ui-breadcrumbs",
+      "folder": "ui-breadcrumb",
+      "topics": [
+        "navigation",
+        "basic",
+        "collections"
+      ],
+      "aka": [
+        "crumbs",
+        "path",
+        "trail",
+        "location"
+      ],
+      "description": "A breadcrumb is used to show hierarchy between content.",
+      "noun": "breadcrumb",
+      "attributes": [
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Text size, `mini` ... `massive`;  `medium` is the default."
+        },
+        {
+          "name": "inverted",
+          "kind": "keyOnly",
+          "description": "For dark backgrounds:  the dark scheme."
+        },
+        {
+          "name": "divider",
+          "kind": "string",
+          "description": "Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`."
+        },
+        {
+          "name": "divider-icon",
+          "kind": "string",
+          "description": "Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as `--ui-breadcrumb-divider-icon`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "`<ui-breadcrumb-section>`s, in order."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "breadcrumb",
+          "description": "The `<nav>` box."
+        },
+        {
+          "name": "list",
+          "description": "The `<ol>` the sections are items of."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "label",
+          "text": "Breadcrumb",
+          "description": "Accessible name of the `<nav>` landmark."
+        }
+      ],
+      "mainTag": "ui-breadcrumb",
+      "main": true,
+      "page": true,
+      "href": "ui-breadcrumb.html"
+    },
+    {
+      "tag": "ui-breadcrumb-section",
+      "name": "Breadcrumb section",
+      "folder": "ui-breadcrumb",
       "topics": [
         "navigation",
         "collections"
@@ -1874,233 +2093,10 @@
         }
       ],
       "texts": [],
-      "mainTag": "ui-breadcrumbs",
+      "mainTag": "ui-breadcrumb",
       "main": false,
       "page": false,
-      "href": "ui-breadcrumbs.html#ui-breadcrumb"
-    },
-    {
-      "tag": "ui-breadcrumbs",
-      "name": "Breadcrumbs",
-      "folder": "ui-breadcrumbs",
-      "topics": [
-        "navigation",
-        "basic",
-        "collections"
-      ],
-      "aka": [
-        "crumbs",
-        "path",
-        "trail",
-        "location"
-      ],
-      "description": "A breadcrumb is used to show hierarchy between content.",
-      "noun": "breadcrumb",
-      "attributes": [
-        {
-          "name": "size",
-          "kind": "size",
-          "values": [
-            "mini",
-            "tiny",
-            "small",
-            "medium",
-            "large",
-            "big",
-            "huge",
-            "massive"
-          ],
-          "valueSet": "sizes",
-          "description": "Text size, `mini` ... `massive`;  `medium` is the default."
-        },
-        {
-          "name": "inverted",
-          "kind": "keyOnly",
-          "description": "For dark backgrounds:  the dark scheme."
-        },
-        {
-          "name": "divider",
-          "kind": "string",
-          "description": "Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`."
-        },
-        {
-          "name": "divider-icon",
-          "kind": "string",
-          "description": "Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as `--ui-breadcrumb-divider-icon`."
-        },
-        {
-          "name": "disabled",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
-        },
-        {
-          "name": "loading",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
-        },
-        {
-          "name": "visible",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
-        },
-        {
-          "name": "animation",
-          "kind": "enum",
-          "values": [
-            "fade",
-            "fade up",
-            "fade down",
-            "fade left",
-            "fade right",
-            "scale",
-            "zoom",
-            "drop",
-            "browse",
-            "browse right",
-            "fly",
-            "fly up",
-            "fly down",
-            "fly left",
-            "fly right",
-            "slide",
-            "slide up",
-            "slide down",
-            "slide left",
-            "slide right",
-            "swing",
-            "swing up",
-            "swing down",
-            "swing left",
-            "swing right",
-            "horizontal flip",
-            "vertical flip",
-            "flash",
-            "shake",
-            "bounce",
-            "tada",
-            "pulse",
-            "jiggle",
-            "glow",
-            "none"
-          ],
-          "shared": true,
-          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
-        },
-        {
-          "name": "link",
-          "kind": "string",
-          "replaces": [
-            {
-              "name": "href"
-            }
-          ],
-          "shared": true,
-          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
-        },
-        {
-          "name": "target",
-          "kind": "string",
-          "shared": true,
-          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
-        },
-        {
-          "name": "font",
-          "kind": "multiple",
-          "values": [
-            "bold",
-            "italic",
-            "underline",
-            "strikethrough",
-            "code",
-            "highlight",
-            "subscript",
-            "superscript"
-          ],
-          "shared": true,
-          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
-        },
-        {
-          "name": "tooltip",
-          "kind": "string",
-          "shared": true,
-          "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
-        }
-      ],
-      "slots": [
-        {
-          "name": "",
-          "description": "`<ui-breadcrumb>`s, in order."
-        }
-      ],
-      "events": [],
-      "parts": [
-        {
-          "name": "breadcrumb",
-          "description": "The `<nav>` box."
-        },
-        {
-          "name": "list",
-          "description": "The `<ol>` the sections are items of."
-        }
-      ],
-      "states": [
-        {
-          "name": "disabled",
-          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
-        },
-        {
-          "name": "loading",
-          "description": "`loading` is set."
-        },
-        {
-          "name": "busy",
-          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
-        },
-        {
-          "name": "dimmed",
-          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
-        },
-        {
-          "name": "hidden",
-          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
-        },
-        {
-          "name": "still",
-          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
-        },
-        {
-          "name": "hiding",
-          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
-        },
-        {
-          "name": "pending",
-          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
-        },
-        {
-          "name": "ready",
-          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
-        }
-      ],
-      "texts": [
-        {
-          "key": "label",
-          "text": "Breadcrumb",
-          "description": "Accessible name of the `<nav>` landmark."
-        }
-      ],
-      "mainTag": "ui-breadcrumbs",
-      "main": true,
-      "page": true,
-      "href": "ui-breadcrumbs.html"
+      "href": "ui-breadcrumb.html#ui-breadcrumb-section"
     },
     {
       "tag": "ui-button",
@@ -13136,14 +13132,9 @@
           "description": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`."
         },
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name is `select`."
+          "description": "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`."
         },
         {
           "name": "page-styles",
@@ -18236,14 +18227,9 @@
           "description": "URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again."
         },
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
+          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content."
         },
         {
           "name": "visible",
@@ -20697,14 +20683,9 @@
           "description": "Its layout page:  a spell path inside the spell editor, else a full URL (epic `property-editor` P6)."
         },
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`."
+          "description": "With `source`:  a CSS selector;  only its first match in the layout page is used."
         },
         {
           "name": "readonly",
@@ -21501,14 +21482,9 @@
       "noun": "section",
       "attributes": [
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name is `select`."
+          "description": "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6)."
         },
         {
           "name": "readonly",
@@ -25169,14 +25145,9 @@
           "description": "URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again."
         },
         {
-          "name": "selector",
+          "name": "select",
           "kind": "string",
-          "replaces": [
-            {
-              "name": "select"
-            }
-          ],
-          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
+          "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content."
         },
         {
           "name": "visible",
@@ -33815,7 +33786,7 @@
         "args table",
         "reference"
       ],
-      "description": "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn.",
+      "description": "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn;  for a family, its tags.",
       "noun": "api",
       "attributes": [
         {
@@ -33832,6 +33803,7 @@
           "name": "only",
           "kind": "enum",
           "values": [
+            "tags",
             "props",
             "attributes",
             "properties",
@@ -33842,7 +33814,7 @@
             "texts",
             "used-in"
           ],
-          "description": "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  Each row is an entry of the page's \"On this page\" list, its id `<section id>-<name>` (`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
+          "description": "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  `tags`, with `family`, is the family's own table:  each tag, its summary, and a link to its first table.  Each row is an entry of the page's \"On this page\" list, its id `<section id>-<name>` (`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
         },
         {
           "name": "level",
@@ -33980,7 +33952,7 @@
         },
         {
           "name": "description",
-          "description": "A tag's one-line summary under its header, with `family`."
+          "description": "A tag's one-line summary under its header, with `family` and no `only` (`only=\"tags\"` lists them)."
         },
         {
           "name": "title",
@@ -34046,6 +34018,11 @@
         }
       ],
       "texts": [
+        {
+          "key": "tags",
+          "text": "Tags",
+          "description": "Title of a family's table of its tags."
+        },
         {
           "key": "props",
           "text": "Props",
@@ -34120,6 +34097,11 @@
           "key": "usedInNote",
           "text": "Every component that draws it, as the source shows.",
           "description": "Line under the used-in title."
+        },
+        {
+          "key": "tag",
+          "text": "Tag",
+          "description": "Column header of the tags table."
         },
         {
           "key": "prop",
@@ -34245,6 +34227,11 @@
           "key": "tableLabel",
           "text": "{section} of {tag}",
           "description": "Accessible name of a table, e.g. `Attributes of <ui-or>`."
+        },
+        {
+          "key": "tagsTableLabel",
+          "text": "Tags of the {family} family",
+          "description": "Accessible name of the tags table, e.g. `Tags of the ui-button family`."
         },
         {
           "key": "noTag",
@@ -36710,18 +36697,95 @@
         }
       ]
     },
-    "ui-breadcrumbs": {
-      "folder": "ui-breadcrumbs",
-      "mainTag": "ui-breadcrumbs",
+    "ui-breadcrumb": {
+      "folder": "ui-breadcrumb",
+      "mainTag": "ui-breadcrumb",
       "title": "Breadcrumb",
       "summary": "A breadcrumb is used to show hierarchy between content.",
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-breadcrumbs",
-        "ui-breadcrumb"
+        "ui-breadcrumb",
+        "ui-breadcrumb-section"
       ],
-      "tokens": []
+      "tokens": [
+        {
+          "name": "--ui-breadcrumb-margin",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-line-height",
+          "default": "var(--ui-line-height)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-breadcrumb-link-color",
+          "default": "var(--ui-link)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-breadcrumb-link-hover-color",
+          "default": "var(--ui-link-hover)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-breadcrumb-active-font-weight",
+          "default": "var(--ui-font-weight-bold)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-breadcrumb-active-color",
+          "default": "initial",
+          "type": "color"
+        },
+        {
+          "name": "--ui-breadcrumb-divider-spacing",
+          "default": "0.4em",
+          "description": "Space each side of a divider, the same either side.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-divider-opacity",
+          "default": "0.7",
+          "type": "number"
+        },
+        {
+          "name": "--ui-breadcrumb-divider-color",
+          "default": "var(--ui-text-light)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-breadcrumb-divider-size",
+          "default": "0.92857em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-icon-divider-size",
+          "default": "0.78571em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-section-padding",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-focus-radius",
+          "default": "var(--ui-radius-s)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-breadcrumb-divider",
+          "default": "\"/\"",
+          "type": "other"
+        }
+      ]
     },
     "ui-button": {
       "folder": "ui-button",
@@ -47605,7 +47669,7 @@
       "name": "github",
       "title": "GitHub",
       "families": [
-        "ui-breadcrumbs",
+        "ui-breadcrumb",
         "ui-button",
         "ui-dropdown",
         "ui-form",

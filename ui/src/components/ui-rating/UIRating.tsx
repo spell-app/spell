@@ -81,7 +81,7 @@ export class UIRating extends F.FormComponent<typeof ratingVocabulary> {
 
   /** The rating shown, `value` clamped to `0 ... iconCount`. */
   get rating(): number {
-    return Math.min(this.iconCount, Math.max(0, Number(this.value) || 0))
+    return E.clamp(Number(this.value) || 0, 0, this.iconCount)
   }
 
   /** Is `point` the partly filled one? */

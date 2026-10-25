@@ -57,8 +57,50 @@ describe("ApiModel.sectionsFor()", () => {
 
 describe("ApiModel.sectionIdsFor()", () => {
   test("lists the tables ANY of the tags has, in table order:  a page's API sections", () => {
-    expect(ApiModel.sectionIdsFor([OR, BUTTON])).toEqual(["attributes", "properties", "parts"])
+    expect(ApiModel.sectionIdsFor([OR, BUTTON])).toEqual(["tags", "attributes", "properties", "parts"])
     expect(ApiModel.sectionIdsFor([])).toEqual([])
+  })
+
+  test("puts the tags table first for 2+ tags only:  a single tag's page has none", () => {
+    expect(ApiModel.sectionIdsFor([BUTTON])).toEqual(["attributes", "properties"])
+    expect(ApiModel.sectionIdsFor([OR])).toEqual(["parts"])
+  })
+})
+
+describe("ApiModel.tagsSectionFor()", () => {
+  test("lists each tag in order with its summary, its name linking to its first table", () => {
+    const empty = tagOf("x-empty", { description: "Nothing `here`." })
+    const section = ApiModel.tagsSectionFor([{ ...BUTTON, description: "A button." }, OR, empty])!
+    expect([section.id, section.columns]).toEqual(["tags", ["tag", "description"]])
+    expect(section.rows.map((row) => [row.key, row.name])).toEqual([
+      ["x-button", "<x-button>"],
+      ["x-or", "<x-or>"],
+      ["x-empty", "<x-empty>"]
+    ])
+    expect(section.rows.map((row) => row.cells)).toEqual([
+      [
+        { type: "name", code: "<x-button>", href: "#x-button", notes: [] },
+        { type: "text", text: "A button." }
+      ],
+      [
+        { type: "name", code: "<x-or>", href: "#x-or", notes: [] },
+        { type: "text", text: "" }
+      ],
+      // no tables to link to:  named only
+      [
+        { type: "name", code: "<x-empty>", notes: [] },
+        { type: "text", text: "Nothing `here`." }
+      ]
+    ])
+  })
+
+  test("is undefined for fewer than 2 tags", () => {
+    expect(ApiModel.tagsSectionFor([BUTTON])).toBeUndefined()
+    expect(ApiModel.tagsSectionFor([])).toBeUndefined()
+  })
+
+  test("is never one of a tag's own tables", () => {
+    expect(ApiModel.sectionsFor(BUTTON).map((section) => section.id)).not.toContain("tags")
   })
 })
 

@@ -124,7 +124,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   @E.untracked
   private move(thumb: Thumb, value: number, originalEvent: Event): boolean {
     const [low, high] = this.bounds(thumb)
-    const next = Math.min(high, Math.max(low, value))
+    const next = E.clamp(value, low, high)
     if (next === this.thumbValue(thumb)) return false
     return this.requestChange(thumb === SECOND ? "end" : "value", next, () =>
       this.send("ui-moved", this.detail(thumb, next, originalEvent))
@@ -442,7 +442,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     const scale = this.scale
     if (this.smooth) {
       const [low, high] = this.bounds(thumb)
-      this.glideRatio = Math.min(scale.ratio(high), Math.max(scale.ratio(low), ratio))
+      this.glideRatio = E.clamp(ratio, scale.ratio(low), scale.ratio(high))
     }
     this.move(thumb, scale.valueAt(ratio), event)
   }
@@ -457,7 +457,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     const size = vertical ? (thumb?.offsetHeight ?? 0) : (thumb?.offsetWidth ?? 0)
     const length = (vertical ? box.height : box.width) - size
     const offset = (vertical ? event.clientY - box.top : event.clientX - box.left) - size / 2
-    const ratio = length > 0 ? Math.min(1, Math.max(0, offset / length)) : 0
+    const ratio = length > 0 ? E.clamp(offset / length, 0, 1) : 0
     return reversed ? 1 - ratio : ratio
   }
 

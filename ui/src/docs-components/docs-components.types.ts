@@ -14,6 +14,8 @@
  */
 
 import type { JSX } from "@solidjs/web"
+
+import { clamp } from "spell-ui/util"
 import type { UIHeaderAttributes } from "spell-ui/jsx"
 
 ////////////////
@@ -575,13 +577,13 @@ export class HeadingLevels {
   /** `value` (an attribute) rounded and clamped to `bounds`;  `bounds.fallback` when unset or not a number. */
   static levelFor(value: unknown, bounds: HeadingBounds): number {
     const level = Math.round(Number(value ?? bounds.fallback))
-    return Number.isFinite(level) ? Math.min(bounds.max, Math.max(bounds.min, level)) : bounds.fallback
+    return Number.isFinite(level) ? clamp(level, bounds.min, bounds.max) : bounds.fallback
   }
 
   /** `level` as `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`, rounded and clamped to a real heading. */
   static attributeFor(level: number): HeadingLevelText {
     // clamped to 1 ... 6 just above, which TypeScript can't follow
-    return String(Math.min(6, Math.max(1, Math.round(level)))) as HeadingLevelText
+    return String(clamp(Math.round(level), 1, 6)) as HeadingLevelText
   }
 }
 
