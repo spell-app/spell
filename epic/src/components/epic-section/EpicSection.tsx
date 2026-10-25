@@ -274,14 +274,18 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
    * - the Phases section's phases the same (Owen, 2026-10-24, epic `epic-engine` I96:  "showed the white corners at
    *   the bottom above P29"):  their title rows, the open ones' bodies between them
+   * - an unfolded ITEM is a run of its own, the line before it ending the run above (I104;  Owen, 2026-10-25:  "item
+   *   header is rounded when it's open"):  its line rounded all round, its details a drawer under it
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
     const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
     const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
+    // an open item stands alone (I104);  an open phase still closes the run it ends
+    const alone = this.holdsItems() ? isUnfolded : () => false
     return {
-      tops: shown.filter((_item, index) => index === 0 || isUnfolded(shown[index - 1])),
-      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item))
+      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1]) || alone(item)),
+      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item) || alone(shown[index + 1]))
     }
   })
 

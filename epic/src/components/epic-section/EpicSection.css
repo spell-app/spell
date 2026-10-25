@@ -13,6 +13,16 @@
   :host(:not([kind="overview-part"])) ui-section {
     --ui-section-stuck-shadow: var(--epic-bar-shadow, none);
   }
+  /*
+   * open, stuck or not:  its title band rounded at the bottom, the bars' one line of shadow under it (I104;  Owen,
+   * 2026-10-25:  "open section header is rounded bottom with 1px shadow");  the corners fall over the section's inset,
+   * where nothing scrolls under
+   */
+  :host(:state(open):not([kind="overview-part"])) ui-section::part(title) {
+    border-end-start-radius: var(--epic-section-radius, 8px);
+    border-end-end-radius: var(--epic-section-radius, 8px);
+    box-shadow: var(--epic-bar-shadow, none);
+  }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);
