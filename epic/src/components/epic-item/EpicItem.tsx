@@ -80,6 +80,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *     a click on one never folds it
  *   - the bed icon (`overnight`:  made overnight), the git icon (with commits)
  *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
+ *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
  * - Its COMMITS (`<epic-commit>` children, or `commits` while its part isn't in):
@@ -362,6 +363,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       !!this.overnight ||
       this.failed !== undefined ||
       !!this.handled ||
+      !!this.takenIn ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing()
@@ -575,7 +577,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             </span>
           </Show>
           <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-          <Show when={this.handled}>{this.handledMark()}</Show>
+          <Show when={this.handled || this.takenIn}>{this.handledMark()}</Show>
           <Show when={this.hasCommits()}>{this.gitButton()}</Show>
           <Show when={!this.reviewState.reviewing() && this.review()}>
             {(review) => (
@@ -614,12 +616,15 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /**
    * Handled in a phase (`handled="p-retry-logic"`, epic `epic-engine` P31):  a quiet grey `in P4` on its line,
    * linking the phase;  its tooltip names it (`P4 · Retry Logic`).
+   * - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same chip, its tooltip saying it was fixed or
+   *   done there;  `handled` wins when an item has both
    * - the phase read from the page when drawn:  a phase moved since shows its old number until the next redraw
    */
   private handledMark(): JSX.Element {
+    const phaseId = () => this.handled || this.takenIn || ""
     const phase = () => {
-      const element = isServer ? null : document.getElementById(this.handled ?? "")
-      if (element?.localName !== "epic-phase") return { short: "P?", full: this.handled ?? "" }
+      const element = isServer ? null : document.getElementById(phaseId())
+      if (element?.localName !== "epic-phase") return { short: "P?", full: phaseId() }
       const short = `P${PhaseIds.numberOf(element)}`
       const title = element.getAttribute("title")
       return { short, full: title ? `${short} · ${title}` : short }
@@ -630,8 +635,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         part={this.partForName("handled")}
         size="mini"
         basic=""
-        href={`#${this.handled}`}
-        title={this.translationForKey("handledTip", { phase: phase().full })}
+        href={`#${phaseId()}`}
+        title={this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>

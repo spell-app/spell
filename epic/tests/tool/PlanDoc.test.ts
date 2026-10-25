@@ -978,6 +978,56 @@ describe("PlanDoc states", () => {
   })
 })
 
+describe("PlanDoc taken in a phase (`taken-in`, epic-engine I128)", () => {
+  /** Each item's `taken-in`, after the whole-doc pass. */
+  function takenIn(plan: PlanDoc, ...ids: string[]) {
+    plan.updateStates()
+    return ids.map((id) => el(plan, id).getAttribute("taken-in"))
+  }
+
+  test("an issue or todo closed while a phase is active is taken in it;  a judgement isn't;  reopened, none", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.addItem("issue", "bug")
+    plan.addItem("todo", "chore")
+    plan.addItem("judgement", "chose x")
+    plan.setPhase(2, "active")
+    for (const id of ["i1", "c1", "j1"]) plan.setItem(id, "done")
+    expect(takenIn(plan, "i1", "c1", "j1")).toEqual(["p-two", "p-two", null])
+    // keeps the first:  closed again under another active phase
+    plan.setPhase(2, "done")
+    plan.setPhase(1, "active")
+    plan.setItem("i1", "done")
+    expect(takenIn(plan, "i1")).toEqual(["p-two"])
+    plan.setItem("i1", "open")
+    plan.setItem("c1", "canceled")
+    expect(takenIn(plan, "i1", "c1")).toEqual([null, null])
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("a closed item a phase's text links:  taken in the latest DONE phase linking it, else the active one", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two", "Three", "Four"]) plan.addPhase(name)
+    for (const title of ["filed", "fixed", "moot", "planned"]) plan.addItem("issue", title)
+    plan.addItem("judgement", "accepted")
+    plan.setPhaseFields(1, { changes: '<p>Files <a href="#i1">I1</a>, <a href="#i2">I2</a></p>' })
+    plan.setPhaseFields(2, { changes: '<p>Fixes <a href="#I1">I1</a>, <a href="#i3">I3</a>, <a href="#j1">J1</a></p>' })
+    plan.setPhaseFields(3, { changes: '<p>Fixes <epic-link item="i2"></epic-link></p>' })
+    plan.setPhaseFields(4, { changes: '<p>Will fix <a href="#i4">I4</a></p>' })
+    plan.setPhase(1, "done")
+    plan.setPhase(2, "done")
+    // closed with no phase active:  only the links say where
+    for (const id of ["i1", "j1"]) plan.setItem(id, "done")
+    plan.setPhase(3, "active")
+    for (const id of ["i2", "i4"]) plan.setItem(id, "done")
+    plan.setItem("i3", "canceled")
+    // the links give I1 and J1 the last done phase linking them;  the active P3 took I2 and I4 as they closed
+    expect(takenIn(plan, "i1", "i2", "i3", "i4", "j1")).toEqual(["p-two", "p-three", null, "p-three", "p-two"])
+    expect(plan.updateStates()).toBe(0)
+  })
+})
+
 describe("PlanDoc review", () => {
   /** States of `kind`'s section, by id, under `filter`. */
   function states(plan: PlanDoc, kind: string, filter?: string) {

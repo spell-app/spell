@@ -57,6 +57,7 @@ import {
 } from "./planDoc.types"
 
 import { IncomingHtml } from "./IncomingHtml"
+import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
 import { PlanCommits } from "./PlanCommits"
 import { PlanItem } from "./PlanItem"
@@ -877,6 +878,8 @@ export class PlanDoc extends PlanReader {
    * Set item `id` open, done or canceled;  closed items stay (`canceled` ones struck through).  Returns its title.
    * - "open" means the kind's live status:  a reopened answered question is `decided` again, an unanswered one `open`
    * - a question moves to its place (`placeQuestion()`);  stamped (`stamp()`)
+   * - TAKEN UP (`taken-in`, epic `epic-engine` I128):  an issue or todo closed done while a phase is active is taken
+   *   in that phase (`PhaseTakes`);  reopened or canceled, it's taken in none
    * - throws on any other status, or an id the doc doesn't have
    */
   setItem(id: string, status: string): string {
@@ -888,6 +891,11 @@ export class PlanDoc extends PlanReader {
       Object.values(KINDS).find((spec) => new RegExp(`^${spec.prefix}\\d+$`).test(item.id))?.live ?? "open"
     if (question) live = item.hasAttribute("answered") ? "decided" : "open"
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
+    if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
+    else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
+      const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
+      if (active) Markup.set<"epic-item">(item, { takenIn: active.id })
+    }
     if (question) this.placeQuestion(item)
     this.stamp(item)
     this.markUpdate(item)
@@ -1703,6 +1711,7 @@ export class PlanDoc extends PlanReader {
    * standing, so everything is worked out again;  returns how many things it changed.
    * - the page's `recent-since`:  from `recentSince` when it was passed in
    * - each item's `state` (`itemState()`):  what the page colours its id chip by
+   * - which phase took each closed item up, from the phases' links (`taken-in`:  `PhaseTakes.stamp()`, I128)
    * - each phase's "To review" field (`updateToReview()`)
    * - how many plan changes each phase holds (`updateChangeCounts()`)
    * - the change marks:  new ones given their id, time and answer, each host's `to-accept` (`updateChanges()`)
@@ -1717,6 +1726,7 @@ export class PlanDoc extends PlanReader {
     }
     // first:  a new mark in a phase's text marks its item handled, which its state reads
     changed += this.updateChanges()
+    changed += PhaseTakes.stamp(this.document).length
     for (const item of this.allItems) {
       const state = this.itemState(item)
       if (item.getAttribute("state") === state) continue

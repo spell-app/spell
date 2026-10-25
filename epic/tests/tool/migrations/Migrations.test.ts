@@ -26,7 +26,8 @@ describe("Migrations", () => {
       "more-requests-first",
       "caveats-and-tests",
       "took-as-minutes",
-      "whole-phase-numbers"
+      "whole-phase-numbers",
+      "taken-in-phase"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()

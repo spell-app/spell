@@ -773,6 +773,22 @@ answer lives in the phase now.
 - Reopen on the mark takes `handled` off (`applyChange()`):  the item is back in the lists, red;  rewritten after its next
   answer, the new mark marks it handled again.
 
+### Taken up in a phase
+
+An item a PHASE fixed or did names it, `<epic-item taken-in="p-fix-open-issues">` (epic `epic-engine` I128;  Owen,
+2026-10-25:  "issues should say "in P14" like questions do"):  its line says `in P1`, linking the phase, as a handled
+question's does.
+
+- NOT `handled`:  that's a state too (grey), and its change mark's Reopen takes it off;  a fixed issue stays green.
+- Written two ways (`PhaseTakes`):
+  - an issue or todo closed while a phase is active is taken in it (`setItem()`)
+  - a closed item (done, decided) a done or active phase's text links (`<a href="#i1">`, `<epic-link item>`) is taken
+    in the LATEST done one linking it, else the active one:  every edit (`updateStates()`), and the migration
+    `taken-in-phase` for pages nobody edits
+- Left alone:  an item taken in a phase already, one `handled`, a test, an open or canceled one;  a phase's "To review"
+  field (open items added during it) and items nested in a phase don't count.
+- Reopened or canceled (`setItem()`):  `taken-in` goes.
+
 ## Migrations
 
 Named, dated, idempotent steps that bring an older page's markup up to today's, by page KIND
