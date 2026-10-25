@@ -248,6 +248,18 @@
     transition-timing-function: var(--ui-ease);
     transition-behavior: allow-discrete;
   }
+  /* more below:  the menu's colour fading up over its last 8px, not a hard edge (Owen);  all in view, it sits
+     over the menu's own bottom edge */
+  .ui.dropdown > .menu[popover]::after {
+    content: "";
+    position: sticky;
+    inset-block-end: 0;
+    display: block;
+    height: 8px;
+    margin-block-start: -8px;
+    pointer-events: none;
+    background: linear-gradient(to top, var(--_ui-dropdown-menu-background), transparent);
+  }
   .ui.dropdown > .menu > * {
     white-space: nowrap;
   }
