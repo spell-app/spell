@@ -543,6 +543,14 @@ describe("<epic-page> Send and its countdown", () => {
     // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
     expect(outline()).toBe("solid")
+    // marks not sent yet:  no pill, so a press never pushes the page down (I123)
+    expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
+    plane(host).click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
+    await vi.waitFor(() => expect(headerButtons(host).send?.[0]).toBe("sent"))
+    await vi.waitFor(() => expect(outline()).toBe("solid"))
+    // sent, and nobody listening:  the pill says so
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[part~="pill"]')).not.toBeNull())
     const pill = host.shadowRoot!.querySelector<HTMLElement>('[part~="pill"]')!
     expect(pill.textContent!.replace(/\s+/g, " ")).toContain(
       "No Claude session is reviewing: start one with /epic review demo"
@@ -552,10 +560,6 @@ describe("<epic-page> Send and its countdown", () => {
     const line = host.shadowRoot!.querySelector<HTMLElement>('[part~="review-line"]')!
     expect(line.nextElementSibling).toBe(pill)
     expect(line.textContent).not.toContain("No Claude session")
-    plane(host).click()
-    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
-    await vi.waitFor(() => expect(headerButtons(host).send?.[0]).toBe("sent"))
-    await vi.waitFor(() => expect(outline()).toBe("solid"))
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await client.refresh()
     await ElementFixture.tick()
@@ -619,7 +623,9 @@ describe("<epic-page> Send and its countdown", () => {
   test("the pill copies the review line's command", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     const routes = new FakeRoutes()
-    routes.inbox.marks = { q1: { action: "approve", at: new Date().toISOString() } }
+    routes.inbox.marks = { q1: { action: "approve", at: new Date(Date.now() - 60_000).toISOString() } }
+    // sent:  the pill shows only for marks sent with nobody listening (I123)
+    routes.inbox.sent = new Date().toISOString()
     await adoptClient(routes)
     const host = await render(page("", ["todo"]))
     await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[part~="pill"]')).not.toBeNull())

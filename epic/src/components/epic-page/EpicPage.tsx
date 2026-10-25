@@ -496,12 +496,18 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /**
    * Does the pill show?  Reviewed, nobody can take the work, and something waits:
-   * marks or comments to send or work through, a Do Now not taken, or a wake to tell of (P16).
+   * marks SENT and not worked through, a Do Now not taken, or a wake to tell of (P16).
+   * - NOT for marks and comments not sent yet (epic `epic-engine` I123):  the pill appeared above the page the moment
+   *   Owen pressed a button, and everything under it jumped down (Owen, 2026-10-25:  "Screen seems to be jumping a
+   *   lot when I click Accept Phase");  Send itself wakes the epic when nobody listens
+   * - in airplane mode, unsent ones too:  the pill says how they're taken after the flight
    */
   readonly hasPill = createMemo((): boolean => {
     const marks = this.marks()
-    if (!marks || (!isAirplane() && marks.listening)) return false
-    return !!(marks.unsent || marks.comments || marks.waiting || marks.asked || marks.woken)
+    if (!marks) return false
+    if (isAirplane()) return !!(marks.unsent || marks.comments || marks.waiting || marks.asked || marks.woken)
+    if (marks.listening) return false
+    return marks.waiting - marks.unsent > 0 || !!(marks.asked || marks.woken)
   })
 
   /**
@@ -1433,7 +1439,8 @@ const SECTIONS = "epic-section"
 
 /** The stage button's texts, by the stage it ends. */
 /** The phases whose build plan waits for Owen's Accept, not done (`plansButton()`). */
-const PLANS_WAITING = ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"])'
+const PLANS_WAITING =
+  ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"], [title="Doc Review" i])'
 
 const STAGE_TEXTS = {
   overview: {

@@ -20,6 +20,7 @@ import {
   NOTE_TEXT,
   REVIEW_CONTROLS,
   REVIEW_ACCEPT,
+  REVIEW_DEFER,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -156,7 +157,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     // a waiting plan's Accept plan, in WORDS, apart from the icons:  the page asks for it (Owen, 2026-10-25:  "p37 not
     // asking me to accept";  a small grey check before)
     const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
-    const group = () => specs().filter((spec) => spec.action !== "details" && spec !== accept())
+    // ... and Defer Phase beside it (Owen, 2026-10-25)
+    const defer = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "defer") : undefined)
+    const group = () => specs().filter((spec) => spec.action !== "details" && spec !== accept() && spec !== defer())
     const doNow = () => specs().find((spec) => spec.action === "details")
     return (
       <span
@@ -183,6 +186,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         </Show>
         <Show when={accept()}>
           {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
+        </Show>
+        <Show when={defer()}>
+          {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
         </Show>
         <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
           <For each={group()}>{(spec) => this.button(spec)}</For>

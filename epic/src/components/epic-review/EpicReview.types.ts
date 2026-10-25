@@ -94,6 +94,7 @@ export type ReviewButtonSpec = {
     | "defer"
     | "reopenChange"
     | "acceptPlan"
+    | "deferPhase"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -163,6 +164,8 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
  */
 export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "approve", color: "green", icon: "circle check", label: "acceptPlan", tip: "acceptPlanTip" },
+  // Owen, 2026-10-25:  "Add a 'Defer Phase' button next to 'Accept Phase'":  after the other phases, still to do
+  { action: "defer", color: "grey", icon: "clock", label: "deferPhase", tip: "deferTip" },
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
 ]
 
@@ -331,6 +334,8 @@ export const REVIEW_GROUP = "review-group"
 export const REVIEW_DO_NOW = "review-do-now"
 /** A waiting plan's Accept plan:  a worded pill of its own (epic `epic-engine` I118). */
 export const REVIEW_ACCEPT = "review-accept"
+/** ... and Defer Phase beside it:  the same pill, quiet. */
+export const REVIEW_DEFER = "review-defer"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"
@@ -429,6 +434,11 @@ export const REVIEW_NAME_TEXTS = [
     key: "acceptPlanTip",
     text: "Claude's plan for this phase is good:  build it",
     description: "What Accept plan does."
+  },
+  {
+    key: "deferPhase",
+    text: "Defer Phase",
+    description: "A phase's worded button while its build plan waits, beside Accept Phase:  build it after the others."
   },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },

@@ -371,8 +371,10 @@ than just being able to move on").
     (`<epic-phase plan="waiting">`).
 - Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "Build plans are up for
   P3-P9".
+- The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
 - Owen accepts them on the page (the header's Accept plan, or Accept Phase on each;  one Send), or says "go" in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
 - Then "5. Each phase", from the first, straight through.
 - A phase ADDED later ("10. Add a phase", a request):  its plan written as it's added, accepted the same way.
 

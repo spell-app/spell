@@ -2342,6 +2342,11 @@
           "description": "What Accept plan does."
         },
         {
+          "key": "deferPhase",
+          "text": "Defer Phase",
+          "description": "A phase's worded button while its build plan waits, beside Accept Phase:  build it after the others."
+        },
+        {
           "key": "defer",
           "text": "Defer",
           "description": "A phase's review button while the phases are agreed:  its name."
