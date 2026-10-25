@@ -155,6 +155,7 @@ header {
   background: var(--spell-site-header-fill, light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86)));
   backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--spell-site-header-rule, light-dark(#e3e0d8, #34343b));
+  box-shadow: var(--spell-site-header-shadow, none);
 }
 a { color: inherit; text-decoration: none; }
 .brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }

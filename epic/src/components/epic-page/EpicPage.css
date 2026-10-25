@@ -45,6 +45,8 @@
      * 2026-10-24:  white / page / white / page / white bands "distracting and ugly";  a lighter ivory before, 2026-10-13)
      */
     --epic-head-fill: var(--epic-toolbar-fill);
+    /* under each bar at the top (the site's, the header, the toolbar):  slight, drawn over what's below */
+    --epic-bar-shadow: 0 1px 3px light-dark(rgb(40 30 90 / 0.12), rgb(0 0 0 / 0.55));
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));
 
     /* ## Type */
@@ -137,6 +139,8 @@
     align-items: center;
     gap: 6px 10px;
     padding: 4px var(--epic-inset);
+    /* a slight shadow under it, over the toolbar, which it touches:  no gap (Owen, 2026-10-24) */
+    box-shadow: var(--epic-bar-shadow);
     /* the toolbar's fill, laid over the page:  opaque, so nothing shows through it as the page scrolls under */
     background: linear-gradient(var(--epic-head-fill), var(--epic-head-fill)), var(--epic-bg);
   }
@@ -223,10 +227,10 @@
     z-index: 5;
     top: calc(var(--spell-site-header-height, 0px) + var(--epic-head-h, 0px));
     /*
-     * ONE hairline, under the header block (the header and the toolbar), drawn as a shadow so it takes no room;  none
-     * between the header and the toolbar:  they're one block (Owen, 2026-10-24)
+     * a slight shadow under each bar, so the site bar, the header and the toolbar read apart on the one background;
+     * shadows, never a gap, which would show what scrolls under (Owen, 2026-10-24)
      */
-    box-shadow: 0 1px 0 var(--epic-toolbar-edge);
+    box-shadow: var(--epic-bar-shadow);
     background: var(--epic-bg);
   }
   .toolbar {

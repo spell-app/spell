@@ -108,6 +108,7 @@ html {
 body.plan-doc {
   --spell-site-header-fill: var(--spell-bg);
   --spell-site-header-rule: transparent;
+  --spell-site-header-shadow: 0 1px 3px light-dark(rgb(40 30 90 / 0.12), rgb(0 0 0 / 0.55));
 }
 body {
   margin: 0;
