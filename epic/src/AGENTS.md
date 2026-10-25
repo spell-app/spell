@@ -276,6 +276,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
+      - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)
+        - the repo it runs in, plus, in a multi-repo top, every child repo cloned in it (`EpicConfig.top`)
+        - the files git tracks, by the settings file `guides/loc/loc.json5` in the content folder (`DataFile`, written
+          with `LOC_DEFAULTS` when missing):  rows (globs), tests, code and doc extensions, `leaveOut`
+          (a repo's own adds to `"*"`'s)
+        - left out besides:  `linguist-generated`, a `GENERATED` marker on the FIRST line only, bundles
+        - `LocPage` rewrites the LOC guide's tables, dates and left-out list as DOM nodes (`Markup.plain()`), keeping
+          its prose and ids;  a missing page is made by `epic pages create durable`
     - `CheckoutServers`:  a checkout's web servers (page server, vite) stopped as it goes (epic `epic-engine` I53)
       - `stop()`, BEFORE a removal:  the worktree hook, `epic worktree remove` (`/isolate done`, `/worktrees`' clean-up
         through `Stock`), `epic worktree move`

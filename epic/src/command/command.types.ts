@@ -643,3 +643,158 @@ export type PastedImage = {
  *   (the page server, in the kit:  `spell`, or `spell-kit` in a checkout from before epic `repo-split` P17)
  */
 export type ToolSpec = { tool: string; tsx?: string; cwd?: string; code?: "own" | "caller"; package?: string[] }
+
+////////////////
+// ## Lines of code
+////////////////
+
+/**
+ * One row's sizes in `epic loc` (`LinesOfCode`):  its code files and its doc files, by extension.
+ * - `codeLines`:  non-blank lines left once comments are taken out;  `codeChars`:  their characters, indentation
+ *   trimmed
+ * - `allLines`, `allChars`:  the same code files, whole
+ * - `docLines`, `docChars`:  the doc files, whole
+ */
+export type LocCounts = {
+  /** code files */
+  files: number
+  /** non-blank lines, comments taken out */
+  codeLines: number
+  /** characters on those lines, indentation trimmed */
+  codeChars: number
+  /** every line of the code files */
+  allLines: number
+  /** every character of the code files */
+  allChars: number
+  /** doc files */
+  docFiles: number
+  /** every line of the doc files */
+  docLines: number
+  /** every character of the doc files */
+  docChars: number
+}
+
+/** `LocCounts`' keys, in the tables' column order. */
+export const LOC_COLUMNS = [
+  "files",
+  "codeLines",
+  "codeChars",
+  "allLines",
+  "allChars",
+  "docFiles",
+  "docLines",
+  "docChars"
+] as const satisfies readonly (keyof LocCounts)[]
+
+/** One repo scanned by `epic loc`. */
+export type LocRepo = {
+  /** its name:  its main checkout's folder name (`spell`, `spell-ui`) */
+  name: string
+  /** its checkout scanned, absolute */
+  folder: string
+  /** every file that isn't a test */
+  code: LocCounts
+  /** its tests (`LocSettings` `tests`) */
+  tests: LocCounts
+  /** `code`, split into its rows (`src/cli/`, `docs/`, `other`), by name;  tests are in no row */
+  rows: Record<string, LocCounts>
+}
+
+/** A file `epic loc` left out though its extension counts, and why:  only the ones a person might have written. */
+export type LocSkipped = {
+  /** `<repo>/<path>` */
+  file: string
+  /** `generated`:  a GENERATED marker on its first line;  `bundled`:  lines over 400 characters on average */
+  why: "generated" | "bundled"
+}
+
+/** What `epic loc` found:  `LinesOfCode.scan()`. */
+export type LocScan = {
+  /** the day it ran, `YYYY-MM-DD` */
+  scanned: string
+  /** the checkout scanned:  the top repo's */
+  root: string
+  /** the top repo first, then each installed child repo, lowest first */
+  repos: LocRepo[]
+  /** the files left out for what's in them (`LocSkipped`) */
+  skipped: LocSkipped[]
+  /** files left out as `linguist-generated` (git's attribute), a count */
+  generatedByAttribute: number
+}
+
+/**
+ * How one repo is counted, in `guides/loc/loc.json5` (`LocSettingsFile`):  every key a list.
+ * - `rows`:  the folders that are rows, as globs from the repo's root (`src/*`:  each folder of `src/`);  the files
+ *   right in a `<folder>/*` pattern's folder are its `<folder>/ (top files)` row;  the rest roll up into `other`
+ * - `rowsWithoutSrc`:  `rows` for a repo with no `src/`
+ * - `tests`:  globs of test files;  in no row, but their own line
+ * - `code`, `docs`:  the extensions counted, each with its dot
+ * - `leaveOut`:  globs of files never counted (vendored, packed, snapshots ...)
+ */
+export type LocSettings = {
+  rows: string[]
+  rowsWithoutSrc: string[]
+  tests: string[]
+  code: string[]
+  docs: string[]
+  leaveOut: string[]
+}
+
+/**
+ * `guides/loc/loc.json5`, in the content folder:  `LocSettings` per repo, by folder name, `"*"` for every repo.
+ * - a repo's own entry is laid over `"*"`'s key by key:  a key it names replaces `"*"`'s, but `leaveOut`, which adds
+ *   to it
+ */
+export type LocSettingsFile = { repos: Record<string, Partial<LocSettings>> }
+
+/** `epic loc`'s settings when the file has none:  what the first scan counted (`experiments/scan.mjs`). */
+export const LOC_DEFAULTS: LocSettings = {
+  rows: ["src/*", "docs"],
+  rowsWithoutSrc: ["*"],
+  tests: ["tests/**", "**/*.test.*", "**/*.spec.*"],
+  code: [".ts", ".tsx", ".js", ".mjs", ".cjs", ".css", ".py", ".spell"],
+  docs: [".md", ".html"],
+  leaveOut: [
+    "**/__pack/**",
+    "vendor/**",
+    ".yarn/**",
+    "**/node_modules/**",
+    "**/*.min.js",
+    "**/*.min.css",
+    "app/static/**",
+    "**/*.snap",
+    "**/__snapshots__/**",
+    "**/*.generated.*"
+  ]
+}
+
+/**
+ * The LOC tables' columns, in groups:  the group's name over its columns (`Code`), each column's short name under it
+ * (`Files`), and the `LocCounts` key it shows.
+ * - Owen, 2026-10-25:  no doc chars ("I don't care about 'doc chars'"), and a two-row header
+ * - the numbers (`--json`) keep every key
+ */
+export const LOC_TABLE: { group: string; columns: { key: keyof LocCounts; name: string; title: string }[] }[] = [
+  {
+    group: "Code",
+    columns: [
+      { key: "files", name: "Files", title: "code files" },
+      { key: "codeLines", name: "Lines", title: "non-blank lines, comments taken out" },
+      { key: "codeChars", name: "Chars", title: "characters on those lines, indentation trimmed" }
+    ]
+  },
+  {
+    group: "All",
+    columns: [
+      { key: "allLines", name: "Lines", title: "every line of the code files" },
+      { key: "allChars", name: "Chars", title: "every character of the code files" }
+    ]
+  },
+  {
+    group: "Doc",
+    columns: [
+      { key: "docFiles", name: "Files", title: "doc files" },
+      { key: "docLines", name: "Lines", title: "every line of the doc files" }
+    ]
+  }
+]
