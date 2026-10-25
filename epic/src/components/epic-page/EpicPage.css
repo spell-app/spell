@@ -38,8 +38,11 @@
     /* the toolbar's band:  the docs' rail ivory (`spell-doc.css`) */
     --epic-toolbar-fill: var(--spell-rail-fill, var(--epic-warm));
     --epic-toolbar-rule: var(--spell-rail-rule, var(--epic-rule));
-    /* the header's row:  a lighter ivory than the toolbar's;  the toolbar's edges:  a darker one (Owen, 2026-10-13) */
-    --epic-head-fill: var(--spell-head-fill, color-mix(in oklab, var(--epic-warm) 45%, var(--epic-bg)));
+    /*
+     * the header's row:  the toolbar's fill, so the two read as ONE header block under the site's bar (Owen,
+     * 2026-10-24:  white / page / white / page / white bands "distracting and ugly";  a lighter ivory before, 2026-10-13)
+     */
+    --epic-head-fill: var(--epic-toolbar-fill);
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));
 
     /* ## Type */
@@ -49,8 +52,11 @@
 
     /* ## Layout:  everything inside a block sits `--epic-inset` in from the bands, which reach edge to edge */
     --epic-inset: 16px;
-    /* title bands:  top-level sections on violet-50, nested ones (phases, Overview parts) and item rows on violet-25 */
-    --epic-band-section: light-dark(var(--spell-violet-50, #f7f7ff), rgb(184 180 255 / 0.1));
+    /*
+     * title bands:  top-level sections on the page itself (no band of their own:  Owen, 2026-10-24, "distracting");
+     * nested ones (phases, Overview parts) and item rows on violet-25, cards standing on the page
+     */
+    --epic-band-section: transparent;
     --epic-band-row: light-dark(var(--spell-violet-25, #fcfcff), rgb(184 180 255 / 0.05));
     /* the page header's controls (git toggle, step label):  one height */
     --epic-control-size: 28px;
@@ -129,8 +135,8 @@
     align-items: center;
     gap: 6px 10px;
     padding: 4px var(--epic-inset);
-    /* a lighter ivory than the toolbar under it (Owen, 2026-10-13:  "Make "REVIEW REVIEW" header lighter beige") */
-    background: var(--epic-head-fill);
+    /* the toolbar's fill, laid over the page:  opaque, so nothing shows through it as the page scrolls under */
+    background: linear-gradient(var(--epic-head-fill), var(--epic-head-fill)), var(--epic-bg);
   }
   /*
    * the h1, taking the row's free room:  the crumbs, then the epic's name, centred on the row, at least as tall as the
@@ -215,12 +221,10 @@
     z-index: 5;
     top: calc(var(--spell-site-header-height, 0px) + var(--epic-head-h, 0px));
     /*
-     * the toolbar's edges, above and below, a darker ivory drawn as shadows, so they take no room (Owen, 2026-10-13:
-     * "Rule above/below should be darker beige -- use a shadow for it")
+     * ONE hairline, under the header block (the header and the toolbar), drawn as a shadow so it takes no room;  none
+     * between the header and the toolbar:  they're one block (Owen, 2026-10-24)
      */
-    box-shadow:
-      0 -1px 0 var(--epic-toolbar-edge),
-      0 1px 0 var(--epic-toolbar-edge);
+    box-shadow: 0 1px 0 var(--epic-toolbar-edge);
     background: var(--epic-bg);
   }
   .toolbar {
