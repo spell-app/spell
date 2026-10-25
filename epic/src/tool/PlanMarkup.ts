@@ -49,13 +49,13 @@ export class PlanMarkup {
   }
 
   /**
-   * A parsed (linkedom) document as page HTML, ready to write, `&` in attribute values ESCAPED:  what the tool writes.
-   * - `serialize()`, with the fix for linkedom (0.18), which writes `title="A &amp; B"`'s `&` bare, so a title
-   *   holding `&lt;` reads back as `<` (I2 of epic `epic-components`)
-   * - the document is left as it was:  each value is escaped for the write, then put back (`escapeAmpersands()`)
+   * A parsed (linkedom) document as page HTML, ready to write, attribute values ESCAPED:  what the tool writes.
+   * - `serialize()`, with the fix for linkedom (0.18), which writes an attribute's `&`, `<` and `>` bare
+   *   (`escapeAttributes()`)
+   * - the document is left as it was:  each value is escaped for the write, then put back
    */
   static serializePage(document: Document): string {
-    const restore = PlanMarkup.escapeAmpersands(document)
+    const restore = PlanMarkup.escapeAttributes(document)
     try {
       return PlanMarkup.serialize(document)
     } finally {
@@ -64,20 +64,24 @@ export class PlanMarkup {
   }
 
   /**
-   * Write every `&` in `document`'s attribute values as `&amp;`, IN PLACE, just before it's serialized:  linkedom
-   * (0.18) escapes only `"` in an attribute, so a title saying `&lt;x&gt;` would be written `title="&lt;x&gt;"` and
-   * read back as `<x>` (I2 of epic `epic-components`).  Returns a function that puts every value back.
+   * Write every `&`, `<` and `>` in `document`'s attribute values as `&amp;`, `&lt;`, `&gt;`, IN PLACE, just before
+   * it's serialized;  returns a function that puts every value back.
+   * - linkedom (0.18) escapes only `"` in an attribute (`&quot;`;  oxfmt may then quote the value with `'` instead):
+   *   - a bare `&`:  a title saying `&lt;x&gt;` was written `title="&lt;x&gt;"`, and read back as `<x>`
+   *     (I2 of epic `epic-components`)
+   *   - a bare `<` or `>`:  a title naming markup (`<ui-menu direction="vertical">`) broke every reader that finds a
+   *     tag by `<epic-item[^>]*>` (the Epics list's running cards, the skeleton's readers;  epic `epic-engine` I126)
    * - HACK: the values are WRONG in the DOM until then (escaped twice):  serialize, never read it in between
    * - for a document split into parts (`EpicParts.split()` serializes each part itself):  escape, split, serialize;
    *   one written whole:  `serializePage()`
    */
-  static escapeAmpersands(document: Document): () => void {
+  static escapeAttributes(document: Document): () => void {
     const changed: [Element, string, string][] = []
     for (const element of document.querySelectorAll("*")) {
       for (const { name, value } of Array.from(element.attributes)) {
-        if (!value.includes("&")) continue
+        if (!ATTRIBUTE_SPECIALS.test(value)) continue
         changed.push([element, name, value])
-        element.setAttribute(name, value.replaceAll("&", "&amp;"))
+        element.setAttribute(name, value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"))
       }
     }
     return () => {
@@ -256,3 +260,6 @@ function lastText(element: Element): Text | undefined {
   const node = element.lastChild
   return node?.nodeType === 3 ? (node as Text) : undefined
 }
+
+/** What `escapeAttributes()` escapes in an attribute value:  `&`, `<`, `>`. */
+const ATTRIBUTE_SPECIALS = /[&<>]/

@@ -162,18 +162,18 @@ export class PlanDocCommands {
       case "create":
         return this.create(name, file, flags)
       case "add-phase": {
-        const label = await this.edit(file, (plan) => {
+        const { label, moved } = await this.edit(file, (plan) => {
           const before = phaseFlag(plan, flags.before, "--before")
           const after = phaseFlag(plan, flags.after, "--after")
           const was = plan.phases
           const added = plan.addPhase(need(rest[0], "a short name"), { ...flags, before, after })
           const moved = movedDown(was, plan.phases)
           plan.log(`${plan.phaseLabel(added)} added:  ${rest[0]}${moved ? `;  ${moved}` : ""}`)
-          return plan.phaseLabel(added)
+          return { label: plan.phaseLabel(added), moved }
         })
         this.print(label)
         // the phases after it moved down a number:  links' words follow them (`links-agree`)
-        return flags.before === undefined ? undefined : this.agree(file)
+        return moved ? this.agree(file) : undefined
       }
       case "phase": {
         const phase = need(rest[0], "a phase")
@@ -195,7 +195,7 @@ export class PlanDocCommands {
         // epic `epic-engine` P34:  a to-do phase to another place among the to-do phases;  numbers and text follow
         return this.edit(file, (plan) => {
           const from = plan.phasePlace(need(rest[0], "a phase"))
-          // its new place:  the phase there now, as people name it (`P5`, `P11.1`)
+          // its new place:  the phase there now, as people name it (`P5`, its name)
           const to = plan.phasePlace(need(rest[1], "its new place (the phase there now:  P5)"))
           const was = plan.phaseLabel(from)
           plan.movePhase(from, to)
@@ -1133,13 +1133,13 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   add-phase <name> "Short Name" --symptom html --changes html [--goal html] [--files html] [--verify html]
             [--estimate 2h] [--after N | --before N]
                                                    a phase:  Symptom (one line), Changes (two or three), then
-                                                   the details (goal, files, verify);  --after 11:  P11.1 (then
-                                                   P11.2), right after P11, no phase renumbered;  --before N:
-                                                   inserted as PN, the to-do phases from N on move down a number
-                                                   (their ids stay:  links and comments stay on them), then
-                                                   links-agree:  links' words follow (stderr says);  neither,
-                                                   with a Doc Review last:  a decimal before it (P14.1), the Doc
-                                                   Review back to do
+                                                   the details (goal, files, verify);  phase numbers are whole:
+                                                   --after 11:  the new P12, right after P11;  --before N:  the
+                                                   new PN;  either way the to-do phases after it move down a
+                                                   number (their ids stay:  links and comments stay on them),
+                                                   items, links and "P5 · Name" text following, then
+                                                   links-agree (stderr says);  neither, with a Doc Review last:
+                                                   before it, the Doc Review moving down one, back to do
   phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--files html] [--verify html]
                                                    set (or "" removes) a phase's body fields
   updated <name> <N> "html" | --file path [--summary "..."]
@@ -1178,7 +1178,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    brings the doc forward in VS Code (it updates itself)
   phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
-                                                   numbers, links and "P5 · Name" text follow (epic-engine P34)
+                                                   numbers, links and "P5 · Name" text follow (epic-engine P34);
+                                                   numbers stay whole:  a phase moved is numbered by its place
   add <name> question|judgement|caveat|issue|todo|test|decision "title" [--details html] [--calm]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
@@ -1389,7 +1390,7 @@ const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name),
 
 /**
  * A flag's phase, as its place in `plan` (`PlanDoc.phasePlace()`):
- * `--before 3`, `--before P3`, `--after 11.1`, `--before epic-migrate` ...
+ * `--before 3`, `--before P3`, `--after 11`, `--before epic-migrate` ...
  * - `undefined` without the flag
  * - throws a `PlanDocError` for the flag bare, or a phase the doc doesn't have
  */
@@ -1402,7 +1403,7 @@ function phaseFlag(plan: PlanDoc, value: string | true | undefined, flag: string
 /**
  * What an insert renumbered, for the log, from the phases `before` it and `after`, by their old numbers and new:
  * `P6 · Doc Review moved down to P7`, or `P5-P6 moved down to P6-P7` for several (I6 of `skillz`);
- * `""` when none moved (a decimal phase, P11.1, renumbers nothing:  epic `epic-engine` P39).
+ * `""` when none moved (the new phase went last).
  */
 export function movedDown(before: Phase[], after: Phase[]): string {
   const moved = before.flatMap((phase) => {

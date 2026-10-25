@@ -3,10 +3,10 @@
  */
 export { CaveatsAndTests } from "./CaveatsAndTests"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
-export { DecimalPhasesAgree } from "./DecimalPhasesAgree"
 export { LinksAgree } from "./LinksAgree"
 export { Migrations } from "./Migrations"
 export { MoreRequestsFirst } from "./MoreRequestsFirst"
 export { TookAsMinutes } from "./TookAsMinutes"
+export { WholePhaseNumbers } from "./WholePhaseNumbers"
 export { PAGE_KINDS } from "./migrations.types"
 export type { AnchorMove, InboxView, Migration, MigrationContext, PageKind } from "./migrations.types"

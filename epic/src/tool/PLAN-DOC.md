@@ -135,12 +135,15 @@ As `plan-doc.md`, "Ids":
     file (`parts/p-epic-migrate.html`) stay on their phase.
   - "P7" is what people see and say:  the 7th phase, worked out as the page draws (`<epic-phase>`, the step label, the
     Epics list page) and as the tool prints.
-    - Counting only the WHOLE-numbered phases:  a phase added on the fly is a DECIMAL of the one before it, P11.1,
-      written on it (`<epic-phase number="11.1">`;  epic `epic-engine` P39), so P12 stays P12.
-  - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, `P11.1`,
-    `seo#P11.1`, its id, its name or slug (`"Epic Migrate"`, `epic-migrate`;  a renamed phase by its name today too).
-    - So do links (`<epic-link epic="seo" phase="P11.1">`), items' and updates' `phase` (`phase="11.1"`) and commit
-      titles (`seo P11.1:  ...`).
+    - Always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
+      moving a phase renumbers the to-do phases after it, and the tool rewrites what names them.
+    - P39 wrote DECIMAL phases (`<epic-phase number="11.1">`);  the migration `whole-phase-numbers` makes each one
+      whole by its place.  One not migrated yet still reads as its own number, the rest counted without it.
+  - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, its id, its name
+    or slug (`"Epic Migrate"`, `epic-migrate`;  a renamed phase by its name today too).
+    - So do links (`<epic-link epic="seo" phase="P7">`), items' and updates' `phase` (`phase="7"`) and commit titles
+      (`seo P7:  ...`).
+    - An old decimal (`P11.1`) still reads, as long as a page holds one.
   - An older page's ids were numbers (`p7`):  the migration `stable-phase-ids` converted every page ("Migrations").
     An old address, `#p7`, still lands on the 7th phase (`PhaseIds.landing()`, the docs runtime's `addressedId()`).
 
@@ -165,17 +168,16 @@ As `plan-doc.md`, "Ids":
 ```
 
 - `id`:  stable, from the name it was added under ("Ids");  `P2`, its place, is drawn.
-- `number`:  a DECIMAL phase's own number (`11.1`, epic `epic-engine` P39), written by `add-phase --after`;
-  absent, its number is its place among the phases without one.
-  - The migration `decimal-phases-agree` (every edit) gives one out of place by a hand edit the number that fits:
-    a decimal of the whole-numbered phase before it.
+- `number`:  an OLD decimal phase's own number (`11.1`, epic `epic-engine` P39);  never written since I126.
+  - The migration `whole-phase-numbers` (every edit) removes it, numbering the phase by its place, the phases after
+    it moving down one, and what names them following (`PhaseNumbers.makeWhole()`).
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
 - `status`:  `todo`, `active`, `done`.
 - `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
     (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
-  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit (the header's button:  Accept plan)
+  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit, ringed 2px #666 while they wait (the header's Send | wand ringed too, its tooltip naming the waiting plans)
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
@@ -186,11 +188,11 @@ As `plan-doc.md`, "Ids":
   - with `--symptom` / `--changes`:  Symptom, Changes, then Goal (optional), Files, Verify
   - without:  Goal, Files, Verify
   - A field not given reads `TBD`;  but the plan, which comes only once written (`--plan`).
-- `add-phase ... --after N` (epic `epic-engine` P39):  a decimal phase, P<N>.1 (P<N>.2 when that's there), right after PN
-  and its decimals.  Nothing is renumbered, so no text goes stale and no `links-agree` runs.
-- `add-phase` with no `--before` / `--after`, the last phase a `Doc Review` (by its name):  the new phase goes before it,
-  as a decimal of the phase before it (P14.1 ahead of Doc Review P15;  P39), and a Doc Review under way or done is to
-  do again, logged, keeping its name and number (P33:  the doc pass floats).
+- `add-phase ... --after N`:  the new P<N+1>, right after PN;  the phases after it move down a number, as `--before`
+  below (epic `epic-engine` I126;  P39 made a decimal, P<N>.1, until then).
+- `add-phase` with no `--before` / `--after`, the last phase a `Doc Review` (by its name):  the new phase goes just
+  before it, and the Doc Review moves down a number;  one under way or done is to do again, logged, keeping its name
+  (P33:  the doc pass floats).
 - `add-phase ... --before N`:  inserted as PN (`N` any way the tool takes a phase:  `--before epic-migrate`).
   - Every phase from N on moves down a NUMBER;  ids stay, so links, comments, marks and part files stay on them.
     What says the number follows:
@@ -200,7 +202,6 @@ As `plan-doc.md`, "Ids":
       (`phase: p-docs`), and `epic requests` shows that phase's number today;  `filed:` keeps the one it had then
   - Prose naming a phase without a link isn't changed.
   - Refused while a phase from N on has started (done or active):  its commits and log say its number.
-  - A decimal phase after it keeps being a decimal of the phase before it:  P5.1 after P5 says P6.1 once P5 is P6.
 - `update <name>#<P6 | id> --title "New title"` (epic `epic-workflow`):  a phase's or an item's new title.
   - Its `title`, or its `slot="title"` child's words (the UPDATE markers in it stay).
     `--html` (last):  the title has markup, so it's a title slot.
@@ -327,7 +328,7 @@ As `plan-doc.md`, "Ids":
     | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
     | `attention` | red    | an open question;  an open judgement call or issue not reviewed, unless `calm`     |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
-    | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or Do Now answered    |
+    | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or request for now answered |
 
     - Green across the board for what's decided, grey only for what no longer matters (Owen, 2026-10-08).
       A `/bedtime` run and `recent-since` no longer colour anything.
@@ -345,7 +346,7 @@ As `plan-doc.md`, "Ids":
     - `reviewed`, `deferred`, `queued` (`YYYY-MM-DD`), `work`, `working`
     - `review-as`:  how Owen's mark was handled
       - `approve`, `todo`, `revisit`
-      - `now`:  a Do Now request done, written by `inbox done`
+      - `now`:  a request for now (Add Details, a revisit now) done, written by `inbox done`
       - `next`, `drop`:  a caveat (work) queued into the next phase, or dropped
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
@@ -384,7 +385,7 @@ As `plan-doc.md`, "Ids":
     - `skip`:  `canceled` ("no longer applies"), reviewed
     - `notnow`:  `deferred`, today:  the run puts deferred tests last
 - A WORK caveat's review buttons (no `limit`;  a todo before P32;  Owen, 2026-10-09):  the plane, Revisit, the x,
-  in one group.  No Approve, Make Caveat or Do Now.
+  in one group.  No Approve or Make Caveat.
   - The plane (`next`, green):  "Do it in the next phase".
     - `inbox apply` queues it into the first phase whose status is `todo`:
       `queued`, and `work` `P10 · <name>`.
@@ -398,7 +399,7 @@ As `plan-doc.md`, "Ids":
   - Its note box matches:  the plane, Revisit Later, the x.
     - The plane or the x takes the note in the box along.
     - `inbox apply` keeps it first, as Owen's `<epic-reply re="next phase">` (or `re="drop"`).
-  - Every other kind keeps Approve, Revisit, Make Caveat and Do Now (the wand), a LIMIT caveat (`limit`) too.
+  - Every other kind keeps Make Caveat, Revisit and Approve, a LIMIT caveat (`limit`) too.
 - EVERY other note box (an item's, an Overview sub-section's, a phase's, the summary's):  Revisit Later, then the x.
   - The x is `skip`, grey:  "Skip this".
   - It took Make Caveat's place in the box (Owen, 2026-10-09);  Make Caveat stays on the line.
@@ -491,7 +492,7 @@ As `plan-doc.md`, "Ids":
   - approve and skip are logged
   - Make Caveat makes a caveat linking `#o3`
   - a kept note is a paragraph at its end
-- So do a phase and the summary (epic `airplane` P2):  Revisit, Make Caveat and Do Now on the page;  no Approve.
+- So do a phase and the summary (epic `airplane` P2):  Make Caveat and Revisit on the page;  no Approve.
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
     - Make Caveat makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
     - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
@@ -615,7 +616,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, Ow
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | red    | needs Owen                               | `attention` chips;  the rail's count (only what needs him)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips;  a `to do` review label                                  |
-| blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Do Now and Review Now (both the wand), Send;  Underway cards;  the active phase |
+| blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Send and its countdown (the wand);  Underway cards;  the active phase |
 | green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Caveat, a caveat's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
 | violet | Claude's voice                           | his reply cards;  the bedtime label                                    |
@@ -628,8 +629,8 @@ The FILL, on every button, pill and chip with a lifecycle.
 
 The fills, in the order they come:
 - a grey outline:  available
-- DASHED in its colour:  Owen pressed it, not committed (not sent;  a Do Now not taken yet)
-- OUTLINED in its colour:  recorded (sent), or in progress (a Do Now taken, its icon turning while Claude is on it)
+- DASHED in its colour:  Owen pressed it, not committed (not sent;  a revisit now not taken yet)
+- OUTLINED in its colour:  recorded (sent), or in progress (a revisit now taken, its icon turning while Claude is on it)
 - then CLEARED, once Claude has handled the mark (`inbox apply` / `done`, the inbox's mark gone):
   - every review button is a grey outline again
   - the id chip carries the result:  green decided, yellow still open, red needs Owen
@@ -664,7 +665,6 @@ In Owen's words (2026-10-10):
 | a caveat's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
 | Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (Owen's turn);  green if it got decided |
-| Do Now (the wand):  Add Details, a revisit now | blue | waiting to be taken | Claude's agent on it (`working`)     | the state's colour              |
 | any work Claude took (an underway status card) | blue | --          | `progress`:  outlined until the card is Done or Noted | the state's colour      |
 | a new caveat or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a caveat yellow) |
 | urgent / not urgent (the id chip itself) | red / yellow | a dashed ring | --                                    | solid red / yellow              |
@@ -691,11 +691,9 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 - Folded content is `hidden="until-found"`, so find-in-page reveals it.
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
-The review buttons, at every step:  Approve, Revisit, Make Caveat in one group, then Do Now apart.
-- Do Now is the wand:
-  the inbox's `details` request, or a revisit now when the note box holds a note.
-  - Nobody listening:  it stays dashed, "waiting for a session",
-    and the page server wakes the epic (epic `epic-workflow` P16:  plan-doc.md, "Review inbox").
+The review buttons, at every step:  Make Caveat, Revisit, Approve in one group.
+- No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand."
+  - The inbox still takes a `details` request (an old mark, an older page):  only the button went.
 - The note box's:  Revisit Later, then the x (skip this).
 
 ## Updates
@@ -831,14 +829,14 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - the log says what each became, `Caveats hold the todos now, tests are T:  T1 → C12, V1 → T1`, so "T4" in old
       chat and commits can be looked up
     - then the links on OTHER pages follow, in the same run (`ContentRelink`):  URLs to the page with an id, a link's
+      words that only say the old id, `<epic-link epic item>`, short addresses;  never the page itself or its parts
+    - idempotent:  a migrated page has no Todos section and no `v` test;  the content pass only follows THIS run's
+      renames
   - `took-as-minutes` (2026-10-25, every edit;  epic `epic-engine` P41):  every phase's `took` in the tool's form
     (`21m`, `1h 30m`:  `TookAsMinutes`)
     - fixes one written by hand (`21 min`, `1.5h`, `took 45m`);  one that won't read is reported, left;  an empty one
       goes
     - a page without one is left as it is:  older phases get a time only when asked (`epic phase … took`)
-      words that only say the old id, `<epic-link epic item>`, short addresses;  never the page itself or its parts
-    - idempotent:  a migrated page has no Todos section and no `v` test;  the content pass only follows THIS run's
-      renames
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

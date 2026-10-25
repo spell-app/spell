@@ -96,7 +96,7 @@ export type AddPhaseOptions = Prettify<
     estimate?: string
     /** inserted at this place, the to-do phases from it on moving down a number (`add-phase --before N`);  default last */
     before?: number
-    /** a decimal phase after the phase at this place (`add-phase --after 11`:  P11.1, epic `epic-engine` P39) */
+    /** right after the phase at this place, the to-do phases after it moving down a number (`add-phase --after 11`:  P12) */
     after?: number
   }
 >

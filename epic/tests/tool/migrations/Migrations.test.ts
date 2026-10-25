@@ -25,8 +25,8 @@ describe("Migrations", () => {
       "links-agree",
       "more-requests-first",
       "caveats-and-tests",
-      "decimal-phases-agree",
-      "took-as-minutes"
+      "took-as-minutes",
+      "whole-phase-numbers"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
@@ -39,8 +39,8 @@ describe("Migrations", () => {
     }
     expect(Migrations.everyEdit.map((step) => step.name)).toEqual([
       "more-requests-first",
-      "decimal-phases-agree",
-      "took-as-minutes"
+      "took-as-minutes",
+      "whole-phase-numbers"
     ])
   })
 

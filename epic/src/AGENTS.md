@@ -105,11 +105,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A time alone (`saved 14:42`):  `PlanDates.clock()`.
   - `phases/` -- `PhaseIds`:  a phase's STABLE id and the number people see (epic `epic-workflow` P15).
     - The id is made once from the phase's name, `p-epic-migrate`, and kept through renames and inserts.
-    - "P7" is its place among the whole-numbered phases, worked out as it's drawn or printed:  never written, never
-      its id.
-    - A phase added on the fly is a DECIMAL of the one before it, P11.1, written on it (`<epic-phase number>`;
-      epic `epic-engine` P39):  so adding one renumbers nothing (`decimalAfter()`, `misplacedDecimals()`).
-    - Finding a phase as people name it (`7`, `P7`, `P11.1`, its id, name or slug), and an old `#p7` landing on P7.
+    - "P7" is its place, worked out as it's drawn or printed:  never written, never its id.
+    - Every number WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
+      moving a phase renumbers the to-do phases after it, and the tool's `PhaseNumbers` rewrites what names them.
+      - P39's DECIMAL phases (`<epic-phase number="11.1">`) are made whole by the migration `whole-phase-numbers`;
+        one not migrated yet still reads as its own number (`decimalOf()`).
+    - Finding a phase as people name it (`7`, `P7`, its id, name or slug), and an old `#p7` landing on P7.
   - `comments/` (`spell-epic/comments`) -- `ThreadFacts`:  what a comment's THREAD shows, worked out ONE way for the
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
     - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`M3`), the few words it's on, its times,

@@ -1,8 +1,8 @@
 import { CaveatsAndTests } from "./CaveatsAndTests"
-import { DecimalPhasesAgree } from "./DecimalPhasesAgree"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { WholePhaseNumbers } from "./WholePhaseNumbers"
 import type { Migration, MigrationContext } from "./migrations.types"
 
 /****************
@@ -30,8 +30,8 @@ export class Migrations {
     new LinksAgree(),
     new MoreRequestsFirst(),
     new CaveatsAndTests(),
-    new DecimalPhasesAgree(),
-    new TookAsMinutes()
+    new TookAsMinutes(),
+    new WholePhaseNumbers()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

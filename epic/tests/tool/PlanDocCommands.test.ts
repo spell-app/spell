@@ -139,24 +139,28 @@ describe("PlanDocCommands add-phase --before", () => {
     ])
   })
 
-  // epic `epic-engine` P39:  `--after 2` adds P2.1, then P2.2;  nothing moves, so no links-agree pass
-  test("--after:  a decimal phase after its base, printed and logged;  no other phase renumbered", async () => {
+  // epic `epic-engine` I126:  `--after 1` adds a WHOLE P2, the to-do phases after it moving down (P39 made P1.1)
+  test("--after:  the next whole number, printed and logged;  the phases after it renumbered", async () => {
     expect(await commands().run(["add-phase", "x", "Notebook", "--after", "1"])).toBe(0)
-    expect(await commands().run(["add-phase", "x", "Reassess", "--after", "P1"])).toBe(0)
-    expect(printed).toEqual(["P1.1", "P1.2"])
+    expect(await commands().run(["add-phase", "x", "Reassess", "--after", "P2"])).toBe(0)
+    expect(printed).toEqual(["P2", "P3"])
     const plan = FILES.read(file)
     expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual([
       "P1 One",
-      "P1.1 Notebook",
-      "P1.2 Reassess",
-      "P2 Two",
-      "P3 Three"
+      "P2 Notebook",
+      "P3 Reassess",
+      "P4 Two",
+      "P5 Three"
     ])
+    expect(plan.phaseElements.some((phase) => phase.hasAttribute("number"))).toBe(false)
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
-    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P1.2 added: Reassess")
-    // the tool's verbs take it by its number
-    expect(await commands().run(["phase", "x", "P1.1", "active", "--no-open"])).toBe(0)
-    expect(FILES.read(file).phases[1]!.status).toBe("active")
+    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P3 added: Reassess; P3-P4 moved down to P4-P5")
+    // a title naming markup, quotes and all, written to the file and read back
+    const title = `a <ui-menu direction="vertical"> & a right click's`
+    expect(await commands().run(["add", "x", "judgement", title])).toBe(0)
+    const written = readFileSync(file, "utf8")
+    expect(written).not.toContain("<ui-menu")
+    expect(FILES.read(file).document.getElementById(printed.at(-1)!.toLowerCase())!.getAttribute("title")).toBe(title)
   })
 
   // epic `epic-engine` I1 (epic-workflow's I7):  the inbox keys a phase by its STABLE id, so an insert moves nothing

@@ -339,8 +339,8 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
   - The LAST phase is always `Doc Review` ("6. Doc Review").
     Its goal names the text pass:  the repo's text-rewriting skill, the epic's guide, the READMEs the epic made untrue,
     `epic pages fuss --branch` and the README checker last.
-    - Added last, it STAYS last:  `add-phase` puts a later phase before it by itself (P33), as a decimal of the
-      phase before it (P14.1, P39).
+    - Added last, it STAYS last:  `add-phase` puts a later phase before it by itself (P33), the Doc Review moving
+      down a number.
 - A decided question a phase carries out:  write it into that phase's text with a change mark,
   `<epic-change item="q<n>">...</epic-change>`, then `epic change <name>`.
   The question is then HANDLED in that phase (P31):  grey, out of the lists.
@@ -594,9 +594,11 @@ than just being able to move on").
 ## 6. Doc Review (the floating last phase)
 
 - It FLOATS (epic `epic-engine` P33, M4):  docs never trail the code.
-  - `add-phase` (no `--before` / `--after`) puts a new phase before a last Doc Review, as a DECIMAL of the phase
-    before it (epic `epic-engine` P39):  P14.1, then P14.2, ahead of Doc Review P15.
-    - The Doc Review keeps its number and its name.
+  - `add-phase` (no `--before` / `--after`) puts a new phase just before a last Doc Review:  P15 the new one, the
+    Doc Review moving down to P16, what names it following.
+    - Phase numbers are always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just
+      reorder");  P39's decimals (P14.1) are gone, made whole by the migration `whole-phase-numbers`.
+    - The Doc Review keeps its name.
     - Under way or done, it is to do again (logged):  it takes in the new phase's docs when it runs again.
       So a phase can be added while the Doc Review runs:  never rename it to get one in after it.
     - New phases on a finished epic bring the doc pass back by themselves.
@@ -1149,18 +1151,18 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
        - goal:  a bullet per outcome, Owen's input in it, each antecedent linked (`<a href="#j1">J1</a>`)
        - files, verify, estimate
     3. where (it prints the new number):
-       - after a phase Owen names ("after P11", "as P11.1"):  `--after 11`, a DECIMAL phase (epic `epic-engine`
-         P39):  P11.1, or P11.2 when P11.1 is there, right after P11;  no other phase changes its number
-       - else last, before a last Doc Review:  `add-phase` puts it there itself, as a decimal of the phase before it
-         (P14.1), and sets an active or done Doc Review back to do ("6. Doc Review")
-       - `--before <N>` only when Owen asks for it to TAKE a number:  it renumbers the to-do phases from N on
+       - every number is WHOLE (epic `epic-engine` I126):  a new phase renumbers the to-do phases after it, and
+         items, links and `P5 · Name` text follow;  never a decimal (P11.1)
+       - after a phase Owen names ("after P11"):  `--after 11`, the new P12, the old P12 on moving down one
+       - `--before <N>` when Owen asks for it to TAKE a number:  the new PN
+       - else last, before a last Doc Review:  `add-phase` puts it there itself, the Doc Review moving down one, and
+         sets an active or done Doc Review back to do ("6. Doc Review")
+       - a started phase after the place refuses it:  only to-do phases move
 
        ```sh
        epic add-phase <name> "<Name>" --symptom ... --changes ... --goal ... --files ... --verify ... --estimate ...
        epic add-phase <name> "<Name>" --after 11 ...
        ```
-
-       - a decimal phase is named as any other:  `<name>#P11.1`, `P11.1:` in its commit's title, `P11.1 · <Name>`
 
     4. each antecedent:  `epic queue <name>#<id> "P<n> · <Name>"`.
        It's that phase's work now;  closed when the phase does it.
@@ -1229,8 +1231,8 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
         - `update <epic>#P<N> --goal ...`, the old bullets kept
       - `updated <epic>#P<N> "<p>r3 joined:  ...</p>"`
    3. else a NEW phase, drafted as "10. Add a phase" drafts one, his words as Owen's input
-      - where "10. Add a phase" puts one:  `add-phase` with no place goes before a last Doc Review by itself, as a
-        decimal (P14.1)
+      - where "10. Add a phase" puts one:  `add-phase` with no place goes before a last Doc Review by itself, the
+        Doc Review moving down one
    4. `epic file <epic>#P<N> r3`:  his words, the context and the screenshots go into phase N's Requests field,
       and the request is marked filed (`P<N>`)
    5. `epic lint <epic>`;  report one line per request:
@@ -1298,10 +1300,9 @@ create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future] [-
                                                     future epic's doc plans it (promoted)
 stage <name> [overview|phases|building]             the page's stage:  what it shows;  Owen's Accept buttons move it
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
-          [--after N | --before N]                  last;  before a last Doc Review as a decimal, P14.1 (an active or
-                                                    done one goes back to do);  --after 11:  P11.1, renumbering
-                                                    nothing;  --before:  inserted as PN, the to-do phases from N
-                                                    move down
+          [--after N | --before N]                  last;  just before a last Doc Review (an active or done one goes
+                                                    back to do);  --after 11:  the new P12;  --before N:  the new
+                                                    PN;  either way the to-do phases after it move down a number
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
 update <name>#P<N> --plan "<ol>..</ol>"             Claude's build plan:  waits for Owen's Accept plan (5., step 1)
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."]   phase N's plan changed:  <epic-update>, after Goal

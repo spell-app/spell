@@ -237,17 +237,19 @@ export class EpicProgram {
 
     this.page(
       epic.command("add-phase"),
-      "add a phase:  what's wrong (symptom), what changes;  --after 11 makes it P11.1, renumbering nothing;  " +
-        "--before N inserts it as PN, renumbering the rest",
+      "add a phase:  what's wrong (symptom), what changes;  --after 11 makes it P12, --before N makes it PN;  " +
+        "the phases after it move down one",
       'epic add-phase seo "Sitemap" --symptom "<p>No sitemap.</p>" --changes "<p>Write one.</p>" --after 11'
     )
       .usage('<epic> "Short Name" --symptom <html> --changes <html> [--goal ...] [--files ...] [--verify ...]')
       .addHelpText(
         "after",
         "\n  Also:  [--estimate 2h] [--after N | --before N]" +
-          "\n  --after 11:  P11.1 right after P11 (P11.2 when P11.1 is there);  no other phase changes its number" +
-          "\n  neither, with a Doc Review last:  a decimal of the phase before it (P14.1 ahead of Doc Review P15);" +
-          "\n    a Doc Review under way or done goes back to do, keeping its name and number"
+          "\n  Phase numbers are whole:  a new phase renumbers the to-do phases after it, and items, links and" +
+          '\n    "P5 · Name" text follow (a started phase in the way:  refused)' +
+          "\n  --after 11:  the new P12, right after P11;  --before 4:  the new P4" +
+          "\n  neither, with a Doc Review last:  just before it, the Doc Review moving down one;" +
+          "\n    a Doc Review under way or done goes back to do, keeping its name"
       )
     this.page(
       epic.command("update"),
@@ -269,9 +271,10 @@ export class EpicProgram {
     ).usage("<epic>#P3 todo | active | done [--done <html>] [--no-open]  |  <epic>#P3 took [--dry-run]")
     this.page(
       epic.command("move"),
-      "move a to-do phase to another place among the to-do phases:  the numbers, links and text naming them follow",
+      "move a to-do phase to another place among the to-do phases:  each numbered by its place, the links and " +
+        "text naming them following",
       "epic move seo#P7 P4"
-    ).usage("<epic>#P7 <the phase whose place it takes:  P4, P11.1>")
+    ).usage("<epic>#P7 <the phase whose place it takes:  P4>")
     this.page(
       epic.command("commit"),
       "list a commit under a phase or an item (replacing its entry there)",
