@@ -48,8 +48,8 @@ import { UIStatistic } from "spell-ui/components/ui-statistic/UIStatistic"
 import { UIStatistics } from "spell-ui/components/ui-statistic/UIStatistics"
 import { UIStep } from "spell-ui/components/ui-step/UIStep"
 import { UISteps } from "spell-ui/components/ui-step/UISteps"
-import { UIBreadcrumb } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb"
-import { UIBreadcrumbSection } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection"
+import { UIBreadcrumbs } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs"
+import { UIBreadcrumb } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb"
 import { UIMessage } from "spell-ui/components/ui-message/UIMessage"
 import { UIProgress } from "spell-ui/components/ui-progress/UIProgress"
 import { UINag } from "spell-ui/components/ui-nag/UINag"
@@ -155,8 +155,8 @@ export class StaticCatalog {
     UIStatistics,
     UIStep,
     UISteps,
+    UIBreadcrumbs,
     UIBreadcrumb,
-    UIBreadcrumbSection,
     UIMessage,
     UIProgress,
     UINag,

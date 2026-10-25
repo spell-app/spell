@@ -122,7 +122,7 @@ describe("ElementManifests.cssCustomData()", () => {
 
 describe("ElementManifests.pascal()", () => {
   test("names a tag's class, `ui-` dropped", () => {
-    expect(ElementManifests.pascal("ui-breadcrumb-section")).toBe("BreadcrumbSection")
+    expect(ElementManifests.pascal("ui-property-editor")).toBe("PropertyEditor")
   })
 })
 

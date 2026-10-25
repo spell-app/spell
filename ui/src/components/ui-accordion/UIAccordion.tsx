@@ -215,7 +215,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
   readonly body = new E.LoadableBody({
     domElement: this.domElement,
     source: () => this.source || undefined,
-    select: () => this.select || undefined,
+    select: () => this.selector || undefined,
     target: () => this.bodyTarget(),
     send: (name, detail) => this.send(name as never, detail)
   })

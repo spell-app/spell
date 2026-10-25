@@ -1,7 +1,7 @@
 /****************
  * ### `BreadcrumbDivider`
  * The values of the divider tokens a breadcrumb publishes (`UIT.BreadcrumbDividerTokens`), as CSS text,
- * for `UIBreadcrumb`.
+ * for `UIBreadcrumbs`.
  * - Imports nothing:  plain DOM, no Solid, so a static server render uses it too.
  * - STATIC and instance-free:  pure conversions.
  ****************/

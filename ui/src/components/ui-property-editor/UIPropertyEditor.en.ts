@@ -36,9 +36,11 @@ const OWN_ATTRIBUTES = [
     description: "Its layout page:  a spell path inside the spell editor, else a full URL (epic `property-editor` P6)."
   },
   {
-    name: "select",
+    name: "selector",
     kind: "string",
-    description: "With `source`:  a CSS selector;  only its first match in the layout page is used."
+    replaces: ["select"],
+    description:
+      "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`."
   },
   {
     name: "readonly",
@@ -64,7 +66,7 @@ export const propertyEditorVocabulary = {
   attributes: passThrough<E.AttributeSpec>(
     OWN_ATTRIBUTES,
     [formVocabulary.attributes, sectionVocabulary.attributes],
-    ["source", "select"]
+    ["source", "selector"]
   ),
   events: passThrough<E.EventSpec>(
     [

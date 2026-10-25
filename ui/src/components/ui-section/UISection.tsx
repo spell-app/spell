@@ -369,7 +369,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   readonly body = new E.LoadableBody({
     domElement: this.domElement,
     source: () => this.source || undefined,
-    select: () => this.select || undefined,
+    select: () => this.selector || undefined,
     target: () => this.domElement,
     send: (name, detail) => this.send(name as never, detail)
   })
@@ -410,7 +410,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
    * - `LoadableBody.load()` loads once per `source` + `select`.
    * - An effect, not in `render()`:  a subclass drawing its own markup still loads its body.
    */
-  @E.onChange("source", "select", "isFolded", "isConnected")
+  @E.onChange("source", "selector", "isFolded", "isConnected")
   protected onBodyWanted(
     source: string | undefined,
     _select: string | undefined,

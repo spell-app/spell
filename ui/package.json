@@ -32,10 +32,10 @@
       "types": "./dist-types/src/components/ui-ad/index.d.ts",
       "default": "./src/components/ui-ad/index.ts"
     },
-    "./components/ui-breadcrumb": {
-      "spell-ui-source": "./src/components/ui-breadcrumb/index.ts",
-      "types": "./dist-types/src/components/ui-breadcrumb/index.d.ts",
-      "default": "./src/components/ui-breadcrumb/index.ts"
+    "./components/ui-breadcrumbs": {
+      "spell-ui-source": "./src/components/ui-breadcrumbs/index.ts",
+      "types": "./dist-types/src/components/ui-breadcrumbs/index.d.ts",
+      "default": "./src/components/ui-breadcrumbs/index.ts"
     },
     "./components/ui-button": {
       "spell-ui-source": "./src/components/ui-button/index.ts",

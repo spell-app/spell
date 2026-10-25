@@ -1,13 +1,13 @@
 /*
- * The style sheet of `<ui-breadcrumb>` and `<ui-breadcrumb-section>`:
+ * The style sheet of `<ui-breadcrumbs>` and `<ui-breadcrumb>`:
  * a port of Fomantic's `breadcrumb.less` + `breadcrumb.variables`.
  * - ONE sheet for both components;  each adopts it after the foundation.
  *
  * - It styles the components' shadow DOM, in Fomantic's class names on semantic elements
  *   (WAI-ARIA's breadcrumb pattern):
- *   - `<ui-breadcrumb>`:  `<nav class="ui [size] [inverted] breadcrumb" part="breadcrumb" aria-label="…">
+ *   - `<ui-breadcrumbs>`:  `<nav class="ui [size] [inverted] breadcrumb" part="breadcrumb" aria-label="…">
  *     <ol part="list"><slot></slot></ol></nav>`;  the label is the translated `texts.label`
- *   - `<ui-breadcrumb-section>`:  `<span class="divider" part="divider" aria-hidden="true"></span>`, then,
+ *   - `<ui-breadcrumb>`:  `<span class="divider" part="divider" aria-hidden="true"></span>`, then,
  *     around the `<slot>`, `<a class="section" part="section" href>` (with `href`),
  *     `<span class="active section" part="section" aria-current="page">` (with `active`)
  *     or `<span class="section" part="section">`.
@@ -80,7 +80,7 @@
     --_ui-breadcrumb-divider-color: var(--ui-breadcrumb-divider-color, var(--ui-text-light));
     --_ui-breadcrumb-divider-size: var(--ui-breadcrumb-divider-size, 0.92857em);
     --_ui-breadcrumb-icon-divider-size: var(--ui-breadcrumb-icon-divider-size, 0.78571em);
-    --_ui-breadcrumb-section-padding: var(--ui-breadcrumb-section-padding, 0);
+    --_ui-breadcrumb-padding: var(--ui-breadcrumb-padding, 0);
     --_ui-breadcrumb-focus-radius: var(--ui-breadcrumb-focus-radius, var(--ui-radius-s));
     box-sizing: border-box;
     display: inline-block;
@@ -128,7 +128,7 @@
   :host > .section {
     display: inline-block;
     margin: 0;
-    padding: var(--_ui-breadcrumb-section-padding);
+    padding: var(--_ui-breadcrumb-padding);
   }
   .ui.breadcrumb a,
   :host > a.section {
