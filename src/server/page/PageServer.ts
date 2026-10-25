@@ -25,6 +25,9 @@ import {
   type RouteModule
 } from "spell/server/page"
 
+/** The mark on every script tag the page server adds to a page (`withPageScripts()`). */
+export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
+
 /**
  * THE page server:  one per checkout (the main one, and each worktree), serving the whole repo on one port.
  * - docs, epic pages, saga pages, Spell UI's docs site and (once `app` is in) the editor, all live-reloading
@@ -379,6 +382,8 @@ export class PageServer {
    * each one whose file exists, unless `served`'s path is under one of its `skip` prefixes.
    * - The settings are read as the server starts;  the files at each page, so a build that lands meanwhile counts.
    * - The server knows nothing of what they are (the app's `spell-language.js`):  the paths come from the settings.
+   * - each tag is marked `data-spell-page-script`:  the docs runtime patches a page in place only when every script
+   *   on it is one it knows, and without the mark this one made every epic page reload on every edit (2026-10-25)
    */
   withPageScripts(page: string, served: ServedFile): string {
     const path = served.path.replace(WORKTREE_ADDRESS, "/")
@@ -387,7 +392,8 @@ export class PageServer {
         ({ file, skip }) =>
           !skip?.some((prefix) => path.startsWith(prefix)) && (!file || existsSync(join(this.root, file)))
       )
-      .map(({ src }) => `<script type="module" src="${src}"></script>\n`)
+      // marked, so a page patching itself in place knows the server added it (`PAGE_SCRIPT_ATTRIBUTE`)
+      .map(({ src }) => `<script type="module" src="${src}" ${PAGE_SCRIPT_ATTRIBUTE}></script>\n`)
       .join("")
     if (!tags) return page
     const end = page.search(/<\/body>/i)
