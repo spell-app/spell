@@ -90,7 +90,8 @@ def test_a_mirror_unsets_what_a_thing_no_longer_has() -> None:
     mirror = StateMirror()
     chip = mirror.read({"$type": "Chip", "$id": "1", "color": "red", "value": 5})
     mirror.read({"$type": "Chip", "$id": "1", "color": "red"})
-    assert chip.value is None
+    # unset:  it reads as its type's default, and isn't saved (epic `prefs-and-undo` P7)
+    assert chip.value == 0
     assert "value" not in chip.to_json()
 
 
