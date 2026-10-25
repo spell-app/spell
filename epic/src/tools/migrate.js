@@ -96,9 +96,9 @@ export const STEPS = [
     run(document) {
       const { tables, unstacked, asides, opened, left } = convertMarkup(document)
       const notes = [
-        ...(tables ? [`${tables} tables -> <ui-table celled compact striped unstackable>`] : []),
+        ...(tables ? [`${tables} tables -> <ui-table celled padding="compact" appearance="striped" unstackable>`] : []),
         ...(unstacked ? [`${unstacked} <ui-table>s made unstackable`] : []),
-        ...(asides ? [`${asides} <details> -> <ui-accordion styled>`] : []),
+        ...(asides ? [`${asides} <details> -> <ui-accordion appearance="styled">`] : []),
         ...opened.map((where) => `${where}:  started open, now folded`),
         ...left.map((why) => `LEFT for a person:  ${why}`)
       ]

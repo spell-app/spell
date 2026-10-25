@@ -19,13 +19,13 @@
           - Ids and classes here are what `scripts/plan-doc.js` edits:  keep them.  Rules:  `plan-doc.md` beside this.
         -->
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb href="../../content/index.html" target="src-packages-docs-index-html"
+          <ui-breadcrumb link="../../content/index.html" target="src-packages-docs-index-html"
             >Docs</ui-breadcrumb
           >
-          <ui-breadcrumb href="../../content/index.html#plans" target="src-packages-docs-index-html"
+          <ui-breadcrumb link="../../content/index.html#plans" target="src-packages-docs-index-html"
             >Plans</ui-breadcrumb
           >
-          <ui-breadcrumb active>{{title}}</ui-breadcrumb>
+          <ui-breadcrumb selected>{{title}}</ui-breadcrumb>
         </ui-breadcrumbs>
         <h1>{{title}}</h1>
         <ui-list class="plan-meta">
@@ -46,7 +46,7 @@
           <ui-progress class="plan-progress" value="0" total="0" bar-text="ratio" size="small" color="green" hidden
             >phases done</ui-progress
           >
-          <ui-steps class="plan-phases" vertical ordered></ui-steps>
+          <ui-steps class="plan-phases" direction="vertical" ordered></ui-steps>
         </section>
 
         <section class="s2">

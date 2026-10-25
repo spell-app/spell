@@ -25,11 +25,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-page&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -79,7 +79,7 @@
           <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>As markup only, not drawn live: the note below says why.</p>
-            <ui-message state="info" header="Not live on this page">
+            <ui-message state="info" heading="Not live on this page">
               <p>
                 An <code>&lt;epic-page&gt;</code> takes over the page around it: its header sticks under the site
                 header, and its sections join the page's rail. So it shows only as markup here; to see one drawn, open
@@ -88,7 +88,7 @@
                 >.
               </p>
             </ui-message>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>A small epic page · 20 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -155,7 +155,7 @@
               >), its blocks cut short:
             </p>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>An epic page's page · 24 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -222,7 +222,7 @@
               <p>
                 In THIS order, always: the tool puts each child where it belongs, and the check refuses another order.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -350,7 +350,7 @@
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <p>The epic's data. Dates are WRITTEN <code>2026-10-08</code> and DRAWN <code>10/8/26</code>.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -503,7 +503,7 @@
             </p>
             <ui-section id="epic-page-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -530,7 +530,7 @@
 
             <ui-section id="epic-page-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -639,7 +639,7 @@
 
             <ui-section id="epic-page-states" label="States" sticky collapsible dividing collapsed>
               <p>Custom states: CSS can match them with <code>epic-page:state(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -820,7 +820,7 @@
                 >; every <code>epic</code> verb edits it as <code>SAGA:/&lt;id&gt;</code>.
               </li>
             </ul>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>A saga page's markup · 13 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -846,7 +846,7 @@
               A page goes through three stages (epic <code>epic-engine</code> P29): the Overview is agreed first, then
               the phases, then it's built. Its <code>stage</code> says which, and decides what the page shows.
             </p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -901,7 +901,7 @@
                 <code>epic stage &lt;epic&gt; overview|phases|building</code> sets it by hand.
               </li>
             </ul>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>A page agreeing its Overview · 7 lines</ui-title>
               <ui-content>
                 <ui-code language="html"

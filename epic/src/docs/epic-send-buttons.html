@@ -28,7 +28,7 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-send-buttons&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-send-buttons&gt;
@@ -69,7 +69,7 @@
   <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
   <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
 </p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 5 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -96,7 +96,7 @@
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>Nobody writes it in a doc: three owners draw it, each setting <code>state</code> and sending its own way.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Owner</th><th>A press sends</th><th>The countdown sends</th></tr>
@@ -127,7 +127,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Attribute</th><th>What it is</th></tr>
@@ -145,7 +145,7 @@
             </ui-table>
             <ui-section id="epic-send-buttons-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Part</th><th>What it is</th></tr>
@@ -162,7 +162,7 @@
             </ui-section>
             <ui-section id="epic-send-buttons-states" label="States" sticky collapsible dividing collapsed>
               <p>Custom states, for <code>:state()</code>.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>State</th><th>When</th></tr>
@@ -177,7 +177,7 @@
             </ui-section>
             <ui-section id="epic-send-buttons-events" label="Events" sticky collapsible dividing collapsed>
               <p>What it tells its owner.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>

@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-note&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -98,7 +98,7 @@
                 ><code>i6.html</code></a
               >, shortened:
             </p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>i6.html · its note · 5 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -125,8 +125,8 @@
               <li>
                 Anywhere prose goes: it's a <dfn class="spell-term" tabindex="0">prose element</dfn
                 ><ui-popup
-                  header="prose element"
-                  content="An &lt;epic-*&gt; element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."
+                  heading="prose element"
+                  label="An &lt;epic-*&gt; element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."
                 ></ui-popup
                 >:
                 <ul>
@@ -191,7 +191,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="list check"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -227,12 +227,12 @@
               <p>
                 A <dfn class="spell-term" tabindex="0">slot</dfn
                 ><ui-popup
-                  header="slot"
-                  content="Where the element shows its own children:  the doc's prose, inside its drawing."
+                  heading="slot"
+                  label="Where the element shows its own children:  the doc's prose, inside its drawing."
                 ></ui-popup>
                 is where the element's own children show.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -253,12 +253,12 @@
               <p>
                 A <dfn class="spell-term" tabindex="0">part</dfn
                 ><ui-popup
-                  header="part"
-                  content="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."
+                  heading="part"
+                  label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."
                 ></ui-popup>
                 is a piece of the drawing a page's CSS can reach.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -295,12 +295,12 @@
               <p>
                 A <dfn class="spell-term" tabindex="0">state</dfn
                 ><ui-popup
-                  header="state"
-                  content="A CSS custom state the element sets on itself as it changes:  epic-aside:state(open)."
+                  heading="state"
+                  label="A CSS custom state the element sets on itself as it changes:  epic-aside:state(open)."
                 ></ui-popup>
                 is set by the element on itself; none is ever written in the doc.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

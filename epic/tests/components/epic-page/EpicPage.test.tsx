@@ -44,7 +44,7 @@ function step(host: Element) {
   return {
     words: label.textContent!.trim(),
     color: label.getAttribute("color"),
-    href: label.getAttribute("href") ?? undefined,
+    href: label.getAttribute("link") ?? undefined,
     // its first line:  the state's why follows on the next
     tip: label.getAttribute("title")?.split("\n")[0]
   }
@@ -127,7 +127,7 @@ describe("<epic-page>", () => {
     expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe("Copy /epic review SAGA:/epics")
     const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
-      crumb.getAttribute("href")
+      crumb.getAttribute("link")
     ])
     expect(crumbs).toEqual([
       ["Docs", "../../pages/index.html"],
@@ -228,8 +228,8 @@ describe("<epic-page>", () => {
     expect(
       Array.from(crumbs.querySelectorAll("ui-breadcrumb"), (crumb) => [
         crumb.textContent,
-        crumb.getAttribute("href"),
-        crumb.hasAttribute("active")
+        crumb.getAttribute("link"),
+        crumb.hasAttribute("selected")
       ])
     ).toEqual([
       ["Docs", "../../pages/index.html", false],

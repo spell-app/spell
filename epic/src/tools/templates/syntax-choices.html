@@ -28,10 +28,10 @@
             - `new` fills the title, lede, "Asked by", the date and the "Where we are" box;  everything else stays.
           -->
           <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-            <ui-breadcrumb href="../pages/index.html" target="src-packages-docs-index-html"
+            <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html"
               >Docs</ui-breadcrumb
             >
-            <ui-breadcrumb active>Short Title</ui-breadcrumb>
+            <ui-breadcrumb selected>Short Title</ui-breadcrumb>
           </ui-breadcrumbs>
           <ui-sticky class="spell-h1"
             ><header class="spell-page-head"><h1>Short Title</h1></header></ui-sticky
@@ -43,7 +43,7 @@
             <epic-field label="Rows" data-choices-rows><code>short-title.rows.json</code>, beside this page</epic-field>
           </div>
 
-          <ui-message class="spell-where" state="info" header="Where we are">
+          <ui-message class="spell-where" state="info" heading="Where we are">
             <epic-field label="Epic"><code>name</code> -- what that work is for, in one line.</epic-field>
             <epic-field label="Just now">what happened that led to these calls.</epic-field>
             <epic-field label="This decides">what changes for you once you press Do it.</epic-field>

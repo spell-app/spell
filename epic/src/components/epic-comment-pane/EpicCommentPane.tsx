@@ -72,8 +72,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           <Show when={this.deletable}>
             <ui-button
               class={TOOL}
-              circular=""
-              basic=""
+              appearance="circular basic"
               size="mini"
               icon="trash can"
               title={this.translationForKey("deleteTitle")}
@@ -83,8 +82,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           </Show>
           <ui-button
             class={TOOL}
-            circular=""
-            basic=""
+            appearance="circular basic"
             size="mini"
             icon="xmark"
             title={this.translationForKey("closeTitle")}

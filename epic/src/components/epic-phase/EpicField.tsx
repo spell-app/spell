@@ -189,7 +189,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
         <ui-modal
           class={ZOOM}
           part={this.partForName("zoom")}
-          basic=""
+          appearance="basic"
           closable=""
           visible={this.zoomed ? "" : undefined}
         >

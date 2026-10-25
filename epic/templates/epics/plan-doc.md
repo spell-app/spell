@@ -732,7 +732,7 @@ decide from WITHOUT asking back: in the item's details, or an Overview sub-secti
 - Concrete cases: name the affected components / examples / tests ("breadcrumb `divider-icon`: the divider stays
   empty in Safari").
 - Many values: a `ui-table` (the 19 renamed emoji: name, today, if changed, other names that reach each), always
-  `<ui-table celled compact striped unstackable>`: never stacked, at any width (Owen, 2026-10-19: a table drawn in the
+  `<ui-table celled padding="compact" appearance="striped" unstackable>`: never stacked, at any width (Owen, 2026-10-19: a table drawn in the
   side bar as its header cells, then each row's cells one under another, "I hate it"). Too wide, it scrolls sideways
   in its own box.
 - Options: side by side, an `<epic-choices>` of `<epic-option letter="A" title="...">`, after the item's text (a

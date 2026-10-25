@@ -264,7 +264,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           </Show>
           {this.moves()}
         </Show>
-        <ui-modal class="zoom" basic="" visible={this.zoomed ? "" : undefined}>
+        <ui-modal class="zoom" appearance="basic" visible={this.zoomed ? "" : undefined}>
           <Show when={this.zoomed}>{(src) => <img class="zoomed" src={src()} alt="" />}</Show>
         </ui-modal>
       </div>
@@ -289,7 +289,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           </span>
           <ui-button
             class="leave"
-            basic=""
+            appearance="basic"
             size="small"
             title={this.translationForKey("doneTip")}
             onClick={() => this.leave()}
@@ -323,14 +323,14 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           </ui-label>
           <h2 class="test-title">{this.titleOf(item())}</h2>
           <Show when={item()?.hasAttribute("failed")}>
-            <ui-label class="before" size="mini" basic="" color="red">
+            <ui-label class="before" size="mini" appearance="basic" color="red">
               {this.translationForKey("failedBefore")}
               {item()?.getAttribute("failed") ? ` · ${item()!.getAttribute("failed")!.toUpperCase()}` : ""}
             </ui-label>
           </Show>
           <Show when={item()?.getAttribute("deferred")}>
             {(date) => (
-              <ui-label class="before" size="mini" basic="" color="yellow">
+              <ui-label class="before" size="mini" appearance="basic" color="yellow">
                 {this.translationForKey("deferredOn", { date: date() })}
               </ui-label>
             )}
@@ -368,9 +368,9 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
                 <ui-button
                   class="action"
                   color="blue"
-                  basic=""
+                  appearance="basic"
                   icon="up right from square"
-                  href={action.href}
+                  link={action.href}
                   target={action.target}
                   title={this.translationForKey("openAction", { href: action.href })}
                 >
@@ -404,7 +404,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           {(shot) => (
             <ui-button
               class="shot"
-              basic=""
+              appearance="basic"
               aria-label={this.translationForKey("zoom", { alt: shot.alt })}
               title={this.translationForKey("zoom", { alt: shot.alt })}
               onClick={(event: MouseEvent) => this.zoom(event)}
@@ -443,7 +443,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     return (
       <ui-button
         class="answer"
-        basic=""
+        appearance="basic"
         icon={look.icon}
         data-color={look.color}
         data-fill={fill()}
@@ -500,7 +500,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
                   {/* VS Code's side bar never lets a dragged file reach the page:  a picker does (I75) */}
                   <ui-button
                     class="choose"
-                    basic=""
+                    appearance="basic"
                     size="mini"
                     icon="file image"
                     onClick={(event: MouseEvent) =>
@@ -523,7 +523,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
               <>
                 <ui-button
                   class="shot"
-                  basic=""
+                  appearance="basic"
                   aria-label={this.translationForKey("zoom", { alt: id.toUpperCase() })}
                   title={this.translationForKey("zoom", { alt: id.toUpperCase() })}
                   onClick={(event: MouseEvent) => this.zoom(event)}
@@ -535,8 +535,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
                 </Show>
                 <ui-button
                   class="remove"
-                  circular=""
-                  basic=""
+                  appearance="circular basic"
                   size="mini"
                   icon="xmark"
                   aria-label={this.translationForKey("removeShot")}
@@ -556,7 +555,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     return (
       <nav class="moves" part={this.partForName("moves")}>
         <ui-button
-          basic=""
+          appearance="basic"
           disabled={this.tests().indexOf(this.at) <= 0 && !this.isSummary ? "" : undefined}
           title={this.translationForKey("backTip")}
           onClick={() => this.move(-1)}
@@ -564,7 +563,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           {this.translationForKey("back")}
         </ui-button>
         <Show when={!this.isSummary}>
-          <ui-button basic="" title={this.translationForKey("nextTip")} onClick={() => this.move(1)}>
+          <ui-button appearance="basic" title={this.translationForKey("nextTip")} onClick={() => this.move(1)}>
             {this.translationForKey("next")}
           </ui-button>
         </Show>
@@ -600,7 +599,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
             <For each={this.commented()}>
               {(each) => (
                 <li>
-                  <ui-label class="id" size="mini" basic="">
+                  <ui-label class="id" size="mini" appearance="basic">
                     {each.id.toUpperCase()}
                   </ui-label>
                   <span class="result">{this.translationForKey(each.result ?? "unanswered")}</span>
@@ -615,7 +614,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           <ui-button
             class="send"
             color="blue"
-            basic=""
+            appearance="basic"
             icon="paper plane"
             data-fill={this.allSent() ? "outline" : "dashed"}
             disabled={this.review.reviewing() ? undefined : ""}
@@ -629,7 +628,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
                 class="next-epic"
                 color="blue"
                 icon="arrow right"
-                href={this.nextHref(next())}
+                link={this.nextHref(next())}
                 onClick={(event: MouseEvent) => this.onNextEpic(event, this.nextHref(next()))}
               >
                 {this.translationForKey("nextEpic", { epic: next().epic, count: next().open })}

@@ -342,7 +342,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             class={BADGE}
             part={this.partForName("badge")}
             size="mini"
-            basic=""
+            appearance="basic"
             color={this.badgeColor ?? "grey"}
           >
             {this.badge}

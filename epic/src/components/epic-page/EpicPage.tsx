@@ -697,7 +697,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               {(phases) => (
                 <ui-label
                   class="bedtime-label"
-                  basic=""
+                  appearance="basic"
                   color="violet"
                   icon="bed"
                   title={this.translationForKey("bedtimeTip", { phases: phases() })}
@@ -719,10 +719,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   <ui-label
                     part={this.state() ? this.partForName("state") : undefined}
                     data-state={this.state()?.name}
-                    basic={step().color === "green" ? undefined : ""}
+                    appearance={step().color === "green" ? undefined : "basic"}
                     color={step().color}
                     icon={step().icon}
-                    href={step().href}
+                    link={step().href}
                     title={step().tip}
                   >
                     {step().words}
@@ -765,11 +765,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           size="small"
           aria-label={this.translationForKey("crumbs")}
         >
-          <ui-breadcrumb href={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
+          <ui-breadcrumb link={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
             {this.translationForKey("crumbDocs")}
           </ui-breadcrumb>
           <ui-breadcrumb
-            href={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
+            link={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
             target={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].target}
           >
             {this.translationForKey(this.isSaga ? "crumbSagas" : "crumbEpics")}
@@ -1174,7 +1174,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("notice")}
         state="info"
         size="small"
-        header={this.translationForKey("futureHeader")}
+        heading={this.translationForKey("futureHeader")}
       >
         <p>
           {this.translationForKey("futureBody")}{" "}

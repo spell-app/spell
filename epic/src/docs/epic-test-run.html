@@ -28,7 +28,7 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-test-run&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-test-run&gt;
@@ -73,7 +73,7 @@
     ></epic-section
   ></epic-page
 >
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 14 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -115,7 +115,7 @@
               <code>file://</code> page): the notice says so, and the answers wait, Send blue in the header.
             </p>
             <p>A TEST item's details, in order (<code>epic add &lt;epic&gt;#V --step ... --should ...</code> writes them):</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Field</th><th>What the card shows</th></tr>
@@ -132,7 +132,7 @@
 
           <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="compass"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Parent</th><th>How many</th><th>As</th></tr>
@@ -147,7 +147,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Attribute</th><th>What it is</th></tr>
@@ -159,7 +159,7 @@
             </ui-table>
             <ui-section id="epic-test-run-answers" label="The answers" sticky collapsible dividing collapsed>
               <p>Each a review mark on the test, <code>{ action: "test", result, note?, shot? }</code>, sent with Send like any mark, or by leaving the run. Not one by one as given: each send wakes a waiting session, so a run of 17 tests would wake it 17 times.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Answer</th><th>Key</th><th>Colour</th><th>Then</th></tr>
@@ -182,7 +182,7 @@
             </ui-section>
             <ui-section id="epic-test-run-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Part</th><th>What it is</th></tr>
@@ -203,7 +203,7 @@
             </ui-section>
             <ui-section id="epic-test-run-events" label="Events" sticky collapsible dividing collapsed>
               <p>What it tells its owner.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>

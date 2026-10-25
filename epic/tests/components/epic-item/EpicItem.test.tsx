@@ -305,7 +305,7 @@ describe("<epic-item>", () => {
         `<epic-item id="q4" title="How many retries?" status="decided" state="handled" handled="p-retry"></epic-item>`
       )
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
-      expect([mark.textContent, mark.getAttribute("href"), mark.title]).toEqual([
+      expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-retry",
         "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again."

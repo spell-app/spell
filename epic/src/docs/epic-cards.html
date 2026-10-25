@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-cards&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -80,7 +80,7 @@
 
             <epic-cards saga="epics"></epic-cards>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 1 line</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -99,7 +99,7 @@
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The saga page template's Epics · 3 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -123,7 +123,7 @@
 
           <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="compass"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -152,7 +152,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -172,7 +172,7 @@
             </ui-table>
             <ui-section id="epic-cards-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

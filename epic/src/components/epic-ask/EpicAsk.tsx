@@ -236,8 +236,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
             <Show when={this.multiple && this.selectAll}>
               <ui-button
                 size="mini"
-                basic=""
-                circular=""
+                appearance="basic circular"
                 icon="list check"
                 aria-pressed={this.isAllSelected ? "true" : "false"}
                 onClick={this.onSelectAll}
@@ -249,10 +248,9 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
               <span class={FILTER} role="group">
                 <ui-button
                   size="mini"
-                  basic=""
-                  circular=""
+                  appearance="basic circular"
                   icon="filter"
-                  active={this.showing === "open" ? "" : undefined}
+                  selected={this.showing === "open" ? "" : undefined}
                   aria-pressed={this.showing === "open" ? "true" : "false"}
                   title={this.translationForKey("openTip")}
                   onClick={() => (this.showing = "open")}
@@ -261,10 +259,9 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                 </ui-button>
                 <ui-button
                   size="mini"
-                  basic=""
-                  circular=""
+                  appearance="basic circular"
                   icon="list check"
-                  active={this.showing === "all" ? "" : undefined}
+                  selected={this.showing === "all" ? "" : undefined}
                   aria-pressed={this.showing === "all" ? "true" : "false"}
                   title={this.translationForKey("allTip")}
                   onClick={() => (this.showing = "all")}

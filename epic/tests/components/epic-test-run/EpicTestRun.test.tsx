@@ -142,7 +142,7 @@ function card(host: Element) {
     step: words(article.querySelector(".step .prose")),
     actions: Array.from(article.querySelectorAll("ui-button.action"), (button) => [
       words(button),
-      button.getAttribute("href"),
+      button.getAttribute("link"),
       button.getAttribute("target")
     ]),
     shots: Array.from(article.querySelectorAll(".example img"), (image) => image.getAttribute("src")),
@@ -373,7 +373,7 @@ describe("<epic-test-run>", () => {
       "2 not answered"
     ])
     const next = root.querySelector("ui-button.next-epic")!
-    expect([words(next), new URL(next.getAttribute("href")!).search]).toEqual([
+    expect([words(next), new URL(next.getAttribute("link")!).search]).toEqual([
       "Next: later (2 tests)",
       "?test=1&all=1"
     ])

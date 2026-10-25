@@ -209,7 +209,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             </Show>
           </span>
         </Show>
-        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+        <ui-buttons class={REVIEW_GROUP} appearance="basic" icon="" size="mini">
           <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
         <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>
@@ -233,7 +233,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         role="group"
         aria-label={this.translationForKey("threadAnswer")}
       >
-        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+        <ui-buttons class={REVIEW_GROUP} appearance="basic" icon="" size="mini">
           <For each={specs()}>
             {(spec) => (
               <ui-button
@@ -266,7 +266,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
       <ui-button
         // `pressed`:  marked (dashed or outlined), for a look that's more than the fill (the plan pill's)
         class={[extra, this.fillOf(spec) !== "none" && PRESSED].filter(Boolean).join(" ") || undefined}
-        basic={extra ? "" : undefined}
+        appearance={extra ? "basic" : undefined}
         size={extra ? "mini" : undefined}
         icon={spec.icon}
         data-action={spec.action}

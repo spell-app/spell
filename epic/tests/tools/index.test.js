@@ -174,7 +174,7 @@ describe("the list pages", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header root=".."></spell-site-header>`)
     expect(html).toContain(
-      `<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>`
+      `<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>`
     )
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
