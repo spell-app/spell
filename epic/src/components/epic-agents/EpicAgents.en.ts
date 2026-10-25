@@ -21,9 +21,9 @@ export const epicAgentsVocabulary = {
   description:
     "What Claude is doing, at the right of an epic page's toolbar (epic `epic-engine` P35), drawn by `<epic-page>` in " +
     "its shadow root, never written in a doc:  the listening session's line (`Responding`, `Building P35`, set by " +
-    "`epic inbox status`), its tooltip listing what it's answering;  and while agents run, `2 agents running`, a " +
-    "button whose popover holds a row per agent (name, status, age, task, the redirects so far), each with a note box " +
-    "that redirects it.  Only while the page is served with a token.",
+    "`epic inbox status`), a grey pill with a spinner, its tooltip listing what it's answering;  and while agents " +
+    "run, `2` and a robot, a button (`2 agents running` its name and tooltip) whose popover holds a row per agent (name, status, age, task, the redirects so far), each with a note box " +
+    "that redirects it, sent by a blue plane.  Only while the page is served with a token.",
   attributes: [
     {
       name: "draws",
@@ -38,16 +38,31 @@ export const epicAgentsVocabulary = {
   slots: [],
   parts: [
     { name: "base", description: "Its tools:  always there, empty while nothing runs." },
-    { name: "doing", description: "The session's line:  a spinner, then what it's doing." },
+    {
+      name: "doing",
+      description: "The session's line:  a grey pill like the header's step label, a spinner, then what it's doing."
+    },
     { name: "doing-tip", description: "The line's styled tooltip (`<ui-popup>`):  what it's answering." },
-    { name: "agents-button", description: "`2 agents running`:  opens the agents' popover." },
+    {
+      name: "agents-button",
+      description:
+        "`2` and a robot, at every width (`2 agents running` its name and tooltip):  opens the agents' popover."
+    },
     { name: "agents", description: "The agents' popover (`<ui-popup>`):  a row per agent." }
   ],
   states: [{ name: "running", description: "Agents are running:  its button shows." }],
   texts: [
     { key: "doingTip", text: "{doing}:", description: "The line's tooltip, its head:  what Claude is doing." },
-    { key: "agentRunning", text: "1 agent running", description: "The agents' button, one running." },
-    { key: "agentsRunning", text: "{count} agents running", description: "The agents' button, several running." },
+    {
+      key: "agentRunning",
+      text: "1 agent running",
+      description: "The agents' button's name and tooltip, one running."
+    },
+    {
+      key: "agentsRunning",
+      text: "{count} agents running",
+      description: "The agents' button's name and tooltip, several running."
+    },
     {
       key: "agentSendTip",
       text: "Send your note to {name}:  it changes what the agent does next",
@@ -61,7 +76,11 @@ export const epicAgentsVocabulary = {
     { key: "agentWaiting", text: "waiting for the session", description: "A redirect no session passed on yet." },
     { key: "agentNote", text: "Redirect {name} ...", description: "An agent's empty note box." },
     { key: "agentNoteLabel", text: "Redirect {name}:  your note", description: "An agent's note box, spoken." },
-    { key: "agentSend", text: "Send", description: "An agent's Send button:  the note redirects it." }
+    {
+      key: "agentSend",
+      text: "Send your note to {name}",
+      description: "An agent's Send button, a blue plane, spoken:  the note redirects it."
+    }
   ],
   children: []
 } as const satisfies EpicVocabulary

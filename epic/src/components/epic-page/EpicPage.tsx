@@ -754,7 +754,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               class={STEP_PILL}
               part={this.partForName("step-pill")}
               style={{
-                "--epic-pill-color": `var(--ui-${this.step()?.color ?? "grey"})`
+                "--epic-pill-color": `var(--ui-${pillColorOf(this.step()?.color)})`,
+                "--epic-pill-ink": `var(--ui-${pillColorOf(this.step()?.color)}-text)`
               }}
             >
               <Show when={this.step()}>
@@ -763,7 +764,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     part={this.state() ? this.partForName("state") : undefined}
                     data-state={this.state()?.name}
                     basic={step().color === "green" ? undefined : ""}
-                    color={step().color}
+                    color={pillColorOf(step().color)}
                     icon={step().icon}
                     href={step().href}
                     title={step().tip}
@@ -1512,3 +1513,13 @@ const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[stat
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"
+
+/**
+ * The header pill's colour for a step's:  blue drawn grey, the rest as they are.
+ * - the pill is quiet, a grey rim and ink (Owen, 2026-10-25:  "Make the P1/agent pill non-blue");
+ *   green (done) and red (the epic's state:  errors) still say something there
+ * - none:  grey
+ */
+function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] {
+  return !color || color === "blue" ? "grey" : color
+}

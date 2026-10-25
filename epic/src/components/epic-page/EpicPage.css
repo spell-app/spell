@@ -217,6 +217,8 @@
   /*
    * the step label and the agents running, ONE pill (Owen, 2026-10-25):  rounded ends, square where they meet, one rim
    * in the label's colour, one 1px line between them
+   * - neutral:  a grey rim and ink, never blue (`pillColorOf()`;  Owen, 2026-10-25:  "Make the P1/agent pill
+   *   non-blue");  green when done, red for an epic's errors
    */
   .step-pill {
     display: inline-flex;
@@ -238,6 +240,7 @@
   }
   .step-pill epic-agents {
     --epic-agents-rule: var(--epic-pill-color);
+    --epic-agents-ink: var(--epic-pill-ink);
     --epic-agents-height: var(--epic-control-size);
     --epic-agents-fill: var(--_epic-pill-fill);
   }

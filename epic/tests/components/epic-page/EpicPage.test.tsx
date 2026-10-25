@@ -271,13 +271,14 @@ describe("<epic-page>", () => {
       `<epic-item id="q2" title="Two" status="decided" state="recent"></epic-item></epic-section>` +
       `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open" state="open"></epic-item></epic-section>`
     const mark = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>('[part~="state"]')
-    // between phases, items open, touched today:  in progress (it used to sleep)
+    // between phases, items open, touched today:  in progress (it used to sleep);  drawn grey, as the header's pill
+    // never draws blue (Owen, 2026-10-25:  "Make the P1/agent pill non-blue"):  the tooltip says which
     const busy = await render(page(`updated="${today}"`, ["done", "todo"], items))
     expect([
       mark(busy)?.dataset.state,
       mark(busy)?.getAttribute("color"),
       mark(busy)?.title.split("\n").at(-1)
-    ]).toEqual(["progress", "blue", `in progress:  1/2 phases done, updated ${today}`])
+    ]).toEqual(["progress", "grey", `in progress:  1/2 phases done, updated ${today}`])
     busy.remove()
     // a phase active, but nobody on it for days:  paused, in grey;  the icon the PHASE's own (P33:  as its row draws it)
     const idle = await render(page(`updated="2026-01-01"`, ["done", "active"], items))
@@ -991,13 +992,31 @@ describe("<epic-page> Agents running", () => {
     AgentsClient.adopt(undefined)
   })
 
-  test("in the toolbar (P35):  '2 agents running', its popover a row per agent:  name, status, age, task, redirects;  axe", async () => {
+  test("in the header's pill (P35):  `2 🤖`, its popover a row per agent:  name, status, age, task, redirects;  axe", async () => {
     await adoptAgents(new FakeAgents())
     const host = await renderWithAgents()
-    const button = agentsRoot(host).querySelector(".agents-button")!
-    expect([button.querySelector(".words")!.textContent, button.getAttribute("aria-label")]).toEqual([
+    const button = agentsRoot(host).querySelector<HTMLButtonElement>(".agents-button")!
+    // the count and the robot, never the words (Owen, 2026-10-25):  they're its name and tooltip
+    expect([button.textContent!.trim(), button.getAttribute("aria-label"), button.title]).toEqual([
+      "2",
       "2 agents running",
       "2 agents running"
+    ])
+    expect(button.querySelector('ui-icon[name="robot"]')).not.toBeNull()
+    // Send:  a round blue plane, no word, named and titled
+    const send = agentsRoot(host).querySelector(".agent-send")!
+    expect([
+      send.textContent,
+      send.getAttribute("icon"),
+      send.getAttribute("color"),
+      send.getAttribute("aria-label"),
+      send.getAttribute("title")
+    ]).toEqual([
+      "",
+      "paper plane",
+      "blue",
+      "Send your note to demo-aaa",
+      "Send your note to demo-aaa:  it changes what the agent does next"
     ])
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
@@ -1121,6 +1140,13 @@ describe("<epic-page> what Claude is doing", () => {
     const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
     expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, M3")
+    // a grey pill like the step label, its spinner where the label's icon goes (Owen, 2026-10-25)
+    const pill = line()!.querySelector("ui-label")!
+    expect([pill.getAttribute("color"), pill.hasAttribute("basic"), pill.querySelector(".spinner")!.slot]).toEqual([
+      "grey",
+      true,
+      "icon"
+    ])
     const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([

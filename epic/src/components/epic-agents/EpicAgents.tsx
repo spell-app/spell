@@ -22,11 +22,12 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * ### `EpicAgents`
  * The component behind `<epic-agents>`:  WHAT CLAUDE IS DOING, at the right of the epic page's toolbar (epic
  * `epic-engine` P35), drawn by `<epic-page>` in its shadow root.
- * - the session's LINE:  what it's doing now, a word or two ("Responding", "Building P35"), a quiet spinner before it;
+ * - the session's LINE:  what it's doing now, a word or two ("Responding", "Building P35"), a quiet spinner before it,
+ *   in a grey pill like the header's step label (Owen, 2026-10-25:  "should look like "running P6" pill");
  *   nothing when idle, or nobody listens (`epic inbox status`, the inbox's `doing`:  `ReviewClient.doing`)
  *   - hovered or focused, a STYLED tooltip (Owen, 2026-10-24:  "pretty tooltip for what you are responding to"):
  *     what it's answering, each item's id and title, linked (`<ui-popup open-on="hover">`)
- * - the RUNNING AGENTS (epic `skillz` P3):  "2 agents running", a button, only while any runs;  a click opens them in
+ * - the RUNNING AGENTS (epic `skillz` P3):  `2 🤖`, a button, only while any runs ("2 agents running" its name);  a click opens them in
  *   a popover from the toolbar (Owen, 2026-10-24:  "click to see the agents which are running, rather than section at
  *   the top"):  a row per agent, each with a note box that REDIRECTS it (`<ui-popup open-on="click">`)
  *   - the "Agents running" panel above the page's blocks went (P35)
@@ -108,8 +109,11 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
                 tabindex={doing().items?.length ? "0" : undefined}
                 aria-label={this.doingLabel(doing())}
               >
-                <span class={SPINNER} aria-hidden="true" />
-                <span class={WORDS}>{doing().text}</span>
+                {/* the header's step label's pill, its spinner in place of the label's icon (Owen, 2026-10-25) */}
+                <ui-label basic="" color="grey" class={DOING_PILL}>
+                  <span slot="icon" class={SPINNER} aria-hidden="true" />
+                  <span class={WORDS}>{doing().text}</span>
+                </ui-label>
               </span>
               <Show when={doing().items?.length}>
                 <ui-popup
@@ -136,19 +140,20 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           )}
         </Show>
         <Show when={this.draws !== "doing" && this.agents.length}>
+          {/* `1 🤖` at every width (Owen, 2026-10-25:  "`1 <robot icon>` is sufficient");  the words its name and tooltip */}
           <button
             type="button"
             class={AGENTS_BUTTON}
             part={this.partForName("agents-button")}
             aria-label={this.agentsWords()}
+            title={this.agentsWords()}
           >
+            <span class={COUNT} aria-hidden="true">
+              {this.agents.length}
+            </span>
             {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
             <span>
               <ui-icon name="robot" />
-            </span>
-            <span class={WORDS}>{this.agentsWords()}</span>
-            <span class={COUNT} aria-hidden="true">
-              {this.agents.length}
             </span>
           </button>
           <ui-popup
@@ -169,7 +174,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
     )
   }
 
-  /** The agents' button, in words:  `2 agents running`. */
+  /** The agents' button, in words, its name and tooltip:  `2 agents running`. */
   private agentsWords(): string {
     const count = this.agents.length
     return this.translationForKey(count === 1 ? "agentRunning" : "agentsRunning", { count })
@@ -187,7 +192,8 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
    *   and age (its start time in the tooltip)
    * - its task
    * - the redirects so far ("You · 10:42 · told 10:43", or "waiting for the session")
-   * - a note box that grows as it's typed in, with Send (`Redirect`)
+   * - a note box that grows as it's typed in, with Send (`Redirect`):  a blue plane in a circle, no word
+   *   (Owen, 2026-10-25:  "Just blue plane icon, ditch "Send"")
    *
    * The box is the DOM's own (never set from the agent):  a poll redraws everything around it, never it.
    */
@@ -240,17 +246,15 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           />
           <ui-button
             class={AGENT_SEND}
-            circular=""
+            appearance="circular"
             color="blue"
             icon="paper plane"
-            size="mini"
             disabled={redirect.canSend ? undefined : ""}
             loading={redirect.isSending ? "" : undefined}
+            aria-label={this.translationForKey("agentSend", { name })}
             title={this.translationForKey("agentSendTip", { name })}
             onClick={() => redirect.sendNote()}
-          >
-            {this.translationForKey("agentSend")}
-          </ui-button>
+          />
         </div>
         <Show when={redirect.error}>
           <p class={AGENT_ERROR} role="alert">
@@ -358,6 +362,7 @@ function statusColorOf(status: string): "blue" | "orange" | "grey" {
 /** Classes of the shadow markup:  its tools, the session's line and its tooltip, the agents' button and popover, each agent's row. */
 const TOOLS = "tools"
 const DOING = "doing"
+const DOING_PILL = "doing-pill"
 const SPINNER = "spinner"
 const DOING_TIP = "doing-tip"
 const TIP_HEAD = "tip-head"

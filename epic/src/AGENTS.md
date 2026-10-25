@@ -137,9 +137,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
-      - `<epic-page>` draws them in its toolbar (epic `epic-engine` P35):  `<epic-agents>`, in its shadow root,
-        "2 agents running", a button whose popover holds their rows;  beside the session's line ("Responding",
-        `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
+      - `<epic-page>` draws them in its header and toolbar (epic `epic-engine` P35):  `<epic-agents>`, in its shadow
+        root, `2 🤖` (its name "2 agents running"), a button whose popover holds their rows;  and the session's line
+        ("Responding", `epic inbox status`, the inbox's `doing`), a grey pill whose styled tooltip lists what it's
+        answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
@@ -1153,11 +1154,12 @@ In `tools/`:
         - `EPIC_WAIT_MS`, 5s at most:  a pack that won't load doesn't hold up the page
       - remembers their folds
       - lands links inside them (a link to an `<epic-item>` opens it)
-    - Running agents (epic `skillz` P3):  `<epic-page>`'s toolbar has "2 agents running", a button opening their
-      rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
-      - It shows while any agent of the epic runs.
-      - Beside it, the session's line (P35):  "Responding", "Building P35" (`epic inbox status`), gone when idle or
-        nobody listens;  hovered, a styled tooltip of what it's answering.
+    - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
+      a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
+      - It shows while any agent of the epic runs, after the step label, the pill grey (Owen, 2026-10-25).
+      - In the toolbar, the session's line (P35):  "Responding", "Building P35" (`epic inbox status`), gone when idle or
+        nobody listens;  a grey pill like the step label, a spinner for its icon;  hovered, a styled tooltip of what
+        it's answering.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.

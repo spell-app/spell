@@ -124,7 +124,7 @@
                 ONE line of crumbs, <code>DOCS / EPICS / SEO</code>, the epic's name in their type, twice their size and
                 bold: the h1 (a click on the name copies <code>/epic resume seo</code>, and a toast says so), and at the
                 header's right the step label: <code>P2</code>, the
-                phase under way, outlined blue
+                phase under way, outlined grey
               </li>
               <li>
                 under the header, the review line (<code>To review this doc, type /epic review seo</code>), then the
@@ -675,7 +675,10 @@
                   >the colour scheme</a
                 >):
                 <ul>
-                  <li>the phase under way: OUTLINED blue (Claude is on it), a link to it</li>
+                  <li>
+                    the phase under way: OUTLINED grey, a link to it (Owen, 2026-10-25: "Make the P1/agent pill
+                    non-blue"); its half-filled circle says it's under way
+                  </li>
                   <li>every phase done: <code>DONE</code>, SOLID green</li>
                   <li>
                     otherwise the next phase, grey; <code>FUTURE</code>, grey, for a future epic; nothing without phases
@@ -725,8 +728,23 @@
                 remembered per page.
               </li>
               <li>
-                <b>Agents running:</b> a panel before the blocks, while any agent of the epic runs, with a note box per
-                agent.
+                <b>Agents running</b> (<code>&lt;epic-agents&gt;</code>, epic <code>epic-engine</code> P35), while any
+                agent of the epic runs:
+                <ul>
+                  <li>
+                    the step label's pill goes on with <code>2</code> and a robot, at every width (Owen, 2026-10-25:
+                    "<code>1 &lt;robot icon&gt;</code> is sufficient, I can click to see what you mean");
+                    <code>2 agents running</code> is its tooltip and the name a screen reader hears
+                  </li>
+                  <li>
+                    a click opens their rows in a popover: each agent's name, status, age and task, and a note box
+                    that redirects it, sent by a blue plane in a circle, no word
+                  </li>
+                  <li>
+                    in the toolbar, the session's line (<code>Building P35</code>): a grey pill like the step label,
+                    a turning spinner where the label has its icon
+                  </li>
+                </ul>
               </li>
               <li>
                 <b>Folding:</b> the page itself doesn't fold. Its blocks do, and on an epic page they all start folded.
