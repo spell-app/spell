@@ -1,5 +1,3 @@
-import _get from "lodash/get"
-
 import type { P } from "spell-parser/parser"
 
 /**
@@ -18,6 +16,15 @@ export class ScopeList<ListType = any, InputType = ListType> {
   /** Backing array of items, in insertion order.  NEVER changed in place -- see above. */
   #items: ListType[] = []
 
+  /**
+   * Each item's normalized key, worked out once:  `get()` reads every item's key on every lookup.
+   * - An item's key never changes once it's in a list:  each record sets its name in its constructor.
+   */
+  #keys = new WeakMap<object, string | undefined>()
+
+  /** `props.parentProp` split at its dots, e.g. `["parentScope", "variables"]`, so `parent` needn't parse it. */
+  #parentPath: string[] | undefined
+
   /** Props this instance was constructed with -- see `ScopeListProps`. */
   props: ScopeListProps
 
@@ -28,18 +35,25 @@ export class ScopeList<ListType = any, InputType = ListType> {
       throw new TypeError("new ScopeList() must pass `target` if you're passing parentProp.")
 
     this.props = props
+    this.#parentPath = props.parentProp?.split(".")
   }
 
   /** Return our `parent`. */
-  get parent() {
-    const { target, parentProp } = this.props
-    return target && parentProp ? _get(target, parentProp) : undefined
+  get parent(): ScopeList | undefined {
+    let parent = this.props.target
+    if (!parent || !this.#parentPath) return undefined
+    for (const step of this.#parentPath) parent = parent?.[step]
+    return parent
   }
 
   /** Given an `item`, return its normalized key in our list. */
   getKeyFor(item: ListType): string | undefined {
     if (!item) return undefined
-    return this.normalizeKey((item as Record<string, any>)[this.props.keyProp])
+    if (typeof item !== "object") return this.normalizeKey((item as Record<string, any>)[this.props.keyProp])
+    if (this.#keys.has(item)) return this.#keys.get(item)
+    const key = this.normalizeKey((item as Record<string, any>)[this.props.keyProp])
+    this.#keys.set(item, key)
+    return key
   }
 
   /**
