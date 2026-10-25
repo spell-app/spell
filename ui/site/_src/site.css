@@ -644,7 +644,9 @@
    * (Owen, 2026-10-25:  "non-selected tab to show bg color";  a theme's segmented track, fruity's grey, before)
    */
   .site-tabs::part(menu) {
-    --ui-menu-segmented-background: transparent;
+    /* the panel's own glass, as its ring is:  an unselected tab shows the panel (r25:  transparent showed the page,
+       and while stuck the page scrolling under) */
+    --ui-menu-segmented-background: var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)));
   }
   .site-tabs > ui-tab::part(tab) {
     margin-block-start: 0;
@@ -870,10 +872,28 @@
    * - drawn as a shadow as wide as everything, cut to the strip's box
    * - the section toolbar draws its own (spell-toolbar.css)
    */
+  /*
+   * stuck with no section toolbar under it:  a strip behind it, out past the column and over the gaps, as with one
+   * (spell-toolbar.css, "Under a page's tabs"), OPAQUE:  the page's own ground (`--ui-bar-wallpaper-color`), so nothing
+   * scrolling under shows through (r25:  "wrong sticky semantics if no subtabs";  a see-through strip before);  the
+   * track's own fill the panel's glass over that same ground
+   */
   .site-tabs-stuck .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
+    --_site-stuck-ground: var(--ui-bar-wallpaper-color, var(--ui-background));
+    --ui-menu-segmented-background:
+      linear-gradient(
+        var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))),
+        var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)))
+      ),
+      var(--_site-stuck-ground);
     box-shadow:
-      0 0 0 var(--site-tabs-band) var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))),
-      0 0 0 100vmax var(--ui-section-sticky-background, var(--ui-background));
+      0 0 0 var(--site-tabs-band)
+        color-mix(
+          in srgb,
+          var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))) 100%,
+          var(--_site-stuck-ground)
+        ),
+      0 0 0 100vmax var(--_site-stuck-ground);
     clip-path: inset(
       calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap))) calc(-1 * (var(--site-gutter) + var(--site-tabs-inset)))
         calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap)))

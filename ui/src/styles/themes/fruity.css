@@ -343,6 +343,11 @@
     --ui-input-border-color: var(--fruity-hairline);
     --ui-input-border-color-hover: var(--ui-border-color-strong);
     --ui-input-border-color-focus: var(--ui-focus-color);
+    /* a select the same well as an input:  it drew the plain surface and border beside them */
+    --ui-select-background: var(--ui-input-background);
+    --ui-select-border-color: var(--ui-input-border-color);
+    --ui-select-border-color-hover: var(--ui-input-border-color-hover);
+    --ui-select-border-color-focus: var(--ui-input-border-color-focus);
 
     /* Progress:  the accent on a grey track */
     --ui-progress-background: var(--fruity-track);
