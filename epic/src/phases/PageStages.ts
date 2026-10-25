@@ -21,10 +21,12 @@ export class PageStages {
   /**
    * The top-level section kinds each stage shows (`<epic-section kind>`);  `building` shows every kind.
    * - the Overview (`<epic-overview>`) always shows, and its sub-sections with it
+   * - the Phases stage shows the Issues too:  the problems found while planning, before any build plan (Owen,
+   *   2026-10-25:  "we're creating 'issues' ... before making the plan, so show those when in 'accept phases' mode")
    */
   static readonly SHOWN: Readonly<Record<PlanningStage, readonly string[]>> = {
     overview: ["questions", "caveats"],
-    phases: ["phases", "questions", "caveats"]
+    phases: ["phases", "questions", "caveats", "issues"]
   }
 
   /** Is `value` one of the stages? */

@@ -19,3 +19,6 @@ __screenshots__/
 # (`workspaces/spell-epic.code-workspace`) by `epic window open | launch | init`, a worktree's (`workspaces/ongoing/`)
 # by `open`.  Its `windowsFolder` (.epic/config.json5) keeps them here (epic `epic-engine` I15, J3;  `epic-eject` P13)
 /workspaces/
+
+# `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/

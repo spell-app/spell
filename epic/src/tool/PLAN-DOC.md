@@ -167,7 +167,7 @@ As `plan-doc.md`, "Ids":
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
     (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
-  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept plan and Revisit
+  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit (the header's button:  Accept plan)
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
@@ -205,7 +205,7 @@ As `plan-doc.md`, "Ids":
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
 - `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
   which sections the page shows (`PageStages`, `spell-epic/phases`).
-  - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases too;  `building`:  everything.
+  - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases and Issues too;  `building`:  everything.
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.

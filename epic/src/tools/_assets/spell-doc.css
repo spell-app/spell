@@ -255,7 +255,9 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
  * - its VIEW:  over the table's box as it shows, cutting the copy off at its edges;  no pointer, so the rows under it
  *   take the clicks
  * - the COPY:  the table's own classes, drawn by the page's rules;  each column as wide as the table's (the runtime
- *   measures them), an opaque ground, no bottom edge of its own (the header row's rule is enough)
+ *   measures them), an opaque ground, a rule under it so the rows slide under a line, and square top corners (r24:
+ *   rows cut in half showed right under it, and at its rounded corners)
+ * - 1px up, over the stuck title's bottom edge:  between them, a line of rows showed through (r24, measured 1px)
  */
 .spell-doc-main .spell-table-pin {
   position: sticky;
@@ -265,7 +267,7 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
 }
 .spell-doc-main .spell-table-pin-view {
   position: absolute;
-  top: 0;
+  top: -1px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -280,9 +282,9 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
   margin: 0;
   overflow: visible;
   border-bottom: 0;
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
+  border-radius: 0;
   background: var(--spell-bg);
+  box-shadow: 0 1px 0 var(--spell-table-rule, var(--ui-border-color));
 }
 .spell-doc-main .spell-table-pin :is(th, td) {
   box-sizing: border-box;

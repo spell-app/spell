@@ -87,6 +87,12 @@ const HOLDS_INSIDE = /^(li|dt|dd|td|th)$/
 /** The CSS highlight the quoted text of every comment is drawn with (`::highlight()` in `spell-comments.css`). */
 const QUOTE_HIGHLIGHT = "spell-comment-quote"
 
+/**
+ * The one a comment's quote is drawn with while it WAITS for Claude (its turn `claude`):  purple, Owen's comments
+ * not taken in yet (Owen, 2026-10-25:  "highlight bullhorn items still-to-be-processed ... purple for my comments")
+ */
+const QUOTE_WAITING_HIGHLIGHT = "spell-comment-quote-waiting"
+
 /** How long after Owen stops typing the comment box saves itself, ms. */
 const COMMENT_SAVE_MS = 600
 
@@ -568,7 +574,7 @@ class PageComments {
       const at = block ?? head
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
-      if (quoted) quotes.push({ ...quoted, id: comment.id })
+      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "claude" })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])
@@ -1651,22 +1657,26 @@ function holderOf(block, { start, end }) {
 }
 
 /**
- * Highlight each quote's text on the page, softly (`QUOTE_HIGHLIGHT`);  returns each one's range, by comment id
- * (`[{ id, range }]`), for a click to find.  Not highlighted where the browser can't, but still found.
+ * Highlight each quote's text on the page:  softly once Claude has had it (`QUOTE_HIGHLIGHT`), purple while it waits
+ * for him (`QUOTE_WAITING_HIGHLIGHT`);  returns each one's range, by comment id (`[{ id, range }]`), for a click to
+ * find.  Not highlighted where the browser can't, but still found.
  */
 function highlightQuotes(quotes) {
-  const found = quotes.flatMap(({ id, start, end }) => {
+  const found = quotes.flatMap(({ id, start, end, waiting }) => {
     try {
       const range = document.createRange()
       range.setStart(...start)
       range.setEnd(...end)
-      return [{ id, range }]
+      return [{ id, range, waiting }]
     } catch {
       return []
     }
   })
-  if (globalThis.Highlight && globalThis.CSS?.highlights)
-    CSS.highlights.set(QUOTE_HIGHLIGHT, new Highlight(...found.map(({ range }) => range)))
+  if (globalThis.Highlight && globalThis.CSS?.highlights) {
+    const ranges = (waiting) => found.filter((each) => !!each.waiting === waiting).map(({ range }) => range)
+    CSS.highlights.set(QUOTE_HIGHLIGHT, new Highlight(...ranges(false)))
+    CSS.highlights.set(QUOTE_WAITING_HIGHLIGHT, new Highlight(...ranges(true)))
+  }
   return found
 }
 

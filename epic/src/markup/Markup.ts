@@ -38,6 +38,30 @@ export class Markup {
   }
 
   /**
+   * A new PLAIN element in `document`, not an epic one (`<table>`, `<ui-section>`, `<code>`):  for a tool writing a
+   * page's other markup as nodes, never as an HTML string (`epic loc`'s tables).
+   * - `attributes`:  as given;  `true` is a bare attribute (`collapsed`), `false` / `undefined` left out
+   * - `children`:  appended in order;  strings are TEXT, never parsed as markup (unlike `append()`)
+   * - checks nothing:  a `<ui-*>` or native tag is the page's to get right
+   */
+  static plain(
+    document: Document,
+    tag: string,
+    attributes: Record<string, string | number | boolean | undefined> = {},
+    children: (Node | string)[] = []
+  ): Element {
+    const element = document.createElement(tag)
+    const given = Object.entries(attributes)
+    // a DOM that puts new attributes first (linkedom) gets them last first, so the file reads in the order given
+    for (const [name, value] of this.prependsAttributes(document) ? given.toReversed() : given) {
+      if (value === true) element.setAttribute(name, "")
+      else if (value !== false && value !== undefined) element.setAttribute(name, String(value))
+    }
+    for (const child of children) element.append(typeof child === "string" ? document.createTextNode(child) : child)
+    return element
+  }
+
+  /**
    * `element`'s data:  every attribute its vocabulary lists that it carries, typed (`EpicData`);  absent ones left
    * out.
    * - NEVER throws on a bad value (it reads as best it can:  `NaN`);  `validate()` reports it.

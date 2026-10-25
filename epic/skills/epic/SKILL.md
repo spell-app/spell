@@ -278,7 +278,8 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 - Three stages, each ended by Owen's button in the page header (`epic stage <name>` prints and sets it):
   1. `overview`:  Claude writes the Overview and its questions;  each answer rewrites it.  Accept Overview ->
   2. `phases`:  Claude writes the phases;  Owen marks each Looks good or Defer.  Accept Phases ->
-  3. `building`:  every phase as "5. Each phase", each with Claude's own build plan, accepted first.
+  3. `building`:  Claude's build plans for EVERY phase, written UP FRONT and accepted together, then the phases built
+     one after another with no stop between them ("4b. Build plans", "5. Each phase").
 
 1. Explore (read-only):  the code, the docs, the kickoff prompt.
    - Agents:  up to 5, don't ask.
@@ -354,23 +355,44 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
   - NEVER change an existing `id`.
 - `epic lint <name>`, then `epic open <name> --review` (new stage:  reload).
 - Owen reviews the phases on the page:  Looks good, or Defer (after the others, still to do;  `inbox apply` moves it).
-  Accept Phases moves the page to `building`.  Then "5. Each phase", the first phase.
+  Accept Phases moves the page to `building`.  Then "4b. Build plans".
+
+## 4b. Build plans:  ALL of them, up front
+
+Claude's build plan for EVERY phase still to do, written at once, before any code (Owen, 2026-10-25:  "write the plans
+up front, then look into adjusting before starting.  Otherwise, you'll stop after each phase and make me approve rather
+than just being able to move on").
+- Before epic `epic-engine` I117 each plan was written right before its phase, and the session stopped after every
+  phase for Owen's Accept.
+- Each one:  `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
+  left out;  short, in Owen's terms.
+  - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
+  - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept Phase and Revisit
+    (`<epic-phase plan="waiting">`).
+- Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "Build plans are up for
+  P3-P9".
+- The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
+- Owen accepts them on the page (the header's Accept plan, or Accept Phase on each;  one Send), or says "go" in chat:  every waiting plan accepted.
+  - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
+- Then "5. Each phase", from the first, straight through.
+- A phase ADDED later ("10. Add a phase", a request):  its plan written as it's added, accepted the same way.
+
+
 
 ## 5. Each phase
 
-1. `epic phase <name>#P<N> active`, then CLAUDE'S BUILD PLAN, accepted before any code (epic `epic-engine` P33, M1).
+1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
    - Check the session's name (the isolate skill's "Session name").
    - The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
-   - Write it into the phase (or each phase of a group built together):
-     `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
-     left out;  short, in Owen's terms.
-     - The phase shows "Claude's plan:" with an orange rule, and its buttons are Accept plan and Revisit
-       (`<epic-phase plan="waiting">`).
-   - Then listen (`epic inbox wait <name>`) and END THE TURN with the phase's link pair:  "Claude's plan is up".
-   - Owen's Accept plan:  `inbox apply` says "plan accepted:  build it" (the field marked accepted):  step 2.
-     - Revisit:  his note says what to change;  write the plan again (a new `--plan` waits again).
-     - He says "go" in chat:  that's the Accept;  build.
-   - Skip it only when Owen said to start the phase without one ("just do it"), or in bedtime mode.
+   - Earlier phases, answers and requests may have moved things since it was written.  Adjust, and go on:
+     - a SMALL change (a file moved, a step folded into an earlier phase, a name changed):  say what and why with
+       `epic updated <name>#P<N> "<p>...</p>" --summary "Plan adjusted:  ..."`;  the plan stays accepted.  NO stop.
+     - a BIG one Owen would want a say in (scope, a choice he made, much more work):  write the plan again
+       (`--plan`, it waits), listen, and END THE TURN with the phase's link pair:  "P<N>'s plan changed:  ...".
+       Only then a stop.
+   - No accepted plan (a phase from before I117, or added without one):  write it now, as "4b. Build plans", and wait.
+   - No plan at all only when Owen said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
    - Found a problem:  `add <name>#I`.
@@ -516,13 +538,19 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
      - In bedtime mode, nothing merges:  `add <name>#C "merge P<n>"`, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
-6. Reply:  a short bulleted list (done, issues, caveats, next), and the "complete.  Next is" line (see the top).
-   - THEN AskUserQuestion, so the user picks without copying anything.
-     Options, most useful first:
+6. A short note (done, issues, caveats, next), the "complete.  Next is" line (see the top), then GO STRAIGHT ON to
+   the next phase whose plan is accepted:  no question, no stop (Owen, 2026-10-25, I117:  "rather than just being able to
+   move on").
+   - Stop, and ask (AskUserQuestion), only when:
+     - the next phase has no accepted plan ("4b. Build plans"), or its check needs a new one (step 1)
+     - something urgent:  a failing check you can't fix, a hard-to-undo call, an open issue that blocks the next phase
+     - it was the last phase, or Owen said to stop after this one
+   - Then the options, most useful first:
      - "Start P<N+1> · <Name> (Recommended)"
      - the top open issue(s):  "Fix I<n>:  <title>"
      - a caveat worth acting on now
      - "Stop here"
+   - Owen can redirect at any time:  a message mid-phase is read as it comes, and taken in before the next phase.
    - Questions the user must answer also go in the doc (`add <name>#Q`).
    - Once answered:  `decide <name>#Q3 "what was decided"`.
      Never `close`:  `decide` writes the answer INTO the question (D13 of `review-review`).

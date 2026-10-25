@@ -40,9 +40,9 @@ describe("PageStages", () => {
     expect(PageStages.ALL.filter(PageStages.isPlanning)).toEqual(["overview", "phases"])
   })
 
-  test("overview shows the Overview, Questions and Caveats;  phases adds the Phases;  building everything", () => {
+  test("overview shows the Overview, Questions and Caveats;  phases adds the Phases and Issues;  building everything", () => {
     expect(shown(page("overview"))).toEqual(["overview", "questions", "caveats"])
-    expect(shown(page("phases"))).toEqual(["overview", "phases", "questions", "caveats"])
+    expect(shown(page("phases"))).toEqual(["overview", "phases", "questions", "caveats", "issues"])
     expect(shown(page("building"))).toHaveLength(8)
     expect(shown(page())).toHaveLength(8)
   })

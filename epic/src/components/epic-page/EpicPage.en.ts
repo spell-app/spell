@@ -79,7 +79,7 @@ export const epicPageVocabulary = {
       values: PageStages.ALL,
       description:
         "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, " +
-        "Questions and Todos only), `phases` (the Phases too), `building` (everything).  The header's Send group is " +
+        "Questions and Caveats only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is " +
         "the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are " +
         "Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages " +
         "looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
@@ -388,6 +388,26 @@ export const epicPageVocabulary = {
       description: "The stage button's tooltip:  what's open;  a reminder, never a lock."
     },
     { key: "nothingOpen", text: "no questions open", description: "The stage button's tooltip:  nothing open." },
+    {
+      key: "acceptPlanOne",
+      text: "Accept plan",
+      description: "While building, the header's button for one waiting build plan (epic `epic-engine` I119)."
+    },
+    {
+      key: "acceptPlansMany",
+      text: "Accept {count} plans",
+      description: "The same, for several waiting build plans."
+    },
+    {
+      key: "acceptPlansTip",
+      text: "Claude's build plans for {phases} wait:  a press accepts them all, and Claude builds straight through",
+      description: "Its tooltip:  which phases (`P5, P6`)."
+    },
+    {
+      key: "acceptedPlans",
+      text: "Plans accepted:  waiting for Claude to build",
+      description: "Its tooltip once pressed."
+    },
     {
       key: "acceptSends",
       text: "sends {count} unsent with it",

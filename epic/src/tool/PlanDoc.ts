@@ -466,8 +466,12 @@ export class PlanDoc extends PlanReader {
     }
     // Claude's build plan (epic `epic-engine` P33):  a new one waits for Owen's Accept;  removed, nothing waits
     if (values.plan !== undefined) {
-      Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
-      this.log(values.plan ? `P${n} plan written:  waiting for Owen's Accept` : `P${n} plan removed`)
+      // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
+      const docReview = DOC_REVIEW.test(PhaseIds.titleOf(phase))
+      if (values.plan && docReview) this.acceptPlan(phase)
+      else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
+      const said = docReview ? "accepted, the doc pass" : "waiting for Owen's Accept"
+      this.log(values.plan ? `P${n} plan written:  ${said}` : `P${n} plan removed`)
     }
     return set
   }

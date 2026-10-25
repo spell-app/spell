@@ -85,6 +85,38 @@
   .review-controls ui-button:hover::part(button) {
     color: var(--_epic-act-ink);
   }
+  /*
+   * Accept plan, while a phase's build plan waits:  a worded green pill before the group, so the page plainly asks
+   * (Owen, 2026-10-25:  "p37 not asking me to accept");  pressed, dashed then outlined, as every review button
+   */
+  .review-accept {
+    margin-inline-end: 6px;
+  }
+  .review-controls .review-accept::part(button) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: auto;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .review-controls .review-accept:not([data-fill="dashed"], [data-fill="outline"])::part(button),
+  .review-controls .review-accept:not([data-fill="dashed"], [data-fill="outline"]):hover::part(button) {
+    background: var(--_epic-act-green);
+    color: var(--ui-green-on, white);
+  }
+  /* Defer Phase:  the same pill, quiet, outlined in grey */
+  .review-controls .review-defer:not([data-fill="dashed"], [data-fill="outline"])::part(button),
+  .review-controls .review-defer:not([data-fill="dashed"], [data-fill="outline"]):hover::part(button) {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--_epic-act-grey);
+    color: var(--_epic-act-muted);
+  }
+  .review-accept::part(icon) {
+    margin: 0;
+  }
   /* Do Now:  an action, not a state (Q8, Q20):  its own round button, apart from the group */
   .review-do-now {
     margin-inline-start: 6px;

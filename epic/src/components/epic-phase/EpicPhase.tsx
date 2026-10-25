@@ -109,7 +109,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    * review pills are Accept plan and Revisit.
    */
   get isPlanWaiting(): boolean {
-    return this.plan === "waiting" && this.shownStatus !== "done"
+    // the doc pass never asks (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
+    return (
+      this.plan === "waiting" && this.shownStatus !== "done" && !DOC_REVIEW.test(EpicPhase.titleText(this.domElement))
+    )
   }
 
   /**
@@ -274,3 +277,6 @@ const STATUS_COLORS = {
   active: "blue",
   done: "green"
 } as const satisfies Record<PhaseStatus, string>
+
+/** The doc pass's title:  its build plan never waits for an Accept (`isPlanWaiting`). */
+const DOC_REVIEW = /^doc review$/i
