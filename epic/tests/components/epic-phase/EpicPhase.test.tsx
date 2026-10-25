@@ -65,6 +65,15 @@ describe("<epic-phase>", () => {
     expect(getComputedStyle(host).borderBottomWidth).toBe("0px")
   })
 
+  // r32 (Owen, 2026-10-25):  "Clicking accept or Revisit should collapse like it does for questions"
+  test("an action chosen on its own review controls (`epic-chosen`) folds it, as an item's", async () => {
+    const host = await render(`<epic-phase id="p1" title="One" status="todo" open><p>Body</p></epic-phase>`)
+    expect(host.matches(":state(open)")).toBe(true)
+    inner(host).dispatchEvent(new CustomEvent("epic-chosen", { bubbles: true, composed: true }))
+    await ElementFixture.tick()
+    expect(host.matches(":state(open)")).toBe(false)
+  })
+
   test("open, it shows its fields through its slot;  nested in a section, its children get the stack", async () => {
     const host = await render<E.DOMElement>(
       `<epic-section id="phases" kind="phases" open><epic-phase id="p1" title="One" status="done" open>` +

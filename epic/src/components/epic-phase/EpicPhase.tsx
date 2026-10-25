@@ -7,7 +7,7 @@ import { PageStages, PhaseIds } from "spell-epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
-import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
+import { CHOSEN, SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
 import { STATUS_SLOT } from "spell-epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell-epic/components/epic-section/EpicFold"
@@ -244,6 +244,19 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         part={this.partForName(part)}
       />
     )
+  }
+
+  /**
+   * Owen chose an action on its own review controls (Accept, Defer, Looks good, a note box button):  it folds, as an
+   * item does, so he moves on to the next (Owen, 2026-10-25, r32:  "Clicking accept or Revisit should collapse like it
+   * does for questions").  Revisit opens the note box first, as an item's;  sending the note folds it.
+   */
+  @E.on(CHOSEN, { target: "renderRoot" })
+  protected onChosen(event: Event) {
+    // its own controls' only:  a nested element's come through here too
+    if ((event.target as Node).getRootNode() !== event.currentTarget) return
+    event.stopPropagation()
+    this.collapse()
   }
 
   /** Revisit or Edit, pressed on its own review controls:  unfolded, its part loaded, to show the note box. */

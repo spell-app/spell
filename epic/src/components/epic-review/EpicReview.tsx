@@ -22,6 +22,7 @@ import {
   REVIEW_ACCEPT,
   REVIEW_DEFER,
   REVIEW_MIDDLE,
+  PRESSED,
   REVIEW_PLAN,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
@@ -263,7 +264,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const busy = () => this.review.busyButton() === spec.action
     return (
       <ui-button
-        class={extra}
+        // `pressed`:  marked (dashed or outlined), for a look that's more than the fill (the plan pill's)
+        class={[extra, this.fillOf(spec) !== "none" && PRESSED].filter(Boolean).join(" ") || undefined}
         basic={extra ? "" : undefined}
         size={extra ? "mini" : undefined}
         icon={spec.icon}
