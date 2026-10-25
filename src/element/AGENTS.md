@@ -80,6 +80,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `elementBaseConfig()`:  Spell UI's `baseConfig()` starts from it, and so does the pack build
     - `CSS_TARGETS`, `SOLID_DEDUPE`
   - [HotElements](../element-tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
+  - [BrowserPage](../element-tools/BrowserPage.ts):  a page in headless Chromium for every tool that checks or
+    pictures pages (epic `coherence` P7):  opened, its problems reported, settled;  plain `node` loads it
+    (`spell/element-tools/BrowserPage`, an entry of its own), and it imports Playwright only when it launches
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
   - [jsx-help/](../element-tools/jsx-help/):

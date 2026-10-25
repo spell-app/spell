@@ -1,16 +1,22 @@
 import { closeSync, openSync, rmSync, statSync } from "node:fs"
 
-import { SRV } from "spell/server"
+// By its file, with its `.ts`:  plain `node` loads this file (below)
+import { FileLockError } from "./server.types.ts"
 
 /**
  * A lock on one file, held as `<file>.lock`, so tools that write the same file take turns:
  * the page server's page edits, `epic`, the app's saves.
  * - created with `open(wx)`:  atomic, so exactly one holder
  * - waits up to `wait` ms (default 20s), then throws a `FileLockError`
+ * - or tries ONCE (`runOnce()`):  answers `"held"` when another holder has it, without waiting
  * - a lock older than `stale` ms (default 60s) is a crashed holder's, and is taken over
  * - writers that don't lock (VS Code, an agent's edit tool) aren't stopped:
  *   the page server's `If-Match` check catches those
  * - From goals' `withLock()` (also copied into the old `plan-doc.js`).
+ * - Its position:  node's own modules and the server's types file only, so plain `node` loads it by its own name,
+ *   `spell/server/FileLock` (an entry of its own in the kit's `exports`:  spell-epic's plain-node scripts).
+ *   Before epic `coherence` P7 it imported the server's barrel, and those scripts wrote three copies of it,
+ *   one of which two runs could both take.
  */
 export class FileLock {
   /** file being guarded */
@@ -40,6 +46,28 @@ export class FileLock {
   /** Run async `fn` holding the lock on `file`, without blocking while waiting. */
   static runAsync<T>(file: string, fn: () => Promise<T>, props?: FileLockProps): Promise<T> {
     return new FileLock(file, props).runAsync(fn)
+  }
+
+  /**
+   * Run `fn` holding the lock on `file` if it's free (or stale);  `"held"`, without running it, when it isn't.
+   * - for work another run is doing already:  this run skips it, rather than waiting to do it again
+   */
+  static runOnce<T>(file: string, fn: () => T, props?: FileLockProps): T | typeof FileLock.HELD {
+    return new FileLock(file, props).runOnce(fn)
+  }
+
+  /** What `runOnce()` answers when another holder has the lock. */
+  static readonly HELD = "held"
+
+  /** Run `fn` holding the lock if it's free (or stale);  `"held"`, without running it, when it isn't. */
+  runOnce<T>(fn: () => T): T | typeof FileLock.HELD {
+    // twice:  the first try only clears a stale lock
+    if (!this.tryAcquire() && !this.tryAcquire()) return FileLock.HELD
+    try {
+      return fn()
+    } finally {
+      this.release()
+    }
   }
 
   /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`Atomics.wait`), for sync scripts. */
@@ -92,8 +120,8 @@ export class FileLock {
   }
 
   /** the error for a lock held too long */
-  private timeout(): SRV.FileLockError {
-    return new SRV.FileLockError(`${this.lockFile} held for ${this.wait / 1000}s:  stuck?`)
+  private timeout(): FileLockError {
+    return new FileLockError(`${this.lockFile} held for ${this.wait / 1000}s:  stuck?`)
   }
 }
 

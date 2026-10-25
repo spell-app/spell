@@ -1,13 +1,14 @@
-import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { existsSync, lstatSync, readdirSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { parseHTML } from "linkedom"
 
 import { escapeHTML, slug } from "spell/util/string"
+import { packageRootFor } from "spell/toolchain/sourceNames"
 import type { SRV } from "spell/server"
 
 import { contentFolderOf } from "./contentFolder"
+import { Git } from "./Git"
 
 /**
  * Links source references in a page of the spell-app checkout at `root`:
@@ -410,7 +411,7 @@ export class Linker {
    */
   private isGitIgnored(path: string): boolean {
     const repo = this.content && isUnder(path, this.content) ? this.content : this.root
-    return spawnSync("git", ["-C", repo, "check-ignore", "-q", path]).status === 0
+    return Git.run(["check-ignore", "-q", path], repo).ok
   }
 
   /**
@@ -604,10 +605,7 @@ function installRoot(root: string): string {
  */
 function spellPackagesIn(top: string): Map<string, string> {
   const found = new Map<string, string>()
-  const installed = (name: string): string | undefined => {
-    const dir = join(top, "node_modules", name)
-    return existsSync(join(dir, "package.json")) ? realpathSync(dir) : undefined
-  }
+  const installed = (name: string): string | undefined => packageRootFor(name, top)
   for (const [name, short] of Object.entries(ONE_PACKAGE_REPOS)) {
     const dir = installed(name)
     if (dir) found.set(short, dir)

@@ -1,9 +1,9 @@
-import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, extname, join, posix } from "node:path"
 
 import { slug } from "spell/util/string"
 import { contentFolderOf } from "spell/server/contentFolder"
+import { Git } from "spell/server/Git"
 
 import { MAP_FOLDER, MAP_ORIGIN, type MapGraph, type MapLink, type MapNode, type MappedRepo } from "./map.types"
 
@@ -248,13 +248,7 @@ function plain(html: string): string {
 /** The files git tracks in the repo at `root`, from its root;  none when it isn't one. */
 function trackedFiles(root: string): string[] {
   if (!existsSync(root)) return []
-  try {
-    return execFileSync("git", ["-C", root, "ls-files"], { encoding: "utf8", maxBuffer: 1 << 28 })
-      .split("\n")
-      .filter((file) => file && [".html", ".md"].includes(extname(file)))
-  } catch {
-    return []
-  }
+  return Git.lines(["ls-files"], root).filter((file) => [".html", ".md"].includes(extname(file)))
 }
 
 /** A file's text;  `undefined` when it can't be read. */

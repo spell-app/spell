@@ -1,6 +1,7 @@
-import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { basename, extname } from "node:path"
+
+import { Git } from "spell/server/Git"
 
 import { bareName } from "./importLinks"
 import type { MapFileStatus, MapGraph, MapKind, MapNode } from "./map.types"
@@ -54,14 +55,9 @@ export function nodesNamed(file: string, name: string): MapNode[] {
 export function newestCommitAt(roots: string[]): number {
   let newest = 0
   for (const root of roots) {
-    try {
-      const seconds = Number(
-        execFileSync("git", ["-C", root, "log", "-1", "--format=%ct"], { encoding: "utf8" }).trim()
-      )
-      newest = Math.max(newest, seconds * 1000)
-    } catch {
-      // not a git repo:  nothing to compare
-    }
+    // not a git repo:  nothing to compare
+    const seconds = Number(Git.out(["log", "-1", "--format=%ct"], root) ?? 0)
+    newest = Math.max(newest, seconds * 1000)
   }
   return newest
 }

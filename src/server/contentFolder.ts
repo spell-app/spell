@@ -1,8 +1,10 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { join, resolve } from "node:path"
 
 import JSON5 from "json5"
+
+// By its file, with its `.ts`:  plain `node` loads this file (below)
+import { Git } from "./Git.ts"
 
 /**
  * The shared content folder of the checkout at `root`:  where its epics, guides, pages, sagas and brand pages are;
@@ -20,7 +22,7 @@ import JSON5 from "json5"
  *   the commands page's data, the WWOD check's citers, the `Linker`'s pages
  * - `undefined`:  no config file, or no `contentFolder` in it;  callers then look in the checkout (an old link)
  * - NEVER throws:  a config file it can't read names none
- * - Its position:  imports only node's own modules and `json5`, so plain `node` loads it by its own name (an entry
+ * - Its position:  imports only node's own modules, `json5` and `Git`, so plain `node` loads it by its own name (an entry
  *   of its own in the kit's `exports`).
  *   - `SRV.contentFolderOf()`, or by its own path (`spell/server/contentFolder`):  that loads only this, so a
  *     `spell` command that needs only this loads no linkedom.
@@ -28,7 +30,7 @@ import JSON5 from "json5"
 export function contentFolderOf(root: string): string | undefined {
   const given = process.env.SPELL_SHARED_DIR
   if (given) return resolve(given)
-  const main = mainCheckoutOf(root)
+  const main = Git.mainRoot(resolve(root))
   const file = join(main, EPIC_CONFIG)
   if (!existsSync(file)) return undefined
   try {
@@ -37,14 +39,6 @@ export function contentFolderOf(root: string): string | undefined {
   } catch {
     return undefined
   }
-}
-
-/** The main checkout of the checkout at `root`:  git's common folder's parent;  `root` itself outside git. */
-function mainCheckoutOf(root: string): string {
-  const run = spawnSync("git", ["-C", root, "rev-parse", "--path-format=absolute", "--git-common-dir"], {
-    encoding: "utf8"
-  })
-  return run.status === 0 && run.stdout.trim() ? dirname(run.stdout.trim()) : resolve(root)
 }
 
 /** The repo's epic settings, from a checkout's root:  spell-epic's `EpicConfig` reads them. */

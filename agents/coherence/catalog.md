@@ -88,18 +88,23 @@ What `/coherence sweep` reads, an agent each.
 
 ### One writer at a time
 
-- **It is:**  `FileLock` (`spell/server`)
+- **It is:**  `FileLock` (`spell/server`;  `spell/server/FileLock` from plain `node`);  `runOnce()` skips the work
+  when another run holds the lock, rather than waiting
 - **Use it when:**  several processes (sessions, agents, the page server) may write one file.
 - **Flag:**  `\.lock["'\x60]|writeFileSync\(.*\.lock`
-- **Copies:**  three in spell-epic (`withLocks`, `withLock`, `lock`), one of which two runs can both take
-  - Why they exist:  `FileLock` imports the server's barrel, so plain `node` can't load it.
+- **Copies:**  `--`
+  - spell-epic's three (`withLocks`, `withLock`, and `lock`, which two runs could both take) use it since epic
+    `coherence` P7:  plain `node` loads it now.
 
 ### A process that's running, or gone
 
 - **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`)
 - **Use it when:**  recording a background process to find, stop or restart it later.
 - **Flag:**  `process\.kill\(\w+, 0\)`
-- **Copies:**  five `isProcessAlive()` in spell-epic, word for word
+- **Copies:**  three in spell-epic, kept, each saying why:  they load in plain `node`, which can't load `PidFile`
+  (it imports the server's barrel)
+  - `spell-epic/src/window.mjs`, `spell-epic/src/command/CheckoutServers.ts`, `spell-epic/src/tools/AskListeners.ts`
+  - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7.
   - Fine:  `spell-epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
 
 ### A free port, a server that stops cleanly
@@ -121,7 +126,24 @@ What `/coherence sweep` reads, an agent each.
 - **It is:**  `openBrowser()`, `openInNewWindow()`, `openInChromeTab()`, `noBrowser()` (`spell/server`, `src/server/open.ts`)
 - **Use it when:**  a command shows a page.
 - **Flag:**  `spawn\(["']open["']|exec\(["']open |osascript`
-- **Copies:**  `spell-epic/src/tools/pages.js` (`openUrlInChrome`), `openInChromeTab()` line for line, plus `front`
+- **Copies:**  `--`
+  - `openInChromeTab(url, key, { front })`:  `front` brings Chrome forward, for a link a person clicked.
+    spell-epic's `openUrlInChrome()` is a wrapper over it since epic `coherence` P7, printing what it did.
+
+### Running git, finding a checkout, a real path
+
+- **It is:**  `Git` (`spell/server`, `src/server/Git.ts`):  `run()` (never throws), `out()`, `lines()`, `mustRun()`
+  (a `GitError`), `mainRoot()`;  `checkoutOf()` (`src/server/checkout.ts`) for a checkout and its main checkout,
+  with no git run;  `RealPath` (`src/server/RealPath.ts`) for comparing paths through links
+  - Each by its own name from plain `node` (`spell/server/Git` ...), and from the `spell` command (no linkedom).
+  - spell-epic's own part, `EpicCheckout`:  the caller's checkout (`nearest()`), the code's (`CODE_ROOT`),
+    `mustGit()` for a verb's message.
+- **Use it when:**  any tool runs git, or asks which checkout a path is in.
+- **Flag:**  `spawnSync\("git"|execFileSync\("git"|"--git-common-dir"|show-toplevel|realpathSync`
+- **Copies:**  `--`
+  - Moved from spell-epic in epic `coherence` P7, with about 20 git runners, 10 checkout finders and 9 real-path
+    helpers across spell-epic and the kit.
+  - Fine:  a test's own scratch repo (`spawnSync("git", ...)` in a test);  `spell-epic/src/tool/InboxPoller.mjs`.
 
 ### The shared content folder
 
@@ -198,6 +220,19 @@ What `/coherence sweep` reads, an agent each.
 - **It is:**  `Linker` (`spell/server`):  link targets;  `formatHTML()` for the files it writes
 - **Use it when:**  writing a page that links others, or fixing links after a move.
 - **Copies:**  `--`
+
+### A headless page check
+
+- **It is:**  `BrowserPage` (`spell/element-tools/BrowserPage`, plain `node` too):  a page in headless Chromium,
+  its problems reported as they happen (`onProblem`), settled (`settle()`:  every pack tag defined);
+  the `globalThis.__name` helper `tsx` needs, in one place
+- **Use it when:**  a tool checks or pictures a page.
+- **Flag:**  `chromium\.launch|on\("pageerror"|globalThis\.__name`
+- **Copies:**  `--`
+  - Its users since epic `coherence` P7:  Spell UI's site check, screenshots, HMR test, visual tests and README
+    pictures;  spell-epic's `browserPage.js`, `check-spell.js`, `designer-shots.js` and demo checks;  the brand's
+    design check and comparison;  the kit's publish check;  the app's examples script.
+  - Fine:  the kit's `scripts/favicon.ts` (renders an image, checks no page).
 
 ### The page server, from an epic page
 
@@ -281,13 +316,6 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ## In spell-epic and the parser
 
-### Git, from spell-epic
-
-- **It is:**  `Git` (`spell-epic/src/command/Git.ts`);  the kit's `checkoutOf()` (`src/server/checkout.ts`) for a
-  checkout and its main checkout;  `RealPath` (`spell-epic/src/config/RealPath.ts`)
-- **Flag:**  `spawnSync\("git"|"--git-common-dir"|realpathSync`
-- **Copies:**  about 20 git runners, 10 checkout finders, 9 real-path helpers (sweep 1, epic-tools-kit #2-4)
-
 ### Clipboard, with VS Code's side bar
 
 - **It is:**  `Clipboard` (`spell-epic/src/components/epic-page/Clipboard.ts`):  falls back where the side bar refuses
@@ -368,7 +396,6 @@ code (epic `coherence`, Q4 and Q5).
   `aria-expanded`, and find-in-page opening it;  each fold above takes it, and fold-all / open-all are built on it.
   - sweep 1 added:  four popover panels in Spell UI (dropdown, calendar, search, icon picker), six overlays'
     animations, ten fold buttons in the epic pages
-- **A headless page check:**  open a page in chromium, collect its errors, wait for it to settle:  15 copies.
 - **A draft that saves itself:**  seven in the epic pages.
 - **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.

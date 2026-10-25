@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process"
-import { existsSync, realpathSync } from "node:fs"
+import { existsSync } from "node:fs"
 import { constants } from "node:os"
 import { join } from "node:path"
 
+// By its file, not the server's barrel:  every `spell` command loads this, and needs no linkedom
+import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 
 /**
@@ -46,17 +48,8 @@ export function engineEnv(root: string): NodeJS.ProcessEnv {
  *   (`import.meta.url`, which node gives as the real path, against `process.argv[1]`)
  */
 export function toolArgs(spec: CLI.ToolSpec, root: string): string[] {
-  const script = realOrSelf(join(root, spec.tool))
+  const script = RealPath.of(join(root, spec.tool))
   return spec.tsx ? ["--import", TSX_LOADER, script] : [script]
-}
-
-/** `path` with its links resolved;  as given when it isn't there. */
-function realOrSelf(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
 }
 
 /** The kit's own `tsx` loader:  a worktree's tool runs before the worktree has a `node_modules`. */

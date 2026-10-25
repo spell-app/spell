@@ -5,7 +5,9 @@
  * - VS Code's doc preview is spell-epic's own opener (its `pages.js` `openInVSCode()`):  the extension is its
  *   (the copy here, which nothing read, went in epic `repo-split` P4).
  * - Gathered from `cli`'s `serve.ts` (`openBrowser`), goals' `launch.js` (`openInBrowser`)
- *   and the docs' `pages.js` (`openInChrome`).
+ *   and the docs' `pages.js` (`openInChrome`;  its `openUrlInChrome()` too, epic `coherence` P7).
+ * - Its position:  node's own modules only, so plain `node` loads it by its own name, `spell/server/open`
+ *   (an entry of its own in the kit's `exports`:  spell-epic's `pages.js`).
  */
 import { spawn, spawnSync } from "node:child_process"
 
@@ -55,15 +57,17 @@ end tell`
 }
 
 /**
- * Show `url` in Chrome, in ONE tab per `key`, IN THE BACKGROUND.  Returns how:  `reused`, `new tab`, `launched`.
+ * Show `url` in Chrome, in ONE tab per `key`, in the background unless `front`.
+ * Returns how:  `reused`, `new tab`, `launched`.
  * - `key`:  a stable part of the URL, e.g. the repo path `/epics/x/x.plan.html`,
  *   so the same page from another checkout or port reuses the tab:  re-pointed if the URL differs, else reloaded
- * - never brings Chrome forward:  the tab is made active in ITS window only
+ * - in the background:  the tab is made active in ITS window only
+ *   - `front`:  Chrome and that tab's window come forward too:  for a link a person clicked
  * - a new tab goes in the front window
  * - Chrome not running, or AppleScript refused:  `open -g -a "Google Chrome"`, which can't reuse a tab
  * - NOTE: `key` is an AppleScript keyword:  the variable is `pageKey`
  */
-export function openInChromeTab(url: string, key: string): string {
+export function openInChromeTab(url: string, key: string, { front = false }: { front?: boolean } = {}): string {
   if (noBrowser()) return "none"
   const script = `
 set target to ${JSON.stringify(url)}
@@ -81,18 +85,20 @@ tell application "Google Chrome"
           set URL of t to target
         end if
         set active tab index of w to i
+        ${front ? "set index of w to 1\n        activate" : ""}
         return "reused"
       end if
     end repeat
   end repeat
   if (count of windows) is 0 then make new window
   tell front window to make new tab with properties {URL:target}
+  ${front ? "activate" : ""}
   return "new tab"
 end tell`
   const run = spawnSync("osascript", ["-e", script], { encoding: "utf8" })
   const how = run.stdout?.trim()
   if (run.status === 0 && how && how !== "launch") return how
-  spawnSync("open", ["-g", "-a", "Google Chrome", url])
+  spawnSync("open", [...(front ? [] : ["-g"]), "-a", "Google Chrome", url])
   return "launched"
 }
 

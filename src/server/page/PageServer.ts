@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, statSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
@@ -125,7 +124,7 @@ export class PageServer {
   private readonly pageScripts: PageScript[]
 
   /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
-  private readonly localCopies: [cdn: string, local: string][]
+  private readonly localCopies: Record<string, string>
 
   constructor({ root, token }: { root: string; token?: string }) {
     this.root = resolve(root)
@@ -140,7 +139,7 @@ export class PageServer {
     const settings = this.settings()
     const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
     this.pageScripts = pageScripts
-    this.localCopies = Object.entries(localCopies)
+    this.localCopies = localCopies
     this.componentSets = componentSets(settings)
     this.engineRoutes = engineRoutes(settings)
     const served = new Set(this.componentSets.map((set) => set.prefix.slice(COMPONENTS_PREFIX.length + 1)))
@@ -371,7 +370,7 @@ export class PageServer {
    * pages load offline.
    */
   withLocalCopies(page: string): string {
-    return this.localCopies.reduce((html, [cdn, local]) => html.replaceAll(cdn, local), page)
+    return withLocalCopies(page, this.localCopies)
   }
 
   /**
@@ -508,8 +507,11 @@ function isInside(file: string, dir: string): boolean {
 /** `worktreeOf()`'s cache, by worktree folder:  two worktrees folders may each hold a `<w>`. */
 const WORKTREES = new Map<string, { branch?: string; worktree?: string }>()
 
-/** Folder of a component set's address served from its site bundle (`ComponentSet.assets`, `componentSetPath()`). */
-const SET_ASSETS = "_assets"
+/**
+ * Folder of a component set's address served from its site bundle (`ComponentSet.assets`, `componentSetPath()`).
+ * - exported for spell-epic's `EpicServer`, which serves the sets too
+ */
+export const SET_ASSETS = "_assets"
 
 /** The home page's URL. */
 export const DOCS_HOME = "/pages/index.html"
@@ -519,8 +521,9 @@ export const DOCS_HOME = "/pages/index.html"
  * a guide's `scripts/` and `experiments/` (their sources, their own tools' output).
  * - except an experiment's built bundle, `*.bundle.js`, which its guide loads:
  *   a rebuild hot-reloads the guide (the live client's `liveAction()`, epic `epic-workflow` P24)
+ * - exported for spell-epic's `EpicServer`, which watches a content folder too
  */
-const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
+export const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
 /**
  * Folders the page server live-reloads when no settings part names any:  the docs areas.
@@ -553,6 +556,15 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
 }
 
 /**
+ * `page` with each CDN URL of `copies` (the settings' `"localCopies"`:  CDN URL => local URL) pointing at its local
+ * copy instead, so it loads offline.
+ * - for every page server:  this one's `withLocalCopies()`, spell-epic's `EpicServer`
+ */
+export function withLocalCopies(page: string, copies: Record<string, string>): string {
+  return Object.entries(copies).reduce((html, [cdn, local]) => html.replaceAll(cdn, local), page)
+}
+
+/**
  * The URL path an ENGINE ROUTE of `routes` serves from in this checkout;  else `undefined`.
  * - e.g. `/_epic/assets/<x>` => `/engine/assets/<x>`, for the route `["/_epic/assets/", "/engine/assets/"]`
  * - from a worktree's address too (`/worktrees/<w>/templates/<x>`):  ONE copy, this checkout's
@@ -573,8 +585,7 @@ export function engineRoutePath(path: string, routes: readonly EngineRoute[]): s
  * - `worktree`:  when `root` is a worktree's own folder (`SRV.checkoutOf()`)
  */
 function checkoutInfo(root: string): { branch?: string; worktree?: string } {
-  const run = spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: root, encoding: "utf8" })
-  const branch = run.status === 0 ? run.stdout.trim() : undefined
+  const branch = SRV.Git.out(["rev-parse", "--abbrev-ref", "HEAD"], root)
   const found = SRV.checkoutOf(root)
   const worktree = found?.root === resolve(root) ? found.worktree : undefined
   return { ...(branch && { branch }), ...(worktree && { worktree }) }
