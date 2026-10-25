@@ -40,7 +40,10 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
 4. **Check each one yourself** before it lands:  open the places it names, run its evidence command.
    - Not the same job after all:  drop it, into the "Considered, left out" line.
 5. **Land each finding** with the epic it's about, by that epic's stage (epic `coherence` Q4, Q5):
-   - which epic:  `epic owns <path...> --json`, the finding's files;  for a plan review, the epic under review
+   - which epic:  `epic owns <path...> --json`, the finding's files:  an owner whose `how` has `branch` (its branch
+     changes them);  for a plan review, the epic under review
+     - a page that only NAMES a file (`how` is just `plan`) doesn't own it:  long-running epics name hundreds
+       (epic `coherence`, sweep 1)
    - **planning** (its Overview or phases not accepted yet):  worked into its plan.
      - The Overview's words, or a phase's goal, rewritten to use the mechanism, in a change mark:
        `<epic-change item="<id>">...</epic-change>`, then `epic change <epic>`.
