@@ -71,7 +71,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a script it loaded, or one beside it:  reloaded, keeping the scroll
         - which:  its `<script src>` tags, and `performance`'s resource entries
           (lazy chunks, `epics.pack.js`, an experiment's `*.bundle.js`)
-        - first offered to the page (`spell-server:scripts`, cancelable, `ScriptsChange`):  a page that runs every
+        - first offered to the page (`spell-server:scripts-reloading`, cancelable, `ScriptsChange`):  a page that runs every
           changed script's new code itself takes it, and doesn't reload (epic `epic-engine` I116:  a rebuilt
           component pack swapped in place by Spell UI's `PackHotSwap`)
       - anything else:  `spell-server:changed`, and the page decides

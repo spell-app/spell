@@ -90,7 +90,7 @@ export type PageChange = { path: string; html: string; etag?: string; reload: ()
 export type FileChange = { path: string }
 
 /**
- * `detail` of `spell-server:scripts`, the CANCELABLE event `liveClient()` fires on `window` before a hot reload:
+ * `detail` of `spell-server:scripts-reloading`, the CANCELABLE event `liveClient()` fires on `window` before a hot reload:
  * the scripts the page loaded that changed (`liveAction()`), once they've been quiet half a second.
  * - `paths`:  their URL paths, as `FileChange`'s
  * - a page that runs the new code of EVERY one itself calls `preventDefault()`:  no reload
@@ -128,7 +128,7 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  * - a stylesheet the page uses (linked, or `@import`ed by one it links) changed:  swapped in place, no reload
  * - a script the page loaded, or one beside it, changed (`liveAction()`):  HOT RELOAD, so the page runs the new code
  *   - e.g. a merge rebuilt `spell-ui.js` and its lazy chunks, or `epics.pack.js`
- *   - first OFFERED to the page (`spell-server:scripts`, `ScriptsChange`):  a page that runs every changed script's
+ *   - first OFFERED to the page (`spell-server:scripts-reloading`, `ScriptsChange`):  a page that runs every changed script's
  *     new code itself takes it, and doesn't reload (a rebuilt component pack swapped in place, epic `epic-engine` I116)
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
@@ -338,14 +338,14 @@ export function liveClient(): void {
   /** reload, keeping the scroll position */
   /**
    * The scripts changed (or the server restarted):  offer the changed scripts to the page first
-   * (`spell-server:scripts`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
+   * (`spell-server:scripts-reloading`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
    * itself, else it reloads.
    * - a server restart always reloads:  the page needs the new client and write token
    */
   function hotReload() {
     const paths = [...changedScripts]
     changedScripts.clear()
-    const offer = new CustomEvent("spell-server:scripts", {
+    const offer = new CustomEvent("spell-server:scripts-reloading", {
       cancelable: true,
       detail: { paths } satisfies ScriptsChange
     })
