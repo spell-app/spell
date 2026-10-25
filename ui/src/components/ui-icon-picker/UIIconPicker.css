@@ -1,0 +1,345 @@
+/*
+ * The style sheet of `<ui-icon-picker>`:  a field in an input's look, and a panel of glyphs under it.
+ * - No Fomantic original:  the field copies `<ui-input>`'s box (its padding, border, radius and placeholder),
+ *   with `<ui-select>`'s caret;  the panel copies the dropdown's menu.
+ * - The shadow markup it expects:
+ *
+ *     <button class="ui [size] [fluid read-only disabled] icon picker" part="field"
+ *             style="--_ui-icon-picker-anchor: --ui-icon-picker-7">
+ *       <span class="glyph" part="glyph"><svg></span>                     (while an icon is chosen)
+ *       <span class="text [placeholder]" part="text">star</span>
+ *     </button>
+ *     <div class="panel" popover part="panel" style="--_ui-icon-picker-anchor: ...">
+ *       <input type="search" class="search" part="search">
+ *       <div class="grid" role="listbox" part="grid">
+ *         <div class="rows" role="none" style="padding-block-start: <rows above>;  block-size: <every row>">
+ *           <div class="cell none [active] [selected]" role="option" part="cell"><svg></div>
+ *           <div class="cell [active] [selected]" role="option" part="cell"><svg></div> ...
+ *         </div>
+ *       </div>
+ *       <div class="message">No icons match</div>                          (a search that finds nothing)
+ *     </div>
+ *
+ *   - `active`:  the chosen icon's cell;  `selected`:  the highlighted one (keys, pointer)
+ *   - only the rows in view are drawn:  the rows box, sized inline, stands for the rest
+ * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor (`anchor-name`, a per-instance name the
+ *   component sets inline on both boxes);  the panel sits below it, or above when there's more room there,
+ *   never taller than that room:  its grid scrolls.
+ * - The DOM element:  `inline-flex`, `:state(fluid)` block-level.
+ * - Public tokens (`--ui-icon-picker-*`) are NEVER declared here:  each is read through a private alias.
+ *   - The field's box falls back to `<ui-input>`'s public tokens, then the global ones,
+ *     so a form that shapes its inputs (`--ui-input-radius`) shapes the picker too.
+ */
+
+@layer ui.components.icon-picker.types, ui.components.icon-picker.content, ui.components.icon-picker.variations, ui.components.icon-picker.states;
+
+/*******************************
+            Icon picker
+*******************************/
+
+@layer ui.components.icon-picker.types {
+  /* The DOM element:  layout only;  the look lives on the field inside. */
+  :host {
+    display: inline-flex;
+    max-inline-size: 100%;
+    vertical-align: middle;
+  }
+  :host(:state(fluid)) {
+    display: flex;
+  }
+  /* `delegatesFocus`:  the field draws the focus, never the DOM element. */
+  :host(:focus-visible) {
+    outline: none;
+  }
+
+  /*
+   * Tokens:  each the private alias of its public token (never declare the public one:  it would block inherited
+   * values);  the field's box falls back to the input's.
+   */
+  .ui.picker,
+  .panel {
+    --_ui-icon-picker-padding-block: var(--ui-icon-picker-padding-block, var(--ui-input-padding-block, 0.67857em));
+    --_ui-icon-picker-padding-inline: var(--ui-icon-picker-padding-inline, var(--ui-input-padding-inline, 1em));
+    --_ui-icon-picker-line-height: var(--ui-icon-picker-line-height, var(--ui-input-line-height, 1.21428em));
+    --_ui-icon-picker-radius: var(--ui-icon-picker-radius, var(--ui-input-radius, var(--ui-radius)));
+    --_ui-icon-picker-background: var(--ui-icon-picker-background, var(--ui-input-background, var(--ui-surface)));
+    --_ui-icon-picker-color: var(--ui-icon-picker-color, var(--ui-input-color, var(--ui-text-color)));
+    --_ui-icon-picker-border-color: var(
+      --ui-icon-picker-border-color,
+      var(--ui-input-border-color, var(--ui-border-color))
+    );
+    --_ui-icon-picker-border-color-hover: var(
+      --ui-icon-picker-border-color-hover,
+      var(--ui-input-border-color-hover, var(--ui-border-color-selected))
+    );
+    --_ui-icon-picker-border-color-focus: var(
+      --ui-icon-picker-border-color-focus,
+      var(--ui-input-border-color-focus, var(--ui-focus-border))
+    );
+    /* a placeholder well lighter than a chosen name, so it never reads as one (Owen) */
+    --_ui-icon-picker-placeholder-color: var(
+      --ui-icon-picker-placeholder-color,
+      color-mix(in oklab, var(--ui-text-light) 55%, transparent)
+    );
+    --_ui-icon-picker-placeholder-style: var(--ui-icon-picker-placeholder-style, italic);
+    --_ui-icon-picker-glyph-size: var(--ui-icon-picker-glyph-size, 1em);
+    --_ui-icon-picker-glyph-gap: var(--ui-icon-picker-glyph-gap, 0.5em);
+    --_ui-icon-picker-min-width: var(--ui-icon-picker-min-width, 12em);
+    --_ui-icon-picker-caret-size: var(--ui-icon-picker-caret-size, 0.35em);
+    --_ui-icon-picker-caret-color: var(
+      --ui-icon-picker-caret-color,
+      color-mix(in oklab, currentColor 50%, transparent)
+    );
+    --_ui-icon-picker-duration: var(--ui-icon-picker-duration, var(--ui-duration-fast));
+    --_ui-icon-picker-disabled-opacity: var(--ui-icon-picker-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-icon-picker-panel-width: var(--ui-icon-picker-panel-width, 21em);
+    --_ui-icon-picker-panel-max-height: var(--ui-icon-picker-panel-max-height, 22em);
+    --_ui-icon-picker-panel-offset: var(--ui-icon-picker-panel-offset, var(--ui-space-2xs));
+    --_ui-icon-picker-panel-padding: var(--ui-icon-picker-panel-padding, var(--ui-space-xs));
+    --_ui-icon-picker-panel-background: var(--ui-icon-picker-panel-background, var(--ui-surface));
+    --_ui-icon-picker-panel-border-color: var(--ui-icon-picker-panel-border-color, var(--ui-border-color));
+    --_ui-icon-picker-panel-radius: var(--ui-icon-picker-panel-radius, var(--ui-radius));
+    --_ui-icon-picker-panel-shadow: var(--ui-icon-picker-panel-shadow, var(--ui-shadow-raised));
+    --_ui-icon-picker-cell-size: var(--ui-icon-picker-cell-size, 2.25em);
+    --_ui-icon-picker-cell-glyph-size: var(--ui-icon-picker-cell-glyph-size, 1.15em);
+    --_ui-icon-picker-cell-radius: var(--ui-icon-picker-cell-radius, var(--ui-radius-s, 4px));
+    --_ui-icon-picker-cell-background-hover: var(
+      --ui-icon-picker-cell-background-hover,
+      oklch(from var(--ui-ink) l c h / 0.06)
+    );
+    --_ui-icon-picker-cell-background-chosen: var(
+      --ui-icon-picker-cell-background-chosen,
+      oklch(from var(--ui-ink) l c h / 0.12)
+    );
+    --_ui-icon-picker-cell-border-chosen: var(
+      --ui-icon-picker-cell-border-chosen,
+      var(--ui-border-color-selected-strong)
+    );
+    --_ui-icon-picker-none-color: var(--ui-icon-picker-none-color, var(--ui-text-light));
+  }
+
+  /* The field:  an input's box, with the select's caret;  the anchor of the panel. */
+  .ui.picker {
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--_ui-icon-picker-glyph-gap);
+    min-inline-size: var(--_ui-icon-picker-min-width);
+    max-inline-size: 100%;
+    margin: 0;
+    padding-block: var(--_ui-icon-picker-padding-block);
+    padding-inline: var(--_ui-icon-picker-padding-inline)
+      calc(2 * var(--_ui-icon-picker-padding-inline) + 2 * var(--_ui-icon-picker-caret-size));
+    border: var(--ui-border-width) solid var(--_ui-icon-picker-border-color);
+    border-radius: var(--_ui-icon-picker-radius);
+    outline: none;
+    background-color: var(--_ui-icon-picker-background);
+    /* The caret:  a filled down-pointing triangle, two right triangles side by side, in `currentColor`. */
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--_ui-icon-picker-caret-color) 50%),
+      linear-gradient(-45deg, transparent 50%, var(--_ui-icon-picker-caret-color) 50%);
+    background-position:
+      calc(100% - var(--_ui-icon-picker-padding-inline) - var(--_ui-icon-picker-caret-size)) 50%,
+      calc(100% - var(--_ui-icon-picker-padding-inline)) 50%;
+    background-size: var(--_ui-icon-picker-caret-size) var(--_ui-icon-picker-caret-size);
+    background-repeat: no-repeat;
+    color: var(--_ui-icon-picker-color);
+    font-family: var(--ui-font-family);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    font-weight: var(--ui-font-weight-normal);
+    line-height: var(--_ui-icon-picker-line-height);
+    text-align: start;
+    cursor: pointer;
+    appearance: none;
+    anchor-name: var(--_ui-icon-picker-anchor, --ui-icon-picker);
+    -webkit-tap-highlight-color: transparent;
+    transition-property: border-color, box-shadow;
+    transition-duration: var(--_ui-icon-picker-duration);
+    transition-timing-function: var(--ui-ease);
+  }
+  :host(:state(fluid)) .ui.picker {
+    inline-size: 100%;
+  }
+
+  /* The panel:  hidden until open;  a popover in the top layer, anchored to the field. */
+  .panel {
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: var(--_ui-icon-picker-panel-padding);
+    padding: var(--_ui-icon-picker-panel-padding);
+    border: var(--ui-border-width) solid var(--_ui-icon-picker-panel-border-color);
+    border-radius: var(--_ui-icon-picker-panel-radius);
+    background: var(--_ui-icon-picker-panel-background);
+    box-shadow: var(--_ui-icon-picker-panel-shadow);
+    color: var(--_ui-icon-picker-color);
+    font-family: var(--ui-font-family);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    line-height: var(--_ui-icon-picker-line-height);
+  }
+  /*
+   * `fixed` (the popover default):  webkit measures an absolute popover's `position-area` against the page's first
+   * screenful (as `UIDropdown.css` says).
+   */
+  .panel[popover] {
+    position: fixed;
+    position-anchor: var(--_ui-icon-picker-anchor, --ui-icon-picker);
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline;
+    /* below or above, whichever has more room */
+    position-try-order: most-block-size;
+    inset: auto;
+    inline-size: max(anchor-size(width), var(--_ui-icon-picker-panel-width));
+    max-inline-size: calc(100% - 2 * var(--_ui-icon-picker-panel-offset));
+    margin: var(--_ui-icon-picker-panel-offset) 0;
+    /* never taller than the room beside the field (`100%`, its `position-area`), less its offset each side */
+    max-block-size: min(var(--_ui-icon-picker-panel-max-height), calc(100% - 2 * var(--_ui-icon-picker-panel-offset)));
+    overflow: hidden;
+  }
+  /* shown only while open:  `[popover]` alone must stay the browser's `display: none` */
+  .panel:popover-open {
+    display: flex;
+  }
+}
+
+/*******************************
+            Content
+*******************************/
+
+@layer ui.components.icon-picker.content {
+  /* The chosen glyph:  a square at the text's size, centred on its line. */
+  .ui.picker > .glyph {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--_ui-icon-picker-glyph-size);
+    block-size: var(--_ui-icon-picker-glyph-size);
+  }
+  .ui.picker > .glyph > svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    fill: currentColor;
+  }
+  .ui.picker > .text {
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui.picker > .text.placeholder {
+    color: var(--_ui-icon-picker-placeholder-color);
+    font-style: var(--_ui-icon-picker-placeholder-style);
+  }
+
+  /* The search box:  the field's box, full width. */
+  .panel > .search {
+    box-sizing: border-box;
+    flex: none;
+    inline-size: 100%;
+    margin: 0;
+    padding: var(--_ui-icon-picker-padding-block) var(--_ui-icon-picker-padding-inline);
+    border: var(--ui-border-width) solid var(--_ui-icon-picker-border-color);
+    border-radius: var(--_ui-icon-picker-radius);
+    outline: none;
+    background: var(--_ui-icon-picker-background);
+    color: inherit;
+    font: inherit;
+    appearance: none;
+  }
+  .panel > .search::placeholder {
+    color: var(--_ui-icon-picker-placeholder-color);
+  }
+  .panel > .search:focus {
+    border-color: var(--_ui-icon-picker-border-color-focus);
+  }
+
+  /* The grid:  scrolling when it's taller than the panel's room. */
+  .panel > .grid {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* the rows drawn change as it scrolls:  no anchoring jumps */
+    overflow-anchor: none;
+  }
+  /* Its rows:  as many columns as fit;  the box as tall as every row, the rows above those drawn its top padding. */
+  .panel > .grid > .rows {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--_ui-icon-picker-cell-size), 1fr));
+    grid-auto-rows: var(--_ui-icon-picker-cell-size);
+    align-content: start;
+    gap: 2px;
+  }
+
+  .panel .cell {
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    border: var(--ui-border-width) solid transparent;
+    border-radius: var(--_ui-icon-picker-cell-radius);
+    color: var(--_ui-icon-picker-color);
+    cursor: pointer;
+  }
+  .panel .cell > svg {
+    display: block;
+    inline-size: var(--_ui-icon-picker-cell-glyph-size);
+    block-size: var(--_ui-icon-picker-cell-glyph-size);
+    fill: currentColor;
+  }
+  /* "none":  a circle with a slash, in a lighter ink. */
+  .panel .cell.none {
+    color: var(--_ui-icon-picker-none-color);
+  }
+  .panel .cell.none > svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .panel > .message {
+    flex: none;
+    padding: var(--_ui-icon-picker-padding-block) var(--_ui-icon-picker-padding-inline);
+    color: var(--ui-text-light);
+    text-align: center;
+  }
+}
+
+/*******************************
+            States
+*******************************/
+
+@layer ui.components.icon-picker.states {
+  .ui.picker:hover {
+    border-color: var(--_ui-icon-picker-border-color-hover);
+  }
+  .ui.picker:focus,
+  :host(:state(open)) .ui.picker {
+    --_ui-icon-picker-caret-color: currentColor;
+    border-color: var(--_ui-icon-picker-border-color-focus);
+  }
+  .ui.picker:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color, Highlight);
+    outline-offset: var(--ui-focus-offset, 2px);
+  }
+  .ui.read-only.picker {
+    cursor: default;
+  }
+  .ui.disabled.picker {
+    cursor: default;
+    opacity: var(--_ui-icon-picker-disabled-opacity);
+    pointer-events: none;
+  }
+
+  /* The highlighted cell (keys, pointer), and the chosen one. */
+  .panel .cell.selected {
+    background: var(--_ui-icon-picker-cell-background-hover);
+  }
+  .panel .cell.active {
+    border-color: var(--_ui-icon-picker-cell-border-chosen);
+    background: var(--_ui-icon-picker-cell-background-chosen);
+  }
+}

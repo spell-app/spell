@@ -356,6 +356,15 @@ export const focusRing = {
 /** Opacity of disabled controls (Fomantic's `@disabledOpacity`). */
 export const disabledOpacity = 0.45
 
+/**
+ * How long, in ms, the pointer rests on a target before its hover popup shows (`--ui-hover-delay`):  the page's
+ * preference for every `<ui-popup open-on="hover">` that names no `show-delay` of its own.
+ * - Owen, 2026-10-25:  "have a theme preference somewhere for tooltip delay, they're all too quick" (Fomantic's 50ms)
+ * - a theme or page sets the token:  `:root { --ui-hover-delay: 2s }`
+ * - NOT the browser's own `title` tooltips:  their delay is the operating system's
+ */
+export const hoverDelay = 800
+
 ////////////////
 // ## Layout
 ////////////////

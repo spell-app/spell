@@ -132,6 +132,11 @@
       "types": "./dist-types/src/components/ui-icon/index.d.ts",
       "default": "./src/components/ui-icon/index.ts"
     },
+    "./components/ui-icon-picker": {
+      "spell-ui-source": "./src/components/ui-icon-picker/index.ts",
+      "types": "./dist-types/src/components/ui-icon-picker/index.d.ts",
+      "default": "./src/components/ui-icon-picker/index.ts"
+    },
     "./components/ui-image": {
       "spell-ui-source": "./src/components/ui-image/index.ts",
       "types": "./dist-types/src/components/ui-image/index.d.ts",

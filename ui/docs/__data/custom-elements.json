@@ -10049,6 +10049,350 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-icon-picker/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIIconPicker",
+          "tagName": "ui-icon-picker",
+          "customElement": true,
+          "summary": "An icon picker lets people choose an icon by searching for it and clicking its glyph.",
+          "description": "An icon picker lets people choose an icon by searching for it and clicking its glyph.\n\nAlso known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search.",
+          "attributes": [
+            {
+              "name": "value",
+              "description": "The chosen icon's name (`star`, `address book`);  empty for none.  Attribute:  the starting (and reset) value;  property:  the live value.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "name",
+              "description": "Form field name.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "placeholder",
+              "description": "What the field says while no icon is chosen;  default:  \"none\".",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "placeholder"
+            },
+            {
+              "name": "size",
+              "description": "Size, `mini` ... `massive`;  `medium` is the default.",
+              "type": {
+                "text": "\"mini\" | \"tiny\" | \"small\" | \"medium\" | \"large\" | \"big\" | \"huge\" | \"massive\""
+              },
+              "fieldName": "size"
+            },
+            {
+              "name": "fluid",
+              "description": "Takes the full width of its container.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "fluid"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, not focusable, left out of the form.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "readonly",
+              "description": "Shows its icon but can't be changed:  never opens;  still focusable and submitted.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "readOnly"
+            },
+            {
+              "name": "required",
+              "description": "Form validation:  an icon must be chosen;  no \"none\" choice in the grid.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "required"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-change",
+              "description": "An icon was picked (`\"\"` for none).  A handler that re-sets `value` wins.",
+              "type": {
+                "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "field",
+              "description": "The closed field:  a `<button>` showing the chosen glyph and its name."
+            },
+            {
+              "name": "glyph",
+              "description": "The chosen icon's glyph, in the field."
+            },
+            {
+              "name": "text",
+              "description": "The chosen icon's name, or the placeholder, in the field."
+            },
+            {
+              "name": "panel",
+              "description": "The open panel:  a popover under the field, holding the search box and the grid."
+            },
+            {
+              "name": "search",
+              "description": "The search box at the panel's top (`<input type=search>`)."
+            },
+            {
+              "name": "grid",
+              "description": "The grid of glyphs (`role=listbox`)."
+            },
+            {
+              "name": "cell",
+              "description": "One glyph in the grid (`role=option`), its name its tooltip."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "open",
+              "description": "The panel is open."
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used."
+            },
+            {
+              "name": "invalid",
+              "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-icon-picker-padding-block",
+              "default": "var(--ui-input-padding-block, 0.67857em)"
+            },
+            {
+              "name": "--ui-icon-picker-padding-inline",
+              "default": "var(--ui-input-padding-inline, 1em)"
+            },
+            {
+              "name": "--ui-icon-picker-line-height",
+              "default": "var(--ui-input-line-height, 1.21428em)"
+            },
+            {
+              "name": "--ui-icon-picker-radius",
+              "default": "var(--ui-input-radius, var(--ui-radius))"
+            },
+            {
+              "name": "--ui-icon-picker-background",
+              "default": "var(--ui-input-background, var(--ui-surface))"
+            },
+            {
+              "name": "--ui-icon-picker-color",
+              "default": "var(--ui-input-color, var(--ui-text-color))"
+            },
+            {
+              "name": "--ui-icon-picker-border-color",
+              "default": "var(--ui-input-border-color, var(--ui-border-color))"
+            },
+            {
+              "name": "--ui-icon-picker-border-color-hover",
+              "default": "var(--ui-input-border-color-hover, var(--ui-border-color-selected))"
+            },
+            {
+              "name": "--ui-icon-picker-border-color-focus",
+              "default": "var(--ui-input-border-color-focus, var(--ui-focus-border))"
+            },
+            {
+              "name": "--ui-icon-picker-placeholder-color",
+              "default": "color-mix(in oklab, var(--ui-text-light) 55%, transparent)",
+              "description": "a placeholder well lighter than a chosen name, so it never reads as one (Owen)"
+            },
+            {
+              "name": "--ui-icon-picker-placeholder-style",
+              "default": "italic"
+            },
+            {
+              "name": "--ui-icon-picker-glyph-size",
+              "default": "1em"
+            },
+            {
+              "name": "--ui-icon-picker-glyph-gap",
+              "default": "0.5em"
+            },
+            {
+              "name": "--ui-icon-picker-min-width",
+              "default": "12em"
+            },
+            {
+              "name": "--ui-icon-picker-caret-size",
+              "default": "0.35em"
+            },
+            {
+              "name": "--ui-icon-picker-caret-color",
+              "default": "color-mix(in oklab, currentColor 50%, transparent)"
+            },
+            {
+              "name": "--ui-icon-picker-duration",
+              "default": "var(--ui-duration-fast)"
+            },
+            {
+              "name": "--ui-icon-picker-disabled-opacity",
+              "default": "var(--ui-disabled-opacity)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-width",
+              "default": "21em"
+            },
+            {
+              "name": "--ui-icon-picker-panel-max-height",
+              "default": "22em"
+            },
+            {
+              "name": "--ui-icon-picker-panel-offset",
+              "default": "var(--ui-space-2xs)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-padding",
+              "default": "var(--ui-space-xs)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-background",
+              "default": "var(--ui-surface)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-border-color",
+              "default": "var(--ui-border-color)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-radius",
+              "default": "var(--ui-radius)"
+            },
+            {
+              "name": "--ui-icon-picker-panel-shadow",
+              "default": "var(--ui-shadow-raised)"
+            },
+            {
+              "name": "--ui-icon-picker-cell-size",
+              "default": "2.25em"
+            },
+            {
+              "name": "--ui-icon-picker-cell-glyph-size",
+              "default": "1.15em"
+            },
+            {
+              "name": "--ui-icon-picker-cell-radius",
+              "default": "var(--ui-radius-s, 4px)"
+            },
+            {
+              "name": "--ui-icon-picker-cell-background-hover",
+              "default": "oklch(from var(--ui-ink) l c h / 0.06)"
+            },
+            {
+              "name": "--ui-icon-picker-cell-background-chosen",
+              "default": "oklch(from var(--ui-ink) l c h / 0.12)"
+            },
+            {
+              "name": "--ui-icon-picker-cell-border-chosen",
+              "default": "var(--ui-border-color-selected-strong)"
+            },
+            {
+              "name": "--ui-icon-picker-none-color",
+              "default": "var(--ui-text-light)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIIconPicker",
+          "declaration": {
+            "name": "UIIconPicker",
+            "module": "src/components/ui-icon-picker/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-icon-picker",
+          "declaration": {
+            "name": "UIIconPicker",
+            "module": "src/components/ui-icon-picker/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-image/index.ts",
       "declarations": [
         {
@@ -19325,7 +19669,7 @@
             },
             {
               "name": "show-delay",
-              "description": "`hover`:  ms before it shows.",
+              "description": "`hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).",
               "type": {
                 "text": "number"
               },

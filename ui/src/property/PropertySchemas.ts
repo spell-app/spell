@@ -57,7 +57,7 @@ export class PropertySchemas {
 
   /**
    * What an attribute's value IS, as a form edits it:  its own `type`, else what its `kind` says.
-   * - `boolean` / `keyOnly`:  `boolean`;  `number`:  `number`;  `json`:  `data`
+   * - `boolean` / `keyOnly`:  `boolean`;  `number`:  `number`;  `json`:  `data`;  `icon`:  `icon`
    * - a kind with `values`:  `choice`;  any other:  `text`
    */
   static typeOf(spec: V.AttributeSpec): V.ValueType {
@@ -70,6 +70,8 @@ export class PropertySchemas {
         return "number"
       case "json":
         return "data"
+      case "icon":
+        return "icon"
       default:
         return spec.values || spec.choicesFrom || CHOICE_KINDS.has(spec.kind) ? "choice" : "text"
     }
@@ -233,6 +235,7 @@ const KIND_FOR_TYPE: Record<V.ValueType, V.AttributeKind> = {
   boolean: "boolean",
   date: "string",
   choice: "enum",
+  icon: "icon",
   list: "json",
   thing: "json",
   data: "json"

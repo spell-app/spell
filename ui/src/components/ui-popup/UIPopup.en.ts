@@ -125,7 +125,7 @@ export const popupVocabulary = {
       group: "behaviour",
       kind: "number",
       default: 50,
-      description: "`hover`:  ms before it shows."
+      description: "`hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default)."
     },
     {
       name: "hide-delay",

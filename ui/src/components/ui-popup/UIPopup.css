@@ -115,6 +115,7 @@
     --_ui-popup-header-distance: var(--ui-popup-header-distance, 0.5em);
     /* Arrow placement, set per position below. */
     --_popup-arrow-shadow: 1px 1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(calc(100% + 2px) -5px, calc(100% + 2px) calc(100% + 2px), -5px calc(100% + 2px));
     --_popup-arrow-edge: var(--ui-color, var(--_ui-popup-arrow-edge));
     position: absolute;
     top: 0;
@@ -171,6 +172,11 @@
     height: var(--_ui-popup-arrow-size);
     background: inherit;
     box-shadow: var(--_popup-arrow-shadow);
+    /*
+     * only the triangle OUTSIDE the box, and a hair over its edge to cover the box's rim:  the half inside it doubled a see-through fill (a theme's glass) into a
+     * darker diamond over the text (Owen, 2026-10-25:  "clip the triangle, make opacity match the text")
+     */
+    clip-path: var(--_popup-arrow-clip, none);
     transform: rotate(45deg);
   }
 }
@@ -217,16 +223,19 @@
   .ui.bottom.popup {
     margin: var(--_ui-popup-distance) 0 0;
     --_popup-arrow-shadow: -1px -1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(-2px -2px, calc(100% + 5px) -2px, -2px calc(100% + 5px));
   }
   .ui.left.center.popup {
     margin: 0 var(--_ui-popup-distance) 0 0;
     transform-origin: right 50%;
     --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(-5px -2px, calc(100% + 2px) -2px, calc(100% + 2px) calc(100% + 5px));
   }
   .ui.right.center.popup {
     margin: 0 0 0 var(--_ui-popup-distance);
     transform-origin: left 50%;
     --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(-2px -5px, calc(100% + 5px) calc(100% + 2px), -2px calc(100% + 2px));
   }
   .ui.top.left.popup {
     transform-origin: left bottom;
@@ -291,11 +300,13 @@
   .ui[class*="left bottom"].left.popup {
     margin: 0 var(--_ui-popup-distance) 0 0;
     --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(-5px -2px, calc(100% + 2px) -2px, calc(100% + 2px) calc(100% + 5px));
   }
   .ui[class*="right top"].right.popup,
   .ui[class*="right bottom"].right.popup {
     margin: 0 0 0 var(--_ui-popup-distance);
     --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
+    --_popup-arrow-clip: polygon(-2px -5px, calc(100% + 5px) calc(100% + 2px), -2px calc(100% + 2px));
   }
   .ui[class*="left top"].left.popup {
     transform-origin: right top;

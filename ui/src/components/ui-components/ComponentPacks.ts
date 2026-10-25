@@ -1,6 +1,6 @@
 import { E } from "spell-ui/core"
 import type { RootCatalogEntry } from "spell-ui/components/ui-root/UIRoot.types"
-import type { ComponentPack } from "./UIComponents.types"
+import type { ComponentPack, PackSwap, PackSwapResult } from "./UIComponents.types"
 
 /****************
  * ### `ComponentPacks`
@@ -10,6 +10,8 @@ import type { ComponentPack } from "./UIComponents.types"
  *   `load()` adds one, and the script calls `registerPack()` as it runs.
  *   That finds the load by `document.currentScript` (else by the name its file implies),
  *   defines the pack's tags and resolves it.
+ * - A pack's script REBUILT (a merge):  `reload()` runs it again in place, its changed families swapped into the live
+ *   elements by the page's hot replacement (`PackSwap`, Spell UI's `PackHotSwap`), so the page needn't reload.
  * - Plain DOM, no Solid:  `<ui-root>` asks it what a tag is (`entryOf()`, `owns()`), and it knows nothing of roots.
  ****************/
 export class ComponentPacks {
@@ -27,6 +29,9 @@ export class ComponentPacks {
 
   /** Loads whose script hasn't registered its pack yet. */
   private static readonly pending = new Set<PendingPack>()
+
+  /** Pack name => its reload under way (`reload()`):  its script's `register()` swaps it in instead of being ignored. */
+  private static readonly reloading = new Map<string, PackReload>()
 
   /** Pack name => its `define()` while it still runs (it loads its families first):  its tags are listed, not yet defined. */
   private static readonly defining = new Map<string, Promise<unknown>>()
@@ -48,6 +53,12 @@ export class ComponentPacks {
     const pending = ComponentPacks.pendingFor(pack.name)
     if (pending) ComponentPacks.pending.delete(pending)
     const known = ComponentPacks.packs.get(pack.name)
+    const reload = ComponentPacks.reloading.get(pack.name)
+    if (known && reload) {
+      ComponentPacks.reloading.delete(pack.name)
+      ComponentPacks.swapIn(known, pack, reload)
+      return
+    }
     if (known) {
       E.Warnings.warn("registerPack()", `a pack named "${pack.name}" is registered already;  this one is ignored`)
       pending?.resolve(known)
@@ -102,6 +113,43 @@ export class ComponentPacks {
     return load
   }
 
+  /**
+   * Run the REBUILT script of a registered pack, at `source`, in place:  its `define()` runs again, and `swap` swaps
+   * the families whose sources changed into the live elements;  the others keep their classes.
+   * - Resolves `"swapped"`;  `"reload"` when only a page reload can show it:
+   *   - a tag the old pack didn't have (`<ui-root>` defines its catalog's tags before their families load)
+   *   - a change the platform can't take in place (`swap.finish()`:  observed attributes ...)
+   * - Resolves `"none"` for a pack that isn't on the page:  nothing to swap.
+   * - Which families changed:  the pack's `families` hashes, old against new;  a pack built without them:  all of them.
+   * - Rejects when the script can't load, or its `define()` throws.  NEVER throws.
+   */
+  static reload(source: string, swap: PackSwap): Promise<PackSwapResult> {
+    let url: URL
+    try {
+      url = new URL(source, document.baseURI)
+    } catch (error) {
+      return Promise.reject(ComponentPacks.asError(error))
+    }
+    const name = ComponentPacks.nameFor(url.href)
+    if (!ComponentPacks.packs.has(name)) return Promise.resolve("none")
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script")
+      ComponentPacks.reloading.set(name, { swap, resolve, reject })
+      script.onerror = () => {
+        if (ComponentPacks.reloading.delete(name)) reject(new Error(`ComponentPacks.reload():  can't load ${url.href}`))
+      }
+      script.onload = () => {
+        if (ComponentPacks.reloading.delete(name))
+          reject(new Error(`ComponentPacks.reload():  ${url.href} registered no pack`))
+        script.remove()
+      }
+      // a new URL, so the browser fetches the rebuilt file, not its cached copy
+      url.searchParams.set(RELOAD_PARAM, String(Date.now()))
+      script.src = url.href
+      document.head.append(script)
+    })
+  }
+
   ////////////////
   // ## What a root asks
   ////////////////
@@ -130,6 +178,20 @@ export class ComponentPacks {
     return false
   }
 
+  /**
+   * The URL a registered pack's script was loaded from, when changed file `path` (a served path, as the page server
+   * reports it:  `/_epic/pack/epics.pack.js`) is that script;  else `undefined`.
+   * - matched by the pack name its file implies (`nameFor()`):  a worktree's page names its files by another path
+   */
+  static sourceOf(path: string): string | undefined {
+    const file = path.split("/").pop() ?? ""
+    if (!PACK_FILE_SUFFIX.test(file)) return undefined
+    const name = file.replace(PACK_FILE_SUFFIX, "")
+    if (!ComponentPacks.packs.has(name)) return undefined
+    const scripts = Array.from(document.querySelectorAll<HTMLScriptElement>("script[src]"), (script) => script.src)
+    return [...ComponentPacks.loads.keys(), ...scripts].find((url) => ComponentPacks.nameFor(url) === name)
+  }
+
   /** The pack name a script URL implies:  `.../epics/components/__pack/epics.pack.js` => `epics`, `x.js` => `x`. */
   static nameFor(url: string): string {
     const file = new URL(url).pathname.split("/").pop() ?? ""
@@ -139,6 +201,50 @@ export class ComponentPacks {
   ////////////////
   // ## Internal
   ////////////////
+
+  /**
+   * Swap pack `next`, the rebuilt script of `known`, into the page (`reload()`):  its `define()` again, keeping the
+   * families whose hashes didn't change (`swap.keep()`), then the live elements re-rendered (`swap.finish()`).
+   */
+  private static swapIn(known: ComponentPack, next: ComponentPack, { swap, resolve, reject }: PackReload) {
+    try {
+      ComponentPacks.check(next)
+    } catch (error) {
+      reject(ComponentPacks.asError(error))
+      return
+    }
+    if (Object.keys(next.catalog).some((tag) => !(tag in known.catalog))) {
+      resolve("reload")
+      return
+    }
+    const changed = ComponentPacks.changedFamilies(known, next)
+    swap.keep((tag) => !!changed && !changed.has(known.catalog[tag]?.folder ?? ""))
+    const done = () => swap.keep(undefined)
+    Promise.resolve()
+      .then(() => next.define())
+      .then(
+        () => {
+          done()
+          ComponentPacks.packs.set(next.name, next)
+          for (const [tag, entry] of Object.entries(next.catalog)) ComponentPacks.catalog.set(tag, entry)
+          resolve(swap.finish() ? "swapped" : "reload")
+        },
+        (error: unknown) => {
+          done()
+          reject(ComponentPacks.asError(error))
+        }
+      )
+  }
+
+  /**
+   * The family folders whose sources differ between `known` and `next` (their `families` hashes);
+   * `undefined` (every family) when either was built without them.
+   */
+  private static changedFamilies(known: ComponentPack, next: ComponentPack): Set<string> | undefined {
+    if (!known.families || !next.families) return undefined
+    const folders = new Set([...Object.keys(known.families), ...Object.keys(next.families)])
+    return new Set([...folders].filter((folder) => known.families![folder] !== next.families![folder]))
+  }
 
   /** Add a `<script>` for `url`;  resolves when it registers its pack, rejects when it fails to. */
   private static inject(url: string): Promise<ComponentPack> {
@@ -212,6 +318,16 @@ type PendingPack = {
   /** Fail the load. */
   readonly reject: (error: Error) => void
 }
+
+/** A reload under way (`reload()`):  how to swap the new pack in, and its promise's ends. */
+type PackReload = {
+  readonly swap: PackSwap
+  readonly resolve: (result: PackSwapResult) => void
+  readonly reject: (error: Error) => void
+}
+
+/** The query `reload()` adds to a pack's URL, so the browser fetches the rebuilt script:  `epics.pack.js?swap=...`. */
+const RELOAD_PARAM = "swap"
 
 /** A pack's tag prefix:  lowercase words joined by `-`, ending in `-` (`epic-`, `x-`, `my-app-`). */
 const PACK_PREFIX = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-$/
