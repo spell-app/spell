@@ -127,7 +127,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Finding a phase as people name it (`7`, `P7`, its id, name or slug), and an old `#p7` landing on P7.
   - `comments/` (`spell-epic/comments`) -- `ThreadFacts`:  what a comment's THREAD shows, worked out ONE way for the
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
-    - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`M3`), the few words it's on, its times,
+    - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`C3`), the few words it's on, its times,
       where a taken comment went (`takenInto()`)
     - pure, node-safe at import, NOT in the `spell-epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
   - `review/` -- `ReviewClient`, one per page:  the review inbox's reads and writes (`/api/epics/review/*`).
@@ -140,7 +140,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
             `<epic-summary>` drew them under its lede before
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
         its own `<epic-review buttons="change">` in a tooltip on its words
-      - `<epic-new-item>`:  the page's toolbar button, and the Caveats and Questions sections' New caveat / question
+      - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
         and the epics left to test (`openTests()`)
@@ -419,8 +419,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its file:  `sagas/<id>/<id>.saga.html`, marked `<epic-page kind="saga" saga="<id>">`
       - named `SAGA:/<id>` (`PlanDocFiles.findDoc()`)
       - made by `epic saga page <id> [--force]` (`SagaPage`) from [saga.html](tool/templates/saga.html), one file:
-        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Log
-        - its Todos went with epic `epic-engine` P32:  no Caveats there yet
+        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Todo, Log
       - its Epics:  `<epic-cards saga>`, the epics whose page names the saga, drawn from the page server
         (`GET /api/epics/saga`, `SagaEpics`), asked again as epic pages change
         - as the Epics page's own list and cards (epic `epic-engine` I39):
@@ -655,13 +654,13 @@ Laid out as every set is since P18 of `people-and-orgs`
     - the site's "On this page" column stays (1200px and wider):
       it lists the nested sections too, and holds the site's header and look controls (J:  keep both)
   - Cmd / Ctrl + K, on a page that takes comments:  the docs pages' jump dialog,
-    taking a comment's id (`M3`) or any id on the page.
+    taking a comment's id (`C3`) or any id on the page.
     - Anything else typed goes to the site's SEARCH, words and all (J:  one key for both).
     - `/` still opens the search straight away;  elsewhere the key stays the search's.
   - Kept in `<page>.inbox.json5` beside a page, git-ignored.
   - No epic owns these pages, so their comments go to the standing epic `feedback` (epic `epic-engine` T9):
     Send says "feedback is listening", or "nobody is listening:  Send wakes feedback".
-    `epic comments list` names each by its served path:  `components/epics/epic-item.html#M1`.
+    `epic comments list` names each by its served path:  `components/epics/epic-item.html#C1`.
   - [check-comments-epic-ui.mjs](demo/check-comments-epic-ui.mjs) checks them in a browser.
 - The epic's write-up and how-to guides stay in the shared guides:
   [Epic Pages as Components](../../spell.epics/guides/epic-components/epic-components.html),
@@ -1123,16 +1122,18 @@ In `tools/`:
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
       the page's state filter, collapse-all, the new item button.
-    - Cmd / Ctrl + K asks which item to jump to (`J7`, `q3`, any id), and lands there as a link would.
+    - Cmd / Ctrl + K asks which item to jump to (`J7`, `q3`, a manual test's `M3`, any id),
+      and lands there as a link would.
       - An id that isn't there:  the dialog says so, and stays open (`wireJumpKey()`).
-      - A comment's id too, `M3`:  see "Jumping to comments" below.
+      - A comment's id too, `C3`:  see "Jumping to comments" below.
   - JUMPING TO COMMENTS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids", "Is there a way to
     jump to comments in replies?"), on every page that takes comments (an epic page's and a guide's alike):
     - a BULLHORN at the right of the toolbar, an orange badge counting the threads waiting on Owen (Claude spoke last)
       - each click lands on the next, in page order, round again after the last:  opened, below the stuck titles
       - hidden while none waits;  `PageComments.drawWaiting()`, its place in `waitingHome()`
-    - Cmd / Ctrl + K takes a comment's id (`M3`, `m3` or the old `cm3`) and lands on its thread, opened
-      - under its box, the threads waiting on Owen, a line each, "M3 · his first words", that lands there
+    - Cmd / Ctrl + K takes a comment's id (`C3`, `c3` or the old `cm3`) and lands on its thread, opened
+      - `M3` is a manual test's since epic `epic-engine` P44 (a comment's before):  it lands on the test
+      - under its box, the threads waiting on Owen, a line each, "C3 · his first words", that lands there
       - a guide's dialog asks "Jump to which comment?", and takes any other id on the page too
     - [check-comment-jump.mjs](demo/check-comment-jump.mjs) checks both, on stubbed comments
   - Sticky titles:  each top-level section's title sticks below the page header.
@@ -1452,7 +1453,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ### Review inbox
 
-- Owen marks an epic page's items ON the page:  approve, Make Caveat (`todo` in the inbox), Add Details, revisit, pick an option card.
+- Owen marks an epic page's items ON the page:  approve, Make Todo (`todo` in the inbox), Add Details, revisit, pick an option card.
   - The marks wait in its INBOX FILE until a Claude session takes them.
     It's `<name>.inbox.json5`, beside the doc in `epics/<name>/`.
   - Absent until the first mark;  deleted once empty.
@@ -1488,7 +1489,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - else Make Caveat, Revisit:  notes on the plan, no Approve
+    - else Make Todo, Revisit:  notes on the plan, no Approve
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
@@ -1496,13 +1497,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - the page moves it at once, and keeps it there (`ReviewClient.pendingMoves`) over live patches until applied
     - it waits for Send, as Defer does;  `epic inbox apply` moves it in the file (`PlanDoc.movePhase()`):  numbers,
       links and "P5 · Name" text follow;  dragged again, the newer mark replaces it
-  - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
+  - A new item asked for from the page (epic `airplane` P2):  a todo, question, issue, manual test or phase;
+    a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.
   - A TEST's answer from Owen's test run (epic `epic-engine` P4), on a test only:
     `{ action: "test", result, note?, shot? }`
     - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
-    - `shot`:  his screenshot, `tests/t3-<stamp>.png` from the page's folder (`POST shot`, below)
+    - `shot`:  his screenshot, `tests/m3-<stamp>.png` from the page's folder (`POST shot`, below)
     - sent with Send;  `epic inbox apply <name>` applies it:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
       - `PlanDoc.applyMark()`:  passed closes, failed files a new issue with the note and screenshot,
         skip cancels, not now defers
@@ -1511,17 +1513,17 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - the answers P / F / S / N
       - a COMMENT box on every card:  the mark's `note`, with any answer
         - before one, the inbox's draft;  `apply` keeps it on the test as Owen's reply
-      - its place in the address (`#t3`), kept there against the runtime's scroll-follow (`spell-doc:scrolled-to`)
+      - its place in the address (`#m3`), kept there against the runtime's scroll-follow (`spell-doc:scrolled-to`)
       - `epic test <name>` opens it;  `epic test --all` the first epic with open tests
       - the run's last card leads to the next (`GET /api/epics/tests`, [epicRoutes.ts](tool/epicRoutes.ts),
         `EpicTests.waiting()`)
-  - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `M1` ...
+  - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `C1` ...
     - Written through the comments route.
     - Sent with Send, as marks are (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude).
       - Unsent (`unsentComments`):  waiting for Claude, and Owen's last words on the thread newer than `sent`.
       - A new comment, or his reply on a thread, turns Send blue;  its tooltip counts both ("2 marks, 1 comment").
       - `wait` hands each over once (`takeWork()`'s `sent.comments`), until Owen speaks on its thread again.
-    - Waiting until answered (`epic inbox done <name>#M3`).
+    - Waiting until answered (`epic inbox done <name>#C3`).
   - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
   - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
@@ -1576,7 +1578,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - a Send on a docs page the epic owns (epic `epic-workflow` P13, see "Comments"):  each comment under its page
     - exits 2 on timeout
   - `epic inbox <name>` lists the comments waiting on the pages the epic owns too (`guides` in its JSON)
-  - `apply [ids]`:  the sent approve / pick / Make Caveat marks and test answers, into the doc (`PlanDoc.applyMark()`),
+  - `apply [ids]`:  the sent approve / pick / Make Todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
     then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
     - A revisit with a pick is left, "to talk over".
   - `<name>#<id> working on|off`
@@ -1888,7 +1890,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Its header:
       - a chevron
       - the bullhorn (a green check circle once done)
-      - its id, `M3`:  small and muted, an outline and no fill (epic `epic-workflow` P23)
+      - its id, `C3`:  small and muted, an outline and no fill (epic `epic-workflow` P23;  `M3` until `epic-engine` P44)
       - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  its tooltip the full place
       - No date:  each message has its time.
     - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
@@ -2015,14 +2017,18 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - [GuideInbox.ts](tool/GuideInbox.ts), in the `epic` tool since P13:  the tool's `wait` reads it
   - an epic page's:  the epic's review inbox, under `comments` (`ReviewInbox`, see "Review inbox")
   - One shape for both, and every change:  [`CommentList`](tool/CommentList.ts).
-  - IDS (epic `epic-workflow` P23):  shown `M1`, `M2` ... ("M" for mark;  Owen, 2026-10-10:  "use `M3` for mark 1")
+  - IDS (epic `epic-engine` P44;  Owen, 2026-10-25:  "Can `Mark` be `Comment (C)`"):  shown `C1`, `C2` ...
     - small and muted in each thread's header, before its summary
-    - every tool prints `M3`, and takes `M3`, `m3` or the old `cm3` (`CommentList.idOf()`, `label()`)
-    - the inbox files KEY them `m1`, `m2` ... too (Owen, 2026-10-17, J178:  "Switch to m3 now";  `cm1` before)
-      - an older file's `cm3` is read as `m3`, and written so at its next write (`CommentList.migrate()`)
+    - every tool prints `C3`, and takes `C3`, `c3` or the old `cm3` (`CommentList.idOf()`, `label()`)
+      - NOT `M3`:  that's a manual test now
+    - the inbox files KEY them `c1`, `c2` ... too
+      - an older file's `m3` or `cm3` is read as `c3`, and written so at its next write (`CommentList.migrate()`);
+        `epic migrate` respells every inbox in the content folder at once (`ContentRelink.respellComments()`)
       - a checkout on older code finds a comment by its key as it is:  until it merges `main`, it misses the
-        comments written as `m3`, and its new ones are `cm1` ... again (read as `m` by this code, a clash renumbered)
-    - `c1` is a caveat's
+        comments written as `c3`, and its new ones are `m1` ... again (read as `c` by this code, a clash renumbered)
+    - before:  `M1` ... ("M" for mark, epic `epic-workflow` P23 to `epic-engine` P44;  Owen, 2026-10-10:  "use `M3`
+      for mark 1"), keyed `m1` (J178, 2026-10-17), and `cm1` from comments' start (epic `airplane` P11)
+    - comments in prose and commit messages from before keep the old letters:  history
 - Where a comment is:  its ANCHOR ([BlockAnchors.js](tools/BlockAnchors.js), shared by the runtime and the tools).
   - the block's id, else `<nearest section or plan part id>#<kind>-<n>`
     - e.g. `memory#table-2`, `p3#field-2`, `p3#update-1`
@@ -2089,8 +2095,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     So Owen's reply on a thread is new work, as a new comment is:  `list` shows it under the comment.
   - `answer` puts Claude's answer on the thread:  Owen's turn.  `--commit`:  the Done line shows it.
   - `list <epic>`:  the comments on the pages that epic owns, and those taken into it.
-  - every component set's pages too:  by their served path, `components/epics/epic-item.html#M1`,
-    `components/app/Chooser.html#M1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
+  - every component set's pages too:  by their served path, `components/epics/epic-item.html#C1`,
+    `components/app/Chooser.html#C1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
     `pagePath()` / `pageAt()`, both through `ComponentSetFolders`:  the sets the checkout's settings name
     (`componentSets()`), Epic UI's the engine's `src/docs/` (named or not), the others where the settings put
     them:  spell-app's `app/docs/`, `../spell-brand/docs`).
@@ -2106,10 +2112,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - Claude's side, for epic pages:  `epic inbox <name>` lists them, and Owen's replies under them.
   - They reach Claude with the page's SEND, as marks do (see "Review inbox"):
     a send with only comments wakes `wait`, which prints them.
-  - `epic inbox working <name>#M3 on | off`:  the thinking stub, as `comments working`.
+  - `epic inbox working <name>#C3 on | off`:  the thinking stub, as `comments working`.
     With an item's id:  its spinner, as before.
   - Answered like a revisit's note, then:
-    - `epic inbox done <name>#M3 [--file <html>] [--commit <sha>]`, or `clear <name>#M3`
+    - `epic inbox done <name>#C3 [--file <html>] [--commit <sha>]`, or `clear <name>#C3`
     - `done` turns `working` off.
   - `--file`:  the answer on the thread too.  Without it, "Answered in the epic page".
 
@@ -2331,7 +2337,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - Airplane mode is off for it, whatever the machine's switch says.
   - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
-      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, a typed revisit,
+      Approve, Make Todo, Revisit and its note box, drafts across a reload, Later, a typed revisit,
       Send.
     - No control past the window, or over a title, at 280 / 900px, light and dark.
     - It refuses while the copy's inbox file exists.
@@ -2349,7 +2355,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - each phase's title pen and plan changes (`<epic-update>` blocks, no box)
     - at 280 / 900px, light and dark
   - `node src/demo/check-comment-jump.mjs [--guide <page>] [--doc <epic>] [outDir]`, from the root:
-    - comment ids (`M1` ...), the toolbar's bullhorn and its count, Cmd-K on a comment's id and its waiting list,
+    - comment ids (`C1` ...), the toolbar's bullhorn and its count, Cmd-K on a comment's id and its waiting list,
       on a guide and an epic page (epic `epic-workflow` P23)
     - their comments stubbed in the browser, every POST aborted:  no inbox read or written, nobody woken
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
@@ -2367,8 +2373,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - on a scratch copy of the set's folder unless `--docs`;  nobody woken
     - Run it after touching the comments' code or look, or Epic UI's layout.
   - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4):
-    - a test run on a scratch copy of an epic page, its To test section replaced by scratch tests (the new shape and
-      older prose-only ones):  Start testing, Passed, Failed with a note and a pasted screenshot, Skip, Not now, a
+    - a test run on a scratch copy of an epic page, its Manual tests section replaced by scratch tests
+      (the new shape and older prose-only ones):  Start testing, Passed, Failed with a note and a pasted screenshot, Skip, Not now, a
       reload mid-run, the summary and Send results, Esc;  the marks read back from the copy's inbox file
     - a run across every epic (`?test=1&all=1`):  the summary's Next opens the next copy in test mode
     - at 390 and 1200px, light and dark, reduced motion

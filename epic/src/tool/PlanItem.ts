@@ -30,7 +30,7 @@ export class PlanItem {
   }
 
   /**
-   * The kind an id names (`q7` -> `question`):  `question`, `judgement`, `caveat`, `issue`, `todo`, `test`;  an old
+   * The kind an id names (`q7` -> `question`):  `question`, `judgement`, `todo`, `issue`, `test`;  an old
    * decision's `d7`:  `decision`;  an Overview sub-section's `o3`:  `overview` (Q14);  `item` for an id of no kind.
    * - an answered question is still a `question` (its status says `decided`)
    */
@@ -42,13 +42,13 @@ export class PlanItem {
   }
 
   /**
-   * Item `item`'s kind, as `kindOf()`, but a caveat's from its markup (epic `epic-engine` P32):  `caveat` for a
-   * LIMIT (`<epic-item limit>`), `todo` for work still to do;  both are `c` ids.
+   * Item `item`'s kind, as `kindOf()`, but a todo's from its markup (epic `epic-engine` P44):  `limit` for a
+   * LIMIT to know about (`<epic-item limit>`), `todo` for work still to do;  both are `t` ids.
    */
   static kindOfItem(item: Element): string {
     const kind = PlanItem.kindOf(item.id)
-    if (kind !== "caveat") return kind
-    return item.hasAttribute("limit") ? "caveat" : "todo"
+    if (kind !== "todo") return kind
+    return item.hasAttribute("limit") ? "limit" : "todo"
   }
 
   /** `q12` -> `12`;  0 for an id without a number. */

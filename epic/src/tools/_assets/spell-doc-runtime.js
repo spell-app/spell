@@ -23,7 +23,7 @@
  *   - an EPIC PAGE's (`buildToolbar()`):  its blocks' icons only, with badges of the items waiting on Owen,
  *     in `<epic-page>`'s header;  and Cmd / Ctrl + K asks for an item to jump to (`wireJumpKey()`)
  *   - at its right, on any page that takes comments, a bullhorn counting the threads waiting on Owen,
- *     landing on the next at each click (`PageComments.drawWaiting()`);  Cmd / Ctrl + K takes a comment's id too (`M3`)
+ *     landing on the next at each click (`PageComments.drawWaiting()`);  Cmd / Ctrl + K takes a comment's id too (`C3`)
  * - sticky headers:  the page header (`ui-sticky.spell-h1`) sticks at the top, each top-level title below it,
  *   nested ones below their parents' (re-measured on resize);
  *   CSS variables on the sections let anchors land below them all

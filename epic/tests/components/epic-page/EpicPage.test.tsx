@@ -120,7 +120,7 @@ describe("<epic-page>", () => {
     const host = await render(
       `<epic-page kind="saga" saga="epics" title="Epic Tooling" started="2026-10-14" updated="2026-10-14">` +
         `<epic-overview id="overview"><epic-summary>Epics.</epic-summary></epic-overview>` +
-        `<epic-section id="caveats" kind="caveats"></epic-section></epic-page>`
+        `<epic-section id="todos" kind="todos"></epic-section></epic-page>`
     )
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
@@ -269,7 +269,7 @@ describe("<epic-page>", () => {
       `<epic-section id="decisions" kind="questions">` +
       `<epic-item id="q1" title="One" status="open" state="attention"></epic-item>` +
       `<epic-item id="q2" title="Two" status="decided" state="recent"></epic-item></epic-section>` +
-      `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open" state="open"></epic-item></epic-section>`
+      `<epic-section id="todos" kind="todos"><epic-item id="t1" title="Later" status="open" state="open"></epic-item></epic-section>`
     const mark = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>('[part~="state"]')
     // between phases, items open, touched today:  in progress (it used to sleep);  drawn grey, as the header's pill
     // never draws blue (Owen, 2026-10-25:  "Make the P1/agent pill non-blue"):  the tooltip says which
@@ -648,13 +648,13 @@ describe("<epic-page> Send and its countdown", () => {
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await adoptClient(routes)
-    const host = await render(page("", ["todo"], `<epic-section id="caveats" kind="caveats"></epic-section>`))
-    const todos = host.querySelector<E.DOMElement>("#caveats")!
+    const host = await render(page("", ["todo"], `<epic-section id="todos" kind="todos"></epic-section>`))
+    const todos = host.querySelector<E.DOMElement>("#todos")!
     await vi.waitFor(() => expect(todos.shadowRoot!.querySelector('[part~="new-button"]')).not.toBeNull())
     expect(host.shadowRoot!.querySelector('[part~="new-button"]')).toBeNull()
     expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).not.toBeNull()
     const button = todos.shadowRoot!.querySelector<HTMLButtonElement>('[part~="new-button"]')!
-    expect(button.title).toBe("New Caveat")
+    expect(button.title).toBe("New Todo")
     expect(button.closest('[part~="tools"]')).not.toBeNull()
     expect(button.querySelector("ui-icon")!.getAttribute("name")).toBe("comment dots")
     // nothing waiting:  there, grey (so it's always in the same place), and no pill
@@ -690,7 +690,7 @@ describe("<epic-page> Send and its countdown", () => {
 // ## The toolbar's state filter and collapse-all (epic `airplane` P8)
 ////////////////
 
-/** A page with a Questions and a Caveats section, items in `states` each. */
+/** A page with a Questions and a Todo section, items in `states` each. */
 function filterPage(questions: string[], todos: string[]): string {
   const items = (letter: string, states: string[]) =>
     states
@@ -702,7 +702,7 @@ function filterPage(questions: string[], todos: string[]): string {
   return (
     `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
     `<epic-section id="decisions" kind="questions">${items("q", questions)}</epic-section>` +
-    `<epic-section id="caveats" kind="caveats">${items("c", todos)}</epic-section></epic-page>`
+    `<epic-section id="todos" kind="todos">${items("t", todos)}</epic-section></epic-page>`
   )
 }
 
@@ -751,10 +751,10 @@ describe("<epic-page> toolbar", () => {
     // a hidden one:  shows too
     await pickPageState(host, "open")
     expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent-3"])
-    expect(shownItems(host)).toEqual(["q1", "q2", "c1"])
+    expect(shownItems(host)).toEqual(["q1", "q2", "t1"])
     // a shown one, others too:  hides
     await pickPageState(host, "attention")
-    expect(shownItems(host)).toEqual(["q2", "c1"])
+    expect(shownItems(host)).toEqual(["q2", "t1"])
     // the only one showing:  everything again
     await pickPageState(host, "open")
     expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent+3"])
@@ -843,12 +843,12 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     const client = await adoptClient(routes)
     const host = await render(filterPage(["attention", "open", "open"], ["open", "recent"]))
     const questions = host.querySelector("#decisions")!
-    const caveats = host.querySelector("#caveats")!
+    const todos = host.querySelector("#todos")!
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"]))
     expect([markedBadge(host), markedBadge(questions)]).toEqual([null, null])
-    // Owen marks two questions and a caveat, one sent and two not:  each counts
+    // Owen marks two questions and a todo, one sent and two not:  each counts
     const at = new Date().toISOString()
-    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at }, c1: { action: "approve", at } }
+    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at }, t1: { action: "approve", at } }
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
@@ -857,14 +857,14 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
     expect(markedBadge(questions)).toEqual(["2", "2 marked in this pass, waiting for Claude"])
     // a section whose items are all marked keeps its badge alone
-    expect(chipsOf(caveats).map((chip) => chip.dataset.state)).toEqual(["recent"])
-    expect(markedBadge(caveats)?.[0]).toBe("1")
+    expect(chipsOf(todos).map((chip) => chip.dataset.state)).toEqual(["recent"])
+    expect(markedBadge(todos)?.[0]).toBe("1")
     // filtered to recent:  the badges stay, and so do the marked items;  the hidden line leaves them out
     await pickPageState(host, "recent")
     expect(pageChips(host)).toEqual(["open-1", "recent+1"])
     expect(markedBadge(host)?.[0]).toBe("3")
     expect(markedBadge(questions)?.[0]).toBe("2")
-    expect(shownItems(host)).toEqual(["q1", "q2", "c1", "c2"])
+    expect(shownItems(host)).toEqual(["q1", "q2", "t1", "t2"])
     const note = questions.shadowRoot!.querySelector('[part~="hidden-note"]')!.shadowRoot!.querySelector("button")!
     expect(note.textContent).toBe("1 hidden · show all")
     // Claude applies them:  the badges go, the counts come back
@@ -874,7 +874,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"])
-    expect([markedBadge(host), markedBadge(questions), markedBadge(caveats)]).toEqual([null, null, null])
+    expect([markedBadge(host), markedBadge(questions), markedBadge(todos)]).toEqual([null, null, null])
   })
 
   test("outside a review (no inbox):  no badge, every count as before", async () => {
@@ -1138,7 +1138,7 @@ describe("<epic-page> what Claude is doing", () => {
       text: "Responding",
       items: [
         { id: "q1", title: "Which?" },
-        { id: "m3", title: "This reads oddly" }
+        { id: "c3", title: "This reads oddly" }
       ],
       at: new Date().toISOString()
     }
@@ -1146,7 +1146,7 @@ describe("<epic-page> what Claude is doing", () => {
     const host = await render(page("", ["active"]))
     const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
-    expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, M3")
+    expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, C3")
     // a grey pill like the step label, its spinner where the label's icon goes (Owen, 2026-10-25)
     const pill = line()!.querySelector("ui-label")!
     expect([pill.getAttribute("color"), pill.hasAttribute("basic"), pill.querySelector(".spinner")!.slot]).toEqual([
@@ -1158,7 +1158,7 @@ describe("<epic-page> what Claude is doing", () => {
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
       ["#q1", "Q1 Which?"],
-      ["#m3", "M3 This reads oddly"]
+      ["#c3", "C3 This reads oddly"]
     ])
     routes.inbox.doing = null
     await client.refresh()
@@ -1182,7 +1182,7 @@ function stagedPage(stage: string): string {
     `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Which?" status="open"></epic-item>` +
     `<epic-item id="q2" title="That?" status="open"></epic-item></epic-section>` +
     `<epic-section id="judgements" kind="judgements"><epic-item id="j1" title="Kept" status="open"></epic-item></epic-section>` +
-    `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open"></epic-item></epic-section>` +
+    `<epic-section id="todos" kind="todos"><epic-item id="t1" title="Later" status="open"></epic-item></epic-section>` +
     `<epic-section id="log" kind="log"><epic-event at="2026-10-24T10:00">made</epic-event></epic-section>` +
     `</epic-page>`
   )
@@ -1210,7 +1210,7 @@ describe("<epic-page> stages", () => {
 
   test("overview:  only the Overview, Questions and Caveats show, numbered as they show;  the toolbar's chips count only them", async () => {
     const host = await render(stagedPage("overview"))
-    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Caveats"]))
+    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Todo"]))
     // the step label says the stage, not a phase that doesn't show
     expect(step(host)?.words).toBe("OVERVIEW")
     // the file still holds them:  only a view
@@ -1222,9 +1222,7 @@ describe("<epic-page> stages", () => {
 
   test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
     const phases = await render(stagedPage("phases"))
-    await vi.waitFor(() =>
-      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Caveats"])
-    )
+    await vi.waitFor(() => expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Todo"]))
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {
       const host = await render(stagedPage(stage))

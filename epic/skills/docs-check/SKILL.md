@@ -62,9 +62,9 @@ From `decisions --json`, later beats earlier:
   - closed:  accepted, binding
   - open:  how it was built, binding until Owen says otherwise
   - canceled:  reversed:  a doc that describes it as how things work is wrong
-- a closed caveat or issue:  done
+- a closed todo or issue:  done
 - a canceled one:  moot, so a doc still promising it is wrong
-- an open caveat:  a real limit
+- an open limit (a todo marked `limit`):  a real limit
   - a doc that says the opposite is wrong
   - a doc that leaves it out is fine
 - a phase's Done list:  what was BUILT, the strongest evidence

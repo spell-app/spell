@@ -13,23 +13,29 @@ const STEP = Migrations.named("taken-in-phase")!
 /** Now, for the context. */
 const NOW = new Date(2026, 9, 25, 15, 0)
 
-/** A page with these phases (`[id, status, body]`) and items (`[id, status, extra attributes]`). */
+/**
+ * A page with these phases (`[id, status, body]`) and items (`[id, status, extra attributes]`):  a manual test
+ * (`m3`) in the Manual tests section, every other item in Issues.
+ */
 function page(phases: [string, string, string][], items: [string, string, string?][]): Document {
   const phaseHtml = phases
     .map(([id, status, body]) => `<epic-phase id="${id}" title="${id}" status="${status}">${body}</epic-phase>`)
     .join("")
-  const itemHtml = items
-    .map(([id, status, extra]) => `<epic-item id="${id}" title="${id}" status="${status}"${extra ?? ""}></epic-item>`)
-    .join("")
+  const itemHtml = (test: boolean) =>
+    items
+      .filter(([id]) => id.startsWith("m") === test)
+      .map(([id, status, extra]) => `<epic-item id="${id}" title="${id}" status="${status}"${extra ?? ""}></epic-item>`)
+      .join("")
   return parseHTML(
     `<html><body><main><epic-page epic="x" title="X"><epic-section id="phases" kind="phases">${phaseHtml}` +
-      `</epic-section><epic-section id="issues" kind="issues">${itemHtml}</epic-section></epic-page></main></body></html>`
+      `</epic-section><epic-section id="issues" kind="issues">${itemHtml(false)}</epic-section>` +
+      `<epic-section id="tests" kind="tests">${itemHtml(true)}</epic-section></epic-page></main></body></html>`
   ).document as unknown as Document
 }
 
 /** Each item's `taken-in`, in order. */
 function takenIn(document: Document): (string | null)[] {
-  return Array.from(document.querySelectorAll("#issues > epic-item"), (item) => item.getAttribute("taken-in"))
+  return Array.from(document.querySelectorAll("epic-section > epic-item"), (item) => item.getAttribute("taken-in"))
 }
 
 /** A phase field holding `html`. */
@@ -62,7 +68,7 @@ describe("taken-in-phase", () => {
 
   test("left alone:  open, canceled, a test, handled, taken already;  To review and nested items don't count", () => {
     const links =
-      '<a href="#i1">I1</a> <a href="#i2">I2</a> <a href="#t3">T3</a> <a href="#q4">Q4</a> <a href="#i5">I5</a>'
+      '<a href="#i1">I1</a> <a href="#i2">I2</a> <a href="#m3">M3</a> <a href="#q4">Q4</a> <a href="#i5">I5</a>'
     const document = page(
       [
         ["p-a", "done", field("changes", links)],
@@ -76,7 +82,7 @@ describe("taken-in-phase", () => {
       [
         ["i1", "open"],
         ["i2", "canceled"],
-        ["t3", "done"],
+        ["m3", "done"],
         ["q4", "decided", ' handled="p-b"'],
         ["i5", "done", ' taken-in="p-b"'],
         ["i6", "done"],
@@ -84,6 +90,6 @@ describe("taken-in-phase", () => {
       ]
     )
     expect(STEP.run(document, { now: NOW })).toBe(false)
-    expect(takenIn(document)).toEqual([null, null, null, null, "p-b", null, null])
+    expect(takenIn(document)).toEqual([null, null, null, "p-b", null, null, null])
   })
 })

@@ -35,7 +35,7 @@ export class GuideInbox {
   /** the file's shape version */
   version = INBOX_VERSION
 
-  /** every comment, by id (`m1` ...;  `cm1` in an older file;  shown `M1`:  `CommentList.label()`), in the order written */
+  /** every comment, by id (`c1` ...;  `m1` or `cm1` in an older file;  shown `C1`:  `CommentList.label()`), in the order written */
   comments: Record<string, Comment> = {}
 
   /** ISO time of Owen's last Send on the page, else `null` */
@@ -44,7 +44,7 @@ export class GuideInbox {
   /** the `sent` time a waiting session last took (`takeSent()`), else `null` */
   handedOver: string | null = null
 
-  /** - `record`:  the file's JSON, as read;  a comment key spelt the other way (`m3`) respelt (`CommentList.migrate()`) */
+  /** - `record`:  the file's JSON, as read;  a comment key spelt an older way (`m3`, `cm3`) respelt (`CommentList.migrate()`) */
   constructor(record: Partial<GuideInbox> = {}) {
     Object.assign(this, record)
     CommentList.migrate(this.comments)

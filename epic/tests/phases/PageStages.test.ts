@@ -9,7 +9,7 @@ import { PageStages } from "spell-epic/phases"
 
 /** A page in `stage` (none:  no attribute), with the Overview and every section kind. */
 function page(stage?: string): Element {
-  const kinds = ["phases", "questions", "judgements", "caveats", "issues", "tests", "log"]
+  const kinds = ["phases", "questions", "judgements", "todos", "issues", "tests", "log"]
   const sections = kinds.map((kind) => `<epic-section id="${kind}" kind="${kind}"><p>in ${kind}</p></epic-section>`)
   const html =
     `<epic-page epic="x" title="X"${stage ? ` stage="${stage}"` : ""}>` +
@@ -40,9 +40,9 @@ describe("PageStages", () => {
     expect(PageStages.ALL.filter(PageStages.isPlanning)).toEqual(["overview", "phases"])
   })
 
-  test("overview shows the Overview, Questions and Caveats;  phases adds the Phases and Issues;  building everything", () => {
-    expect(shown(page("overview"))).toEqual(["overview", "questions", "caveats"])
-    expect(shown(page("phases"))).toEqual(["overview", "phases", "questions", "caveats", "issues"])
+  test("overview shows the Overview, Questions and Todo;  phases adds the Phases and Issues;  building everything", () => {
+    expect(shown(page("overview"))).toEqual(["overview", "questions", "todos"])
+    expect(shown(page("phases"))).toEqual(["overview", "phases", "questions", "todos", "issues"])
     expect(shown(page("building"))).toHaveLength(8)
     expect(shown(page())).toHaveLength(8)
   })
@@ -50,7 +50,7 @@ describe("PageStages", () => {
   test("what's inside a hidden section is hidden too;  the Overview's sub-sections never are", () => {
     const overview = page("overview")
     expect(PageStages.hides(overview.querySelector("#log p")!)).toBe(true)
-    expect(PageStages.hides(overview.querySelector("#caveats p")!)).toBe(false)
+    expect(PageStages.hides(overview.querySelector("#todos p")!)).toBe(false)
     expect(PageStages.hides(overview.querySelector("#o1")!)).toBe(false)
   })
 })

@@ -16,14 +16,14 @@ const ON_FIELD = { anchor: "p3#field-2", kind: "field", label: "Notes", excerpt:
 const NOW = new Date("2026-10-10T14:02:00.000Z")
 
 describe("CommentList", () => {
-  test("adds comments `m1`, `m2` ... (shown M1) (never a caveat's `c1`);  a quote rides along with its offset", () => {
+  test("adds comments `c1`, `c2` ... (shown C1) (never a todo's `t1`);  a quote rides along with its offset", () => {
     const comments = new CommentList({})
-    expect(comments.add(ON_FIELD, "  Which file?  ", NOW)).toBe("m1")
-    expect(comments.add({ ...ON_FIELD, quote: " the inbox file ", offset: 14 }, "This one?", NOW)).toBe("m2")
+    expect(comments.add(ON_FIELD, "  Which file?  ", NOW)).toBe("c1")
+    expect(comments.add({ ...ON_FIELD, quote: " the inbox file ", offset: 14 }, "This one?", NOW)).toBe("c2")
     expect(comments.all).toEqual([
-      { id: "m1", ...ON_FIELD, text: "Which file?", at: NOW.toISOString(), status: "new" },
+      { id: "c1", ...ON_FIELD, text: "Which file?", at: NOW.toISOString(), status: "new" },
       {
-        id: "m2",
+        id: "c2",
         ...ON_FIELD,
         quote: "the inbox file",
         offset: 14,
@@ -32,7 +32,7 @@ describe("CommentList", () => {
         status: "new"
       }
     ])
-    expect([CommentList.isCommentId("m2"), CommentList.isCommentId("c2")]).toEqual([true, false])
+    expect([CommentList.isCommentId("c2"), CommentList.isCommentId("t2")]).toEqual([true, false])
   })
 
   test("Owen edits or deletes one only while it waits;  Claude takes it, or answers it", () => {
@@ -73,7 +73,7 @@ describe("CommentList", () => {
     const restored = comments.restore(id, { ...comments.comment(id) })
     expect(comments.comment(restored).taken).toMatchObject({ phaseId: "p-memory", title: "Memory" })
     const bad = { ...comments.comment(id), taken: { ...into, phaseId: "#nope", at: NOW.toISOString() } }
-    expect(comments.comment(comments.restore("m9", bad)).taken).not.toHaveProperty("phaseId")
+    expect(comments.comment(comments.restore("c9", bad)).taken).not.toHaveProperty("phaseId")
   })
 
   test("Undo:  a deleted or cleared comment comes back as it was, under its id unless a new one took it", () => {
@@ -88,16 +88,16 @@ describe("CommentList", () => {
     // deleted, then a new comment took its id:  back under the next one
     comments.clear(id)
     expect(comments.add(ON_FIELD, "newer", NOW)).toBe(id)
-    expect(comments.restore(id, before)).toBe("m2")
+    expect(comments.restore(id, before)).toBe("c2")
     const { id: _id, ...kept } = before
-    expect(comments.comment("m2")).toEqual(kept)
+    expect(comments.comment("c2")).toEqual(kept)
     expect(comments.all.map(({ id: each, text }) => [each, text])).toEqual([
-      ["m1", "newer"],
-      ["m2", "Which one?"]
+      ["c1", "newer"],
+      ["c2", "Which one?"]
     ])
-    expect(() => comments.restore("m9", { ...before, text: "  " })).toThrow(/needs some text/)
-    expect(() => comments.restore("m9", { ...before, status: "gone" as "new" })).toThrow(/isn't a comment's status/)
-    expect(() => comments.restore("m9", { ...before, anchor: "two words" })).toThrow(/isn't an anchor/)
+    expect(() => comments.restore("c9", { ...before, text: "  " })).toThrow(/needs some text/)
+    expect(() => comments.restore("c9", { ...before, status: "gone" as "new" })).toThrow(/isn't a comment's status/)
+    expect(() => comments.restore("c9", { ...before, anchor: "two words" })).toThrow(/isn't an anchor/)
   })
 
   test("a THREAD:  Claude answers, Owen replies (saved as typed, one pending reply), Claude answers again", () => {
@@ -139,7 +139,7 @@ describe("CommentList", () => {
     comments.reply(id, "Hm", NOW)
     comments.reply(id, " ", NOW)
     expect([comments.comment(id).replies?.length, CommentList.turnOf(comments.comment(id))]).toEqual([1, "owen"])
-    expect(() => comments.reply("m9", "x")).toThrow(expect.objectContaining({ status: 404 }))
+    expect(() => comments.reply("c9", "x")).toThrow(expect.objectContaining({ status: 404 }))
   })
 
   test("that's good / skip it close a thread;  reopen, or a reply, opens it again", () => {
@@ -201,7 +201,7 @@ describe("CommentList", () => {
     expect(() => comments.add({ ...ON_FIELD, anchor: "two words" }, "x")).toThrow(/isn't an anchor/)
     expect(() => comments.add({ ...ON_FIELD, kind: "Field!" }, "x")).toThrow(/kind of block/)
     expect(() => comments.add(ON_FIELD, "   ")).toThrow(/needs some text/)
-    expect(() => comments.remove("m9")).toThrow(expect.objectContaining({ status: 404 }))
+    expect(() => comments.remove("c9")).toThrow(expect.objectContaining({ status: 404 }))
   })
 
   test("NEVER an empty comment:  white space, or characters that draw nothing, are refused on add and edit", () => {
@@ -238,7 +238,7 @@ describe("CommentList", () => {
     comments.setWorking(id, true, later(7))
     comments.setWorking(id, false)
     expect(comments.comment(id).working).toBeUndefined()
-    expect(() => comments.setWorking("m9", true)).toThrow(expect.objectContaining({ status: 404 }))
+    expect(() => comments.setWorking("c9", true)).toThrow(expect.objectContaining({ status: 404 }))
   })
 
   test("lastWordsAt:  when Owen last changed his words on the thread -- his comment, his replies, their edits", () => {
@@ -257,82 +257,93 @@ describe("CommentList", () => {
   })
 })
 
-describe("ids:  shown M3, typed M3 / m3 / cm3, keyed m3;  an older file's cm3 read as m3 (epic `epic-workflow` P23, J178)", () => {
+describe("ids:  shown C3, typed C3 / c3 / cm3, keyed c3;  an older file's cm3 read as c3 (epic `epic-workflow` P23, J178)", () => {
   /** A comment as a file holds it, with text `text`. */
   const held = (text: string): Comment => ({ ...ON_FIELD, text, at: NOW.toISOString(), status: "new" })
 
   test("idOf():  every way an id is typed, as the file keys it;  anything else as it is", () => {
-    expect(["M3", "m3", "cm3", "CM3", "#M3", " m03 "].map(CommentList.idOf)).toEqual([
-      "m3",
-      "m3",
-      "m3",
-      "m3",
-      "m3",
-      "m3"
-    ])
-    expect(["j3", "c3", "m", "mm3", "p-epic-migrate"].map(CommentList.idOf)).toEqual([
-      "j3",
+    expect(["C3", "c3", "cm3", "CM3", "#C3", " c03 "].map(CommentList.idOf)).toEqual([
       "c3",
+      "c3",
+      "c3",
+      "c3",
+      "c3",
+      "c3"
+    ])
+    expect(["j3", "t3", "m", "mm3", "p-epic-migrate"].map(CommentList.idOf)).toEqual([
+      "j3",
+      "t3",
       "m",
       "mm3",
       "p-epic-migrate"
     ])
   })
 
-  test("label():  as Owen sees it, M3;  isCommentId():  every spelling, never a caveat's or an item's", () => {
-    expect(["cm3", "m3", "M3", "#cm12"].map(CommentList.label)).toEqual(["M3", "M3", "M3", "M12"])
+  test("label():  as Owen sees it, C3;  isCommentId():  every spelling, never a todo's or an item's", () => {
+    expect(["cm3", "c3", "C3", "#cm12"].map(CommentList.label)).toEqual(["C3", "C3", "C3", "C12"])
     expect(CommentList.label("j3")).toBe("j3")
-    expect(["M3", "m3", "cm3", "CM3"].every(CommentList.isCommentId)).toBe(true)
-    expect(["c3", "j3", "q1", "mm3", "m"].some(CommentList.isCommentId)).toBe(false)
+    expect(["C3", "c3", "cm3", "CM3"].every(CommentList.isCommentId)).toBe(true)
+    expect(["t3", "j3", "q1", "mm3", "m"].some(CommentList.isCommentId)).toBe(false)
   })
 
-  test("every method takes M3, m3 or the old cm3 for the comment the file keys m3", () => {
+  test("every method takes C3, c3 or the old cm3 for the comment the file keys c3", () => {
     const comments = new CommentList({})
     const id = comments.add(ON_FIELD, "one", NOW)
-    expect(id).toBe("m1")
-    comments.edit("M1", "one, better", NOW)
+    expect(id).toBe("c1")
+    comments.edit("C1", "one, better", NOW)
     comments.setWorking("cm1", true, NOW)
-    expect(comments.comment("M1")).toMatchObject({ text: "one, better", working: NOW.toISOString() })
-    comments.answer("M1", "<p>Yes.</p>", NOW)
+    expect(comments.comment("C1")).toMatchObject({ text: "one, better", working: NOW.toISOString() })
+    comments.answer("C1", "<p>Yes.</p>", NOW)
     comments.reply("cm1", "Thanks", NOW)
-    comments.resolve("M1", "good", NOW)
-    expect(Object.keys(comments.comments)).toEqual(["m1"])
+    comments.resolve("C1", "good", NOW)
+    expect(Object.keys(comments.comments)).toEqual(["c1"])
     comments.clear("cm1")
     expect(comments.comments).toEqual({})
-    expect(() => comments.comment("M9")).toThrow(/no comment M9 here/)
+    expect(() => comments.comment("C9")).toThrow(/no comment C9 here/)
   })
 
-  test("Undo under the old cm3 comes back keyed m3", () => {
+  test("Undo under the old cm3 comes back keyed c3", () => {
     const comments = new CommentList({})
     const id = comments.add(ON_FIELD, "one", NOW)
     const before = comments.all[0]!
     comments.remove(id)
-    expect(comments.restore("cm1", before)).toBe("m1")
+    expect(comments.restore("cm1", before)).toBe("c1")
   })
 
-  test("migrate():  an older file's cm3 is read as m3;  a clash (cm2 and m2:  an older checkout added one) takes the next number", () => {
-    const record: Record<string, Comment> = { cm2: held("two"), m1: held("one"), m2: held("clash"), cm5: held("five") }
+  test("migrate():  an older file's cm3 is read as c3;  a clash (cm2 and c2:  an older checkout added one) takes the next number", () => {
+    const record: Record<string, Comment> = { cm2: held("two"), c1: held("one"), c2: held("clash"), cm5: held("five") }
     const comments = new CommentList(record)
-    expect(Object.keys(record)).toEqual(["m1", "m2", "m3", "m5"])
-    expect(comments.comment("M3").text).toBe("two")
-    expect(comments.comment("M2").text).toBe("clash")
-    expect(comments.comment("M5").text).toBe("five")
-    expect(comments.add(ON_FIELD, "next", NOW)).toBe("m6")
+    expect(Object.keys(record)).toEqual(["c1", "c2", "c3", "c5"])
+    expect(comments.comment("C3").text).toBe("two")
+    expect(comments.comment("C2").text).toBe("clash")
+    expect(comments.comment("C5").text).toBe("five")
+    expect(comments.add(ON_FIELD, "next", NOW)).toBe("c6")
   })
 
-  test("migrate():  a file keyed m3 already, or with no comments, is left as it is (the same object, same order)", () => {
-    const record: Record<string, Comment> = { m2: held("two"), m1: held("one") }
-    expect(Object.keys(CommentList.migrate(record))).toEqual(["m2", "m1"])
+  // epic `epic-engine` P44:  comments were `m3` ("M" for mark), and `M3` is a manual test's now
+  test("migrate():  an older file's m3 is read as c3 too;  TYPED, M3 and m3 are a manual test's, never a comment's", () => {
+    const record: Record<string, Comment> = { m2: held("two"), m1: held("one"), cm4: held("four") }
+    const comments = new CommentList(record)
+    expect(Object.keys(record)).toEqual(["c1", "c2", "c4"])
+    expect(comments.comment("C2").text).toBe("two")
+    expect(["M3", "m3", "#M3"].map(CommentList.idOf)).toEqual(["M3", "m3", "#M3"])
+    expect(["M3", "m3"].some(CommentList.isCommentId)).toBe(false)
+    expect(["m3", "cm3", "c3", "M3"].map(CommentList.keyOf)).toEqual(["c3", "c3", "c3", "c3"])
+  })
+
+  test("migrate():  a file keyed c3 already, or with no comments, is left as it is (the same object, same order)", () => {
+    const record: Record<string, Comment> = { c2: held("two"), c1: held("one") }
+    expect(Object.keys(CommentList.migrate(record))).toEqual(["c2", "c1"])
     expect(CommentList.migrate({})).toEqual({})
   })
 
-  test("both inboxes read an older file's cm3 as m3, and write it so next time", () => {
+  test("both inboxes read an older file's cm3 as c3, and write it so next time", () => {
     const review = new ReviewInbox({ comments: { cm1: held("on an epic page") } })
-    expect(Object.keys(review.comments)).toEqual(["m1"])
+    expect(Object.keys(review.comments)).toEqual(["c1"])
     const guide = new GuideInbox({ comments: { cm4: held("on a guide") } })
-    expect(Object.keys(guide.comments)).toEqual(["m4"])
-    expect(guide.commentList.comment("M4").text).toBe("on a guide")
-    expect(Object.keys(JSON.parse(JSON.stringify(guide)).comments)).toEqual(["m4"])
+    expect(Object.keys(guide.comments)).toEqual(["c4"])
+    expect(guide.commentList.comment("C4").text).toBe("on a guide")
+    expect(Object.keys(JSON.parse(JSON.stringify(guide)).comments)).toEqual(["c4"])
   })
 })
 
@@ -341,7 +352,7 @@ describe("ReviewInbox.commentList", () => {
     const inbox = new ReviewInbox()
     expect(inbox.isEmpty).toBe(true)
     inbox.commentList.add(ON_FIELD, "Which file?", NOW)
-    expect([inbox.isEmpty, Object.keys(inbox.comments)]).toEqual([false, ["m1"]])
+    expect([inbox.isEmpty, Object.keys(inbox.comments)]).toEqual([false, ["c1"]])
     expect(new ReviewInbox(JSON.parse(JSON.stringify(inbox))).commentList.waiting).toHaveLength(1)
   })
 })

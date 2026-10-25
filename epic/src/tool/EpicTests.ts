@@ -127,11 +127,11 @@ export class EpicTests {
   }
 
   /**
-   * A test's markup from `epic add <epic>#T` / `epic details <epic>#T3`'s flags, as HTML:  the fields in their order,
+   * A test's markup from `epic add <epic>#M` / `epic details <epic>#M3`'s flags, as HTML:  the fields in their order,
    * Step, Should, Example, If not (`TEST_FIELDS`);  `""` when none is given.
    * - each value is HTML, as `--details` is:  a Step may hold ACTION links,
    *   `<a class="epic-test-action" href="...">Open the Epics page</a>`, shown as buttons in the run
-   * - `example`:  `{ image?, text? }`:  the image's path from the epic page's folder (`tests/t3.png`), a line of text
+   * - `example`:  `{ image?, text? }`:  the image's path from the epic page's folder (`tests/m3.png`), a line of text
    * - throws a `TypeError` for a Should without a Step, or the reverse:  a test says both
    */
   static fieldsHTML({ step, should, example, ifNot }: TestFieldValues): string {
@@ -266,7 +266,7 @@ export type EpicTestCount = {
 
 /** An open test, as the run shows it (`EpicTests.openIn()`, `epic test <epic> --list --json`). */
 export type OpenTest = {
-  /** its id, upper case:  `T3` */
+  /** its id, upper case:  `M3` */
   id: string
   /** its title */
   title: string
@@ -282,7 +282,7 @@ export type OpenTest = {
   should?: string
   /** the Example's text */
   example?: string
-  /** the Example's screenshot, from the epic page's folder:  `tests/t3.png` */
+  /** the Example's screenshot, from the epic page's folder:  `tests/m3.png` */
   image?: string
   /** what to tell Claude when it doesn't */
   ifNot?: string
@@ -318,7 +318,7 @@ export const TESTS_API = "/api/epics/tests"
 export const TEST_ACTION = "epic-test-action"
 
 /** A test item's id. */
-const TEST_ID = /^t\d+$/
+const TEST_ID = /^m\d+$/
 
 ////////////////
 // ## Helpers

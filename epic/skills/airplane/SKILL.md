@@ -7,7 +7,7 @@ argument-hint: '[land | status]'
 # /airplane
 
 Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (epic `airplane`).
-- He reads epic pages and guides in VS Code's right side bar, marks items, writes notes, adds caveats and questions.
+- He reads epic pages and guides in VS Code's right side bar, marks items, writes notes, adds todos and questions.
 - Every page saves to this laptop's page server.
 - `/airplane` gets the laptop ready before;  `/airplane land` works through what he left, after.
 
@@ -64,7 +64,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
    - how it works on the plane, as bullets:
      - open an epic page:  the Review tab's list button, "Review:  Open Epic...";  any page:  "Review:  Home Page"
      - mark items as usual;  Send isn't needed:  every mark is taken at landing, sent or not
-     - "+" on an epic page's header (or its Caveats / Questions):  a new caveat or question;
+     - "+" on an epic page's header (or its Todo / Questions):  a new todo or question;
        the bubble on a phase or the summary:  a note
      - any page, epic pages too:  a comment, saved at once
        - the bullhorn beside a block (a section, table, aside, code, an item, a phase's field ...)
@@ -112,9 +112,9 @@ Owen is back online.  Gather everything, work through it in the background, then
 3. Reply at once, short:  the counts by place, and that the work runs in the background now.
 4. Per epic, in the session itself (quick):  `epic inbox apply <name> --all`.
    - Into the doc go, sent or not (Owen's decision Q3 of `airplane`):
-     - approvals, picks, caveats made, and new items
-     - a caveat's plane:  queued into the next phase
-     - a caveat's x:  dropped, canceled
+     - approvals, picks, todos made, and new items
+     - a todo's plane:  queued into the next phase
+     - a todo's x:  dropped, canceled
      - a note box's x:  skipped, reviewed with nothing to do
 
 4b. Docs pages' comments, in the session itself (quick):  `epic comments gather --json`.
@@ -144,10 +144,10 @@ Owen is back online.  Gather everything, work through it in the background, then
    - A mark that only asked to RECORD a choice (no answer to write):
      `status ... noted "<what was recorded;  what happens next>"`.
      - Never `done` (Owen, 2026-10-10:  a Done card means work was done).
-     - The cards `apply --all` makes for picks, caveats and new items are Noted already.
+     - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
-     - First `epic inbox working <name>#M3 on`:  his thread shows "Claude: thinking…" until the answer lands.
-     - Into the item or phase it's on, then `epic inbox done <name>#M3 --file <answer.html>`.
+     - First `epic inbox working <name>#C3 on`:  his thread shows "Claude: thinking…" until the answer lands.
+     - Into the item or phase it's on, then `epic inbox done <name>#C3 --file <answer.html>`.
        - The answer goes on his thread too:  his turn, and the thinking stub gone.
      - A reply of his:  answer his latest words.
    - Page notes were gathered in 4b with the comments.

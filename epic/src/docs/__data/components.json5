@@ -1878,20 +1878,22 @@
         "question",
         "decision",
         "judgement call",
-        "caveat",
         "todo",
+        "limit",
+        "caveat",
         "issue",
         "test",
+        "manual test",
         "ticket"
       ],
-      "description": "One item:  a question, judgement call, caveat, todo, issue or test -- ONE element for every kind, the kind its id's letter (Q11).  Its line (id chip in its state's colour, title, review label, review buttons) and note box are drawn;  its details, choices, answer, replies, earlier versions and commits are its children.",
+      "description": "One item:  a question, judgement call, todo, issue or manual test -- ONE element for every kind, the kind its id's letter (Q11).  Its line (id chip in its state's colour, title, review label, review buttons) and note box are drawn;  its details, choices, answer, replies, earlier versions and commits are its children.",
       "noun": "item",
       "attributes": [
         {
           "name": "id",
           "kind": "string",
           "property": "epicId",
-          "description": "`q7` (question), `j3` (judgement call), `c1` (caveat), `t4` (todo), `i2` (issue), `v1` (test):  shown as `Q7`;  links use it (`#q7`)."
+          "description": "`q7` (question), `j3` (judgement call), `t4` (todo, or a limit), `i2` (issue), `m1` (manual test):  shown as `Q7`;  links use it (`#q7`)."
         },
         {
           "name": "title",
@@ -1991,7 +1993,7 @@
         {
           "name": "limit",
           "kind": "boolean",
-          "description": "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered for the next phase;  a caveat without it is work still to do (a todo, before P32)."
+          "description": "A todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn calmer, and never offered for the next phase;  a todo without it is work still to do."
         },
         {
           "name": "bedtime",
@@ -2373,8 +2375,8 @@
         },
         {
           "key": "todo",
-          "text": "Make Caveat",
-          "description": "Review button:  its name (a todo, before epic `epic-engine` P32)."
+          "text": "Make Todo",
+          "description": "Review button:  its name (Make Caveat, epic `epic-engine` P32 to P44)."
         },
         {
           "key": "revisit",
@@ -3500,7 +3502,7 @@
             "phases",
             "building"
           ],
-          "description": "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, Questions and Caveats only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
+          "description": "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, Questions and Todo only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
         },
         {
           "name": "saga",
@@ -3630,7 +3632,7 @@
         },
         {
           "name": "test-run",
-          "description": "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the To test section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, `epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
+          "description": "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, `epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
         }
       ],
       "states": [
@@ -3880,7 +3882,7 @@
         },
         {
           "key": "stageOverviewTip",
-          "text": "Agreeing the Overview:  only it, the questions and caveats show until Accept Overview",
+          "text": "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
           "description": "The step label's tooltip, Overview stage."
         },
         {
@@ -5015,7 +5017,7 @@
             "phases",
             "questions",
             "judgements",
-            "caveats",
+            "todos",
             "issues",
             "tests",
             "log",
@@ -5109,7 +5111,7 @@
         {
           "name": "epic-test-opening",
           "detail": "{}",
-          "description": "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
+          "description": "The Manual tests section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
         }
       ],
       "parts": [
@@ -5163,7 +5165,7 @@
         },
         {
           "name": "new-item",
-          "description": "A Todos, Questions, Issues or Tests section's New todo / question / issue / test (an `<epic-new-item>`, epic `airplane` P2), at its end:  the button, or the form in its place.  Only while the page is reviewed."
+          "description": "A Todo, Questions, Issues or Manual tests section's New todo / question / issue / test (an `<epic-new-item>`, epic `airplane` P2), at its end:  the button, or the form in its place.  Only while the page is reviewed."
         },
         {
           "name": "new-button",
@@ -5171,11 +5173,11 @@
         },
         {
           "name": "new-list",
-          "description": "A Todos or Questions section's new items waiting to be made:  dashed until sent, then outlined."
+          "description": "A Todo or Questions section's new items waiting to be made:  dashed until sent, then outlined."
         },
         {
           "name": "start-testing",
-          "description": "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
+          "description": "The Manual tests section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
         }
       ],
       "states": [
@@ -5234,8 +5236,8 @@
           "text": "Judgement calls"
         },
         {
-          "key": "caveatsTitle",
-          "text": "Caveats"
+          "key": "todosTitle",
+          "text": "Todo"
         },
         {
           "key": "issuesTitle",
@@ -5243,7 +5245,7 @@
         },
         {
           "key": "testsTitle",
-          "text": "To test"
+          "text": "Manual tests"
         },
         {
           "key": "logTitle",
@@ -5287,7 +5289,7 @@
         {
           "key": "startTesting",
           "text": "Start testing · {count}",
-          "description": "The To test section's button on its title (epic `epic-engine` P4):  how many tests are open."
+          "description": "The Manual tests section's button on its title (epic `epic-engine` P4):  how many tests are open."
         },
         {
           "key": "startTestingTip",
@@ -5296,8 +5298,8 @@
         },
         {
           "key": "newTodo",
-          "text": "Caveat",
-          "description": "Kind:  a caveat, work still to do (a todo, before epic `epic-engine` P32)."
+          "text": "Todo",
+          "description": "Kind:  a todo, work still to do (a caveat, epic `epic-engine` P32 to P44)."
         },
         {
           "key": "newQuestion",
@@ -5311,8 +5313,8 @@
         },
         {
           "key": "newTest",
-          "text": "Test",
-          "description": "Kind:  a test, for Owen to try by hand."
+          "text": "Manual test",
+          "description": "Kind:  a manual test, for Owen to try by hand."
         },
         {
           "key": "newPhase",
@@ -6021,7 +6023,7 @@
         "to test",
         "hand checks"
       ],
-      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
+      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the Manual tests section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
       "noun": "test run",
       "attributes": [
         {
@@ -6535,7 +6537,7 @@
         "conversation",
         "reply"
       ],
-      "description": "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green check circle once done), its id (`M3`), the first words it's on;  while it's Owen's turn, his answer (an item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen did:  the comments' code saves and redraws.",
+      "description": "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green check circle once done), its id (`C3`), the first words it's on;  while it's Owen's turn, his answer (an item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen did:  the comments' code saves and redraws.",
       "noun": "thread",
       "attributes": [
         {
@@ -6626,7 +6628,7 @@
         },
         {
           "name": "id",
-          "description": "Its id, `M3`:  small and muted, an outline and no fill."
+          "description": "Its id, `C3`:  small and muted, an outline and no fill."
         },
         {
           "name": "headline",
@@ -7312,7 +7314,7 @@
       "folder": "epic-item",
       "mainTag": "epic-item",
       "title": "<epic-item>",
-      "summary": "One item of an epic page: a question, judgement call, caveat, todo, issue or test, drawn as a line that unfolds.",
+      "summary": "One item of an epic page: a question, judgement call, todo, issue or manual test, drawn as a line that unfolds.",
       "status": "done",
       "docs": false,
       "tags": [

@@ -190,7 +190,7 @@ export class EpicProgram {
     ).usage("[--json]")
     this.page(
       epic.command("summary"),
-      "an epic's phases, the next one, its open questions, issues, caveats and todos",
+      "an epic's phases, the next one, its open questions, issues, todos and manual tests",
       "epic summary seo"
     ).usage("<epic> [--json]")
     this.page(
@@ -293,9 +293,9 @@ export class EpicProgram {
 
     epic.commandsGroup("Epic page:  items:")
 
-    this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, C caveat, T test, D decision)")
+    this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, T todo, M manual test, D decision)")
       .usage(
-        '<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#C "Title" [--limit]  |  <epic>#T "Title" --step <html> ...'
+        '<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
       )
       .addHelpText("after", ADD_HELP)
     this.page(
@@ -325,7 +325,7 @@ export class EpicProgram {
       epic.command("details"),
       "write an agent's details or reply into an item;  --append adds it, --more under it",
       "epic details seo#J3 --file reply.html"
-    ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#T3 --step <html> --should <html> ...")
+    ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#M3 --step <html> --should <html> ...")
     this.page(
       epic.command("summarize"),
       "condense an item after a lot of back and forth:  the file replaces what it shows;  its text and every reply " +
@@ -365,7 +365,7 @@ export class EpicProgram {
       "the marks and comments Owen sends from the page, and how a review session takes them"
     )
       .usage(
-        '[watch | ignore | wait | apply] <epic>  |  status <epic> "<text>" [--items q3,m2] | --clear  |  ' +
+        '[watch | ignore | wait | apply] <epic>  |  status <epic> "<text>" [--items q3,c2] | --clear  |  ' +
           "working <epic>#J3 on | off  |  done | clear <epic>#J3"
       )
       .addHelpText("after", INBOX_HELP)
@@ -374,7 +374,7 @@ export class EpicProgram {
       "Owen's test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
         "epic's;  --list:  the open tests"
     )
-      .usage("<epic>[#T3] [--list [--json]]  |  --all [--list] [--json]")
+      .usage("<epic>[#M3] [--list [--json]]  |  --all [--list] [--json]")
       .addHelpText("after", TEST_HELP)
 
     ////////////////
@@ -851,12 +851,12 @@ function rawArgs(verb: string): string[] {
 const EPIC_HELP = `
 Naming what a verb acts on:
   seo                 the epic's page, epics/seo/seo.plan.html
-  seo#J3              an item:  J3 (a comment on the page, seo#M3, too;  m3, cm3 read the same)
+  seo#J3              an item:  J3 (a comment on the page, seo#C3, too;  the old cm3 reads the same)
   seo#P3              a phase:  P3, or by its id, seo#p-epic-migrate;  phase, updated and file take its name
                       too:  seo#epic-migrate, "seo#Epic Migrate"
   seo#J               a new item of that kind, for add:  epic add seo#J "Title"
   SAGA:/epics         a saga's page, sagas/epics/epics.saga.html:  epic add SAGA:/epics#T "Title"
-  guides/x.html#M3    a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
+  guides/x.html#C3    a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
 
 Examples:
   epic summary seo
@@ -994,11 +994,12 @@ Example:
 /** After `epic add --help`. */
 const ADD_HELP = `
 Prints the new item's id.  The letter after # is its kind:
-  J judgement   Q question   I issue   C caveat   T test (checked by hand)   D decision (a question born answered)
-A caveat (C) is work still to do (a todo, before epic-engine P32);  --limit:  a limit to know about, not work.
+  J judgement   Q question   I issue   T todo   M manual test (checked by hand)   D decision (a question born answered)
+A todo (T) is work still to do;  --limit:  a limit to know about, not work.
+The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
-A test (T;  V, its old letter, still works) Owen's test run steps him through, its fields HTML, or plain text:
-steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#T3 takes them too):
+A manual test (M) Owen's test run steps him through, its fields HTML, or plain text:
+steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run;
                       the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
                       fenced block in plain text), which the run shows with a Copy button;  a wait its own step
@@ -1008,9 +1009,9 @@ steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic detail
 
 Examples:
   epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
-  epic add seo#C "Retry the upload once it's online"
-  epic add seo#C "Find-in-page misses folded text" --limit
-  epic add seo#T "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
+  epic add seo#T "Retry the upload once it's online"
+  epic add seo#T "Find-in-page misses folded text" --limit
+  epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
 
 /** After `epic test --help`. */
 const TEST_HELP = `
@@ -1019,7 +1020,7 @@ and a screenshot), Skip or Not now, and Send hands them to the session listening
 
 Examples:
   epic test seo                   the run, in the Review tab (the page with ?test=1)
-  epic test seo#T3                ... at T3
+  epic test seo#M3                ... at M3
   epic test seo --list [--json]   its open tests, in the run's order:  page order, Not now ones last
   epic test --all [--list]        every epic with open tests, in Owen's saga order;  the first one opened,
                                   its last card leading to the next`
@@ -1033,7 +1034,7 @@ Examples:
   epic inbox watch seo            this session waits on the inbox (the page says someone's reviewing);  ignore:  stopped
   epic inbox wait seo             block until there's work, print it, exit 0 (run it in the background)
   epic inbox apply seo [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not
-  epic inbox working seo#J3 on    the page's spinner on an item (or a comment, seo#M3);  off:  stopped
-  epic inbox status seo "Responding" --items q3,m2   the toolbar's line:  what the session is doing;  --clear:  idle
+  epic inbox working seo#J3 on    the page's spinner on an item (or a comment, seo#C3);  off:  stopped
+  epic inbox status seo "Responding" --items q3,c2   the toolbar's line:  what the session is doing;  --clear:  idle
   epic inbox done seo#J3          an agent finished the item:  its mark and spinner go
   epic inbox clear seo#J3         drop its marks (a revisit talked over)`

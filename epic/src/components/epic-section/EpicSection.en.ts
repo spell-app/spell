@@ -53,7 +53,7 @@ export const epicSectionVocabulary = {
         "phases",
         "questions",
         "judgements",
-        "caveats",
+        "todos",
         "issues",
         "tests",
         "log",
@@ -107,7 +107,7 @@ export const epicSectionVocabulary = {
       name: "epic-test-opening",
       detail: "{}",
       description:
-        "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
+        "The Manual tests section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
     }
   ],
   slots: [
@@ -147,7 +147,7 @@ export const epicSectionVocabulary = {
     {
       name: "new-item",
       description:
-        "A Todos, Questions, Issues or Tests section's New todo / question / issue / test (an `<epic-new-item>`, epic " +
+        "A Todo, Questions, Issues or Manual tests section's New todo / question / issue / test (an `<epic-new-item>`, epic " +
         "`airplane` P2), at its end:  the button, or the form in its place.  Only while the page is reviewed."
     },
     {
@@ -157,12 +157,12 @@ export const epicSectionVocabulary = {
     },
     {
       name: "new-list",
-      description: "A Todos or Questions section's new items waiting to be made:  dashed until sent, then outlined."
+      description: "A Todo or Questions section's new items waiting to be made:  dashed until sent, then outlined."
     },
     {
       name: "start-testing",
       description:
-        "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
+        "The Manual tests section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
         "open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
     }
   ],
@@ -176,9 +176,9 @@ export const epicSectionVocabulary = {
     { key: "phasesTitle", text: "Phases" },
     { key: "questionsTitle", text: "Questions" },
     { key: "judgementsTitle", text: "Judgement calls" },
-    { key: "caveatsTitle", text: "Caveats" },
+    { key: "todosTitle", text: "Todo" },
     { key: "issuesTitle", text: "Issues" },
-    { key: "testsTitle", text: "To test" },
+    { key: "testsTitle", text: "Manual tests" },
     { key: "logTitle", text: "Log" },
     { key: "noneYet", text: "None yet", description: "An item section with no items." },
     { key: "showFiles", text: "Show each phase's Files", description: "The Phases title's Files toggle, off." },
@@ -194,7 +194,7 @@ export const epicSectionVocabulary = {
     {
       key: "startTesting",
       text: "Start testing · {count}",
-      description: "The To test section's button on its title (epic `epic-engine` P4):  how many tests are open."
+      description: "The Manual tests section's button on its title (epic `epic-engine` P4):  how many tests are open."
     },
     {
       key: "startTestingTip",
@@ -229,7 +229,7 @@ export const epicSectionVocabulary = {
     { tag: "epic-phase", when: { attribute: "kind", values: ["phases"] }, description: "The phases, in order." },
     {
       tag: "epic-item",
-      when: { attribute: "kind", values: ["questions", "judgements", "caveats", "issues", "tests"] },
+      when: { attribute: "kind", values: ["questions", "judgements", "todos", "issues", "tests"] },
       description: "The items, their id's letter the section's (`q` in Questions)."
     },
     { tag: "epic-event", when: { attribute: "kind", values: ["log"] }, description: "The log, oldest first." },

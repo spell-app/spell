@@ -20,9 +20,9 @@ import { PageInboxes } from "spell-epic/tools/PageInboxes"
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
 
-const T1 = "2026-10-07T10:00:00.000-04:00"
-const T2 = "2026-10-07T10:01:00.000-04:00"
-const T3 = "2026-10-07T10:02:00.000-04:00"
+const M1 = "2026-10-07T10:00:00.000-04:00"
+const M2 = "2026-10-07T10:01:00.000-04:00"
+const M3 = "2026-10-07T10:02:00.000-04:00"
 
 const root = mkdtempSync(join(tmpdir(), "inbox-commands-"))
 const file = join(root, "epics", "x", "x.plan.html")
@@ -57,10 +57,10 @@ afterAll(() => rmSync(root, { recursive: true, force: true }))
 
 test("apply:  the SENT urgency from the id chips goes into the doc, logged, and leaves the inbox;  unsent waits", async () => {
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setUrgency("j1", true, T1)
-    inbox.setUrgency("j2", false, T1)
-    inbox.markSent(T2)
-    inbox.setUrgency("j1", false, T3)
+    inbox.setUrgency("j1", true, M1)
+    inbox.setUrgency("j2", false, M1)
+    inbox.markSent(M2)
+    inbox.setUrgency("j1", false, M3)
   })
   // j1 changed after the send:  not applied, kept
   await commands().inbox.run("x", file, ["apply"], {})
@@ -73,8 +73,8 @@ test("apply:  the SENT urgency from the id chips goes into the doc, logged, and 
   expect(printed.join("\n")).toContain("J2  marked urgent")
   expect(Object.keys(ReviewInbox.read(inboxFile).urgency)).toEqual(["j1"])
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setUrgency("j1", true, T3)
-    inbox.markSent(T3)
+    inbox.setUrgency("j1", true, M3)
+    inbox.markSent(M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.getAttribute("state")).toBe("open")
@@ -92,10 +92,10 @@ test("apply:  a sent pick on a judgement call's reply cards (I8) approves it wit
   plan.addItem("question", "which?", { details: `<p>why</p>${options(["A", "B"])}` })
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("j1", { action: "pick", pick: "C", choices: 1 }, T1)
+    inbox.setMark("j1", { action: "pick", pick: "C", choices: 1 }, M1)
     // a mark from before I8:  no card set, the question's own
-    inbox.setMark("q1", { action: "pick", pick: "B" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("q1", { action: "pick", pick: "B" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -113,23 +113,23 @@ test("apply:  a sent pick on a judgement call's reply cards (I8) approves it wit
 })
 
 test("print:  the urgency waiting, by item, sent or not", async () => {
-  ReviewInbox.update(inboxFile, (inbox) => inbox.setUrgency("j2", false, T1))
+  ReviewInbox.update(inboxFile, (inbox) => inbox.setUrgency("j2", false, M1))
   await commands().inbox.run("x", file, [], {})
   expect(printed.join("\n")).toMatch(/urgency, from the id chips \(1\):\n {2}- J2 {2}follows WWOD {2}· urgent · unsent/)
 })
 
 test("apply:  a sent todo gets a status card born NOTED, saying what was recorded (Q19);  an approval none", async () => {
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("j1", { action: "todo" }, T1)
-    inbox.setMark("j2", { action: "approve" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("j1", { action: "todo" }, M1)
+    inbox.setMark("j2", { action: "approve" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   const card = plan.findItem("j1")!.querySelector(':scope > epic-status[slot="status"]')!
   expect([card.getAttribute("state"), card.innerHTML]).toEqual([
     "noted",
-    '<p>Made caveat <a href="#c1">C1</a> to follow this up.</p>'
+    '<p>Made todo <a href="#t1">T1</a> to follow this up.</p>'
   ])
   expect(plan.findItem("j2")!.querySelector("epic-status")).toBeNull()
 })
@@ -144,13 +144,13 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
   plan.updateStates()
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("c1", { action: "next", note: "after the merge" }, T1)
-    inbox.setMark("c2", { action: "drop" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("t1", { action: "next", note: "after the merge" }, M1)
+    inbox.setMark("t2", { action: "drop" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  const t1 = after.findItem("c1")!
+  const t1 = after.findItem("t1")!
   expect([t1.getAttribute("queued"), t1.getAttribute("work"), t1.getAttribute("review-as")]).toEqual([
     after.today,
     "P2 · Fold Into Elements",
@@ -160,16 +160,16 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
   expect([card.getAttribute("state"), card.textContent]).toEqual(["noted", "Queued for P2 · Fold Into Elements"])
   // Owen's note kept, as his reply
   expect(t1.querySelector('epic-reply[from="Owen"]')?.textContent).toBe("after the merge")
-  const t2 = after.findItem("c2")!
+  const t2 = after.findItem("t2")!
   expect([t2.getAttribute("status"), t2.getAttribute("state"), t2.getAttribute("review-as")]).toEqual([
     "canceled",
     "old",
     "drop"
   ])
   const out = printed.join("\n")
-  expect(out).toContain("C1  queued for P2 · Fold Into Elements")
-  expect(out).toContain("C2  canceled:  dropped by Owen in review")
-  expect(after.toString()).toMatch(/C2 canceled:\s+dropped by Owen in review/)
+  expect(out).toContain("T1  queued for P2 · Fold Into Elements")
+  expect(out).toContain("T2  canceled:  dropped by Owen in review")
+  expect(after.toString()).toMatch(/T2 canceled:\s+dropped by Owen in review/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -178,16 +178,16 @@ test("apply:  a todo's plane with no phase still to do:  queued for the next pha
   plan.addItem("todo", "later")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("c1", { action: "next" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("t1", { action: "next" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
-  const t1 = PlanDoc.parse(readFileSync(file, "utf8")).findItem("c1")!
+  const t1 = PlanDoc.parse(readFileSync(file, "utf8")).findItem("t1")!
   expect(t1.getAttribute("work")).toBe("the next phase")
   expect(t1.querySelector("epic-status")!.textContent).toMatch(
     /^Queued for the next phase:\s+there's no phase to do yet$/
   )
-  expect(printed.join("\n")).toContain("C1  queued for the next phase (no phase to do yet)")
+  expect(printed.join("\n")).toContain("T1  queued for the next phase (no phase to do yet)")
 })
 
 test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  a todo dropped;  a phase noted", async () => {
@@ -198,11 +198,11 @@ test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  
   plan.updateStates()
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("j1", { action: "skip", note: "covered by P3" }, T1)
-    inbox.setMark("q1", { action: "skip" }, T1)
-    inbox.setMark("c1", { action: "skip" }, T1)
-    inbox.setMark("p1", { action: "skip", note: "fine as planned" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("j1", { action: "skip", note: "covered by P3" }, M1)
+    inbox.setMark("q1", { action: "skip" }, M1)
+    inbox.setMark("t1", { action: "skip" }, M1)
+    inbox.setMark("p1", { action: "skip", note: "fine as planned" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -217,20 +217,20 @@ test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  
   expect(after.findItem("j1")!.getAttribute("state")).not.toBe("attention")
   expect(after.findItem("j1")!.querySelector('epic-reply[from="Owen"][re="skip"]')?.textContent).toBe("covered by P3")
   // a todo:  skipping it IS dropping it
-  expect(facts("c1")).toEqual(["canceled", after.today, "drop"])
+  expect(facts("t1")).toEqual(["canceled", after.today, "drop"])
   expect(after.document.getElementById("p-bring-it-in")!.querySelector('epic-reply[from="Owen"]')?.textContent).toBe(
     "fine as planned"
   )
   const out = printed.join("\n")
   expect(out).toContain("J1  skipped:  nothing to do, reviewed (his note kept)")
   expect(out).toContain("Q1  skipped:  nothing to do, reviewed")
-  expect(out).toContain("C1  canceled:  dropped by Owen in review")
+  expect(out).toContain("T1  canceled:  dropped by Owen in review")
   expect(out).toContain("P1  skipped:  nothing to do (his note kept)")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
 test("apply --all:  marks never sent are applied too, as if sent (`/airplane land`)", async () => {
-  ReviewInbox.update(inboxFile, (inbox) => inbox.setMark("j1", { action: "todo" }, T1))
+  ReviewInbox.update(inboxFile, (inbox) => inbox.setMark("j1", { action: "todo" }, M1))
   await commands().inbox.run("x", file, ["apply"], {})
   expect(ReviewInbox.read(inboxFile).marks.j1).toBeDefined()
   await commands().inbox.run("x", file, ["apply"], { all: true })
@@ -240,8 +240,8 @@ test("apply --all:  marks never sent are applied too, as if sent (`/airplane lan
 
 test("done:  a Do Now request done is `review-as=now`;  a revisit talked over, `revisit`:  neither settles it (J10)", async () => {
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.requestNow("j1", "details", "", T1)
-    inbox.setMark("j2", { action: "revisit", when: "soon", note: "why?" }, T1)
+    inbox.requestNow("j1", "details", "", M1)
+    inbox.setMark("j2", { action: "revisit", when: "soon", note: "why?" }, M1)
   })
   await commands().inbox.run("x", file, ["done", "j1"], {})
   await commands().inbox.run("x", file, ["clear", "j2"], {})
@@ -254,8 +254,8 @@ test("done:  a Do Now request done is `review-as=now`;  a revisit talked over, `
   expect(["j1", "j2"].map((id) => plan.findItem(id)!.getAttribute("state"))).not.toContain("recent")
 })
 
-test("done M1 --file:  the answer goes on the comment's thread;  Owen's reply lists it as waiting again", async () => {
-  const id = "m1"
+test("done C1 --file:  the answer goes on the comment's thread;  Owen's reply lists it as waiting again", async () => {
+  const id = "c1"
   ReviewInbox.update(inboxFile, (inbox) => void inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?"))
   const answer = join(root, "answer.html")
   writeFileSync(answer, "<p>Because.</p>\n")
@@ -265,29 +265,29 @@ test("done M1 --file:  the answer goes on the comment's thread;  Owen's reply li
   ])
   ReviewInbox.update(inboxFile, (inbox) => inbox.commentList.reply(id, "Say more"))
   await commands().inbox.run("x", file, [], {})
-  expect(printed.join("\n")).toMatch(/M1 {2}on j1 \(item\)[^\n]*\n {4}Owen replied:  "Say more"/)
+  expect(printed.join("\n")).toMatch(/C1 {2}on j1 \(item\)[^\n]*\n {4}Owen replied:  "Say more"/)
 })
 
 // Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up" -- he keeps Send as the way comments
 // reach Claude, so a send with only comments must wake the waiting session
 test("wait:  a send with ONLY comments wakes it, and prints each comment and Owen's latest reply;  once", async () => {
   ReviewInbox.update(inboxFile, (inbox) => {
-    const id = inbox.commentList.add({ anchor: "j1", kind: "item", quote: "a real choice" }, "Why?", new Date(T1))
-    inbox.commentList.answer(id, "<p>Because.</p>", new Date(T1))
-    inbox.commentList.reply(id, "Say more", new Date(T2))
-    inbox.commentList.add({ anchor: "p1#field-1", kind: "field" }, "Is this hooked up?", new Date(T2))
+    const id = inbox.commentList.add({ anchor: "j1", kind: "item", quote: "a real choice" }, "Why?", new Date(M1))
+    inbox.commentList.answer(id, "<p>Because.</p>", new Date(M1))
+    inbox.commentList.reply(id, "Say more", new Date(M2))
+    inbox.commentList.add({ anchor: "p1#field-1", kind: "field" }, "Is this hooked up?", new Date(M2))
   })
   await commands().inbox.run("x", file, [], {})
   expect(printed.join("\n")).toMatch(/sent:  never;  2 unsent/)
   printed = []
-  ReviewInbox.update(inboxFile, (inbox) => inbox.markSent(T3))
+  ReviewInbox.update(inboxFile, (inbox) => inbox.markSent(M3))
   expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
   const said = printed.join("\n")
   expect(said).toMatch(/^sent [^\n]* \(0 marks, 2 comments\):/)
   expect(said).toMatch(
-    /M1 {2}on j1 \(item\) {2}quoting "a real choice" {2}"Why\?"[^\n]*\n {6}Owen replied:  "Say more"/
+    /C1 {2}on j1 \(item\) {2}quoting "a real choice" {2}"Why\?"[^\n]*\n {6}Owen replied:  "Say more"/
   )
-  expect(said).toMatch(/M2 {2}on p1#field-1 \(field\) {2}"Is this hooked up\?"/)
+  expect(said).toMatch(/C2 {2}on p1#field-1 \(field\) {2}"Is this hooked up\?"/)
   expect(said).toMatch(/epic inbox working x#<M id> on/)
   // nothing to apply:  no line saying so
   expect(said).not.toMatch(/epic inbox apply x/)
@@ -309,22 +309,22 @@ function ownGuide(): string {
 test("wait:  a Send on a guide the epic owns wakes it, each comment under its page;  once;  `inbox` lists it", async () => {
   const guide = GuideInbox.fileFor(ownGuide())
   GuideInbox.update(guide, (comments) => {
-    comments.add({ anchor: "summary", kind: "section", label: "1. Summary" }, "Too long?", new Date(T1))
+    comments.add({ anchor: "summary", kind: "section", label: "1. Summary" }, "Too long?", new Date(M1))
   })
   await commands().inbox.run("x", file, [], {})
   expect(printed.join("\n")).toMatch(
-    /comments on the pages x owns, waiting for an answer \(1\):\n {2}guides\/x\.html {2}\(sent never\)\n {4}- M1 {2}on summary \(section\) {2}"Too long\?"[^\n]*· unsent/
+    /comments on the pages x owns, waiting for an answer \(1\):\n {2}guides\/x\.html {2}\(sent never\)\n {4}- C1 {2}on summary \(section\) {2}"Too long\?"[^\n]*· unsent/
   )
   printed = []
-  GuideInbox.update(guide, (_comments, inbox) => inbox.markSent(T2))
+  GuideInbox.update(guide, (_comments, inbox) => inbox.markSent(M2))
   expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
   const said = printed.join("\n")
-  expect(said).toMatch(/^sent from the pages x owns \(1 comment\):\n {2}guides\/x\.html {2}\(sent [^)]+\):\n {4}- M1/)
+  expect(said).toMatch(/^sent from the pages x owns \(1 comment\):\n {2}guides\/x\.html {2}\(sent [^)]+\):\n {4}- C1/)
   expect(said).toMatch(/epic comments working <page>#<M id> on/)
   expect(GuideInbox.read(guide).hasNewSend).toBe(false)
 })
 
-// epic `epic-engine` T9 (J7):  the STANDING epic `feedback` hears every page no epic owns;  `guide-changes` is it too
+// epic `epic-engine` M9 (J7):  the STANDING epic `feedback` hears every page no epic owns;  `guide-changes` is it too
 test("wait:  feedback hears a Send on a page no epic owns, not on one an epic owns;  asked as guide-changes too", async () => {
   // only the scratch checkout's inboxes:  never the engine's real Epic UI folder's
   const found = PageInboxes.prototype.inboxFiles
@@ -341,8 +341,8 @@ test("wait:  feedback hears a Send on a page no epic owns, not on one an epic ow
   const unowned = GuideInbox.fileFor(join(root, "pages", "list.html"))
   for (const inbox of [owned, unowned])
     GuideInbox.update(inbox, (comments, box) => {
-      comments.add({ anchor: "page", kind: "page", label: "" }, "Which epic?", new Date(T1))
-      box.markSent(T2)
+      comments.add({ anchor: "page", kind: "page", label: "" }, "Which epic?", new Date(M1))
+      box.markSent(M2)
     })
   try {
     expect(await commands().inbox.run("guide-changes", feedback, ["wait"], { timeout: "5" })).toBeUndefined()
@@ -360,30 +360,30 @@ test("wait:  feedback hears a Send on a page no epic owns, not on one an epic ow
 
 test("wait --json:  the send's comments, as the inbox holds them", async () => {
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?", new Date(T1))
-    inbox.markSent(T2)
+    inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?", new Date(M1))
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["wait"], { timeout: "5", json: true })
   const work = JSON.parse(printed.join("\n")) as { sent: { comments: { id: string; text: string }[] } }
-  expect(work.sent.comments).toMatchObject([{ id: "m1", text: "Why?" }])
+  expect(work.sent.comments).toMatchObject([{ id: "c1", text: "Why?" }])
 })
 
-test("working M1 on | off (m1, the old m1 too):  the thread's thinking stub, not an item's spinner;  done turns it off", async () => {
-  const id = "m1"
+test("working C1 on | off (c1, the old c1 too):  the thread's thinking stub, not an item's spinner;  done turns it off", async () => {
+  const id = "c1"
   ReviewInbox.update(inboxFile, (inbox) => void inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?"))
   const comment = () => ReviewInbox.read(inboxFile).comments[id]
-  await commands().inbox.run("x", file, ["working", "M1", "on"], {})
+  await commands().inbox.run("x", file, ["working", "C1", "on"], {})
   expect(comment().working).toEqual(expect.any(String))
   expect(ReviewInbox.read(inboxFile).working).toEqual({})
   // being thought about:  no longer waiting for Claude
   expect(ReviewInbox.read(inboxFile).commentList.waiting).toEqual([])
-  await commands().inbox.run("x", file, ["working", "m1", "off"], {})
+  await commands().inbox.run("x", file, ["working", "c1", "off"], {})
   expect(comment().working).toBeUndefined()
   await commands().inbox.run("x", file, ["working", "cm1", "on"], {})
   await commands().inbox.run("x", file, ["done", id], {})
   expect(comment().working).toBeUndefined()
-  expect(printed).toEqual(["M1 working:  on", "M1 working:  off", "M1 working:  on", "comments answered:  M1"])
-  await expect(commands().inbox.run("x", file, ["working", "cm9", "on"], {})).rejects.toThrow(/no comment M9/)
+  expect(printed).toEqual(["C1 working:  on", "C1 working:  off", "C1 working:  on", "comments answered:  C1"])
+  await expect(commands().inbox.run("x", file, ["working", "cm9", "on"], {})).rejects.toThrow(/no comment C9/)
 })
 
 test("status:  underway writes the card AND turns the page's spinner on;  done turns both;  done again is refused", async () => {
@@ -439,8 +439,8 @@ test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, w
   plan.setDetails("j1", `<p>weighed</p>${options}`)
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("j1", { action: "revisit", when: "soon", note: "B, but cheaper?", pick: "B" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("j1", { action: "revisit", when: "soon", note: "B, but cheaper?", pick: "B" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["clear", "j1"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -463,30 +463,30 @@ function withPhase() {
 test("apply:  sent new items are made, a phase's and the summary's todos filed;  all leave the inbox;  unsent waits", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setNew(undefined, { kind: "question", title: "window or aisle?", note: "long flight", near: "p1" }, T1)
-    inbox.setMark("p1", { action: "todo", note: "after the flight" }, T1)
-    inbox.setMark("summary", { action: "todo" }, T1)
-    inbox.markSent(T2)
-    inbox.setNew(undefined, { kind: "todo", title: "not sent yet" }, T3)
+    inbox.setNew(undefined, { kind: "question", title: "window or aisle?", note: "long flight", near: "p1" }, M1)
+    inbox.setMark("p1", { action: "todo", note: "after the flight" }, M1)
+    inbox.setMark("summary", { action: "todo" }, M1)
+    inbox.markSent(M2)
+    inbox.setNew(undefined, { kind: "todo", title: "not sent yet" }, M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n")).toBe(
-    ["NEW1  made question Q1:  window or aisle?", "P1  to caveat C1", "SUMMARY  to caveat C2"].join("\n")
+    ["NEW1  made question Q1:  window or aisle?", "P1  to todo T1", "SUMMARY  to todo T2"].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   // `near` the phase by its old id (`p1`):  linked by its stable one
   expect(after.findItem("q1")!.querySelector('a[href="#p-offline-pages"]')).not.toBeNull()
   expect(after.findItem("q1")!.querySelector('epic-status[state="noted"]')).not.toBeNull()
-  expect(after.findItem("c1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
-  expect(after.findItem("c2")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
+  expect(after.findItem("t2")!.getAttribute("title")).toBe("Follow up:  the summary")
   expect(Object.keys(ReviewInbox.read(inboxFile).marks)).toEqual(["new2"])
 })
 
 test("print:  a new item by its kind and title, with its note and what it's about;  a phase's mark by its title", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers", near: "j1" }, T1)
-    inbox.setMark("p1", { action: "revisit", note: "too big?" }, T1)
+    inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers", near: "j1" }, M1)
+    inbox.setMark("p1", { action: "revisit", note: "too big?" }, M1)
   })
   await commands().inbox.run("x", file, [], {})
   const text = printed.join("\n")
@@ -497,8 +497,8 @@ test("print:  a new item by its kind and title, with its note and what it's abou
 test("clear:  a phase's note is kept as Owen's reply in the phase;  a new item's note is never a reply", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("p1", { action: "revisit", note: "too big?" }, T1)
-    inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers" }, T1)
+    inbox.setMark("p1", { action: "revisit", note: "too big?" }, M1)
+    inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers" }, M1)
   })
   await commands().inbox.run("x", file, ["clear", "p1", "new1"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -515,14 +515,14 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
   for (const title of ["one", "two", "three", "four"]) plan.addItem("test", title)
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("t1", { action: "test", result: "passed" }, T1)
-    inbox.setMark("t2", { action: "test", result: "failed", note: "grey", shot: "tests/t2-20261007-1000.png" }, T1)
-    inbox.setMark("t3", { action: "test", result: "skip" }, T1)
-    inbox.setMark("t4", { action: "test", result: "notnow" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("m1", { action: "test", result: "passed" }, M1)
+    inbox.setMark("m2", { action: "test", result: "failed", note: "grey", shot: "tests/m2-20261007-1000.png" }, M1)
+    inbox.setMark("m3", { action: "test", result: "skip" }, M1)
+    inbox.setMark("m4", { action: "test", result: "notnow" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, [], {})
-  expect(printed.join("\n")).toContain('T2  two  · FAILED · comment "grey" · screenshot tests/t2-20261007-1000.png')
+  expect(printed.join("\n")).toContain('M2  two  · FAILED · comment "grey" · screenshot tests/m2-20261007-1000.png')
   printed = []
   await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
   const work = printed.join("\n")
@@ -530,27 +530,27 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
   )
   expect(work).toMatch(
-    /T2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/t2-20261007-1000\.png/
+    /M2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/m2-20261007-1000\.png/
   )
   expect(work).toContain("test results")
   printed = []
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n").split("\n")).toEqual([
-    "T1  passed (Owen's run)",
-    "T2  failed (Owen's run):  filed I1",
-    "T3  canceled:  no longer applies (Owen's run)",
-    "T4  not now:  deferred (Owen's run)",
+    "M1  passed (Owen's run)",
+    "M2  failed (Owen's run):  filed I1",
+    "M3  canceled:  no longer applies (Owen's run)",
+    "M4  not now:  deferred (Owen's run)",
     `failed tests (1):  tell Owen one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
-    "  T2 -> I1"
+    "  M2 -> I1"
   ])
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
-  expect(["t1", "t2", "t3", "t4"].map((id) => after.findItem(id)!.getAttribute("status"))).toEqual([
+  expect(["m1", "m2", "m3", "m4"].map((id) => after.findItem(id)!.getAttribute("status"))).toEqual([
     "done",
     "open",
     "canceled",
     "open"
   ])
-  expect(after.findItem("t2")!.getAttribute("failed")).toBe("i1")
+  expect(after.findItem("m2")!.getAttribute("failed")).toBe("i1")
   expect(ReviewInbox.read(inboxFile).marks).toEqual({})
 })
 
@@ -561,14 +561,14 @@ test("a failed test's issue on a split page:  its screenshot written into the pa
   plan.addItem("test", "one", { details: "<p>Do it.</p>" })
   await files.writeDoc(file, plan, true)
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("t1", { action: "test", result: "failed", note: "no", shot: "tests/t1-20261007-1000.png" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("m1", { action: "test", result: "failed", note: "no", shot: "tests/m1-20261007-1000.png" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(readFileSync(join(root, "epics", "x", "parts", "i1.html"), "utf8")).toContain(
-    'src="../tests/t1-20261007-1000.png"'
+    'src="../tests/m1-20261007-1000.png"'
   )
-  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/t1-20261007-1000.png")
+  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/m1-20261007-1000.png")
   rmSync(join(root, "epics", "x", "parts"), { recursive: true, force: true })
 })
 
@@ -578,8 +578,8 @@ test("apply:  a sent Accept Overview moves the page to the phases stage, logged;
   plan.setStage("overview")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("stage", { action: "accept", stage: "overview" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("stage", { action: "accept", stage: "overview" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -590,8 +590,8 @@ test("apply:  a sent Accept Overview moves the page to the phases stage, logged;
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
   // sent twice:  the page has moved on, so it's dropped, nothing changed
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("stage", { action: "accept", stage: "overview" }, T2)
-    inbox.markSent(T3)
+    inbox.setMark("stage", { action: "accept", stage: "overview" }, M2)
+    inbox.markSent(M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(PlanDoc.parse(readFileSync(file, "utf8")).stage).toBe("phases")
@@ -607,8 +607,8 @@ test("apply:  a sent Accept Phases accepts every build plan waiting too, and sta
   plan.setStage("phases")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("stage", { action: "accept", stage: "phases" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -623,9 +623,9 @@ test("apply:  a phase's sent Defer moves it after the others, still to do;  its 
   plan.setStage("phases")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("p-one", { action: "defer" }, T1)
-    inbox.setMark("p-two", { action: "approve" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("p-one", { action: "defer" }, M1)
+    inbox.setMark("p-two", { action: "approve" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -693,8 +693,8 @@ test("apply:  a change's sent Accept makes it accepted (no longer to accept), it
   plan.updateStates()
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("ch1", { action: "accept" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("ch1", { action: "accept" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   let after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -708,8 +708,8 @@ test("apply:  a change's sent Accept makes it accepted (no longer to accept), it
 
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("ch1", { action: "reopen" }, T2)
-    inbox.markSent(T3)
+    inbox.setMark("ch1", { action: "reopen" }, M2)
+    inbox.markSent(M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -747,8 +747,8 @@ test("apply:  Reopen on a phase's change mark takes `handled` off:  its question
   const change = plan.document.querySelector("epic-change")!.id
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark(change, { action: "reopen" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark(change, { action: "reopen" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -763,12 +763,12 @@ test("apply:  Reopen on a phase's change mark takes `handled` off:  its question
 
 test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere else;  the stage's Accept still needs its stage", () => {
   const inbox = ReviewInbox.read(inboxFile)
-  expect(inbox.setMark("ch2", { action: "accept" }, T1)).toMatchObject({ action: "accept" })
-  expect(inbox.setMark("ch2", { action: "reopen" }, T1)).toMatchObject({ action: "reopen" })
-  expect(() => inbox.setMark("ch2", { action: "approve" }, T1)).toThrow("a change takes Accept or Reopen, not approve")
-  expect(() => inbox.setMark("q1", { action: "reopen" }, T1)).toThrow("only a change (ch3 ...) takes Reopen")
-  expect(() => inbox.setMark("stage", { action: "accept" }, T1)).toThrow("accept which stage?")
-  expect(inbox.setMark("stage", { action: "accept", stage: "overview" }, T1)).toMatchObject({ stage: "overview" })
+  expect(inbox.setMark("ch2", { action: "accept" }, M1)).toMatchObject({ action: "accept" })
+  expect(inbox.setMark("ch2", { action: "reopen" }, M1)).toMatchObject({ action: "reopen" })
+  expect(() => inbox.setMark("ch2", { action: "approve" }, M1)).toThrow("a change takes Accept or Reopen, not approve")
+  expect(() => inbox.setMark("q1", { action: "reopen" }, M1)).toThrow("only a change (ch3 ...) takes Reopen")
+  expect(() => inbox.setMark("stage", { action: "accept" }, M1)).toThrow("accept which stage?")
+  expect(inbox.setMark("stage", { action: "accept", stage: "overview" }, M1)).toMatchObject({ stage: "overview" })
 })
 
 ////////////////
@@ -783,8 +783,8 @@ test("a phase's build plan waits for Owen:  Accept plan (approve) marks it accep
   expect(phase.getAttribute("plan")).toBe("waiting")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark(phase.id, { action: "approve" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark(phase.id, { action: "approve" }, M1)
+    inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -825,7 +825,7 @@ test("move:  a to-do phase to another place;  numbers, links and 'P3 · Name' te
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   for (const name of ["One", "Two", "Event", "Event Model"]) plan.addPhase(name)
   plan.setPhase(1, "done")
-  const q = plan.addItem("caveat", "Later")
+  const q = plan.addItem("limit", "Later")
   plan.document.getElementById(q)!.setAttribute("work", "P4 · Event Model")
   plan.document.getElementById(q)!.setAttribute("phase", "4")
   plan.findSection("log")!.insertAdjacentHTML("beforeend", "<epic-event>queued for P4 · Event Model</epic-event>")
@@ -859,26 +859,26 @@ test("status:  the session's line, with what it answers (titles from the doc, a 
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
     inbox.setListening("s1")
-    inbox.comments.m3 = {
+    inbox.comments.c3 = {
       anchor: "o1",
       kind: "section",
       label: "",
       excerpt: "",
       text: "This   reads oddly, and goes on",
-      at: T1,
+      at: M1,
       status: "new"
     } as never
   })
-  await commands().inbox.run("x", file, ["status", "Responding"], { items: `${q},m3` })
+  await commands().inbox.run("x", file, ["status", "Responding"], { items: `${q},c3` })
   const doing = ReviewInbox.read(inboxFile).doing!
   expect([doing.text, doing.items]).toEqual([
     "Responding",
     [
       { id: q, title: "Which way?" },
-      { id: "m3", title: "This reads oddly, and goes on" }
+      { id: "c3", title: "This reads oddly, and goes on" }
     ]
   ])
-  expect(printed.join("\n")).toContain(`doing:  Responding (${q.toUpperCase()}, M3)`)
+  expect(printed.join("\n")).toContain(`doing:  Responding (${q.toUpperCase()}, C3)`)
   await commands().inbox.run("x", file, ["status"], { clear: true })
   expect(ReviewInbox.read(inboxFile).doing).toBeNull()
   await expect(commands().inbox.run("x", file, ["status", "Responding"], { items: "q99" })).rejects.toThrow(
@@ -888,10 +888,10 @@ test("status:  the session's line, with what it answers (titles from the doc, a 
 
 test("a stale line never lingers:  ignore clears it;  the page reads none once the listener's heartbeat is old", () => {
   const inbox = ReviewInbox.read(inboxFile)
-  inbox.setListening("s1", T1)
-  inbox.setDoing({ text: "Building P35" }, T1)
-  expect(inbox.forPage(Date.parse(T1) + 1000).doing?.text).toBe("Building P35")
-  expect(inbox.forPage(Date.parse(T1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  inbox.setListening("s1", M1)
+  inbox.setDoing({ text: "Building P35" }, M1)
+  expect(inbox.forPage(Date.parse(M1) + 1000).doing?.text).toBe("Building P35")
+  expect(inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
   inbox.setListening(null)
   expect(inbox.doing).toBeNull()
 })

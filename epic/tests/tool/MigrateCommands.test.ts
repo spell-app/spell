@@ -122,7 +122,7 @@ describe("migrate:  the runner", () => {
       "epic pages:  1 of 2 changed (links-agree 1)"
     ])
     const plan = FILES.read(docOf("old"))
-    expect(plan.item("c1").querySelector("a")!.textContent).toBe("P2 · Two")
+    expect(plan.item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
     expect(plan.document.querySelector("#log > epic-event:last-of-type")!.textContent).toMatch(
       /migrated:\s+links-agree/
     )
@@ -170,7 +170,7 @@ describe("migrate:  the runner", () => {
   test("links-agree moves a comment whose block moved, in the inbox, after the page", async () => {
     const inbox = ReviewInbox.pathFor(docOf("new"))
     ReviewInbox.update(inbox, (each) => {
-      each.comments.m1 = {
+      each.comments.c1 = {
         anchor: "p-one#field-9",
         kind: "field",
         label: "",
@@ -182,7 +182,7 @@ describe("migrate:  the runner", () => {
     })
     expect(await commands().run(["migrate", "new", "--step", "links-agree"])).toBe(0)
     expect(printed[0]).toBe("new:  links-agree")
-    expect(ReviewInbox.read(inbox).comments.m1!.anchor).toMatch(/^p-three#field-\d$/)
+    expect(ReviewInbox.read(inbox).comments.c1!.anchor).toMatch(/^p-three#field-\d$/)
   })
 
   test("--list:  the epic page's steps, then the other kinds' (the docs tool)", async () => {
@@ -190,12 +190,12 @@ describe("migrate:  the runner", () => {
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
       "epic 2026-10-11 links-agree",
       "epic 2026-10-24 more-requests-first",
-      "epic 2026-10-24 caveats-and-tests",
       "epic 2026-10-25 took-as-minutes",
       "epic 2026-10-25 whole-phase-numbers",
       "epic 2026-10-25 taken-in-phase",
       "epic 2026-10-25 to-review-marks",
       "epic 2026-10-25 changes-after-goal",
+      "epic 2026-10-25 item-renames",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/)
     ])
@@ -235,7 +235,7 @@ describe("migrate --notify", () => {
       `  to 🚧 busy:  ${MigrateCommands.message("busy", ["links-agree"])}`
     ])
     expect(readFileSync(docOf("busy"), "utf8")).toBe(before)
-    expect(FILES.read(docOf("old")).item("c1").querySelector("a")!.textContent).toBe("P2 · Two")
+    expect(FILES.read(docOf("old")).item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
   })
 
   test("the message:  one line, what to run, when, and that it may commit it", () => {

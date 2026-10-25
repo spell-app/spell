@@ -1,5 +1,5 @@
-import { CaveatsAndTests } from "./CaveatsAndTests"
 import { ChangesAfterGoal } from "./ChangesAfterGoal"
+import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
 import { TakenInPhase } from "./TakenInPhase"
@@ -22,7 +22,8 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *   It must change nothing on a doc it has migrated already, and keep every word.
  * - The older steps went once every page had run them (epic `repo-split` Q45):  `updates-as-epic-update`,
  *   `owen-types-to-you-type`, `stable-phase-ids`, `json5-data-files`, `engine-asset-routes`,
- *   `unstackable-tables`;  `engine-links` in P14, once the content rewrite left no epic page needing it.
+ *   `unstackable-tables`;  `engine-links` in P14, once the content rewrite left no epic page needing it;
+ *   `caveats-and-tests` (epic `epic-engine` P32) with `item-renames` (P44), which would read its Todo as old todos.
  *   Their code is in git history, for a page restored from an old backup.
  *   - `links-agree` stays:  `rename` and `add-phase --before` run it too, so links follow what moved
  * - STATIC:  the registry.
@@ -32,12 +33,12 @@ export class Migrations {
   static readonly all: readonly Migration[] = [
     new LinksAgree(),
     new MoreRequestsFirst(),
-    new CaveatsAndTests(),
     new TookAsMinutes(),
     new WholePhaseNumbers(),
     new TakenInPhase(),
     new ToReviewMarks(),
-    new ChangesAfterGoal()
+    new ChangesAfterGoal(),
+    new ItemRenames()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

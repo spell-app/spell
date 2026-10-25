@@ -17,9 +17,9 @@ import {
   isoTime
 } from "spell-epic/tool/ReviewInbox"
 
-const T1 = "2026-10-04T15:00:00-04:00"
-const T2 = "2026-10-04T15:01:00-04:00"
-const T3 = "2026-10-04T15:02:00-04:00"
+const M1 = "2026-10-04T15:00:00-04:00"
+const M2 = "2026-10-04T15:01:00-04:00"
+const M3 = "2026-10-04T15:02:00-04:00"
 
 describe("ReviewInbox marks", () => {
   // epic `epic-engine` P29
@@ -40,9 +40,9 @@ describe("ReviewInbox marks", () => {
 
   test("set, replace, remove;  ids lower-cased", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.setMark("J3", { action: "approve", at: "ignored" }, T1)).toEqual({ action: "approve", at: T1 })
-    inbox.setMark("j3", { action: "todo" }, T2)
-    expect(inbox.marks).toEqual({ j3: { action: "todo", at: T2 } })
+    expect(inbox.setMark("J3", { action: "approve", at: "ignored" }, M1)).toEqual({ action: "approve", at: M1 })
+    inbox.setMark("j3", { action: "todo" }, M2)
+    expect(inbox.marks).toEqual({ j3: { action: "todo", at: M2 } })
     expect(inbox.setMark("j3", null)).toBeNull()
     expect(inbox.marks).toEqual({})
   })
@@ -107,25 +107,25 @@ describe("ReviewInbox marks", () => {
 
   test("revisit now keeps a pick's card set too, on the mark and the request", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j2", { action: "pick", pick: "C", choices: 1 }, T1)
-    expect(inbox.requestNow("j2", "revisit", "but?", T2)).toEqual({
+    inbox.setMark("j2", { action: "pick", pick: "C", choices: 1 }, M1)
+    expect(inbox.requestNow("j2", "revisit", "but?", M2)).toEqual({
       id: "j2",
       action: "revisit",
-      at: T2,
+      at: M2,
       note: "but?",
       pick: "C",
       choices: 1
     })
-    expect(inbox.marks.j2).toEqual({ action: "revisit", when: "now", note: "but?", pick: "C", choices: 1, at: T2 })
+    expect(inbox.marks.j2).toEqual({ action: "revisit", when: "now", note: "but?", pick: "C", choices: 1, at: M2 })
   })
 
   test("a pick with a revisit is unsent like any other, and sent with the send", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("q7", { action: "revisit", note: "why?", pick: "B" }, T1)
+    inbox.setMark("q7", { action: "revisit", note: "why?", pick: "B" }, M1)
     expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["q7"])
-    inbox.markSent(T2)
+    inbox.markSent(M2)
     expect(inbox.takeWork()!.sent!.marks).toEqual([
-      { id: "q7", action: "revisit", when: "soon", note: "why?", pick: "B", at: T1, again: false }
+      { id: "q7", action: "revisit", when: "soon", note: "why?", pick: "B", at: M1, again: false }
     ])
   })
 
@@ -145,20 +145,20 @@ describe("ReviewInbox marks", () => {
 
   test("unsent:  newer than the send, never an immediate request", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.requestNow("i2", "details", "", T1)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.requestNow("i2", "details", "", M1)
     expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["j1"])
-    inbox.markSent(T2)
+    inbox.markSent(M2)
     expect(inbox.unsentMarks).toEqual([])
-    inbox.setMark("q8", { action: "pick", pick: "B" }, T3)
-    expect(inbox.unsentMarks).toEqual([{ id: "q8", action: "pick", pick: "B", at: T3 }])
+    inbox.setMark("q8", { action: "pick", pick: "B" }, M3)
+    expect(inbox.unsentMarks).toEqual([{ id: "q8", action: "pick", pick: "B", at: M3 }])
   })
 
   test("clearMarks drops the marks and their requests;  returns the ids that had one", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.requestNow("i2", "details", "", T1)
-    expect(inbox.clearMarks(["J1", "i2", "t9"])).toEqual(["j1", "i2"])
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.requestNow("i2", "details", "", M1)
+    expect(inbox.clearMarks(["J1", "i2", "m9"])).toEqual(["j1", "i2"])
     expect(inbox.marks).toEqual({})
     expect(inbox.now).toEqual([])
   })
@@ -168,8 +168,8 @@ describe("ReviewInbox marks", () => {
 describe("ReviewInbox.cancelNow()", () => {
   test("a queued request:  gone with its mark, nobody to tell;  a pick-carrying revisit's pick goes too", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("i2", "details", "", T1)
-    expect(inbox.cancelNow("I2", T2)).toEqual({ action: "details", at: T2, told: true })
+    inbox.requestNow("i2", "details", "", M1)
+    expect(inbox.cancelNow("I2", M2)).toEqual({ action: "details", at: M2, told: true })
     expect(inbox.now).toEqual([])
     expect(inbox.marks).toEqual({})
     expect(inbox.isCanceled("i2")).toBe(true)
@@ -178,29 +178,29 @@ describe("ReviewInbox.cancelNow()", () => {
 
   test("work a session took:  its working goes, and the next take tells it once", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("q3", "revisit", "why?", T1)
-    inbox.takeWork(T1)
-    inbox.cancelNow("q3", T2)
+    inbox.requestNow("q3", "revisit", "why?", M1)
+    inbox.takeWork(M1)
+    inbox.cancelNow("q3", M2)
     expect(inbox.working).toEqual({})
     expect(inbox.hasWork).toBe(true)
-    expect(inbox.takeWork(T3)).toEqual({ now: [], sent: null, canceled: [{ id: "q3", action: "revisit", at: T2 }] })
+    expect(inbox.takeWork(M3)).toEqual({ now: [], sent: null, canceled: [{ id: "q3", action: "revisit", at: M2 }] })
     expect(inbox.hasWork).toBe(false)
   })
 
   test("nothing asked:  null, and a mark waiting for a send stays", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
+    inbox.setMark("j1", { action: "approve" }, M1)
     expect(inbox.cancelNow("j1")).toBe(null)
     expect(inbox.marks.j1.action).toBe("approve")
   })
 
   test("asked again, or done with:  the cancel is over", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("i2", "details", "", T1)
-    inbox.cancelNow("i2", T2)
-    inbox.requestNow("i2", "details", "", T3)
+    inbox.requestNow("i2", "details", "", M1)
+    inbox.cancelNow("i2", M2)
+    inbox.requestNow("i2", "details", "", M3)
     expect(inbox.isCanceled("i2")).toBe(false)
-    inbox.cancelNow("i2", T3)
+    inbox.cancelNow("i2", M3)
     inbox.clearMarks(["i2"])
     expect(inbox.isCanceled("i2")).toBe(false)
     expect(inbox.isEmpty).toBe(true)
@@ -210,11 +210,11 @@ describe("ReviewInbox.cancelNow()", () => {
 describe("ReviewInbox todo notes", () => {
   test("Make Todo keeps a note, trimmed, only when there is one;  it drops the draft", () => {
     const inbox = new ReviewInbox()
-    inbox.setDraft("q3", "todo", "check perf", T1)
-    expect(inbox.setMark("q3", { action: "todo", note: "  check perf " }, T2)).toEqual({
+    inbox.setDraft("q3", "todo", "check perf", M1)
+    expect(inbox.setMark("q3", { action: "todo", note: "  check perf " }, M2)).toEqual({
       action: "todo",
       note: "check perf",
-      at: T2
+      at: M2
     })
     expect(inbox.drafts).toEqual({})
     expect(ReviewInbox.toMark({ action: "todo", note: "  " })).toEqual({ action: "todo" })
@@ -225,37 +225,37 @@ describe("ReviewInbox todo notes", () => {
 describe("ReviewInbox.setDraft()", () => {
   test("kept as typed (not trimmed);  blank or null drops it;  an inbox with only a draft isn't empty", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.setDraft("Q3", "revisit", "  why not B?\n", T1)).toEqual({
+    expect(inbox.setDraft("Q3", "revisit", "  why not B?\n", M1)).toEqual({
       action: "revisit",
       note: "  why not B?\n",
-      at: T1
+      at: M1
     })
     expect(inbox.isEmpty).toBe(false)
     expect(inbox.setDraft("q3", "revisit", "   ")).toBe(null)
     expect(inbox.drafts).toEqual({})
-    inbox.setDraft("q3", "todo", "later", T1)
+    inbox.setDraft("q3", "todo", "later", M1)
     inbox.setDraft("q3", "todo", null)
     expect(inbox.isEmpty).toBe(true)
   })
 
   test("never a mark:  not counted, never work for a waiting session", () => {
     const inbox = new ReviewInbox()
-    inbox.setDraft("q3", "revisit", "why?", T1)
+    inbox.setDraft("q3", "revisit", "why?", M1)
     expect(inbox.unsentMarks).toEqual([])
     expect(inbox.hasWork).toBe(false)
   })
 
   test("the mark that uses the note drops the draft:  revisit soon, revisit now, Clear;  approve doesn't", () => {
     const inbox = new ReviewInbox()
-    inbox.setDraft("q3", "revisit", "why?", T1)
-    inbox.setMark("q3", { action: "approve" }, T2)
+    inbox.setDraft("q3", "revisit", "why?", M1)
+    inbox.setMark("q3", { action: "approve" }, M2)
     expect(inbox.drafts.q3).toBeDefined()
-    inbox.setMark("q3", { action: "revisit", note: "why?" }, T2)
+    inbox.setMark("q3", { action: "revisit", note: "why?" }, M2)
     expect(inbox.drafts.q3).toBeUndefined()
-    inbox.setDraft("i2", "revisit", "and this", T1)
-    inbox.requestNow("i2", "revisit", "and this", T2)
+    inbox.setDraft("i2", "revisit", "and this", M1)
+    inbox.requestNow("i2", "revisit", "and this", M2)
     expect(inbox.drafts.i2).toBeUndefined()
-    inbox.setDraft("j1", "revisit", "hmm", T1)
+    inbox.setDraft("j1", "revisit", "hmm", M1)
     inbox.setMark("j1", null)
     expect(inbox.drafts.j1).toBeUndefined()
   })
@@ -269,42 +269,42 @@ describe("ReviewInbox.setDraft()", () => {
 describe("ReviewInbox.requestNow()", () => {
   test("details:  queued, and marked", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.requestNow("I2", "details", "", T1)).toEqual({ id: "i2", action: "details", at: T1 })
-    expect(inbox.marks.i2).toEqual({ action: "details", at: T1 })
+    expect(inbox.requestNow("I2", "details", "", M1)).toEqual({ id: "i2", action: "details", at: M1 })
+    expect(inbox.marks.i2).toEqual({ action: "details", at: M1 })
   })
 
   test("revisit now:  the note travels;  a second request replaces the first", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("q7", "revisit", "first", T1)
-    inbox.requestNow("q7", "revisit", " second ", T2)
-    expect(inbox.now).toEqual([{ id: "q7", action: "revisit", at: T2, note: "second" }])
-    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "second", at: T2 })
+    inbox.requestNow("q7", "revisit", "first", M1)
+    inbox.requestNow("q7", "revisit", " second ", M2)
+    expect(inbox.now).toEqual([{ id: "q7", action: "revisit", at: M2, note: "second" }])
+    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "second", at: M2 })
   })
 
   test("revisit now keeps the item's pick, on the mark and the request;  details doesn't", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("q7", { action: "pick", pick: "B" }, T1)
-    expect(inbox.requestNow("q7", "revisit", "but?", T2)).toEqual({
+    inbox.setMark("q7", { action: "pick", pick: "B" }, M1)
+    expect(inbox.requestNow("q7", "revisit", "but?", M2)).toEqual({
       id: "q7",
       action: "revisit",
-      at: T2,
+      at: M2,
       note: "but?",
       pick: "B"
     })
-    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "but?", pick: "B", at: T2 })
+    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "but?", pick: "B", at: M2 })
     // again, from a revisit carrying it
-    inbox.requestNow("q7", "revisit", "and?", T3)
+    inbox.requestNow("q7", "revisit", "and?", M3)
     expect(inbox.marks.q7.pick).toBe("B")
-    inbox.requestNow("q7", "details", "", T3)
-    expect(inbox.marks.q7).toEqual({ action: "details", at: T3 })
+    inbox.requestNow("q7", "details", "", M3)
+    expect(inbox.marks.q7).toEqual({ action: "details", at: M3 })
   })
 
   test("a mark that waits for a send, or none, drops the queued request", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("q7", "revisit", "", T1)
-    inbox.setMark("q7", { action: "revisit", when: "soon" }, T2)
+    inbox.requestNow("q7", "revisit", "", M1)
+    inbox.setMark("q7", { action: "revisit", when: "soon" }, M2)
     expect(inbox.now).toEqual([])
-    inbox.requestNow("i2", "details", "", T1)
+    inbox.requestNow("i2", "details", "", M1)
     inbox.setMark("i2", null)
     expect(inbox.now).toEqual([])
   })
@@ -315,7 +315,7 @@ describe("ReviewInbox.requestNow()", () => {
 
   test("takeNow empties the queue", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("i2", "details", "", T1)
+    inbox.requestNow("i2", "details", "", M1)
     expect(inbox.takeNow().map((each) => each.id)).toEqual(["i2"])
     expect(inbox.now).toEqual([])
     expect(inbox.marks.i2).toBeDefined()
@@ -325,27 +325,27 @@ describe("ReviewInbox.requestNow()", () => {
 describe("ReviewInbox.reviewNow() (windows-and-review P4)", () => {
   test("every waiting revisit asked now, its note and pick kept;  the rest sent", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.setMark("q7", { action: "revisit", when: "soon", note: "but?", pick: "B" }, T1)
-    inbox.setMark("i2", { action: "revisit", when: "soon", note: "sent before" }, T1)
-    inbox.markSent(T2)
-    inbox.setMark("t1", { action: "todo", note: "later" }, T2)
-    inbox.setMark("c3", { action: "revisit", when: "soon", note: "fresh" }, T2)
-    inbox.requestNow("i5", "details", "", T2)
-    expect(inbox.reviewNow(T3).sort((a, b) => a.localeCompare(b))).toEqual(["c3", "i2", "q7"])
-    expect(inbox.sent).toBe(T3)
-    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "but?", pick: "B", at: T3 })
-    expect(inbox.now.map((each) => each.id).sort((a, b) => a.localeCompare(b))).toEqual(["c3", "i2", "i5", "q7"])
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("q7", { action: "revisit", when: "soon", note: "but?", pick: "B" }, M1)
+    inbox.setMark("i2", { action: "revisit", when: "soon", note: "sent before" }, M1)
+    inbox.markSent(M2)
+    inbox.setMark("m1", { action: "todo", note: "later" }, M2)
+    inbox.setMark("t3", { action: "revisit", when: "soon", note: "fresh" }, M2)
+    inbox.requestNow("i5", "details", "", M2)
+    expect(inbox.reviewNow(M3).sort((a, b) => a.localeCompare(b))).toEqual(["i2", "q7", "t3"])
+    expect(inbox.sent).toBe(M3)
+    expect(inbox.marks.q7).toEqual({ action: "revisit", when: "now", note: "but?", pick: "B", at: M3 })
+    expect(inbox.now.map((each) => each.id).sort((a, b) => a.localeCompare(b))).toEqual(["i2", "i5", "q7", "t3"])
     // what the send hands over:  the approval and the todo, no revisit
-    expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["j1", "t1"])
+    expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["j1", "m1"])
     expect(inbox.unsentMarks).toEqual([])
   })
 
   test("nothing to revisit:  a plain send", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    expect(inbox.reviewNow(T2)).toEqual([])
-    expect(inbox.sent).toBe(T2)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    expect(inbox.reviewNow(M2)).toEqual([])
+    expect(inbox.sent).toBe(M2)
     expect(inbox.now).toEqual([])
   })
 })
@@ -353,89 +353,89 @@ describe("ReviewInbox.reviewNow() (windows-and-review P4)", () => {
 describe("ReviewInbox, Claude's side", () => {
   test("working and listening, set and cleared", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.setWorking("I2", "details", T1)).toEqual({ action: "details", since: T1 })
-    expect(inbox.working).toEqual({ i2: { action: "details", since: T1 } })
+    expect(inbox.setWorking("I2", "details", M1)).toEqual({ action: "details", since: M1 })
+    expect(inbox.working).toEqual({ i2: { action: "details", since: M1 } })
     inbox.setWorking("i2", null)
     expect(inbox.working).toEqual({})
-    expect(inbox.setListening("abc", T1)).toEqual({ session: "abc", since: T1, seen: T1 })
+    expect(inbox.setListening("abc", M1)).toEqual({ session: "abc", since: M1, seen: M1 })
     expect(inbox.setListening(null)).toBeNull()
   })
 
   test("heartbeat:  touch stamps seen;  nobody listening, nothing starts", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.touchListening(T2)).toBeNull()
+    expect(inbox.touchListening(M2)).toBeNull()
     expect(inbox.listening).toBeNull()
-    inbox.setListening("abc", T1)
-    expect(inbox.touchListening(T2)).toEqual({ session: "abc", since: T1, seen: T2 })
+    inbox.setListening("abc", M1)
+    expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2 })
   })
 
   test("liveListener:  stale once seen is older than LISTEN_STALE_MS;  an old file's since counts", () => {
     const inbox = new ReviewInbox()
     expect(inbox.liveListener()).toBeNull()
-    inbox.setListening("abc", T1)
-    const seen = Date.parse(T1)
+    inbox.setListening("abc", M1)
+    const seen = Date.parse(M1)
     expect(inbox.liveListener(seen + LISTEN_STALE_MS)).toEqual(inbox.listening)
     expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
-    inbox.touchListening(T2)
+    inbox.touchListening(M2)
     expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).not.toBeNull()
-    inbox.listening = { session: "old", since: T1 }
+    inbox.listening = { session: "old", since: M1 }
     expect(inbox.liveListener(seen + LISTEN_STALE_MS + 1)).toBeNull()
     expect(LISTEN_HEARTBEAT_MS * 3).toBe(LISTEN_STALE_MS)
   })
 
   test("liveListener:  a monitor's (pid) is live while its process runs, heartbeat or not;  gone once it ends", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.setListening("abc", T1, process.pid)).toEqual({
+    expect(inbox.setListening("abc", M1, process.pid)).toEqual({
       session: "abc",
-      since: T1,
-      seen: T1,
+      since: M1,
+      seen: M1,
       pid: process.pid
     })
-    const seen = Date.parse(T1)
+    const seen = Date.parse(M1)
     expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
-    inbox.setListening("abc", T1, 999_999)
+    inbox.setListening("abc", M1, 999_999)
     expect(inbox.liveListener(seen)).toBeNull()
   })
 
   test("forPage:  the whole inbox, listening null once stale;  the inbox itself untouched", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.setListening("abc", T1)
-    const late = inbox.forPage(Date.parse(T1) + LISTEN_STALE_MS + 1)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setListening("abc", M1)
+    const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
     expect(late).toEqual({ ...inbox.toRecord(), listening: null, unsentComments: [] })
     expect(inbox.listening!.session).toBe("abc")
-    expect(inbox.forPage(Date.parse(T1)).listening!.session).toBe("abc")
+    expect(inbox.forPage(Date.parse(M1)).listening!.session).toBe("abc")
   })
 
   test("finishMarks:  immediate marks go;  one Owen changed meanwhile stays", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("i2", "details", "", T1)
-    inbox.requestNow("q7", "revisit", "why?", T1)
-    inbox.takeWork(T2)
+    inbox.requestNow("i2", "details", "", M1)
+    inbox.requestNow("q7", "revisit", "why?", M1)
+    inbox.takeWork(M2)
     // Owen chooses B on Q7 while the agent works:  the note stays, the pick waits for the send
-    inbox.setMark("q7", { action: "revisit", when: "soon", note: "why?", pick: "B" }, T3)
-    expect(inbox.finishMarks(["I2", "q7", "t9"])).toEqual({ had: ["i2"], kept: ["q7"] })
-    expect(inbox.marks).toEqual({ q7: { action: "revisit", when: "soon", note: "why?", pick: "B", at: T3 } })
+    inbox.setMark("q7", { action: "revisit", when: "soon", note: "why?", pick: "B" }, M3)
+    expect(inbox.finishMarks(["I2", "q7", "m9"])).toEqual({ had: ["i2"], kept: ["q7"] })
+    expect(inbox.marks).toEqual({ q7: { action: "revisit", when: "soon", note: "why?", pick: "B", at: M3 } })
   })
 })
 
 describe("ReviewInbox.takeWork()", () => {
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
+    inbox.setMark("j1", { action: "approve" }, M1)
     expect(inbox.sentMarks).toEqual([])
-    inbox.requestNow("i2", "details", "", T1)
-    inbox.markSent(T2)
-    inbox.setMark("q8", { action: "pick", pick: "B" }, T3)
+    inbox.requestNow("i2", "details", "", M1)
+    inbox.markSent(M2)
+    inbox.setMark("q8", { action: "pick", pick: "B" }, M3)
     expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["j1"])
   })
 
   test("takeWork:  now requests taken and marked working, their marks kept", () => {
     const inbox = new ReviewInbox()
-    inbox.requestNow("i2", "details", "", T1)
+    inbox.requestNow("i2", "details", "", M1)
     expect(inbox.hasWork).toBe(true)
-    expect(inbox.takeWork(T2)).toEqual({ now: [{ id: "i2", action: "details", at: T1 }], sent: null, canceled: [] })
-    expect(inbox.working).toEqual({ i2: { action: "details", since: T2 } })
+    expect(inbox.takeWork(M2)).toEqual({ now: [{ id: "i2", action: "details", at: M1 }], sent: null, canceled: [] })
+    expect(inbox.working).toEqual({ i2: { action: "details", since: M2 } })
     expect(inbox.marks.i2).toBeDefined()
     expect(inbox.hasWork).toBe(false)
     expect(inbox.takeWork()).toBeNull()
@@ -443,32 +443,32 @@ describe("ReviewInbox.takeWork()", () => {
 
   test("takeWork:  a send is handed over once;  the next send repeats what's left, flagged again", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.setMark("q7", { action: "revisit", note: "why?" }, T1)
-    inbox.markSent(T2)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("q7", { action: "revisit", note: "why?" }, M1)
+    inbox.markSent(M2)
     expect(inbox.hasNewSend).toBe(true)
     const first = inbox.takeWork()!
-    expect(first.sent!.at).toBe(T2)
+    expect(first.sent!.at).toBe(M2)
     expect(first.sent!.marks.map((mark) => [mark.id, mark.again])).toEqual([
       ["j1", false],
       ["q7", false]
     ])
-    expect(inbox.handedOver).toBe(T2)
+    expect(inbox.handedOver).toBe(M2)
     expect(inbox.hasWork).toBe(false)
     // j1 applied;  q7 still being talked over when Owen sends a new mark
     inbox.clearMarks(["j1"])
-    inbox.setMark("c1", { action: "todo" }, T3)
+    inbox.setMark("t1", { action: "todo" }, M3)
     inbox.markSent("2026-10-04T15:03:00-04:00")
     expect(inbox.takeWork()!.sent!.marks.map((mark) => [mark.id, mark.again])).toEqual([
       ["q7", true],
-      ["c1", false]
+      ["t1", false]
     ])
   })
 
   test("takeWork:  a send with no marks left is taken quietly", () => {
     const inbox = new ReviewInbox()
-    inbox.setListening("abc", T1)
-    inbox.markSent(T2)
+    inbox.setListening("abc", M1)
+    inbox.markSent(M2)
     expect(inbox.hasWork).toBe(true)
     expect(inbox.takeWork()).toBeNull()
     expect(inbox.hasWork).toBe(false)
@@ -476,10 +476,10 @@ describe("ReviewInbox.takeWork()", () => {
 
   test("clearApplied:  only marks still as applied;  a newer one stays", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.setMark("j2", { action: "approve" }, T1)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j2", { action: "approve" }, M1)
     const applied = inbox.markList
-    inbox.setMark("j2", { action: "todo" }, T2)
+    inbox.setMark("j2", { action: "todo" }, M2)
     expect(inbox.clearApplied(applied)).toEqual(["j1"])
     expect(Object.keys(inbox.marks)).toEqual(["j2"])
   })
@@ -488,14 +488,14 @@ describe("ReviewInbox.takeWork()", () => {
 describe("ReviewInbox urgency (an id chip clicked)", () => {
   test("set, replaced, dropped by null;  only calls and issues;  never a mark", () => {
     const inbox = new ReviewInbox()
-    expect(inbox.setUrgency("J1", true, T1)).toEqual({ calm: true, at: T1 })
+    expect(inbox.setUrgency("J1", true, M1)).toEqual({ calm: true, at: M1 })
     expect(inbox.isEmpty).toBe(false)
     expect(inbox.marks).toEqual({})
-    inbox.setMark("j1", { action: "approve" }, T1)
-    inbox.setUrgency("i2", false, T2)
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setUrgency("i2", false, M2)
     expect(inbox.urgencyList).toEqual([
-      { id: "j1", calm: true, at: T1 },
-      { id: "i2", calm: false, at: T2 }
+      { id: "j1", calm: true, at: M1 },
+      { id: "i2", calm: false, at: M2 }
     ])
     expect(inbox.marks.j1.action).toBe("approve")
     expect(inbox.setUrgency("j1", null)).toBeNull()
@@ -506,38 +506,38 @@ describe("ReviewInbox urgency (an id chip clicked)", () => {
 
   test("sent with the marks:  handed over by takeWork, alone too;  cleared only while as applied", () => {
     const inbox = new ReviewInbox()
-    inbox.setUrgency("j1", true, T1)
+    inbox.setUrgency("j1", true, M1)
     expect([inbox.unsentUrgency.length, inbox.sentUrgency.length]).toEqual([1, 0])
-    inbox.markSent(T2)
-    inbox.setUrgency("j2", true, T3)
+    inbox.markSent(M2)
+    inbox.setUrgency("j2", true, M3)
     expect(inbox.sentUrgency.map((entry) => entry.id)).toEqual(["j1"])
     expect(inbox.unsentUrgency.map((entry) => entry.id)).toEqual(["j2"])
     expect(inbox.takeWork()!.sent).toEqual({
-      at: T2,
+      at: M2,
       marks: [],
-      urgency: [{ id: "j1", calm: true, at: T1 }],
+      urgency: [{ id: "j1", calm: true, at: M1 }],
       comments: []
     })
     const applied = inbox.sentUrgency
-    inbox.setUrgency("j1", false, T3)
+    inbox.setUrgency("j1", false, M3)
     expect(inbox.clearUrgency(applied)).toEqual([])
-    expect(inbox.clearUrgency([{ id: "j2", at: T3 }])).toEqual(["j2"])
+    expect(inbox.clearUrgency([{ id: "j2", at: M3 }])).toEqual(["j2"])
   })
 })
 
 // Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up" -- with only comments waiting,
 // Send had nothing to send.  He keeps Send as the way comments reach Claude.
 describe("ReviewInbox comments and Send", () => {
-  const T4 = "2026-10-04T15:03:00-04:00"
+  const M4 = "2026-10-04T15:03:00-04:00"
   const PLACE = { anchor: "p1#field-1", kind: "field", label: "P1", excerpt: "Goal" }
 
   test("a waiting comment is unsent until Send;  the page hears which (`forPage().unsentComments`)", () => {
     const inbox = new ReviewInbox()
-    const id = inbox.commentList.add(PLACE, "is this hooked up?", new Date(T1))
+    const id = inbox.commentList.add(PLACE, "is this hooked up?", new Date(M1))
     expect(inbox.unsentComments.map((comment) => comment.id)).toEqual([id])
     expect(inbox.forPage().unsentComments).toEqual([id])
     expect(inbox.sentComments).toEqual([])
-    inbox.markSent(T2)
+    inbox.markSent(M2)
     expect(inbox.unsentComments).toEqual([])
     expect(inbox.sentComments.map((comment) => comment.id)).toEqual([id])
     expect(inbox.forPage().unsentComments).toEqual([])
@@ -545,47 +545,47 @@ describe("ReviewInbox comments and Send", () => {
 
   test("a send with ONLY comments wakes a waiting session, and hands them over once", () => {
     const inbox = new ReviewInbox()
-    const id = inbox.commentList.add(PLACE, "is this hooked up?", new Date(T1))
+    const id = inbox.commentList.add(PLACE, "is this hooked up?", new Date(M1))
     expect(inbox.hasWork).toBe(false)
-    inbox.markSent(T2)
+    inbox.markSent(M2)
     expect(inbox.hasWork).toBe(true)
-    const work = inbox.takeWork(T2)!
-    expect(work.sent).toMatchObject({ at: T2, marks: [], urgency: [], comments: [{ id, text: "is this hooked up?" }] })
+    const work = inbox.takeWork(M2)!
+    expect(work.sent).toMatchObject({ at: M2, marks: [], urgency: [], comments: [{ id, text: "is this hooked up?" }] })
     // the next send, with nothing new from Owen on the thread:  not handed over again
-    inbox.setMark("j1", { action: "approve" }, T3)
-    inbox.markSent(T4)
-    expect(inbox.takeWork(T4)!.sent!.comments).toEqual([])
+    inbox.setMark("j1", { action: "approve" }, M3)
+    inbox.markSent(M4)
+    expect(inbox.takeWork(M4)!.sent!.comments).toEqual([])
   })
 
   test("Owen's reply on an answered thread is unsent again, and goes with the next send", () => {
     const inbox = new ReviewInbox()
-    const id = inbox.commentList.add(PLACE, "why?", new Date(T1))
-    inbox.markSent(T2)
-    inbox.takeWork(T2)
-    inbox.commentList.answer(id, "<p>because</p>", new Date(T2))
+    const id = inbox.commentList.add(PLACE, "why?", new Date(M1))
+    inbox.markSent(M2)
+    inbox.takeWork(M2)
+    inbox.commentList.answer(id, "<p>because</p>", new Date(M2))
     expect(inbox.unsentComments).toEqual([])
-    inbox.commentList.reply(id, "but then?", new Date(T3))
+    inbox.commentList.reply(id, "but then?", new Date(M3))
     expect(inbox.unsentComments.map((comment) => comment.id)).toEqual([id])
-    inbox.markSent(T4)
-    expect(inbox.takeWork(T4)!.sent!.comments.map((comment) => comment.id)).toEqual([id])
+    inbox.markSent(M4)
+    expect(inbox.takeWork(M4)!.sent!.comments.map((comment) => comment.id)).toEqual([id])
   })
 
   test("a comment Claude is working on, answered, or closed is never unsent", () => {
     const inbox = new ReviewInbox()
-    const working = inbox.commentList.add(PLACE, "one", new Date(T1))
-    const answered = inbox.commentList.add(PLACE, "two", new Date(T1))
-    const closed = inbox.commentList.add(PLACE, "three", new Date(T1))
-    inbox.commentList.setWorking(working, true, new Date(T2))
-    inbox.commentList.answer(answered, "", new Date(T2))
-    inbox.commentList.resolve(closed, "skip", new Date(T2))
+    const working = inbox.commentList.add(PLACE, "one", new Date(M1))
+    const answered = inbox.commentList.add(PLACE, "two", new Date(M1))
+    const closed = inbox.commentList.add(PLACE, "three", new Date(M1))
+    inbox.commentList.setWorking(working, true, new Date(M2))
+    inbox.commentList.answer(answered, "", new Date(M2))
+    inbox.commentList.resolve(closed, "skip", new Date(M2))
     expect(inbox.unsentComments).toEqual([])
   })
 
   test("Review Now sends them too", () => {
     const inbox = new ReviewInbox()
-    const id = inbox.commentList.add(PLACE, "now please", new Date(T1))
-    inbox.reviewNow(T2)
-    expect(inbox.takeWork(T2)!.sent!.comments.map((comment) => comment.id)).toEqual([id])
+    const id = inbox.commentList.add(PLACE, "now please", new Date(M1))
+    inbox.reviewNow(M2)
+    expect(inbox.takeWork(M2)!.sent!.comments.map((comment) => comment.id)).toEqual([id])
   })
 })
 
@@ -593,11 +593,11 @@ describe("ReviewInbox comments and Send", () => {
 describe("ReviewInbox phases, the summary, new items", () => {
   test("a phase and the summary take marks as an Overview sub-section does", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("P3", { action: "todo", note: "split it" }, T1)
-    inbox.setMark("summary", { action: "revisit", note: "too long?" }, T2)
+    inbox.setMark("P3", { action: "todo", note: "split it" }, M1)
+    inbox.setMark("summary", { action: "revisit", note: "too long?" }, M2)
     expect(inbox.marks).toEqual({
-      p3: { action: "todo", note: "split it", at: T1 },
-      summary: { action: "revisit", when: "soon", note: "too long?", at: T2 }
+      p3: { action: "todo", note: "split it", at: M1 },
+      summary: { action: "revisit", when: "soon", note: "too long?", at: M2 }
     })
     expect(() => inbox.setMark("summaries", { action: "todo" })).toThrow(InboxError)
   })
@@ -605,25 +605,25 @@ describe("ReviewInbox phases, the summary, new items", () => {
   test("setNew:  the next free key each time, so several wait at once;  edited in place;  removed", () => {
     const inbox = new ReviewInbox()
     expect(
-      inbox.setNew(undefined, { kind: "todo", title: " check wifi ", note: " before boarding ", near: "P2" }, T1)
+      inbox.setNew(undefined, { kind: "todo", title: " check wifi ", note: " before boarding ", near: "P2" }, M1)
     ).toBe("new1")
-    expect(inbox.setNew(null, { kind: "question", title: "which seat?" }, T2)).toBe("new2")
+    expect(inbox.setNew(null, { kind: "question", title: "which seat?" }, M2)).toBe("new2")
     expect(inbox.marks).toEqual({
-      new1: { action: "new", kind: "todo", title: "check wifi", note: "before boarding", near: "p2", at: T1 },
-      new2: { action: "new", kind: "question", title: "which seat?", at: T2 }
+      new1: { action: "new", kind: "todo", title: "check wifi", note: "before boarding", near: "p2", at: M1 },
+      new2: { action: "new", kind: "question", title: "which seat?", at: M2 }
     })
-    expect(inbox.setNew("NEW1", { kind: "todo", title: "check the wifi" }, T3)).toBe("new1")
-    expect(inbox.marks.new1).toEqual({ action: "new", kind: "todo", title: "check the wifi", at: T3 })
+    expect(inbox.setNew("NEW1", { kind: "todo", title: "check the wifi" }, M3)).toBe("new1")
+    expect(inbox.marks.new1).toEqual({ action: "new", kind: "todo", title: "check the wifi", at: M3 })
     expect(inbox.setNew("new1", null)).toBeNull()
-    expect(inbox.setNew(undefined, { kind: "todo", title: "again" }, T3)).toBe("new3")
+    expect(inbox.setNew(undefined, { kind: "todo", title: "again" }, M3)).toBe("new3")
   })
 
   test("a new item is a mark like any other:  unsent until the send, then sent and handed over", () => {
     const inbox = new ReviewInbox()
-    inbox.setNew(undefined, { kind: "todo", title: "pack" }, T1)
+    inbox.setNew(undefined, { kind: "todo", title: "pack" }, M1)
     expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["new1"])
-    inbox.markSent(T2)
-    expect(inbox.takeWork(T3)!.sent!.marks).toMatchObject([{ id: "new1", action: "new", title: "pack", again: false }])
+    inbox.markSent(M2)
+    expect(inbox.takeWork(M3)!.sent!.marks).toMatchObject([{ id: "new1", action: "new", title: "pack", again: false }])
   })
 
   test("bad new items throw;  `new` only under a new key;  a new key never takes another action", () => {
@@ -656,10 +656,10 @@ describe("ReviewInbox files", () => {
 
   test("absent:  an empty inbox;  partial:  filled in", () => {
     expect(ReviewInbox.read(file)).toEqual(new ReviewInbox())
-    writeFileSync(file, JSON.stringify({ marks: { j1: { action: "approve", at: T1 } } }))
+    writeFileSync(file, JSON.stringify({ marks: { j1: { action: "approve", at: M1 } } }))
     expect(ReviewInbox.read(file)).toEqual({
       ...new ReviewInbox().toRecord(),
-      marks: { j1: { action: "approve", at: T1 } }
+      marks: { j1: { action: "approve", at: M1 } }
     })
     writeFileSync(file, "{ nope")
     expect(() => ReviewInbox.read(file)).toThrow(InboxError)
@@ -667,7 +667,7 @@ describe("ReviewInbox files", () => {
   })
 
   test("written under the lock, no temp left;  deleted once empty", () => {
-    ReviewInbox.update(file, (inbox) => inbox.setMark("j1", { action: "approve" }, T1))
+    ReviewInbox.update(file, (inbox) => inbox.setMark("j1", { action: "approve" }, M1))
     expect(JSON.parse(readFileSync(file, "utf8")).marks.j1.action).toBe("approve")
     expect(existsSync(`${file}.tmp`)).toBe(false)
     expect(existsSync(`${file}.lock`)).toBe(false)
@@ -686,7 +686,7 @@ describe("ReviewInbox files", () => {
 })
 
 test("itemIds:  none in the old markup (read no more since P15)", () => {
-  const html = `<ui-item id="T1" data-status="open"></ui-item><ui-item id="q2" data-status="decided"></ui-item>`
+  const html = `<ui-item id="M1" data-status="open"></ui-item><ui-item id="q2" data-status="decided"></ui-item>`
   expect([...ReviewInbox.itemIds(html)]).toEqual([])
 })
 
@@ -772,11 +772,11 @@ describe("ReviewInbox waking the epic", () => {
   test("hasUnsent:  a mark, an urgency or a comment newer than the last send;  nothing once sent", () => {
     const inbox = new ReviewInbox()
     expect(inbox.hasUnsent).toBe(false)
-    inbox.setMark("j1", { action: "approve" }, T1)
+    inbox.setMark("j1", { action: "approve" }, M1)
     expect(inbox.hasUnsent).toBe(true)
-    inbox.markSent(T2)
+    inbox.markSent(M2)
     expect(inbox.hasUnsent).toBe(false)
-    inbox.setUrgency("j1", true, T3)
+    inbox.setUrgency("j1", true, M3)
     expect(inbox.hasUnsent).toBe(true)
   })
 
@@ -796,23 +796,23 @@ describe("ReviewInbox test answers (epic `epic-engine` P4)", () => {
         action: "test",
         result: "failed",
         note: "  grey  ",
-        shot: "tests/t3-20261019-1432.png",
+        shot: "tests/m3-20261019-1432.png",
         x: 1
       })
-    ).toEqual({ action: "test", result: "failed", note: "grey", shot: "tests/t3-20261019-1432.png" })
+    ).toEqual({ action: "test", result: "failed", note: "grey", shot: "tests/m3-20261019-1432.png" })
     expect(ReviewInbox.toMark({ action: "test", result: "passed", note: " ", shot: "" })).toEqual({
       action: "test",
       result: "passed"
     })
-    expect(ReviewInbox.toMark({ action: "test", result: "notnow", shot: "tests/t3-20261019-1432-2.png" }).shot).toBe(
-      "tests/t3-20261019-1432-2.png"
+    expect(ReviewInbox.toMark({ action: "test", result: "notnow", shot: "tests/m3-20261019-1432-2.png" }).shot).toBe(
+      "tests/m3-20261019-1432-2.png"
     )
     for (const bad of [
       { action: "test" },
       { action: "test", result: "maybe" },
       { action: "test", result: "skip", note: 3 },
       { action: "test", result: "failed", shot: "../../etc/passwd" },
-      { action: "test", result: "failed", shot: "tests/t3.png" },
+      { action: "test", result: "failed", shot: "tests/m3.png" },
       { action: "test", result: "failed", note: "x".repeat(20_001) }
     ])
       expect(() => ReviewInbox.toMark(bad)).toThrow(InboxError)
@@ -820,10 +820,10 @@ describe("ReviewInbox test answers (epic `epic-engine` P4)", () => {
 
   test("only on a test item;  waits for Send like any mark, and counts as unsent until then", () => {
     const inbox = new ReviewInbox()
-    expect(() => inbox.setMark("j3", { action: "test", result: "passed" }, T1)).toThrow(/only a test/)
-    inbox.setMark("T3", { action: "test", result: "skip" }, T1)
-    expect(inbox.unsentMarks.map((mark) => [mark.id, mark.result])).toEqual([["t3", "skip"]])
-    inbox.markSent(T2)
-    expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["t3"])
+    expect(() => inbox.setMark("j3", { action: "test", result: "passed" }, M1)).toThrow(/only a test/)
+    inbox.setMark("M3", { action: "test", result: "skip" }, M1)
+    expect(inbox.unsentMarks.map((mark) => [mark.id, mark.result])).toEqual([["m3", "skip"]])
+    inbox.markSent(M2)
+    expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["m3"])
   })
 })

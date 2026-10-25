@@ -18,9 +18,9 @@ const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/too
 /** spell-epic's own `templates/`. */
 const ENGINE_TEMPLATES = resolve(dirname(fileURLToPath(import.meta.url)), "../../templates")
 
-// epic `epic-workflow` P19:  a docs page's comment named as an epic page's is, `seo#M3`
+// epic `epic-workflow` P19:  a docs page's comment named as an epic page's is, `seo#C3`
 test("pageAndId():  `<page>#<id>` is the page and the id;  the two words read the same", () => {
-  expect(pageAndId(["guides/x.html#M3", "on"])).toEqual(["guides/x.html", "M3", "on"])
+  expect(pageAndId(["guides/x.html#C3", "on"])).toEqual(["guides/x.html", "C3", "on"])
   expect(pageAndId(["guides/x.html", "cm3", "on"])).toEqual(["guides/x.html", "cm3", "on"])
   expect(pageAndId(["guides/x.html#n3"])).toEqual(["guides/x.html", "n3"])
   expect(pageAndId([])).toEqual([])

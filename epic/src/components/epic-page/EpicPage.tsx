@@ -131,7 +131,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
- *   - `overview`:  only the Overview, Questions and Caveats show;  `phases`:  the Phases and Issues too;  `building` (or none):
+ *   - `overview`:  only the Overview, Questions and Todo show;  `phases`:  the Phases and Issues too;  `building` (or none):
  *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
  *     what shows (`spell-doc-runtime.js` reads the same rule)
  *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON
@@ -193,7 +193,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox,
  *     for the session running `/epic review SAGA:/<id>` (`reviewRoutes.ts`)
  * - TEST MODE (epic `epic-engine` P4):  a TEST RUN over its blocks (`<epic-test-run>`), its open tests one at a time
- *   - from the To test section's Start testing (`epic-test-opening`), or the address's `?test=1` (`epic test <epic>`);
+ *   - from the Manual tests section's Start testing (`epic-test-opening`), or the address's `?test=1` (`epic test <epic>`);
  *     `?test=1&all=1` (or `?test=all`), one epic of a run across every epic (`epic test --all`)
  *   - only the header (Send, the step label) and the pill stay:  the toolbar's bar, the review line, the meta lines,
  *     See Also, the agents and the blocks hide (`:state(testing)`)
@@ -1256,7 +1256,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   // ## Test mode (epic `epic-engine` P4)
   ////////////////
 
-  /** The To test section's Start testing:  a run starts, the address saying so (`?test=1`), at its first test. */
+  /** The Manual tests section's Start testing:  a run starts, the address saying so (`?test=1`), at its first test. */
   @E.on(TEST_START)
   protected onTestStart(event: Event) {
     event.stopPropagation()
@@ -1265,7 +1265,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     E.afterSolidUpdate(() => window.scrollTo({ top: 0, behavior: "instant" }))
   }
 
-  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#t3` off the address. */
+  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#m3` off the address. */
   @E.on(TEST_DONE, { target: "renderRoot" })
   protected onTestDone(event: Event) {
     event.stopPropagation()
@@ -1285,7 +1285,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return value === TEST_ALL || query.has(ALL_QUERY) ? TEST_ALL : "1"
   }
 
-  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#t3`), replacing it. */
+  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#m3`), replacing it. */
   private static markTestQuery(value: string | undefined) {
     const url = new URL(location.href)
     if (value) url.searchParams.set(TEST_QUERY, value)

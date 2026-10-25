@@ -29,11 +29,14 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["add", "seo#J", "Title", "--details", "<p>d</p>"], [["add", "seo", "judgement", "Title", "--details", "<p>d</p>"]]],
   // epic `epic-engine` P4:  a test's fields;  the test run, at a test or every epic's
   [
-    ["add", "seo#V", "T", "--step", "Do", "--should", "Works"],
+    ["add", "seo#M", "T", "--step", "Do", "--should", "Works"],
     [["add", "seo", "test", "T", "--step", "Do", "--should", "Works"]]
   ],
   [["test", "seo"], [["test", "seo"]]],
-  [["test", "seo#V3"], [["test", "seo", "--at", "V3"]]],
+  [["test", "seo#M3"], [["test", "seo", "--at", "M3"]]],
+  // epic `epic-engine` P44:  `#T` a todo, `--limit` on it a limit
+  [["add", "seo#T", "Later"], [["add", "seo", "todo", "Later"]]],
+  [["add", "seo#limit", "Slow"], [["add", "seo", "limit", "Slow"]]],
   [["test", "seo", "--list", "--json"], [["test", "seo", "--list", "--json"]]],
   [["test", "--all"], [["test", "--all"]]],
   [["decide", "seo#Q3", "yes", "--option", "A"], [["decide", "seo", "Q3", "yes", "--option", "A"]]],
@@ -85,11 +88,20 @@ describe("planDocArgs()", () => {
     expect(refused("update", ["seo", "J3", "underway", "x"])).toThrow('epic update seo#J3 underway "<reading>"')
     expect(refused("phase", ["seo", "3", "done"])).toThrow("epic phase seo#P3 ...")
     expect(refused("updated", ["seo", "Epic Migrate", "<p>x</p>"])).toThrow('epic updated "seo#Epic Migrate" ...')
-    expect(refused("add", ["seo", "todo", "T"])).toThrow("epic add seo#C ...")
+    expect(refused("add", ["seo", "todo", "T"])).toThrow("epic add seo#T ...")
+    expect(refused("add", ["seo", "limit", "T"])).toThrow("epic add seo#T ...")
     expect(refused("commit", ["seo", "abc", "s", "--phase", "3"])).toThrow("epic commit seo#P3 <sha>")
     expect(refused("commit", ["seo", "abc", "s", "--item", "J3"])).toThrow("epic commit seo#J3 <sha>")
     expect(refused("update", ["seo", "P3", "--goal", "g"])).toThrow("epic update seo#P3 --<field> <value> ...")
     expect(refused("file", ["seo", "7", "r3"])).toThrow("epic file seo#P7 ...")
+  })
+
+  // epic `epic-engine` P44:  the old letters never make the wrong kind
+  test("add's old letters, #C and #V, refused:  the message names the new ones", () => {
+    for (const old of ["seo#C", "seo#c", "seo#V"])
+      expect(() => planDocArgs("add", [old, "Title"])).toThrow(
+        /the letters moved \(epic-engine P44\):  T todo, M manual test;  C is a comment's now/
+      )
   })
 
   test("an item or phase verb given only the epic:  which one, with an example", () => {
@@ -150,9 +162,9 @@ describe("planDocArgs()", () => {
     ])
   })
 
-  test("inbox:  a comment's id (M3, as the page shows it;  the old cm3 too), its flags, and several ids", () => {
-    expect(planDocArgs("inbox", ["done", "seo#M3", "--file", "a.html"])).toEqual([
-      ["inbox", "seo", "done", "M3", "--file", "a.html"]
+  test("inbox:  a comment's id (C3, as the page shows it;  the old cm3 too), its flags, and several ids", () => {
+    expect(planDocArgs("inbox", ["done", "seo#C3", "--file", "a.html"])).toEqual([
+      ["inbox", "seo", "done", "C3", "--file", "a.html"]
     ])
     expect(planDocArgs("inbox", ["done", "seo#cm3", "--file", "a.html"])).toEqual([
       ["inbox", "seo", "done", "cm3", "--file", "a.html"]

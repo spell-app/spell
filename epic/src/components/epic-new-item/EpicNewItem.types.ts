@@ -23,7 +23,7 @@ export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test", "phase"] as 
  * - `section`:  the section it lands in
  */
 export const NEW_KIND_LOOKS = {
-  todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "caveats" },
+  todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "todos" },
   question: {
     icon: "circle question",
     label: "newQuestion",
@@ -67,22 +67,26 @@ export const NEW_CLOSED = "epic-new-closed"
 export const NEW_KIND_TEXTS = [
   {
     key: "newTodo",
-    text: "Caveat",
-    description: "Kind:  a caveat, work still to do (a todo, before epic `epic-engine` P32)."
+    text: "Todo",
+    description: "Kind:  a todo, work still to do (a caveat, epic `epic-engine` P32 to P44)."
   },
   { key: "newQuestion", text: "Question", description: "Kind:  a question." },
   { key: "newIssue", text: "Issue", description: "Kind:  an issue." },
-  { key: "newTest", text: "Test", description: "Kind:  a test, for Owen to try by hand." },
+  { key: "newTest", text: "Manual test", description: "Kind:  a manual test, for Owen to try by hand." },
   { key: "newPhase", text: "Phase", description: "Kind:  a phase, which Claude drafts from its name and Owen's note." }
 ] as const
 
 /** The rest of `<epic-new-item>`'s texts. */
 export const NEW_ITEM_TEXTS = [
-  { key: "newButton", text: "New caveat, question, issue or test", description: "The button's words without `adds`." },
-  { key: "addTodo", text: "New caveat", description: "The Caveats section's button, at its end." },
+  {
+    key: "newButton",
+    text: "New todo, question, issue or manual test",
+    description: "The button's words without `adds`."
+  },
+  { key: "addTodo", text: "New todo", description: "The Todo section's button, at its end." },
   { key: "addQuestion", text: "New question", description: "The Questions section's button, at its end." },
   { key: "addIssue", text: "New issue", description: "The Issues section's button, at its end." },
-  { key: "addTest", text: "New test", description: "The Tests section's button, at its end." },
+  { key: "addTest", text: "New manual test", description: "The Manual tests section's button, at its end." },
   {
     key: "addPhase",
     text: "Add phase",
@@ -104,10 +108,10 @@ export const NEW_ITEM_TEXTS = [
   { key: "newAdd", text: "Add", description: "The form's button:  a new one." },
   { key: "newSave", text: "Save", description: "The form's button:  one being changed." },
   { key: "newCancel", text: "Cancel", description: "The form's button:  closes it, nothing saved." },
-  { key: "newTodoTip", text: "Make it a caveat:  work still to do", description: "Kind button:  its tooltip." },
+  { key: "newTodoTip", text: "Make it a todo:  work still to do", description: "Kind button:  its tooltip." },
   { key: "newQuestionTip", text: "Make it a question", description: "Kind button:  its tooltip." },
   { key: "newIssueTip", text: "Make it an issue", description: "Kind button:  its tooltip." },
-  { key: "newTestTip", text: "Make it a test", description: "Kind button:  its tooltip." },
+  { key: "newTestTip", text: "Make it a manual test", description: "Kind button:  its tooltip." },
   {
     key: "newPhaseTip",
     text: "Make it a phase:  Claude drafts it from its name and your note, for you to review",

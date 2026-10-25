@@ -9,8 +9,8 @@ import { InboxError } from "./ReviewInbox"
  * ### `TestShots`
  * Owen's SCREENSHOTS in a test run (epic `epic-engine` P4):  a failure pasted or dropped on the page, saved beside
  * the epic page for the issue it becomes.
- * - in the page's folder's `tests/` (`TEST_SHOTS`):  `epics/<epic>/tests/t3-20261019-1432.png`
- *   - beside the screenshots Claude takes for a test's Example (`tests/t3.png`, `epic add <epic>#T --example`)
+ * - in the page's folder's `tests/` (`TEST_SHOTS`):  `epics/<epic>/tests/m3-20261019-1432.png`
+ *   - beside the screenshots Claude takes for a test's Example (`tests/m3.png`, `epic add <epic>#M --example`)
  * - read by the review routes' `POST shot` (`reviewRoutes.ts`):  the mark then carries its path (`shot`)
  * - Light on purpose:  the review routes load it, and they never load the epic tool's doc code (`PlanDoc`).
  *   Imports only `spell/server` and `ReviewInbox`'s error.
@@ -30,7 +30,7 @@ export class TestShots {
 
   /**
    * Save test `id`'s screenshot `bytes` beside epic page `file`, in its folder's `tests/`;
-   * resolves to its path from that folder, `tests/t3-20261019-1432.png` (`-2` ... when one is there).
+   * resolves to its path from that folder, `tests/m3-20261019-1432.png` (`-2` ... when one is there).
    * - from the epic page's folder, so the page's `<img src>` finds it, and so does a part's (parts load into the page)
    * - `now`:  the time it's stamped with, local, to the minute
    * - throws an `InboxError` for an id that isn't a test's
@@ -56,7 +56,7 @@ export class TestShots {
 export const TEST_SHOTS = "tests"
 
 /** A test item's id. */
-const TEST_ID = /^t\d+$/
+const TEST_ID = /^m\d+$/
 
 /** A pasted PNG's data URL's start. */
 const PNG_DATA_URL = "data:image/png;base64,"

@@ -158,7 +158,7 @@ describe("<epic-section>", () => {
 
   test("an item section with no items says None yet;  the Phases toggles show the fields they name", async () => {
     const host = await render(
-      `<div><epic-section id="caveats" kind="caveats" open></epic-section>` +
+      `<div><epic-section id="todos" kind="todos" open></epic-section>` +
         `<epic-section id="phases" kind="phases" open></epic-section></div>`
     )
     expect(host.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("None yet")
@@ -279,7 +279,7 @@ describe("<epic-section> counts and state filter", () => {
       `<div><epic-section id="phases" kind="phases">` +
         `<epic-phase id="p1" title="One" status="done"></epic-phase>` +
         `<epic-phase id="p2" title="Two" status="active"></epic-phase></epic-section>` +
-        `<epic-section id="caveats" kind="caveats"></epic-section>` +
+        `<epic-section id="todos" kind="todos"></epic-section>` +
         `<epic-section id="log" kind="log"></epic-section></div>`
     )
     const sections = host.parentElement!.querySelectorAll("epic-section")
@@ -454,7 +454,7 @@ describe("<epic-section> actions slot", () => {
     expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(all.getBoundingClientRect().left + 0.5)
     // the slotted button isn't a child:  an item section holding only it still says None yet
     const empty = await render(
-      `<epic-section id="caveats" kind="caveats" open><button slot="actions">C</button></epic-section>`
+      `<epic-section id="todos" kind="todos" open><button slot="actions">C</button></epic-section>`
     )
     expect(empty.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("None yet")
   })

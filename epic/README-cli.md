@@ -91,12 +91,12 @@ It reads like a link because it nearly is one:  `seo#J3` is item J3 of the seo e
 
 ```text
 seo                 the epic's page, epics/seo/seo.plan.html
-seo#J3              an item:  J3 (a comment on the page, seo#M3, too;  m3, cm3 read the same)
+seo#J3              an item:  J3 (a comment on the page, seo#C3, too;  the old cm3 reads the same)
 seo#P3              a phase:  P3, or by its id, seo#p-epic-migrate;  phase, updated and file take its name
                     too:  seo#epic-migrate, "seo#Epic Migrate"
 seo#J               a new item of that kind, for add:  epic add seo#J "Title"
 SAGA:/epics         a saga's page, sagas/epics/epics.saga.html:  epic add SAGA:/epics#Q "Title"
-guides/x.html#M3    a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
+guides/x.html#C3    a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
 ```
 
 _The forms `epic --help` lists, as it prints them._
@@ -179,7 +179,7 @@ flowchart TD
   watch["epic inbox watch seo<br/>the page says someone is reviewing"]
   wait["epic inbox wait seo<br/>in the background;  the turn ends"]
   work["exit 0:  it prints your marks,<br/>and the exit wakes the session"]
-  apply["epic inbox apply seo<br/>approvals, picks, caveats, test answers"]
+  apply["epic inbox apply seo<br/>approvals, picks, todos, test answers"]
   underway["a revisit, first:<br/>epic update seo#J3 underway<br/>a blue card:  what Claude took it to mean"]
   agent["a background agent writes the answer:<br/>epic details seo#J3 --append --file reply.html"]
   done["epic update seo#J3 done<br/>epic inbox done seo#J3"]
@@ -295,7 +295,7 @@ Every verb here only reads, but `create`:  run them from anywhere, as often as y
 | --- | --- |
 | `epic create <epic> --title "Title"` | makes an epic page from the template, and lists it on the docs' home page;  `--prompt "..."` or `--prompt-file <file>`:  the prompt that started it;  `--saga <id>`:  the saga it serves;  `--future`:  an idea for later, not planned yet;  on a future epic's page, plans it where it is |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
-| `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, caveats and tests |
+| `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, todos, limits and manual tests |
 | `epic summaries <page.html> ...` | prints `summary --json` for each page, by path, worktrees' too:  what `/epics` reads |
 | `epic items <epic>` | prints what a review walks:  sections, counts, items, the queue;  `--section issues`, `--filter unreviewed \| open \| reviewed \| queued \| all`, `--json`;  `--spec <file>`:  a review's item picker, as a details page's questions |
 | `epic docs <epic> [--json]` | lists the docs an epic wrote besides its page (its guide, what its commits changed, docs that name it) and its changelog entry:  what `/docs-check` reads |
@@ -340,7 +340,7 @@ and the text it had moves into a folded Original Discussion.
 
 | Verb | What it does |
 | --- | --- |
-| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `C` caveat (work still to do;  `--limit`:  a limit to know about), `T` test, `D` a question born answered (it gets a `Q` id);  `--details <html>`;  `--calm`, last, for a call or issue that wouldn't surprise you |
+| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `T` todo (work still to do;  `--limit`:  a limit to know about), `M` manual test, `D` a question born answered (it gets a `Q` id);  `C` and `V`, the letters before epic-engine P44, are refused, naming the new ones (`C` is a comment's now);  `--details <html>`;  `--calm`, last, for a call or issue that wouldn't surprise you |
 | `epic calm <epic>#J3 [J4 ...]` | marks calls or issues not urgent, yellow rather than red, as clicking the id chip does;  `--loud`:  red again |
 | `epic decide <epic>#Q3 "answer"` | answers a question, writing the answer INTO it, and prints its id;  `--option A` marks the chosen option card;  `--details <html>` |
 | `epic choose <epic>#J9 <letter> ["outcome"]` | records an option you settled in conversation, on any item, as your pick on the page would:  chosen on the item's latest set of cards (`--set N`:  the Nth), the item answered, closed or reviewed, and a Noted card |
@@ -357,20 +357,20 @@ and the text it had moves into a folded Original Discussion.
 | `epic unqueue <epic>#J3` | takes it off that list:  started, or dropped |
 
 <details>
-<summary>A test's fields</summary>
+<summary>A manual test's fields</summary>
 
-A test (`T`) is something you check by hand before merging, and your test run steps you through it.
+A manual test (`M`) is something you check by hand before merging, and your test run steps you through it.
 It takes its fields as it's added, each one HTML:
 
 ```sh
-epic add seo#T "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"
+epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"
 ```
 
 - `--step`:  exactly what to do;  a link of class `epic-test-action` in it is a button in the run.
 - `--should`:  what should happen.
 - `--example`:  a screenshot of it, copied to `tests/<id>.png` beside the page;  or a line of text.
 - `--if-not`:  what to tell Claude when it doesn't.
-- `epic details seo#T3` takes the same fields, to change them.
+- `epic details seo#M3` takes the same fields, to change them.
 
 </details>
 
@@ -399,11 +399,11 @@ inbox:  epic inbox wait seo  (the inbox's verb goes first)
 | `epic inbox watch <epic>` | this session is reviewing the page:  the page stops saying nobody is |
 | `epic inbox ignore <epic>` | this session has stopped reviewing:  the page says so |
 | `epic inbox wait <epic>` | waits in the background until there's work, prints it and exits 0, which wakes the session;  nothing in 55 minutes:  exit 2 (`--timeout <seconds>`) |
-| `epic inbox apply <epic> [ids ...]` | applies the sent approvals, picks, new caveats and test answers, printing each, and what it left to talk over;  `--all`:  unsent ones too |
-| `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item on or off;  on a comment (`seo#M3`), its "Claude:  thinking…" |
+| `epic inbox apply <epic> [ids ...]` | applies the sent approvals, picks, new todos and test answers, printing each, and what it left to talk over;  `--all`:  unsent ones too |
+| `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item on or off;  on a comment (`seo#C3`), its "Claude:  thinking…" |
 | `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go, unless you changed the mark meanwhile |
 | `epic inbox clear <epic>#J3` | drops an item's marks:  a revisit talked over |
-| `epic test <epic>[#T3]` | opens your test run in the Review tab, one test at a time (at T3);  `--list [--json]`:  its open tests, Not now ones last;  `--all`:  every epic's, in the sagas' order |
+| `epic test <epic>[#M3]` | opens your test run in the Review tab, one test at a time (at M3);  `--list [--json]`:  its open tests, Not now ones last;  `--all`:  every epic's, in the sagas' order |
 
 ### Epic page:  log and upkeep
 
@@ -619,8 +619,8 @@ The same group keeps the comments you leave on any docs page, the background age
 | `epic comments list [<epic>]` | lists the comments you left on docs pages that still wait for Claude;  `--all`:  taken and answered ones too |
 | `epic comments wait [<page> ...]` | waits until a comment starts waiting, on those pages or any, prints it and exits 0;  exit 2 after `--timeout` (8h) |
 | `epic comments gather [<page> ... \| --all]` | gathers the waiting comments, and new page notes, into the standing epic `feedback`, one phase per page |
-| `epic comments working <page>#M3 on \| off` | shows "Claude:  thinking…" on a comment's thread, or stops |
-| `epic comments answer <page>#M3 --file <reply.html>` | writes Claude's answer into the comment's thread;  `--commit <sha>`:  the commit it was built in |
+| `epic comments working <page>#C3 on \| off` | shows "Claude:  thinking…" on a comment's thread, or stops |
+| `epic comments answer <page>#C3 --file <reply.html>` | writes Claude's answer into the comment's thread;  `--commit <sha>`:  the commit it was built in |
 | `epic notes list \| answer \| done` | page notes, the kind from before comments:  lists them (`--all`), answers one (`<page>#n3 --file <reply.html>`), marks one done |
 | `epic agents [list]` | lists the background agents running now, oldest first:  this epic's, else this checkout's |
 | `epic agents add <name> "<task>"` | records an agent starting, and prints its full name (below);  exit 1 if it's running already;  `--status`, `--task-id` |

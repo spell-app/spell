@@ -23,6 +23,12 @@ import { ThreadFacts } from "spell-epic/comments"
 /** Below this many px for each title, a titled toolbar shows its buttons' marks only (`fitTitles()`). */
 const MIN_TITLE_PX = 50
 
+/** The widest a titled toolbar's title may be while they shrink (`fitTitles()`), set on the toolbar. */
+const TITLE_MAX = "--spell-toolbar-title-max"
+
+/** Epic UI's page bar, which holds its toolbar (`spell-comments.js`;  the site's `PAGE_BAR`). */
+const SITE_BAR = ".spell-site-toolbar"
+
 /**
  * A TITLED toolbar's items (a guide's, a details page's, Epic UI's):  one per top-level section, its mark and title.
  * - `groups`:  `{ element, id, label, glyph }` each, the outline's top-level entries
@@ -287,14 +293,17 @@ export function removeToolbar() {
  * get less than 50px").
  * - each title's share:  the row's room, less every button's mark, badge and padding, and what else the row holds (the
  *   bullhorn, the spell syntax guide's Expand all), split evenly
+ * - shrinking, the longest titles give way first, down to one width (`--spell-toolbar-title-max`, `titleCap()`):
+ *   so no short title is cut to its first letter while a long one stays whole
  * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
+ * - which toolbars:  `fitsTitles()`
  */
 export function fitTitles(toolbar) {
   const row = toolbarRow(toolbar)
   const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
   toolbar.classList.remove("spell-toolbar-icons")
-  // a `<ui-toolbar>` keeps its titles and scrolls, its `‹` / `›` buttons showing what's past either end
-  if (!row || !items.length || toolbar.localName === "ui-toolbar") return
+  toolbar.style.removeProperty(TITLE_MAX)
+  if (!row || !items.length || !fitsTitles(toolbar)) return
   const style = getComputedStyle(row)
   const others = [...toolbar.children]
     .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)
@@ -305,11 +314,42 @@ export function fitTitles(toolbar) {
     parseFloat(style.paddingRight) -
     (parseFloat(style.columnGap) || 0) * (toolbar.children.length - 1) -
     others
-  const fixed = items.reduce(
-    (sum, item) => sum + boxOf(item).width - (item.querySelector(".spell-toolbar-label")?.offsetWidth ?? 0),
-    0
+  const labels = items.map((item) => item.querySelector(".spell-toolbar-label"))
+  const fixed = items.reduce((sum, item, index) => sum + boxOf(item).width - (labels[index]?.offsetWidth ?? 0), 0)
+  if ((room - fixed) / items.length < MIN_TITLE_PX) return void toolbar.classList.add("spell-toolbar-icons")
+  const cap = titleCap(
+    labels.map((label) => label?.scrollWidth ?? 0),
+    room - fixed
   )
-  if ((room - fixed) / items.length < MIN_TITLE_PX) toolbar.classList.add("spell-toolbar-icons")
+  if (cap !== undefined) toolbar.style.setProperty(TITLE_MAX, `${cap}px`)
+}
+
+/**
+ * Does `fitTitles()` fit `toolbar`'s titles, or does it keep them whole and scroll?
+ * - a `<ui-menu>` (a page without Spell UI's toolbar):  fits
+ * - a `<ui-toolbar>`:  keeps them whole, scrolling, its `‹` / `›` buttons showing what's past either end (epic `debut`)
+ *   - EXCEPT Epic UI's page bar (`.spell-site-toolbar`), as the docs pages' rule says (Owen, epic `epic-engine` I132:
+ *     its row ran off the page's right at the side bar's width);  scrolling only once even the marks don't fit
+ *   - but not a SEGMENTED one there, under a page's tabs:  its track is only as wide as its buttons
+ */
+function fitsTitles(toolbar) {
+  if (toolbar.localName !== "ui-toolbar") return true
+  return !!toolbar.closest(SITE_BAR) && !toolbar.classList.contains("spell-toolbar-segmented")
+}
+
+/**
+ * The widest a title may be so `widths` fit in `room`, the longest giving way first;  `undefined`:  all fit whole.
+ * - e.g. `[30, 80, 120]` in 200px:  90 (30 + 80 + 90)
+ */
+export function titleCap(widths, room) {
+  const sorted = [...widths].sort((a, b) => a - b)
+  let left = room
+  for (const [index, width] of sorted.entries()) {
+    const share = left / (sorted.length - index)
+    if (width > share) return Math.max(0, Math.floor(share))
+    left -= width
+  }
+  return undefined
 }
 
 /**
@@ -361,7 +401,7 @@ function scrollIntoRow(item) {
 // ## Jump to an id (Cmd / Ctrl + K)
 ////////////////
 
-/** What a typed id looks like (`M3`, `j7`, `cm3`, `#p2`):  on Epic UI's pages, anything else is words to search. */
+/** What a typed id looks like (`C3`, `j7`, `cm3`, `#p2`):  on Epic UI's pages, anything else is words to search. */
 const ID_LIKE = /^#?[a-z]{1,2}\d+$/i
 
 /**
@@ -369,9 +409,10 @@ const ID_LIKE = /^#?[a-z]{1,2}\d+$/i
  * ui-prompt asking what number I want to jump to (e.g. J7)"), and lands there exactly as a link to `#j7` does
  * (`go()`:  what hides it unfolds, an item opens, it lands below the stuck titles).
  * - any id on the page, case and a `#` aside:  `J7`, `q3`, `P2`, `o1`, `#decisions`
- * - a COMMENT's (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids"):  `M3` (`m3`, the old `cm3`)
+ * - a COMMENT's (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids"):  `C3` (`c3`, the old `cm3`;
+ *   `M3` is a manual test's since epic `epic-engine` P44)
  *   lands on its thread, opened, below the stuck titles (`PageComments.landOn()`);  under the box, the threads
- *   waiting on Owen (Claude spoke last), each a line "M3 · his first words" that lands there
+ *   waiting on Owen (Claude spoke last), each a line "C3 · his first words" that lands there
  * - an epic page, and every page that takes comments (a guide, Epic UI's pages:  comment ids, and any other id on it)
  * - an id that isn't there:  the dialog says so and stays open, the text selected for typing over
  * - never while typing in a field (a note box, the new item form), nor with a dialog already open
@@ -402,7 +443,7 @@ export function wireJumpKey(go, canGo, { search, host, first = false } = {}) {
 
 /**
  * The jump dialog:  an id typed, Go lands there;  Cancel or Escape just closes it.
- * - a comment's id (`M3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
+ * - a comment's id (`C3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
  *   (`jumpWaitingList()`)
  * - `search`, `host`:  as `wireJumpKey()` takes them
  */
@@ -426,10 +467,10 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
         "label",
         { class: "ui-native spell-jump" },
         epicPage
-          ? "Its id:  J7, q3, P2, M3 ..."
+          ? "Its id:  J7, q3, P2, C3 ..."
           : search
-            ? "A comment's id (M3), any id on the page, or words to search the site"
-            : "Its id:  M3, or any id on the page",
+            ? "A comment's id (C3), any id on the page, or words to search the site"
+            : "Its id:  C3, or any id on the page",
         input
       ),
       miss,
@@ -494,7 +535,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
 
 /**
  * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
- * order:  a line each, "M3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
+ * order:  a line each, "C3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
  * no comments.
  * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu vertical secondary link>`, its title a header item, each line
  *   a `<ui-item>` button, so it takes the focus, and Enter

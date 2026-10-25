@@ -14,16 +14,28 @@ import { REVIEW_NAME_TEXTS, REVIEW_PARTS } from "spell-epic/components/epic-revi
 
 /****************
  * ### `<epic-item>`
- * One item of an epic page:  a question, judgement call, caveat, todo, issue or test.
+ * One item of an epic page:  a question, judgement call, todo, issue or manual test.
  ****************/
 export const epicItemVocabulary = {
   tag: "epic-item",
   topics: ["documentation", "lists", "status"],
-  aka: ["item", "question", "decision", "judgement call", "caveat", "todo", "issue", "test", "ticket"],
+  aka: [
+    "item",
+    "question",
+    "decision",
+    "judgement call",
+    "todo",
+    "limit",
+    "caveat",
+    "issue",
+    "test",
+    "manual test",
+    "ticket"
+  ],
   noun: "item",
   ui: false,
   description:
-    "One item:  a question, judgement call, caveat, todo, issue or test -- ONE element for every kind, the kind " +
+    "One item:  a question, judgement call, todo, issue or manual test -- ONE element for every kind, the kind " +
     "its id's letter (Q11).  Its line (id chip in its state's colour, title, review label, review buttons) and " +
     "note box are drawn;  its details, choices, answer, replies, earlier versions and commits are its children.",
   attributes: [
@@ -34,7 +46,7 @@ export const epicItemVocabulary = {
       required: true,
       format: "item id",
       description:
-        "`q7` (question), `j3` (judgement call), `c1` (caveat), `t4` (todo), `i2` (issue), `v1` (test):  shown as " +
+        "`q7` (question), `j3` (judgement call), `t4` (todo, or a limit), `i2` (issue), `m1` (manual test):  shown as " +
         "`Q7`;  links use it (`#q7`)."
     },
     {
@@ -124,8 +136,8 @@ export const epicItemVocabulary = {
       name: "limit",
       kind: "boolean",
       description:
-        "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered " +
-        "for the next phase;  a caveat without it is work still to do (a todo, before P32)."
+        "A todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn " +
+        "calmer, and never offered for the next phase;  a todo without it is work still to do."
     },
     {
       name: "bedtime",

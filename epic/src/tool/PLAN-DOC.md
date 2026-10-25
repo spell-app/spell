@@ -39,7 +39,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
       <epic-section id="overnight" kind="report" title="Overnight · 2026-10-04">...prose...</epic-section>
       <epic-section id="phases" kind="phases">...<epic-phase>s...</epic-section>
       <epic-section id="decisions" kind="questions">...<epic-item>s...</epic-section>
-      ... judgements, caveats, issues, tests ...
+      ... judgements, todos, issues, tests ...
       <epic-section id="log" kind="log">...<epic-event>s...</epic-section>
     </epic-page>
   </main></div>
@@ -116,10 +116,12 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 As `plan-doc.md`, "Ids":
 - The letters:
   - `q` question (an answered one is a decision)
-  - `j` judgement call, `c` caveat (work still to do, or with `limit` a limit to know about)
-  - `i` issue, `t` test
-  - before epic `epic-engine` P32:  `t` todo and `v` test;  the migration `caveats-and-tests` renumbered them
-    ("Migrations", below)
+  - `j` judgement call, `t` todo (work still to do, or with `limit` a limit to know about)
+  - `i` issue, `m` manual test
+  - a comment is `c` (`C3`), in the inbox, never an item
+  - before epic `epic-engine` P44:  `c` caveat (the todos), `t` test, and comments `m` ("M" for mark);  the migration
+    `item-renames` renamed them, every number kept ("Migrations", below)
+  - before epic `epic-engine` P32:  `t` todo and `v` test;  the migration `caveats-and-tests` renumbered them (retired)
   - `p` phase;  `o` Overview sub-section
 - An item's KIND is its id's letter (Q11):  one `<epic-item>` for all of them, in its kind's section.
 - An old decision's `d7` lives on as an `<epic-answer id="d7">` inside its question:
@@ -163,7 +165,7 @@ As `plan-doc.md`, "Ids":
   <epic-commit sha="2c71ac57...">one or two sentences</epic-commit>
   <epic-field name="files">...</epic-field>
   <epic-field name="verify">...</epic-field>
-  <epic-field name="to-review"><epic-mark item="j1" link></epic-mark>, <epic-mark item="c3" link></epic-mark></epic-field>
+  <epic-field name="to-review"><epic-mark item="j1" link></epic-mark>, <epic-mark item="t3" link></epic-mark></epic-field>
 </epic-phase>
 ```
 
@@ -222,7 +224,7 @@ As `plan-doc.md`, "Ids":
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
 - `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
   which sections the page shows (`PageStages`, `spell-epic/phases`).
-  - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases and Issues too;  `building`:  everything.
+  - `overview`:  the Overview, Questions and Todo;  `phases`:  the Phases and Issues too;  `building`:  everything.
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
@@ -351,45 +353,46 @@ As `plan-doc.md`, "Ids":
     - `review-as`:  how Owen's mark was handled
       - `approve`, `todo`, `revisit`
       - `now`:  a request for now (Add Details, a revisit now) done, written by `inbox done`
-      - `next`, `drop`:  a caveat (work) queued into the next phase, or dropped
+      - `next`, `drop`:  a todo (work) queued into the next phase, or dropped
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
-  - `limit`:  a caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, never
-    offered for the next phase, with an item's buttons (Approve, Revisit, Make Caveat).
-    - a caveat without it is WORK still to do, a todo before P32:  the plane, Revisit, the x (below)
-    - `add <name>#C` writes work;  `--limit` (or `#caveat`) a limit
+  - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
+    calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
+    - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
+    - `add <name>#T` writes work;  `--limit` (or `#limit`, the old `#caveat`) a limit
   - `failed`:  a test that failed in Owen's test run, the issue it was filed as (`i42`;  epic `epic-engine` P4).
     - written by `inbox apply`, the test left open;  gone once a run passes it
-- A TEST (`t3`, epic `epic-engine` P4;  `v3` before P32):  its text is FIELDS, in this order, so Owen's test run can
-  step him through it, one at a time, on the page:
+- A MANUAL TEST (`m3`, epic `epic-engine` P4;  `t3` before P44, `v3` before P32):
+  its text is FIELDS, in this order, so Owen's test run can step him through it, one at a time, on the page:
 
   ```html
-  <epic-item id="t3" title="The sitemap lists every guide" status="open">
+  <epic-item id="m3" title="The sitemap lists every guide" status="open">
     <epic-field label="Step">Open <a class="epic-test-action" href="/sitemap.xml">the sitemap</a></epic-field>
     <epic-field label="Should">Every guide is in it</epic-field>
-    <epic-field label="Example"><img src="tests/t3.png" alt="What it should look like"> a line or two</epic-field>
+    <epic-field label="Example"><img src="tests/m3.png" alt="What it should look like"> a line or two</epic-field>
     <epic-field label="If not">Say which guide is missing</epic-field>
   </epic-item>
   ```
 
   - Step and Should, always;  Example and If not when there's one.
-  - `epic add <name>#T "title" --step ... --should ... [--example <png> | "text"] [--if-not ...]` writes them
-    (`EpicTests.fieldsHTML()`);  `details <name>#T3 --step ...` rewrites a test in them.
+  - `epic add <name>#M "title" --step ... --should ... [--example <png> | "text"] [--if-not ...]` writes them
+    (`EpicTests.fieldsHTML()`);  `details <name>#M3 --step ...` rewrites a test in them.
   - A Step's `a.epic-test-action` links are pages to open:  the run shows each as a button.
   - Screenshots live beside the page in `tests/`, their paths from the page's folder:
-    Claude's examples `tests/t3.png`, Owen's failures `tests/t3-20261019-1432.png` (`v3-...` from before P32 still read).
+    Claude's examples `tests/m3.png`, Owen's failures `tests/m3-20261019-1432.png`.
+    - An older one keeps its file name (`tests/t3-...`, `v3-...`):  the page names it by path.
   - An older test has only prose, still valid:  the run shows the prose as its Step.
     No migration step:  the fields are new content a test MAY have, nothing an old page must change.
   - Owen's answers in the run are review marks, `{ action: "test", result, note?, shot? }`, applied by
     `inbox apply` (`PlanDoc.applyMark()`):
     - `passed`:  `done`, reviewed, `failed` gone
-    - `failed`:  a new issue, "T3 failed:  <title>", linking the test, with his note and an `<img>` of his
+    - `failed`:  a new issue, "M3 failed:  <title>", linking the test, with his note and an `<img>` of his
       screenshot;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking it
     - `skip`:  `canceled` ("no longer applies"), reviewed
     - `notnow`:  `deferred`, today:  the run puts deferred tests last
-- A WORK caveat's review buttons (no `limit`;  a todo before P32;  Owen, 2026-10-09):  the plane, Revisit, the x,
-  in one group.  No Approve or Make Caveat.
+- A WORK todo's review buttons (no `limit`;  Owen, 2026-10-09):  the plane, Revisit, the x,
+  in one group.  No Approve or Make Todo.
   - The plane (`next`, green):  "Do it in the next phase".
     - `inbox apply` queues it into the first phase whose status is `todo`:
       `queued`, and `work` `P10 · <name>`.
@@ -399,14 +402,14 @@ As `plan-doc.md`, "Ids":
   - Revisit (blue):  "Revisit:  I'm adding a note for you";  answered as any revisit.
   - The x (`drop`, grey):  "Drop it".
     - `inbox apply` cancels it:  struck through, grey;  reviewed.
-    - The log:  `C3 canceled:  dropped by Owen in review`.
+    - The log:  `T3 canceled:  dropped by Owen in review`.
   - Its note box matches:  the plane, Revisit Later, the x.
     - The plane or the x takes the note in the box along.
     - `inbox apply` keeps it first, as Owen's `<epic-reply re="next phase">` (or `re="drop"`).
-  - Every other kind keeps Make Caveat, Revisit and Approve, a LIMIT caveat (`limit`) too.
+  - Every other kind keeps Make Todo, Revisit and Approve, a LIMIT todo (`limit`) too.
 - EVERY other note box (an item's, an Overview sub-section's, a phase's, the summary's):  Revisit Later, then the x.
   - The x is `skip`, grey:  "Skip this".
-  - It took Make Caveat's place in the box (Owen, 2026-10-09);  Make Caveat stays on the line.
+  - It took Make Todo's place in the box (Owen, 2026-10-09);  Make Todo stays on the line.
   - The x means nothing to do here.
     - It takes the note in the box along, or none.
     - It replaces any other mark, a pick too.
@@ -417,7 +420,7 @@ As `plan-doc.md`, "Ids":
     - No status card.
     - A note is kept first, as Owen's `<epic-reply re="skip">`.
     - The log:  `J9 skipped:  nothing to do, reviewed`.
-  - On a caveat that's work, skipping it IS dropping it.
+  - On a todo that's work, skipping it IS dropping it.
     - Its own box's x is `drop`.
     - A `skip` from a page drawn before is applied as `drop`.
   - On an Overview sub-section, a phase, or the summary:
@@ -494,19 +497,19 @@ As `plan-doc.md`, "Ids":
 - Owen's note, once Claude clears its mark:  `<epic-reply from="Owen" at="..." re="revisit soon">`.
 - An Overview sub-section takes review marks too (Q14):
   - approve and skip are logged
-  - Make Caveat makes a caveat linking `#o3`
+  - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
-- So do a phase and the summary (epic `airplane` P2):  Make Caveat and Revisit on the page;  no Approve.
+- So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
-    - Make Caveat makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
+    - Make Todo makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
     - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
   - The summary, keyed `summary` in the inbox (it has no id):
-    - Make Caveat makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
+    - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
 - NEW items from the page (epic `airplane` P2).
-  - Asked for with a small form:  caveat or question, title, note, what it's about.
+  - Asked for with a small form:  todo or question, title, note, what it's about.
   - Opened by the page toolbar's new-item button:  comment dots (Owen, 2026-10-10).
-  - Or by a New caveat / New question button, at the end of the Caveats and Questions sections.
+  - Or by a New todo / New question button, at the end of the Todo and Questions sections.
   - It waits in the inbox as a mark under a key of its own, `new1`, `new2` ...:
     `{ action: "new", kind, title, note?, near? }`.
   - Drawn at the end of its section:  dashed until sent, then outlined.
@@ -554,7 +557,7 @@ In Owen's words (2026-10-10):  "Claude Done entries are confusing ... you haven'
 
 | card             | when                                                                  | says, in one line                                   |
 | ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
-| `Claude • Noted` | Claude RECORDED what Owen chose, nothing built yet:  a pick, a caveat made or queued, a new item made, a choice talked over | what was recorded, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
+| `Claude • Noted` | Claude RECORDED what Owen chose, nothing built yet:  a pick, a todo made or queued, a new item made, a choice talked over | what was recorded, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
 | `Claude • Done`  | WORK was done:  an answer or reply written, code changed, a phase built | the reading kept, a summary when worth saying     |
 
 ```html
@@ -598,10 +601,10 @@ In Owen's words (2026-10-10):  "Claude Done entries are confusing ... you haven'
     - Spinner off.
     - `done --filed "<what>"`, the older spelling, writes the same Noted card.
   - `inbox apply`:  a card born NOTED for each of these (none for an approval):
-    - each pick and caveat it files (Q19):
+    - each pick and todo it files (Q19):
       - a pick:  `Chose B · <option>:  recorded ...;  waiting for ...`
-      - a caveat:  `Made caveat C23 to follow this up.`
-    - each caveat it queues:  `Queued for P10 · <name>`
+      - a todo:  `Made todo T23 to follow this up.`
+    - each todo it queues:  `Queued for P10 · <name>`
     - each new item it makes:  `Made from the page:  Owen's new todo, ...`
   - `inbox done | clear` of a mark carrying a pick:  a Noted card with the pick kept,
     `Chose B · ...:  recorded after the talk;  ...`.
@@ -621,11 +624,11 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, Ow
 | red    | needs Owen                               | `attention` chips;  the rail's count (only what needs him)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips;  a `to do` review label                                  |
 | blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Send;  Underway cards;  the active phase |
-| green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Caveat, a caveat's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
+| green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
 | violet | Claude's voice                           | his reply cards;  the bedtime label                                    |
 | ivory  | Owen's voice                             | his note box, marked note, reply cards, the answer card                |
-| grey   | no longer relevant, inactive, not chosen | `old` chips (canceled);  a caveat's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
+| grey   | no longer relevant, inactive, not chosen | `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.
 - Those are:  the review buttons, the note box's, the pick's letter, the Choose pill and its card, Send.
@@ -652,7 +655,7 @@ In Owen's words (2026-10-10):
 - While his OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
   the mark, and the colour below is the button's (Owen, 2026-10-11, epic `epic-workflow` I6:  a red item marked
   Revisit turned blue, and its section's red count matched no chip).
-  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), a caveat queued (green),
+  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), a todo queued (green),
     work underway (blue).
 - So at a glance:
   - a dashed or outlined chip is ANSWERED (don't answer again)
@@ -660,17 +663,17 @@ In Owen's words (2026-10-10):
 
 | Owen's answer                          | colour | dashed:  not sent | outlined:  sent, Claude has it, or still due | solid:  done (the item's state) |
 | -------------------------------------- | ------ | ----------------- | -------------------------------------------- | ------------------------------- |
-| Approve                                | green  | pressed           | sent, until `inbox apply`                    | green:  a call accepted, a test passed;  an issue / caveat settled |
+| Approve                                | green  | pressed           | sent, until `inbox apply`                    | green:  a call accepted, a test passed;  an issue / todo settled |
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
-| Make Caveat                            | green  | pressed           | sent                                         | green:  settled;  the new caveat is its own item (yellow until queued) |
-| a caveat's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  outlined until the caveat is closed | green, once done |
+| Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
+| a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  outlined until the todo is closed | green, once done |
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  outlined until started and done     | green, once done                |
-| a caveat's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
+| a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
 | Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (Owen's turn);  green if it got decided |
 | any work Claude took (an underway status card) | blue | --          | `progress`:  outlined until the card is Done or Noted | the state's colour      |
-| a new caveat or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a caveat yellow) |
+| a new todo or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a todo yellow) |
 | urgent / not urgent (the id chip itself) | red / yellow | a dashed ring | --                                    | solid red / yellow              |
 
 - The chip of an item waiting on Owen is never outlined:
@@ -695,7 +698,7 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 - Folded content is `hidden="until-found"`, so find-in-page reveals it.
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
-The review buttons, at every step:  Make Caveat, Revisit, Approve in one group.
+The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
 - No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
   same day:  Send alone.
   - The inbox still takes a `details` request (an old mark, an older page):  only the button went.
@@ -841,8 +844,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr)
     - a phase's number in its words is its place (`PhaseIds.labelOf()`);  a phase's `renamed` line names the phase
       titled with its new name, else the one at that number
-  - `caveats-and-tests` (2026-10-24, on command;  epic `epic-engine` P32, Q16):  one list of loose ends, Caveats,
-    the todos folded in;  tests take `T` (`CaveatsAndTests`)
+  - `caveats-and-tests` (2026-10-24, on command;  epic `epic-engine` P32, Q16), RETIRED by `item-renames` (P44):  one
+    list of loose ends, Caveats, the todos folded in;  tests took `T` (`CaveatsAndTests`, in git history)
     - the page's caveats keep their ids, marked `limit`;  its todos become caveats numbered after the last one, in page
       order, at the end of the Caveats section;  the Todos section goes;  its tests `v3` become `t3`
     - every reference on the page follows, all at once:  ids, `#t3` links and words that only say `T3`, a change mark's
@@ -863,6 +866,25 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     reported
   - `changes-after-goal` (2026-10-25, every edit;  P45):  a phase's Changes field after its Goal, where the content
     model lists it now (`ChangesAfterGoal`, by `Markup.place()`)
+  - `item-renames` (2026-10-25, on command;  epic `epic-engine` P44):  the item letters say what they are, every
+    number kept, all at once (`ItemRenames`)
+    - Caveats become Todo:  `c3` => `t3`, the section `kind="todos"`, `id="todos"` (a limit stays a todo marked `limit`)
+    - Tests become Manual tests:  `t3` => `m3`
+    - comments become C:  the review inbox's `m3` (and the older `cm3`) => `c3`, by `CommentList.migrate()`
+    - every reference on the page follows:  ids, `#t3` links (and words that only say `T3`), `#caveats` links, a change
+      mark's `item`, an `<epic-mark item>`, a part's `source` (its file written fresh under the new name),
+      `part-ids`, a note box's `for`, an `<epic-link item>` naming this page
+    - the page's review inbox follows:  its marks by item, its comments to `c`, a comment anchored on a renamed item
+      with it
+    - ONE log line:  `The item letters moved, every number kept:  Caveats are Todo (C3 -> T3), Tests are Manual tests
+      (T3 -> M3), ...`
+    - then the content folder's pass, in the same run (`ContentRelink`):  links on OTHER pages (`#caveats` -> `#todos`
+      too), and the comment keys of EVERY inbox in the content folder, guides' included, open and closed
+      (`ContentRelink.respellComments()`)
+    - test screenshots keep their file names:  pages name them by path
+    - idempotent:  a migrated page has no Caveats section and no `t` ids in its Manual tests
+    - it retired `caveats-and-tests`:  no page needed it any more, and it would read the new Todo section's `t` ids
+      as old todos
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

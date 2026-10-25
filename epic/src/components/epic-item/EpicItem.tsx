@@ -68,7 +68,7 @@ import tooltipCSS from "./Tooltip.css?inline"
 
 /****************
  * ### `EpicItem`
- * The component behind `<epic-item>`:  one item -- question, judgement call, caveat, todo, issue or test.
+ * The component behind `<epic-item>`:  one item -- question, judgement call, todo, issue or manual test.
  * Its kind is its id's letter (Q11).
  *
  * - Its LINE, in the shadow root, sticky while open (under the section titles stuck above it):

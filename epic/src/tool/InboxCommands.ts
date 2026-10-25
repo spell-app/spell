@@ -97,12 +97,12 @@ export class InboxCommands {
   /**
    * The page's spinner on item `id` of the doc at `file`, on or off (`inbox working`;  `status` too):
    * the inbox's `working` entry, and the session's heartbeat.
-   * - a comment's id (`M3`;  `m3`, `cm3` too):  its thread's "Claude: thinking…" stub instead
+   * - a comment's id (`C3`;  `c3`, `cm3` too):  its thread's "Claude: thinking…" stub instead
    *   (`CommentList.setWorking()`);  `done` turns it off too.  Throws when there's no such comment.
    * - SIDE EFFECT:  writes the inbox, under its lock
    */
   /**
-   * `inbox status <name> "<text>" [--items q6,m3]`:  what the session is doing now, the page's toolbar line (epic
+   * `inbox status <name> "<text>" [--items q6,c3]`:  what the session is doing now, the page's toolbar line (epic
    * `epic-engine` P35);  `--clear`:  nothing.
    * - `--items`:  what it's answering, each with its title from the doc (an item, a phase, a change mark) or the inbox
    *   (a comment's first words);  an id that's neither is refused
@@ -574,7 +574,7 @@ export class InboxCommands {
   }
 
   /**
-   * `done` / `clear` comments `ids` (`M3`, `m3` or `cm3`;  epic `airplane` P11).
+   * `done` / `clear` comments `ids` (`C3`, `c3` or `cm3`;  epic `airplane` P11).
    * - `done`:  answered;  Owen's turn on the page's thread
    *   - `--file <html>`:  the answer, on the thread (its markup, as is);  none:  answered in the doc
    *   - `--commit <sha>`:  the commit it was built in (the thread's Done line shows it)
@@ -783,12 +783,12 @@ function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`
 }
 
-/** `["q7", "i2", "m3"]` -> `Q7, I2, M3` */
+/** `["q7", "i2", "c3"]` -> `Q7, I2, C3` */
 function upper(ids: string[]): string {
   return ids.map(shown).join(", ")
 }
 
-/** An item's id as Owen reads it:  `q7` -> `Q7`;  a comment's, `M3` (`cm3`, `m3`:  `CommentList.label()`). */
+/** An item's id as Owen reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
 function shown(id: string): string {
   return CommentList.isCommentId(id) ? CommentList.label(id) : id.toUpperCase()
 }

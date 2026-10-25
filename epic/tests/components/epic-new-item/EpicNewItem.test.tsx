@@ -59,7 +59,7 @@ describe("<epic-new-item>", () => {
     host.addEventListener("epic-new-closed", (event) => closed.push((event as CustomEvent).detail))
     expect(find(host, "[part~='button']")).toBeNull()
     const form = find<HTMLFormElement>(host, "[part~='form']")!
-    expect(form.querySelector("[aria-pressed='true']")!.textContent).toBe("Caveat")
+    expect(form.querySelector("[aria-pressed='true']")!.textContent).toBe("Todo")
     expect(form.querySelector<HTMLInputElement>("[data-field='near']")!.value).toBe("P3")
     form.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, composed: true }))
     await ElementFixture.tick()

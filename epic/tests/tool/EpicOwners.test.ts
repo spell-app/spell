@@ -86,7 +86,7 @@ describe("EpicOwners on a scratch checkout", () => {
     })
     await page("later", (plan) => {
       plan.page.setAttribute("future", "")
-      plan.addItem("caveat", "touches src/new.ts")
+      plan.addItem("limit", "touches src/new.ts")
     })
   })
 

@@ -118,16 +118,17 @@ export type Duration = {
  * and its status while it counts:  a question waits (`open`), an answered one is in force (`decided`).
  * - a decision is an answered question (D13 of `review-review`):
  *   `decision` makes a question born answered (`q` id, `decided`, `answered`), in Questions
- * - `test`:  something Owen checks by hand before merging (`T1`);  `close` it once it passes
- * - a `caveat` and a `todo` are both CAVEATS (`c` ids, one section:  epic `epic-engine` P32, Q16), told apart by
- *   `limit` (`<epic-item limit>`):  a caveat is a LIMIT to know about, a todo is work still to do
+ * - `test`:  a MANUAL test, something Owen checks by hand before merging (`M1`);  `close` it once it passes
+ * - a `todo` and a `limit` are both in Todo (`t` ids, one section:  epic `epic-engine` P44), told apart by
+ *   `limit` (`<epic-item limit>`):  a todo is work still to do, a limit is something to know about
+ *   - `caveat`, the word before P44, is read as `limit` (`kindNamed()`)
  */
 export const KINDS = {
   question: { prefix: "q", section: "questions", live: "open" },
-  caveat: { prefix: "c", section: "caveats", live: "open", limit: true },
+  todo: { prefix: "t", section: "todos", live: "open", limit: false },
+  limit: { prefix: "t", section: "todos", live: "open", limit: true },
   issue: { prefix: "i", section: "issues", live: "open" },
-  todo: { prefix: "c", section: "caveats", live: "open", limit: false },
-  test: { prefix: "t", section: "tests", live: "open" },
+  test: { prefix: "m", section: "tests", live: "open" },
   decision: { prefix: "q", section: "questions", live: "decided" },
   judgement: { prefix: "j", section: "judgements", live: "open" }
 } as const satisfies Record<
@@ -135,12 +136,20 @@ export const KINDS = {
   { prefix: string; section: ItemSectionKind; live: "open" | "decided"; limit?: boolean }
 >
 
-/** An item's kind, `KINDS`':  `question`, `caveat` ... */
+/** An item's kind, `KINDS`':  `question`, `todo` ... */
 export type ItemKind = keyof typeof KINDS
 
 /** Whether `kind` is one of `KINDS`:  a command line's word, checked. */
 export function isItemKind(kind: string): kind is ItemKind {
   return Object.hasOwn(KINDS, kind)
+}
+
+/** What a `limit` was called before epic `epic-engine` P44:  a caveat. */
+const OLD_LIMIT_WORD = "caveat"
+
+/** A command line's kind word as `KINDS` names it:  the old `caveat` (before epic `epic-engine` P44) is `limit`. */
+export function kindNamed(word: string): string {
+  return word === OLD_LIMIT_WORD ? "limit" : word
 }
 
 /**
@@ -183,14 +192,14 @@ export type ItemStatus = (typeof ITEM_STATUSES)[number]
  * - `judgement`:  a choice Claude made without Owen (a `/bedtime` run, an agent mid-phase);
  *   open until he reviews it, then `close`d (accepted), or turned into a question.
  */
-export const OPEN_KINDS = ["question", "judgement", "issue", "caveat", "todo", "test"] as const
+export const OPEN_KINDS = ["question", "judgement", "issue", "limit", "todo", "test"] as const
 
 /** A kind `summary` reports, `OPEN_KINDS`'. */
 export type OpenKind = (typeof OPEN_KINDS)[number]
 
 /** One item, as `PlanReader.items()` lists it. */
 export type ItemSummary = {
-  /** its id, lower case:  `c3` */
+  /** its id, lower case:  `t3` */
   id: string
   /** its title's text */
   title: string
@@ -340,7 +349,7 @@ export type OptionCard = {
  * - `replied` (orange):  Claude answered it with options, and it waits for Owen's pick (Owen, 2026-10-09)
  * - `progress` (blue):  Claude is working on it (an underway status card, or `working`)
  * - `open` (yellow):  open, still undecided, not urgent
- *   (todos, caveats, tests;  reviewed issues and judgement calls;  work a review queued, not started;
+ *   (todos, limits, manual tests;  reviewed issues and judgement calls;  work a review queued, not started;
  *   a revisit or Do Now Claude answered, the item still open)
  * - `recent` (green):  decided or done, however long ago (Owen, 2026-10-08:  "green across the board is good"):
  *   closed, or open and settled by a review (`SETTLED_AS`)
@@ -412,10 +421,10 @@ export type ReviewState = "queued" | "reviewed" | "deferred" | "outstanding"
 export const REVIEW_SECTIONS: { kind: ItemKind; label: string }[] = [
   { kind: "question", label: "Questions" },
   { kind: "judgement", label: "Judgement calls" },
-  { kind: "todo", label: "Caveats (to do)" },
-  { kind: "caveat", label: "Caveats (limits)" },
+  { kind: "todo", label: "Todo" },
+  { kind: "limit", label: "Todo (limits)" },
   { kind: "issue", label: "Issues" },
-  { kind: "test", label: "To test" }
+  { kind: "test", label: "Manual tests" }
 ]
 
 /** One item, as a review walks it (`PlanReader.reviewItem()`). */
@@ -533,7 +542,7 @@ export type PlanMark = {
   near?: string
   /** a test answer's (`action: "test"`, epic `epic-engine` P4):  `passed`, `failed`, `skip`, `notnow` */
   result?: string
-  /** a test answer's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png` */
+  /** a test answer's screenshot, from the epic page's folder:  `tests/m3-20261019-1432.png` */
   shot?: string
   /** the stage a stage button's mark ends (`action: "accept"`, epic `epic-engine` P29):  `overview`, `phases` */
   stage?: string

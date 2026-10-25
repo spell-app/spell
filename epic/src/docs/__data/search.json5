@@ -759,7 +759,7 @@
     {
       "path": "epic-item.html",
       "title": "<epic-item>",
-      "summary": "One item of an epic page: a question, judgement call, caveat, todo, issue or test, drawn as a line that unfolds.",
+      "summary": "One item of an epic page: a question, judgement call, todo, issue or manual test, drawn as a line that unfolds.",
       "tag": "epic-item",
       "sections": [
         {

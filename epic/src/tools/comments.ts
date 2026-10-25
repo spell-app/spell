@@ -4,11 +4,11 @@
  *   (`GuideInbox`);  this is Claude's side:
  *
  *     epic comments list
- *     guides/solid/solid-2.html#M3  table in 2. Memory  2026-10-10T14:02:00.000Z
+ *     guides/solid/solid-2.html#C3  table in 2. Memory  2026-10-10T14:02:00.000Z
  *       Too wide on a phone?
  *     epic comments gather
- *     guides/solid/solid-2.html  ->  feedback#P4 (new phase):  M3
- *     epic comments answer guides/solid/solid-2.html#M3 --file /tmp/reply.html
+ *     guides/solid/solid-2.html  ->  feedback#P4 (new phase):  C3
+ *     epic comments answer guides/solid/solid-2.html#C3 --file /tmp/reply.html
  *
  * - `list [<epic>] [--all] [--json]` (default):  every comment still waiting, on every docs page, by page
  *   - `<epic>`:  only that epic's:  on a page it owns (its own `epics/<epic>/details/`, or a guide its See Also
@@ -32,9 +32,9 @@
  * - a THREAD:  Owen answers Claude's answer on the page (that's good, reply, skip it:  `CommentList`);  his reply is
  *   waiting work, as a new comment is:  `list` shows it under the comment, `gather` takes it again
  * - `<page>`:  from the checkout's root (`guides/x.html`), or from an area (`pages.js` `pageFile()`);  a comment on
- *   it, `<page>#<id>`, as on an epic page (`seo#M3`), or as two words, `<page> <id>` (`pageAndId()`)
- * - `<id>`:  a comment's, as the page shows it, `M3`;  `m3` and the old `cm3` read the same (`CommentList.idOf()`).
- *   Printed `M3`
+ *   it, `<page>#<id>`, as on an epic page (`seo#C3`), or as two words, `<page> <id>` (`pageAndId()`)
+ * - `<id>`:  a comment's, as the page shows it, `C3`;  `c3` and the old `cm3` read the same (`CommentList.idOf()`).
+ *   Printed `C3`;  `M3` is a manual test's since epic `epic-engine` P44, never a comment's
  * - epic pages' comments wait in their epic's review inbox instead:  `epic inbox <name>`
  * - a page an epic owns (epic `epic-workflow` P13):  its header's Send hands its comments to that epic's session
  *   (`epic inbox wait <epic>` prints them under the page);  `working` and `answer`, here, take them one at a time.

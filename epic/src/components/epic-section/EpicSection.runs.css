@@ -26,57 +26,48 @@
 
 @layer ui.components.epic-section.page {
   /* ## the items the state filter hides */
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item[data-epic-filtered] {
     display: none;
   }
 
   /* ## an item list's runs:  each one's top */
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered]):nth-child(1 of epic-item:not([hidden], [data-epic-filtered])),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
-    > epic-item:not([hidden], [data-epic-filtered])[open]
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
-    + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
@@ -84,9 +75,18 @@
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + epic-item:not([hidden], [data-epic-filtered]),
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open]
     + :is([hidden], [data-epic-filtered], :not(epic-item))
     + :is([hidden], [data-epic-filtered], :not(epic-item))
@@ -101,9 +101,9 @@
     border-top: none;
   }
   /* each one's bottom:  an unfolded line, or the last one showing */
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered])[open],
-  epic-section:is([kind="questions"], [kind="judgements"], [kind="caveats"], [kind="issues"], [kind="tests"])
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
     > epic-item:not([hidden], [data-epic-filtered]):nth-last-child(1 of epic-item:not([hidden], [data-epic-filtered])) {
     --epic-item-bottom-radius: var(--_epic-run-radius);
   }

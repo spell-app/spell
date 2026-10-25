@@ -67,18 +67,19 @@ export class ThreadFacts {
   ////////////////
 
   /**
-   * A comment id's number, however typed or keyed:  `M3`, `m3`, `cm3` (any case, a `#` before it aside) -> 3;  else
-   * `undefined`.  As `CommentList.idOf()`.
+   * A comment id's number, however typed or keyed:  `C3`, `c3`, the old `cm3` (any case, a `#` before it aside) -> 3;
+   * else `undefined`.  As `CommentList.idOf()`.
+   * - NOT `M3`:  a manual test's id since epic `epic-engine` P44 (a comment's before:  "M" for mark)
    */
   static numberOf(typed: string | undefined): number | undefined {
     const number = TYPED_ID.exec((typed ?? "").trim())?.[1]
     return number === undefined ? undefined : Number(number)
   }
 
-  /** A comment's id as Owen sees it:  `M3` (`cm3`, `m3` alike;  `CommentList.label()`). */
+  /** A comment's id as Owen sees it:  `C3` (`c3`, `cm3` alike;  `CommentList.label()`). */
   static label(id: string): string {
     const number = ThreadFacts.numberOf(id)
-    return number === undefined ? String(id) : `M${number}`
+    return number === undefined ? String(id) : `C${number}`
   }
 
   ////////////////
@@ -98,7 +99,7 @@ export class ThreadFacts {
 
   /**
    * Which block a comment is on, in full, for a tooltip:  "On a field in “Guide Comments”";  with its id (a saved
-   * comment's):  "Comment M3, on ..."
+   * comment's):  "Comment C3, on ..."
    */
   static aboutTip({ id, place }: { id?: string; place: ThreadPlace }): string {
     const what = THE_ONE.includes(place.kind)
@@ -163,8 +164,8 @@ export type ThreadComment = Comment & { id: string; turn?: Turn }
 /** Who writes Owen's words on a thread (`CommentList`'s `OWEN`). */
 const OWEN = "Owen"
 
-/** A typed comment id:  `M3`, `m3`, the old `cm3`, a `#` before it. */
-const TYPED_ID = /^#?c?m(\d+)$/i
+/** A typed comment id:  `C3`, `c3`, the old `cm3`, a `#` before it (`M3` is a manual test's:  epic `epic-engine` P44). */
+const TYPED_ID = /^#?cm?(\d+)$/i
 
 /** How many characters of the selected text (or the block's) a header shows. */
 const HEADLINE_CHARS = 40

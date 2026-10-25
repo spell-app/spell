@@ -42,16 +42,22 @@ export class PhaseTakes {
     return stamped
   }
 
-  /** Can a phase take `item` up?  Closed (done or decided), not a test, not `handled` in a phase already. */
+  /** Can a phase take `item` up?  Closed (done or decided), not a manual test, not `handled` in a phase already. */
   static canTake(item: Element): boolean {
     return (
-      CLOSED_BY_WORK.has(item.getAttribute("status") ?? "") && !TEST_ID.test(item.id) && !item.hasAttribute("handled")
+      CLOSED_BY_WORK.has(item.getAttribute("status") ?? "") &&
+      !item.closest(TESTS_SECTION) &&
+      !item.hasAttribute("handled")
     )
   }
 
-  /** Is `item` work a phase does as it closes it:  an issue, or a todo (a `c` that isn't a caveat's `limit`)? */
+  /**
+   * Is `item` work a phase does as it closes it:  an issue, or a todo (one that isn't a `limit`)?
+   * - by its SECTION, not its id's letter:  so a page not yet migrated to epic `epic-engine` P44's letters (a caveat
+   *   `c3`, a test `t3`) reads the same as one migrated
+   */
   static isWork(item: Element): boolean {
-    return ISSUE_ID.test(item.id) || (TODO_ID.test(item.id) && !item.hasAttribute("limit"))
+    return Boolean(item.closest(ISSUES_SECTION) || (item.closest(TODO_SECTION) && !item.hasAttribute("limit")))
   }
 
   /**
@@ -95,14 +101,14 @@ const CLOSED_BY_WORK = new Set(["done", "decided"])
 /** An item id, as a link names it:  `i1`, `q13`, `d7`. */
 const ITEM_ID = /^[a-z]{1,2}\d+$/
 
-/** A test's id:  its run says where it passed. */
-const TEST_ID = /^t\d+$/
+/** The Manual tests section:  a test's run says where it passed. */
+const TESTS_SECTION = 'epic-section[kind="tests"]'
 
-/** An issue's id. */
-const ISSUE_ID = /^i\d+$/
+/** The Issues section. */
+const ISSUES_SECTION = 'epic-section[kind="issues"]'
 
-/** A todo's (or caveat's) id:  the `limit` attribute tells them apart. */
-const TODO_ID = /^c\d+$/
+/** The Todo section (Caveats, before epic `epic-engine` P44):  the `limit` attribute tells work from a limit. */
+const TODO_SECTION = 'epic-section:is([kind="todos"], [kind="caveats"])'
 
 /** A phase's "To review" field. */
 const TO_REVIEW = 'epic-field[name="to-review"]'

@@ -172,7 +172,7 @@ describe("planFacts()", () => {
 <epic-phase id="p2" title="Two" status="todo"></epic-phase></epic-section>
 <epic-section id="decisions" kind="questions"><epic-item id="q1" title="a"
   status="open" state="attention"></epic-item><epic-item id="q2" title="b" status="decided" state="recent" answered></epic-item></epic-section>
-<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="c" status="open" state="open"></epic-item></epic-section>
+<epic-section id="todos" kind="todos"><epic-item id="t1" title="c" status="open" state="open"></epic-item></epic-section>
 <epic-section id="issues" kind="issues"><epic-item id="i1" title="d" status="open" state="replied"></epic-item></epic-section></epic-page></body>`
     )
     expect(Worktrees.planFacts(file)).toEqual({

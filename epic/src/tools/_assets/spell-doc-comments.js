@@ -177,9 +177,10 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   - the trash, on a thread or the pane:  one click (`delete` while it waits, else `clear`);  Undo in the toast
  *   - the BULLHORN only ever starts a new comment:  no count, since the block's threads are right there
  *     (Owen, 2026-10-10:  "Bullhorn to the far right is unnecessary")
- * - IDS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "use `M3` for mark 1"):
- *   shown `M3`, small and muted in each thread's header, before its summary (`<epic-thread>`)
- *   - the server keys them `m3`, and a typed id takes `M3`, `m3` or `cm3` (`ThreadFacts.numberOf()`)
+ * - IDS (epic `epic-engine` P44;  Owen, 2026-10-25:  "Can `Mark` be `Comment (C)`";  `M3` from epic `epic-workflow` P23):
+ *   shown `C3`, small and muted in each thread's header, before its summary (`<epic-thread>`)
+ *   - the server keys them `c3`, and a typed id takes `C3`, `c3` or `cm3` (`ThreadFacts.numberOf()`);  `M3` is a
+ *     manual test's
  * - JUMPING to the threads waiting on Owen (Claude spoke last;
  *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
  *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
@@ -637,7 +638,7 @@ class PageComments {
     return this.main.querySelector(`#comment-${CSS.escape(id)}`)
   }
 
-  /** The comment with id `typed` (`M3`, `m3`, the old `cm3`, a `#` aside), else `undefined`. */
+  /** The comment with id `typed` (`C3`, `c3`, the old `cm3`, a `#` aside), else `undefined`. */
   find(typed) {
     const number = ThreadFacts.numberOf(typed)
     return number === undefined ? undefined : this.list.find((each) => ThreadFacts.numberOf(each.id) === number)
@@ -700,7 +701,7 @@ class PageComments {
   /**
    * Land on comment `id`'s thread, opened, then the focus to its header without scrolling.
    * - as a link to it would (`go()`):  what hides it unfolds, it lands below the stuck titles,
-   *   the address says `#comment-m3`
+   *   the address says `#comment-c3`
    * - seen (`markSeen()`)
    */
   async landOn(id) {
