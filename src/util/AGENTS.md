@@ -60,6 +60,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - lodash and string helpers
   - `Observable` / `Derivative` / `Loadable`, `Task` / `TaskList`
   - `$fetch`, `Logger`, `assert` / `die`
+  - `safelyCall()` / `safelyCallAll()`, `makeErrorWrapper()`, `setDebugGlobal()` ([safely.ts](spell/safely.ts)):
+    WWOD §5's and §19's helpers, written when coherence found WWOD naming them and no repo having them (its I2)
   - DOM helpers
 - The bottom of the spell chain:  every spell-family package may import it, and it imports nothing above it.
   - Formerly the package `spell-util`.

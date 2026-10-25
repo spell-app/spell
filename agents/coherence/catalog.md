@@ -186,6 +186,17 @@ The coherence agent reads it too, for every sweep and plan review (epic `coheren
 - **Flag:**  `ok: false`
 - **Copies:**  `--`
 
+### A caller's callback, run safely;  a class's errors, named
+
+- **It is:**  `safelyCall()` (a predicate:  warned, never thrown), `safelyCallAll()` (cleanups:  every one run),
+  `makeErrorWrapper(className)` (a class decorator:  each method's error carries the method and its arguments),
+  `setDebugGlobal()` (objects at the devtools console):  `spell/util`, `src/util/spell/safely.ts`
+- **Use it when:**  WWOD §5 and §19:  running code you don't own;  naming where an error came from;  inspecting
+  state while debugging, instead of `console.log()`.
+- **Flag:**  `catch \{\s*\}|catch \(\w+\) \{\s*\}|window\.\w+ = `
+- **Copies:**  `--`
+- **History:**  WWOD named all four for months before any existed (epic `coherence` I2).
+
 ### Logging
 
 - **It is:**  `Logger` (`spell/util`)
