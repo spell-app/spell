@@ -207,6 +207,27 @@
   .status:empty {
     display: none;
   }
+  /*
+   * the changes to accept and the step label, ONE pill (Owen, 2026-10-25):  rounded ends, the two halves meeting
+   * square in the middle, one rule between them
+   */
+  .step-pill {
+    display: inline-flex;
+    align-items: center;
+  }
+  .step-pill:empty {
+    display: none;
+  }
+  .step-pill ui-label {
+    --ui-label-radius: 999px;
+  }
+  .step-pill ui-label:not(:last-child) {
+    --_label-radius: 999px 0 0 999px;
+  }
+  .step-pill ui-label:not(:first-child) {
+    --_label-radius: 0 999px 999px 0;
+    margin-inline-start: -1px;
+  }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {
     box-sizing: border-box;

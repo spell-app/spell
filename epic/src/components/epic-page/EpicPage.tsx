@@ -679,7 +679,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             </button>
           </h1>
           <span class={STATUS} part={this.partForName("status")}>
-            <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
             <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
             <Show when={this.bedtime}>
               {(phases) => (
@@ -694,21 +693,26 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 </ui-label>
               )}
             </Show>
-            <Show when={this.step()}>
-              {(step) => (
-                <ui-label
-                  part={this.state() ? this.partForName("state") : undefined}
-                  data-state={this.state()?.name}
-                  basic={step().color === "green" ? undefined : ""}
-                  color={step().color}
-                  icon={step().icon}
-                  href={step().href}
-                  title={step().tip}
-                >
-                  {step().words}
-                </ui-label>
-              )}
-            </Show>
+            {/* ONE pill (Owen, 2026-10-25:  "pencil and P36 should be pills -- can we combine them"):  the changes to
+                accept, while any wait, on its left;  the step label on its right */}
+            <span class={STEP_PILL}>
+              <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
+              <Show when={this.step()}>
+                {(step) => (
+                  <ui-label
+                    part={this.state() ? this.partForName("state") : undefined}
+                    data-state={this.state()?.name}
+                    basic={step().color === "green" ? undefined : ""}
+                    color={step().color}
+                    icon={step().icon}
+                    href={step().href}
+                    title={step().tip}
+                  >
+                    {step().words}
+                  </ui-label>
+                )}
+              </Show>
+            </span>
             <Show when={this.hasCommits()}>{this.gitToggle()}</Show>
           </span>
         </header>
@@ -1443,6 +1447,9 @@ const STAGE_TEXTS = {
 } as const
 
 /** The open questions:  what the stage button's tooltip counts (epic `epic-engine` P29). */
+/** The pill holding the changes to accept and the step label, joined (`EpicPage.css`). */
+const STEP_PILL = "step-pill"
+
 const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
 
 /** A change mark's tag (epic `epic-engine` P30). */
