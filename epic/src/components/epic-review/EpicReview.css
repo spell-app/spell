@@ -89,7 +89,7 @@
    * Accept plan, while a phase's build plan waits:  a worded green pill before the group, so the page plainly asks
    * (Owen, 2026-10-25:  "p37 not asking me to accept");  pressed, dashed then outlined, as every review button
    */
-  /* Accept and Defer:  ONE segmented pill, round at its two ends, square where they meet, a hairline between */
+  /* Accept, Revisit and Defer:  ONE segmented pill, round at its two ends, square where they meet, a hairline between */
   .review-plan {
     display: inline-flex;
     flex: none;
@@ -119,6 +119,11 @@
     background: transparent;
     box-shadow: inset 0 0 0 1px var(--_epic-act-green);
     color: var(--_epic-act-green);
+  }
+  /* Revisit, between them:  square at both ends, a hairline each side */
+  .review-controls .review-middle::part(button) {
+    border-radius: 0;
+    margin-inline: -1px;
   }
   .review-accept::part(icon) {
     margin: 0;

@@ -21,6 +21,7 @@ import {
   REVIEW_CONTROLS,
   REVIEW_ACCEPT,
   REVIEW_DEFER,
+  REVIEW_MIDDLE,
   REVIEW_PLAN,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
@@ -160,7 +161,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
     // ... and Defer Phase beside it (Owen, 2026-10-25)
     const defer = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "defer") : undefined)
-    const group = () => specs().filter((spec) => spec.action !== "details" && spec !== accept() && spec !== defer())
+    // ... and Revisit between them, in the same pill (Owen, 2026-10-25:  "revisit should be between accept / defer")
+    const revisit = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "revisit") : undefined)
+    const inPill = (spec: ReviewButtonSpec) => spec === accept() || spec === revisit() || spec === defer()
+    const group = () => specs().filter((spec) => spec.action !== "details" && !inPill(spec))
     const doNow = () => specs().find((spec) => spec.action === "details")
     return (
       <span
@@ -189,6 +193,15 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           <span class={REVIEW_PLAN}>
             <Show when={accept()}>
               {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
+            </Show>
+            <Show when={revisit()}>
+              {(spec) =>
+                this.button(
+                  spec(),
+                  `${REVIEW_ACCEPT} ${REVIEW_DEFER} ${REVIEW_MIDDLE}`,
+                  this.translationForKey(spec().label)
+                )
+              }
             </Show>
             <Show when={defer()}>
               {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}

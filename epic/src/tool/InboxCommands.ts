@@ -277,10 +277,9 @@ export class InboxCommands {
       const sent = guides.take()
       if (work || sent.length) return this.printWork(name, this.owner.read(file), work ?? NO_WORK, sent, Boolean(json))
       if (Date.now() >= end) break
-      if (Date.now() - beat >= LISTEN_HEARTBEAT_MS) {
-        beat = Date.now()
-        heartbeat()
-      }
+      // a beat that didn't land (the inbox mid-write, unreadable) is tried again a second later, not 30s:  three missed
+      // in a row went stale, and the page told Owen nobody was listening (2026-10-25)
+      if (Date.now() - beat >= LISTEN_HEARTBEAT_MS && heartbeat()) beat = Date.now()
       await sleep(1000)
     }
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
@@ -299,14 +298,18 @@ export class InboxCommands {
 
     /**
      * Stamp the listening session's heartbeat;  nobody listening:  no write at all.
-     * - a file that can't be read (hand-edited mid-poll) is skipped:  the next beat tries again
+     * - returns whether it's done:  `false` when the file couldn't be read or written (hand-edited mid-poll, or its
+     *   lock held), so the loop tries again a second later
      */
-    function heartbeat() {
-      if (!peek(path).listening) return
+    function heartbeat(): boolean {
       try {
+        if (!ReviewInbox.read(path).listening) return true
         ReviewInbox.update(path, (box) => box.touchListening())
+        return true
       } catch (error) {
-        if (!(error instanceof InboxError)) throw error
+        if (error instanceof InboxError) return false
+        console.error("inbox wait:  the heartbeat failed, trying again:", error)
+        return false
       }
     }
   }

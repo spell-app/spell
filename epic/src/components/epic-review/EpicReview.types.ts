@@ -339,6 +339,8 @@ export const REVIEW_ACCEPT = "review-accept"
 export const REVIEW_DEFER = "review-defer"
 /** The two together, one segmented pill (Owen, 2026-10-25:  "make this single segmented pill, with just Accept Defer"). */
 export const REVIEW_PLAN = "review-plan"
+/** Class of a segment in the middle of the plan pill (Revisit):  square at both ends */
+export const REVIEW_MIDDLE = "review-middle"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"
