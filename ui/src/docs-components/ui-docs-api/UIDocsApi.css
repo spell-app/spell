@@ -12,6 +12,8 @@
  *   - A table is `<ui-header part="title">`, an optional `<p class="note" part="note">`,
  *     and `<ui-table part="table">` around a native `<table>`,
  *     whose row headers (`th[scope=row]`) hold the name and `<small class="ui-caption">` notes.
+ *   - Its head is `thead.full-width`:  every header cell alike, the first one too.
+ *   - A values cell is `td.values`, a description cell `td.description`.
  *   - With `only`:  no title;  each row header is `part="member"`, and its row is `tr.landed` while it flashes.
  *   - `only="tags"`:  one table of the family's tags, each row header's `<code>` inside an `<a>` to its first table.
  * - Public tokens (`--ui-docs-api-*`) are never declared:  each is read through a private alias
@@ -36,19 +38,18 @@
     --_ui-docs-api-landed-background: var(--ui-docs-api-landed-background, var(--ui-highlight));
     /* Background of inline code. */
     --_ui-docs-api-code-background: var(--ui-docs-api-code-background, var(--ui-surface-strong));
+    /* Narrowest a values cell gets:  its labels flow in rows, never one a line. */
+    --_ui-docs-api-values-width: var(--ui-docs-api-values-width, 14em);
+    /*
+     * Narrowest a description cell gets, in a table of three or more columns:  a few words a line;
+     * a narrow page scrolls the table sideways instead.  Beside the name alone it takes the rest of the row.
+     */
+    --_ui-docs-api-description-width: var(--ui-docs-api-description-width, 16em);
     display: block;
   }
 }
 
 @layer ui.components.docs-api.content {
-  /* never stacked (`stack-by="none"`):  too wide for its column (phone width), it scrolls sideways in its own box,
-     never the page */
-  [part~="table"] {
-    display: block;
-    max-inline-size: 100%;
-    overflow-x: auto;
-  }
-
   .tag {
     display: block;
     scroll-margin-block-start: var(--_ui-docs-api-scroll-margin);
@@ -98,6 +99,27 @@
   th > a:hover {
     color: var(--ui-link-hover);
     text-decoration-line: underline;
+  }
+
+  /*
+   * Cells:  each starts at the top of its row, and the wide columns keep a width to read at;
+   * a table wider than its column scrolls sideways in `<ui-table>`'s own scroller (it never stacks).
+   * - Before, a phone squeezed the values to one label a line (the `animation` row 818px tall)
+   *   and the descriptions to a word a line (epic `debut` P16).
+   */
+  th,
+  td {
+    vertical-align: top;
+  }
+  td.values {
+    min-width: var(--_ui-docs-api-values-width);
+  }
+  td.description:not(:nth-child(2)) {
+    min-width: var(--_ui-docs-api-description-width);
+  }
+  /* a code span longer than that width breaks anywhere, rather than widen its column past a desktop's */
+  td.description code {
+    overflow-wrap: anywhere;
   }
 
   /* Notes under a name (`alias`, `cancelable` ...) and under values (`set sizes`):  one per line. */

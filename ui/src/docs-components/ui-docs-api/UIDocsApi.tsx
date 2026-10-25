@@ -23,6 +23,7 @@ import {
   type ApiRow,
   type ApiSection,
   type ApiSectionId,
+  type DocsApiTextKey,
   type DocsApiVocabulary
 } from "./UIDocsApi.types"
 import { docsApiVocabulary } from "./UIDocsApi.en"
@@ -58,8 +59,8 @@ import apiCSS from "./UIDocsApi.css?inline"
  *     This element only FLASHES the row the hash names (`landedId`), when its tables are drawn and on `hashchange`.
  * - Descriptions:  `` `code` `` spans become `<code>` (`InlineCode`), as text nodes, never HTML.
  * - Values:  compact `<ui-labels size="mini">`;  hues painted in their own colour, a numeric run as one label.
- * - NEVER stacks (`stack-by="none"`;  Owen, 2026-10-25, on the API tab's tables stacked at 1400px wide in a 760px
- *   column:  as every docs table, I36 "I hate it"):  too wide for its column, it scrolls sideways in its own box.
+ * - NEVER stacks (`stack-by="none"`;  Owen, 2026-10-25:  a table never stacks, epic `debut` J64):
+ *   too wide for its column (phone width), it scrolls sideways in `<ui-table>`'s own scroller, a focusable region.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet, which never reaches a table inside this shadow root.
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
@@ -256,23 +257,16 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
             {this.inline(section.note ? this.translationForKey(section.note) : "")}
           </p>
         </Show>
-        <ui-table
-          part={this.partForName("table")}
-          celled=""
-          padding="compact"
-          definition=""
-          stack-by="none"
-          // it may scroll sideways (`UIDocsApi.css`):  a scrollable box takes the keyboard's focus
-          tabindex="0"
-        >
+        <ui-table part={this.partForName("table")} celled="" padding="compact" definition="" stack-by="none">
           <table aria-label={owner.label(this.translationForKey(section.id))}>
-            <thead>
+            {/* `full-width`:  the first column's header is a header like the rest, not the definition table's blank corner */}
+            <thead class={FULL_WIDTH_CLASS}>
               <tr>
                 <For each={section.columns}>{(column) => <th scope="col">{this.translationForKey(column)}</th>}</For>
               </tr>
             </thead>
             <tbody>
-              <For each={section.rows}>{(row) => this.row(owner, row)}</For>
+              <For each={section.rows}>{(row) => this.row(owner, row, section.columns)}</For>
             </tbody>
           </table>
         </ui-table>
@@ -280,21 +274,30 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     )
   }
 
-  /** One row;  with `only`, its name cell an anchor and an "On this page" entry, and the row flashing when landed on. */
-  private row(owner: TableOwner, row: ApiRow): JSX.Element {
+  /**
+   * One row;  with `only`, its name cell an anchor and an "On this page" entry, and the row flashing when landed on.
+   * - `columns`:  its table's, so each cell knows which column it's in (`cell()`).
+   */
+  private row(owner: TableOwner, row: ApiRow, columns: readonly DocsApiTextKey[]): JSX.Element {
     const id = this.onlyId ? `${owner.anchor()}-${TocIndex.slug(row.name)}` : undefined
     return (
       <tr class={{ [LANDED_CLASS]: !!id && this.landedId === id }}>
-        <For each={row.cells}>{(cell) => this.cell(cell, id && { id, name: row.name })}</For>
+        <For each={row.cells}>{(cell, at) => this.cell(cell, columns[at()], id && { id, name: row.name })}</For>
       </tr>
     )
   }
 
   /**
    * One cell:  a name as the row's `<th>`, prose with code spans, or values as labels.
+   * - `column`:  its column's header key;  the description column's cells are `td.description`,
+   *   kept wide enough to read (`UIDocsApi.css`)
    * - `member`:  the row's anchor id and "On this page" text, with `only`.
    */
-  private cell(cell: ApiCell, member?: { id: string; name: string } | ""): JSX.Element {
+  private cell(
+    cell: ApiCell,
+    column: DocsApiTextKey | undefined,
+    member?: { id: string; name: string } | ""
+  ): JSX.Element {
     if (cell.type === "name") {
       return (
         <th
@@ -326,9 +329,11 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
         </th>
       )
     }
-    if (cell.type === "text") return <td>{this.inline(cell.text)}</td>
+    if (cell.type === "text") {
+      return <td class={column === DESCRIPTION_COLUMN ? DESCRIPTION_CLASS : undefined}>{this.inline(cell.text)}</td>
+    }
     return (
-      <td>
+      <td class={VALUES_CLASS}>
         <ui-labels size="mini">
           <For each={ApiModel.labelsFor(cell)}>
             {(value) => (
@@ -496,6 +501,18 @@ const TAG_CLASS = "tag"
 
 /** Classes of the line under a table's title:  muted. */
 const NOTE_CLASS = "note ui-muted"
+
+/** Class of the API tables' head:  Fomantic's `full-width`, so a definition table's first header isn't a blank corner. */
+const FULL_WIDTH_CLASS = "full-width"
+
+/** The description column's header key. */
+const DESCRIPTION_COLUMN = "description" satisfies DocsApiTextKey
+
+/** Class of a description cell:  kept wide enough to read, the table scrolling sideways instead. */
+const DESCRIPTION_CLASS = "description"
+
+/** Class of a values cell:  wide enough for its labels to flow in rows. */
+const VALUES_CLASS = "values"
 
 /** Class of the small notes under a name or values:  the caption utility. */
 const CAPTION_CLASS = "ui-caption"

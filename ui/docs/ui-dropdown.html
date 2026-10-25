@@ -2288,7 +2288,18 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-dropdown" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-dropdown" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-dropdown label="File">
+                  <ui-item>New</ui-item>
+                  <ui-item description="ctrl + o">Open...</ui-item>
+                  <ui-item description="ctrl + s">Save as...</ui-item>
+                  <ui-item kind="divider"></ui-item>
+                  <ui-item>Edit</ui-item>
+                  <ui-item>Share</ui-item>
+                </ui-dropdown>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

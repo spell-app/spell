@@ -1009,7 +1009,12 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-popup" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-popup" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-button icon="plus" aria-label="Add users"></ui-button>
+                <ui-popup label="Add users to your feed"></ui-popup>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

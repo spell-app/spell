@@ -827,7 +827,8 @@ function tabsState() {
 function sectionsState(): { sections: SectionState[]; flat: string[] } {
   const main = document.querySelector("main#main")
   const tabs = main?.querySelector("ui-tabs.site-tabs")
-  const page = (element: Element) => !element.parentElement?.closest("ui-docs-example, template")
+  // a demo inside an example or a Theming playground (its family's main example) isn't the page's
+  const page = (element: Element) => !element.parentElement?.closest("ui-docs-example, ui-docs-tokens, template")
   const sections = [...(main?.querySelectorAll("ui-section") ?? [])].filter(page).map((section) => {
     const pane = section.closest("ui-tab")
     const slotted = section.querySelector(':scope > [slot="label"]')

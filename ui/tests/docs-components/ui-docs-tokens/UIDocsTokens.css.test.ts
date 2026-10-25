@@ -45,7 +45,8 @@ describe("UIDocsTokens.css layout", () => {
     const swatch = shadow.querySelector("[part~=swatch]")!.getBoundingClientRect()
     const code = shadow.querySelector("code")!.getBoundingClientRect()
     expect(code.left).toBeGreaterThan(swatch.right)
-    expect(getComputedStyle(shadow.querySelector("code")!).overflowWrap).toBe("anywhere")
+    // between words, not anywhere:  the table scrolls sideways, so a phone needn't squeeze the column (epic `debut` J64)
+    expect(getComputedStyle(shadow.querySelector("code")!).overflowWrap).toBe("break-word")
   })
 
   it("takes a public token from outside", () => {

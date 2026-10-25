@@ -33,7 +33,7 @@ export const buttonVocabulary = {
       group: "appearance",
       kind: "size",
       default: "medium",
-      description: "Size, `mini` ... `massive`;  `medium` is the default."
+      description: "How big it is, from `mini` to `massive`.  The default is `medium`."
     },
     {
       name: "color",
@@ -41,9 +41,10 @@ export const buttonVocabulary = {
       kind: "color",
       replaces: COLOR_SWITCHES,
       description:
-        "Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, " +
-        "`positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, " +
-        "`negative` written alone."
+        "Its hue:  it fills the button, or only its ring and text when `basic`.  " +
+        "`primary` and `secondary` are the brand's colours.  " +
+        "`positive` and `negative` say what pressing it does.  " +
+        "Those four also work written alone, their old names."
     },
     {
       name: "appearance",
@@ -58,9 +59,11 @@ export const buttonVocabulary = {
         { from: "circular", value: "circular" }
       ],
       description:
-        "The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), " +
-        "`tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it " +
-        "holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone."
+        "The look, several words at once.  " +
+        "`basic` is less pronounced:  transparent, with a hairline ring.  " +
+        "`tertiary` is the least:  text only, underlined on hover.  " +
+        "`circular` is pill-shaped, and round when it holds only an icon.  " +
+        "Each word also works written alone, its old name."
     },
     {
       name: "inverted",
@@ -72,7 +75,9 @@ export const buttonVocabulary = {
       name: "toggle",
       group: "appearance",
       kind: "keyOnly",
-      description: "Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
+      description:
+        "Each click turns `selected` on or off, and `aria-pressed` with it.  " +
+        "It sends `ui-selected` or `ui-deselected` as it turns."
     },
     {
       name: "selected",
@@ -87,14 +92,18 @@ export const buttonVocabulary = {
       group: "states",
       kind: "string",
       description:
-        "Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With " +
-        "either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
+        "The text shown while `selected`, instead of the content:  `Following`.  " +
+        "It's Fomantic's `state` behaviour.  " +
+        "With either state text the label says the state, so a toggle button leaves `aria-pressed` off " +
+        "(WAI-ARIA APG)."
     },
     {
       name: "inactive-text",
       group: "states",
       kind: "string",
-      description: "Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content."
+      description:
+        "The text shown while NOT `selected`, instead of the content:  `Follow`.  " +
+        "It's Fomantic's `state` behaviour, as `active-text` is."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
     {
@@ -141,8 +150,8 @@ export const buttonVocabulary = {
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
       description:
-        'With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  ' +
-        'With `badge`:  which side the badge goes, `labeled` (end) or `labeled="left"`.'
+        'With `icon`, the icon gets a block of its own:  at the start, or at the end with `labeled="right"`.  ' +
+        'With `badge`, it picks which side the badge goes:  the end, or the start with `labeled="left"`.'
     },
     {
       name: "reveal",
@@ -152,7 +161,7 @@ export const buttonVocabulary = {
       classes: { slide: "animated", fade: "fade animated", vertical: "vertical animated" },
       replaces: [{ from: "animated", value: "slide" }],
       description:
-        "Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  " +
+        "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  " +
         "Its old name is `animated`."
     },
     {
@@ -163,7 +172,7 @@ export const buttonVocabulary = {
       classes: ATTACH_CLASSES,
       replaces: [{ from: "attached", value: "both" }],
       description:
-        "Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  " +
+        "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  " +
         "Its old name is `attached`."
     },
     {
@@ -178,8 +187,9 @@ export const buttonVocabulary = {
       group: "content",
       kind: "icon",
       description:
-        "Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the " +
-        "`icon` class (square padding);  with `labeled` it becomes a `labeled icon` button."
+        "Its icon, by name:  Font Awesome's, or Fomantic's aliases.  " +
+        "With no text, it's an icon button, with square padding (the `icon` class).  " +
+        "With `labeled`, it's a `labeled icon` button."
     },
     {
       name: "icon-position",
@@ -187,8 +197,10 @@ export const buttonVocabulary = {
       kind: "enum",
       values: ["left", "right"],
       description:
-        "Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. " +
-        "`Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`."
+        "Which side of the text the icon goes:  `left` (the default) or `right`.  " +
+        "`right` is Fomantic's right icon, as in `Next →`.  " +
+        "The space between them is `--ui-button-icon-spacing`.  " +
+        "A labeled icon block takes its side from `labeled` instead."
     },
     {
       name: "label",
@@ -196,16 +208,18 @@ export const buttonVocabulary = {
       kind: "string",
       replaces: ["content"],
       description:
-        "Shorthand for the button's text, instead of the default slot;  slotted children win.  " +
-        "Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`."
+        "The button's text, written as an attribute instead of in the default slot.  " +
+        "Children in the slot win.  " +
+        "Its old name is `content`.  " +
+        "NOTE:  `label` used to be the joined badge, which is `badge` now."
     },
     {
       name: "badge",
       group: "content",
       kind: "string",
       description:
-        "Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  " +
-        "It was `label` (no old name:  `label` is the text now)."
+        "A badge joined to the button, such as a count:  it draws a `ui labeled button` round the button.  " +
+        "It used to be `label`, which is the button's text now, so it has no old name."
     },
     {
       name: "type",
@@ -213,7 +227,7 @@ export const buttonVocabulary = {
       kind: "enum",
       values: ["button", "submit", "reset"],
       default: "button",
-      description: "Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`."
+      description: "What it does in a form, as the native `<button type>`.  `submit` calls `form.requestSubmit()`."
     },
     {
       name: "commandfor",
@@ -221,19 +235,23 @@ export const buttonVocabulary = {
       kind: "string",
       property: "commandFor",
       description:
-        "Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up " +
-        "in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't " +
-        "see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in " +
-        "commands itself."
+        "The id of the element `command` acts on, as the native `<button commandfor>`.  " +
+        "It's looked up in the button's own tree.  " +
+        "The inner button gets the element itself (`commandForElement`), since a shadow button can't see " +
+        "a light-DOM id.  " +
+        "In a browser without invoker commands (`UI.browser.supports.invokers`), " +
+        "a click runs the built-in commands itself."
     },
     {
       name: "command",
       group: "behaviour",
       kind: "string",
       description:
-        "Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a " +
-        "`<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that " +
-        "the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`)."
+        "The invoker command to run, as the native `<button command>`.  " +
+        "A dialog takes `show-modal / close / request-close`, " +
+        "a popover `show-popover / hide-popover / toggle-popover`.  " +
+        "Any other is a custom `--name`, which the target hears as a `command` event.  " +
+        "`<ui-modal>` answers `--show / --close / --toggle`."
     },
     {
       name: "link",
@@ -290,7 +308,7 @@ export const buttonVocabulary = {
     { name: "active", description: "Pressed / on (`selected`)." },
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
-    { name: "fluid", description: "The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`." },
+    { name: "fluid", description: "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)." },
     { name: "left-floated", description: 'The host floats left (`floated="left"`).' },
     { name: "right-floated", description: 'The host floats right (`floated="right"`).' },
     { name: "ellipsis", description: "Cuts its text off with `…`:  the host is never wider than its parent." }

@@ -4,7 +4,8 @@
  *   - the source parts (`<ui-loader part="loader">`, `<ui-message part="error">`)
  *   - then a `<section>` holding `<article class="ui [size] markdown" part="body">`,
  *     the rendered HTML (`h1`-`h6` with ids, `p`, lists (task items:  `li > input[type=checkbox]`), `blockquote`,
- *     `table`, `hr`, `img`, inline `code`, `del`), with each code block as a `<ui-code>` (its own sheet).
+ *     `table`, `hr`, `img`, inline `code` (`code.short`:  kept on one line), `del`),
+ *     with each code block as a `<ui-code>` (its own sheet).
  * - `editable`:  `<nav part="tabs">` of `<button part="tab" aria-selected>`,
  *   a `<section>` around `<textarea part="editor">`, then the article's `<section>` (both `role=tabpanel`).
  * - A subclass's engine may draw the article's blocks as `ui-*` elements (`ui-header`, `ui-list`, `ui-table` ...:
@@ -63,7 +64,8 @@
     --_ui-markdown-stripe: var(--ui-markdown-stripe, var(--ui-surface-muted));
     --_ui-markdown-blockquote-color: var(--ui-markdown-blockquote-color, var(--ui-text-muted));
     --_ui-markdown-blockquote-border: var(--ui-markdown-blockquote-border, var(--ui-border-color-strong));
-    --_ui-markdown-code-background: var(--ui-markdown-code-background, var(--ui-surface-muted));
+    /* inline code's chip:  the foundation's (`ui-typography`), so its padding reads as the chip, not as a space */
+    --_ui-markdown-code-background: var(--ui-markdown-code-background, var(--ui-surface-strong));
     --_ui-markdown-radius: var(--ui-markdown-radius, var(--ui-radius));
     display: block;
     color: var(--_ui-markdown-color);
@@ -190,9 +192,14 @@
     color: var(--_ui-markdown-strong-color, inherit);
   }
 
-  /* inline code, images, strikethrough */
+  /*
+   * Inline code:  the foundation's chip, padded a little at its sides, no margin, so punctuation sits against it.
+   * - A short span never breaks across lines (`--toggle` split at its dashes):
+   *   `code.short`, marked by `UIMarkdown.keepShortCode()`.
+   *   A longer one still wraps, so it never runs off a phone's screen.
+   */
   .ui.markdown :not(pre) > code {
-    padding: 0.2em 0.4em;
+    padding: 0.125em 0.375em;
     border-radius: var(--_ui-markdown-radius);
     background: var(--_ui-markdown-code-background);
     color: var(--_ui-markdown-code-color, inherit);
@@ -200,6 +207,11 @@
     font-size: 0.85em;
   }
 
+  .ui.markdown :not(pre) > code.short {
+    white-space: nowrap;
+  }
+
+  /* images, strikethrough */
   .ui.markdown img {
     max-width: 100%;
     height: auto;

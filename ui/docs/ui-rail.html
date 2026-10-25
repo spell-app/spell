@@ -357,7 +357,17 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-rail" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-rail" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <div style="margin-inline: 20em">
+                  <ui-segment>
+                    <ui-rail position="left"><ui-segment>Left rail content</ui-segment></ui-rail>
+                    <ui-rail position="right"><ui-segment>Right rail content</ui-segment></ui-rail>
+                    <p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
+                  </ui-segment>
+                </div>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

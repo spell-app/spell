@@ -487,7 +487,14 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-select" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-select" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-select placeholder="Gender" name="gender">
+                  <ui-item value="male">Male</ui-item>
+                  <ui-item value="female">Female</ui-item>
+                </ui-select>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

@@ -21,17 +21,20 @@ describe("SiteSearchBuilder.page()", () => {
         <ui-tab value="usage" label="Usage">
           <ui-section id="usage-slots"><span slot="label">The <code>header</code> slot</span></ui-section>
         </ui-tab>
+        <ui-tab value="theming" label="Theming">
+          <ui-docs-tokens family="ui-section" playground><ui-section id="played" label="Never"></ui-section></ui-docs-tokens>
+        </ui-tab>
       </ui-tabs>
       <template><ui-section id="templated" label="Never"></ui-section></template>
     </main></body></html>`
 
-  it("reads the title, summary, tabs and every section with its parent and tab;  never a demo's", () => {
+  it("reads the title, summary, tabs and every section with its parent and tab;  never a demo's, nor a playground's", () => {
     expect(SiteSearchBuilder.page("ui-divider.html", PAGE)).toEqual({
       path: "ui-divider.html",
       title: "Divider",
       summary: "Segments content.",
       tag: "ui-divider",
-      tabs: { examples: "Examples", usage: "Usage" },
+      tabs: { examples: "Examples", usage: "Usage", theming: "Theming" },
       sections: [
         { id: "examples-types", title: "Types", tab: "examples" },
         { id: "examples-types-vertical-divider", title: "Vertical Divider", parent: 0 },

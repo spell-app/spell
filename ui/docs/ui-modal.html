@@ -790,7 +790,24 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-modal" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-modal" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="modal-types-standard-playground" command="--show">Show</button>
+                <ui-modal id="modal-types-standard-playground" closable>
+                  <ui-header>Profile Picture</ui-header>
+                  <ui-content>
+                    <ui-description>
+                      <p>We've found the following gravatar image associated with your e-mail address.</p>
+                      <p>Is it okay to use this photo?</p>
+                    </ui-description>
+                  </ui-content>
+                  <ui-actions>
+                    <ui-button class="deny" color="black">Nope</ui-button>
+                    <ui-button class="approve" color="positive">Yep, that's me</ui-button>
+                  </ui-actions>
+                </ui-modal>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
