@@ -172,7 +172,6 @@ export const epicPageVocabulary = {
       description:
         "The toolbar's state filter:  a chip per state the page's items are in, with how many;  filters every section."
     },
-    { name: "collapse-all", description: "The toolbar's double chevron:  folds everything on the page." },
     {
       name: "pill",
       description:
@@ -231,7 +230,11 @@ export const epicPageVocabulary = {
       description:
         "A doc still planning (no phases, not future):  the folded `Plan hung?` aside, with the prompt to copy."
     },
-    { name: "expand-all", description: "The toolbar's expand-all button:  opens every section, phase and item." },
+    {
+      name: "toggle-all",
+      description:
+        "The toolbar's ONE double chevron:  down, it opens every section, phase and item;  up once it has, it folds them."
+    },
     {
       name: "see-also",
       description:

@@ -354,27 +354,31 @@ describe("<epic-section> counts and state filter", () => {
     expect(chip(host, "replied").getAttribute("data-color")).toBe("orange")
   })
 
-  test("collapse-all, beside the chevron while open:  its phases fold, it stays open", async () => {
+  test("toggle-all, beside the chevron:  opens everything, then its phases fold, it stays open", async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases" open>` +
         `<epic-phase id="p1" title="One" status="active" open><p>Do it.</p></epic-phase></epic-section>`
     )
     await ElementFixture.settle(host)
-    const button = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="collapse-all"]')!
+    const button = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="toggle-all"]')!
     // last in the title's tools:  beside the chevron
     expect(button.parentElement!.lastElementChild).toBe(button)
+    // first:  everything opens;  then the same button folds what's inside
+    button.click()
+    await ElementFixture.tick()
+    expect(button.getAttribute("aria-pressed")).toBe("true")
     button.click()
     await ElementFixture.tick()
     const phase = host.querySelector("epic-phase")!
     expect([host.matches(":state(open)"), phase.matches(":state(open)")]).toEqual([true, false])
-    // folded:  no collapse-all
+    // folded by hand:  the toggle starts over, opening everything
     ;(host as FoldHost & { open: boolean }).open = false
     await ElementFixture.tick()
-    expect(host.shadowRoot!.querySelector('[part~="collapse-all"]')).toBeNull()
+    expect(button.getAttribute("aria-pressed")).toBe("false")
   })
 
   // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-  test("expand-all, folded or open, just before collapse-all:  one click opens it and everything inside, parts loading", async () => {
+  test("toggle-all, folded or open:  one click opens it and everything inside, parts loading", async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases">` +
         `<epic-phase id="p1" title="One" status="active" source="${FIXTURES}/phase-part.html"></epic-phase>` +
@@ -382,9 +386,12 @@ describe("<epic-section> counts and state filter", () => {
     )
     await ElementFixture.settle(host)
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
-    // folded:  expand-all shows, collapse-all doesn't;  last in the title's tools, beside the chevron
-    const expand = tools.querySelector<HTMLButtonElement>('[part~="expand-all"]')!
-    expect([tools.lastElementChild === expand, tools.querySelector('[part~="collapse-all"]')]).toEqual([true, null])
+    // ONE button, last in the title's tools, beside the chevron
+    const expand = tools.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
+    expect([tools.lastElementChild === expand, tools.querySelectorAll('[part~="toggle-all"]').length]).toEqual([
+      true,
+      1
+    ])
     expect([expand.title, expand.getAttribute("aria-label")]).toEqual([
       "Open everything in 1. Phases",
       "Open everything in 1. Phases"
@@ -403,12 +410,10 @@ describe("<epic-section> counts and state filter", () => {
     ])
     // each a click's open:  the page remembers the blocks' and items' folds by these
     expect(opened).toEqual(["phases", "p1", "p2", "q7"])
-    // open:  expand-all, then collapse-all, beside the chevron
+    // open:  the same button now folds everything inside
     await ElementFixture.tick()
-    const all = tools.querySelector('[part~="collapse-all"]')!
-    expect([tools.lastElementChild === all, all.previousElementSibling === expand]).toEqual([true, true])
-    const [e, c] = [expand, all].map((each) => each.getBoundingClientRect())
-    expect([e.width, e.height, e.right <= c.left + 0.5, Math.abs(e.top - c.top) < 0.5]).toEqual([24, 24, true, true])
+    const e = expand.getBoundingClientRect()
+    expect([expand.title, e.width, e.height]).toEqual(["Fold everything in 1. Phases", 24, 24])
     await expectAccessible(host)
   })
 
@@ -427,7 +432,7 @@ describe("<epic-section> counts and state filter", () => {
 // epic `epic-workflow` P25:  the page's own buttons in the title row, where the docs runtime puts the bullhorn too
 describe("<epic-section> actions slot", () => {
   // P25:  the page's own buttons at the title's end, before its tools and its fold
-  test('`slot="actions"`:  at the title\'s end, BEFORE its tools, collapse-all and chevron;  a click never folds it', async () => {
+  test('`slot="actions"`:  at the title\'s end, BEFORE its tools, the toggle-all and chevron;  a click never folds it', async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases"><button slot="actions" aria-label="Copy">C</button></epic-section>`
     )
@@ -444,8 +449,8 @@ describe("<epic-section> actions slot", () => {
     toggle(host).click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)
-    // open:  before collapse-all too
-    const all = host.shadowRoot!.querySelector('[part~="collapse-all"]')!
+    // open:  before the toggle-all too
+    const all = host.shadowRoot!.querySelector('[part~="toggle-all"]')!
     expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(all.getBoundingClientRect().left + 0.5)
     // the slotted button isn't a child:  an item section holding only it still says None yet
     const empty = await render(

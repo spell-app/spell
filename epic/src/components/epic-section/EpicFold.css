@@ -34,7 +34,12 @@
   ui-section {
     --ui-section-margin: 0;
     --ui-section-dividing-border: none;
-    --ui-section-title-padding: 10px var(--epic-inset, 16px);
+    /*
+     * its right end in from the edge by the phases' cards' (`--epic-controls-in`), so every row's toggle and chevron
+     * line up in one column, the toolbar's too (Owen, 2026-10-25:  "icons don't line up")
+     */
+    --ui-section-title-padding: 10px calc(var(--epic-inset, 16px) + var(--epic-controls-in, 26px)) 10px
+      var(--epic-inset, 16px);
     --ui-section-title-gap: 10px;
     --ui-section-title-color: var(--_epic-fold-title-color, var(--epic-heading-ink, var(--ui-text-color)));
     --ui-section-title-line-height: 1.25;
@@ -191,6 +196,8 @@
       --ui-section-h3: 1.05;
       --ui-section-title-gap: 8px;
       --ui-section-tip-width: 240px;
+      /* the phases' cards narrow:  their controls in by less (the toolbar's too, EpicPage.css) */
+      --epic-controls-in: 16px;
     }
   }
 }

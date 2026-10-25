@@ -139,6 +139,32 @@ export class Fold {
   }
 
   /**
+   * ONE button for expand-all and collapse-all (Owen, 2026-10-25:  "Instead of two buttons for expand all / collapse
+   * all, have one button that toggles"):  chevrons down while it would open everything, up once it has
+   * - `expanded()`:  what its owner last did with it (and still holds:  folding the owner by hand resets it)
+   */
+  static toggleAllButton({ expandLabel, collapseLabel, part, expanded, onToggle }: ToggleAllOptions): JSX.Element {
+    const label = () => (expanded() ? collapseLabel : expandLabel)
+    return (
+      <button
+        type="button"
+        class={COLLAPSE_ALL}
+        part={part}
+        aria-label={label()}
+        title={label()}
+        aria-pressed={expanded() ? "true" : "false"}
+        onClick={onToggle}
+      >
+        <svg class={CHEVRONS} viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d={expanded() ? "M4 8.5 8 4.5 12 8.5M4 12.5 8 8.5 12 12.5" : "M4 3.5 8 7.5 12 3.5M4 7.5 8 11.5 12 7.5"}
+          />
+        </svg>
+      </button>
+    )
+  }
+
+  /**
    * The box of a title row's ACTIONS SLOT (`Fold.types.ts`):  the page's own buttons there
    * (`<ui-button slot="actions">`), and the docs runtime's bullhorn.
    * - Each element puts it after its title, before its own buttons.
@@ -278,6 +304,20 @@ export type CollapseAllOptions = {
   part: string
   /** clicked:  fold everything under its owner */
   onCollapse: () => void
+}
+
+/** What `Fold.toggleAllButton()` takes. */
+export type ToggleAllOptions = {
+  /** its name and tooltip while it would open everything:  `Open everything in Questions` */
+  expandLabel: string
+  /** ... and once it has:  `Fold everything in Questions` */
+  collapseLabel: string
+  /** its `part`:  `toggle-all` in each owner's vocabulary */
+  part: string
+  /** is everything open (its owner's last use of it, still holding)? */
+  expanded: () => boolean
+  /** clicked:  open everything, or fold everything, as `expanded()` says */
+  onToggle: () => void
 }
 
 /** What `Fold.actions()` takes. */

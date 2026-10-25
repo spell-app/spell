@@ -249,8 +249,8 @@ describe("<epic-phase> title, folded and open", () => {
 })
 
 // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-describe("<epic-phase> expand-all", () => {
-  test("folded or open, before collapse-all and the chevron;  a click opens the phase and its items", async () => {
+describe("<epic-phase> toggle-all", () => {
+  test("folded or open, last before the chevron;  a click opens the phase and its items, the next folds them", async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-phase id="p2" title="Two" status="todo"><epic-item id="t1" title="Do it" status="open"><p>How.</p>` +
         `</epic-item></epic-phase>`
@@ -258,13 +258,16 @@ describe("<epic-phase> expand-all", () => {
     await inner(host).ready
     await ElementFixture.settle(host)
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
-    const expand = tools.querySelector<HTMLButtonElement>('[part~="expand-all"]')!
+    const expand = tools.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
     expect([tools.lastElementChild === expand, expand.title]).toEqual([true, "Open everything in P1 · Two"])
     expand.click()
     await vi.waitFor(() => expect(host.querySelector("epic-item")!.matches(":state(open)")).toBe(true))
     expect(host.matches(":state(open)")).toBe(true)
     await ElementFixture.tick()
-    expect(tools.lastElementChild!.matches('[part~="collapse-all"]')).toBe(true)
-    expect(tools.lastElementChild!.previousElementSibling).toBe(expand)
+    // one button:  still last, now folding everything inside
+    expect([tools.lastElementChild === expand, expand.title]).toEqual([true, "Fold everything in P1 · Two"])
+    expand.click()
+    await vi.waitFor(() => expect(host.querySelector("epic-item")!.matches(":state(open)")).toBe(false))
+    expect(host.matches(":state(open)")).toBe(true)
   })
 })

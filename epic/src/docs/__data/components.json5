@@ -3208,12 +3208,8 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "expand-all",
-          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
-        },
-        {
-          "name": "collapse-all",
-          "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
+          "name": "toggle-all",
+          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
         },
         {
           "name": "note",
@@ -3450,10 +3446,6 @@
           "description": "The toolbar's state filter:  a chip per state the page's items are in, with how many;  filters every section."
         },
         {
-          "name": "collapse-all",
-          "description": "The toolbar's double chevron:  folds everything on the page."
-        },
-        {
           "name": "pill",
           "description": "Under the review line, while marks, comments or Do Now requests wait and nobody can take them:  no Claude session reviewing (orange), or airplane mode;  once a Send or Do Now woke the epic, what the wake did (`Typed /epic review <name> into 🚧 <name>:  press Enter there`).  A click copies the review line's command."
         },
@@ -3502,8 +3494,8 @@
           "description": "A doc still planning (no phases, not future):  the folded `Plan hung?` aside, with the prompt to copy."
         },
         {
-          "name": "expand-all",
-          "description": "The toolbar's expand-all button:  opens every section, phase and item."
+          "name": "toggle-all",
+          "description": "The toolbar's ONE double chevron:  down, it opens every section, phase and item;  up once it has, it folds them."
         },
         {
           "name": "see-also",
@@ -4137,12 +4129,8 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "expand-all",
-          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
-        },
-        {
-          "name": "collapse-all",
-          "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
+          "name": "toggle-all",
+          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
         },
         {
           "name": "note",
@@ -4996,12 +4984,8 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "expand-all",
-          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
-        },
-        {
-          "name": "collapse-all",
-          "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
+          "name": "toggle-all",
+          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
         },
         {
           "name": "note",

@@ -297,6 +297,9 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
    - `decide <name>#Q<n> "..."`, then rewrite the Overview's words it changes, wrapping the changed words in
      `<epic-change item="q<n>">...</epic-change>`, in the part file
    - then `epic change <name>`:  it stamps each mark;  Owen accepts or reopens each on the page
+   - NEVER wait on the marks (Owen, 2026-10-25:  "I don't like that you block on waiting for me to approve those
+     marks"):  he accepts them at his leisure, a review AFTER the fact.  Go straight on:  the next answer, the next
+     question, the phases once the Overview is accepted;  a Reopen comes back as a mark like any other
    - a new question the answer raises:  `add <name>#Q`, as step 3
 6. Owen presses Accept Overview:  `inbox apply` moves the page to `phases`.  Then "4. Fill the doc".
    - Owen says "go" in chat instead:  `epic stage <name> phases` yourself.
