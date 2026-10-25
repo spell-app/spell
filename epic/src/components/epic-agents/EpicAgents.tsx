@@ -153,7 +153,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
               {this.agents.length}
             </span>
             {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
-            <span>
+            <span class={ROBOT}>
               <ui-icon name="robot" />
             </span>
           </button>
@@ -372,6 +372,7 @@ const TIP_ITEMS = "tip-items"
 const TIP_CHIP = "tip-chip"
 const WORDS = "words"
 const COUNT = "count"
+const ROBOT = "robot"
 const AGENTS_BUTTON = "agents-button"
 const AGENTS_POP = "agents-pop"
 const AGENTS_LIST = "agents-list"
