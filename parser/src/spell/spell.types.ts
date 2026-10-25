@@ -53,6 +53,21 @@ export function isProjectFile(name: string): boolean {
   return (PROJECT_FILES as readonly string[]).includes(name)
 }
 
+/** End of a code spell file's name:  `Card.spell`, `Carta.es.spell`. */
+export const SPELL_SUFFIX = ".spell"
+
+/** End of a spellx file's name, spell's tag-shaped form (epic `elemental-spell`):  `Card.spellx`, `Carta.es.spellx`. */
+export const SPELLX_SUFFIX = ".spellx"
+
+/**
+ * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or spellx, in any language?
+ * - `Card.spell`, `Carta.es.spell`, `Card.spellx`, `Carta.es.spellx`
+ * - NOT a project's built output, `Solitaire.spell.js`.
+ */
+export function isSpellSourceName(name: string | undefined): boolean {
+  return !!name && (name.endsWith(SPELL_SUFFIX) || name.endsWith(SPELLX_SUFFIX))
+}
+
 /**
  * End of a project's compiled output file's name, e.g. `Solitaire.spell.js` -- see `SpellProject.outputFile`.
  * - NEVER one of a project's own files:  the server leaves it out of the manifest.

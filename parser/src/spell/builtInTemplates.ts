@@ -55,5 +55,19 @@ export function loadBuiltInTemplates(scope: P.RootScope, languages: readonly SP.
   }
 }
 
+/**
+ * The file in the core's `src/core/templates/` that spell path `path` names, if it's a built-in template's:
+ * where its records say they were declared, e.g. `@spell/core/TwoSidedView/TwoSidedView.es.spell` => `TwoSidedView.es.spell`.
+ * - So an editor opens the template's source when a person goes to one of its words (epic `elemental-spell` C20).
+ * - `undefined` for any other path.
+ */
+export function builtInTemplateFileFor(path: string): string | undefined {
+  const [className, file, ...rest] = path.startsWith(`${TEMPLATES_FROM}/`)
+    ? path.slice(TEMPLATES_FROM.length + 1).split("/")
+    : []
+  const isTemplate = Object.values(BUILT_IN_TEMPLATES).includes(className ?? "")
+  return isTemplate && file && !rest.length ? file : undefined
+}
+
 /** Where a built-in template's records say they came from:  the core's templates, e.g. `@spell/core/TwoSidedView`. */
 const TEMPLATES_FROM = "@spell/core"

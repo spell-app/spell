@@ -31,6 +31,14 @@ export class SpellxTwin {
     return SpellxTwin.for(SP.Language.of(scope), parser, line, next)
   }
 
+  /**
+   * The twin of `line`, read by `parser` (a spellx parser:  its language's), with no scope:  see `of()`.
+   * - For what writes a spellx file's code-spell text, `SX.CodeSpellWriter` (epic `elemental-spell` P8).
+   */
+  static lineOf(line: P.LineToken, next: P.Token | undefined, parser: SP.SpellParser): SpellxTwinLine | undefined {
+    return SpellxTwin.for(parser.language ?? SP.Language.default, parser, line, next)
+  }
+
   /** The twin of `line`, read in `language` by `parser`:  see `of()`. */
   private static for(
     language: SP.Language,

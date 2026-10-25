@@ -5,6 +5,7 @@
  *   - `spellx.types.ts`:  the chunk tree's nodes, spans and diagnostics
  *   - `SpellxFile`:  a file, read
  *   - `SpellxView`:  a file's chunk tree, built from the tokens spell's parser reads it as
+ *   - `CodeSpellWriter`:  the code spell a file means, as text ("Show as .spell")
  * - Above `spell-parser/spell` in the import graph:  it uses the language's spellx tokenizer there;
  *   nothing in `spell` imports it.
  */
@@ -14,3 +15,4 @@ export * from "./spellx.types"
 
 export * from "./SpellxFile"
 export * from "./SpellxView"
+export * from "./CodeSpellWriter"
