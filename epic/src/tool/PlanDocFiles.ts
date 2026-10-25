@@ -5,9 +5,9 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { EpicRepo } from "spell-epic/config/EpicRepo"
-import { RealPath } from "spell-epic/config/RealPath"
 import { DataFile, type DataFileMove } from "spell-epic/data/DataFile"
 import { RepoList } from "spell-epic/server/RepoList"
 import { SRV } from "spell/server"
@@ -480,14 +480,20 @@ export class PlanDocFiles {
    * - STATIC:  any checkout's
    */
   static gitIn(cwd: string, ...args: string[]): string {
-    const run = spawnSync("git", args, { cwd, encoding: "utf8" })
-    return run.status === 0 ? run.stdout.trim() : ""
+    return SRV.Git.out(args, cwd) ?? ""
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
   mainRoot(): string {
-    const common = this.git("rev-parse", "--path-format=absolute", "--git-common-dir")
-    return common ? dirname(common) : this.root
+    return SRV.Git.mainRoot(this.root)
+  }
+
+  /**
+   * The git checkout `root` is in, its real path (what `git rev-parse --show-toplevel` says, with no git run);
+   * `root` itself outside git.
+   */
+  get checkoutRoot(): string {
+    return RealPath.of(SRV.checkoutOf(this.root)?.root ?? this.root)
   }
 
   /**
@@ -553,9 +559,7 @@ export class PlanDocFiles {
     const checkout = this.checkoutOf(file)
     const path = relative(checkout, file).split(sep).join("/")
     const names = [path, path.replace(/\.plan\.html$/, ".html")]
-    const tracked = names.find(
-      (name) => spawnSync("git", ["cat-file", "-e", `HEAD:${name}`], { cwd: checkout }).status === 0
-    )
+    const tracked = names.find((name) => SRV.Git.run(["cat-file", "-e", `HEAD:${name}`], checkout).ok)
     return tracked
       ? PlanDocFiles.parseLog(PlanDocFiles.gitIn(checkout, "log", "--follow", "--format=%H%x09%s", "--", tracked))
       : PlanDocFiles.sharedDocLog(file, this.repoFolders(file))

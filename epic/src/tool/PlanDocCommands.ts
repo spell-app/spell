@@ -412,7 +412,7 @@ export class PlanDocCommands {
     const found = PlanDocFiles.planDocIn(dirname(file), name)
     if (found && !future) {
       const branch = files.git("branch", "--show-current") || "(detached)"
-      const worktree = files.git("rev-parse", "--show-toplevel") || files.root
+      const worktree = files.checkoutRoot
       const promoted = (plan: PlanDoc) => {
         const was = plan.promote({ branch, worktree })
         if (was) nameSaga(plan)
@@ -432,7 +432,7 @@ export class PlanDocCommands {
       date: today,
       at: PlanTime.isoMinutes(now),
       branch: files.git("branch", "--show-current") || "(detached)",
-      worktree: files.git("rev-parse", "--show-toplevel") || files.root
+      worktree: files.checkoutRoot
     }
     // `atDepth()`:  the template's asset paths, pack and site header
     // for the doc's own depth (`epics/<name>/`:  2)

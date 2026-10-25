@@ -2,8 +2,8 @@ import { existsSync, mkdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RealPath } from "spell-epic/config/RealPath"
 import { DataFile } from "spell-epic/data/DataFile"
 
 import {

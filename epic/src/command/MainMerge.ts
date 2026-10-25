@@ -2,10 +2,10 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import { basename, dirname, join, matchesGlob, relative } from "node:path"
 
+import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
-import { Git } from "./Git"
 import { StrayFiles } from "./StrayFiles"
 
 /**
@@ -103,7 +103,7 @@ export class MainMerge {
    */
   run(mode: "start" | "continue" = "start"): MergeMainReport {
     const { root, generators, snapshotUpdate } = this
-    const branch = gitOut(root, ["branch", "--show-current"])
+    const branch = Git.out(["branch", "--show-current"], root) ?? ""
     if (!branch) throw new EpicCommandError("merge-main:  not on a branch;  check out the worktree's branch first")
     // the branch merged in:  the repo's base branch (`.epic/config.json5`)
     const upstream = EpicConfig.of(root).baseBranch
@@ -119,13 +119,13 @@ export class MainMerge {
 
     const merging = Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], root).ok
     // ours, before the merge:  to see whether it changed a lockfile
-    const before = gitOut(root, ["rev-parse", "HEAD"])
+    const before = Git.out(["rev-parse", "HEAD"], root) ?? ""
     if (mode === "continue") {
       if (!merging) throw new EpicCommandError("merge-main --continue:  no merge in progress")
     } else {
       if (merging)
         throw new EpicCommandError("merge-main:  a merge is in progress;  `--continue` it, or `git merge --abort`")
-      if (gitOut(root, ["status", "--porcelain", "--untracked-files=no"])) Object.assign(report, this.ditchStrays())
+      if (Git.out(["status", "--porcelain", "--untracked-files=no"], root)) Object.assign(report, this.ditchStrays())
       if (Git.run(["merge-base", "--is-ancestor", upstream, "HEAD"], root).ok)
         return { ...report, result: "up-to-date" }
       if (Git.run(["merge-base", "--is-ancestor", "HEAD", upstream], root).ok) {
@@ -152,10 +152,12 @@ export class MainMerge {
     // (A file both sides track, though ignored, stays.)
     // ONLY `.gitignore`s, never this machine's `.git/info/exclude`:  a file listed there was untracked by every merge
     // (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice)
-    const base = gitOut(root, ["merge-base", "HEAD", "MERGE_HEAD"])
-    const conflicted = gitLines(root, ["diff", "--name-only", "--diff-filter=U"])
-    const theirs = gitLines(root, ["diff", "--name-only", base, "MERGE_HEAD"])
-    const ignored = new Set(gitLines(root, ["ls-files", "--cached", "--ignored", "--exclude-per-directory=.gitignore"]))
+    const base = Git.out(["merge-base", "HEAD", "MERGE_HEAD"], root) ?? ""
+    const conflicted = Git.lines(["diff", "--name-only", "--diff-filter=U"], root)
+    const theirs = Git.lines(["diff", "--name-only", base, "MERGE_HEAD"], root)
+    const ignored = new Set(
+      Git.lines(["ls-files", "--cached", "--ignored", "--exclude-per-directory=.gitignore"], root)
+    )
     const dropped = [...new Set([...conflicted, ...theirs])].filter((file) => ignored.has(file))
     const [inOurs, inTheirs] = [inTree(root, "HEAD", dropped), inTree(root, "MERGE_HEAD", dropped)]
     report.untracked = dropped.filter((file) => !(inOurs.has(file) && inTheirs.has(file))).sort()
@@ -165,7 +167,7 @@ export class MainMerge {
     ////////
     // What to regenerate:  every generated file conflicted or changed on both sides;
     // anything else conflicted stops it
-    const ours = new Set(gitLines(root, ["diff", "--name-only", base, "HEAD"]))
+    const ours = new Set(Git.lines(["diff", "--name-only", base, "HEAD"], root))
     const touched = [...new Set([...unmerged, ...theirs.filter((file) => !report.untracked.includes(file))])]
     const candidates = touched.filter((file) => unmerged.includes(file) || ours.has(file))
     const plan = MainMerge.generatorsFor(candidates, generators, snapshotUpdate, root)
@@ -200,7 +202,7 @@ export class MainMerge {
 
     ////////
     // Commit, then say what a person should look at
-    const left = gitLines(root, ["diff", "--name-only", "--diff-filter=U"])
+    const left = Git.lines(["diff", "--name-only", "--diff-filter=U"], root)
     if (left.length) throw new EpicCommandError(`merge-main:  still unmerged:  ${left.join(", ")}`, EXIT.ERRORS)
     report.review = reviewSnapshots(
       root,
@@ -221,7 +223,7 @@ export class MainMerge {
    */
   private reinstall(before: string): Pick<MergeMainReport, "installed"> {
     const { root, install } = this
-    const lockfiles = before ? gitLines(root, ["diff", "--name-only", before, "HEAD", "--", ...LOCKFILES]) : []
+    const lockfiles = before ? Git.lines(["diff", "--name-only", before, "HEAD", "--", ...LOCKFILES], root) : []
     if (!lockfiles.length || !install.length) return {}
     const run = spawnSync(install[0]!, install.slice(1), { cwd: root, stdio: ["ignore", 2, 2] })
     return { installed: { command: install.join(" "), lockfiles, ok: run.status === 0 } }
@@ -253,7 +255,7 @@ export class MainMerge {
       try {
         reports.push({ ...make(worktree).run(mode), repo })
       } catch (error) {
-        const branch = gitOut(worktree, ["branch", "--show-current"])
+        const branch = Git.out(["branch", "--show-current"], worktree) ?? ""
         reports.push({ ...emptyReport(branch), repo, error: (error as Error).message })
       }
     }
@@ -395,23 +397,12 @@ function changedFiles(root: string): string[] {
 /** Which of `files` commit `rev`'s tree has;  none asked:  none (`ls-tree` with no path lists every file). */
 function inTree(root: string, rev: string, files: string[]): Set<string> {
   if (!files.length) return new Set()
-  return new Set(gitLines(root, ["ls-tree", "-r", "--name-only", rev, "--", ...files]))
+  return new Set(Git.lines(["ls-tree", "-r", "--name-only", rev, "--", ...files], root))
 }
 
 /** `file` matches one of `globs`. */
 function matchesAny(file: string, globs: string[]): boolean {
   return globs.some((glob) => matchesGlob(file, glob))
-}
-
-/** `git <args>`'s output, or `""` when it fails. */
-function gitOut(root: string, args: string[]): string {
-  const run = Git.run(args, root)
-  return run.ok ? run.out : ""
-}
-
-/** `git <args>`'s output lines. */
-function gitLines(root: string, args: string[]): string[] {
-  return gitOut(root, args).split("\n").filter(Boolean)
 }
 
 /** `git <args>`'s output;  throws a `EpicCommandError` with git's own message when it fails. */

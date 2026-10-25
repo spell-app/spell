@@ -6,9 +6,9 @@ import { join } from "node:path"
 import { settingsParts } from "spell/server/page/settings"
 import { firstPackageDir, KIT_PACKAGES, tsxImports } from "spell-epic/tools/packageDir"
 
+import { EpicCheckout } from "./EpicCheckout"
 import { EXIT, type ToolSpec } from "./command.types"
 import { planDocArgs } from "./epicArgs"
-import { Git } from "./Git"
 import { Sessions } from "./Sessions"
 
 /****************
@@ -17,9 +17,9 @@ import { Sessions } from "./Sessions"
  * - scripts in a child `node`, terminal attached (`run()`)
  * - the `epic` tool, in this process (`planDoc()`)
  *
- * - ONE copy of the code:  every tool is the copy beside THIS code (`Git.CODE_ROOT`), whichever checkout calls it.
+ * - ONE copy of the code:  every tool is the copy beside THIS code (`EpicCheckout.CODE_ROOT`), whichever checkout calls it.
  *   - So a worktree 50 commits behind main runs main's tools, through main's `epic` on the `PATH`.
- *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`),
+ *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`EpicCheckout.nearest()`),
  *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
  *   - The exceptions:  the tools that SERVE their checkout, whose code is that checkout's:
  *     - the page server, the `spell/server` its install resolves (`package`)
@@ -41,9 +41,9 @@ export class EpicTools {
    * - `codeRoot`:  where the code is, default this checkout (tests give a fake checkout of tools)
    */
   static run(name: EpicToolName, args: string[], options: EpicToolOptions = {}): Promise<number> {
-    const { env = {}, codeRoot = Git.CODE_ROOT, cwd = process.cwd() } = options
+    const { env = {}, codeRoot = EpicCheckout.CODE_ROOT, cwd = process.cwd() } = options
     const spec: ToolSpec = EpicTools.TOOLS[name]
-    const data = Git.nearestCheckout({ marker: spec.package ? CHECKOUT_MARKER : spec.tool, from: cwd })
+    const data = EpicCheckout.nearest({ marker: spec.package ? CHECKOUT_MARKER : spec.tool, from: cwd })
     const code = EpicTools.codeOf(spec, data, codeRoot)
     if (!code) {
       process.stderr.write(`epic:  ${data} doesn't install ${spec.package?.join(" or ")}, so has no ${name} to run\n`)
@@ -67,7 +67,7 @@ export class EpicTools {
    * - `code: "caller"`:  `data`
    * - else `codeRoot`, the running `epic`'s checkout
    */
-  static codeOf(spec: ToolSpec, data: string, codeRoot = Git.CODE_ROOT): string | undefined {
+  static codeOf(spec: ToolSpec, data: string, codeRoot = EpicCheckout.CODE_ROOT): string | undefined {
     if (spec.package) return firstPackageDir(spec.package, data)
     return spec.code === "caller" ? data : codeRoot
   }
@@ -135,7 +135,7 @@ export class EpicTools {
       },
       { PlanDocFiles: new (props: { root: string }) => unknown }
     ]
-    const files = new PlanDocFiles({ root: Git.nearestCheckout() })
+    const files = new PlanDocFiles({ root: EpicCheckout.nearest() })
     const exitCode = await new PlanDocCommands({ files, sessionsOf }).run(argv)
     await flushed()
     return exitCode
@@ -205,7 +205,7 @@ export class EpicTools {
    */
   static hasPageServer(cwd = process.cwd()): boolean {
     const spec: ToolSpec = EpicTools.TOOLS.server
-    const data = Git.nearestCheckout({ marker: CHECKOUT_MARKER, from: cwd })
+    const data = EpicCheckout.nearest({ marker: CHECKOUT_MARKER, from: cwd })
     const code = EpicTools.codeOf(spec, data)
     return settingsParts(data).length > 0 && !!code && existsSync(join(code, spec.tool))
   }
@@ -232,7 +232,7 @@ export class EpicTools {
    * P10), never `<root>/node_modules/...` by hand.
    * - static:  where every tool's loaders come from
    */
-  static readonly TSX_IMPORTS = tsxImports(Git.CODE_ROOT)
+  static readonly TSX_IMPORTS = tsxImports(EpicCheckout.CODE_ROOT)
 }
 
 /** A tool `EpicTools.run()` runs, e.g. `details`. */

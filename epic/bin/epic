@@ -9,7 +9,7 @@
  *   source.
  * - Runs `src/cli/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
  *   of a second.
- * - Every verb runs THIS copy's code, on the caller's checkout's data (`Git.nearestCheckout()`, `EPIC_CHECKOUT`).
+ * - Every verb runs THIS copy's code, on the caller's checkout's data (`EpicCheckout.nearest()`, `EPIC_CHECKOUT`).
  * - Plain ESM with no extension:  `"type": "module"` in spell-epic's `package.json` makes node read it so.
  * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in spell-epic.
  */

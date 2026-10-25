@@ -2,8 +2,9 @@ import { existsSync, readdirSync, statSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
 import { localMinutes } from "spell/util/time"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RealPath } from "spell-epic/config/RealPath"
 
 import {
   EXIT,
@@ -14,7 +15,6 @@ import {
   type StockItem,
   type StockReport
 } from "./command.types"
-import { Git } from "./Git"
 import { Parking } from "./Parking"
 import { Worktrees } from "./Worktrees"
 

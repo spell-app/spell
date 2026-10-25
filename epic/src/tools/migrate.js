@@ -23,12 +23,13 @@
  *   - one page (`--file`, its kind found unless given)
  *   - `--list`:  the steps
  */
-import { closeSync, existsSync, openSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { isAbsolute, join, relative, resolve, sep } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { FileLock } from "spell/server/FileLock"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { engineUrlFor } from "spell-epic/server/server.types.ts"
@@ -293,34 +294,13 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
 }
 
 /**
- * Run `fn` holding every `<file>.lock` of `files`, as `SRV.FileLock` takes them (`open(wx)`).
+ * Run `fn` holding every `<file>.lock` of `files`:  the kit's `FileLock`, one inside the other.
  * - waits up to 30s for each, and takes over one older than a minute (a crashed holder's)
- * - plain node:  this script loads none of `spell/server`, whose files import each other without extensions
  */
 export function withLocks(files, fn) {
-  const held = []
-  try {
-    for (const file of files) {
-      const lock = `${file}.lock`
-      const deadline = Date.now() + 30_000
-      for (;;) {
-        try {
-          closeSync(openSync(lock, "wx"))
-          held.push(lock)
-          break
-        } catch (error) {
-          if (error.code !== "EEXIST") throw error
-          const age = Date.now() - (statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now())
-          if (age > 60_000) rmSync(lock, { force: true })
-          else if (Date.now() > deadline) throw new Error(`${lock} held for 30s:  stuck?`)
-          else Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100)
-        }
-      }
-    }
-    return fn()
-  } finally {
-    for (const lock of held) rmSync(lock, { force: true })
-  }
+  const [file, ...rest] = files
+  if (file === undefined) return fn()
+  return FileLock.run(file, () => withLocks(rest, fn), { wait: 30_000, stale: 60_000 })
 }
 
 /** An epic page, from the checkout's root:  `epics/<name>/<name>.plan.html` (or an older `<name>.html`). */

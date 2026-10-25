@@ -22,6 +22,7 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFil
 import { dirname, extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { checkoutOf } from "spell/server/checkout"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { HIGHLIGHT_JS } from "spell-epic/server/server.types"
 
@@ -138,14 +139,6 @@ function lineOf(text: string, offset = 0): number {
   return text.slice(0, offset).split("\n").length
 }
 
-/** The checkout `start` is in:  the folder holding `.git` at or above it. */
-function checkoutOf(start: string): string | undefined {
-  for (let dir = resolve(start); ; dir = dirname(dir)) {
-    if (existsSync(join(dir, ".git"))) return dir
-    if (dirname(dir) === dir) return undefined
-  }
-}
-
 ////////////////
 // ## The command
 ////////////////
@@ -156,7 +149,7 @@ export function run(args: string[], { cwd = process.cwd() } = {}): number {
   const unknown = [...flags].find((flag) => !FLAGS.includes(flag))
   try {
     if (unknown) throw new OfflineError(`unknown flag ${unknown}:  ${FLAGS.join(", ")}`)
-    const checkout = checkoutOf(cwd)
+    const checkout = checkoutOf(cwd)?.root
     if (!checkout) throw new OfflineError("not in a checkout")
     // pages are served from their repo's content folder, at `/`:  the highlight.js fix is relative to it
     const root = EpicConfig.contentOf(checkout)

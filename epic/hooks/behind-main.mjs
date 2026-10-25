@@ -17,9 +17,11 @@
  *   `epic-patches.log` in the checkout's git folder, and nothing is said:  a patch is meant to go unnoticed.
  * - Always exits 0, within a few seconds:  never blocks a session.
  */
-import { spawn, spawnSync } from "node:child_process"
+import { spawn } from "node:child_process"
 import { existsSync, openSync, readFileSync } from "node:fs"
 import { join } from "node:path"
+
+import { Git } from "spell/server/Git"
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
@@ -76,8 +78,7 @@ function behindMain(dir, main) {
   return count > 0 ? { branch, count } : undefined
 }
 
-/** `git -C dir ...args`, trimmed;  `""` on any failure. */
+/** `git ...args` in `dir`, trimmed;  `""` on any failure, or after 3s:  a session start never waits on it. */
 function git(dir, ...args) {
-  const run = spawnSync("git", ["-C", dir, ...args], { encoding: "utf8", timeout: 3000 })
-  return run.status === 0 ? run.stdout.trim() : ""
+  return Git.out(args, dir, { timeout: 3000 }) ?? ""
 }

@@ -66,8 +66,9 @@ if (!process.env.CHECK_FOLD_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes, logInto } = await import("./demoPages.mjs")
 
 ////////////////
 // ## Settings
@@ -107,7 +108,7 @@ mkdirSync(out, { recursive: true })
 const server = await DemoServer.start({ content: join(HERE, "shots/fold"), port: 47_900 + Math.floor(Math.random() * 90) })
 const base = server.base
 const docUrl = `${base}/epics/${docName}/${docName}.plan.html`
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 try {
   for (const size of SIZES) {
     const ids = await pickIds(size)
@@ -298,20 +299,12 @@ async function guideCases(size) {
 
 /** A fresh page (no remembered folds), its errors collected, a few helpers installed. */
 async function openPage(size, url) {
-  const context = await browser.newContext({ viewport: size })
-  const page = await context.newPage()
-  const bundle = flagValue("--bundle")
-  if (bundle) {
-    const code = readFileSync(resolve(bundle))
-    await page.route("**/_epic/assets/spell-ui.js", (route) =>
-      route.fulfill({ body: code, contentType: "text/javascript" })
-    )
-  }
   const logs = []
-  page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
-  page.on("console", (message) => {
-    if (message.type() === "error" && !/^Failed to load resource/.test(message.text()))
-      logs.push(`console:  ${message.text()}`)
+  const page = await BrowserPage.newPage(browser, {
+    viewport: size,
+    ignore: /^Failed to load resource/,
+    onProblem: logInto(logs),
+    routes: bundleRoutes(flagValue("--bundle"))
   })
   await page.addInitScript(() => {
     /** An item's line, in its shadow root. */

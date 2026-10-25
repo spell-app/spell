@@ -54,13 +54,14 @@
 
 import { build } from "esbuild"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number.ts"
+import { RealPath } from "spell/server/RealPath"
 import { sourceNames } from "spell/toolchain/sourceNames"
 
 import { packageDir } from "./packageDir.ts"
@@ -74,7 +75,7 @@ const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
  *   through a link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
  *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
  */
-const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? packageDir("spell-ui") ?? "spell-ui (not installed)"))
+const UI_DIR = RealPath.of(resolve(process.env.SPELL_UI_DIR ?? packageDir("spell-ui") ?? "spell-ui (not installed)"))
 /** spell-element, the `spell/element` package, by its real path:  its source must never be bundled. */
 const ELEMENT_DIR = packageDir("spell/element")
 const ASSETS = join(DOCS, "tools/_assets")
@@ -575,7 +576,7 @@ function checkOneSolid(metafile) {
  * carries, so two `UIComponent`s and two `ShadowEvents` (epic `epic-engine` P9).
  */
 function checkNoElementSource(metafile) {
-  const sources = Object.keys(metafile.inputs).filter((input) => isInside(realPath(resolve(input)), ELEMENT_DIR))
+  const sources = Object.keys(metafile.inputs).filter((input) => isInside(RealPath.of(resolve(input)), ELEMENT_DIR))
   if (sources.length) fail(`spell-element bundled from its source, a second copy:\n  ${sources.join("\n  ")}`)
 }
 
@@ -586,7 +587,7 @@ function checkNoElementSource(metafile) {
 function checkNoSpellUI(metafile) {
   const shared = Object.keys(metafile.inputs).filter(
     (input) =>
-      [UI_DIR, ELEMENT_DIR].some((dir) => isInside(realPath(resolve(input)), dir)) ||
+      [UI_DIR, ELEMENT_DIR].some((dir) => isInside(RealPath.of(resolve(input)), dir)) ||
       /node_modules\/(?:solid-js|@solidjs)\//.test(input)
   )
   if (shared.length) fail(`${relative(DOCS, COMMENTS_OUT)} took in what the page shares:\n  ${shared.join("\n  ")}`)
@@ -600,7 +601,7 @@ function checkEachFileOnce(metafile) {
   const seen = new Map()
   for (const input of Object.keys(metafile.inputs)) {
     if (input.includes(":")) continue
-    const real = realPath(resolve(input))
+    const real = RealPath.of(resolve(input))
     const other = seen.get(real)
     if (other) fail(`${real} bundled twice, as ${other} and ${input}:  resolve both through its real path`)
     seen.set(real, input)
@@ -710,11 +711,6 @@ function report(warnings, file = OUTFILE) {
 function fail(message) {
   console.error(`!! ${message}`)
   process.exit(1)
-}
-
-/** `path`'s real path (links resolved);  `path` itself when it isn't there (the UI check says so). */
-function realPath(path) {
-  return existsSync(path) ? realpathSync(path) : path
 }
 
 /** Is `path` in folder `dir` (both real paths)?  Never when there's no `dir`. */

@@ -89,8 +89,9 @@ if (!process.env.CHECK_REVIEW_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { logInto } = await import("./demoPages.mjs")
 const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
 const { ReviewInbox } = await import("spell-epic/tool/ReviewInbox.ts")
@@ -153,7 +154,7 @@ const pagePath = `/epics/${docName}/${docName}.plan.html`
 const url = `${base}${pagePath}`
 summary.url = url
 
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 try {
   await run()
 } catch (error) {
@@ -177,7 +178,9 @@ if (problems.length) {
 ////////////////
 
 async function run() {
+  // a context of its own, not `BrowserPage.newPage()`'s:  the layouts' pages share it (`layouts()`)
   const context = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 2 })
+  await context.addInitScript(BrowserPage.NAME_HELPER)
   // on every load, a live reload's too:  `rootOf(id)` queries element `id`'s shadow root, then those of the
   // `<epic-review>`s / `<epic-new-item>`s drawn in it (its review controls, P10)
   await context.addInitScript(() => {
@@ -203,8 +206,7 @@ async function run() {
   })
   const page = await context.newPage()
   const logs = []
-  page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
-  page.on("console", (message) => message.type() === "error" && logs.push(`console:  ${message.text()}`))
+  BrowserPage.watch(page, { onProblem: logInto(logs) })
   await open(page)
 
   // Send and its countdown:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);

@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, realpathSync } from "node:fs"
+import { mkdirSync } from "node:fs"
 import { homedir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { dirname, join } from "node:path"
 
+import { RealPath } from "spell/server/RealPath"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
 
@@ -27,7 +28,7 @@ import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
 export class AskListeners {
   /** The heartbeat file of details page `page` (its file):  `<home>/asks/<hash of its real path>.json5`. */
   static fileFor(page: string): string {
-    const key = createHash("sha1").update(realOf(page)).digest("hex").slice(0, 16)
+    const key = createHash("sha1").update(RealPath.of(page)).digest("hex").slice(0, 16)
     return join(homeFolder(), ASKS_FOLDER, `${key}${DataFile.SUFFIX}`)
   }
 
@@ -38,7 +39,7 @@ export class AskListeners {
   static stamp(page: string, { since, at = new Date().toISOString() }: { since?: string; at?: string } = {}) {
     const file = AskListeners.fileFor(page)
     mkdirSync(dirname(file), { recursive: true })
-    const listener: AskListener = { page: realOf(page), pid: process.pid, since: since ?? at, seen: at }
+    const listener: AskListener = { page: RealPath.of(page), pid: process.pid, since: since ?? at, seen: at }
     DataFile.write(file, listener)
     return listener
   }
@@ -129,12 +130,6 @@ function homeFolder(): string {
   return process.env[HOME_ENV] || join(homedir(), HOME_FOLDER)
 }
 
-/** `page`'s real path, links resolved (`/tmp` and `/private/tmp` alike);  as given when it isn't there. */
-function realOf(page: string): string {
-  const path = resolve(page)
-  return existsSync(path) ? realpathSync(path) : path
-}
-
 /** The heartbeat in `file`, or `undefined` (none, or one that won't read). */
 function readListener(file: string): AskListener | undefined {
   try {
@@ -145,7 +140,10 @@ function readListener(file: string): AskListener | undefined {
   }
 }
 
-/** Is process `pid` running?  `EPERM`:  it is, someone else's. */
+/**
+ * Is process `pid` running?  `EPERM`:  it is, someone else's.
+ * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` loads this file, and can't load the kit's `PidFile`
+ */
 function isRunning(pid: number): boolean {
   try {
     process.kill(pid, 0)

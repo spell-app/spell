@@ -3,10 +3,12 @@
  * the other docs tools (the `epic` tool, `spell-epic/tool`, has its own).
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs"
+import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { openInChromeTab } from "spell/server/open"
+import { RealPath } from "spell/server/RealPath"
 import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
@@ -169,9 +171,9 @@ export function pagePath(file) {
   const path = resolve(file)
   const run = runPagePath(path)
   if (run) return run
-  const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, realOf(path))
+  const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, RealPath.of(path))
   if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
-  const inSet = SETS.pageFor(path) ?? SETS.pageFor(realOf(path), realOf)
+  const inSet = SETS.pageFor(path) ?? SETS.pageFor(RealPath.of(path), RealPath.of)
   if (inSet !== undefined) return inSet
   const content = insideContent(path)
   return (content ?? relative(ROOT, path)).split(sep).join("/")
@@ -204,20 +206,7 @@ function insideOf(dir, path) {
  * outside it.
  */
 function insideContent(path) {
-  return insideOf(CONTENT, path) ?? insideOf(realOf(CONTENT), realOf(path))
-}
-
-/**
- * `path` with its links followed (a checkout's `spell-epic` link, an old checkout's `epics` link ...):  its nearest
- * folder that exists, real, then the rest as it is;  so a page not made yet is followed too.
- */
-function realOf(path) {
-  try {
-    return realpathSync(path)
-  } catch {
-    const parent = dirname(path)
-    return parent === path ? path : join(realOf(parent), basename(path))
-  }
+  return RealPath.from(CONTENT, path)
 }
 
 /**
@@ -410,15 +399,14 @@ export function formattedAlready(files) {
   const paths = files.map((file) => (isAbsolute(file) ? file : pageAt(file)))
   if (!paths.length) return []
   const run = spawnSync("yarn", ["vp", "fmt", "--list-different", ...paths], { cwd: PACKAGE, encoding: "utf8" })
-  const real = (path) => (existsSync(path) ? realpathSync(path) : path)
   const different = new Set(
     (run.stdout ?? "")
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter(Boolean)
-      .map((line) => real(resolve(PACKAGE, line)))
+      .map((line) => RealPath.of(resolve(PACKAGE, line)))
   )
-  return paths.filter((path) => !different.has(real(path)))
+  return paths.filter((path) => !different.has(RealPath.of(path)))
 }
 
 /**
@@ -647,44 +635,17 @@ export function openInChrome(page, { hash, query } = {}) {
 }
 
 /**
- * Show `url` in Chrome, reusing the tab whose URL contains `key` (see `openInChrome()`).
+ * Show `url` in Chrome, reusing the tab whose URL contains `key` (see `openInChrome()`), and say how.
  * - `front`:  bring Chrome and that tab's window forward -- a link Owen clicked (`showRoutes.ts`)
  * - else in the background
+ * - the kit's `openInChromeTab()` opens it
  */
 export function openUrlInChrome(url, key, { front = false } = {}) {
-  const script = `
-set target to ${JSON.stringify(url)}
-set pageKey to ${JSON.stringify(key)}
-if application "Google Chrome" is not running then return "launch"
-tell application "Google Chrome"
-  repeat with w in windows
-    set i to 0
-    repeat with t in tabs of w
-      set i to i + 1
-      if (URL of t) contains pageKey then
-        if (URL of t) starts with target then
-          tell t to reload
-        else
-          set URL of t to target
-        end if
-        set active tab index of w to i
-        ${front ? "set index of w to 1\n        activate" : ""}
-        return "reused"
-      end if
-    end repeat
-  end repeat
-  if (count of windows) is 0 then make new window
-  tell front window to make new tab with properties {URL:target}
-  ${front ? "activate" : ""}
-  return "new tab"
-end tell`
+  const how = openInChromeTab(url, key, { front })
   const where = front ? "in front" : "in the background"
-  const run = spawnSync("osascript", ["-e", script], { encoding: "utf8" })
-  const how = run.stdout.trim()
-  if (run.status === 0 && how !== "launch") return console.log(`opened ${url} (${how}, ${where})`)
-  if (run.status !== 0) console.error(`Chrome via AppleScript failed (${run.stderr.trim()}):  falling back to \`open\``)
-  spawnSync("open", [...(front ? [] : ["-g"]), "-a", "Google Chrome", url])
-  console.log(`opened ${url} (Chrome launched ${where})`)
+  if (how === "none") console.log(`not opened ${url}:  SPELL_NO_BROWSER is set`)
+  else if (how === "launched") console.log(`opened ${url} (Chrome launched ${where})`)
+  else console.log(`opened ${url} (${how}, ${where})`)
 }
 
 /**
