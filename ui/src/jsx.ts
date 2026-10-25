@@ -28675,6 +28675,240 @@ export interface UISliderAttributes {
 export interface UISliderJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UISliderEventMap>>, keyof UISliderAttributes>, UISliderAttributes {}
 
+/** `<ui-stack>`'s own attributes, from its vocabulary. */
+export interface UIStackAttributes {
+  /**
+   * `vertical`, a column (the default), or `horizontal`, a row.
+   * - takes:  `vertical` · `horizontal`
+   * - default:  `vertical`
+   */
+  direction?: "vertical" | "horizontal"
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "vertical" | "horizontal"
+  /**
+   * A row wraps onto the next line when its children don't fit (Web Awesome's cluster).
+   * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrap"?: boolean | ""
+  /**
+   * The space between children:  `none` to `xl`;  `md` (1em) by default.
+   * - takes:  `none` · `xs` · `sm` · `md` · `lg` · `xl`
+   * - default:  `md`
+   */
+  spacing?: "none" | "xs" | "sm" | "md" | "lg" | "xl"
+  /**
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "none" | "xs" | "sm" | "md" | "lg" | "xl"
+  /**
+   * Lines children up ACROSS the stack:  a column's left edges, centres or right edges;  a row's tops, middles, bottoms or text baselines.  By default a column stretches them, a row centres them.
+   * - takes:  `start` · `center` · `end` · `stretch` · `baseline`
+   */
+  align?: "start" | "center" | "end" | "stretch" | "baseline"
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "start" | "center" | "end" | "stretch" | "baseline"
+  /**
+   * Places children ALONG the stack:  packed at its `start`, `center` or `end`, or spread out (`between`:  the first and last at the ends, `around`:  equal space around each).  `<ui-stack direction="horizontal" justify="between">` puts one thing left and one right.
+   * - takes:  `start` · `center` · `end` · `between` · `around`
+   */
+  justify?: "start" | "center" | "end" | "between" | "around"
+  /**
+   * `justify`, as the DOM element's property.
+   * @deprecated write `justify` -- `prop:` stays only for compiled spell
+   */
+  "prop:justify"?: "start" | "center" | "end" | "between" | "around"
+  /**
+   * Takes the full width of its container.
+   * - takes:  flag (present / absent)
+   */
+  fluid?: boolean | ""
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
+  "prop:fluid"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-stack>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIStackJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIStackAttributes>, UIStackAttributes {}
+
 /** `<ui-statistic>`'s own attributes, from its vocabulary. */
 export interface UIStatisticAttributes {
   /**
@@ -35157,6 +35391,13 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-slider": UISliderJSXAttributes
       /**
+       * `<ui-stack>`:  A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own.
+       * - also known as:  stack, cluster, flex box, row, column, hbox, vbox, spacer
+       * - slots:
+       *   - default:  What it lays out:  any elements.
+       */
+      "ui-stack": UIStackJSXAttributes
+      /**
        * `<ui-statistic>`:  A statistic emphasizes the current value of an attribute.
        * - also known as:  stat, kpi, metric, counter, number display
        * - slots:
@@ -35453,6 +35694,7 @@ declare global {
     "ui-side": HTMLElement
     "ui-sidebar": UIHTMLElement<UISidebarEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
+    "ui-stack": HTMLElement
     "ui-statistic": HTMLElement
     "ui-statistics": HTMLElement
     "ui-step": HTMLElement

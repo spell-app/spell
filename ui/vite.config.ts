@@ -70,6 +70,7 @@ export const COMPONENTS = [
   "ui-items",
   "ui-feed",
   "ui-comment",
+  "ui-stack",
   "ui-statistic",
   "ui-step",
   "ui-rail",

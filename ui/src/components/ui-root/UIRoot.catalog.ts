@@ -1534,6 +1534,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-stack": { folder: "ui-stack", attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid"] },
   "ui-statistic": {
     folder: "ui-statistic",
     skeleton: { display: "inline", width: "6em", height: "4em" },

@@ -122,6 +122,7 @@ import { stepsEs } from "spell-ui/components/ui-step/UISteps.es"
 import { stickyEs } from "spell-ui/components/ui-sticky/UISticky.es"
 import { tabEs } from "spell-ui/components/ui-tab/UITab.es"
 import { tabsEs } from "spell-ui/components/ui-tab/UITabs.es"
+import { stackEs } from "spell-ui/components/ui-stack/UIStack.es"
 import { tableEs } from "spell-ui/components/ui-table/UITable.es"
 import { cellEs } from "spell-ui/components/ui-table/UICell.es"
 import { textEs } from "spell-ui/components/ui-text/UIText.es"
@@ -736,6 +737,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   stickyEs,
   tabEs,
   tabsEs,
+  stackEs,
   tableEs,
   cellEs,
   textEs,

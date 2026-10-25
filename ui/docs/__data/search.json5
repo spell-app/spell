@@ -144,6 +144,7 @@
         {"id":"spell-ui-s-own-panel","title":"Panel","parent":59},
         {"id":"spell-ui-s-own-root","title":"Root","parent":59},
         {"id":"spell-ui-s-own-section","title":"Section","parent":59},
+        {"id":"spell-ui-s-own-stack","title":"Stack","parent":59},
         {"id":"spell-ui-s-own-theme-editor","title":"Theme Editor","parent":59}
       ]
     },
@@ -2913,6 +2914,28 @@
         {"id":"api-texts","title":"Texts","tab":"api"},
         {"id":"theming-tokens","title":"Tokens","tab":"theming"},
         {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
+      "path": "ui-stack.html",
+      "title": "Stack",
+      "summary": "A stack lays its children out in a column, or a row that wraps, evenly spaced.",
+      "tag": "ui-stack",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-stack","title":"Stack","parent":0},
+        {"id":"examples-types-row","title":"Row","parent":0},
+        {"id":"examples-types-wrapping-row","title":"Wrapping row","parent":0},
+        {"id":"examples-variations","title":"Variations","tab":"examples"},
+        {"id":"examples-variations-spacing","title":"Spacing","parent":4},
+        {"id":"examples-variations-one-left-one-right","title":"One left, one right","parent":4},
+        {"id":"examples-variations-centred","title":"Centred","parent":4},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"}
       ]
     },
     {

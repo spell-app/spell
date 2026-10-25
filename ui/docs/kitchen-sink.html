@@ -2335,6 +2335,34 @@
               </ui-docs-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-stack" label="Stack" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A stack lays its children out in a column, or a row that wraps, evenly spaced.
+                  <a href="ui-stack.html">Stack page</a>
+                </p>
+                <ui-stack>
+                  <ui-segment>First</ui-segment>
+                  <ui-segment>Second</ui-segment>
+                  <ui-segment>Third</ui-segment>
+                </ui-stack>
+              </ui-docs-example>
+              <ui-docs-example description="Horizontal, wrapping">
+                <ui-stack direction="horizontal" wrap spacing="sm">
+                  <ui-label>Design</ui-label>
+                  <ui-label>Engineering</ui-label>
+                  <ui-label>Research</ui-label>
+                  <ui-label>Writing</ui-label>
+                </ui-stack>
+              </ui-docs-example>
+              <ui-docs-example description="One left, one right">
+                <ui-stack direction="horizontal" justify="between">
+                  <ui-header level="4">Inbox</ui-header>
+                  <ui-button color="primary">New message</ui-button>
+                </ui-stack>
+              </ui-docs-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-theme-editor" label="Theme Editor" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">

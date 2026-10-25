@@ -287,6 +287,11 @@
       "types": "./dist-types/src/components/ui-slider/index.d.ts",
       "default": "./src/components/ui-slider/index.ts"
     },
+    "./components/ui-stack": {
+      "spell-ui-source": "./src/components/ui-stack/index.ts",
+      "types": "./dist-types/src/components/ui-stack/index.d.ts",
+      "default": "./src/components/ui-stack/index.ts"
+    },
     "./components/ui-statistic": {
       "spell-ui-source": "./src/components/ui-statistic/index.ts",
       "types": "./dist-types/src/components/ui-statistic/index.d.ts",
