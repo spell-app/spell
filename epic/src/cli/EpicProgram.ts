@@ -213,6 +213,12 @@ export class EpicProgram {
       "epic decisions seo"
     ).usage("<epic> [--json]")
     this.page(
+      epic.command("owns"),
+      "which open epics own each file (a path from the checkout's root):  their branch changes it, or their page " +
+        "names it;  each with its stage, planning or building (for /coherence)",
+      "epic owns src/server/LiveReload.ts spell-epic/src/window.mjs"
+    ).usage("<path>... [--json]")
+    this.page(
       epic.command("open"),
       "show an epic's page in VS Code's side bar:  Epic Docs, or with --review the Review tab",
       "epic open seo --review"

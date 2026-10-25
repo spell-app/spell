@@ -284,6 +284,12 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 1. Explore (read-only):  the code, the docs, the kickoff prompt.
    - Agents:  up to 5, don't ask.
      Unless the user said "watch token budget":  then one question is "How many agents can I use for this?".
+   - One of them, always, the COHERENCE review (epic `coherence` P4, its Q3):  a `coherence` agent, named and listed
+     `<name>-coherence`, on the kickoff prompt:  "what in the repos already does part of this?"
+     ([the coherence skill](../coherence/SKILL.md), its "epic" form, steps 2-4).
+     - Its findings go into the Overview as it's written (step 2):  the plan uses the mechanism that exists, said in
+       plain words where it's chosen;  a real choice between two good ways is a question (step 3), "(coherence)".
+     - Skipped in a repo with no catalog (`agents/coherence/`), in one line.
 2. Write the OVERVIEW, by hand, in the skeleton's `#overview` (shape:  "4. Fill the doc"):
    - the summary, `<epic-summary>`:  two sentences
    - numbered sub-sections (structure, code, flows):  what will become guides
@@ -369,6 +375,12 @@ than just being able to move on").
   - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
   - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept Phase and Revisit
     (`<epic-phase plan="waiting">`).
+- Before showing them, ONE coherence review over ALL the plans (epic `coherence` P4, its Q3):  a `coherence` agent,
+  `<name>-coherence`, as in "3. Plan", step 1, but on the plans.
+  - The build plan is where "write a new X" shows:  each finding changes its plan to use what exists, or becomes a
+    question, "(coherence)".
+  - A plan that adds nothing new (a rename, docs, a test) is left out of it, in one line.
+  - Again whenever a plan is written later:  a phase added, a request filed, a plan rewritten ("5. Each phase", step 1).
 - Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "Build plans are up for
   P3-P9".
 - The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
@@ -389,8 +401,8 @@ than just being able to move on").
      - a SMALL change (a file moved, a step folded into an earlier phase, a name changed):  say what and why with
        `epic updated <name>#P<N> "<p>...</p>" --summary "Plan adjusted:  ..."`;  the plan stays accepted.  NO stop.
      - a BIG one Owen would want a say in (scope, a choice he made, much more work):  write the plan again
-       (`--plan`, it waits), listen, and END THE TURN with the phase's link pair:  "P<N>'s plan changed:  ...".
-       Only then a stop.
+       (`--plan`, it waits), with the coherence review over it ("4b. Build plans"), listen, and END THE TURN with the
+       phase's link pair:  "P<N>'s plan changed:  ...".  Only then a stop.
    - No accepted plan (a phase from before I117, or added without one):  write it now, as "4b. Build plans", and wait.
    - No plan at all only when Owen said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.

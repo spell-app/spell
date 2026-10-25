@@ -107,8 +107,8 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     const shown = this.parts.filter((part) => !part.hasAttribute("hidden"))
     const isOpen = (part: Element | undefined) => !!part?.hasAttribute("open")
     return {
-      tops: shown.filter((part, index) => index === 0 || isOpen(shown[index - 1]) || isOpen(part)),
-      bottoms: shown.filter((part, index) => index === shown.length - 1 || isOpen(part) || isOpen(shown[index + 1]))
+      tops: shown.filter((part, index) => index === 0 || isOpen(shown[index - 1])),
+      bottoms: shown.filter((part, index) => index === shown.length - 1 || isOpen(part))
     }
   }
 

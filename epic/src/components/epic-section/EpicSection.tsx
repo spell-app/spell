@@ -275,20 +275,19 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
    * - the Phases section's phases the same (Owen, 2026-10-24, epic `epic-engine` I96:  "showed the white corners at
    *   the bottom above P29"):  their title rows, the open ones' bodies between them
-   * - an OPEN item stands free, with room above and below it (I105;  Owen, 2026-10-25:  "touching items are square,
-   *   round when free", "more padding above / below open question drawer"):  a run of its own, so the line before it
-   *   rounds its bottom, the one after it its top;  its own line rounds all round, its drawer hanging 4px in from its edges
-   * - an OPEN PHASE the same (I115):  a drawer, free above and below
+   * - an OPEN item or phase ends its run (its drawer under it), the line above touching it, room only below it
+   *   (I105, I115;  Owen, 2026-10-25:  "Don't put space at the top of open sections, just below");  the next line
+   *   starts a run
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
     const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
     const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
-    // an open item, or an open phase (its drawer, I115), stands free:  a run of its own
-    const alone = isUnfolded
+    // an open item or phase ends its run (its drawer under it), and the row after it starts one;  the row above it
+    // touches it, room only below an open one (Owen, 2026-10-25:  "Don't put space at the top of open sections")
     return {
-      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1]) || alone(item)),
-      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item) || alone(shown[index + 1]))
+      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1])),
+      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item))
     }
   })
 

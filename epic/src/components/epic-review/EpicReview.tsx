@@ -21,6 +21,7 @@ import {
   REVIEW_CONTROLS,
   REVIEW_ACCEPT,
   REVIEW_DEFER,
+  REVIEW_PLAN,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -185,10 +186,14 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           )}
         </Show>
         <Show when={accept()}>
-          {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
-        </Show>
-        <Show when={defer()}>
-          {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
+          <span class={REVIEW_PLAN}>
+            <Show when={accept()}>
+              {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
+            </Show>
+            <Show when={defer()}>
+              {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
+            </Show>
+          </span>
         </Show>
         <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
           <For each={group()}>{(spec) => this.button(spec)}</For>

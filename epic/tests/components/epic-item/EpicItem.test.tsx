@@ -13,8 +13,8 @@ import "spell-epic/components/epic-item"
 /** An `<epic-item>` host:  its `open`, and its source API. */
 type ItemHost = E.DOMElement & { open: boolean; load(): Promise<void>; reload(): Promise<void> }
 
-/** The room an open item keeps above and below it (`EpicItem.css`, I105). */
-const OPEN_ROOM = 10
+/** The room an open item keeps ABOVE it:  none since 2026-10-25, its room below only (`EpicItem.css`). */
+const OPEN_ROOM = 0
 
 /** The part file the source tests serve. */
 const PART = "/demo/parts/items-q6.html"
@@ -447,7 +447,7 @@ describe("<epic-item> title, folded and open", () => {
     expect(host.open).toBe(true)
     expect(title.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(title.hasAttribute("title")).toBe(false)
-    // down by the room an open item keeps above it (I105:  10px), and nothing else
+    // nothing moves as it opens:  its room is below it, none above (Owen, 2026-10-25)
     expect(title.getBoundingClientRect().top).toBeCloseTo(folded.top + OPEN_ROOM, 0)
     expect(button.getBoundingClientRect().left).toBeCloseTo(folded.button.left, 0)
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top + OPEN_ROOM, 0)

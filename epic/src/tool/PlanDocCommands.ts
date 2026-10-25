@@ -8,6 +8,7 @@ import { atDepth } from "spell-epic/tools/pages.js"
 import { OPEN_KINDS, PlanDocError, REVIEW_SECTIONS, TITLE_PREFIX, type Phase, type PlanSummary } from "./planDoc.types"
 
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
+import { EpicOwners, type PathOwners } from "./EpicOwners"
 import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { InboxCommands } from "./InboxCommands"
@@ -36,10 +37,11 @@ import { TestCommands } from "./TestCommands"
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell-epic/definitions`
  * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
- *   `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
+ *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
  *   the docs an epic wrote besides its epic page, and what its epic page settled
+ * - `owns` (`EpicOwners`, for `/coherence`):  which open epics own a file, by their branch or their epic page
  * - the `<epic-*>` markup only:  every command refuses a doc still in the old markup before it writes anything
  *   (one restored from an old backup;  `PlanDocFiles.read()`):  the converter that read it went in epic `repo-split`
  *   (Q45)
@@ -128,6 +130,8 @@ export class PlanDocCommands {
     if (command === "test" && flags.all) return this.tests.all(flags)
     if (!command || !name) return this.usage()
     if (command === "summaries") return this.printSummaries(positional.slice(1))
+    if (command === "owns")
+      return this.printOwners(new EpicOwners({ files: this.files }).find(positional.slice(1)), Boolean(flags.json))
     // the shared doc, by THIS checkout's path (`findDoc()`);
     // `--here` meant that before every checkout shared one copy:
     // accepted and ignored, so old callers keep working (T3 of `review-review`)
@@ -940,6 +944,25 @@ export class PlanDocCommands {
   }
 
   /**
+   * `owns`:  a line per path and owner, `src/a.ts  epic-engine  building  branch, plan`;  `src/b.ts  --` for a path
+   * no open epic owns (or JSON, for `/coherence`).
+   */
+  private printOwners(owned: PathOwners[], json: boolean): void {
+    if (json) return this.print(JSON.stringify(owned, null, 2))
+    const pathWidth = Math.max(...owned.map(({ path }) => path.length))
+    const epicWidth = Math.max(0, ...owned.flatMap(({ owners }) => owners.map(({ epic }) => epic.length)))
+    const lines = owned.flatMap(({ path, owners }) =>
+      owners.length
+        ? owners.map(
+            ({ epic, stage, how }) =>
+              `${path.padEnd(pathWidth)}  ${epic.padEnd(epicWidth)}  ${stage.padEnd(8)}  ${how.join(", ")}`
+          )
+        : [`${path.padEnd(pathWidth)}  --`]
+    )
+    this.print(lines.join("\n"))
+  }
+
+  /**
    * `items`:  where reviews stand, then each section with items, its counts and the items `--filter` picks.
    * - `--section <kind or label>`:  that section only
    * - `--json`:  `{ file, status, sections }`
@@ -1120,6 +1143,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   decisions <name> [--json]                        what the epic page settled:  phases (Done, Updated notes),
                                                    items (status, chosen option, answer;  --json:  their
                                                    text).  For /docs-check
+  owns <path> ... [--json]                         which open epics own each path (from the checkout's root),
+                                                   their stage (planning, building) and how:  their branch
+                                                   changes it (branch), their page names it (plan).  For /coherence
   review <name> <id> ["outcome"]                   mark an item reviewed today;  the outcome goes in the log
   defer <name> <id>                                put an item off:  still not reviewed, dated
   queue <name> <id> "work"  /  unqueue <name> <id> work a review decided on, waiting  /  started or dropped

@@ -336,6 +336,8 @@ export const REVIEW_DO_NOW = "review-do-now"
 export const REVIEW_ACCEPT = "review-accept"
 /** ... and Defer Phase beside it:  the same pill, quiet. */
 export const REVIEW_DEFER = "review-defer"
+/** The two together, one segmented pill (Owen, 2026-10-25:  "make this single segmented pill, with just Accept Defer"). */
+export const REVIEW_PLAN = "review-plan"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"
@@ -426,9 +428,9 @@ export const REVIEW_NAME_TEXTS = [
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
   {
     key: "acceptPlan",
-    text: "Accept Phase",
+    text: "Accept",
     description:
-      "A phase's review button while Claude's build plan waits (Owen, 2026-10-25:  \"In the phase, the button should be Accept Phase\";  the header's says Accept plan)."
+      "A phase's review button while Claude's build plan waits, the left of its Accept | Defer pill (Owen, 2026-10-25:  \"make this single segmented pill, with just Accept Defer\";  the header's says Accept plan)."
   },
   {
     key: "acceptPlanTip",
@@ -437,8 +439,8 @@ export const REVIEW_NAME_TEXTS = [
   },
   {
     key: "deferPhase",
-    text: "Defer Phase",
-    description: "A phase's worded button while its build plan waits, beside Accept Phase:  build it after the others."
+    text: "Defer",
+    description: "The right of a waiting plan's Accept | Defer pill:  build this phase after the others."
   },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },

@@ -47,9 +47,12 @@
   :host([hidden]) {
     display: none;
   }
-  /* open:  free of its neighbours, room above and below its drawer (I105;  Owen, 2026-10-25), its corners round there */
+  /*
+   * open:  room BELOW its drawer, none above (Owen, 2026-10-25:  "Don't put space at the top of open sections, just
+   * below":  room above moved the line down as it opened, breaking the animation);  the line stays in its run above
+   */
   :host([open]) {
-    margin-block: 10px;
+    margin-block: 0 10px;
   }
 
   .item {
