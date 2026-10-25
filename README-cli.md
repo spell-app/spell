@@ -968,7 +968,7 @@ After an unknown command it adds `(spell help lists the commands)`.
     what the Type Explorer reads.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:
     `schemas/Person.schema.json`.
-  - Its declarations and words are committed beside its source:  `<Project>.declarations.json5` and `<Project>.en.js`.
+  - Its declarations and words there too:  `<Project>.declarations.json5` and `<Project>.en.js`.
   - Each other target's output, e.g. `<Project>.spell.tsx`, for the `"targets"` in its project file.
   - Each `*.editor.html` page, to its `<type-editor>` module:  the property editor's pages, through the app's hook.
 - `watch` writes the same after each rebuild, unless `--check-only`.
