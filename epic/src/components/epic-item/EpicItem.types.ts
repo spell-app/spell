@@ -53,9 +53,22 @@ export const STATUS_STATES: Readonly<Record<string, ItemState>> = { decided: "re
  * - worked out as the page draws, never written:  the tool's `state` stays `recent`
  */
 export class ItemAge {
-  /** `state` as drawn for an item last changed `changed` (ISO, or any date `Date.parse()` reads). */
-  static shown(state: ItemState, changed: string | null | undefined, now = Date.now()): ItemState {
-    if (state !== "recent" || !changed) return state
+  /**
+   * `state` as drawn for an item last changed `changed` (ISO, or any date `Date.parse()` reads), and `reviewed` (a day,
+   * `2026-10-24`) when Owen approved it.
+   * - reviewed on or after the day it last changed:  grey at once (Owen, 2026-10-25:  "when we check a Q we should be
+   *   able to grey it immediately"):  green only says "new since you looked";  a change on a later day, green again
+   * - by DAY:  applying his approve stamps `changed` with the time too
+   */
+  static shown(
+    state: ItemState,
+    changed: string | null | undefined,
+    reviewed?: string | null,
+    now = Date.now()
+  ): ItemState {
+    if (state !== "recent") return state
+    if (reviewed && (!changed || reviewed.slice(0, 10) >= changed.slice(0, 10))) return "old"
+    if (!changed) return state
     const at = Date.parse(changed)
     return Number.isFinite(at) && now - at > RECENT_DAYS * DAY_MS ? "old" : state
   }

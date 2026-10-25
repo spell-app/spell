@@ -87,8 +87,8 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
       const item = document.getElementById(decodeURIComponent(link.getAttribute("href")!.slice(1)))
       if (!item) continue
       const written = item.getAttribute("state") ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
-      // a week-old decided or done item draws grey (`ItemAge`)
-      const state = ItemAge.shown(written as ItemState, item.getAttribute("changed"))
+      // a decided or done item a week old, or approved since it changed, draws grey (`ItemAge`)
+      const state = ItemAge.shown(written as ItemState, item.getAttribute("changed"), item.getAttribute("reviewed"))
       if (link.getAttribute(LINK_STATE) !== state) link.setAttribute(LINK_STATE, state)
     }
   }

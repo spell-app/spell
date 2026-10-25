@@ -31,7 +31,8 @@ describe("<epic-page-note-head>", () => {
   test("a click flips `open` and says so;  open, the preview hides", async () => {
     const head = await ElementFixture.render(`<epic-page-note-head preview="first line"></epic-page-note-head>`)
     const heard: unknown[] = []
-    for (const type of ["epic-note-opened", "epic-note-closed"]) head.addEventListener(type, (event) => heard.push((event as CustomEvent).detail))
+    for (const type of ["epic-note-opened", "epic-note-closed"])
+      head.addEventListener(type, (event) => heard.push((event as CustomEvent).detail))
     part(head, "base").click()
     await ElementFixture.settle(head)
     const preview = head.shadowRoot!.querySelector(".preview")!

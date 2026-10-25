@@ -111,17 +111,18 @@ export type ReviewButtonSpec = {
 }
 
 /**
- * The line's four review buttons, in their order (decision Q20):
- * - Approve, Revisit, Make Todo (the GROUP:  what Owen makes of it)
+ * The line's four review buttons, in their order (decision Q20;  reordered, Owen, 2026-10-25:  "`todo` is first, then
+ * `revisit`, then `check` - gap - wand"):
+ * - Make Todo, Revisit, Approve (the GROUP:  what Owen makes of it)
  * - then Do Now apart, with the magic wand (the page header's Review Now had it too, until epic `epic-engine` P20)
  *   - Owen, 2026-10-09:  it was a paper plane, which a todo's "next phase" button wears now
  *   - an action, not a state:  it replaces Add Details Now and the note box's Do Now
  * - Every one shows at every step:  a mark done can still be followed by another.
  */
 export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" },
-  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   { action: "todo", color: "green", icon: "list check", label: "todo", tip: "todoTip" },
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
+  { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" },
   { action: "details", color: "blue", icon: "wand magic sparkles", label: "doNow", tip: "doNowTip" }
 ]
 

@@ -133,6 +133,17 @@ describe("planDocArgs()", () => {
     expect(() => planDocArgs("add", ["seo#J3", "T"])).toThrow(/a kind after the #/)
   })
 
+  // epic `epic-engine` P39:  a decimal phase, P11.1, wherever a phase goes
+  test("a decimal phase:  `seo#P11.1`, `seo#11.1`, for phase, move, commit and update", () => {
+    expect(planDocArgs("phase", ["seo#P11.1", "done"])).toEqual([["phase", "seo", "11.1", "done"]])
+    expect(planDocArgs("move", ["seo#11.1", "P4"])).toEqual([["move", "seo", "11.1", "P4"]])
+    expect(planDocArgs("commit", ["seo#P11.1", "abc", "did"])).toEqual([
+      ["commit", "seo", "abc", "did", "--phase", "11.1"]
+    ])
+    expect(planDocArgs("update", ["seo#P11.1", "--title", "New"])).toEqual([["rename", "seo", "P11.1", "New"]])
+    expect(phaseOf("p11.1")).toBe("11.1")
+  })
+
   test("commit:  an item after the # is --item", () => {
     expect(planDocArgs("commit", ["seo#J3", "abc", "fixed"])).toEqual([
       ["commit", "seo", "abc", "fixed", "--item", "J3"]

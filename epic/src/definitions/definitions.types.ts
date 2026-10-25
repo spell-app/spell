@@ -126,6 +126,8 @@ export type AttributeTest = {
  * - `item id` -- `q7`, `j3`, `c1`, `i2`, `t4`:  its letter is its kind (`ItemLetters`)
  * - `phase id` -- `p-epic-migrate`:  stable, made from its name (`PhaseIds`, epic `epic-workflow` P15);
  *   an older page's `p3`, until the migration `stable-phase-ids`
+ * - `phase number` -- a phase as people number it:  `3`, or a decimal phase's `11.1` (epic `epic-engine` P39)
+ * - `decimal phase number` -- `11.1`:  a phase added on the fly, after P11 (`<epic-phase number>`)
  * - `anchor` -- any id a link may land on (`d7`, an old decision's, kept on its answer)
  * - `ids` -- anchors, space-separated (`data-part-ids` today)
  * - `sha` -- a git commit, 7 to 40 hex digits
@@ -139,6 +141,8 @@ export const Formats = {
   time: /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)?)?$/,
   "item id": /^[qjcitv]\d+$/,
   "phase id": /^p(?:\d+|-[a-z0-9]+(?:-[a-z0-9]+)*)$/,
+  "phase number": /^\d+(?:\.[1-9]\d*)?$/,
+  "decimal phase number": /^\d+\.[1-9]\d*$/,
   anchor: /^[A-Za-z][\w-]*$/,
   ids: /^[A-Za-z][\w-]*( [A-Za-z][\w-]*)*$/,
   sha: /^[0-9a-f]{7,40}$/,

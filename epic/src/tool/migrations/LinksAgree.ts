@@ -73,10 +73,10 @@ export class LinksAgree implements Migration {
     if (!target) return { note: `#${id} is gone (a link saying "${words}"):  left for you` }
     if (!TITLED.includes(target.localName)) return undefined
     const label = target.localName === "epic-phase" ? PhaseIds.labelOf(target) : id.toUpperCase()
-    const labelled = /^([A-Za-z]+\d+)\s*·\s*(.+)$/.exec(words)
+    const labelled = /^([A-Za-z]+\d+(?:\.\d+)?)\s*·\s*(.+)$/.exec(words)
     const said = labelled ? labelled[2]! : words
     const title = PlanItem.titleOf(target)
-    const phaseLabel = labelled && target.localName === "epic-phase" && /^P\d+$/i.test(labelled[1]!)
+    const phaseLabel = labelled && target.localName === "epic-phase" && /^P\d+(\.\d+)?$/i.test(labelled[1]!)
     if (phaseLabel && said !== title) {
       // a phase link naming another phase's title:  the phase moved
       const moved = Array.from(document.querySelectorAll("epic-phase")).filter(
@@ -109,9 +109,11 @@ export class LinksAgree implements Migration {
     const was = new Map<string, Set<string>>()
     const phases = PhaseIds.phasesIn(document)
     for (const event of document.querySelectorAll("epic-event")) {
-      const m = /^([A-Za-z]+\d+) renamed:\s+"(.*)" -> "(.*)"/.exec(PlanMarkup.squeeze(event.textContent ?? ""))
+      const m = /^([A-Za-z]+\d+(?:\.\d+)?) renamed:\s+"(.*)" -> "(.*)"/.exec(
+        PlanMarkup.squeeze(event.textContent ?? "")
+      )
       if (!m) continue
-      const phase = /^P\d+$/i.test(m[1]!)
+      const phase = /^P\d+(\.\d+)?$/i.test(m[1]!)
         ? (phases.find((each) => PlanItem.titleOf(each) === m[3]) ?? PhaseIds.find(phases, m[1]!))
         : undefined
       const id = phase?.id ?? m[1]!.toLowerCase()

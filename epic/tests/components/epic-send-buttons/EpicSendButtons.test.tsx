@@ -32,7 +32,9 @@ function part(host: Element, name: string): HTMLElement | null {
 /** Every `epic-send-saving` `host` sends, as its `auto`. */
 function asks(host: Element): boolean[] {
   const heard: boolean[] = []
-  host.addEventListener("epic-send-saving", (event) => heard.push((event as CustomEvent<{ auto: boolean }>).detail.auto))
+  host.addEventListener("epic-send-saving", (event) =>
+    heard.push((event as CustomEvent<{ auto: boolean }>).detail.auto)
+  )
   return heard
 }
 

@@ -135,8 +135,12 @@ As `plan-doc.md`, "Ids":
     file (`parts/p-epic-migrate.html`) stay on their phase.
   - "P7" is what people see and say:  the 7th phase, worked out as the page draws (`<epic-phase>`, the step label, the
     Epics list page) and as the tool prints.
-  - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, its id, its name or
-    slug (`"Epic Migrate"`, `epic-migrate`;  a renamed phase by its name today too).
+    - Counting only the WHOLE-numbered phases:  a phase added on the fly is a DECIMAL of the one before it, P11.1,
+      written on it (`<epic-phase number="11.1">`;  epic `epic-engine` P39), so P12 stays P12.
+  - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, `P11.1`,
+    `seo#P11.1`, its id, its name or slug (`"Epic Migrate"`, `epic-migrate`;  a renamed phase by its name today too).
+    - So do links (`<epic-link epic="seo" phase="P11.1">`), items' and updates' `phase` (`phase="11.1"`) and commit
+      titles (`seo P11.1:  ...`).
   - An older page's ids were numbers (`p7`):  the migration `stable-phase-ids` converted every page ("Migrations").
     An old address, `#p7`, still lands on the 7th phase (`PhaseIds.landing()`, the docs runtime's `addressedId()`).
 
@@ -161,6 +165,10 @@ As `plan-doc.md`, "Ids":
 ```
 
 - `id`:  stable, from the name it was added under ("Ids");  `P2`, its place, is drawn.
+- `number`:  a DECIMAL phase's own number (`11.1`, epic `epic-engine` P39), written by `add-phase --after`;
+  absent, its number is its place among the phases without one.
+  - The migration `decimal-phases-agree` (every edit) gives one out of place by a hand edit the number that fits:
+    a decimal of the whole-numbered phase before it.
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
 - `status`:  `todo`, `active`, `done`.
 - `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
@@ -178,8 +186,11 @@ As `plan-doc.md`, "Ids":
   - with `--symptom` / `--changes`:  Symptom, Changes, then Goal (optional), Files, Verify
   - without:  Goal, Files, Verify
   - A field not given reads `TBD`;  but the plan, which comes only once written (`--plan`).
-- `add-phase` with no `--before`, the last phase a `Doc Review` (by its name):  the new phase goes before it, and a Doc
-  Review already done is to do again, logged (P33:  the doc pass floats).
+- `add-phase ... --after N` (epic `epic-engine` P39):  a decimal phase, P<N>.1 (P<N>.2 when that's there), right after PN
+  and its decimals.  Nothing is renumbered, so no text goes stale and no `links-agree` runs.
+- `add-phase` with no `--before` / `--after`, the last phase a `Doc Review` (by its name):  the new phase goes before it,
+  as a decimal of the phase before it (P14.1 ahead of Doc Review P15;  P39), and a Doc Review under way or done is to
+  do again, logged, keeping its name and number (P33:  the doc pass floats).
 - `add-phase ... --before N`:  inserted as PN (`N` any way the tool takes a phase:  `--before epic-migrate`).
   - Every phase from N on moves down a NUMBER;  ids stay, so links, comments, marks and part files stay on them.
     What says the number follows:
@@ -189,6 +200,7 @@ As `plan-doc.md`, "Ids":
       (`phase: p-docs`), and `epic requests` shows that phase's number today;  `filed:` keeps the one it had then
   - Prose naming a phase without a link isn't changed.
   - Refused while a phase from N on has started (done or active):  its commits and log say its number.
+  - A decimal phase after it keeps being a decimal of the phase before it:  P5.1 after P5 says P6.1 once P5 is P6.
 - `update <name>#<P6 | id> --title "New title"` (epic `epic-workflow`):  a phase's or an item's new title.
   - Its `title`, or its `slot="title"` child's words (the UPDATE markers in it stay).
     `--html` (last):  the title has markup, so it's a title slot.

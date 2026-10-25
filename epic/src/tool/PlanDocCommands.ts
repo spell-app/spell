@@ -141,20 +141,22 @@ export class PlanDocCommands {
       case "create":
         return this.create(name, file, flags)
       case "add-phase": {
-        const n = await this.edit(file, (plan) => {
+        const label = await this.edit(file, (plan) => {
           const before = phaseFlag(plan, flags.before, "--before")
-          const added = plan.addPhase(need(rest[0], "a short name"), { ...flags, before })
-          const moved = before === undefined ? "" : `;  ${movedDown(plan.phases, added)}`
-          plan.log(`P${added} added:  ${rest[0]}${moved}`)
-          return added
+          const after = phaseFlag(plan, flags.after, "--after")
+          const was = plan.phases
+          const added = plan.addPhase(need(rest[0], "a short name"), { ...flags, before, after })
+          const moved = movedDown(was, plan.phases)
+          plan.log(`${plan.phaseLabel(added)} added:  ${rest[0]}${moved ? `;  ${moved}` : ""}`)
+          return plan.phaseLabel(added)
         })
-        this.print(`P${n}`)
+        this.print(label)
         // the phases after it moved down a number:  links' words follow them (`links-agree`)
         return flags.before === undefined ? undefined : this.agree(file)
       }
       case "phase":
         await this.edit(file, (plan) =>
-          plan.setPhase(plan.phaseNumber(need(rest[0], "a phase")), need(rest[1], "a status"), {
+          plan.setPhase(plan.phasePlace(need(rest[0], "a phase")), need(rest[1], "a status"), {
             done: flags.done as string | undefined
           })
         )
@@ -167,23 +169,25 @@ export class PlanDocCommands {
       case "move":
         // epic `epic-engine` P34:  a to-do phase to another place among the to-do phases;  numbers and text follow
         return this.edit(file, (plan) => {
-          const from = plan.phaseNumber(need(rest[0], "a phase"))
-          const to = Number(need(rest[1], "its new place (a number)").replace(/^p/i, ""))
+          const from = plan.phasePlace(need(rest[0], "a phase"))
+          // its new place:  the phase there now, as people name it (`P5`, `P11.1`)
+          const to = plan.phasePlace(need(rest[1], "its new place (the phase there now:  P5)"))
+          const was = plan.phaseLabel(from)
           plan.movePhase(from, to)
-          this.print(`P${from} -> P${to}`)
+          this.print(`${was} -> ${plan.phaseLabel(to)}`)
         })
       case "phase-body":
         return this.edit(file, (plan) => {
-          const n = plan.phaseNumber(need(rest[0], "a phase"))
+          const n = plan.phasePlace(need(rest[0], "a phase"))
           const set = plan.setPhaseFields(n, flags)
           if (!set.length)
             throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify`)
-          plan.log(`P${n} ${set.join(", ")} set`)
+          plan.log(`${plan.phaseLabel(n)} ${set.join(", ")} set`)
         })
       case "updated":
         return this.edit(file, (plan) =>
           plan.addPhaseUpdate(
-            plan.phaseNumber(need(rest[0], "a phase")),
+            plan.phasePlace(need(rest[0], "a phase")),
             flags.file ? readFileSync(flags.file as string, "utf8") : need(rest[1], "what changed (html)"),
             { summary: typeof flags.summary === "string" ? flags.summary : undefined }
           )
@@ -206,7 +210,7 @@ export class PlanDocCommands {
       case "request":
         return this.edit(file, (plan) =>
           plan.addPhaseRequest(
-            plan.phaseNumber(need(rest[0], "a phase")),
+            plan.phasePlace(need(rest[0], "a phase")),
             need(rest[1], "a request id"),
             need(flags.from as string | undefined, "--from (who sent it)"),
             readFileSync(need(flags.file as string | undefined, "--file (the request as html)"), "utf8")
@@ -222,9 +226,9 @@ export class PlanDocCommands {
       }
       case "estimate":
         return this.edit(file, (plan) => {
-          const n = plan.phaseNumber(need(rest[0], "a phase"))
+          const n = plan.phasePlace(need(rest[0], "a phase"))
           plan.setEstimate(n, need(rest[1], "the estimate"))
-          plan.log(`P${n} estimate:  ${rest[1]}`)
+          plan.log(`${plan.phaseLabel(n)} estimate:  ${rest[1]}`)
         })
       case "add": {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
@@ -493,8 +497,8 @@ export class PlanDocCommands {
     const base = this.files.commitBase(file)
     const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(folder, "remote", "get-url", "origin"))
     const { done, where } = await this.edit(file, (plan) => {
-      const target = phase !== undefined ? { phase: plan.phaseNumber(String(phase)) } : { item: String(item) }
-      const where = target.phase !== undefined ? `P${target.phase}` : target.item!.toUpperCase()
+      const target = phase !== undefined ? { phase: plan.phasePlace(String(phase)) } : { item: String(item) }
+      const where = target.phase !== undefined ? plan.phaseLabel(target.phase) : target.item!.toUpperCase()
       return { done: plan.addCommit(target, full, sentence, { base, repo }), where }
     })
     this.print(`${where}:  ${full.slice(0, 7)} ${done}`)
@@ -512,9 +516,13 @@ export class PlanDocCommands {
     const others = [...new EpicDocs({ files: this.files, name: epic }).otherEpicsCommits()]
     const log = this.files.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
     const base = this.files.commitBase(file)
-    const added = await this.edit(file, (plan) => plan.backfillCommits(log, { base, epic }))
+    const added = await this.edit(file, (plan) =>
+      plan
+        .backfillCommits(log, { base, epic })
+        .map((entry) => ({ ...entry, where: entry.phase !== undefined ? plan.phaseLabel(entry.phase) : undefined }))
+    )
     for (const entry of added) {
-      const where = entry.phase !== undefined ? `P${entry.phase}` : entry.item!.toUpperCase()
+      const where = entry.where ?? entry.item!.toUpperCase()
       this.print(`  ${where.padEnd(4)} ${entry.sha.slice(0, 7)}`)
     }
     this.print(`${added.length} commit${added.length === 1 ? "" : "s"} added (${log.length} in the doc's history)`)
@@ -880,10 +888,10 @@ export class PlanDocCommands {
     const lines = [`${summary.title}`]
     for (const phase of summary.phases) {
       const mark = PHASE_MARKS[phase.status as keyof typeof PHASE_MARKS] ?? "[?]"
-      lines.push(`  ${mark} P${phase.n} · ${phase.name}${phase.estimate ? `  (${phase.estimate})` : ""}`)
+      lines.push(`  ${mark} P${phase.number} · ${phase.name}${phase.estimate ? `  (${phase.estimate})` : ""}`)
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
-    if (summary.next) lines.push(`next:  P${summary.next.n} · ${summary.next.name}`)
+    if (summary.next) lines.push(`next:  P${summary.next.number} · ${summary.next.name}`)
     for (const kind of OPEN_KINDS) {
       const open = summary.open[kind]
       if (!open.length) continue
@@ -931,7 +939,7 @@ export class PlanDocCommands {
     if (json) return this.print(JSON.stringify(decisions, null, 2))
     const lines = [`${decisions.epic}:  ${decisions.planDoc}`]
     for (const phase of decisions.phases) {
-      lines.push(`P${phase.n} · ${phase.name}  [${phase.status}]`)
+      lines.push(`P${phase.number} · ${phase.name}  [${phase.status}]`)
       if (phase.done) lines.push(`    done:  ${phase.done}`)
       for (const update of phase.updates) lines.push(`    updated ${update.at}:  ${update.text}`)
     }
@@ -1054,11 +1062,15 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    --saga:  the saga it serves (epic saga list);
                                                    it starts in the Overview stage (--stage:  another)
   add-phase <name> "Short Name" --symptom html --changes html [--goal html] [--files html] [--verify html]
-            [--estimate 2h] [--before N]           a phase:  Symptom (one line), Changes (two or three), then
-                                                   the details (goal, files, verify);  --before N:  inserted as
-                                                   PN, the to-do phases from N on move down a number (their
-                                                   ids stay:  links and comments stay on them);  then
-                                                   links-agree:  links' words follow (stderr says)
+            [--estimate 2h] [--after N | --before N]
+                                                   a phase:  Symptom (one line), Changes (two or three), then
+                                                   the details (goal, files, verify);  --after 11:  P11.1 (then
+                                                   P11.2), right after P11, no phase renumbered;  --before N:
+                                                   inserted as PN, the to-do phases from N on move down a number
+                                                   (their ids stay:  links and comments stay on them), then
+                                                   links-agree:  links' words follow (stderr says);  neither,
+                                                   with a Doc Review last:  a decimal before it (P14.1), the Doc
+                                                   Review back to do
   phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--files html] [--verify html]
                                                    set (or "" removes) a phase's body fields
   updated <name> <N> "html" | --file path [--summary "..."]
@@ -1304,26 +1316,30 @@ function need(value: string | undefined, what: string): string {
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 
 /**
- * A flag's phase, as its number in `plan` (`PlanDoc.phaseNumber()`):
- * `--before 3`, `--before P3`, `--before epic-migrate` ...
+ * A flag's phase, as its place in `plan` (`PlanDoc.phasePlace()`):
+ * `--before 3`, `--before P3`, `--after 11.1`, `--before epic-migrate` ...
  * - `undefined` without the flag
  * - throws a `PlanDocError` for the flag bare, or a phase the doc doesn't have
  */
 function phaseFlag(plan: PlanDoc, value: string | true | undefined, flag: string): number | undefined {
   if (value === undefined) return undefined
   if (value === true) throw new PlanDocError(`${flag} needs a phase (its number, or its name)`)
-  return plan.phaseNumber(value)
+  return plan.phasePlace(value)
 }
 
 /**
- * What an insert before phase `added` moved, for the log, by their old numbers and new:
- * `P6 · Doc Review moved down to P7`, or `P5-P6 moved down to P6-P7` for several (I6 of `skillz`).
+ * What an insert renumbered, for the log, from the phases `before` it and `after`, by their old numbers and new:
+ * `P6 · Doc Review moved down to P7`, or `P5-P6 moved down to P6-P7` for several (I6 of `skillz`);
+ * `""` when none moved (a decimal phase, P11.1, renumbers nothing:  epic `epic-engine` P39).
  */
-export function movedDown(phases: Phase[], added: number): string {
-  const moved = phases.filter((phase) => phase.n > added)
-  if (moved.length === 1) return `P${added} · ${moved[0]!.name} moved down to P${added + 1}`
-  const last = moved.at(-1)!.n
-  return `P${added}-P${last - 1} moved down to P${added + 1}-P${last}`
+export function movedDown(before: Phase[], after: Phase[]): string {
+  const moved = before.flatMap((phase) => {
+    const now = after.find((each) => each.id === phase.id)
+    return now && now.number !== phase.number ? [{ name: phase.name, was: phase.number, now: now.number }] : []
+  })
+  if (!moved.length) return ""
+  if (moved.length === 1) return `P${moved[0]!.was} · ${moved[0]!.name} moved down to P${moved[0]!.now}`
+  return `P${moved[0]!.was}-P${moved.at(-1)!.was} moved down to P${moved[0]!.now}-P${moved.at(-1)!.now}`
 }
 
 /** `kebab-name` -> `Kebab Name`. */

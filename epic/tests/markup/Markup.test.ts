@@ -34,6 +34,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-phase": {
     id: "p2",
     title: "Review Buttons",
+    number: "1.1",
     status: "done",
     estimate: "3-4h",
     source: "parts/p2.html",
@@ -41,14 +42,14 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     commits: true
   },
   "epic-field": { name: "to-review" },
-  "epic-updated": { at: "2026-10-06 14:30", phase: 3 },
+  "epic-updated": { at: "2026-10-06 14:30", phase: "3" },
   "epic-item": {
     id: "q1",
     title: "Which colour names?",
     status: "decided",
     state: "old",
     changed: "2026-10-06T09:28:23-04:00",
-    phase: 2,
+    phase: "2",
     answered: true,
     reviewed: "2026-10-06",
     reviewAs: "approve",
@@ -82,7 +83,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-version": { asOf: "2026-10-04 20:49" },
   "epic-commit": { sha: "82d5106c165cbebf3922fd97793798e41f1b2760" },
   "epic-event": { at: "2026-10-06T08:12-04:00", icon: "pen to square" },
-  "epic-update": { phase: 2 },
+  "epic-update": { phase: "2.1" },
   "epic-net-effect": { option: "A", recommended: true },
   "epic-question": {},
   "epic-summary": {},
@@ -197,7 +198,7 @@ function planDoc(document: Document): Element {
       make("epic-phase", { id: "p1", title: "Saved Replies", status: "done", estimate: "2h" }, [
         make("epic-field", { name: "symptom" }, "notes get lost"),
         make("epic-field", { name: "changes" }, "notes are saved"),
-        make("epic-updated", { at: "2026-10-06 14:30", phase: 1 }, "<p>moved the box</p>"),
+        make("epic-updated", { at: "2026-10-06 14:30", phase: "1" }, "<p>moved the box</p>"),
         make("epic-field", { name: "goal" }, "<ul><li>nothing lost</li></ul>"),
         make("epic-field", { name: "done" }, "<ul><li>saved</li></ul>"),
         make("epic-commit", { sha: "82d5106" }, "saves notes"),
@@ -209,7 +210,7 @@ function planDoc(document: Document): Element {
     make("epic-section", { id: "decisions", kind: "questions" }, [
       make("epic-item", { id: "q1", title: "Which colour names?", status: "decided", answered: true }, [
         make("epic-question", {}, "<p>Which colour names should windows take?</p>"),
-        make("epic-update", { phase: 1 }),
+        make("epic-update", { phase: "1" }),
         make("epic-net-effect", { option: "A", recommended: true }, "<ul><li>names, not hex</li></ul>"),
         make("epic-choices", { chosen: "A" }, [
           make("epic-option", { letter: "A", title: "A named palette", recommended: true }, [
@@ -234,7 +235,7 @@ function planDoc(document: Document): Element {
       ])
     ]),
     make("epic-section", { id: "judgements", kind: "judgements" }, [
-      make("epic-item", { id: "j1", title: "Kept the old ids", status: "open", phase: 1 }, [
+      make("epic-item", { id: "j1", title: "Kept the old ids", status: "open", phase: "1" }, [
         '<p>Chose X. <epic-update phase="1"></epic-update></p>',
         make("epic-note", { state: "update", title: "partly fixed by J9" }, "<p>Reworded.</p>"),
         make("epic-aside", { title: "where it stood" }, "<p>Before.</p>"),
@@ -281,7 +282,7 @@ describe("Markup.element() / read()", () => {
     const element = Markup.element(blankDocument(), "epic-item", {
       reviewAs: "todo",
       answered: true,
-      phase: 3,
+      phase: "3",
       status: "open",
       title: "Which browser first?",
       id: "q3"
@@ -325,7 +326,7 @@ describe("Markup.element() / read()", () => {
 describe("Markup.set()", () => {
   /** A fresh `<epic-item id="q1" ...>`. */
   function item(): Element {
-    return Markup.element(blankDocument(), "epic-item", { id: "q1", title: "One line", status: "open", phase: 2 })
+    return Markup.element(blankDocument(), "epic-item", { id: "q1", title: "One line", status: "open", phase: "2" })
   }
 
   test("sets, changes and removes attributes:  `undefined` / `false` remove one", () => {
@@ -352,7 +353,8 @@ describe("Markup.set()", () => {
     )
     expect(() => Markup.set<"epic-item">(element, { status: "closed" as never })).toThrow(/isn't one of its values/)
     expect(() => Markup.set<"epic-item">(element, { reviewed: "yesterday" })).toThrow(/isn't a well-formed date/)
-    expect(() => Markup.set<"epic-item">(element, { phase: "2" as never })).toThrow(/takes a number/)
+    expect(() => Markup.set<"epic-item">(element, { phase: 2 as never })).toThrow(/takes a string/)
+    expect(() => Markup.set<"epic-item">(element, { phase: "P2" })).toThrow(/isn't a well-formed phase number/)
     expect(() => Markup.set<"epic-item">(element, { id: "x1" })).toThrow(/isn't a well-formed item id/)
     expect(element.outerHTML).toBe(before)
   })

@@ -584,7 +584,9 @@ test("apply:  a sent Accept Overview moves the page to the phases stage, logged;
   await commands().inbox.run("x", file, ["apply"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   expect(after.stage).toBe("phases")
-  expect(printed.join("\n")).toContain("STAGE  accepted overview:  stage phases, write the phases")
+  expect(printed.join("\n")).toContain(
+    "STAGE  accepted overview:  stage phases, write the phases and their build plans"
+  )
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
   // sent twice:  the page has moved on, so it's dropped, nothing changed
   ReviewInbox.update(inboxFile, (inbox) => {
@@ -594,6 +596,25 @@ test("apply:  a sent Accept Overview moves the page to the phases stage, logged;
   await commands().inbox.run("x", file, ["apply"], {})
   expect(PlanDoc.parse(readFileSync(file, "utf8")).stage).toBe("phases")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+})
+
+// epic `epic-engine` I125:  ONE Accept for the phases and their plans
+test("apply:  a sent Accept Phases accepts every build plan waiting too, and starts the build", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two", "Three"]) plan.addPhase(name, { goal: `<ul><li>${name}</li></ul>` })
+  plan.setPhaseFields(1, { plan: "<ol><li>Do one.</li></ol>" })
+  plan.setPhaseFields(2, { plan: "<ol><li>Do two.</li></ol>" })
+  plan.setStage("phases")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("stage", { action: "accept", stage: "phases" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.stage).toBe("building")
+  expect(after.phaseElements.map((phase) => phase.getAttribute("plan"))).toEqual(["accepted", "accepted", null])
+  expect(printed.join("\n")).toContain("accepted phases:  stage building, start building (2 build plans accepted)")
 })
 
 test("apply:  a phase's sent Defer moves it after the others, still to do;  its Looks good is noted", async () => {

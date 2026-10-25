@@ -5,6 +5,7 @@ import { parseHTML } from "linkedom"
 
 // Import directly:  the `spell/server/site` barrel is browser code (the site header);  this file imports nothing
 import { URGENT_SELECTOR } from "spell-epic/list/EpicState"
+import { PhaseIds } from "spell-epic/phases"
 import { FAVORITES_FILE, eventTimesIn, favoritesIn, isoLocal, lastWorked } from "spell-epic/list/EpicCards"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
@@ -94,8 +95,8 @@ export class SagaEpics {
           future: page.hasAttribute("future"),
           standing: page.hasAttribute("standing"),
           urgent: Array.from(document.querySelectorAll(URGENT_SELECTOR), (item) => item.id),
-          // its number by its place, never its id:  phase ids may be words (P15's stable ids)
-          active: active ? `P${phases.indexOf(active) + 1} · ${(activeTitle ?? "").trim()}` : undefined
+          // its number as drawn (P7, P11.1), never its id:  phase ids may be words (P15's stable ids)
+          active: active ? `${PhaseIds.labelOf(active)} · ${(activeTitle ?? "").trim()}` : undefined
         },
         // the doc's own:  its `updated` day and log lines;  `of()` adds its log part's
         worked: SagaEpics.worked([page.getAttribute("updated"), ...eventTimesIn(html)])

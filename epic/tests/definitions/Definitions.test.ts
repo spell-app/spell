@@ -151,6 +151,7 @@ describe("Definitions.valueProblem() / parse() / text()", () => {
   const status = attributeNamed("epic-item", "status")!
   const answered = attributeNamed("epic-item", "answered")!
   const phase = attributeNamed("epic-item", "phase")!
+  const changes = attributeNamed("epic-phase", "changes")!
   const reviewed = attributeNamed("epic-item", "reviewed")!
 
   test("checks values, booleans, numbers and formats", () => {
@@ -158,8 +159,16 @@ describe("Definitions.valueProblem() / parse() / text()", () => {
     expect(Definitions.valueProblem(status, "closed")).toMatch(/isn't one of its values/)
     expect(Definitions.valueProblem(answered, "")).toBeUndefined()
     expect(Definitions.valueProblem(answered, "maybe")).toMatch(/isn't a boolean/)
-    expect(Definitions.valueProblem(phase, "3")).toBeUndefined()
-    expect(Definitions.valueProblem(phase, "three")).toMatch(/isn't a number/)
+    expect(Definitions.valueProblem(changes, "3")).toBeUndefined()
+    expect(Definitions.valueProblem(changes, "three")).toMatch(/isn't a number/)
+    // a phase by its number (epic `epic-engine` P39):  whole, or a decimal phase's
+    expect(["3", "11.1", "11.12"].map((text) => Definitions.valueProblem(phase, text))).toEqual([
+      undefined,
+      undefined,
+      undefined
+    ])
+    expect(Definitions.valueProblem(phase, "P3")).toMatch(/isn't a well-formed phase number/)
+    expect(Definitions.valueProblem(phase, "11.0")).toMatch(/isn't a well-formed phase number/)
     expect(Definitions.valueProblem(reviewed, "2026-10-07")).toBeUndefined()
     expect(Definitions.valueProblem(reviewed, "10-07")).toMatch(/isn't a well-formed date/)
   })
@@ -172,14 +181,16 @@ describe("Definitions.valueProblem() / parse() / text()", () => {
       false,
       false
     ])
-    expect(Definitions.parse(phase, "3")).toBe(3)
+    expect(Definitions.parse(changes, "3")).toBe(3)
+    expect(Definitions.parse(phase, "11.1")).toBe("11.1")
   })
 
   test("writes `true` as presence, leaves `false` / `undefined` out, and refuses the wrong type", () => {
     expect(Definitions.text(answered, true)).toBe("")
     expect(Definitions.text(answered, false)).toBeUndefined()
-    expect(Definitions.text(phase, 3)).toBe("3")
-    expect(() => Definitions.text(phase, "3")).toThrow(TypeError)
+    expect(Definitions.text(changes, 3)).toBe("3")
+    expect(() => Definitions.text(changes, "3")).toThrow(TypeError)
+    expect(() => Definitions.text(phase, 3)).toThrow(TypeError)
     expect(() => Definitions.text(status, "closed")).toThrow(/isn't one of its values/)
   })
 })

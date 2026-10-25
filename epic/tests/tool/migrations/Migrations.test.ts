@@ -21,7 +21,12 @@ function upToDateDoc(): Document {
 
 describe("Migrations", () => {
   test("every step by name, in order;  `named()` finds one", () => {
-    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree", "more-requests-first", "caveats-and-tests"])
+    expect(Migrations.all.map((step) => step.name)).toEqual([
+      "links-agree",
+      "more-requests-first",
+      "caveats-and-tests",
+      "decimal-phases-agree"
+    ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
   })
@@ -31,7 +36,7 @@ describe("Migrations", () => {
       expect(step.kind).toBe("epic")
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
     }
-    expect(Migrations.everyEdit.map((step) => step.name)).toEqual(["more-requests-first"])
+    expect(Migrations.everyEdit.map((step) => step.name)).toEqual(["more-requests-first", "decimal-phases-agree"])
   })
 
   test("`run()` names the steps that changed something:  none on a page that's up to date;  `only` picks steps", () => {

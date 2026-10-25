@@ -348,7 +348,7 @@ export const epicPageVocabulary = {
     },
     {
       key: "acceptPhasesTip",
-      text: "The phases are agreed:  Claude starts building",
+      text: "The phases and their build plans are agreed:  Claude starts building",
       description: "The stage button's tooltip, Phases stage:  what a press does."
     },
     {
@@ -378,7 +378,7 @@ export const epicPageVocabulary = {
     },
     {
       key: "stagePhasesTip",
-      text: "Agreeing the phases:  Looks good or Defer on each, then Accept Phases",
+      text: "Agreeing the phases and their build plans:  Defer any, then Accept Phases, one press for both",
       description: "The step label's tooltip, Phases stage."
     },
     { key: "openQuestionsOne", text: "1 question open", description: "The stage button's tooltip:  what's open." },

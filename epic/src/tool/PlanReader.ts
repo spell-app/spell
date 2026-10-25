@@ -135,9 +135,9 @@ export abstract class PlanReader {
   // ## Phases and items
   ////////////////
 
-  /** Number of the phase in progress, if any. */
-  get activePhase(): number | undefined {
-    return this.phases.find((phase) => phase.status === "active")?.n
+  /** The number of the phase in progress (`3`, `11.1`), if any:  what an item's `phase` says. */
+  get activePhase(): string | undefined {
+    return this.phases.find((phase) => phase.status === "active")?.number
   }
 
   /** Is a `/bedtime` run going on?  Then every item a command changes stays "recent" until reviewed. */

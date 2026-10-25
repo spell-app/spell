@@ -6,6 +6,7 @@ import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
 import { Git } from "./Git"
+import { StrayFiles } from "./StrayFiles"
 
 /**
  * A Vitest snapshot file:  its test is `<dir>/../<name>` less `.snap`.
@@ -78,6 +79,24 @@ export class MainMerge {
   }
 
   /**
+   * Move aside what a build or test run left uncommitted in `root` (`StrayFiles`), so the merge can start.
+   * - Why (Owen, 2026-10-25, epic `epic-engine` I124):  "if `people.lib.ts` etc are generated, YOU SHOULD DITCH THEM
+   *   AUTOMATICALLY"
+   * - into `ditched/<time>/<repo>/` in the epic home, never deleted
+   * - throws `EpicCommandError`, naming them, when someone's changes are among them:  nothing moved
+   */
+  private ditchStrays(): Pick<MergeMainReport, "ditched" | "ditchedTo"> {
+    const stray = new StrayFiles(this.root, this.generators)
+    const handMade = stray.handMade.filter((file) => file.tracked)
+    if (handMade.length) {
+      const list = handMade.map(({ path }) => `\n  ${path}`).join("")
+      throw new EpicCommandError(`merge-main:  uncommitted changes;  commit them first${list}`)
+    }
+    const folder = join(StrayFiles.folderFor(), basename(this.root))
+    return { ditched: stray.ditch({ folder, ditch: false }), ditchedTo: folder }
+  }
+
+  /**
    * Merge the base branch into `root`'s branch;  what it did (`MergeMainReport`).
    * - `mode`:  `start` (default) merges;  `continue` finishes a merge it stopped on other conflicts
    * - throws `EpicCommandError` for a merge that can't start or go on, saying what to do
@@ -106,9 +125,7 @@ export class MainMerge {
     } else {
       if (merging)
         throw new EpicCommandError("merge-main:  a merge is in progress;  `--continue` it, or `git merge --abort`")
-      if (gitOut(root, ["status", "--porcelain", "--untracked-files=no"])) {
-        throw new EpicCommandError("merge-main:  uncommitted changes;  commit them first")
-      }
+      if (gitOut(root, ["status", "--porcelain", "--untracked-files=no"])) Object.assign(report, this.ditchStrays())
       if (Git.run(["merge-base", "--is-ancestor", upstream, "HEAD"], root).ok)
         return { ...report, result: "up-to-date" }
       if (Git.run(["merge-base", "--is-ancestor", "HEAD", upstream], root).ok) {

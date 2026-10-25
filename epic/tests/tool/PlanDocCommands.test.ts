@@ -61,7 +61,9 @@ describe("PlanDocCommands add-phase --before", () => {
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
     // whitespace squeezed:  the written page's formatter folds the double spaces
     expect(last.textContent!.replace(/\s+/g, " ")).toBe("P2 added: Inserted; P2-P3 moved down to P3-P4")
-    expect(movedDown(plan.phases, 3)).toBe("P3 · Three moved down to P4")
+    const three = plan.phases.at(-1)!
+    expect(movedDown([{ ...three, number: "3" }], plan.phases)).toBe("P3 · Three moved down to P4")
+    expect(movedDown(plan.phases, plan.phases)).toBe("")
     // each part under its phase's stable id:  the inserted one's beside them, nothing moved
     expect(
       readdirSync(parts)
@@ -82,6 +84,26 @@ describe("PlanDocCommands add-phase --before", () => {
       "p-second-insert",
       "p-three"
     ])
+  })
+
+  // epic `epic-engine` P39:  `--after 2` adds P2.1, then P2.2;  nothing moves, so no links-agree pass
+  test("--after:  a decimal phase after its base, printed and logged;  no other phase renumbered", async () => {
+    expect(await commands().run(["add-phase", "x", "Notebook", "--after", "1"])).toBe(0)
+    expect(await commands().run(["add-phase", "x", "Reassess", "--after", "P1"])).toBe(0)
+    expect(printed).toEqual(["P1.1", "P1.2"])
+    const plan = FILES.read(file)
+    expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual([
+      "P1 One",
+      "P1.1 Notebook",
+      "P1.2 Reassess",
+      "P2 Two",
+      "P3 Three"
+    ])
+    const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
+    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P1.2 added: Reassess")
+    // the tool's verbs take it by its number
+    expect(await commands().run(["phase", "x", "P1.1", "active", "--no-open"])).toBe(0)
+    expect(FILES.read(file).phases[1]!.status).toBe("active")
   })
 
   // epic `epic-engine` I1 (epic-workflow's I7):  the inbox keys a phase by its STABLE id, so an insert moves nothing

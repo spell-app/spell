@@ -146,12 +146,12 @@ export class GuideChanges {
               `<code>epic comments answer ${escape(page.page)}#&lt;id&gt; --file reply.html</code>.`,
             goal: list
           })
-          plan.log(`P${phase} added:  ${page.title} (${many(count)}, epic comments gather)`)
+          plan.log(`${plan.phaseLabel(phase)} added:  ${page.title} (${many(count)}, epic comments gather)`)
         }
         return {
           page: page.page,
           epic: this.epic,
-          phase,
+          phase: PhaseIds.numberOf(plan.phase(phase)),
           phaseId: plan.phase(phase).id,
           phaseTitle: PhaseIds.titleOf(plan.phase(phase)),
           as: open ? "update" : "phase",
@@ -262,8 +262,8 @@ export type PageWaiting = {
 export type Gathered = {
   page: string
   epic: string
-  /** the phase it went into, by number:  `P3` */
-  phase: number
+  /** the phase it went into, by its number:  `3`, a decimal phase's `11.1` */
+  phase: string
   /** the phase it went into, by its stable id (`p-solid-2`):  where a link to it goes */
   phaseId: string
   /** that phase's title (`Solid 2`):  what a taken comment's link says */

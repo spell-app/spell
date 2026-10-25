@@ -77,7 +77,12 @@ export const epicItemVocabulary = {
       format: "time",
       description: "When a command last changed its status or review marks (ISO, with offset)."
     },
-    { name: "phase", kind: "number", description: "The phase active when it was added:  its To review line lists it." },
+    {
+      name: "phase",
+      kind: "string",
+      format: "phase number",
+      description: "The phase active when it was added, by its number (`3`, `11.1`):  its To review line lists it."
+    },
     {
       name: "answered",
       kind: "boolean",
@@ -222,10 +227,6 @@ export const epicItemVocabulary = {
     { name: "line", description: "Its line:  fold button, id chip, title, review label, actions;  sticky while open." },
     { name: "toggle", description: "The fold `<button>` (the chevron), on an item with details." },
     {
-      name: "collapse-all",
-      description: "Open, holding cards or panels that fold:  the double chevron at its line's end, folding them all."
-    },
-    {
       name: "id",
       description:
         "The id chip (`Q7`), a link to the item, in its state's colour.  While the page is reviewed, an open " +
@@ -261,7 +262,7 @@ export const epicItemVocabulary = {
       name: "actions",
       description:
         "The box at the end of the line:  the `actions` slot (the page's own buttons, the bullhorn), then the git " +
-        "icon, the review label, the review buttons and collapse-all."
+        "icon, the review label and the review buttons."
     },
     { name: "details", description: "Its details:  hidden while folded." },
     { name: "label", description: "`Original question` / `Original reply` over its own text." },
@@ -277,11 +278,6 @@ export const epicItemVocabulary = {
   texts: [
     { key: "fold", text: "Fold {id}", description: "Accessible name of the fold button while open." },
     { key: "unfold", text: "Unfold {id}", description: "Accessible name of the fold button while folded." },
-    {
-      key: "collapseAll",
-      text: "Fold everything in {id}",
-      description: "The collapse-all button's name and tooltip:  folds every card and panel in the item."
-    },
     {
       key: "showCommits",
       text: "Show this item's commits",

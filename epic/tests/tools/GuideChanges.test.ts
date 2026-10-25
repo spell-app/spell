@@ -92,7 +92,7 @@ describe("GuideChanges.gather()", () => {
       {
         page: "guides/memory/memory.html",
         epic: "gc",
-        phase: 1,
+        phase: "1",
         phaseId: "p-memory",
         phaseTitle: "Memory",
         as: "phase",
@@ -110,7 +110,7 @@ describe("GuideChanges.gather()", () => {
     const inbox = GuideInbox.read(join(root, "guides", "memory", "memory.inbox.json5"))
     expect(inbox.comments[id]).toMatchObject({
       status: "taken",
-      taken: { epic: "gc", phase: 1, phaseId: "p-memory", title: "Memory" }
+      taken: { epic: "gc", phase: "1", phaseId: "p-memory", title: "Memory" }
     })
     const page = readFileSync(join(root, "guides", "memory", "memory.html"), "utf8")
     expect(page).toMatch(
@@ -122,9 +122,9 @@ describe("GuideChanges.gather()", () => {
   test("a page with its phase still open gets an update;  another page its own phase;  one page alone", async () => {
     const more = comment("guides/memory/memory.html", "And the second table?")
     const other = comment("guides/plain.html", "A picture here")
-    expect(await changes.gather(["guides/plain.html"])).toMatchObject([{ page: "guides/plain.html", phase: 2 }])
+    expect(await changes.gather(["guides/plain.html"])).toMatchObject([{ page: "guides/plain.html", phase: "2" }])
     expect(await changes.gather()).toMatchObject([
-      { page: "guides/memory/memory.html", phase: 1, as: "update", comments: [more] }
+      { page: "guides/memory/memory.html", phase: "1", as: "update", comments: [more] }
     ])
     expect(epicText()).toMatch(
       /<epic-update[^>]*summary="1 comment more from Owen"[^>]*>[\s\S]*1 comment more from Owen[\s\S]*And the second table\?/

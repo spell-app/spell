@@ -54,6 +54,7 @@ import {
 } from "./planDoc.types"
 
 import { IncomingHtml } from "./IncomingHtml"
+import { PhaseNumbers } from "./PhaseNumbers"
 import { PlanCommits } from "./PlanCommits"
 import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
@@ -174,14 +175,16 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Every phase, in order:  `{ n, id, name, status, estimate }`, from each `<epic-phase>`.
-   * - `n`:  its place in the list (P15:  the number people see and say), not its id
+   * Every phase, in order:  `{ n, number, id, name, status, estimate }`, from each `<epic-phase>`.
+   * - `n`:  its place in the list, from 1:  what this class's methods take (`phase(n)`)
+   * - `number`:  the number people see and say (`7`, `11.1`;  `PhaseIds.numberOf()`), not its id
    */
   get phases(): Phase[] {
     return this.phaseElements.map((phase, index) => {
       const estimate = phase.getAttribute("estimate")
       return {
         n: index + 1,
+        number: PhaseIds.numberOf(phase),
         id: phase.id,
         name: PlanItem.titleOf(phase),
         status: phase.getAttribute("status") ?? "todo",
@@ -190,11 +193,16 @@ export class PlanDoc extends PlanReader {
     })
   }
 
-  /** Phase `n`'s `<epic-phase>`:  the `n`th, from 1;  throws when there's none. */
+  /** The phase at place `n`'s `<epic-phase>`:  the `n`th, from 1;  throws when there's none. */
   phase(n: number): Element {
     const phase = this.phaseElements[n - 1]
-    if (!phase) throw new PlanDocError(`no phase P${n} in the doc`)
+    if (!phase) throw new PlanDocError(`no phase at place ${n} in the doc`)
     return phase
+  }
+
+  /** The phase at place `n`'s label, as people say it:  `P7`, `P11.1`. */
+  phaseLabel(n: number): string {
+    return PhaseIds.labelOf(this.phase(n))
   }
 
   /**
@@ -210,25 +218,27 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The number of the phase `ref` names, as people name one (`PhaseIds.find()`):  `7`, `P7`, `#p7`, its id
-   * (`p-epic-migrate`), its name or slug (`Epic Migrate`, `epic-migrate`).
+   * The PLACE of the phase `ref` names (from 1:  what `phase(n)` takes), as people name one (`PhaseIds.find()`):
+   * `7`, `P7`, `#p7`, `11.1`, `P11.1`, its id (`p-epic-migrate`), its name or slug (`Epic Migrate`, `epic-migrate`).
    * - throws for none, saying what there is
    */
-  phaseNumber(ref: string | number): number {
+  phasePlace(ref: string | number): number {
     const phases = this.phaseElements
     const phase = PhaseIds.find(phases, ref)
     if (!phase) {
-      const range = phases.length ? `P1-P${phases.length}, or a phase's name` : "none yet"
+      const range = phases.length
+        ? `${PhaseIds.labelOf(phases[0]!)}-${PhaseIds.labelOf(phases.at(-1)!)}, or a phase's name`
+        : "none yet"
       const said = String(ref).trim()
       throw new PlanDocError(
-        `no phase ${/^[Pp]?\d+$/.test(said) ? said.replace(/^[Pp]?/, "P") : `"${said}"`} in the doc (${range})`
+        `no phase ${/^[Pp]?\d+(\.\d+)?$/.test(said) ? said.replace(/^[Pp]?/, "P") : `"${said}"`} in the doc (${range})`
       )
     }
     return phases.indexOf(phase) + 1
   }
 
   /**
-   * Append phase `name` (2-4 words);  returns its number.
+   * Add phase `name` (2-4 words);  returns its PLACE (`phaseLabel()` says its number).
    * - its id:  STABLE, made from `name` once and kept for good (`PhaseIds.make()`:  `p-epic-migrate`), so a rename
    *   or a later insert never moves what points at it
    * - `symptom` / `changes` / `goal` / `files` / `verify`:  its `<epic-field>`s, as HTML:
@@ -236,25 +246,37 @@ export class PlanDoc extends PlanReader {
    *   - omitted ones get `TBD` to fill in, but the goal:  optional once there's a symptom or changes
    *   - neither of those:  the shape before P3 of `windows-and-review`, Goal / Files / Verify
    * - `estimate` (`1-2h`):  `<epic-phase estimate>`
-   * - `before` (`add-phase --before N`, epic `skillz`):
-   *   inserted as phase N, the to-do phases from N on moving down one (`makeRoomForPhase()`)
+   * - WHERE, and its number:
+   *   - `after` (`add-phase --after 11`, epic `epic-engine` P39):  a DECIMAL phase, P11.1 (P11.2 when P11.1 is
+   *     there), right after P11 and its decimals (`PhaseIds.decimalAfter()`);  no other phase changes its number
+   *   - `before` (`add-phase --before N`, epic `skillz`):  inserted as phase N, the to-do phases from N on moving
+   *     down one (`makeRoomForPhase()`), the text naming them following (`renumberAll()`)
+   *   - neither:  last;  but the DOC PASS FLOATS (epic `epic-engine` P33, M4):  when the last phase is Doc Review
+   *     (`DOC_REVIEW`), the new one goes before it, as a decimal of the phase before it (P14.1 ahead of Doc Review
+   *     P15, P39):  docs never trail the code
+   *     - a Doc Review under way or done is to do again (logged), keeping its name and number:  it takes in the new
+   *       phase's docs when it runs again
+   *     - a Doc Review that is the only phase:  the new one goes in as P1, before it
    * - a future epic with a phase is planned:  no longer future;  the "Plan hung?" notice (drawn while there's no
    *   phase) goes by itself
-   * - the DOC PASS FLOATS (epic `epic-engine` P33, M4):  with no `before`, a new phase goes before the last phase when
-   *   that's Doc Review (`DOC_REVIEW`), and a Doc Review already done is to do again (logged):  docs never trail the
-   *   code
+   * - throws for both `before` and `after`, or a refused `before` (`makeRoomForPhase()`), changing nothing
    */
-  addPhase(name: string, { estimate, before: asked, ...values }: AddPhaseOptions = {}): number {
-    const docReview = DOC_REVIEW.test(name) ? undefined : this.lastDocReview()
-    const before = asked ?? (docReview ? this.phases.length : undefined)
-    if (docReview?.status === "done" && asked === undefined) {
-      Markup.set<"epic-phase">(this.phaseElements.at(-1)!, { status: "todo" })
-      this.log(`P${docReview.n} ${docReview.name}:  back to do, after the new phase`)
+  addPhase(name: string, { estimate, before: asked, after, ...values }: AddPhaseOptions = {}): number {
+    if (asked !== undefined && after !== undefined) throw new PlanDocError("add-phase:  --before or --after, not both")
+    const docReview =
+      asked !== undefined || after !== undefined || DOC_REVIEW.test(name) ? undefined : this.lastDocReview()
+    const elements = this.phaseElements
+    const base = after !== undefined ? this.phase(after) : docReview ? elements.at(-2) : undefined
+    const decimal = base ? PhaseIds.decimalAfter(elements, base) : undefined
+    // a Doc Review alone:  the new phase before it, renumbering (it's to do by then, below)
+    const before = asked ?? (docReview && !decimal ? docReview.n : undefined)
+    if (docReview && docReview.status !== "todo") {
+      Markup.set<"epic-phase">(elements.at(-1)!, { status: "todo" })
+      this.log(`P${docReview.number} ${docReview.name}:  back to do (was ${docReview.status}), after the new phase`)
     }
     // the room first:  a refused --before changes nothing
-    const n = before === undefined ? this.phases.length + 1 : this.makeRoomForPhase(before)
-    // the text naming a moved phase by its number and name follows it (r21), once it's in (below)
-    const relabel = before !== undefined
+    if (before !== undefined) this.makeRoomForPhase(before)
+    const numbers = before === undefined ? undefined : PhaseNumbers.snapshot(this.document)
     const section = this.section("phases")
     if (this.future) Markup.set(this.page, { future: false })
     const framed = values.symptom !== undefined || values.changes !== undefined
@@ -265,12 +287,18 @@ export class PlanDoc extends PlanReader {
       )
       .map((name) => this.make("epic-field", { name }, this.incoming(values[name] ?? "TBD")))
     const id = PhaseIds.make(name, PhaseIds.idsIn(this.document))
-    const phase = this.make("epic-phase", { id, title: name, status: "todo", estimate }, fields)
-    if (before === undefined) section.append(phase)
-    else this.phase(n).before(phase)
-    if (relabel) this.relabelPhaseNames()
+    const phase = this.make(
+      "epic-phase",
+      { id, number: decimal?.number, title: name, status: "todo", estimate },
+      fields
+    )
+    if (decimal) decimal.after.after(phase)
+    else if (before !== undefined) this.phase(before).before(phase)
+    else section.append(phase)
+    // the phases after it moved down a number:  what names them follows (r21)
+    if (numbers) this.renumberAll(numbers)
     this.updateEstimate()
-    return n
+    return this.phaseElements.indexOf(phase) + 1
   }
 
   /** The last phase, when it's the doc pass (`DOC_REVIEW`, its name);  else `undefined`. */
@@ -280,8 +308,8 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Make room for a new phase `n`, before the one numbered `n` now (`add-phase --before n`):
-   * it and every later phase move down one;  returns `n`.
+   * Check there's room for a new phase at place `n`, before the phase there now (`add-phase --before n`):
+   * it and every later phase move down a number once it's in (`addPhase()`);  returns `n`.
    * - only NUMBERS move (P15):  a phase's id is stable, so its links, comments, marks and part file stay put
    *   - the `P5` in the words of links to it (`href="#p-docs"`) says `P6`
    *   - the `phase` / `of` of items, UPDATE markers and Updated lines (the phase active then, by number)
@@ -295,26 +323,8 @@ export class PlanDoc extends PlanReader {
       throw new PlanDocError(`--before ${n}:  no such phase (${phases.length ? `1-${phases.length}` : "none yet"})`)
     }
     const started = phases.find((phase) => phase.n >= n && phase.status !== "todo")
-    if (started) throw new PlanDocError(`--before ${n}:  P${started.n} has started;  only to-do phases move down`)
-    // last first, so a number is free before anything moves onto it
-    for (let k = phases.length; k >= n; k--) this.renumberPhase(k, k + 1)
+    if (started) throw new PlanDocError(`--before ${n}:  P${started.number} has started;  only to-do phases move down`)
     return n
-  }
-
-  /** Phase `from` becomes phase `to`:  what points at it by number (`makeRoomForPhase()`);  its id stays. */
-  private renumberPhase(from: number, to: number): void {
-    const id = this.phase(from).id
-    for (const element of this.document.querySelectorAll(
-      PHASE_POINTERS.map((tag) => `${tag}[phase="${from}"]`).join()
-    )) {
-      Markup.set<"epic-item">(element, { phase: to })
-    }
-    for (const line of this.document.querySelectorAll(`epic-updated[of="${from}"]`)) {
-      Markup.set<"epic-updated">(line, { of: to })
-    }
-    for (const link of this.document.querySelectorAll(`a[href="#${id}"]`)) {
-      link.innerHTML = link.innerHTML.replace(new RegExp(`\\bP${from}\\b`), `P${to}`)
-    }
   }
 
   /**
@@ -333,7 +343,7 @@ export class PlanDoc extends PlanReader {
    */
   renameEntry(target: string, title: string, { html = false }: { html?: boolean } = {}): RenameResult {
     const key = String(target).trim().toLowerCase()
-    const element = ITEM_REF.test(key) && !OLD_PHASE_REF.test(key) ? this.item(key) : this.phase(this.phaseNumber(key))
+    const element = ITEM_REF.test(key) && !OLD_PHASE_REF.test(key) ? this.item(key) : this.phase(this.phasePlace(key))
     const label = element.localName === "epic-phase" ? PhaseIds.labelOf(element) : element.id.toUpperCase()
     const was = PlanItem.titleOf(element)
     const heading = html ? this.titleFromHTML(title) : { title: PlanMarkup.squeeze(title) }
@@ -420,7 +430,7 @@ export class PlanDoc extends PlanReader {
     }
     const total = PlanTime.sumRanges(estimated.map((phase) => phase.range!))
     const left = PlanTime.sumRanges(estimated.filter((phase) => phase.status !== "done").map((phase) => phase.range!))
-    const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.n}`)
+    const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.number}`)
     let text = `${PlanTime.formatRange(total)} in all, ${PlanTime.formatRange(left)} left`
     if (missing.length) text += ` (${missing.join(", ")} not estimated)`
     Markup.set(this.overview, { estimate: text })
@@ -443,7 +453,7 @@ export class PlanDoc extends PlanReader {
       if (done) this.setDone(n, done)
     }
     this.updateEstimate()
-    this.log(`P${n} ${status}`)
+    this.log(`${this.phaseLabel(n)} ${status}`)
   }
 
   /** Phase `n`'s Done field (`<epic-field name="done">`):  what was built, as HTML;  replaces an earlier one. */
@@ -471,7 +481,8 @@ export class PlanDoc extends PlanReader {
       if (values.plan && docReview) this.acceptPlan(phase)
       else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
       const said = docReview ? "accepted, the doc pass" : "waiting for Owen's Accept"
-      this.log(values.plan ? `P${n} plan written:  ${said}` : `P${n} plan removed`)
+      const label = PhaseIds.labelOf(phase)
+      this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
     return set
   }
@@ -509,7 +520,7 @@ export class PlanDoc extends PlanReader {
       summary: given || UpdateSummary.of(nodes) || undefined
     }
     Markup.place(phase, this.make("epic-update", data, nodes))
-    this.log(`P${n} plan updated${data.summary ? `:  ${data.summary}` : ""}`)
+    this.log(`${PhaseIds.labelOf(phase)} plan updated${data.summary ? `:  ${data.summary}` : ""}`)
   }
 
   /**
@@ -532,7 +543,7 @@ export class PlanDoc extends PlanReader {
       if (block.getAttribute("label")!.split(" · ")[0] === id) block.remove()
     }
     Markup.append(field, [this.make("epic-field", { label }, this.incoming(html))])
-    this.log(`${id} filed into P${n}`)
+    this.log(`${id} filed into ${PhaseIds.labelOf(phase)}`)
   }
 
   /**
@@ -573,11 +584,12 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * UPDATE markers of phase `n`:  every `<epic-update phase="N">` but a phase's own plan changes
-   * (`epic-phase > epic-update`, kept for good):  the bare labels, and the updates to prose.
+   * UPDATE markers of the phase at place `n`:  every `<epic-update phase="N">` (its number) but a phase's own plan
+   * changes (`epic-phase > epic-update`, kept for good):  the bare labels, and the updates to prose.
    */
   updateMarkers(n: number): Element[] {
-    return Array.from(this.document.querySelectorAll(`epic-update[phase="${n}"]`)).filter(
+    const number = PhaseIds.numberOf(this.phase(n))
+    return Array.from(this.document.querySelectorAll(`epic-update[phase="${number}"]`)).filter(
       (update) => update.parentElement?.localName !== "epic-phase"
     )
   }
@@ -1081,7 +1093,7 @@ export class PlanDoc extends PlanReader {
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
-        const where = phase ? `P${phase.n} · ${phase.name}` : "the next phase"
+        const where = phase ? `P${phase.number} · ${phase.name}` : "the next phase"
         if (note) this.keepNote(item.id, { note, action: "next phase", at })
         this.queue(item.id, where)
         const card = phase ? `Queued for ${where}` : `Queued for the next phase:  there's no phase to do yet`
@@ -1588,7 +1600,7 @@ export class PlanDoc extends PlanReader {
    */
   nextStepWords(): string {
     const phase = this.phases.find((each) => each.status === "todo")
-    return phase ? `waiting for the next phase, P${phase.n} · ${phase.name}` : "waiting for a phase to take it up"
+    return phase ? `waiting for the next phase, P${phase.number} · ${phase.name}` : "waiting for a phase to take it up"
   }
 
   /** `host`'s latest underway status card, if any. */
@@ -1723,6 +1735,7 @@ export class PlanDoc extends PlanReader {
    *   phase commits (`P3:  Name -- summary`) and item fixes (`Fix I3:  ...`)
    * - only phases and items the doc has;  a commit already listed there is skipped, so it can run again
    * - a commit naming another epic first (`other-epic P7:`) is left out (`epic`)
+   * - a phase by its number as people say it (`P11.1:` too, epic `epic-engine` P39)
    * - a phase by its NAME, not its number alone (epic `epic-engine` r17):  phases get renumbered
    *   - `P27:  Pile Drawing` is P27 only while P27 is called Pile Drawing
    *   - a title naming ANOTHER phase is that phase's, from before a renumbering:  left out
@@ -1752,11 +1765,13 @@ export class PlanDoc extends PlanReader {
    * title names no other phase.
    */
   private phasesNamedBy({ phases, title }: ParsedCommit): number[] {
-    return phases.filter((n) => {
-      const phase = this.phases.find((each) => each.n === n)
-      if (!phase) return false
-      if (PlanCommits.titleNames(title, phase.name)) return true
-      return !this.phases.some((other) => other.name !== phase.name && PlanCommits.titleNames(title, other.name))
+    const all = this.phases
+    return phases.flatMap((number) => {
+      const phase = all.find((each) => each.number === number)
+      if (!phase) return []
+      if (PlanCommits.titleNames(title, phase.name)) return [phase.n]
+      const other = all.some((each) => each.name !== phase.name && PlanCommits.titleNames(title, each.name))
+      return other ? [] : [phase.n]
     })
   }
 
@@ -1807,20 +1822,22 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Phase `n` DEFERRED (its Defer pill while the phases are agreed, epic `epic-engine` P29):
+   * The phase at place `n` DEFERRED (its Defer pill while the phases are agreed, epic `epic-engine` P29):
    * moved after every other phase, still to do;  its number changes, its id never.
-   * - returns its new number
+   * - returns its new place
    */
   deferPhase(n: number): number {
     return this.movePhase(n, this.phaseElements.length)
   }
 
   /**
-   * Move phase `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);  returns `to`.
+   * Move the phase at place `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);
+   * returns `to`.
    * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
    *   active one keeps its number:  its commits and log say it)
    * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, the
    *   `P5` in links' words, and every `P5 · <its name>` in the page's words and attributes (`relabelPhaseNames()`)
+   * - a decimal phase (P11.1, P39) stays a decimal, of the whole-numbered phase before its new place
    * - SIDE EFFECT:  logs it
    * - throws for a place out of range, or a started phase in the way
    */
@@ -1828,49 +1845,33 @@ export class PlanDoc extends PlanReader {
     const phases = this.phases
     for (const n of [from, to])
       if (!Number.isInteger(n) || n < 1 || n > phases.length)
-        throw new PlanDocError(`move P${from} to P${to}:  no place P${n} (1-${phases.length})`)
+        throw new PlanDocError(`move ${from} to ${to}:  no place ${n} (1-${phases.length})`)
     if (from === to) return to
     const [low, high] = from < to ? [from, to] : [to, from]
     const started = phases.find((phase) => phase.n >= low && phase.n <= high && phase.status !== "todo")
-    if (started) throw new PlanDocError(`move P${from} to P${to}:  P${started.n} has started;  only to-do phases move`)
-    const before = new Map(this.phaseElements.map((element, at) => [element.id, at + 1]))
+    const said = `move P${phases[from - 1]!.number} to P${phases[to - 1]!.number}`
+    if (started) throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
+    const before = PhaseNumbers.snapshot(this.document)
     const moving = this.phase(from)
     const name = PlanItem.titleOf(moving)
     if (from < to) this.phase(to).after(moving)
     else this.phase(to).before(moving)
     this.renumberAll(before)
-    this.log(`P${from} ${name}:  moved to P${to}`)
+    this.log(`P${phases[from - 1]!.number} ${name}:  moved to ${PhaseIds.labelOf(moving)}`)
     return to
   }
 
   /**
-   * After phases moved:  everything that names one by NUMBER follows, from `before` (each phase's id => its number
-   * then), ALL AT ONCE, so a number another phase takes is never renamed twice.
-   * - items' and updates' `phase`, Updated lines' `of`, the `P5` in the words of links to a phase (`href="#id"`)
+   * After phases moved:  everything that names one by NUMBER follows, from `before` (`PhaseNumbers.snapshot()`:
+   * each phase's id => its number then), ALL AT ONCE, so a number another phase takes is never renamed twice.
+   * - first, a decimal phase out of place takes the decimal that fits where it is now (`PhaseNumbers.fixDecimals()`)
+   * - items' and updates' `phase`, Updated lines' `of`, the `P5` in the words of links to a phase (`href="#id"`):
+   *   `PhaseNumbers.follow()`
    * - then the `P5 · <name>` text everywhere (`relabelPhaseNames()`)
    */
-  private renumberAll(before: Map<string, number>): void {
-    const now = new Map(this.phaseElements.map((element, at) => [element.id, at + 1]))
-    const numbers = new Map<number, number>()
-    for (const [id, was] of before) if (now.has(id) && now.get(id) !== was) numbers.set(was, now.get(id)!)
-    if (!numbers.size) return
-    const pointers = Array.from(this.document.querySelectorAll(PHASE_POINTERS.map((tag) => `${tag}[phase]`).join()))
-    const lines = Array.from(this.document.querySelectorAll("epic-updated[of]"))
-    for (const element of pointers) {
-      const to = numbers.get(Number(element.getAttribute("phase")))
-      if (to) element.setAttribute("phase", String(to))
-    }
-    for (const line of lines) {
-      const to = numbers.get(Number(line.getAttribute("of")))
-      if (to) line.setAttribute("of", String(to))
-    }
-    for (const [id, was] of before) {
-      const to = now.get(id)
-      if (!to || to === was) continue
-      for (const link of this.document.querySelectorAll(`a[href="#${id}"]`))
-        link.innerHTML = link.innerHTML.replace(new RegExp(`\\bP${was}\\b`), `P${to}`)
-    }
-    this.relabelPhaseNames()
+  private renumberAll(before: ReadonlyMap<string, string>): void {
+    PhaseNumbers.fixDecimals(this.document)
+    if (PhaseNumbers.follow(this.document, before)) this.relabelPhaseNames()
   }
 
   /**
@@ -1883,12 +1884,15 @@ export class PlanDoc extends PlanReader {
    * - returns how many it changed
    */
   relabelPhaseNames(): number {
-    const labels = this.phaseElements.map((element, at) => ({ name: PlanItem.titleOf(element), n: at + 1 }))
+    const labels = this.phaseElements.map((element) => ({
+      name: PlanItem.titleOf(element),
+      n: PhaseIds.numberOf(element)
+    }))
     // the longest first:  `Event Model` before `Event`
     const named = labels.filter((label) => label.name).sort((a, b) => b.name.length - a.name.length)
     if (!named.length) return 0
     const pattern = new RegExp(
-      `\\bP\\d+( · (?:${named.map((label) => escapeRegExp(label.name)).join("|")}))(?![\\w-])`,
+      `\\bP\\d+(?:\\.\\d+)?( · (?:${named.map((label) => escapeRegExp(label.name)).join("|")}))(?![\\w-])`,
       "g"
     )
     const byName = new Map(named.map((label) => [label.name, label.n]))
@@ -2007,7 +2011,7 @@ export class PlanDoc extends PlanReader {
       if (id && !seen.has(id)) problems.push(`link to missing #${id} ("${(a.textContent ?? "").trim()}")`)
     }
     for (const phase of this.phases)
-      if (!isPhaseStatus(phase.status)) problems.push(`P${phase.n} has status "${phase.status}"`)
+      if (!isPhaseStatus(phase.status)) problems.push(`P${phase.number} has status "${phase.status}"`)
     problems.push(...this.changeProblems())
     for (const problem of Markup.validate(this.document)) {
       // duplicate ids are counted above, once each
@@ -2184,12 +2188,15 @@ export class PlanDoc extends PlanReader {
           if (!(error instanceof PlanDocError)) throw error
           return { applied: false, gone: true, left: `${part.label}:  ${error.message}:  dropped` }
         }
-        return { applied: true, did: `moved:  now P${this.phaseElements.indexOf(part.element) + 1}` }
+        return { applied: true, did: `moved:  now ${PhaseIds.labelOf(part.element)}` }
       }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }
-        const n = this.deferPhase(this.phaseElements.indexOf(part.element) + 1)
-        return { applied: true, did: `deferred:  after the other phases, now P${n}, still to do` }
+        this.deferPhase(this.phaseElements.indexOf(part.element) + 1)
+        return {
+          applied: true,
+          did: `deferred:  after the other phases, now ${PhaseIds.labelOf(part.element)}, still to do`
+        }
       }
       default:
         return this.leftForClaude({ action, pick, when, note }, () => undefined)
@@ -2200,6 +2207,9 @@ export class PlanDoc extends PlanReader {
    * The page header's stage button, Accept Overview or Accept Phases (epic `epic-engine` P29):
    * the page moves on from the stage the mark ended (`stage`) to the next (`PageStages.next()`).
    * - the page in another stage by now (moved by hand, or the mark sent twice):  dropped (`gone`), nothing changed
+   * - Accept Phases accepts every build plan waiting too (epic `epic-engine` I125;  Owen, 2026-10-25:  "the mode where
+   *   I 'accept the phase' twice (once for symptom/goals, once for plan) is slowing things down.  Collapse them into
+   *   one"):  the plans are written with the phases, so ONE press starts the build
    * - logs it (`STAGE accepted overview:  stage phases, write the phases`):  what the session does next
    */
   private applyAccept({ stage }: PlanMark): MarkResult {
@@ -2209,7 +2219,13 @@ export class PlanDoc extends PlanReader {
     const next = PageStages.next(stage)
     // its own log line below, not `setStage()`'s
     Markup.set(this.page, { stage: next })
-    const then = next === "phases" ? "write the phases" : "start building"
+    const plans =
+      next === "phases" ? [] : this.phaseElements.filter((phase) => phase.getAttribute("plan") === "waiting")
+    for (const phase of plans) this.acceptPlan(phase)
+    const then =
+      next === "phases"
+        ? "write the phases and their build plans"
+        : `start building${plans.length ? ` (${plans.length} build plan${plans.length === 1 ? "" : "s"} accepted)` : ""}`
     const did = `accepted ${stage}:  stage ${next}, ${then}`
     this.log(`${STAGE_ID.toUpperCase()} ${did}`)
     return { applied: true, did }
@@ -2563,7 +2579,6 @@ function cardSetWords(choices: number | undefined): string {
 const PLAN_CHANGES = ":scope > epic-update[at], :scope > epic-update[summary], :scope > epic-updated"
 
 /** The tags whose `phase` names a phase by number:  renumbered with it (`PlanDoc.makeRoomForPhase()`). */
-const PHASE_POINTERS = ["epic-item", "epic-update", "epic-updated"]
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {

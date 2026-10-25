@@ -691,6 +691,19 @@ function repoLines(states: RepoState[]): string[] {
 
 /** `merge-main`'s report, for a person. */
 function mergeMainLines(report: MergeMainReport): string[] {
+  const lines = mergeResultLines(report)
+  const { ditched, ditchedTo } = report
+  if (!ditched?.length) return lines
+  return [
+    lines[0]!,
+    `  moved ${ditched.length} generated file(s) aside, into ${ditchedTo}:`,
+    ...ditched.map((file) => `    ${file}`),
+    ...lines.slice(1)
+  ]
+}
+
+/** `merge-main`'s report, for a person:  what the merge itself did. */
+function mergeResultLines(report: MergeMainReport): string[] {
   const { branch, result, conflicts, untracked, regenerated, review, unstaged, installed } = report
   const install = !installed
     ? []

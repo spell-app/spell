@@ -512,10 +512,15 @@ function read(
   const attribute = (tag: string, name: string) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1]
   const page = /<epic-page\b[^>]*>/.exec(html)?.[0] ?? ""
   const tags = (pattern: RegExp) => (page ? [...html.matchAll(pattern)].map(([tag]) => tag) : [])
-  const phases = tags(/<epic-phase\b[^>]*>/g).map((tag, index) => ({
-    status: attribute(tag, "status") ?? "todo",
-    header: `P${index + 1} · ${attribute(tag, "title") ?? ""}`
-  }))
+  // numbered as drawn:  the whole-numbered ones counted, a decimal phase its own (`number="11.1"`, `PhaseIds`)
+  let whole = 0
+  const phases = tags(/<epic-phase\b[^>]*>/g).map((tag) => {
+    const decimal = attribute(tag, "number")
+    return {
+      status: attribute(tag, "status") ?? "todo",
+      header: `P${decimal ?? ++whole} · ${attribute(tag, "title") ?? ""}`
+    }
+  })
   const active = phases.find((phase) => phase.status === "active")?.header
   const updated = /^\d{4}-\d\d-\d\d$/.exec(attribute(page, "updated") ?? "")?.[0]
   const future = /\sfuture(?=[\s=>])/.test(page)

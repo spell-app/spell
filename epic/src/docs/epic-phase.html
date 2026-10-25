@@ -439,9 +439,20 @@
                       Stable, made from its name when it's added and kept through renames and inserts:
                       <code>p-epic-migrate</code> (an older page's <code>p2</code>, until
                       <code>stable-phase-ids</code>). Links and comments use it (<code>#p-epic-migrate</code>); the
-                      number shown, <code>P2 · &lt;title&gt;</code>, is its place among the phases.
+                      number shown, <code>P2 · &lt;title&gt;</code>, is its place among the whole-numbered phases, or
+                      its own <code>number</code>.
                     </td>
                     <td>yes</td>
+                  </tr>
+                  <tr>
+                    <td><code>number</code></td>
+                    <td>text: decimal phase number</td>
+                    <td>
+                      A phase added on the fly: its own number, a decimal of the phase before it (<code>11.1</code>,
+                      drawn <code>P11.1</code>), so no other phase is renumbered. Absent: its number is its place among
+                      the phases without one.
+                    </td>
+                    <td></td>
                   </tr>
                   <tr>
                     <td>
@@ -723,9 +734,12 @@
               <li>
                 <code
                   >epic add-phase &lt;epic&gt; "Short Name" --symptom ... --changes ... [--goal ...]
-                  [--files ...] [--verify ...] [--estimate 1-2h] [--before N]</code
+                  [--files ...] [--verify ...] [--estimate 1-2h] [--after N | --before N]</code
                 >: a new phase, <code>todo</code>; a field not given reads <code>TBD</code>.
-                <code>--before N</code> inserts it as PN and renumbers the rest.
+                <code>--after 11</code> makes it P11.1 (then P11.2), right after P11, and renumbers nothing;
+                <code>--before N</code> inserts it as PN and renumbers the rest. With neither, and a Doc Review last,
+                it goes before the Doc Review as a decimal of the phase before it (P14.1), and a Doc Review under way
+                or done is to do again.
               </li>
               <li><code>epic update &lt;epic&gt;#P&lt;N&gt; --symptom ...</code>: sets its fields.</li>
               <li>

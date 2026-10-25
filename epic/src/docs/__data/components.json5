@@ -1862,8 +1862,8 @@
         },
         {
           "name": "phase",
-          "kind": "number",
-          "description": "The phase active when it was added:  its To review line lists it."
+          "kind": "string",
+          "description": "The phase active when it was added, by its number (`3`, `11.1`):  its To review line lists it."
         },
         {
           "name": "answered",
@@ -2022,10 +2022,6 @@
           "description": "The fold `<button>` (the chevron), on an item with details."
         },
         {
-          "name": "collapse-all",
-          "description": "Open, holding cards or panels that fold:  the double chevron at its line's end, folding them all."
-        },
-        {
           "name": "id",
           "description": "The id chip (`Q7`), a link to the item, in its state's colour.  While the page is reviewed, an open judgement call's or issue's chip is a button instead:  urgent (red) <-> not urgent (yellow)."
         },
@@ -2055,7 +2051,7 @@
         },
         {
           "name": "actions",
-          "description": "The box at the end of the line:  the `actions` slot (the page's own buttons, the bullhorn), then the git icon, the review label, the review buttons and collapse-all."
+          "description": "The box at the end of the line:  the `actions` slot (the page's own buttons, the bullhorn), then the git icon, the review label and the review buttons."
         },
         {
           "name": "details",
@@ -2110,11 +2106,6 @@
           "key": "unfold",
           "text": "Unfold {id}",
           "description": "Accessible name of the fold button while folded."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Fold everything in {id}",
-          "description": "The collapse-all button's name and tooltip:  folds every card and panel in the item."
         },
         {
           "key": "showCommits",
@@ -3727,7 +3718,7 @@
         },
         {
           "key": "acceptPhasesTip",
-          "text": "The phases are agreed:  Claude starts building",
+          "text": "The phases and their build plans are agreed:  Claude starts building",
           "description": "The stage button's tooltip, Phases stage:  what a press does."
         },
         {
@@ -3757,7 +3748,7 @@
         },
         {
           "key": "stagePhasesTip",
-          "text": "Agreeing the phases:  Looks good or Defer on each, then Accept Phases",
+          "text": "Agreeing the phases and their build plans:  Defer any, then Accept Phases, one press for both",
           "description": "The step label's tooltip, Phases stage."
         },
         {
@@ -4005,7 +3996,12 @@
           "name": "id",
           "kind": "string",
           "property": "epicId",
-          "description": "Stable, made from its name when it's added, and kept through renames and inserts:  `p-epic-migrate` (an older page's `p2`, until `stable-phase-ids`).  Links and comments use it (`#p-epic-migrate`);  the number shown, `P2 · <title>`, is its place among the phases."
+          "description": "Stable, made from its name when it's added, and kept through renames and inserts:  `p-epic-migrate` (an older page's `p2`, until `stable-phase-ids`).  Links and comments use it (`#p-epic-migrate`);  the number shown, `P2 · <title>`, is its place among the whole-numbered phases, or its own `number`."
+        },
+        {
+          "name": "number",
+          "kind": "string",
+          "description": "A phase added on the fly (epic `epic-engine` P39):  its own number, a decimal of the phase before it (`11.1`, drawn `P11.1`), so no other phase is renumbered.  Absent:  its number is its place among the phases without one."
         },
         {
           "name": "title",
@@ -6632,8 +6628,8 @@
         },
         {
           "name": "phase",
-          "kind": "number",
-          "description": "The phase active when it was written (`3`).  `phase 3 done` removes P3's bare labels and the updates outside a phase;  a phase's own plan changes stay."
+          "kind": "string",
+          "description": "The phase active when it was written, by its number (`3`, `11.1`).  `phase 3 done` removes P3's bare labels and the updates outside a phase;  a phase's own plan changes stay."
         }
       ],
       "slots": [
@@ -6751,12 +6747,12 @@
         },
         {
           "name": "phase",
-          "kind": "number",
-          "description": "The phase active when it changed (`3`)."
+          "kind": "string",
+          "description": "The phase active when it changed, by its number (`3`, `11.1`)."
         },
         {
           "name": "of",
-          "kind": "number",
+          "kind": "string",
           "description": "An OLDER doc's COPY in the Phases section (T14, until 2026-10-11):  the phase whose plan it changes (`5`).  Never drawn;  the epic tool removes the copies on its next write.  Never on the line in its phase."
         }
       ],

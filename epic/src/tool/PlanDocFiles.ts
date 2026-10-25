@@ -603,8 +603,8 @@ export class PlanDocFiles {
         if (subject.startsWith(`${name} `)) return true
         return Boolean(
           parsed?.phases.length &&
-          parsed.phases.every((n) => {
-            const phase = phases.find((each) => each.n === n)
+          parsed.phases.every((number) => {
+            const phase = phases.find((each) => each.number === number)
             return phase && PlanCommits.titleNames(parsed.title, phase.name)
           })
         )
