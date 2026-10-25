@@ -9,6 +9,7 @@ import { P } from "spell-parser/parser"
 import { SpellParser } from "spell-parser/spell/SpellParser"
 import { Synonyms } from "spell-parser/spell/rules/expressions"
 
+import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
@@ -119,6 +120,46 @@ eventsEs.addRule(On, {
         ],
         // never the last word:  `al clic en` is event `clic`, then a word it can't read
         ["al clic en", ['on("clic")', '/* PARSE ERROR: No entiendo "en" */']]
+      ]
+    }
+  ]
+})
+
+// an event a template's things send, and what comes with it (epic `elemental-spell` P5):
+// `- envía "volteada" con un lado como una dirección`, or `una carta envía "volteada"` -- see `DeclareEvent`
+eventsEs.addRule(DeclareEvent, {
+  syntax: "{type:subject_it} (envía|envia) {event:text} {props:with_props_arg}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["una carta es una cosa donde:", '\t- envía "volteada" con lado como texto'],
+          js: [
+            "export class Carta extends Thing {}",
+            '// envía "volteada" con lado como texto',
+            'core.describeEvent(Carta, "volteada", { params: { lado: "text" } })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+eventsEs.addRule(DeclareEvent, { syntax: "{type:subject_implied} (envía|envia) {event:text} {props:with_props_arg}?" })
+eventsEs.addRule(DeclareEvent, {
+  syntax: "(un|una) {type} (envía|envia) {event:text} {props:with_props_arg}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["una carta es una cosa", 'una carta envía "volteada"'],
+          js: [
+            "export class Carta extends Thing {}",
+            '// una carta envía "volteada"',
+            'core.describeEvent(Carta, "volteada", {})'
+          ]
+        }
       ]
     }
   ]

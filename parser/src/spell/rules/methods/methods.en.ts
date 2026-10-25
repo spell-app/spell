@@ -10,12 +10,14 @@ import { Synonyms, Wording } from "spell-parser/spell/rules/expressions"
 import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
+import { ActionDetail } from "./ActionDetail"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
 import { QuotedSignatureWords } from "./QuotedSignatureWords"
 import { QuotedTypeExpression } from "./QuotedTypeExpression"
+import { ShortcutKeys } from "./ShortcutKeys"
 import { ToDoSomething } from "./ToDoSomething"
 import { TypedMethodArg } from "./TypedMethodArg"
 import { TypeMethodArg } from "./TypeMethodArg"
@@ -73,9 +75,57 @@ methods.addRule(QuotedSignatureWords, {
 methods.addRule(QuotedMethodSignature)
 
 methods.addRule(ToDoSomething, {
-  // TODO: add tests for `test` case
   syntax: `to (asTest:test)? {signature:method_signature} :? {statement_body}?`,
   tests: [
+    {
+      title: "a template's test, in its outline:  a test as any other, its `it` a new one (epic `elemental-spell` Q21)",
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a card is a thing where:",
+            "\t- it has a rank as a number",
+            "\t- to test card setup:",
+            "\t\tits rank should be nothing",
+            "\t\tget a new card whose rank is 3",
+            "\t\tits rank should be 3"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  // - it has a rank as a number",
+            '  static { this.declareProp("rank", { type: "number" }) }',
+            '  get rank() { return this.getProp("rank") }',
+            '  set rank(value) { this.setProp("rank", value) }',
+            "}",
+            "export function testCardSetup() {",
+            '  return core.test("test card setup", function testCardSetup() {',
+            "    const it = new Card()",
+            "    core.expect(it.rank, `its rank`, undefined, `nothing`)",
+            "    core.echoTestAction(`get a new card whose rank is 3`)",
+            "    const it2 = new Card({ rank: 3 })",
+            "    core.expect(it2.rank, `its rank`, 3, `3`)",
+            "  })",
+            "}"
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            "  // - it has a rank as a number",
+            '  @prop({ type: "number" })',
+            "  accessor rank!: number",
+            "}",
+            "export function testCardSetup() {",
+            '  return core.test("test card setup", function testCardSetup() {',
+            "    const it = new Card()",
+            "    core.expect(it.rank, `its rank`, undefined, `nothing`)",
+            "    core.echoTestAction(`get a new card whose rank is 3`)",
+            "    const it2 = new Card({ rank: 3 })",
+            "    core.expect(it2.rank, `its rank`, 3, `3`)",
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    },
     {
       title: "inline method signatures & variables",
       compileAs: "block",
@@ -1068,3 +1118,87 @@ methods.addRule(CreateHook, {
     }
   ]
 })
+
+// one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `shortcut`
+methods.addRule(ShortcutKeys)
+
+// an ACTION's description, indented under it (epic `elemental-spell` P5):  `- to turn it over:`, then each line
+methods.addRule(ActionDetail, {
+  syntax: "shortcut {keys:shortcut_keys}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "every line an action's description may have:  a getter for each condition, then the description",
+          input: [
+            "a card is a thing where:",
+            "\t- its direction is one of up or down",
+            "\t- to turn it over:",
+            "\t\t- shortcut meta+T",
+            "\t\t- shortcut F2",
+            "\t\t- enabled when its direction is down",
+            "\t\t- selected when its direction is up",
+            '\t\t- undone as "Turn Card"',
+            '\t\t- icon "rotate"',
+            "\t\tset its direction to up"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"]',
+            '  static { this.declareProp("direction", { oneOf: Card.Directions }) }',
+            '  get direction() { return this.getProp("direction") }',
+            '  set direction(value) { this.setProp("direction", value) }',
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "",
+            "  get turnOverIsEnabled() {",
+            '    return this.direction === "down"',
+            "  }",
+            "",
+            "  get turnOverIsSelected() {",
+            '    return this.direction === "up"',
+            "  }",
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
+          ],
+          ts: [
+            "export type Direction = (typeof Card.Directions)[number]",
+            "",
+            "export class Card extends Thing {",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"] as const',
+            "  @prop({ oneOf: () => Card.Directions })",
+            "  accessor direction!: Direction",
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "",
+            "  get turnOverIsEnabled() {",
+            '    return this.direction === "down"',
+            "  }",
+            "",
+            "  get turnOverIsSelected() {",
+            '    return this.direction === "up"',
+            "  }",
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
+          ]
+        },
+        {
+          title: "only in a template's action:  a loose function has no description",
+          input: ["to start the game:", "\tshortcut meta+N"],
+          js: ["export function startTheGame() {", '  /* PARSE ERROR: Don\'t understand "shortcut meta+N" */', "}"]
+        }
+      ]
+    }
+  ]
+})
+methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
+methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
+methods.addRule(ActionDetail, { syntax: "undone as {undoneAs:text}" })
+methods.addRule(ActionDetail, { syntax: "icon {icon:text}" })

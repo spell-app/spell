@@ -139,12 +139,16 @@ export abstract class ProgramWriter extends Writer {
   spellOf(node: P.ASTNode): string | undefined {
     if (node instanceof P.ASTReactiveProperty && listsItsValues(node)) return undefined
     if (node instanceof P.ASTStaticDefinition && !(unwrapped(node.value) instanceof P.ASTEnumeration)) return undefined
-    const input = node.match?.inputText ?? ""
-    // a property's own line, then each rule indented under it:  its body
-    const bodyText =
-      node instanceof P.ASTReactiveProperty ? (node.match?.data.body as P.Match | undefined)?.inputText : ""
+    // a property's own line, then each line indented under it (its rules and aliases):  its body --
+    // the reactive property's, or its list of values' (epic `elemental-spell` P5);  a getter's bulleted members
+    // (`property_value_getter`'s `data.members`) come after its body
+    const ownsBody = node instanceof P.ASTReactiveProperty || node instanceof P.ASTStaticDefinition
+    const membersText = ownsBody ? (node.match?.data.members as P.Match | undefined)?.inputText : ""
+    const whole = node.match?.inputText ?? ""
+    const input = membersText && whole.endsWith(membersText) ? whole.slice(0, -membersText.length) : whole
+    const bodyText = ownsBody ? (node.match?.data.body as P.Match | undefined)?.inputText : ""
     const first = bodyText && input.endsWith(bodyText) ? input.slice(0, -bodyText.length) : input
-    const body = bodyText ? bodyText.split(/\r?\n/) : []
+    const body = [bodyText, membersText].flatMap((text) => (text ? text.split(/\r?\n/) : []))
     const text = first.replace(/\s+/g, " ").trim()
     if (!text) return undefined
     // an outline line (`it` / `its` the type it's in) gets back the dash it was written with, which isn't matched

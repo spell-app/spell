@@ -2069,6 +2069,66 @@
       "description": "Document or shadow root the app lives in:  `appRoot`'s shadow root, if it's in one, else `document`."
     },
     {
+      "kind": "method",
+      "name": "describeAction",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "description"
+        }
+      ],
+      "description": "Describe class `Class`'s action `name`, its method's name, e.g. `turnOver` for `to turn it over`."
+    },
+    {
+      "kind": "method",
+      "name": "describeEvent",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "description"
+        }
+      ],
+      "description": "Describe an event class `Class`'s things send, e.g. `flipped` with its `side`."
+    },
+    {
+      "kind": "method",
+      "name": "actionsOf",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Every action class `Class` describes, its own and its super-classes', by method name."
+    },
+    {
+      "kind": "method",
+      "name": "eventsOf",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Every event class `Class`'s things send, its own and its super-classes', by name -- as `actionsOf()`."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"

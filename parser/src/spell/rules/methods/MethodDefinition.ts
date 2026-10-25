@@ -5,6 +5,7 @@ import { Wording } from "spell-parser/spell/rules/expressions"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell-parser/spell/rules/Statement"
 import { SubjectRule } from "spell-parser/spell/rules/types"
+import { ActionDetail } from "./ActionDetail"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"
 import { MethodPostfixRule } from "./MethodPostfixRule"
@@ -62,7 +63,10 @@ export class MethodDefinition<
   processSignature(groups: P.MatchGroups, signature: MethodSignatureData, scope: P.Scope): MethodSignatureData {
     const initialType = signature.types.find((type) => !type.isSimple)
     const subject = this.inlineInitialType && !initialType ? P.SubjectScope.of(scope)?.subjectType : undefined
-    if (subject) {
+    if (subject && (groups as { asTest?: P.Match }).asTest) {
+      // a test in a template's outline tests the template:  a test as any other, its `it` a new one (Q21)
+      signature.testOf = subject.name
+    } else if (subject) {
       MethodDefinition.takeSubject(signature, subject, scope)
     } else if (this.inlineInitialType && initialType) {
       signature.instanceType = initialType.name
@@ -258,9 +262,16 @@ export class MethodDefinition<
    *   var-name alias) directly onto the new scope's `variables`.
    */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
-    const { methodName, args, extraVars, instanceType, valueKindOf } = this.getSignature(match)!
+    const { methodName, args, extraVars, instanceType, valueKindOf, testOf } = this.getSignature(match)!
     // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
     const declaredBy = match as P.Match
+    // a template's test:  `it` is a new one of the template, made as the test starts -- see `getAST()`
+    // a variable, not an alias:  so a `get` in it declares `it_2`, as after any `it`
+    if (testOf) {
+      const testScope = new P.MethodScope({ parentScope: match.scope, name: methodName, declaredBy })
+      testScope.variables.add({ name: "it", datatype: SP.typeName(testOf), declaredBy })
+      return testScope
+    }
     // a value kind's phrase:  `it` / `the rank` are its argument, the value -- see `MethodSignatureData.valueKindOf`
     if (valueKindOf && instanceType) {
       const datatype = SP.typeName(valueKindOf)
@@ -496,7 +507,7 @@ export class MethodDefinition<
       asAnimation?: P.Match
     }
     const signature = this.getSignature(match)!
-    const { methodName = "", args, props, instanceType, instanceTypeName, asPostfixExpression } = signature
+    const { methodName = "", args, props, instanceType, instanceTypeName, asPostfixExpression, testOf } = signature
     // what it declared is said by its `/*! SPELL: DECLARES` comment -- see `SP.SpellDeclarations.commentFor()`
     const output: Array<P.ASTStatement | P.ASTExpression | P.ASTComment | P.ASTBlankLine> = []
 
@@ -525,10 +536,28 @@ export class MethodDefinition<
       method.body.statements = statements
     }
 
+    // an action's description lines (`- shortcut meta+T`) are no steps of it:  `describedAction()` writes them
+    if (method.body.statements) {
+      method.body.statements = method.body.statements.filter(
+        (line) => !ActionDetail.isDetailLine(line.match as P.Match)
+      )
+    }
+
     // Add props assignment to START of method body
     if (props) {
       const propsAssignment = this.getPropsAssignment(match)
       if (propsAssignment) (method.body.statements ??= []).unshift(propsAssignment)
+    }
+
+    // a template's test starts with a new one of the template, its `it`:  `const it = new Card()`
+    if (testOf) {
+      const type = new P.ASTTypeExpression(match, { name: SP.typeName(testOf) })
+      const newOne = new P.ASTAssignmentStatement(match, {
+        thing: new P.ASTVariableExpression(match, { name: "it" }),
+        value: new P.ASTNewInstanceExpression(match, { type }),
+        isNewVariable: true
+      })
+      ;(method.body.statements ??= []).unshift(newOne)
     }
 
     if (asAnimation) {
@@ -575,15 +604,17 @@ export class MethodDefinition<
             method
           })
         )
+        output.push(...this.describedAction(match, typeName, methodName))
       }
     }
     // No instance type: create as a loose function -- `export`ed at file level, so another project can import it.
     // NOTE: not a scope LOOKUP, just where it was written -- as `ASTAssignmentStatement.exportVar` decides.
+    // A template's test too, written in its outline:  it runs as every test does (Q21).
     else if (asTest) {
       output.push(
         new P.ASTMethodDefinition(match, {
           methodName,
-          exported: isTopLevel(match.scope),
+          exported: isTopLevel(match.scope) || !!testOf,
           body: new P.ASTCoreMethodInvocation(match, {
             methodName: "test",
             args: [new P.ASTQuotedExpression(match, signature.methodBits.join(" ")), method]
@@ -596,6 +627,48 @@ export class MethodDefinition<
     }
 
     return new P.ASTStatementGroup(match, { statements: output })
+  }
+
+  /**
+   * What action `match` says about itself, when its body's lines describe it (`ActionDetail`, epic `elemental-spell` P5):
+   * a getter for each condition, then the description, after the class -- none when it says nothing.
+   * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
+   * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
+   * - Its title is its words as written, `turn it over`.
+   * - Pure:  reads only matches.
+   */
+  private describedAction(match: P.MatchFor<this>, typeName: string, methodName: string): P.ASTStatement[] {
+    // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
+    const action = match as P.Match
+    const details = ActionDetail.detailsOf(action, this.getBody(match))
+    if (!details) return []
+    const signature = (action.groups as { signature?: P.Match }).signature
+    const description: Record<string, P.ASTDescriptionValue> = { title: `${signature?.inputText ?? ""}`.trimEnd() }
+    if (details.shortcuts.length) description.shortcuts = details.shortcuts
+    if (details.icon) description.icon = details.icon
+    const statements: P.ASTStatement[] = []
+    const conditions = [
+      ["enabled", details.enabled],
+      ["selected", details.selected]
+    ] as const
+    for (const [moment, condition] of conditions) {
+      if (!condition) continue
+      const getter = `${methodName}_is_${moment}`
+      const body = condition.AST as P.ASTExpression
+      statements.push(
+        new P.ASTPropertyDefinition(condition, {
+          type: typeName,
+          property: getter,
+          get: new P.ASTMethodDefinition(condition, { body })
+        })
+      )
+      description[`${moment}_when`] = { member: getter }
+    }
+    if (details.undoneAs) description.undone_as = details.undoneAs
+    statements.push(
+      new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description })
+    )
+    return statements
   }
 
   /**

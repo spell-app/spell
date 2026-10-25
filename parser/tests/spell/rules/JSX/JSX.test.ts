@@ -106,11 +106,14 @@ describe("a drawing of several elements side by side:  a fragment", () => {
     expect(drawOf([...CARD, "\treturn <a>", "\t\tA", "\t</a>", "\t<b>", "\t\tB", "\t</b>"])).toBe(explicit)
   })
 
-  test("a less indented element, or one after a blank line, is NOT part of it", () => {
+  test("a less indented element, or one after a blank line, is NOT part of it:  in a drawing, a line of its own", () => {
+    // a markup line in a drawing IS what it draws (`drawn_markup`, epic `elemental-spell` P5):  its own `return`
     const lessIndented = [...CARD, "\tif 1 is 2", "\t\treturn <a>A</a>", "\t<b>B</b>"]
-    expect(errorsOf(lessIndented)).toEqual(['5:1 Don\'t understand "<b>B</b>"'])
+    expect(errorsOf(lessIndented)).toEqual([])
+    expect(drawOf(lessIndented)).toMatch(/return h\("a", "A"\)\n\s+return h\("b", "B"\)/)
     const afterBlank = [...CARD, "\treturn <a>A</a>", "", "\t<b>B</b>"]
-    expect(errorsOf(afterBlank)).toEqual(['5:1 Don\'t understand "<b>B</b>"'])
+    expect(errorsOf(afterBlank)).toEqual([])
+    expect(drawOf(afterBlank)).toMatch(/return h\("a", "A"\)\n\n?\s+return h\("b", "B"\)/)
   })
 
   test("the fragment's tokens are all reached by the tokenizer's walker, its `</>` too", () => {

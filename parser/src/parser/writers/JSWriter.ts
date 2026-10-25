@@ -1323,6 +1323,36 @@ export class JSWriter extends ProgramWriter {
     return this.withSpell(node, `${this.write(node.type)}.declareRules(${name}, ${this.bare(node.rules)})`)
   }
 
+  /**
+   * What a template says about an action or event, from outside its class (epic `elemental-spell` P5):
+   * `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"] })`,
+   * `core.describeEvent(Card, "flipped", { params: { side: "direction" } })`.
+   * - Fields and members by our names:  `enabledWhen: "turnOverIsEnabled"`.
+   */
+  ASTTypeDescription(node: P.ASTTypeDescription): string {
+    const method = node.describes === "action" ? "describeAction" : "describeEvent"
+    const name = this.quoted(node.describes === "action" ? this.nameOf(node.name) : node.name)
+    const fields = Object.entries(node.description).map(([key, value]) => {
+      return `${this.nameOf(key, "property")}: ${this.descriptionValue(value)}`
+    })
+    const description = fields.length ? `{ ${fields.join(", ")} }` : "{}"
+    const code = `core.${method}(${this.write(node.type)}, ${name}, ${description})`
+    // an event's one line says it;  an action's spell is the method just above
+    return node.describes === "event" ? this.withSpell(node, code) : code
+  }
+
+  /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
+  protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (typeof value === "string") return this.quoted(value)
+    if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
+    if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))
+    const entries = Object.entries(value as Record<string, string>).map(([key, text]) => {
+      const written = jsText.isLegalIdentifier(key) ? key : this.quoted(key)
+      return `${written}: ${this.quoted(text)}`
+    })
+    return `{ ${entries.join(", ")} }`
+  }
+
   ////////////////
   // ## Conditionals
   ////////////////

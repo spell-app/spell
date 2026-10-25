@@ -393,6 +393,16 @@ export type LanguageWords = {
    */
   retiredTypeWords?: Record<string, string>
   /**
+   * A built-in template written in spell, by the datatype it's made from:  the lines a type made straight from it
+   * gets, in its outline body, before its own (epic `elemental-spell` P5).
+   * - e.g. `two sided view`:  its parts, its direction, `it is face up`, `turn it over` and its drawing, which picks
+   *   its front or its back -- so `a card is a two sided view` with `to draw its front:` and `to draw its back:`
+   *   just works.
+   * - Written in this language, so they compile in it, as the type's own lines would.
+   * - See `CreateType.preludeOf()`.
+   */
+  templatePreludes?: Record<string, string>
+  /**
    * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
    * - None:  a spellx file in this language reads English's.
    */

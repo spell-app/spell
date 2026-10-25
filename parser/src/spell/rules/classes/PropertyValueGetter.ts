@@ -1,9 +1,12 @@
-import { proto } from "spell/util"
+import { proto, upperFirst } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { Priority } from "spell-parser/spell/rules/rules.types"
 import { getKnownType } from "spell-parser/spell/rules/types"
+// Through the folder:  read only when called, once the folder has loaded
+import { DefinePropertyHas } from "spell-parser/spell/rules/classes"
 // Import directly to avoid circular import
+import { BlockLine } from "spell-parser/spell/rules/BlockLine"
 import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
@@ -22,10 +25,25 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  *   `return the first word of the name` instead of repeating `of the card`.
  * - Compiles to a getter in its class running the parsed body, e.g.
  *   `the value of a card is its name` => `get value() { return this.name }`.
+ * - A worked-out value from a list of its own (epic `elemental-spell` P5, Q13):
+ *
+ *   ```spell
+ *   - its "color" is one of red, black:
+ *   	red if it is a diamond or it is a heart
+ *   	black otherwise
+ *   	- it "is (color)"
+ *   	- it "is a (color) card"
+ *   ```
+ *
+ *   - Its list is declared as a stored property's is (`DefinePropertyHas.declareEnumeration()`):
+ *     `static Colors = ["red", "black"]`, the kind `card color`, the constants `red` and `black`.
+ *   - Its BULLETED lines (`- it "is (color)"`) are its members, NOT its body:  its aliases, parsed as the type's
+ *     outline body parses them, and compiled after the getter -- see `parseNestedBlock()`.
+ *     Any getter's indented body may have them, its value lines first.
  */
 export class PropertyValueGetter extends SpellStatement<
-  "property|type|body?",
-  { valueKind?: boolean; inheritedType?: string }
+  "property|type|specifier?|body?",
+  { valueKind?: boolean; inheritedType?: string; members?: P.Match }
 > {
   @proto static alias = "statement"
   @proto static declares: P.DeclaresSpec = { kind: "property", name: "property", of: "type" }
@@ -46,6 +64,9 @@ export class PropertyValueGetter extends SpellStatement<
     // ... once its body parsed:  `- color is red if ... otherwise it is black` is `property_value_either`'s
     const bodyParsed = !!this.getBody(match) || match.length === tokens.length
     if (!match.groups.type.length && bodyParsed) match.priority = Priority.declaration
+    // with a list of its own, `- its "color" is one of red, black:`, it's a declaration too:  it outranks the
+    // stored property's line, `define_property_has`, which would read the line all but its colon (epic `elemental-spell` P5)
+    if (match.groups.specifier) match.priority = Priority.declaration
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
@@ -102,11 +123,59 @@ export class PropertyValueGetter extends SpellStatement<
    * - A value kind's property reads as a call of its static method, e.g. `Suit.color({it})`:  its `readAs`.
    */
   mutateScope(match: P.MatchFor<this>) {
-    const { type, property } = match.groups
+    const { type, property, specifier } = match.groups
     const typeScope = getKnownType(type)
     // a value kind's is its static method, which `readAs` reads;  anything else's, a getter
     const readAs = match.data.valueKind ? `${typeScope.name}.${property.value}({it})` : undefined
     typeScope.declareProperty(`${property.value}`, match, { asWritten: property.raw, readAs })
+    // its own list of values, `one of red, black`:  as a stored property's
+    const values = specifier?.AST
+    if (values instanceof P.ASTEnumeration) {
+      const written = `${property.raw ?? property.value}`
+      DefinePropertyHas.declareEnumeration(match, typeScope, { name: `${property.value}`, written }, values.values)
+    }
+  }
+
+  /**
+   * Parse `nestedBlock`, our indented body:  its value lines as our body, its BULLETED lines (`- it "is (color)"`)
+   * as our members (epic `elemental-spell` P5).
+   * - The members parse as the type's outline body does, in a `P.SubjectScope` of our type, AFTER our body:
+   *   so each is committed (an alias's rules land in the file), and its blanks find our list of values.
+   * - A bulleted line's own indented block goes with it.
+   * - SIDE EFFECT:  records them as `match.data.members`, and in our groups as `members`.
+   */
+  parseNestedBlock(statement: P.Match, nestedBlock: P.BlockToken): P.Match | undefined {
+    const { values, members } = PropertyValueGetter.splitMembers(nestedBlock)
+    if (!members) return super.parseNestedBlock(statement, nestedBlock)
+    const body = values ? super.parseNestedBlock(statement, values) : undefined
+    const { type } = (statement as P.MatchFor<this>).groups
+    const scope = new P.SubjectScope({ parentScope: statement.scope, subject: `${type.value}`, declaredBy: statement })
+    const parsed = scope.parser?.parse([members], "block", scope)
+    if (parsed) {
+      statement.addMatch(parsed, "members")
+      statement.data.members = parsed
+    }
+    return body
+  }
+
+  /**
+   * `block` split into its value lines and its bulleted lines, each a `P.BlockToken` of its own -- `undefined` for
+   * a part it hasn't.  A line's indented block goes with the line above it.
+   */
+  private static splitMembers(block: P.BlockToken): { values?: P.BlockToken; members?: P.BlockToken } {
+    const values: Array<P.LineToken | P.BlockToken> = []
+    const members: Array<P.LineToken | P.BlockToken> = []
+    let into = values
+    for (const token of block.tokens) {
+      if (token instanceof P.LineToken) into = BlockLine.isBullet(token.tokens) ? members : values
+      into.push(token)
+    }
+    const blockOf = (tokens: Array<P.LineToken | P.BlockToken>) => {
+      const [first] = tokens
+      if (!first) return undefined
+      return new P.BlockToken({ ...block.record, start: first.start, line: first.line, ch: first.ch, tokens })
+    }
+    return { values: blockOf(values), members: blockOf(members) }
   }
 
   /**
@@ -153,7 +222,25 @@ export class PropertyValueGetter extends SpellStatement<
       declaredBy: match
     })
   }
-  getAST(match: P.MatchFor<this>): P.ASTPropertyDefinition | P.ASTStaticMethod {
+  getAST(match: P.MatchFor<this>): P.ASTPropertyDefinition | P.ASTStaticMethod | P.ASTStatementGroup {
+    const getter = this.getterAST(match)
+    const values = match.groups.specifier?.AST
+    const members = match.data.members?.AST
+    if (!(values instanceof P.ASTEnumeration) && !members) return getter
+    // its list of values first, e.g. `static Colors = ["red", "black"]`, then the getter, then its members
+    const statements: NonNullable<P.ASTStatementGroup["statements"]> = []
+    if (values instanceof P.ASTEnumeration) {
+      const name = P.pluralize(upperFirst(`${match.groups.property.value}`))
+      const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
+      statements.push(new P.ASTStaticDefinition(match, { type, name, value: values }))
+    }
+    statements.push(getter)
+    if (members) statements.push(members as P.ASTStatement)
+    return new P.ASTStatementGroup(match, { statements })
+  }
+
+  /** The getter itself, or a value kind's static method -- see `getAST()`. */
+  private getterAST(match: P.MatchFor<this>): P.ASTPropertyDefinition | P.ASTStaticMethod {
     const { type, property } = match.groups
     if (match.data.valueKind) {
       const typeAST = P.matchAST<P.ASTTypeExpression>(type)

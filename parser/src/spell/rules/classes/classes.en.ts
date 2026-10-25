@@ -20,6 +20,9 @@ import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
+import { DrawnMarkup } from "./DrawnMarkup"
+import { DrawPart } from "./DrawPart"
+import { HasParts } from "./HasParts"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -115,6 +118,11 @@ classes.addRule(
   }
 )
 
+// a part's drawing, quoted:  `to "draw its front":` -- the words before the part's name (epic `elemental-spell` P5)
+classes.addRule(Wording.specialize({ ruleName: "draw_its_part", meanings: ["draw_its_part"] }), {
+  syntax: "((draw_its_part:draw its|draw the))"
+})
+
 classes.addRule(WithNestedStatements, {
   syntax: "(where|with)? :",
   tests: [
@@ -168,30 +176,8 @@ classes.addRule(CreateType, {
             "core.useElement(Card, CardElement)"
           ]
         ],
-        [
-          "a card is a two sided view",
-          [
-            "export class Card extends TwoSidedView {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Card extends TwoSidedView {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-classes-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its card's properties;  its methods call its card's.",
-            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
-            " */",
-            "export class CardElement extends SpellElement<Card> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-card", "card", [])',
-            "}",
-            "core.useElement(Card, CardElement)"
-          ]
-        ],
+        // `a card is a two sided view` gets the two sided view's own lines (epic `elemental-spell` P5):
+        // see `parserTests/codeSpellGrows.test.ts`
         [
           "a home is a page",
           ["export class Home extends Page {", '  static elementTag = core.defineElement(this, "test_classes")', "}"],
@@ -1703,6 +1689,24 @@ classes.addRule(PropertyValueGetter, {
   syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
 })
 
+// a worked-out value from a list of its own (epic `elemental-spell` P5):  `- its "color" is one of red, black:`,
+// then its value lines -- and its aliases, bulleted, under them
+classes.addRule(PropertyValueGetter, {
+  syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
+// ... and with the subject left out:  `- "color" is one of red, black:`
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
+// ... and in the sentence style (Q20):  `the color of a card is one of red, black:`
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`
 classes.addRule(DrawIt, {
   syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?"
@@ -1711,6 +1715,44 @@ classes.addRule(DrawIt, {
 // unquoted:  a method's body, which returns it -- `- to draw each item:` + `return <div>{draw the card}</div>`
 classes.addRule(DrawIt, {
   syntax: "to {phrase:draw_method} :? {statement_body}?"
+})
+
+// a part's own drawing (epic `elemental-spell` P5):  `- to draw its front:`, its lines drawing it
+classes.addRule(DrawIt, {
+  syntax: "to draw its {part:member_words} :? {statement_body}?"
+})
+
+// a view's parts:  `- it has parts "front" and "back"`
+classes.addRule(HasParts, {
+  syntax: "{type:subject_it} has (the)? parts [parts:{part:text} (,|and)]"
+})
+
+// ... with the subject left out:  `- has parts "front" and "back"`
+classes.addRule(HasParts, {
+  syntax: "{type:subject_implied} has (the)? parts [parts:{part:text} (,|and)]"
+})
+
+// ... and in the sentence style:  `a card has parts "front" and "back"`
+classes.addRule(HasParts, {
+  syntax: "(a|an) {type:singular_type} has (the)? parts [parts:{part:text} (,|and)]"
+})
+
+// placing a part in a drawing:  `draw its front`
+classes.addRule(DrawPart, {
+  syntax: "draw its {part:member_words}"
+})
+
+// a line of a drawing that IS the drawing:  markup, or a part placed
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:jsxElement}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:jsxFragment}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_part}"
 })
 
 classes.addRule(QuotedPropertyFormula, {

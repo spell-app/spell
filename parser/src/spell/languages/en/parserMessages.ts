@@ -37,6 +37,9 @@ export const PARSER_MESSAGES = {
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */
   "always-the-same": '{name} is always {value}:  to give it a type, write "{name} is {type}"',
+  /** A line under a property, `- its "suit" is ...`, that is neither its rule nor its alias (epic `elemental-spell` P5). */
+  "not-a-property-body-line":
+    "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
   /** `tableau T1` when two tableaus are named `T1`. */
   "named-twice": 'More than one {type} is named "{name}":  this finds the first one made',
   /** `the position of x`, with no list, where `x` isn't one of a value kind's values. */

@@ -32,6 +32,7 @@ describe("priority and precedence", () => {
     }
     expect([...seen.keys()].sort().map((name) => seen.get(name))).toMatchInlineSnapshot(`
       [
+        "action_detail:  Priority.declaration",
         "and:  Precedence.and",
         "as_a_type:  Precedence.comparison",
         "as_lowercase:  Precedence.comparison",
@@ -48,6 +49,7 @@ describe("priority and precedence", () => {
         "create_type:  Priority.declaration",
         "create_viewable_list_type:  Priority.declaration",
         "css_block:  Priority.declaration",
+        "declare_event:  Priority.declaration",
         "define_property_has:  Priority.declaration",
         "divided_by:  Precedence.product",
         "does_not_include:  Precedence.comparison",
@@ -55,11 +57,14 @@ describe("priority and precedence", () => {
         "drag_handler:  Priority.declaration",
         "draw_it:  Priority.declaration",
         "draw_items:  Priority.specific",
+        "draw_part:  Priority.specific",
         "draw_thing:  Priority.preferred",
+        "drawn_markup:  Priority.specific",
         "else_if:  Priority.preferred",
         "ends_with:  Precedence.comparison",
         "exists:  Precedence.comparison",
         "gt_lt:  Precedence.comparison",
+        "has_parts:  Priority.declaration",
         "implied_it:  Priority.preferred",
         "includes:  Precedence.comparison",
         "is_a:  Precedence.comparison",

@@ -9,6 +9,7 @@ import { P } from "spell-parser/parser"
 import { Synonyms } from "spell-parser/spell/rules/expressions"
 
 import { events } from "./events.parser"
+import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
@@ -88,5 +89,104 @@ events.addRule(On, {
 // `on card click with a card`:  an event's name of several words, the same event as `card-click` -- see `event_words`
 events.addRule(On, {
   syntax: "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
-  tests: [{ compileAs: "block", tests: [["on card click", 'on("card-click")']] }]
+  tests: [
+    { compileAs: "block", tests: [["on card click", 'on("card-click")']] },
+    {
+      title: "in a template's outline:  each of its things' handler, `it` the thing (epic `elemental-spell` P5)",
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a card is a thing where:",
+            "\t- it has a rank as a number",
+            "\t- on mouse down:",
+            "\t\tprint its rank",
+            "\t- on card click with a card:",
+            "\t\tprint the rank of the card"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  // - it has a rank as a number",
+            '  static { this.declareProp("rank", { type: "number" }) }',
+            '  get rank() { return this.getProp("rank") }',
+            '  set rank(value) { this.setProp("rank", value) }',
+            "",
+            "  onMouseDown(event) {",
+            "    core.console.log(this.rank)",
+            "  }",
+            "",
+            "  onCardClick(event) {",
+            "    const { card } = event",
+            "    core.console.log(card.rank)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            "  // - it has a rank as a number",
+            '  @prop({ type: "number" })',
+            "  accessor rank!: number",
+            "",
+            "  onMouseDown(event: any /* spell: type unknown */) {",
+            "    core.console.log(this.rank)",
+            "  }",
+            "",
+            "  onCardClick(event: { card?: Card }) {",
+            "    const { card } = event",
+            "    core.console.log(card.rank)",
+            "  }",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// an event a template's things send, and what comes with it (epic `elemental-spell` P5):
+// `- it sends "flipped" with a side as a direction`, or `a card sends "flipped"` -- see `DeclareEvent`
+events.addRule(DeclareEvent, {
+  syntax: "{type:subject_it} sends {event:text} {props:with_props_arg}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["a card is a thing where:", '\t- it sends "flipped" with side as text and a card'],
+          js: [
+            "export class Card extends Thing {}",
+            '// - it sends "flipped" with side as text and a card',
+            'core.describeEvent(Card, "flipped", { params: { side: "text", card: "Card" } })'
+          ]
+        },
+        {
+          input: ["a card is a thing where:", '\t- it sends "card flipped"'],
+          js: [
+            "export class Card extends Thing {}",
+            '// - it sends "card flipped"',
+            'core.describeEvent(Card, "card-flipped", {})'
+          ]
+        }
+      ]
+    }
+  ]
+})
+events.addRule(DeclareEvent, { syntax: "{type:subject_implied} sends {event:text} {props:with_props_arg}?" })
+events.addRule(DeclareEvent, {
+  syntax: "(a|an) {type} sends {event:text} {props:with_props_arg}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["a card is a thing", 'a card sends "flipped" with side as text'],
+          js: [
+            "export class Card extends Thing {}",
+            '// a card sends "flipped" with side as text',
+            'core.describeEvent(Card, "flipped", { params: { side: "text" } })'
+          ]
+        }
+      ]
+    }
+  ]
 })

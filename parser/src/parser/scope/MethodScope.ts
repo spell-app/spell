@@ -19,6 +19,11 @@ export class MethodScope extends BlockScope {
   declare mapItTo: string
   /** What `thisVar` and `it` are, if set on construction, e.g. `Card` -- their alias variables' `datatype`. */
   declare itDatatype: P.Datatype | undefined
+  /**
+   * Statement match which made this scope, e.g. a method's definition -- if set on construction.
+   * - So a line of its body can ask what it's in, e.g. an action's description line (spell's `action_detail`).
+   */
+  declare declaredBy: P.Match | undefined
 
   /**
    * Create with optional `args` (added to `variables` with `kind: "argument"`), and set up `thisVar`/
@@ -28,6 +33,7 @@ export class MethodScope extends BlockScope {
    */
   constructor({ args, declaredBy, ...props }: MethodScopeProps) {
     super(props)
+    this.declaredBy = declaredBy
     // Add `args` to our variables list
     if (args && args.length) {
       args.forEach((input) => {

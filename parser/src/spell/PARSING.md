@@ -849,6 +849,22 @@ A kind that says so is saved in a file of its own.
   - An alias true for every one of the type says so:  `- it "can move" always`.
     - `always` / `never` are constants, read as its body.
 
+- What spellx can say, said in an outline too (epic `elemental-spell` P5:  each spellx tag has a code-spell twin):
+  - A TEST in a template's outline, `- to test card setup:`, tests the template.
+    - `MethodDefinition.processSignature()` marks it `testOf`, not a method of the type.
+    - It compiles as a test written at the top level does, exported, so the program runs it as it loads;
+      its body starts with `const it = new Card()`, a real variable, so a `get` in it declares `it2`.
+  - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
+    `- undone as "..."`, `- icon "..."`.
+    - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
+      its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
+    - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
+      after the class, a getter per condition and `core.describeAction(...)` (`P.ASTTypeDescription`).
+    - `shortcut_keys` reads a key as typed, its tokens joined up to the first space:  `meta+shift+Z`.
+  - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
+  - An EVENT its things send, `- it sends "flipped" with side as a direction` (`declare_event`):
+    `core.describeEvent(...)` after the class.
+
 ## Value kinds:  `"suits" as one of clubs, diamonds, hearts or spades`
 
 - In a type's outline body, [`value_kind`](rules/classes/ValueKind.ts)
@@ -1025,9 +1041,56 @@ A kind that says so is saved in a file of its own.
     and `(a|al)` before an argument, `mover la carta al montón`.
   - Its name says the short one (`contractedName()`):  either way of writing it makes one method.
   - ONE drawing per thing:  the front / back sides (`draw_side`) are gone (epic `spanish` P20).
+    Its PARTS are named drawings it places instead (below).
 - A one-line indented body (a `{nested_expression}`) parses in the statement's `nestedScope`.
   - e.g. `return` + markup, or `draw_it`'s
   - As an inline body does (`SpellStatement.parseNestedBlock()`).
+
+## What spellx says, in code spell (epic `elemental-spell` P5)
+
+Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  these are the lines P5 added.
+
+- A property's own ALIASES, indented under it (Q13):  `- its "suit" is one of ...`, then `- it "is a (suit)"` under it.
+  - `define_property_has`'s body (`{nested_statements}`) parses its lines in a `P.SubjectScope` of the type, as the
+    outline body does, so each alias is committed there.
+  - `DefinePropertyHas.getAST()` compiles every body line but its rules (`property_body_must`) after the property,
+    as if written after it.  A line that's neither a rule nor an alias warns (`not-a-property-body-line`), and compiles
+    the same.
+  - The property's comment lists its body lines (`ProgramWriter.spellOf()`), for its list of values too.
+- A worked-out value from a list of ITS OWN:  `- its "color" is one of red, black:`, then its value lines.
+  - `property_value_getter` with a `{specifier:outline_specifier_enum}` and a required `:`;  at `Priority.declaration`,
+    so it beats `define_property_has`, which would read all but the colon.
+  - Its list is declared as a stored property's (`DefinePropertyHas.declareEnumeration()`):  the class variable,
+    the kind, the constants.  `static Colors = [...]`, then the getter.
+  - Its BULLETED lines are its members, not its body:  `PropertyValueGetter.parseNestedBlock()` splits the block,
+    the value lines as the getter's body, the bullets parsed after it in a `P.SubjectScope` of the type
+    (`data.members`, compiled after the getter).  Any getter's body may have them.
+  - Sentence style too (Q20):  `the color of a card is one of red, black:`.
+- PARTS (Q55, Q56):  a view's named drawings, which it places.
+  - `- it has parts "front" and "back"`:  [`has_parts`](rules/classes/HasParts.ts) =>
+    `static parts = ["front", "back"]`, and `P.TypeScope.declarePart()` (journaled;  `hasPart()` walks the chain).
+  - `- to draw its front:` / `to "draw its front":`:  `draw_it`'s part drawing => `drawFront()`, declaring the part too.
+    - Unquoted, `to draw its {part:member_words}`;  quoted, the `draw_its_part` word rule's lead (`draw its`,
+      `dibujar su`) then the name.
+    - NOT a list's `draw its placeholder` (`draw_method`'s):  `DrawIt.readsAsDrawMethod()` steps aside, so the
+      first-line pre-pass still makes it callable.
+  - `draw its front`:  [`draw_part`](rules/classes/DrawPart.ts), only in a drawing => `this.drawFront()`.
+    `Priority.specific`, over `draw_thing`;  a name that's the view's property, not a part, is left to `draw_thing`.
+  - A part's markup carries its name as a CSS part (J6):  `part="front"`, added to any it says (`DrawIt.withPart()`).
+- A DRAWN LINE (Q14):  in a drawing, a line of markup, or a part placed, IS the drawing.
+  - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
+    `{markup:draw_part}` => `return ...`, at `Priority.specific`.
+  - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
+- A BUILT-IN TEMPLATE written in spell:  `a card is a two sided view` (J8).
+  - The template's lines are the language's `templatePreludes` (English's, Spanish's own words), parsed into the
+    type's outline body BEFORE its own lines (`CreateType.readPrelude()`, in `mutateScope()`), kept as
+    `data.preludeBlock`, compiled into the class.
+  - A two sided view's:  its parts front and back, `its "direction" is up or down` (a new one starts up),
+    `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a part.
+  - Only a type made STRAIGHT from it;  its sub-types get them through it.
+  - The pre-pass knows its methods ahead (`SpellParser.preludeMethodsFor()`), so a file before the card's can call
+    `turn the card over`.
+  - Its lines' positions are the prelude's own text, not the file's:  hover and go-to on them land nowhere useful.
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 

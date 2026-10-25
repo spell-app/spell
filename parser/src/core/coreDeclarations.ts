@@ -54,6 +54,7 @@ import { thingsMethods } from "./things"
 import { jsonMethods } from "./json"
 import { carryMethods } from "./carry"
 import { classesMethods } from "./classes"
+import { describedMethods } from "./described"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -77,7 +78,8 @@ const CORE_MODULES: Record<string, object> = {
   things: thingsMethods,
   json: jsonMethods,
   carry: carryMethods,
-  classes: classesMethods
+  classes: classesMethods,
+  described: describedMethods
 }
 
 /**

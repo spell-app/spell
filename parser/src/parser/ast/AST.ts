@@ -1756,6 +1756,47 @@ export class ASTPropertyRules extends ASTStatement {
   }
 }
 
+/**
+ * TypeDescription -- what a template SAYS about one of its actions or events, beyond their code
+ * (epic `elemental-spell` P5):  data the runtime keeps, which nothing runs yet.
+ * - e.g. `- to turn it over:` with `- shortcut meta+T` =>
+ *   `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"] })`
+ * - e.g. `- it sends "flipped" with a side as a direction` =>
+ *   `core.describeEvent(Card, "flipped", { params: { side: "direction" } })`
+ * - `type` (required) is its class, as a TypeExpression or bare name.
+ * - `describes` (required):  `"action"` or `"event"`.
+ * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
+ *   an event's name as text (`flipped`).
+ * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
+ *   - text, or a list of text, e.g. `title`, `shortcuts`
+ *   - a MEMBER of the class (`{ member: "turn_over_is_enabled" }`), named as the writer names members
+ *   - a map of text to text, e.g. an event's `params`
+ * - Always written from outside its class, after it, as `ASTPropertyRules` is:  NOT a ClassMember.
+ */
+export type ASTTypeDescriptionProps = Prettify<{
+  type: string | ASTTypeExpression
+  describes: "action" | "event"
+  name: string
+  description: Record<string, ASTDescriptionValue>
+}>
+
+/** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
+export type ASTDescriptionValue = string | string[] | { member: string } | Record<string, string>
+
+export class ASTTypeDescription extends ASTStatement {
+  declare type: ASTTypeExpression
+  declare describes: "action" | "event"
+  declare name: string
+  declare description: Record<string, ASTDescriptionValue>
+  constructor(match: P.AnyMatch, props: ASTTypeDescriptionProps) {
+    super(match, props)
+    if (typeof this.type === "string") this.type = new ASTTypeExpression(match, { name: this.type })
+    this.assertType("type", ASTTypeExpression)
+    this.assertType("name", "string")
+    this.assert(["action", "event"].includes(this.describes), `ASTTypeDescription: unknown kind '${this.describes}'`)
+  }
+}
+
 ////////////////
 // ## Conditionals
 ////////////////
