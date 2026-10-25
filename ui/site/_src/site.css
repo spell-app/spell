@@ -765,9 +765,59 @@
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    background-color: var(--ui-bar-rest-background, transparent);
+    /*
+     * in place:  a rounded bar with a slight shadow, as an epic page's phases (Owen, 2026-10-25:  "rounded w/shadows
+     * like in epic page, add horizontal margins, more for each heading level");  stuck, it goes edge to edge, square,
+     * as before, so nothing scrolling under shows at its sides
+     * - in from the band's edges by `--_site-title-inset`, its words where they were:  the padding gives back the margin
+     */
+    margin-inline: calc(var(--_site-title-inset) - var(--site-gutter) - var(--_site-band-start))
+      calc(var(--_site-title-inset) - var(--site-gutter) - var(--_site-band-end));
+    padding-inline: calc(var(--site-gutter) + var(--_site-band-start) - var(--_site-title-inset))
+      calc(var(--site-gutter) + var(--_site-band-end) - var(--_site-title-inset));
+    border-radius: var(--ui-radius-m, 8px);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+    /* a theme with no bar fill of its own:  a faint tint, so the bar's shape reads */
+    background-color: var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent));
     background-image: none;
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
+  }
+  /*
+   * touching bars are square where they touch, round where free (Owen's rule on the epic page):  an open section whose
+   * body starts with a nested section, and that nested section's title
+   */
+  .site-main
+    ui-section[sticky]:not([collapsed]):has(> ui-section[sticky]:not(:not([slot]) ~ *)):not(
+      :state(stuck)
+    )::part(title) {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  .site-main ui-section > ui-section[sticky]:not(:not([slot]) ~ *):not(:state(stuck))::part(title) {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+  /* each heading level a step further in */
+  .site-main ui-section[sticky] {
+    --_site-title-inset: 12px;
+  }
+  .site-main ui-section[sticky] ui-section[sticky] {
+    --_site-title-inset: 28px;
+  }
+  .site-main ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+    --_site-title-inset: 44px;
+  }
+  /* phones:  the gutter is narrow, so smaller steps */
+  @media (--ui-mobile) {
+    .site-main ui-section[sticky] {
+      --_site-title-inset: 4px;
+    }
+    .site-main ui-section[sticky] ui-section[sticky] {
+      --_site-title-inset: 8px;
+    }
+    .site-main ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+      --_site-title-inset: 12px;
+    }
   }
   /*
    * a section's first nested title sits right under its own, open:  no gap
