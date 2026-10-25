@@ -172,7 +172,11 @@ export type PropInfo = {
    * list on a class defined after ours.
    */
   oneOf?: readonly unknown[] | (() => readonly unknown[])
-  /** Its value while unset -- NOT stored, so it isn't one of `keys()`.  Primitives only:  objects use `init`. */
+  /**
+   * Its value while unset -- NOT stored, so it isn't one of `keys()`.  Primitives only:  objects use `init`.
+   * - None declared:  its first choice (`oneOf`), else its type's:  `number` 0, `text` "", `choice` false;
+   *   a thing's type has none (`defaultFor()`, epic `prefs-and-undo` P7).
+   */
   default?: unknown
   /**
    * Makes its value on first read, once per instance, e.g. `() => new List()` -- stored, so it's one of `keys()`.

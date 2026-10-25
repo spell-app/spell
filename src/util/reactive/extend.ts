@@ -1,4 +1,6 @@
 import { hasOwnProp } from "spell/util/class"
+// A leaf of persist/, importing only types:  the defaults rule a pref and a prop share
+import { defaultFor } from "spell/util/persist/values"
 
 import { isTrackingCells } from "./cells"
 import { Cell } from "./Cell"
@@ -81,7 +83,8 @@ export function initializeExtended(target: any, ..._what: Array<"derived" | "pro
  * Prop `property` of `target`, tracked:  a reader re-runs when it changes, even if it's unset now.
  * - Unset:  `initializer()`'s value, stored once per object.
  *   - Else what its class's schema declares (see `PropInfo`):
- *     its `init`, stored the same way, or its `default`, NOT stored.
+ *     its `init`, stored the same way, or its default, NOT stored (`defaultFor()`):
+ *     its `default`, else its first choice (`oneOf`), else its type's (`number` 0, `text` "", `choice` false).
  * - An initializer is called with `this` ~== `target`, and its value stored WITHOUT notifying the prop's readers:
  *   nobody can have read another value.  The key set does change, so `keysOf()` readers hear of it.
  */
@@ -96,10 +99,10 @@ export function getProp<T>(target: any, property: string, initializer?: () => T)
   if (!initializer) {
     info = declared(target, property)
     initializer = info?.init as (() => T) | undefined
-    if (!initializer) return info?.default
+    if (!initializer) return defaultFor(info)
   }
   const value = initializer.call(target)
-  if (value === undefined) return info?.default
+  if (value === undefined) return defaultFor(info)
   record.set(property, value)
   extended[KEYS]?.changed()
   return value
@@ -138,6 +141,22 @@ export function storeProp(target: any, property: string, value: unknown): boolea
  */
 export function peekProp<T>(target: any, property: string): T | undefined {
   return extendedFor(target)[PROPS].get(property) as T | undefined
+}
+
+/**
+ * Is `value`, read from prop `property` of `target`, only its IMPLIED default:  the prop declared, unset, with no
+ * `default` of its own, and `value` its first choice or its type's (`0`, `""`, `false`;  `defaultFor()`)?
+ * - For what shows only what was SET, as HTML's attributes do:  a drawn thing's element shows no attribute for it
+ *   (epic `prefs-and-undo` P7).
+ * - A getter that always gives another value isn't:  its value shows.
+ *   One that always gives the default itself (a stock pile's `layout`, `stacked`, its first choice) can't be told
+ *   apart here:  the caller checks for a getter with no setter (`SpellElement.isReadOnly()`).
+ * - UNTRACKED.
+ */
+export function readsAsImpliedDefault(target: any, property: string, value: unknown): boolean {
+  if (extendedFor(target)[PROPS].has(property)) return false
+  const info = declared(target, property)
+  return !!info && info.default === undefined && !info.init && value === defaultFor(info)
 }
 
 /** Delete prop `property` of `target`:  it leaves `keysOf()`, and a later set appends it.  Returns whether it was set. */
