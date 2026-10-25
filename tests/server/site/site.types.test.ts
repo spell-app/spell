@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 // the leaf, not the barrel:  `SiteHeader` extends `HTMLElement`, which node lacks
-import {
-  SCHEME_CLASSES,
-  componentSet,
-  docsArea,
-  forcedScheme,
-  litTab,
-  type SiteTab
-} from "spell/server/site/site.types"
+import { componentSet, docsArea, litTab, type SiteTab } from "spell/server/site/site.types"
 
 /**
  * Tabs of a made-up site, as a page server's settings would name them (`"siteTabs"`):  the header names none itself.
@@ -79,26 +72,5 @@ describe("componentSet() and docsArea()", () => {
     expect(docsArea("/epics/templates/x.html", areas)).toBe("epics")
     expect(docsArea("/guides/x.html", areas)).toBeUndefined()
     expect(docsArea("/components/epics/templates/x.html", areas)).toBeUndefined()
-  })
-})
-
-/** A class list holding `names`, as `<html>`'s `classList` answers `contains()`. */
-function classes(...names: string[]) {
-  return { contains: (token: string) => names.includes(token) }
-}
-
-describe("forcedScheme()", () => {
-  it("reads the scheme `<html>`'s classes force:  what the site header's icon shows", () => {
-    expect(forcedScheme(classes(SCHEME_CLASSES.dark))).toBe("dark")
-    expect(forcedScheme(classes("ui-typography", SCHEME_CLASSES.light))).toBe("light")
-  })
-
-  it("is `undefined` with neither class:  the page follows the OS", () => {
-    expect(forcedScheme(classes())).toBeUndefined()
-    expect(forcedScheme(classes("ui-typography"))).toBeUndefined()
-  })
-
-  it("keeps Spell UI's class names, which pages switch themselves", () => {
-    expect(SCHEME_CLASSES).toEqual({ light: "ui-light", dark: "ui-dark" })
   })
 })

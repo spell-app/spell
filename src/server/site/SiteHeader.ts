@@ -1,22 +1,7 @@
-import { PrefStore } from "spell/util/persist"
+import { ColorScheme, PrefStore, type ColorSchemeName } from "spell/util/persist"
 import { escapeHTML } from "spell/util/string"
 import type { ServerConfig, ServerInfo } from "spell/server"
-import {
-  DARK_QUERY,
-  EDIT_PREF,
-  FAVICON_SVG,
-  forcedScheme,
-  LEGACY_SCHEME_KEYS,
-  litTab,
-  LOGO_MARK,
-  SCHEME_CLASSES,
-  SCHEME_KEY,
-  SCHEME_PREF,
-  SITE_HOME,
-  SITE_PREFS,
-  type SiteScheme,
-  type SiteTab
-} from "spell/server/site"
+import { EDIT_PREF, FAVICON_SVG, litTab, LOGO_MARK, SITE_HOME, SITE_PREFS, type SiteTab } from "spell/server/site"
 
 /****************
  * ### `<spell-site-header>`
@@ -43,11 +28,11 @@ import {
  *   - light / dark:  ONE button showing the scheme the page shows (sun / moon);  a click flips it
  *     - until the first click, it follows the OS
  *     - flipping BACK to the OS's own scheme follows the OS again, so two clicks always undo one (`flipTheme()`)
- *     - kept under `SCHEME_KEY` (through a `PrefStore`):
- *       the one key every doc site shares, Spell UI's `ThemePreference` too
- *     - applied as `ui-light` / `ui-dark` on `<html>` (UI's tokens, `--ui-scheme`)
- *       AND as inline `color-scheme` (pages without UI's sheets, and this bar's own `light-dark()`)
- *     - follows the OS while it changes, and other tabs' switches (`storage`)
+ *     - kept, shown and followed by `ColorScheme` (`spell/util/persist`):
+ *       the one choice every Spell site shares, Spell UI's `ThemePreference` too
+ *       - shown as `ui-light` / `ui-dark` on `<html>` (UI's tokens, `--ui-scheme`)
+ *         AND as inline `color-scheme` (pages without UI's sheets, and this bar's own `light-dark()`)
+ *       - follows the OS while it changes, and other tabs' switches
  *   - the icon shows what `<html>` shows:  a page that switches its own scheme
  *     (toggles `ui-light` / `ui-dark`, as Spell App's pill does) re-draws it too,
  *     through a `MutationObserver` on `<html>`'s class;  a click then flips from what the page shows
@@ -99,45 +84,37 @@ export class SiteHeader extends HTMLElement {
   /** re-draw on `PAGE_EVENT` */
   private readonly onPage = () => this.render()
 
-  /** the OS's scheme, watched while connected:  the button shows it while following the OS */
-  private readonly osDark = matchMedia(DARK_QUERY)
-
-  /** the OS switched scheme:  re-draw (the button shows the scheme the page shows) */
-  private readonly onOsScheme = () => this.render()
-
-  /** another tab switched the scheme:  apply it here too, and re-draw */
-  private readonly onStorage = (event: StorageEvent) => {
-    if (event.key !== SCHEME_KEY && event.key !== null) return
-    applyTheme(readTheme())
-    this.render()
-  }
+  /**
+   * Stops following the OS's scheme and other tabs' choices (`ColorScheme.watch()`), while connected:
+   * either one re-draws (the button shows the scheme the page shows).
+   */
+  private stopWatchingScheme?: () => void
 
   /** the scheme the icon shows now, so `<html>` class changes that keep it re-draw nothing */
-  private drawnTheme?: Theme
+  private drawnTheme?: ColorSchemeName
 
   /** watches `<html>`'s class while connected:  a page that switches its own scheme */
   private readonly pageScheme = new MutationObserver(() => {
-    if (this.shownTheme() !== this.drawnTheme) this.render()
+    if (ColorScheme.shown() !== this.drawnTheme) this.render()
   })
 
   connectedCallback(): void {
-    applyTheme(readTheme())
+    ColorScheme.apply(ColorScheme.chosen())
     installPageStyle(this.docked)
     installFavicon()
     if (!this.shadowRoot) this.attachShadow({ mode: "open" })
     this.info = serverConfig()
     this.render()
     document.addEventListener(SiteHeader.PAGE_EVENT, this.onPage)
-    this.osDark.addEventListener("change", this.onOsScheme)
-    window.addEventListener("storage", this.onStorage)
+    this.stopWatchingScheme ??= ColorScheme.watch(() => this.render())
     this.pageScheme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
     if (!this.info && location.protocol.startsWith("http")) void this.ping()
   }
 
   disconnectedCallback(): void {
     document.removeEventListener(SiteHeader.PAGE_EVENT, this.onPage)
-    this.osDark.removeEventListener("change", this.onOsScheme)
-    window.removeEventListener("storage", this.onStorage)
+    this.stopWatchingScheme?.()
+    this.stopWatchingScheme = undefined
     this.pageScheme.disconnect()
   }
 
@@ -231,7 +208,7 @@ export class SiteHeader extends HTMLElement {
     const edit = canEdit
       ? `<button class="tool${editing ? " on" : ""}" data-action="edit" aria-pressed="${editing}" title="Edit sections in place" aria-label="Edit sections in place">${ICONS.pencil}</button>`
       : ""
-    const shown = this.shownTheme()
+    const shown = ColorScheme.shown()
     this.drawnTheme = shown
     const themeLabel = this.themeLabel()
     shadow.innerHTML = `<style>${STYLE}</style>
@@ -248,25 +225,15 @@ export class SiteHeader extends HTMLElement {
     if (editButton) editButton.onclick = () => this.toggleEdit()
   }
 
-  /** the scheme the OS asks for */
-  private osTheme(): Theme {
-    return this.osDark.matches ? "dark" : "light"
-  }
-
-  /** the scheme the page shows:  what `<html>`'s classes force (this bar's choice, or the page's own), else the OS's */
-  private shownTheme(): Theme {
-    return forcedScheme(document.documentElement.classList) ?? readTheme() ?? this.osTheme()
-  }
-
   /**
    * The theme button's name:  what the page shows, and what a click does.
    * - `Dark, as the OS (click:  light)` while following the OS
    * - `Light (click:  dark, as the OS)` when a click goes back to following it
    */
   private themeLabel(): string {
-    const chosen = readTheme()
-    const os = this.osTheme()
-    const shown = this.shownTheme()
+    const chosen = ColorScheme.chosen()
+    const os = ColorScheme.osScheme()
+    const shown = ColorScheme.shown()
     const next = shown === "dark" ? "light" : "dark"
     const name = { light: "Light", dark: "Dark" }[shown]
     if (!chosen && shown === os) return `${name}, as the OS (click:  ${next})`
@@ -281,10 +248,8 @@ export class SiteHeader extends HTMLElement {
    *   - a third "auto" state on one button makes every other click look like it did nothing
    */
   private flipTheme(): void {
-    const next: Theme = this.shownTheme() === "dark" ? "light" : "dark"
-    const stored = next === this.osTheme() ? undefined : next
-    sitePrefs.set(SCHEME_PREF, stored)
-    applyTheme(stored)
+    const next: ColorSchemeName = ColorScheme.shown() === "dark" ? "light" : "dark"
+    ColorScheme.choose(next === ColorScheme.osScheme() ? undefined : next)
     this.render()
   }
 
@@ -311,15 +276,6 @@ export class SiteHeader extends HTMLElement {
   }
 }
 
-/** A chosen color scheme;  `undefined` follows the OS. */
-type Theme = SiteScheme
-
-/**
- * The site's lasting preferences:  the chosen scheme, `SCHEME_KEY`.
- * - Storage blocked:  kept for this page (`PrefStore`'s memory).
- */
-const sitePrefs = new PrefStore(SITE_PREFS)
-
 /** This tab's preferences:  edit mode, `spell-site:edit`. */
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
 
@@ -339,45 +295,6 @@ export function serverConfig(): ServerConfig | undefined {
 export function readEdit(): boolean {
   if (document.querySelector(`${SiteHeader.tag}[no-tools]`)) return false
   return tabPrefs.get(EDIT_PREF) === EDIT_ON
-}
-
-/**
- * The remembered color scheme;  `undefined`:  follow the OS.
- * - SIDE EFFECT:  while `SCHEME_KEY` is absent, moves an old key's scheme over (`migrateTheme()`).
- */
-function readTheme(): Theme | undefined {
-  const theme = sitePrefs.get(SCHEME_PREF) ?? migrateTheme()
-  return theme === "light" || theme === "dark" ? theme : undefined
-}
-
-/**
- * Move the scheme from the keys it lived under before `SCHEME_KEY` (`LEGACY_SCHEME_KEYS`).
- * - Returns the scheme, else `undefined`.
- * - the first valid one is copied to `SCHEME_KEY`, and every old key removed, so this runs once
- * - the same steps as Spell UI's `ThemePreference`:  whichever site the viewer opens first moves it
- */
-function migrateTheme(): Theme | undefined {
-  let found: Theme | undefined
-  for (const key of LEGACY_SCHEME_KEYS) {
-    const value = PrefStore.getAt(key)
-    if (!found && (value === "light" || value === "dark")) found = value
-    PrefStore.setAt(key, undefined)
-  }
-  if (found) sitePrefs.set(SCHEME_PREF, found)
-  return found
-}
-
-/**
- * Show `theme` on the page;  `undefined`:  back to the page's own (the OS).
- * - `ui-light` / `ui-dark` on `<html>`, as Spell UI's `ThemePreference` does:  UI's tokens and `--ui-scheme` follow
- * - AND inline `color-scheme`:  pages without UI's sheets (goals), and this bar's `light-dark()`
- */
-function applyTheme(theme: Theme | undefined): void {
-  const root = document.documentElement
-  root.classList.toggle(SCHEME_CLASSES.light, theme === "light")
-  root.classList.toggle(SCHEME_CLASSES.dark, theme === "dark")
-  if (theme) root.style.colorScheme = theme
-  else root.style.removeProperty("color-scheme")
 }
 
 /**

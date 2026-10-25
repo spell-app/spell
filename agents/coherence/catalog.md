@@ -211,6 +211,14 @@ What `/coherence sweep` reads, an agent each.
 - **Flag:**  `localStorage\.(get|set)Item`
 - **Copies:**  `--`  (about a dozen users already;  the docs pages' runtime keeps its fold memory on top of it:
   see "Showing and hiding")
+- **The light / dark choice:**  `ColorScheme` beside it (`src/util/persist/ColorScheme.ts`;  epic `coherence` P12):
+  one key for every Spell site, its old keys moved once, `ui-light` / `ui-dark` and inline `color-scheme`,
+  following the OS and other tabs;  and the one dark-mode query, `DARK_QUERY`
+  - its users:  the kit's site header, Spell UI's `ThemePreference` (which keeps the theme beside it) and its
+    runtime's `UI.browser.isDark`, the editor's code colours (`CodeThemes`)
+  - **Flag:**  `prefers-color-scheme: dark` in code, `ui-dark` toggled by hand
+  - **Copies:**  the inline `<head>` script, written into every docs page and template:  it must run before
+    first paint, with no module;  `ThemePreference.HEAD_SCRIPT` is its source
 
 ### Timing
 

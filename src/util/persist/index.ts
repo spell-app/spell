@@ -1,6 +1,7 @@
 /**
  * Barrel for `spell/util/persist`:  what an app keeps for people --
- * their preferences across visits (`PrefStore`, and the places it keeps them),
+ * their preferences across visits (`PrefStore`, and the places it keeps them;
+ *   `ColorScheme`, the light / dark choice every Spell site shares),
  * and the history they undo and redo (`UndoStack`).
  * - Flattened into `spell/util`.
  * - GENERIC, like the files beside `../index.ts`:  nothing spell-specific.
@@ -21,4 +22,5 @@ export * from "./WaitedOnPlace"
 export * from "./DatabasePlace"
 export * from "./ServerPlace"
 export * from "./PrefStore"
+export * from "./ColorScheme"
 export * from "./UndoStack"

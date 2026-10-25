@@ -33,7 +33,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
   - `string.ts`, `number.ts`, `time.ts` and `color.ts` import nothing, so plain `node` loads them too,
     with their extension (`spell/util/time.ts`)
-  - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`
+  - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
+    `copyText()` (the clipboard, with the fallback VS Code's side bar needs)
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`
 - It sits UNDER every other package, and imports NONE of them.
   - `spell-ui` is published, and bundles what it imports from here (its `.d.ts` files inline it).
@@ -131,14 +132,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `DatabasePlace`:  the browser's IndexedDB, one database for the site, `spell-prefs`
       - `ServerPlace`:  the page server's `/api/prefs`, which spell-app's spaces answer, in the person's space
       - the protocol's types:  [persist.types.ts](persist/persist.types.ts)
+  - [ColorScheme](persist/ColorScheme.ts):  the light / dark choice, on `PrefStore` (epic `coherence` P12, C16).
+    - ONE key for every Spell site (`spell-site:scheme`), its old keys moved over once
+    - shown as `ui-light` / `ui-dark` on `<html>` and inline `color-scheme`;  follows the OS and other tabs
+    - ONE dark-mode query, `DARK_QUERY`, in [persist.types.ts](persist/persist.types.ts):
+      the kit's site header, Spell UI's `ThemePreference` and runtime, and the editor's code colours read it
   - [UndoStack](persist/UndoStack.ts):  undo and redo, with transactions and folding.
     - a transaction:  one step for everything an action does, waits included
     - its records say how to undo themselves, so it knows nothing of what's kept
     - On the reactive engine (`spell/util/reactive`), for its live titles:  the folder's one import from outside it.
-- GENERIC, like the files beside `index.ts`:  nothing spell-specific.
+- GENERIC, like the files beside `index.ts`:  nothing spell-specific,
+  except `ColorScheme`'s key and classes:  the one choice every Spell site shares, kept by both the kit and Spell UI.
   - The pref store imports nothing from outside the folder.
   - NOT in Spell UI's util barrel:  in its `core` bundle it cost every page 1.9 kB (`yarn measure`, 2026-10-24).
-    Spell UI's files that keep preferences import `spell/util/persist/PrefStore` by file.
+    Spell UI's files that keep preferences import `spell/util/persist/PrefStore` (or `ColorScheme`) by file.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `util`):  they use the browser's own storage.
 - Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written

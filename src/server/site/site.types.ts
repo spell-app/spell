@@ -100,49 +100,10 @@ export function docsArea(path: string, areas: readonly string[]): string | undef
 }
 
 /**
- * `localStorage` key of the chosen color scheme:  `light`, `dark`, or absent for the OS's.
- * - ONE key for every doc site, so a switch on one site holds on the others:
- *   Spell UI's `ThemePreference` reads and writes it too, as `DOCS_LOOK_KEYS.scheme`
- *   (spell-ui's `src/docs-components/docs-components.types.ts`)
- * - MUST stay equal:  `ui`'s `UIDocsThemes.test.tsx` pins it
+ * The name of the site header's `PrefStore`:  `spell-site:edit` (per tab) is its `edit`.
+ * - The chosen colour scheme, `spell-site:scheme`, is `ColorScheme`'s (`spell/util/persist`).
  */
-export const SCHEME_KEY = "spell-site:scheme"
-
-/** The name of the site header's `PrefStore`:  `SCHEME_KEY` is its `scheme`, `spell-site:edit` (per tab) its `edit`. */
 export const SITE_PREFS = "spell-site"
-/** The chosen color scheme's key in `SITE_PREFS`:  `SCHEME_KEY`. */
-export const SCHEME_PREF = "scheme"
-
-/**
- * Keys the scheme lived under before `SCHEME_KEY` (2026-10-04).
- * - Read once while `SCHEME_KEY` is absent, copied to it, then removed;  the first valid one wins.
- * - `spell-site:theme`:  this header's
- * - `spell-ui-site:scheme`:  Spell UI's site
- * - MUST equal `DOCS_LEGACY_SCHEME_KEYS` in `ui`'s `docs-components.types.ts`
- */
-export const LEGACY_SCHEME_KEYS = ["spell-site:theme", "spell-ui-site:scheme"] as const
-
-/** Media query of the OS's dark scheme:  what an absent `SCHEME_KEY` follows. */
-export const DARK_QUERY = "(prefers-color-scheme: dark)"
-
-/** A color scheme a page shows. */
-export type SiteScheme = "light" | "dark"
-
-/**
- * Classes on `<html>` that force a scheme:  Spell UI's (`ThemePreference`).
- * - the site header sets them too, and so does a page with its own light / dark switch (Spell App's pill)
- */
-export const SCHEME_CLASSES = { light: "ui-light", dark: "ui-dark" } as const satisfies Record<SiteScheme, string>
-
-/**
- * The scheme `classes` (`<html>`'s) force, or `undefined` when neither class is on (the page follows the OS).
- * - Why:  the site header's sun / moon shows what the page SHOWS, also when the page switched it itself.
- */
-export function forcedScheme(classes: { contains(token: string): boolean }): SiteScheme | undefined {
-  if (classes.contains(SCHEME_CLASSES.dark)) return "dark"
-  if (classes.contains(SCHEME_CLASSES.light)) return "light"
-  return undefined
-}
 
 /** Edit mode on for this tab:  its key in `SITE_PREFS`, kept per tab (`sessionStorage`'s `spell-site:edit`). */
 export const EDIT_PREF = "edit"
