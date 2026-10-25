@@ -302,9 +302,10 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
+| `spell spellx convert [projects...]` | writes each `.spell` file as spellx, the same program in tags, `Card.spell` => `Card.spellx` beside it;  never in the frozen test projects |
 
 <details>
-<summary>Every option of compile, lint, watch and format</summary>
+<summary>Every option of compile, lint, watch, format and spellx convert</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -318,6 +319,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
+| `spell spellx convert --dry-run` | writes nothing, prints each `.spellx` file instead |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
   ([spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
