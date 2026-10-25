@@ -253,15 +253,17 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   display: none;
 }
 /*
- * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, the text's own colour, no underline
+ * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, its tab's own text colour, no underline
  * (Owen, 2026-10-23:  "Lose underline under T")
+ * - NEVER a colour of its own:  a fixed dark ink read 1.4:1 on a selected tab's violet, a light one as little on
+ *   its lavender in dark (epic `debut` P16)
  * - the key tip under the item says what it does (`wireKeyTips()`)
  * - the item's letter mark (a section with no icon) shows only while the titles are hidden (below),
  *   so the letter never shows twice
  */
 .spell-toolbar-key {
   font-weight: 700;
-  color: var(--ui-text-dark, currentColor);
+  color: inherit;
   text-decoration: none;
 }
 /*
