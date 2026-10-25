@@ -115,8 +115,15 @@ export type AttributeSpec = {
 
   //////
   // What a form needs to edit it (epic `property-editor` P2):  all optional, read by `<ui-property>`.
-  // How ONE form shows it (groups, order, which control, hints, presets) is never here:  that's the form's page.
+  // How ONE form shows it (order, which control, hints, presets) is never here:  that's the form's page.
+  // Its group is, as every inspector shows it (epic `debut`, Owen 2026-10-25).
   //////
+
+  /**
+   * The section an inspector shows it in:  Name, Content, Appearance, Layout ... (`AttributeGroup`).
+   * - The same attribute name keeps one group on every tag, unless it means something else there.
+   */
+  group?: AttributeGroup
 
   /** The value's own type, when its `kind` doesn't say it:  a `json` attribute holding a list, say. */
   type?: ValueType
@@ -158,6 +165,32 @@ export type AttributeSpec = {
  * - `thing`:  a nested thing, with its own `attributesOf`
  * - `data`:  anything else (JSON), edited as text
  */
+/**
+ * The sections an inspector shows a tag's attributes in, in this order (`ATTRIBUTE_GROUPS`):
+ * - name:  what it's called (`name`, `label`, `title`)
+ * - content:  what it shows (`icon`, `description`, `image`)
+ * - appearance:  how it looks (`color`, `style`, `size`)
+ * - layout:  where it sits and the room it takes (`fluid`, `align`, `padding`)
+ * - states:  what it's doing now (`active`, `disabled`, `open`)
+ * - form:  its value, and the rules on it (`value`, `required`, `min`)
+ * - link:  where it goes or loads from (`href`, `source`)
+ * - behaviour:  how it acts (`closable`, `timeout`, `autoplay`)
+ * - advanced:  its machinery, folded away (`debug`, `page-styles`)
+ */
+export const ATTRIBUTE_GROUPS = [
+  "name",
+  "content",
+  "appearance",
+  "layout",
+  "states",
+  "form",
+  "link",
+  "behaviour",
+  "advanced"
+] as const
+/** One of them. */
+export type AttributeGroup = (typeof ATTRIBUTE_GROUPS)[number]
+
 export type ValueType = "text" | "number" | "boolean" | "date" | "choice" | "list" | "thing" | "data"
 
 /**
