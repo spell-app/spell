@@ -773,7 +773,10 @@ export class ReviewClient {
   }
 
   /** Where the backups are kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
-  private backupsKept = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
+  private backupsKept = new StoragePlace({
+    storage: () => this.options.storage ?? undefined,
+    description: "this browser"
+  })
 
   /** The page's backup key:  the old runtime's, so its backups are found. */
   private get backupKey(): string {

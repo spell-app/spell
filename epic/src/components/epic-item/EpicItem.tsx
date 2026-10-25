@@ -53,6 +53,7 @@ import {
   TITLE,
   TOGGLE,
   UNDER_LINE,
+  UNDER_TITLE,
   UNFOLDED,
   type ChipMark,
   type EpicItemVocabulary,
@@ -164,6 +165,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** Its own commits show (its git icon pressed). */
   @E.state accessor showCommits = false
+
+  /** Its line sits right under the section titles stuck above it, scrolled there:  its top corners square (`watchScroll()`). */
+  @E.state accessor isUnderTitle = false
 
   /** The git icon's glyph. */
   readonly gitGlyph = new E.IconGlyph({ owner: this, name: () => "git" })
@@ -433,7 +437,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.limit && LIMIT,
       this.hasDetails() && HAS_DETAILS,
       this.boxUnderLine() && NOTE_OPEN,
-      this.isOpen() && UNFOLDED
+      this.isOpen() && UNFOLDED,
+      this.isUnderTitle && UNDER_TITLE
     ]
       .filter(Boolean)
       .join(" ")
@@ -854,6 +859,39 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   @E.on("beforematch", { target: "renderRoot" })
   protected onBeforeMatch() {
     this.reveal()
+  }
+
+  /**
+   * While connected, follow the page's scroll:  is its line right under the section titles stuck above it
+   * (`isUnderTitle`)?  Then its top corners are square (Owen, 2026-10-24:  a rounded run top there showed the page
+   * through, under the stuck title).
+   * - where the titles end:  the line's own `top`, the stack it sticks under once open (`EpicItem.css`)
+   * - read once a frame at most, and only while its run rounds its top (`--epic-item-top-radius`, its section's)
+   */
+  @E.whileConnected
+  protected watchScroll() {
+    const listeners = new AbortController()
+    let pending = false
+    const measure = () => {
+      pending = false
+      const line = this.lineBox
+      const rounded = getComputedStyle(this.domElement).getPropertyValue("--epic-item-top-radius").trim()
+      if (!line || !rounded) {
+        this.isUnderTitle = false
+        return
+      }
+      const stack = parseFloat(getComputedStyle(line).top) || 0
+      const box = line.getBoundingClientRect()
+      this.isUnderTitle = box.top <= stack + 1 && box.bottom > stack
+    }
+    const onScroll = () => {
+      if (pending) return
+      pending = true
+      E.beforeNextPaint(measure)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true, signal: listeners.signal })
+    onScroll()
+    return () => listeners.abort()
   }
 
   /** The address's own `#hash` was followed:  an item that moves doesn't open for it again as it reconnects. */

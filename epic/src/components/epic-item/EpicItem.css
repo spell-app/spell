@@ -65,6 +65,8 @@
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
     border-end-end-radius: var(--_epic-item-bottom-radius);
+    /* the stack it sticks under once open:  also where `watchScroll()` reads the titles end, folded or not */
+    top: var(--epic-stack, calc(var(--spell-site-header-height, 0px) + var(--spell-stack, 0px)));
     background: var(--_epic-item-band);
     font-size: var(--_epic-item-line-size);
     line-height: var(--_epic-item-line-height);
@@ -79,6 +81,11 @@
     position: sticky;
     z-index: 1;
     top: var(--epic-stack, calc(var(--spell-site-header-height, 0px) + var(--spell-stack, 0px)));
+  }
+  /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
+  .item.under-title > .line {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
   }
   /* one line tall, its box centred:  what sits in it centres on the title's first line */
   .cell {

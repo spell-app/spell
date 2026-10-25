@@ -98,6 +98,7 @@ export const UNDER_LINE = "under-line"
 /** Class words on the item box:  it has details;  it's unfolded. */
 export const HAS_DETAILS = "has-details"
 export const UNFOLDED = "unfolded"
+export const UNDER_TITLE = "under-title"
 
 /** Class word on the item box:  no details, its note box open under the line (its chevron folds it away). */
 export const NOTE_OPEN = "note-open"
