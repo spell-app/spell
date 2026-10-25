@@ -90,3 +90,27 @@ describe("TocIndex.scan() over a `<ui-docs-api>`'s shadow root", () => {
 function entryOf(id: string, entries: TocEntry[] = []): TocEntry {
   return { id, text: id, target: document.createElement("div"), entries }
 }
+
+describe("TocIndex.reached()", () => {
+  test("names the last target whose top has reached its line, skipping the hidden;  none above the first", () => {
+    const box = document.createElement("div")
+    box.innerHTML = `<p id="a" style="height: 50px"></p><p id="b" hidden></p><p id="c" style="height: 50px"></p>`
+    document.body.append(box)
+    try {
+      const targets = [...box.children]
+      const topOf = (id: string) => document.getElementById(id)!.getBoundingClientRect().top
+      expect(TocIndex.reached(targets, () => topOf("a") - 1)).toBeUndefined()
+      expect(TocIndex.reached(targets, () => topOf("a"))?.id).toBe("a")
+      expect(TocIndex.reached(targets, () => topOf("c") + 1)?.id).toBe("c")
+      expect(
+        TocIndex.reached(
+          targets,
+          () => topOf("c"),
+          (target) => target.id !== "c"
+        )?.id
+      ).toBe("a")
+    } finally {
+      box.remove()
+    }
+  })
+})

@@ -14,6 +14,7 @@ import {
   type SiteFamily,
   type SitePageSeed,
   type SitePagesFile,
+  type SiteSet,
   type SiteTag,
   type SiteTagPage
 } from "spell-ui/docs-components/docs-components.types"
@@ -46,6 +47,8 @@ import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
  *   - titles are pages.json5's `themes`, seeded once per new sheet
  * - And the search file, `docs/__data/search.json5` (`searchText()`, `src/tools/SiteSearchBuilder.ts`):
  *   every page's sections, read from the pages' markup.
+ * - Another component set's data (`set`, `forSet()`):  its own groups as the topics, its own side-column links,
+ *   its pages one flat folder;  the brand's, Epic UI's and App UI's are built so.
  * - Deterministic:  sorted, no dates, so a rebuild with nothing changed writes the same bytes.
  * - Node only;  imports `src/` data only (vocabularies, `ValueSets`, the site data's types), never the elements.
  ****************/
@@ -180,7 +183,35 @@ export class SiteDataBuilder {
       foundation,
       themes: themes.read(seeded.themes)
     }
-    return { data, pages: seeded }
+    return { data: this.options.set ? SiteDataBuilder.forSet(data, this.options.set) : data, pages: seeded }
+  }
+
+  /**
+   * `data` made a component set's (`set`, its hand-kept `pages.json5`):
+   * - its topics:  the set's groups, in order, then Other when a tag is in none
+   * - each tag's topic:  the group listing it, else a group listing no tags that its own `topics` name, else Other
+   * - each tag's page in the set's ONE flat folder (`components/ui-x.html` => `ui-x.html`)
+   * - its side column's own links, `nav`
+   * - Static:  pure;  Epic UI's and App UI's data, built from their own sources, go through it too.
+   */
+  static forSet(data: SiteDataFile, { groups, nav }: SiteSet): SiteDataFile {
+    const tags = [...data.components, ...data.docs]
+    const listing = new Map(groups.flatMap((group) => (group.tags ?? []).map((tag) => [tag, group.id] as const)))
+    const groupOf = (tag: SiteTag) =>
+      listing.get(tag.tag) ?? groups.find((group) => !group.tags && tag.topics.includes(group.id))?.id ?? OTHER.id
+    const hasOthers = tags.some((tag) => groupOf(tag) === OTHER.id)
+    const forTag = (tag: SiteTag): SiteTag => ({
+      ...tag,
+      topics: [groupOf(tag)],
+      ...(tag.href && { href: tag.href.replace(/^components\//, "") })
+    })
+    return {
+      ...data,
+      topics: [...groups, ...(hasOthers ? [OTHER] : [])].map(({ id, title }) => ({ id, title })),
+      components: data.components.map(forTag),
+      docs: data.docs.map(forTag),
+      nav
+    }
   }
 
   /** `value` as the files are written:  2-space JSON, a final newline. */
@@ -386,7 +417,12 @@ export type SiteDataBuilderProps = {
   data?: string
   /** the site's pages, as `docs/` (`SITE_PAGES`):  what `search.json5` is read from */
   pages?: string
+  /** another component set's own facts:  `build()` makes the data the set's (`forSet()`) */
+  set?: SiteSet
 }
+
+/** The group of a set's tag no group files. */
+const OTHER = { id: "other", title: "Other" } as const
 
 /** A tag before its family is known. */
 type RawTag = Omit<SiteTag, "mainTag" | "main" | "page" | "href">

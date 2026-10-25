@@ -363,7 +363,7 @@ export class SiteRouter {
   /** Resolves once `include`'s next markup is in;  rejects on its `ui-error` or after `TIMEOUT_MS`. */
   private static inserted(include: HTMLElement, href: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => done(timedOut()), TIMEOUT_MS)
+      const timer = E.after(TIMEOUT_MS / 1000, () => done(timedOut()))
       include.addEventListener("ui-drawing", onInsert)
       include.addEventListener("ui-error", onError)
 
@@ -393,7 +393,7 @@ export class SiteRouter {
 
       /** Settle once, dropping the listeners and the timer. */
       function done(error?: Error) {
-        clearTimeout(timer)
+        timer.cancel()
         include.removeEventListener("ui-drawing", onInsert)
         include.removeEventListener("ui-error", onError)
         if (error) reject(error)

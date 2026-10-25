@@ -562,7 +562,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
     ([every variable it reads](README-site.md#environment-variables))
   - ONE printer:  the kit's [`Terminal`](https://github.com/spell-app/spell/blob/main/src/element-tools/Terminal.ts) (`spell/element-tools/Terminal`)
   - ONE dependency finder:  the kit's [`NodePackage`](https://github.com/spell-app/spell/blob/main/src/element-tools/NodePackage.ts)
-  - ONE write-or-`--check` for generated files:  [`generatedFiles`](src/tools/generatedFiles.ts)
+  - ONE write-or-`--check` for generated files:  the kit's [`generatedFiles`](https://github.com/spell-app/spell/blob/main/src/element-tools/generatedFiles.ts) (`spell/element-tools/generatedFiles`)
 
 </details>
 

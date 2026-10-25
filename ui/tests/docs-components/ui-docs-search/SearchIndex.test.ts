@@ -113,16 +113,16 @@ describe("SearchIndex.wordStart()", () => {
   })
 })
 
-describe("SearchIndex.trail()", () => {
+describe("PageOutline.trail()", () => {
   test("names a section's tab, then the sections around it, outermost first", () => {
     const sections = [
       { title: "Variations", tab: "examples" },
       { title: "Circular", parent: 0 },
       { title: "Small", parent: 1 }
     ]
-    expect(SearchIndex.trail(sections, 2, { examples: "Examples" })).toEqual(["Examples", "Variations", "Circular"])
-    expect(SearchIndex.trail(sections, 0, { examples: "Examples" })).toEqual(["Examples"])
-    expect(SearchIndex.trail(sections, 1)).toEqual(["Variations"])
+    expect(PageOutline.trail(sections, 2, { examples: "Examples" })).toEqual(["Examples", "Variations", "Circular"])
+    expect(PageOutline.trail(sections, 0, { examples: "Examples" })).toEqual(["Examples"])
+    expect(PageOutline.trail(sections, 1)).toEqual(["Variations"])
   })
 })
 

@@ -258,7 +258,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - the site bundle's build, `site-bundle.ts`, watched by `site-dev.ts`
   - `site-check.ts`, `tokens-alias.ts`, `design-build.ts`
   - What several scripts share:
-    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  write-or-`--check`, `vp fmt`, a page's status words
+    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  `vp fmt`, a page's status words;
+      write-or-`--check` and splicing:  the kit's `spell/element-tools/generatedFiles`
       (escaping markup:  the kit's `escapeHTML()`, `spell/util/string`)
       - in `src/tools/` since epic `repo-split` P14:  a test reads it too, and only `src/` is imported
     - data:  `iconExtras.ts`, a camelCase helper file here, run by none

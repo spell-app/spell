@@ -1,5 +1,6 @@
 import { withoutAccents } from "spell-ui/util"
 import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import { PageOutline } from "./PageOutline"
 import {
   GROUP_LIMIT,
   INSIDE_MIN,
@@ -72,7 +73,7 @@ export class SearchIndex {
         const entry: SearchEntry = {
           kind: "section",
           title: section.title,
-          context: [page.title, ...SearchIndex.trail(page.sections, at, page.tabs)].join(TRAIL),
+          context: [page.title, ...PageOutline.trail(page.sections, at, page.tabs)].join(TRAIL),
           href: `${page.path}#${section.id}`,
           terms: [page.title, section.id]
         }
@@ -273,26 +274,6 @@ export class SearchIndex {
       href: `${page}#${tag.tag}`,
       terms: [tag.tag, tag.name, ...(attribute.aliases ?? [])]
     }))
-  }
-
-  /**
-   * Where a section sits:  its tab's label, then the titles of the sections around it, outermost first (not its own).
-   * - `sections` are a page's (`SiteSearchSection`s or the live outline's), `at` the section's index.
-   */
-  static trail(
-    sections: readonly { title: string; parent?: number; tab?: string }[],
-    at: number,
-    tabs?: Readonly<Record<string, string>>
-  ): string[] {
-    const titles: string[] = []
-    let tab: string | undefined
-    for (let index = sections[at]!.parent; index !== undefined; index = sections[index]!.parent) {
-      titles.unshift(sections[index]!.title)
-      tab = sections[index]!.tab ?? tab
-    }
-    tab = sections[at]!.parent === undefined ? sections[at]!.tab : tab
-    const label = tab && tabs && Object.hasOwn(tabs, tab) ? tabs[tab] : undefined
-    return label ? [label, ...titles] : titles
   }
 }
 

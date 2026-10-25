@@ -97,6 +97,28 @@ export type SiteNav = {
   readonly titles?: { readonly start?: string; readonly components?: string; readonly foundation?: string }
 }
 
+/**
+ * A component set's own facts, hand-kept in its `pages.json5`:  its side column's groups and links
+ * (Spell UI's `SiteDataBuilder` `set`, `SiteDataBuilder.forSet()`).
+ * - Epic UI's, the brand's, App UI's
+ */
+export type SiteSet = {
+  /** the side column's groups, in order:  the data's topics */
+  readonly groups: readonly SiteSetGroup[]
+  /** the side column's own links and band titles */
+  readonly nav: SiteNav
+}
+
+/** One group of a set's side column:  a topic, in the site data's words. */
+export type SiteSetGroup = {
+  /** id, as a tag's `topics` names it, e.g. `menus and dialogs` */
+  readonly id: string
+  /** what the side column shows, e.g. `Menus and dialogs` */
+  readonly title: string
+  /** the tags filed under it;  none:  the tags whose own `topics` name it */
+  readonly tags?: readonly string[]
+}
+
 /** One of a site's own links in `<ui-docs-nav>`. */
 export type SiteNavPage = {
   /** what `current` names it by:  its file name without `.html`, e.g. `index` */
