@@ -53,7 +53,7 @@ export type ReviewKind = (typeof REVIEW_KINDS)[number]
 /**
  * The colours of the review controls (decision Q20 of epic `epic-components`, Owen, 2026-10-08):
  * - green:  decided or done (Approve, Make Todo, a pick;  a todo's plane, do it in the next phase)
- * - blue:  do it now, or Claude is on it (Revisit, Do Now)
+ * - blue:  an ask of Claude, or Claude is on it (Revisit)
  * - grey:  no longer relevant (a todo's x, drop it;  every other note box's x, skip this:  Owen, 2026-10-09)
  */
 export type ReviewColor = "green" | "blue" | "grey"
@@ -64,8 +64,8 @@ export type ReviewColor = "green" | "blue" | "grey"
  * - `none`:  a grey outline, available
  *   - also once Claude has handled the mark:
  *     the buttons CLEAR, and the id chip shows the result (green decided, yellow open, red needs Owen)
- * - `dashed`:  dashed in its colour:  Owen pressed it, not committed (not sent;  a Do Now not taken yet)
- * - `outline`:  outlined in its colour:  recorded (sent;  a Do Now taken), not done yet, or in progress
+ * - `dashed`:  dashed in its colour:  Owen pressed it, not committed (not sent;  a revisit-now not taken yet)
+ * - `outline`:  outlined in its colour:  recorded (sent;  a revisit-now taken), not done yet, or in progress
  * - never solid:  solid is the chips' (and the Choose pill's, once applied)
  */
 export type ReviewFill = "none" | "dashed" | "outline"
@@ -73,10 +73,9 @@ export type ReviewFill = "none" | "dashed" | "outline"
 /** One review button:  its action, colour, icon, and its name and tooltip texts. */
 export type ReviewButtonSpec = {
   /**
-   * what it does (`ReviewClient.press()`;  `details` is Do Now, the inbox's name for an immediate request;
-   * `next` and `drop` a todo's plane and x)
+   * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "details" | "next" | "drop" | "defer" | "accept" | "reopen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -86,7 +85,6 @@ export type ReviewButtonSpec = {
     | "approve"
     | "todo"
     | "revisit"
-    | "doNow"
     | "next"
     | "revisitNote"
     | "drop"
@@ -100,7 +98,6 @@ export type ReviewButtonSpec = {
     | "approveTip"
     | "todoTip"
     | "revisitTip"
-    | "doNowTip"
     | "nextTip"
     | "revisitNoteTip"
     | "dropTip"
@@ -111,19 +108,17 @@ export type ReviewButtonSpec = {
 }
 
 /**
- * The line's four review buttons, in their order (decision Q20;  reordered, Owen, 2026-10-25:  "`todo` is first, then
- * `revisit`, then `check` - gap - wand"):
- * - Make Todo, Revisit, Approve (the GROUP:  what Owen makes of it)
- * - then Do Now apart, with the magic wand (the page header's Review Now had it too, until epic `epic-engine` P20)
- *   - Owen, 2026-10-09:  it was a paper plane, which a todo's "next phase" button wears now
- *   - an action, not a state:  it replaces Add Details Now and the note box's Do Now
+ * The line's three review buttons, in their order (decision Q20;  reordered, Owen, 2026-10-25:  "`todo` is first, then
+ * `revisit`, then `check`"):
+ * - Make Todo, Revisit, Approve:  ONE group, what Owen makes of it
  * - Every one shows at every step:  a mark done can still be followed by another.
+ * - No Do Now (the wand) any more (Owen, 2026-10-25:  "In practice, I'm never using the wand.  Should we ditch it?").
+ *   - The inbox still takes a `details` request (an old mark, a page that still sends one):  only the button went.
  */
 export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "todo", color: "green", icon: "list check", label: "todo", tip: "todoTip" },
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
-  { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" },
-  { action: "details", color: "blue", icon: "wand magic sparkles", label: "doNow", tip: "doNowTip" }
+  { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" }
 ]
 
 /**
@@ -132,7 +127,7 @@ export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
  *   `inbox apply` queues it into the first phase still to do
  * - Revisit (blue):  Owen is adding a note for Claude, in the box
  * - the x (`drop`, grey:  no longer relevant):  drop it;  `inbox apply` cancels it
- * - no Approve, Make Todo or Do Now:  a todo is already the follow-up
+ * - no Approve or Make Todo:  a todo is already the follow-up
  */
 export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "next", color: "green", icon: "paper plane", label: "next", tip: "nextTip" },
@@ -142,7 +137,7 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
 
 /**
  * A part of the plan's review buttons -- an Overview sub-section's (decision Q14), a phase's, the summary's:
- * Revisit, Make Todo, Do Now -- notes on the plan's parts, not sign-off, so no Approve.
+ * Make Todo, Revisit -- notes on the plan's parts, not sign-off, so no Approve.
  */
 export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((spec) => spec.action !== "approve")
 
@@ -270,7 +265,7 @@ export type NoteButtonSpec = {
  * - the x (`skip`, grey:  no longer relevant):  nothing to do here;
  *   `inbox apply` marks it reviewed and keeps a typed note as Owen's reply
  * - every box but a todo's (below):  an item's, an Overview section's, a phase's, the summary's
- * - no Do Now here any more (Q20):  the line's Do Now takes the note in the box with it
+ * - no Do Now:  gone from the box (Q20), then from the line (Owen, 2026-10-25)
  */
 export const NOTE_BUTTONS: readonly NoteButtonSpec[] = [
   { how: "soon", color: "blue", icon: "history", label: "boxSoon", tip: "boxSoonTip" },
@@ -333,7 +328,6 @@ export const DO_IT_ID = /^[jc]\d+$/i
 /** Class names inside the shadow root (`EpicReview.css`). */
 export const REVIEW_CONTROLS = "review-controls"
 export const REVIEW_GROUP = "review-group"
-export const REVIEW_DO_NOW = "review-do-now"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"
@@ -386,7 +380,7 @@ export const REVIEW_PARTS = [
     name: "review-buttons",
     description:
       "The review buttons (P9, an `<epic-review>`):  the note bubble, a pick's letter, Approve / Revisit / Make " +
-      "Todo, then Do Now (the wand);  a todo's:  the plane (next phase), Revisit, the x (drop).  " +
+      "Todo;  a todo's:  the plane (next phase), Revisit, the x (drop).  " +
       "Only while the page is reviewed (served by the page server, its inbox answering)."
   },
   {
@@ -413,7 +407,6 @@ export const REVIEW_NAME_TEXTS = [
     description: "Review button:  its name (a todo, before epic `epic-engine` P32)."
   },
   { key: "revisit", text: "Revisit", description: "Review button:  its name." },
-  { key: "doNow", text: "Do Now", description: "Review button:  its name." },
   { key: "next", text: "Do it in the next phase", description: "A todo's review button (the plane):  its name." },
   {
     key: "revisitNote",
@@ -454,11 +447,6 @@ export const REVIEW_TEXTS = [
   },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
   {
-    key: "doNowTip",
-    text: "Claude takes it at once:  answers the note in its box, or adds details",
-    description: "Review button:  what Do Now does."
-  },
-  {
     key: "nextTip",
     text: "Queued into the next phase still to do, once Claude applies it",
     description: "A todo's review button:  what the plane does."
@@ -493,7 +481,11 @@ export const REVIEW_TEXTS = [
     text: "waiting for a session:  {why}",
     description: "A request queued with nobody listening;  `why`:  what the wake did, or that nobody is reviewing."
   },
-  { key: "asked", text: "asked · waiting for Claude to take it", description: "A Do Now not taken yet." },
+  {
+    key: "asked",
+    text: "asked · waiting for Claude to take it",
+    description: "A request for now (a revisit now) not taken yet."
+  },
   { key: "working", text: "Claude is on it · click to call it off", description: "A button whose work is under way." },
   { key: "callOff", text: "{label}:  click to call it off", description: "A spinning button's tooltip." },
   { key: "buttonTip", text: "{label}:  {what}", description: "A review button's tooltip:  its name, what it does." },

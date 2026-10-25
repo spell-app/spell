@@ -34,7 +34,7 @@ export const epicPhaseVocabulary = {
     "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, " +
     "Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
     "description), then Done, commits, Files, Verify and To review, as children in that order.  " +
-    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Revisit, Make Todo, Do Now.",
+    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
   attributes: [
     {
       name: "id",

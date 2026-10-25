@@ -46,7 +46,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
  *   (epic `airplane` P2;  `<epic-review buttons="part">`):
- *   - Revisit, Make Todo, Do Now at its title's end (no Approve:  notes on the plan, not sign-off)
+ *   - Make Todo, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
  *   - Revisit and Edit unfold it (`epic-note-showing`)
@@ -248,7 +248,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   // ## Review
   ////////////////
 
-  /** The review buttons at the title's end:  Revisit, Make Todo, Do Now;  proposed, Looks good and Defer. */
+  /** The review buttons at the title's end:  Make Todo, Revisit;  proposed, Looks good and Defer. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
   }

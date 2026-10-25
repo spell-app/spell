@@ -395,7 +395,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - its Send wakes `/epic review SAGA:/<id>`
     - the page server's review routes ([reviewRoutes.ts](tool/reviewRoutes.ts)) and what they call:
       - `ReviewInbox`:  the inbox file
-      - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
+      - `ReviewStart`:  the pill's start, and WAKING the epic when Send finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
     - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR, one beside every session
       ([monitors.json](../monitors/monitors.json);  epic `epic-engine` P18):
@@ -1134,7 +1134,7 @@ In `tools/`:
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
       - the page header and its toolbar's tools:
-        Send and its countdown while reviewed (`<epic-send-buttons>`), the step label, git
+        Send while reviewed (`<epic-send-buttons>`;  no wand or countdown since 2026-10-25), the step label, git
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
       - every review control on the page's ONE review client
@@ -1441,7 +1441,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - else Revisit, Make Caveat, Do Now:  notes on the plan, no Approve
+    - else Make Caveat, Revisit:  notes on the plan, no Approve
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
@@ -1480,7 +1480,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
     P19):  live exactly while that process runs, with no heartbeat.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
-    - Send (or its countdown) or Do Now with nobody listening wakes it, inside the request:
+    - Send with nobody listening wakes it, inside the request:
       `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
     - Claimed under the inbox's lock (`claimWake()`):  two Sends at once wake once.
     - It stands 10 minutes (`WAKE_COOLDOWN_MS`), or until a session listens (`setListening()` clears it).
@@ -1496,7 +1496,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST now { page, id, action, note? }`:  Add Details, or revisit now, queued on `now`
       - revisit now keeps the item's pick
     - `POST cancel { page, id }`:  "nevermind"
-    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20),
+    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
       every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
     - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
@@ -1747,7 +1747,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - a block with a TITLE ROW:  in that row, its `actions` slot, never over a button
         - a docs section:  `<ui-section>`'s own slot (`.at-section`)
         - an epic page's Overview, item, update (with a date), aside and code block (`.at-title`, `TITLE_ROW_BLOCKS`):
-          after the title, before the block's own buttons (review pills, Do Now, the date, the fold)
+          after the title, before the block's own buttons (review pills, the date, the fold)
         - every epic element with a title row has the slot:  [Fold.types.ts](components/epic-item/Fold.types.ts)
       - a block with NO title row (a paragraph, a table, a list, a message, cards, a phase's field, the summary):
         first in the block's ACTIONS ROW (`.at-block`;  `addBlockAction()`, epic `epic-engine` I26)
@@ -2280,12 +2280,12 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - Their header comments have the details.
   - Every one serves its copies from a page server of its own,
     [DemoServer.ts](demo/DemoServer.ts) (epic `epic-engine` I11):  spell-epic's `EpicServer`, this checkout's code.
-    - It WAKES NOBODY:  a Send or Do Now with nobody listening reaches a stubbed wake, never a window or a session.
+    - It WAKES NOBODY:  a Send with nobody listening reaches a stubbed wake, never a window or a session.
     - Airplane mode is off for it, whatever the machine's switch says.
   - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
-      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
-      Add Details Now, Send, the countdown's send.
+      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, a typed revisit,
+      Send.
     - No control past the window, or over a title, at 280 / 900px, light and dark.
     - It refuses while the copy's inbox file exists.
     - Run it after touching the review controls or `ReviewClient`.

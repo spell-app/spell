@@ -317,7 +317,7 @@ element takes its colour from this table, never a colour that means something el
 | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
 | yellow | open, still undecided                       | an open caveat or test (a caveat a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
-| blue   | do it now, or Claude is working on it       | Do Now, Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); an epic in progress; a goals topic "building" |
+| blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); an epic in progress; a goals topic "building" |
 | green  | decided or done (however long ago)          | Approve, Make Caveat, a caveat's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done, the Done status card (filled), the Noted status card (outlined: your choice recorded, nothing built yet); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
 | orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen; "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | Claude's voice                              | his reply cards; "recommended" (a thumbs-up, no word)                                                                                                                                                               |
@@ -375,7 +375,6 @@ your pick) chip waits on you, and only those (the toolbar counts them).
 | a review's "do it" (`queue <id> "work"`)           | green  | --               | queued: outlined until done                                       | green, once done                                               |
 | a caveat's x, "drop it"                            | grey   | pressed          | sent                                                              | grey, canceled                                                 |
 | Revisit, with a note                               | blue   | pressed          | sent: Claude talking it over                                      | yellow (talked over, still open); orange (Claude answered with options: your pick); green if decided |
-| Do Now (the wand)                                  | blue   | waiting to be taken | Claude's agent on it                                           | the state's colour                                             |
 | work Claude took (an Underway card)                | blue   | --               | outlined until the card is Done or Noted                          | the state's colour                                             |
 | a new caveat / question from the page              | its section's new row | not sent | sent                                                     | the new item's own chip (a question red, a caveat yellow)      |
 | urgent / not urgent (clicking the chip)            | red / yellow | a dashed ring | --                                                        | solid red / yellow                                             |
@@ -388,12 +387,13 @@ so the pick stays in sight.
 
 On an item's line, ONE group, in this order:
 
-1. Approve (check), green
+1. Make Caveat (list check), green:  a new caveat, work to follow it up
 2. Revisit (history), blue
-3. Make Caveat (list check), green:  a new caveat, work to follow it up
+3. Approve (check), green
 
-Then, APART from the group, Do Now (the magic wand:  Owen, 2026-10-09;  it was a paper plane), blue: it replaces Add Details Now on the line, and the note box's "now". An item Claude has answered or done
-keeps the three-button group, so Owen can still approve it.
+(Owen, 2026-10-25:  "`todo` is first, then `revisit`, then `check`".)  No Do Now (the wand) since that day:  "In
+practice, I'm never using the wand";  the inbox still takes an older page's request for now. An item Claude has
+answered or done keeps the three-button group, so Owen can still approve it.
 
 The NOTE BOX (every one but a work caveat's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
 buttons:  Revisit Later (history), blue, and Skip This (x), grey (Owen, 2026-10-09:  the x replaced the box's Make
@@ -402,8 +402,8 @@ with the note typed (or none);  no line button wears it, the id chip does, grey.
 nothing else (an open question stays open, no status card), the note kept as Owen's `<epic-reply re="skip">`;  on a
 phase, the summary or an Overview sub-section, logged and the note kept;  on a work caveat, as `drop`.
 
-A WORK caveat's line is different (no `limit`;  a todo before P32;  Owen, 2026-10-09):  ONE group, no Approve, Make
-Caveat or Do Now:
+A WORK caveat's line is different (no `limit`;  a todo before P32;  Owen, 2026-10-09):  ONE group, no Approve or Make
+Caveat:
 
 1. Do it in the next phase (paper plane), green:  `inbox apply` queues it into the first phase still to do
    (`queue <name>#<id> "P10 · <name>"`, a Noted card "Queued for P10 · ...";  no phase to do:  "the next phase");
@@ -428,7 +428,7 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet: your turn to pick      |
 | `attention` | red    | an open question; an open judgement call or issue not reviewed, unless `calm` (not urgent)   |
 | `recent`    | green  | open, settled by a review: approved as it stands, or made a caveat                           |
-| `open`      | yellow | anything else open: still undecided, not urgent (caveats, tests; reviewed issues and judgement calls; a revisit or Do Now Claude answered) |
+| `open`      | yellow | anything else open: still undecided, not urgent (caveats, tests; reviewed issues and judgement calls; a revisit or request for now Claude answered) |
 
 - Green across the board for what's decided; grey only for what no longer matters (Owen, 2026-10-08). Neither age
   nor a `/bedtime` run colours a chip any more.
@@ -555,13 +555,13 @@ spell-epic's `src/AGENTS.md`, "Review inbox". NEVER change its data by hand: go 
 (`DataFile`, epic `epic-workflow` P21), as in every data file the tooling keeps.
 
 The summary and every phase take marks too (epic `airplane` P2), as an Overview sub-section does: Revisit (with a
-note), Make Caveat, Do Now, no Approve; the summary is keyed `summary` (it has no id), a phase by its id (`p3`). And
+note), Make Caveat, no Approve; the summary is keyed `summary` (it has no id), a phase by its id (`p3`). And
 Owen can ask for a NEW caveat or question from the page: the `+` in the page header, or New caveat / New question at
 the end of the Caveats and Questions sections, opens a small form (caveat or question, title, note, what it's about). It
 waits in the inbox as a mark under its own key, `new1`, `new2` ... (`{ action: "new", kind, title, note?, near? }`,
 `POST new`), drawn at the end of its section until made (Edit, Remove), and goes with the next send like any mark.
-All of it works with no session listening: the marks wait, dashed, until Send (or its countdown) or Do Now wakes the
-epic (below).
+All of it works with no session listening: the marks wait, dashed, until Send wakes the epic
+(below).
 
 Owen's TEST RUN (epic `epic-engine` P4): the page steps him through the epic's open tests one at a time, in the
 Review tab ("Start testing" on the To test section, or `epic test <name>`;  `epic test --all` for every epic's, in
@@ -573,13 +573,14 @@ any other:
 - only on a test;  `epic inbox <name>` and `wait` print each with its result, note and screenshot
 
 COUNTDOWN MODE (the page header's wand, beside Send; epic `epic-engine` P20, in place of `windows-and-review` P4's
-Review Now): on by default, it sends 2 minutes after Owen stops typing, clicking and scrolling, a ring draining round
+Review Now) is NOT DRAWN since Owen, 2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back
+later"):  Send alone, the plane filled blue until he presses it;  `<epic-send-buttons wand>` brings it back.  It was on by default, it sends 2 minutes after Owen stops typing, clicking and scrolling, a ring draining round
 the wand. That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into
 a request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did: the listening session
 answers them all at once, by background agents, into the items. Off, the paper plane is filled blue until he presses
 it. Typing in a note box turns its Revisit on at the first key (`ReviewClient.saveTyped()`), the box staying open.
 
-WAKING the epic (epic `epic-workflow` P16): Send (or its countdown) or Do Now while NO session listens makes the page
+WAKING the epic (epic `epic-workflow` P16): Send while NO session listens makes the page
 server wake the epic, inside that request (no process runs while Owen isn't working; `ReviewStart.changeAndWake()`):
 
 - who, first match wins: the ONE running session titled for the epic (`🚧 <epic>`) gets `/epic review <epic>` typed
@@ -592,7 +593,7 @@ server wake the epic, inside that request (no process runs while Owen isn't work
   two Sends at once (the epic page and one of its guides) wake once; a second press says "Already ... at 17:32"
 - no wake when several sessions are titled for the epic, in airplane mode, or for a Send with nothing new; the
   pill's click still types the command on purpose
-- a Do Now waiting with nobody listening says "waiting for a session" (its tooltip), the usual spinner once taken
+- a revisit now waiting with nobody listening says "waiting for a session" (its tooltip), the usual spinner once taken
 
 How a `/epic review` session takes the marks (it wakes when a background command it started ends, or when the page
 server types `/epic review` into it, above):

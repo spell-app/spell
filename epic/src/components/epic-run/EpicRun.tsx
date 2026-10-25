@@ -34,7 +34,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - its progress:  the latest line, then every line, folded;  with passes, only the fold (the card is the progress)
  *   - the table:  the command's columns' heads and the answer's, then a row per thing to answer, `<epic-run-row>`,
  *     each given its row, the columns and Owen's answer so far
- *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send (no countdown:  `manual`;  a command carries on with exactly what was sent)
+ *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send (no countdown, as every Send now;  a command carries on with exactly what was sent)
  *     (`<epic-send-buttons>`, blue by the fill rule), and why a read, save or Send failed
  * - A row's answer (`epic-run-answered`) goes to the form, which saves it:  a keystroke half a second later, a pick or a
  *   tick at once.
@@ -409,7 +409,6 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
             state={SEND_STATES_OF[this.fill]}
             busy={this.isSending() ? "" : undefined}
             send-tip={this.translationForKey("sendTip")}
-            manual=""
           />
         </div>
         <For each={this.errors} keyed={false}>

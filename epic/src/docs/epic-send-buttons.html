@@ -7,7 +7,7 @@
     <title>epic-send-buttons</title>
     <meta
       name="description"
-      content="The &lt;epic-send-buttons&gt; element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off."
+      content="The &lt;epic-send-buttons&gt; element: Send: the paper plane, alone since 2026-10-25;  with wand, its countdown too."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -32,7 +32,7 @@
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-send-buttons&gt;
-            <ui-header>The &lt;epic-send-buttons&gt; element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.</ui-header>
+            <ui-header>The &lt;epic-send-buttons&gt; element: Send: the paper plane, alone since 2026-10-25;  with wand, its countdown too.</ui-header>
           </ui-header>
         </ui-container>
       </ui-segment>
@@ -40,15 +40,16 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            <code>&lt;epic-send-buttons&gt;</code> is Send and its countdown, one pill: the paper plane, then the wand.
+            <code>&lt;epic-send-buttons&gt;</code> is Send: the paper plane, alone, on every page since Owen, 2026-10-25
+            ("remove the wand EVERYWHERE ... We may bring the wand back later").
           </p>
           <ul>
             <li>The plane sends what Owen marked, typed or commented, as every Send did.</li>
+            <li>The plane is filled blue while something waits: he presses it himself.</li>
             <li>
-              The wand turns COUNTDOWN MODE on and off. On, what's unsent goes by itself 2 minutes after he stops typing,
-              clicking and scrolling.
+              With <code>wand</code>, the wand comes back:  it turns COUNTDOWN MODE on and off.  On, what's unsent goes
+              by itself 2 minutes after he stops typing, clicking and scrolling.  No page sets it today.
             </li>
-            <li>Off, the plane is filled blue while something waits: he presses it himself.</li>
             <li>It sends nothing itself: it asks its owner, which sends its own way.</li>
           </ul>
           <p class="meta">
@@ -68,9 +69,11 @@
   <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
   <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
   <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
+  <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
+  <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
 </p>
             <ui-accordion class="spell-code" styled>
-              <ui-title>The example above · 5 lines</ui-title>
+              <ui-title>The example above · 7 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
@@ -80,13 +83,15 @@
                       <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
                       <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
                       <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
+                      <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
+                      <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
                     </p>
                   </script></ui-code
                 >
               </ui-content>
             </ui-accordion>
             <ul>
-              <li>Nothing to send, something waiting, all of it sent.</li>
+              <li>Nothing to send, something waiting, all of it sent;  the two stage buttons;  then waiting on you, ringed 2px #666, and dotted once you've pressed what it waits for.</li>
               <li>The middle one's ring turns blue, clockwise, while you leave this page alone; any key, click or scroll starts it again.</li>
               <li>Its 2 minutes running out sends nothing here: nobody on this page listens.</li>
               <li>A click on a wand turns countdown mode off on every page in this browser: click it again to turn it back on.</li>
@@ -99,7 +104,7 @@
             <ui-table celled compact striped unstackable>
               <table>
                 <thead>
-                  <tr><th>Owner</th><th>A press sends</th><th>The countdown sends</th></tr>
+                  <tr><th>Owner</th><th>A press sends</th><th>The countdown sends (with <code>wand</code> only)</th></tr>
                 </thead>
                 <tbody>
                   <tr><td><a href="epic-page.html" target="src-spell-epic-src-docs-epic-page-html"><code>&lt;epic-page&gt;</code></a>'s header</td><td>every unsent mark and comment</td><td>the same, every revisit asked now, as Review Now did (decision Q7)</td></tr>
@@ -112,7 +117,7 @@
 
           <ui-section id="3-the-countdown" label="3. The countdown" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="clock"></ui-icon>
-            <p>Owen, 2026-10-22: "when it is on, you wait for 2 minutes of inactivity from me (I haven't typed / clicked / scrolled) and when that is reached you submit the answers".</p>
+            <p>Only with <code>wand</code>, which no page sets since 2026-10-25. Owen, 2026-10-22: "when it is on, you wait for 2 minutes of inactivity from me (I haven't typed / clicked / scrolled) and when that is reached you submit the answers".</p>
             <ul>
               <li>It runs only while countdown mode is on and something waits (<code>state="unsent"</code>).</li>
               <li>Every key, click, wheel, scroll or input on the page starts it again, in a same-origin frame too.</li>
@@ -139,7 +144,8 @@
                   <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
                   <tr><td><code>accept</code></td><td>A STAGE BUTTON in the plane's place, drawn by an epic page's header while the page is in a stage (epic <code>epic-engine</code> P29): a check and these words (<code>Accept Overview</code>), green. A press asks the owner as the plane's does, and the wand stays.</td></tr>
                   <tr><td><code>accepted</code></td><td>The stage button pressed: the pill outlined green, waiting for the session to move the page on.</td></tr>
-                  <tr><td><code>manual</code></td><td>No countdown: only a press sends, and no wand is drawn. For a page a command waits on (<code>&lt;epic-run&gt;</code>).</td></tr>
+                  <tr><td><code>asks</code></td><td>The pill WAITS ON YOU (Owen, 2026-10-25): <code>waiting</code>, the pill's own border 2px #666, darker than its hairline, solid; <code>taken</code>, dotted once you've pressed what it waits for. An epic page's header sets it while Claude's build plans wait for your Accept on their phases: still Send | wand, never green.</td></tr>
+                  <tr><td><code>wand</code></td><td>Draws the wand, and with it countdown mode. Off by default: no page sets it since Owen, 2026-10-25 ("remove the wand EVERYWHERE"), so only a press sends. <code>manual</code> before, the other way round.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -154,7 +160,7 @@
                   <tr><td><code>base</code></td><td>The pill.</td></tr>
                   <tr><td><code>send</code></td><td>The paper plane, a <code>&lt;button&gt;</code>.</td></tr>
                   <tr><td><code>count</code></td><td>The badge on the plane.</td></tr>
-                  <tr><td><code>countdown</code></td><td>The wand, a <code>&lt;button aria-pressed&gt;</code>.</td></tr>
+                  <tr><td><code>countdown</code></td><td>The wand, a <code>&lt;button aria-pressed&gt;</code>, only with <code>wand</code>.</td></tr>
                   <tr><td><code>ring</code></td><td>The countdown's ring round the wand, only while it runs.</td></tr>
                 </tbody>
               </table>
@@ -193,10 +199,11 @@
           <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
-              <li>One pill: the plane's round end, a hairline, the wand's round end.</li>
+              <li>One pill: the plane's round end;  with <code>wand</code>, a hairline and the wand's round end after it.</li>
               <li>The pill's outline: a grey hairline, blue once sent; never dashed.</li>
               <li>The wand filled light blue, its icon white, while countdown mode is on, grey while off; while it counts, a light grey ring round it turns blue, clockwise from the top.</li>
               <li>Countdown off with something waiting: the plane filled blue, its icon white.</li>
+              <li>Waiting on you (<code>asks</code>): the pill's own border 2px #666 in place of its hairline, 1px out so nothing moves; dotted once pressed. The same ring as a waiting plan's buttons on its phase.</li>
               <li>
                 Its tokens, which an epic page's header sets to its own:
                 <ul>

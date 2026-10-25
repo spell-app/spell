@@ -1623,7 +1623,7 @@
     {
       "path": "epic-send-buttons.html",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.",
+      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
       "tag": "epic-send-buttons",
       "sections": [
         {

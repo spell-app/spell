@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, NOBODY_LISTENING, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -19,7 +19,6 @@ import {
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
-  REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
   REVIEW_PICK,
@@ -126,34 +125,32 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * - the group:  Approve, Revisit, Make Todo
    *   - a todo's group instead:  the plane (do it in the next phase), Revisit,
    *     the x (drop it:  Owen, 2026-10-09)
-   * - then Do Now apart (decision Q20, the wand)
    *
    * How they look and act:
    * - every button shows at every step, its FILL saying how far its mark has got (`ReviewFill`):
    *   - a grey outline:  available
    *   - dashed in its colour:  pressed, not sent
-   *   - outlined:  sent (a Do Now:  taken)
+   *   - outlined:  sent (a revisit now:  taken)
    *   - then CLEARED, a grey outline again, once Claude has handled it
    *     (they're Owen's input:  the id chip carries the result, Owen, 2026-10-08)
    * - colours:
    *   - green:  decided (Approve, Make Todo, a todo's plane)
-   *   - blue:  an ask of Claude (Revisit, Do Now)
+   *   - blue:  an ask of Claude (Revisit)
    *   - grey:  no longer relevant (a todo's x)
    * - work on its way or under way (`ReviewState.busyButton()`):
    *   - that button's icon turns while Claude is on it (`data-busy`)
    *   - queued with nobody listening, it stays dashed, "waiting for a session" (and what the page server's wake did:
    *     epic `epic-workflow` P16)
    *   - clicked then:  "nevermind"
-   * - Revisit takes the reader to the note box (`takeToNote()`);
-   *   Do Now takes the note in it along (`ReviewClient.press()`)
+   * - Revisit takes the reader to the note box (`takeToNote()`)
+   * - no Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand"
    * - tooltips:  the plain browser ones (`title`):  just the name (Q8), then the element's review label
    *   (`tip`, `Approve · reviewed 10/7/26`:  Owen, 2026-10-07, in place of the label beside them);
    *   a screen reader hears the state too
    */
   private controls(): JSX.Element {
     const specs = () => BUTTONS_OF[this.buttons ?? "item"]
-    const group = () => specs().filter((spec) => spec.action !== "details")
-    const doNow = () => specs().find((spec) => spec.action === "details")
+    const group = specs
     return (
       <span
         class={REVIEW_CONTROLS}
@@ -178,7 +175,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           )}
         </Show>
         {/* a waiting plan's Accept, Revisit and Defer:  icons like every row's, so they line up row to row;  the group
-            ringed 3px solid while it waits on Owen, dotted once he's pressed one (Owen, 2026-10-25:  "Make the entire
+            ringed 2px #666 while it waits on Owen, dotted once he's pressed one (Owen, 2026-10-25:  "Make the entire
             group just icons, black border.  Dotted when action is being taken, 3px solid when you're waiting on input
             from me") */}
         <ui-buttons
@@ -196,7 +193,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         >
           <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
-        <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>
       </span>
     )
   }
@@ -243,14 +239,11 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     this.send(THREAD_ANSWER, { act: spec.act })
   }
 
-  /** One review button, as its action stands;  `words`:  its label shown beside its icon (Accept plan). */
-  private button(spec: ReviewButtonSpec, extra?: string, words?: string): JSX.Element {
+  /** One review button, as its action stands. */
+  private button(spec: ReviewButtonSpec): JSX.Element {
     const busy = () => this.review.busyButton() === spec.action
     return (
       <ui-button
-        class={extra}
-        basic={extra ? "" : undefined}
-        size={extra ? "mini" : undefined}
         icon={spec.icon}
         data-action={spec.action}
         data-color={spec.color}
@@ -261,9 +254,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         }
         aria-label={`${this.translationForKey(spec.label)} · ${this.stateOf(spec)}`}
         onClick={(event: MouseEvent) => this.press(event, spec)}
-      >
-        {words}
-      </ui-button>
+      />
     )
   }
 
@@ -310,8 +301,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const fill = this.fillOf(spec)
     if (fill === "dashed") return this.translationForKey("chosenUnsent")
     if (fill === "outline") return this.translationForKey("chosenSent")
-    const tip = this.translationForKey(spec.tip)
-    return spec.action === "details" && !review.listening() ? `${tip}.  ${NOBODY_LISTENING}` : tip
+    return this.translationForKey(spec.tip)
   }
 
   /** What Owen wrote:  the draft, else the mark's note;  `""` for none. */
@@ -353,7 +343,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *     Owen, 2026-10-09, in place of Make Todo, which stays on the line)
    * - a todo's buttons (`TODO_NOTE_BUTTONS`), in its line's order:
    *   the plane (green), Revisit Later, the x (grey:  drop it)
-   * - Do Now is the line's (decision Q20):  it takes the note along
    * - SAVED as typed, `DRAFT_SAVE_MS` after the last key, and at once when the box loses focus or the page goes away
    *   (`watchPageHide()`)
    *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
@@ -667,7 +656,7 @@ const HOW_KEYS: Partial<Record<string, "howTodo" | "howNext" | "howDrop" | "howS
 
 /**
  * The note box button `mark` stands for:  the x (`skip`;  a todo's `drop`), a todo's plane (`next`), `soon` (Later);
- * else none (a Make Todo or a Do Now is the line's).
+ * else none (a Make Todo is the line's).
  */
 function markButton(mark: InboxMark | undefined): NoteHow | undefined {
   if (mark?.action === "skip" || mark?.action === "next" || mark?.action === "drop") return mark.action

@@ -77,8 +77,19 @@ export const TODO = "todo"
 /**
  * The attributes a step label or a number depends on:  a change bumps the page's layout.
  * - `stage`, the page's own (epic `epic-engine` P29):  which sections show, and a phase's review pills
+ * - `plan`, a phase's:  whether Send is ringed, waiting on Owen's Accept (`plansWaiting()`)
  */
-export const LAYOUT_ATTRIBUTES = ["status", "state", "title", "kind", "commits", "stage", "to-accept", "accepted"]
+export const LAYOUT_ATTRIBUTES = [
+  "status",
+  "state",
+  "title",
+  "kind",
+  "commits",
+  "stage",
+  "to-accept",
+  "accepted",
+  "plan"
+]
 
 /** `localStorage` key prefix of the commits toggle, per page path. */
 export const COMMITS_KEY = "epic-commits:"
@@ -207,7 +218,7 @@ export type HeaderMarks = {
   comments: number
   /** marks a countdown's send would have Claude work through (as Review Now did):  all but the requests on their way */
   waiting: number
-  /** Do Now requests queued, not taken yet */
+  /** requests for now queued, not taken yet */
   asked: number
   /** a Claude session is listening */
   listening: boolean

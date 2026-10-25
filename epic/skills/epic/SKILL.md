@@ -395,7 +395,7 @@ than just being able to move on").
   build plans are up, P3-P9:  one Accept Phases takes both".
 - The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
 - Owen accepts them on the page:  the header's Accept Phases (in the `phases` stage:  the phases and every waiting plan,
-  ONE press, I125), Accept plan / Accept N plans (once building), or Accept Phase on each;  one Send.  Or he says "go"
+  ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or he says "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
   - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
@@ -668,8 +668,7 @@ than just being able to move on").
 ## 7. Review:  `/epic review [<name>]`
 
 Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he marks items.
-- Each item's buttons:  one group, Approve, Revisit, Make Caveat;
-  then Do Now apart, the wand, for Add Details or a revisit now.
+- Each item's buttons:  one group, Make Caveat, Revisit, Approve (no wand anywhere since 2026-10-25).
 - A caveat that's WORK (no `limit`;  a todo, before epic `epic-engine` P32) has these instead:
   the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
@@ -680,8 +679,7 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
   (`{ action: "move", to }`);  `inbox apply` moves it, the numbers and every link and "P5 · Name" following.
 - Their colours and fills:  `plan-doc.md`, "Colours".
 - He sends them with the page header's paper plane,
-  or with Review Now beside it (the wand:  every revisit waiting is asked now too, epic `windows-and-review` P4).
-- A running Do Now clicked again is "nevermind" (`canceled`, 7.3).
+- A running revisit now clicked again is "nevermind" (`canceled`, 7.3).
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.
 - EVERY epic session listens on its own while it's open, `/epic review` or not (epic `epic-engine` P18):
@@ -713,7 +711,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
   - The page server finds the ONE running session titled for the epic (`🚧 <name>`, or the name as a word),
     and types `/epic review <name>` into its tab through its window's bridge:  Owen presses Enter there.
   - None, or several:  nothing is sent, and the page says which sessions it found.
-- And WOKEN by the page (epic `epic-workflow` P16):  Send, Review Now or Do Now pressed with NO session listening.
+- And WOKEN by the page (epic `epic-workflow` P16):  Send with NO session listening.
   - The page server, the first of these that applies:
     - types `/epic review <name>` into the epic's running session (`🚧 <name>`)
     - else opens a new session in the epic's worktree window (opening the window if it's closed)
@@ -780,7 +778,6 @@ epic inbox <name> [--json]                 what's waiting, sent or not
    - Then `epic inbox wait <name>`, with Bash `run_in_background: true`.
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
-   Do Now (an item's wand) starts at once (click again to call one off);
    a caveat's plane queues it for the next phase, its x drops it;
    a note box's x skips it (nothing to do);
    the header's paper plane sends the rest.  I'm listening."
@@ -814,7 +811,7 @@ want you to just do it").
    taken>`, so Owen sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 
-1b. CANCELED:  Owen said "nevermind" on a running Do Now (epic `windows-and-review` P2).
+1b. CANCELED:  Owen said "nevermind" on a running request for now (epic `windows-and-review` P2).
    - Stop that item's background agent (`TaskStop`).
    - Then `epic update <name>#<id> done "Called off on the page:  nothing written."`.
    - And `epic inbox done <name>#<id>`.

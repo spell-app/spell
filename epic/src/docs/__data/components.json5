@@ -1633,7 +1633,7 @@
         "where",
         "step"
       ],
-      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size in a modal.",
+      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size, over the page (`<epic-zoom>`).",
       "noun": "field",
       "attributes": [
         {
@@ -1695,10 +1695,6 @@
         {
           "name": "body",
           "description": "A request's prose, under its label:  folded, `hidden=\"until-found\"`."
-        },
-        {
-          "name": "zoom",
-          "description": "A request's modal, a screenshot full size."
         }
       ],
       "states": [
@@ -1768,11 +1764,6 @@
           "key": "unfoldTip",
           "text": "Open this request",
           "description": "A request's fold button, while folded."
-        },
-        {
-          "key": "zoomed",
-          "text": "{alt}, full size",
-          "description": "The zoomed screenshot's alt text (its own `alt`)."
         }
       ]
     },
@@ -1897,6 +1888,11 @@
           "description": "HANDLED IN A PHASE (epic `epic-engine` P31):  the phase whose text took its answer (`p-retry-logic`), set when a change mark naming it is first stamped there;  grey and quiet, its line linking the phase.  Reopen on the mark takes it off."
         },
         {
+          "name": "taken-in",
+          "kind": "string",
+          "description": "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set when an issue or todo is closed while that phase is active, or when a done phase's text links it (`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state."
+        },
+        {
           "name": "changed",
           "kind": "string",
           "description": "When a command last changed its status or review marks (ISO, with offset)."
@@ -1928,7 +1924,7 @@
             "drop",
             "skip"
           ],
-          "description": "How Owen's review mark was handled (`now`:  a Do Now request, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
+          "description": "How Owen's review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
         },
         {
           "name": "deferred",
@@ -2084,7 +2080,7 @@
         },
         {
           "name": "handled",
-          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31)."
+          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that fixed or did it."
         },
         {
           "name": "git",
@@ -2227,6 +2223,11 @@
           "key": "handledTip",
           "text": "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
           "description": "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+        },
+        {
+          "key": "takenTip",
+          "text": "Taken up in {phase}:  fixed or done there",
+          "description": "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
         },
         {
           "key": "tipTodo",
@@ -3149,7 +3150,7 @@
         "introduction",
         "kickoff"
       ],
-      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row (Revisit, Make Todo, Do Now), keyed `summary` in the review inbox.",
+      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row (Make Todo, Revisit), keyed `summary` in the review inbox.",
       "noun": "overview",
       "attributes": [
         {
@@ -3424,7 +3425,7 @@
         {
           "name": "reviewing",
           "kind": "boolean",
-          "description": "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its review inbox answering -- so items and Overview parts show their review controls, and the header Send and its countdown.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
+          "description": "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its review inbox answering -- so items and Overview parts show their review controls, and the header Send.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
         }
       ],
       "slots": [
@@ -3453,7 +3454,7 @@
         },
         {
           "name": "header",
-          "description": "The sticky page header:  the h1, then at its right Send and its countdown (while reviewed), the bedtime label, the step label (the state in it) and the git toggle."
+          "description": "The sticky page header:  the h1, then at its right Send (while reviewed), the bedtime label, the step label (the state in it) and the git toggle."
         },
         {
           "name": "heading",
@@ -3477,7 +3478,7 @@
         },
         {
           "name": "send",
-          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did.  While the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed 3px solid (`asks`), dotted once each has his mark;  its tooltip names them."
+          "description": "In the header while the page is reviewed, Send (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), dotted once each has his mark;  its tooltip names them."
         },
         {
           "name": "git",
@@ -3485,7 +3486,7 @@
         },
         {
           "name": "status",
-          "description": "The header's right side:  the changes to accept, Send and its countdown (while reviewed), the bedtime label, the step label, the git toggle."
+          "description": "The header's right side:  the changes to accept, Send (while reviewed), the bedtime label, the step label, the git toggle."
         },
         {
           "name": "step-pill",
@@ -4015,7 +4016,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Revisit, Make Todo, Do Now.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -5334,7 +5335,7 @@
         "paper plane",
         "wand"
       ],
-      "description": "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane, ALONE since 2026-10-25 (Owen:  \"remove the wand EVERYWHERE\").  With `wand`, its countdown too (epic `epic-engine` P20):  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -5379,12 +5380,12 @@
             "waiting",
             "taken"
           ],
-          "description": "The pill WAITS ON YOU (Owen, 2026-10-25):  `waiting`, ringed 3px solid in the text colour;  `taken`, a 2px dotted ring once you've pressed what it waits for;  none:  no ring.  An epic page's header sets it while Claude's build plans wait for your Accept, on their phases;  the pill stays Send | wand, never green.  The same ring as a waiting plan's own buttons on its phase."
+          "description": "The pill WAITS ON YOU (Owen, 2026-10-25):  `waiting`, the pill's own border 2px #666, darker than its hairline, solid;  `taken`, dotted once you've pressed what it waits for;  none:  no ring.  An epic page's header sets it while Claude's build plans wait for your Accept, on their phases;  the pill stays Send, never green.  The same ring as a waiting plan's own buttons on its phase."
         },
         {
-          "name": "manual",
+          "name": "wand",
           "kind": "boolean",
-          "description": "No countdown:  only a press sends, and no wand is drawn.  For a page a COMMAND waits on (`<epic-run>`):  it carries on with exactly what was sent (Owen, 2026-10-23)."
+          "description": "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere since Owen, 2026-10-25 (\"remove the wand EVERYWHERE ...  We may bring the wand back later\"), so only a press sends.  `manual` before, the other way round, for a page a command waits on (`<epic-run>`)."
         }
       ],
       "slots": [],
@@ -5410,7 +5411,7 @@
         },
         {
           "name": "countdown",
-          "description": "The wand, a `<button aria-pressed>`:  countdown mode on (blue) or off (grey)."
+          "description": "The wand, a `<button aria-pressed>`, only with `wand`:  countdown mode on (blue) or off (grey)."
         },
         {
           "name": "ring",
@@ -7346,7 +7347,7 @@
       "folder": "epic-send-buttons",
       "mainTag": "epic-send-buttons",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.",
+      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
       "status": "done",
       "docs": false,
       "tags": [

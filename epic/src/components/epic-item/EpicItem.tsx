@@ -95,7 +95,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - under them:  Claude's status cards (`<epic-status slot="status">`, P13), then the note box
  * - REVIEW (P9), three `<epic-review>`s:  its buttons, its note box, a marked note.
  *   - only while the page is reviewed (served with a token, its inbox answering:  `ReviewState`)
- *   - at the line's end:  Approve, Revisit, Make Todo, then Do Now (the wand)
+ *   - at the line's end:  Make Todo, Revisit, Approve, one group (no Do Now wand since 2026-10-25)
  *     - a todo's:  the plane (do it in the next phase), Revisit, the x (drop it:  Owen, 2026-10-09)
  *     - the review label in their tooltips, not beside them (Owen, 2026-10-07)
  *   - Revisit and Edit unfold it to show the box (`epic-note-showing`)

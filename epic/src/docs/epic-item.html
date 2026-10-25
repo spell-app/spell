@@ -447,7 +447,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     <td><code>review-as</code></td>
                     <td><code>approve</code>, <code>todo</code>, <code>revisit</code>, <code>now</code></td>
                     <td>
-                      How Owen's review mark was handled (<code>now</code>: a Do Now request, done): the record, not
+                      How Owen's review mark was handled (<code>now</code>: a request for now, done): the record, not
                       drawn on the buttons (they clear once handled); <code>approve</code> or <code>todo</code> on an
                       open item make it <code>recent</code> (green).
                     </td>
@@ -500,6 +500,18 @@ holding its id (Q7).  Its colour says where the item stands."
                       A test that FAILED in Owen's test run (epic <code>epic-engine</code> P4): the issue it was filed as
                       (<code>i42</code>). Drawn on its line as a red "failed → I42" linking the issue. It stays open;  gone
                       once a run passes it.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>taken-in</code></td>
+                    <td>phase id</td>
+                    <td>
+                      The phase that TOOK IT UP (epic <code>epic-engine</code> I128): fixed or did it
+                      (<code>p-fix-open-issues</code>). Drawn on its line as a grey <code>in P1</code> linking the phase,
+                      as a handled question's is, but the item stays green. Set when an issue or todo is closed while
+                      that phase is active, or when a done phase's text links it (the latest such phase); reopened or
+                      canceled, it goes.
                     </td>
                     <td></td>
                   </tr>
@@ -672,8 +684,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     <tr>
                       <td><code>review-buttons</code></td>
                       <td>
-                        The review buttons (P9): the note bubble, a pick's letter, Approve / Revisit / Make Todo, then
-                        Do Now. Only while the page is reviewed (served by the page server, its inbox answering).
+                        The review buttons (P9): the note bubble, a pick's letter, Make Todo / Revisit / Approve. Only while the page is reviewed (served by the page server, its inbox answering).
                       </td>
                     </tr>
                     <tr>
@@ -861,23 +872,24 @@ holding its id (Q7).  Its colour says where the item stands."
                 (<code>&lt;name&gt;.inbox.json</code>).
               </p>
               <p>
-                Then the line ends with four buttons: Approve (green), Revisit (blue), Make Todo (green) in one group,
-                and Do Now (blue, the wand) apart. Each wears the fill rule, which says how far a mark has got:
+                Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve
+                (green). No Do Now (the wand) since Owen, 2026-10-25: "In practice, I'm never using the wand." Each
+                wears the fill rule, which says how far a mark has got:
               </p>
               <ul>
                 <li>a grey outline: available</li>
                 <li>dashed in its colour: Owen pressed it, not sent yet</li>
-                <li>outlined in its colour: sent (or a Do Now taken, its icon turning while Claude works)</li>
+                <li>outlined in its colour: sent (or a revisit now taken, its icon turning while Claude works)</li>
                 <li>
-                  a Do Now with nobody listening stays dashed, "waiting for a session": the page server wakes the epic
-                  (types <code>/epic review &lt;name&gt;</code> into its session) and the tooltip says how
+                  a revisit now with nobody listening stays dashed, "waiting for a session": the page server wakes the
+                  epic (types <code>/epic review &lt;name&gt;</code> into its session) and the tooltip says how
                 </li>
                 <li>a grey outline again once Claude has handled it: the chip shows the result</li>
               </ul>
               <p>
                 Revisit (the history icon) opens the item's note box, the cursor in it. TYPING in the box turns Revisit
                 on, at the first key, and the box stays open while he types (Owen, 2026-10-22, epic
-                <code>epic-engine</code> P20): Send, or its countdown, hands his words over with no press of Later.
+                <code>epic-engine</code> P20): Send hands his words over with no press of Later.
               </p>
               <p>
                 On a judgement call or a todo whose box is empty (no draft, no earlier note), the box already holds
@@ -886,7 +898,7 @@ holding its id (Q7).  Its colour says where the item stands."
               </p>
               <ul>
                 <li>his first key replaces it;  a box that holds his words is left alone</li>
-                <li>Revisit turns on with it at once, so a reload keeps it, and Send or Do Now takes it along</li>
+                <li>Revisit turns on with it at once, so a reload keeps it, and Send takes it along</li>
                 <li>Claude reads a revisit note <code>do it</code> as: do it, no question back</li>
                 <li>questions, issues, caveats, tests and the plan's parts: an empty box, as before</li>
               </ul>

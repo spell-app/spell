@@ -99,12 +99,12 @@ export const REVISIT_KEY_PREFIX = "spell-revisit:"
 /**
  * What the page says when no Claude session waits on the inbox (epic page `review-review`, D6):
  * `listening` null, which the routes also answer once a session's heartbeat stops (`ReviewInbox.forPage()`).
- * - since epic `epic-workflow` P16, Send and Do Now wake the epic's session then (the page server types
+ * - since epic `epic-workflow` P16, Send (and a request for now) wakes the epic's session then (the page server types
  *   `/epic review <epic>` into it, or opens one):  what a wake did is `ReviewClient.waitingWhy`
  */
 export const NOBODY_LISTENING = isAirplane()
   ? "Airplane mode:  queued for when you land (/airplane land)"
-  : "No Claude session is reviewing this doc:  Send or Do Now wakes one"
+  : "No Claude session is reviewing this doc:  Send wakes one"
 
 /**
  * Airplane mode is on (epic `airplane`):  Owen works with no Claude, and everything waits for `/airplane land`.

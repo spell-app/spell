@@ -177,7 +177,7 @@ As `plan-doc.md`, "Ids":
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
     (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
-  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit, ringed 2px #666 while they wait (the header's Send | wand ringed too, its tooltip naming the waiting plans)
+  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit, ringed 2px #666 while they wait (the header's Send ringed too, its tooltip naming the waiting plans)
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
@@ -616,7 +616,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, Ow
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | red    | needs Owen                               | `attention` chips;  the rail's count (only what needs him)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips;  a `to do` review label                                  |
-| blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Send and its countdown (the wand);  Underway cards;  the active phase |
+| blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Caveat, a caveat's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
 | violet | Claude's voice                           | his reply cards;  the bedtime label                                    |
@@ -692,7 +692,8 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
 The review buttons, at every step:  Make Caveat, Revisit, Approve in one group.
-- No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand."
+- No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
+  same day:  Send alone.
   - The inbox still takes a `details` request (an old mark, an older page):  only the button went.
 - The note box's:  Revisit Later, then the x (skip this).
 
