@@ -3399,7 +3399,45 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-table" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-table" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-table celled>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>John</td>
+                        <td>Approved</td>
+                        <td>None</td>
+                      </tr>
+                      <tr>
+                        <td>Jamie</td>
+                        <td>Approved</td>
+                        <td>Requires call</td>
+                      </tr>
+                      <tr>
+                        <td>Jill</td>
+                        <td>Denied</td>
+                        <td>None</td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>3 People</th>
+                        <th>2 Approved</th>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </ui-table>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

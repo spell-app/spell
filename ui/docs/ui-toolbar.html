@@ -184,7 +184,18 @@
                   root. Edit a value below to try it.
                 </script>
               </ui-markdown>
-              <ui-docs-tokens family="ui-toolbar" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-toolbar" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
+                  <ui-item link="#types" selected>Types</ui-item>
+                  <ui-item link="#groups">Groups</ui-item>
+                  <ui-item link="#content">Content</ui-item>
+                  <ui-item link="#states">States</ui-item>
+                  <ui-item link="#variations">Variations</ui-item>
+                  <ui-item link="#group-variations">Group Variations</ui-item>
+                </ui-toolbar>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>

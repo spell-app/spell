@@ -553,7 +553,16 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-shape" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-shape" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="shape-demo-plain-playground" command="--next">Flip left</button>
+                <ui-shape id="shape-demo-plain-playground">
+                  <ui-side><p>This side starts visible.</p></ui-side>
+                  <ui-side><p>This is yet another side.</p></ui-side>
+                  <ui-side><p>This is the last side.</p></ui-side>
+                </ui-shape>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

@@ -261,7 +261,13 @@
                   }
                 </script>
               </ui-code>
-              <ui-docs-tokens family="ui-include" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-include" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-include source="examples/release-notes.html"
+                  >Loading the release notes...</ui-include
+                >
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

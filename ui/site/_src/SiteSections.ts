@@ -582,8 +582,8 @@ const TABS_LEAVE = "--site-tabs-leave"
 /** `main`'s custom property:  the tabs' track height, px, for the panel the section toolbar draws behind it. */
 const TABS_TRACK = "--site-tabs-track"
 
-/** What can't be a page section:  a demo inside an example, a template. */
-const NOT_PAGE = "ui-docs-example, template"
+/** What can't be a page section:  a demo inside an example or a Theming playground, a template. */
+const NOT_PAGE = "ui-docs-example, ui-docs-tokens, template"
 
 /** The section tag. */
 const SECTION_TAG = "ui-section"

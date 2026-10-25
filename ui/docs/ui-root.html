@@ -411,7 +411,17 @@
                   }
                 </script>
               </ui-code>
-              <ui-docs-tokens family="ui-root" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-root" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-root>
+                  <ui-segment>
+                    <ui-header>Report</ui-header>
+                    <p>Every component inside was loaded by the root, on demand.</p>
+                    <ui-button color="primary">Save</ui-button>
+                  </ui-segment>
+                </ui-root>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

@@ -396,7 +396,15 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-loader" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-loader" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <div
+                  style="position: relative; height: 8em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)"
+                >
+                  <ui-loader visible></ui-loader>
+                </div>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

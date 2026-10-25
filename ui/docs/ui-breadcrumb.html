@@ -347,7 +347,15 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-breadcrumb" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-breadcrumb" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-breadcrumb aria-label="Breadcrumb demo">
+                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
+                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
+                </ui-breadcrumb>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

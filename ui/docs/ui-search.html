@@ -593,7 +593,14 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-search" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-search" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-search
+                  placeholder="Common passwords..."
+                  source='[{"title":"123456"},{"title":"password"},{"title":"qwerty"},{"title":"letmein"},{"title":"dragon"}]'
+                ></ui-search>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
