@@ -294,7 +294,8 @@ and you review it on the page, in VS Code's side bar, while the agent works.
 What that asks of the agent:
 - It drafts the plan in Claude Code's plan mode:  phases named `P1 · Short Name`, the last always "Doc Review".
 - It records what it finds as it goes, not at the end, each with a short id:
-  `Q3` a question for you, `J7` a call it made without you, `I2` an issue, `C1` a caveat, `T4` a todo, `V2` a test.
+  `Q3` a question for you, `J7` a call it made without you, `I2` an issue, `T4` a todo (or a limit it accepts),
+  `M2` a manual test for you to check by hand.
   So "approve J7" works in chat.
 - A call made without you is calm (yellow) by default, and red only when it would surprise you.
 - It commits each phase in every repo it touched, lowest repo first, under one subject,

@@ -975,7 +975,7 @@ seo#J3              an item:  J3
 seo#P3              a phase:  P3
 seo#J               a new item of that kind, for add:  epic add seo#J "Title"
 SAGA:/epics         a saga's page:  epic add SAGA:/epics#T "Title"
-guides/x.html#M3    a comment on a docs page, for epic comments
+guides/x.html#C3    a comment on a docs page, for epic comments
 ```
 
 ```sh
