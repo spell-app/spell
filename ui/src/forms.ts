@@ -5,6 +5,7 @@
  * - `Validator` (Fomantic's rules)
  * - `MenuOptions` (search, additions, keyboard navigation of an option list)
  * - `ControlLabels` (the DOM element's `<label>`s as the inner control's name)
+ * - `PopoverPanel` (the panel a control opens under itself:  dropdown, calendar, search, icon picker)
  * - Imported by the families with a value:
  *   `checkbox`, `dropdown`, `form`, `input`, `select`, `search`, `calendar`, `rating` and `slider`.
  *   - `ui-button` is form-associated too (submit / reset), but through `elementSetup.isAFormControl` alone:
@@ -22,6 +23,7 @@ export * from "spell-ui/elements/MenuOptions"
 export * from "spell-ui/elements/DOMFormControl"
 export * from "spell-ui/elements/FormComponent"
 export * from "spell-ui/elements/ControlLabels"
+export * from "spell-ui/elements/PopoverPanel"
 
 /** The `forms` namespace:  `import { F } from "spell-ui/forms"`, then `F.FormComponent` (`AGENTS.md`). */
 export * as F from "spell-ui/forms"

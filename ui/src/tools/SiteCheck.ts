@@ -6,8 +6,9 @@ import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
-import { chromium, type Browser, type BrowserContextOptions, type Page } from "playwright"
+import type { Browser, Page } from "playwright"
 
+import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { KIT_ROOT, SPELL_CLI } from "./pageServer.ts"
@@ -158,7 +159,7 @@ export class SiteCheck {
   async run(): Promise<PageReport[]> {
     this.base = await this.ensureServer()
     mkdirSync(this.out, { recursive: true })
-    this.browser = await chromium.launch()
+    this.browser = await BrowserPage.launch()
     const reports: PageReport[] = []
     try {
       for (const file of this.files) {
@@ -443,21 +444,16 @@ export class SiteCheck {
    * - NOTE:  a favicon 404 is a problem too, since 2026-10-04:
    *   the page server answers `/favicon.ico` and injects its own icon links (`spell/server`'s `WebServer`)
    * - `net::ERR_ABORTED` is a note:  a navigation (the next tab's fresh load) cancels what's still in flight
+   * - the response / request listeners stay here:  `BrowserPage` reports only the page's own errors
    */
-  private async open(check: CheckContext, options: BrowserContextOptions, label: string): Promise<Page> {
-    const context = await this.browser!.newContext(options)
-    // HACK:  tsx compiles this file with esbuild `keepNames`,
-    // which wraps the in-page probes' inner functions in `__name(...)`,
-    // a helper the page doesn't have (as `hmr.e2e.ts`)
-    await context.addInitScript("globalThis.__name = (fn) => fn")
-    const page = await context.newPage()
-    page.setDefaultTimeout(STEP_MS)
+  private async open(check: CheckContext, props: BrowserPageProps, label: string): Promise<Page> {
     const { problem, report } = check
-    page.on("pageerror", (error) => problem(`page error (${label}):  ${error}`))
-    page.on("console", (message) => {
-      if (message.type() !== "error" || message.text().startsWith("Failed to load resource")) return
-      problem(`console (${label}):  ${message.text()}`)
+    const page = await BrowserPage.newPage(this.browser!, {
+      ...props,
+      ignore: /^Failed to load resource/,
+      onProblem: (text, kind) => problem(`${kind === "page error" ? kind : "console"} (${label}):  ${text}`)
     })
+    page.setDefaultTimeout(STEP_MS)
     page.on("response", (response) => {
       if (response.status() >= 400) problem(`HTTP ${response.status()} (${label}):  ${response.url()}`)
     })
@@ -470,25 +466,26 @@ export class SiteCheck {
   }
 
   /**
-   * Go to `url` and let it settle:
+   * Go to `url` and let it settle (`BrowserPage.settle()`):
    * every `ui-*` / `spell-*` element defined (at most `SETTLE_MS`), the network idle, then `RUNTIME_SETTLE_MS` for
    * the runtime.
+   * - NOT `BrowserPage.open()`:  an error status is a problem the response listener reports, not a throw
    * - a page that doesn't settle is NOT a problem here:  `inspectElements` reports what stayed undefined
    * - SIDE EFFECT:  sets `check.isUnsettled` when it doesn't, so later loads wait only `RESETTLE_MS`
    */
   private async load(page: Page, url: string, check: CheckContext): Promise<void> {
     await page.goto(url, { timeout: LOAD_MS })
     const timeout = check.isUnsettled ? RESETTLE_MS : SETTLE_MS
-    const isSettled = await page.waitForFunction(allDefined, undefined, { timeout }).then(
-      () => true,
-      () => false
-    )
+    const isSettled = await BrowserPage.settle(page, {
+      tags: OUR_TAGS,
+      timeout,
+      networkIdle: NETWORK_IDLE_MS,
+      quiet: RUNTIME_SETTLE_MS
+    })
     if (!isSettled) {
       check.isUnsettled = true
       check.report.notes.push(`${url}:  not every element defined after ${timeout / 1000}s`)
     }
-    await page.waitForLoadState("networkidle", { timeout: NETWORK_IDLE_MS }).catch(() => {})
-    await page.waitForTimeout(RUNTIME_SETTLE_MS)
   }
 
   /**
@@ -702,15 +699,19 @@ const TABS = ["examples", "usage", "api", "theming"]
 const OPTIONAL_TABS = ["theming"]
 
 /** Desktop viewport. */
-const DESKTOP: BrowserContextOptions = { viewport: { width: 1440, height: 900 } }
+const DESKTOP: BrowserPageProps = { viewport: { width: 1440, height: 900 } }
 
 /** Phone viewport:  an iPhone 14-ish, touch, retina. */
-const PHONE: BrowserContextOptions = {
+const PHONE: BrowserPageProps = {
   viewport: { width: 390, height: 844 },
-  isMobile: true,
-  hasTouch: true,
-  deviceScaleFactor: 2
+  context: { isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
 }
+
+/**
+ * The tags a page must define before it's checked:  Spell UI's and the app's.
+ * - any other undefined tag (a third party's) is none of our business:  it would never settle
+ */
+const OUR_TAGS = /^(ui|spell)-/
 
 /** Pane shorter than this counts as empty, px. */
 const MIN_PANE_HEIGHT = 50
@@ -772,17 +773,6 @@ const PROBE_MS = 10000
 // ## In-page probes
 // Serialized into the page by `page.evaluate()` / `waitForFunction()`:  self-contained, no closures over this module.
 ////////////////
-
-/**
- * Whether every `ui-*` / `spell-*` element in the light DOM has its family loaded:  defined, and not pending.
- * - any other undefined tag (a third party's) is none of our business:  it would never settle
- * - the selector is `E.DOMElement.notAttached`, written out:  this runs in the page, which has no `E`
- */
-function allDefined() {
-  return [...document.querySelectorAll(":is(:not(:defined), :state(pending))")].every(
-    (el) => !el.localName.startsWith("ui-") && !el.localName.startsWith("spell-")
-  )
-}
 
 /**
  * Elements of ours across the light DOM and every open shadow root:

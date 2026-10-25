@@ -5,12 +5,12 @@
  * - The shadow markup it expects (class grammar on semantic elements), in this order inside the root:
  *
  *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
- *                 [loading disabled] search" style="--_ui-search-anchor: --ui-search-4">
+ *                 [loading disabled] search" style="anchor-name: --ui-search-4">
  *       <div class="ui icon [loading fluid disabled] input" part="input">
  *         <input class="prompt" part="prompt" role="combobox">
  *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
  *       </div>
- *       <div class="results" popover part="results" role="listbox">       (role only while there are results)
+ *       <div class="results" popover part="results" role="listbox" style="position-anchor: --ui-search-4">
  *         <a|div class="[active] result" role="option" part="result">
  *           <div class="image"><img></div>
  *           <div class="content"><div class="price"> <div class="title"> <div class="description"></div>
@@ -25,7 +25,8 @@
  *
  * - `active` on a result === the keyboard-HIGHLIGHTED one (Fomantic's meaning), also `[aria-selected="true"]`.
  * - Positioning:  POPOVER + ANCHOR, no JS (as the dropdown's menu).
- *   - root:  `anchor-name: var(--_ui-search-anchor, --ui-search)`, `anchor-scope: all`
+ *   - the anchor's name, and the results hung from it:  inline, per element (the component's `PopoverPanel`)
+ *   - root:  `anchor-scope: all`
  *   - `.results[popover]`:  below, flipping (`flip-block, flip-inline`);  `right aligned` extends to the start
  *   - a `.results` WITHOUT `popover` is Fomantic's `top: 100%` box, shown with `visible` (static examples)
  * - The `:state()`s the component sets:  `:state(fluid)` (a block-level DOM element),
@@ -134,7 +135,6 @@
     box-sizing: border-box;
     display: inline-block;
     max-width: 100%;
-    anchor-name: var(--_ui-search-anchor, --ui-search);
     anchor-scope: all;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -181,7 +181,6 @@
     white-space: normal;
   }
   .ui.search > .results[popover] {
-    position-anchor: var(--_ui-search-anchor, --ui-search);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     inset: auto;

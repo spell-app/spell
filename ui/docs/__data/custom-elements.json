@@ -11191,6 +11191,20 @@
               "type": {
                 "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
               }
+            },
+            {
+              "name": "ui-opening",
+              "description": "The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ open: true, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-closing",
+              "description": "The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ open: false, originalEvent?: Event }>"
+              }
             }
           ],
           "slots": [],

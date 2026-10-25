@@ -69,3 +69,23 @@ export const READING_LINE = 0.2
 
 /** Default `size`. */
 export const DEFAULT_SIZE = "small"
+
+////////////////
+// ## Folds
+////////////////
+
+/** What the header's toggle last did, on any page:  every section open, or every section folded. */
+export type TocAllFolds = (typeof TOC_ALL_FOLDS)[number]
+
+/** `TocAllFolds`' values. */
+export const TOC_ALL_FOLDS = ["expanded", "collapsed"] as const
+
+/** The reader's own folds on one page, by section id:  `true` opened, `false` folded. */
+export type TocFolds = Readonly<Record<string, boolean>>
+
+/**
+ * Where a toc keeps its folds (`TocPreferences`):  the `PrefStore` name, and its keys.
+ * - `all`:  the toggle's `TocAllFolds`, ONE for every page in this browser
+ * - `folds`:  + the page's path, its `TocFolds`
+ */
+export const TOC_PREFS = { store: "spell-ui-docs-toc", all: "all", folds: "folds:" } as const

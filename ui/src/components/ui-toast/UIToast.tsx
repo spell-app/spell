@@ -317,8 +317,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
       ? UI.transitions.animate({ element: box, name: SCALE, direction: UIT.IN })
       : Promise.resolve(true)
     void entered.then(() => {
-      const detail: UIT.ToastShowDetail = { displayTime: this.displayDuration }
-      if (!this.isClosing) this.send("ui-opened", detail)
+      if (!this.isClosing) this.disclosure.sendAfter(true)
     })
   }
 
@@ -343,13 +342,37 @@ export class UIToast extends E.UIComponent<Vocabulary> {
   }
 
   /**
+   * Open until it closes, once:  `ui-opened` as it has appeared, the cancelable `ui-closing` as it's asked to close,
+   * `ui-closed` once it has gone.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    kept: {
+      isOpen: () => !this.isClosing,
+      setOpen: (open) => {
+        if (!open) this.startClosing()
+      }
+    },
+    detail: (_open, originalEvent): UIT.ToastCloseDetail => ({ reason: this.closeReason, originalEvent }),
+    afterDetail: (open): UIT.ToastShowDetail | UIT.ToastCloseDetail =>
+      open ? { displayTime: this.displayDuration } : { reason: this.closeReason }
+  })
+
+  /** Why it was asked to close:  `ui-closing`'s and `ui-closed`'s `reason`. */
+  private closeReason: UIT.ToastCloseReason = "dismiss"
+
+  /**
    * Close for `reason`:  the cancelable `ui-closing`, then the exit animation, `hidden` on the DOM element and `ui-closed`.
    * - True when it closes;  false when vetoed or already closing.
    */
   close(reason: UIT.ToastCloseReason = "dismiss", originalEvent?: Event): boolean {
     if (this.isClosing) return false
-    const detail: UIT.ToastCloseDetail = { reason, originalEvent }
-    if (!this.send("ui-closing", detail)) return false
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
+  }
+
+  /** `ui-closing` wasn't cancelled:  the exit animation, `hidden` on the DOM element, `ui-closed`. */
+  private startClosing() {
     this.isClosing = true
     this.stopTimer()
     UI.overlays.close(this.overlay)
@@ -359,10 +382,8 @@ export class UIToast extends E.UIComponent<Vocabulary> {
       : Promise.resolve(true)
     void exited.then(() => {
       this.domElement.hidden = true
-      const hidden: UIT.ToastCloseDetail = { reason }
-      this.send("ui-closed", hidden)
+      this.disclosure.sendAfter(false)
     })
-    return true
   }
 
   ////////////////

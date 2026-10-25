@@ -61,20 +61,30 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
     return !this.persistent
   }
 
+  /**
+   * Shown or hidden, as `visible` (`isVisible`):  `ui-opening` / `ui-closing` first, `ui-opened` / `ui-closed` once
+   * it has slid in or out (`show()`, `hide()`).
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isVisible",
+    detail: (visible, originalEvent): UIT.SidebarOpenDetail | UIT.SidebarCloseDetail =>
+      visible ? { visible, originalEvent } : { visible, reason: this.closeReason, originalEvent },
+    afterDetail: (visible): UIT.SidebarOpenDetail => ({ visible })
+  })
+
+  /** Why the latest close was asked for:  `ui-closing`'s `reason`. */
+  private closeReason: UIT.SidebarCloseReason = UIT.CLOSE
+
   /** Show for a person's action, dispatching the cancelable `ui-opening` first;  true when applied. */
-  @E.untracked
   requestOpen(originalEvent?: Event): boolean {
-    if (this.isVisible) return false
-    const detail: UIT.SidebarOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.send("ui-opening", detail))
+    return this.disclosure.open(originalEvent)
   }
 
   /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
-  @E.untracked
   requestClose(reason: UIT.SidebarCloseReason, originalEvent?: Event): boolean {
-    if (!this.isVisible) return false
-    const detail: UIT.SidebarCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.send("ui-closing", detail))
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
   }
 
   /** An invoker command aimed at the DOM element (`ToggleCommands`). */
@@ -142,8 +152,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
       this.releaseFocusTrap = UI.focus.trap(this.domElement)
     }
     this.after(() => {
-      const detail: UIT.SidebarOpenDetail = { visible: true }
-      if (this.isVisible) this.send("ui-opened", detail)
+      if (this.isVisible) this.disclosure.sendAfter(true)
     })
   }
 
@@ -161,8 +170,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
       UI.overlays.close(this.overlay)
     }
     this.after(() => {
-      const detail: UIT.SidebarOpenDetail = { visible: false }
-      if (!this.isVisible && this.domElement.isConnected) this.send("ui-closed", detail)
+      if (!this.isVisible && this.domElement.isConnected) this.disclosure.sendAfter(false)
     })
   }
 

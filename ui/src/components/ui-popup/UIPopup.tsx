@@ -78,13 +78,17 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     onDismiss: () => void this.requestVisible(false)
   }
 
+  /** Shown or hidden, as `visible` (`isVisible`):  `ui-opening` / `ui-closing` first. */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isVisible",
+    detail: (visible, originalEvent): UIT.PopupOpenDetail => ({ visible, originalEvent })
+  })
+
   /** Show or hide, dispatching the cancelable `ui-opening` / `ui-closing` first;  true when applied. */
-  @E.untracked
   requestVisible(visible: boolean, originalEvent?: Event): boolean {
     this.delayTimer?.cancel()
-    if (visible === this.isVisible) return false
-    const detail: UIT.PopupOpenDetail = { visible, originalEvent }
-    return this.requestChange("isVisible", visible, () => this.send(visible ? "ui-opening" : "ui-closing", detail))
+    return this.disclosure.request(visible, originalEvent)
   }
 
   /** `requestVisible()` after `delay` ms (at once for `0`);  a newer call replaces a pending one. */
@@ -171,10 +175,8 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
    */
   @E.on("toggle")
   protected onToggle(event: Event) {
-    if ((event as ToggleEvent).newState !== CLOSED || !this.domElement.isConnected || !this.isVisible) return
-    const detail: UIT.PopupOpenDetail = { visible: false, originalEvent: event }
-    this.send("ui-closing", detail)
-    this.isVisible = false
+    if ((event as ToggleEvent).newState !== CLOSED || !this.domElement.isConnected) return
+    this.disclosure.adopt(false, event)
   }
 
   /** An invoker command aimed at the DOM element (`ToggleCommands`). */
