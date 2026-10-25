@@ -51,7 +51,7 @@ export const epicReviewVocabulary = {
         "plane, Revisit Later, the x), `part` (an Overview sub-section, a phase, the summary:  no Approve);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
         "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +
-        "Defer);  `change` (a change mark, `<epic-change>`:  Accept, Reopen);  `plan` (a phase whose build plan waits:  " +
+        "Defer);  `change` (a change mark, `<epic-change>`:  Reopen);  `plan` (a phase whose build plan waits:  " +
         "Accept plan, Revisit)."
     },
     {

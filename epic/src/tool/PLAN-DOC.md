@@ -724,17 +724,16 @@ text itself, where an `<epic-update>` only said a block changed.
     has one, so the chip still says why months later
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
     `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
-- Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting, in the
-  skeleton:  `to-accept="ch1 ch3"`.  The page counts and finds them with the body not loaded;  the review routes take
+- Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it not `accepted`, in the
+  skeleton:  `to-accept="ch1 ch3"` (the name from when marks waited for an Accept).  The page counts and finds them with the body not loaded;  the review routes take
   their marks from it (`ReviewInbox.itemIds()`).
 - On the page:  the words on an orange ground, a folded chip naming the item (`Q16`;  unfolded, its title and the
-  answer), Accept and Reopen under the chip on hover while reviewed (`<epic-review buttons="change">`).
-  - Accept:  `{ action: "accept" }` under its id;  `inbox apply` writes `accepted="2026-10-24 19:02"`:  no orange,
-    the chip stays for good, off its host's `to-accept`
-  - Reopen:  `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its
-    answer kept), and the mark stays orange:  answered again, Claude rewrites the words with a new mark
-  - the page header counts the waiting ones (an orange label before Send, landing on the next), and so does the stage
-    button's tooltip (Accept Overview, Accept Phases)
+  answer).  NO approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question"):
+  orange for 3 days after `at`, then quiet (`isNewChange()`;  `<epic-change>`'s `isQuiet`).
+  - while new and reviewed:  Reopen, in a tooltip on the words (`<epic-review buttons="change">`):
+    `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
+    kept):  answered again, Claude rewrites the words with a new mark
+  - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
 - The `<epic-update>` blocks written before stay as they are.  No migration step:  a new element, nothing old changes.
 
 ### Handled in a phase

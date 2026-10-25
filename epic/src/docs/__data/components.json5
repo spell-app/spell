@@ -699,7 +699,7 @@
         {
           "name": "accepted",
           "kind": "string",
-          "description": "When Owen accepted it (`2026-10-24 19:02`), written by `epic inbox apply`:  no orange any more, the chip stays.  None:  waiting for his Accept."
+          "description": "When Owen accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
         }
       ],
       "slots": [
@@ -708,13 +708,7 @@
           "description": "The changed or new words:  running text, links and code included."
         }
       ],
-      "events": [
-        {
-          "name": "epic-change-answered",
-          "detail": "{ id }",
-          "description": "Accept or Reopen pressed (bubbles, composed;  `detail.id`):  the page lands on the next change waiting."
-        }
-      ],
+      "events": [],
       "parts": [
         {
           "name": "base",
@@ -722,7 +716,7 @@
         },
         {
           "name": "words",
-          "description": "The changed words, a `<mark>`:  orange until accepted."
+          "description": "The changed words, a `<mark>`:  orange while new (3 days)."
         },
         {
           "name": "chip",
@@ -739,8 +733,8 @@
       ],
       "states": [
         {
-          "name": "accepted",
-          "description": "Owen accepted it:  no orange, the chip muted."
+          "name": "quiet",
+          "description": "No longer new (3 days), or accepted before:  no orange, the chip muted."
         },
         {
           "name": "open",
@@ -749,14 +743,14 @@
       ],
       "texts": [
         {
-          "key": "waitingTip",
-          "text": "Changed by {item}'s answer{when}:  Accept or Reopen",
-          "description": "The words' tooltip while the change waits;  `when`, ` on 10/24/26 15:10`."
+          "key": "newTip",
+          "text": "Changed by {item}'s answer{when}:  Reopen to talk it over again",
+          "description": "The words' tooltip while the change is new and the page reviewed;  `when`, ` on 10/24/26 15:10`."
         },
         {
-          "key": "acceptedTip",
-          "text": "Changed by {item}'s answer{when};  accepted {accepted}",
-          "description": "The words' tooltip once accepted."
+          "key": "changedTip",
+          "text": "Changed by {item}'s answer{when}",
+          "description": "The words' tooltip otherwise."
         },
         {
           "key": "unfoldTip",
@@ -776,7 +770,7 @@
         {
           "key": "buttonsLabel",
           "text": "the change by {item}",
-          "description": "Accept and Reopen's group, spoken."
+          "description": "Reopen's group, spoken."
         }
       ]
     },
@@ -2353,11 +2347,6 @@
           "description": "A phase's review button while the phases are agreed:  its name."
         },
         {
-          "key": "acceptChange",
-          "text": "Accept",
-          "description": "A change mark's button:  its name."
-        },
-        {
           "key": "reopenChange",
           "text": "Reopen",
           "description": "A change mark's button (the history):  its name."
@@ -3463,15 +3452,11 @@
         },
         {
           "name": "step-pill",
-          "description": "One pill (epic `epic-engine` I108):  the changes to accept on its left while any wait, the step label on its right."
+          "description": "One pill (epic `epic-engine` I108):  the step label, then the agents running (`agents-pill`)."
         },
         {
           "name": "agents-pill",
           "description": "The agents running, in the header's pill after the step label (`<epic-agents draws=agents>`)."
-        },
-        {
-          "name": "changes",
-          "description": "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange label with how many, before Send;  a click lands on the first."
         },
         {
           "name": "state",
@@ -3779,21 +3764,6 @@
           "key": "nothingOpen",
           "text": "no questions open",
           "description": "The stage button's tooltip:  nothing open."
-        },
-        {
-          "key": "changesOne",
-          "text": "1 change to accept",
-          "description": "The change marks waiting for Accept:  one."
-        },
-        {
-          "key": "changesMany",
-          "text": "{count} changes to accept",
-          "description": "The change marks waiting for Accept (`<epic-change>`):  the stage button's tooltip, the header's label."
-        },
-        {
-          "key": "changesTip",
-          "text": "{changes}:  the next, {next}",
-          "description": "The header's changes label's tooltip:  how many, and where a click goes."
         },
         {
           "key": "acceptSends",

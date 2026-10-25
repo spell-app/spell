@@ -643,8 +643,8 @@ test("a change mark written by hand is STAMPED on the next edit:  its id, time a
     stamped: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(change.getAttribute("at") ?? ""),
     toAccept: plan.document.querySelector("#o1")!.getAttribute("to-accept")
   }).toEqual({ id: "ch1", item: "q1", answer: "One list, Caveats", stamped: true, toAccept: "ch1" })
-  expect(printed.join("\n")).toContain("CH1   Q1   waiting")
-  expect(printed.join("\n")).toContain("1 change to accept (1 marked)")
+  expect(printed.join("\n")).toContain("CH1   Q1   new")
+  expect(printed.join("\n")).toContain("1 new (1 marked)")
   // the review routes take its marks from the skeleton's text alone
   expect(ReviewInbox.itemIds(readFileSync(file, "utf8")).has("ch1")).toBe(true)
 })

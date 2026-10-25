@@ -15,11 +15,23 @@ import "spell-epic/components/epic-change"
 
 const PAGE = "/epics/sample/sample.plan.html"
 
-/** A waiting change mark, stamped, its question's answer copied in. */
-const WAITING = `<epic-change id="ch3" item="q16" at="2026-10-24 15:10" answer="One list, Caveats">todos fold into it</epic-change>`
+/** `date` as a change mark stamps it:  `2026-10-24 15:10`, local time. */
+function stamp(date: Date): string {
+  const two = (n: number) => String(n).padStart(2, "0")
+  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`
+}
 
-/** The same change, accepted. */
-const ACCEPTED = WAITING.replace(` answer=`, ` accepted="2026-10-24 19:02" answer=`)
+/** Stamped an hour ago. */
+const AN_HOUR_AGO = stamp(new Date(Date.now() - 60 * 60 * 1000))
+
+/** A NEW change mark (stamped an hour ago), its question's answer copied in. */
+const NEW = `<epic-change id="ch3" item="q16" at="${AN_HOUR_AGO}" answer="One list, Caveats">todos fold into it</epic-change>`
+
+/** The same change, stamped 4 days ago:  quiet. */
+const OLDER = NEW.replace(AN_HOUR_AGO, stamp(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)))
+
+/** The same change, accepted on a page from before changes needed no approval:  quiet. */
+const ACCEPTED = NEW.replace(` answer=`, ` accepted="2026-10-24 19:02" answer=`)
 
 /** The review routes' `mark`, as `fetch`, over an inbox kept here:  each reply the whole inbox. */
 class FakeRoutes {
@@ -93,12 +105,12 @@ afterEach(() => {
 ////////////////
 
 describe("<epic-change>", () => {
-  test("draws its words on an orange ground, then a folded chip naming the question;  passes axe", async () => {
-    const host = await render(`<p>Caveats:  ${WAITING}.</p>`).then((p) => p.querySelector("epic-change")!)
+  test("new:  its words on an orange ground, then a folded chip naming the question;  passes axe", async () => {
+    const host = await render(`<p>Caveats:  ${NEW}.</p>`).then((p) => p.querySelector("epic-change")!)
     const words = part(host, "words")
     expect([words.localName, words.querySelector("slot") !== null]).toEqual(["mark", true])
     expect(getComputedStyle(words).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(words.title).toBe("Changed by Q16's answer on 10/24/26 15:10:  Accept or Reopen")
+    expect(words.title).toMatch(/^Changed by Q16's answer on \d+\/\d+\/\d+ \d+:\d+$/)
     const chip = part(host, "chip")
     expect([chip.textContent, chip.getAttribute("aria-expanded"), part(host, "qa").hidden]).toEqual([
       "Q16",
@@ -110,7 +122,7 @@ describe("<epic-change>", () => {
 
   test("its chip unfolds the question's title (from the page) and its answer, in a line", async () => {
     const page = await render(
-      `<div><epic-item id="q16" title="Where do caveats go?" status="decided"></epic-item><p>${WAITING}</p></div>`
+      `<div><epic-item id="q16" title="Where do caveats go?" status="decided"></epic-item><p>${NEW}</p></div>`
     )
     const host = page.querySelector("epic-change")!
     part(host, "chip").click()
@@ -123,35 +135,30 @@ describe("<epic-change>", () => {
     ])
   })
 
-  test("accepted:  NO orange, the chip muted but kept (Q13, B), and no buttons", async () => {
+  test("no approval (Owen, 2026-10-25):  quiet after 3 days, or accepted before:  NO orange, the chip kept, no button", async () => {
     await adoptClient()
-    const host = await render(ACCEPTED)
-    expect(host.matches(":state(accepted)")).toBe(true)
-    expect(getComputedStyle(part(host, "words")).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(part(host, "chip").textContent).toBe("Q16")
-    expect(part(host, "words").title).toBe("Changed by Q16's answer on 10/24/26 15:10;  accepted 10/24/26 19:02")
-    expect(button(host, "accept")).toBeNull()
+    for (const markup of [OLDER, ACCEPTED]) {
+      const host = await render(markup)
+      expect(host.matches(":state(quiet)")).toBe(true)
+      expect(getComputedStyle(part(host, "words")).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
+      expect(part(host, "chip").textContent).toBe("Q16")
+      expect(part(host, "words").title).toMatch(/^Changed by Q16's answer on /)
+      expect(button(host, "reopen")).toBeNull()
+    }
   })
 
-  test("while reviewed:  Accept (green) and Reopen (blue) post their marks under its id;  none unstamped or unserved", async () => {
+  test("new and reviewed:  Reopen (blue) alone posts its mark under its id;  none unstamped or unserved, no Accept", async () => {
     await adoptClient({ served: false })
-    expect(button(await render(WAITING), "accept")).toBeNull()
+    expect(button(await render(NEW), "reopen")).toBeNull()
     ReviewClient.adopt(undefined)
     await adoptClient()
-    expect(button(await render(`<epic-change item="q16">just written</epic-change>`), "accept")).toBeNull()
-    const host = await render(WAITING)
-    const accept = button(host, "accept")!
-    expect([accept.dataset.color, button(host, "reopen")!.dataset.color]).toEqual(["green", "blue"])
-    const answered: string[] = []
-    host.addEventListener("epic-change-answered", (event) =>
-      answered.push((event as CustomEvent<{ id: string }>).detail.id)
-    )
-    accept.click()
-    await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("accept"))
-    // the orange goes at once, before the session applies it (Owen, 2026-10-25);  the page is told, to go on
-    await vi.waitFor(() => expect(host.matches(":state(accepted)")).toBe(true))
-    expect(answered).toEqual(["ch3"])
-    button(host, "reopen")!.click()
+    expect(button(await render(`<epic-change item="q16">just written</epic-change>`), "reopen")).toBeNull()
+    const host = await render(NEW)
+    expect(button(host, "accept")).toBeNull()
+    const reopen = button(host, "reopen")!
+    expect(reopen.dataset.color).toBe("blue")
+    expect(part(host, "words").hasAttribute("title")).toBe(false)
+    reopen.click()
     await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("reopen"))
   })
 })

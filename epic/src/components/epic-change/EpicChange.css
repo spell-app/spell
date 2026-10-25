@@ -2,7 +2,7 @@
  * `<epic-change>` (`EpicChange.tsx`):  a change mark, inline in running text.
  * - The words:  an orange ground (orange is "changed since you looked", T55), wrapping with the line
  *   (`box-decoration-break: clone`:  each line's piece rounded).  Accepted:  no ground, plain text.
- * - The chip:  the question's id, small, mono, an outline in the accent;  accepted, muted (old text is quieter, T51).
+ * - The chip:  the question's id, small, mono, an outline in the accent;  quiet (older, or accepted before), muted (old text is quieter, T51).
  * - The Q&A after it, unfolded:  smaller, muted, on a faint ground of its own.
  * - Accept and Reopen float UNDER the chip on hover or focus (and while unfolded):  out of the line, so nothing in
  *   the paragraph moves;  above it, a stuck section title covered them.  Their own top padding bridges the chip and
@@ -35,7 +35,7 @@
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
-  :host(:state(accepted)) .words {
+  :host(:state(quiet)) .words {
     padding: 0;
     background: none;
   }
@@ -67,7 +67,7 @@
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: 1px;
   }
-  :host(:state(accepted)) .chip {
+  :host(:state(quiet)) .chip {
     border-color: var(--epic-rule, color-mix(in srgb, currentColor 25%, transparent));
     color: var(--epic-muted, var(--ui-text-muted));
   }

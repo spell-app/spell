@@ -38,7 +38,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   P29):  Looks good and Defer (`PROPOSAL_BUTTONS`);  its note box a part's
  * - `plan`:  a phase whose build plan waits for Owen (`<epic-phase plan="waiting">`, P33):  Accept plan and Revisit
  *   (`PLAN_BUTTONS`);  its note box a part's
- * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Accept and Reopen (`CHANGE_BUTTONS`);
+ * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Reopen (`CHANGE_BUTTONS`);
  *   no note box
  */
 export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal", "change", "plan"] as const
@@ -92,7 +92,6 @@ export type ReviewButtonSpec = {
     | "drop"
     | "looksGood"
     | "defer"
-    | "acceptChange"
     | "reopenChange"
     | "acceptPlan"
   /** what it does, for a screen reader */
@@ -106,7 +105,6 @@ export type ReviewButtonSpec = {
     | "dropTip"
     | "looksGoodTip"
     | "deferTip"
-    | "acceptChangeTip"
     | "reopenChangeTip"
     | "acceptPlanTip"
 }
@@ -169,13 +167,11 @@ export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
- * A change mark's buttons (`<epic-change>`, epic `epic-engine` P30;  Q13, B), drawn over its chip on hover or focus:
- * - Accept (`accept`, green:  decided):  the change stands;  `inbox apply` clears its orange, its chip stays
- * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it, the words stay
- *   orange until it's answered again
+ * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in a tooltip on its words while it's new:
+ * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it
+ * - no Accept (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question")
  */
 export const CHANGE_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "accept", color: "green", icon: "check", label: "acceptChange", tip: "acceptChangeTip" },
   { action: "reopen", color: "blue", icon: "history", label: "reopenChange", tip: "reopenChangeTip" }
 ]
 
@@ -428,7 +424,6 @@ export const REVIEW_NAME_TEXTS = [
     description: "What Accept plan does."
   },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
-  { key: "acceptChange", text: "Accept", description: "A change mark's button:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
@@ -474,13 +469,8 @@ export const REVIEW_TEXTS = [
     description: "A phase's review button while the phases are agreed:  what Defer does."
   },
   {
-    key: "acceptChangeTip",
-    text: "The change stands:  the orange goes, the chip stays, once Claude applies it",
-    description: "A change mark's button:  what Accept does."
-  },
-  {
     key: "reopenChangeTip",
-    text: "Talk the question over again:  it opens, the words stay orange",
+    text: "Talk the question over again:  it opens for you to answer",
     description: "A change mark's button:  what Reopen does."
   },
   {

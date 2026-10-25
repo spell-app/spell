@@ -120,8 +120,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `<epic-review>`:  the review controls drawn by items, sections (Overview parts), phases and the Overview
         - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-overview>` (keyed `summary`, on its title row:  epic
           `epic-engine` I55;  `<epic-summary>` drew them under its lede before)
-      - `<epic-change>` (epic `epic-engine` P30):  a change mark's Accept and Reopen, keyed by its id (`ch3`),
-        its own `<epic-review buttons="change">` under its chip
+      - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
+        its own `<epic-review buttons="change">` in a tooltip on its words
       - `<epic-new-item>`:  the page's toolbar button, and the Caveats and Questions sections' New caveat / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
@@ -1367,12 +1367,12 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - A question's pick with a remark is ONE revisit mark carrying `pick`:
       `{ action: "revisit", when, note, pick }`.
     - It's talked over, never applied by itself.
-  - A CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30):  Accept or Reopen, under its id
-    - `{ action: "accept" }` (no `stage`:  the header's stage button's carries one) or `{ action: "reopen" }`;
-      only a change takes them, and a change takes nothing else
+  - A CHANGE MARK's button (`<epic-change id="ch3">`, epic `epic-engine` P30):  Reopen, under its id;  no Accept
+    since changes need no approval (Owen, 2026-10-25)
+    - `{ action: "reopen" }`;  an old `{ action: "accept" }` (no `stage`) still applies;  only a change takes
+      them, and a change takes nothing else
     - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
-    - `epic inbox apply` makes Accept `accepted` (the orange goes, the chip stays) and reopens the question for
-      Reopen:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
+    - `epic inbox apply` reopens the question for Reopen (an old Accept:  `accepted`, quiet):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
   - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`):
     - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
       moved after the others)

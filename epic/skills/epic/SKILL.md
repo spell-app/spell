@@ -296,10 +296,10 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 5. Each answer REWRITES the Overview (Q13, B;  `plan-doc.md`, "Change marks"):
    - `decide <name>#Q<n> "..."`, then rewrite the Overview's words it changes, wrapping the changed words in
      `<epic-change item="q<n>">...</epic-change>`, in the part file
-   - then `epic change <name>`:  it stamps each mark;  Owen accepts or reopens each on the page
-   - NEVER wait on the marks (Owen, 2026-10-25:  "I don't like that you block on waiting for me to approve those
-     marks"):  he accepts them at his leisure, a review AFTER the fact.  Go straight on:  the next answer, the next
-     question, the phases once the Overview is accepted;  a Reopen comes back as a mark like any other
+   - then `epic change <name>`:  it stamps each mark;  the words show orange for 3 days, so Owen sees what moved
+   - NO approval, and never a wait (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the
+     question"):  go straight on, the next answer, the next question, the phases once the Overview is accepted.  He
+     Reopens one if he disagrees:  it comes back as a mark like any other
    - a new question the answer raises:  `add <name>#Q`, as step 3
 6. Owen presses Accept Overview:  `inbox apply` moves the page to `phases`.  Then "4. Fill the doc".
    - Owen says "go" in chat instead:  `epic stage <name> phases` yourself.
@@ -442,10 +442,10 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
    - An ANSWER rewrote the Overview's or a phase's words (epic `epic-engine` P30;  Q13, B):  mark the changed words
      themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them (no `<epic-update>`).
      - The words, not the block:  one mark per change, the question's id alone.
-     - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists what waits;
+     - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists them;
        `epic lint` fails one not stamped, or naming no item.
-     - Owen accepts each on the page (the orange goes, the `Q16` chip stays) or reopens its question;
-       `inbox apply` writes both.  Rules:  `plan-doc.md`, "Change marks".
+     - No approval:  orange for 3 days, then quiet, the `Q16` chip for good.  Owen reopens its question if he
+       disagrees;  `inbox apply` reopens it.  Rules:  `plan-doc.md`, "Change marks".
      - In a PHASE's text, the mark marks its item handled in that phase (P31):  grey, out of the lists.
        So settle a question by rewriting the phase it belongs to, marked, rather than leaving it one more decided item.
    - Changed a prose block any other way:  put an `<epic-update>` right AFTER it.
@@ -1251,8 +1251,8 @@ commits <name> --backfill                           every phase / item commit (`
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
-change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list those
-                                                    waiting for Owen's Accept;  --for:  the item of marks naming none
+change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,
+                                                    new first;  --for:  the item of marks naming none
 log <name> "text"                                   timestamped line in the doc's log
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview

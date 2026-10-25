@@ -943,12 +943,12 @@ export class PlanDoc extends PlanReader {
    * Item `id` as the inbox shows it;  what takes notes as an item does too (`reviewPart()`):
    * an Overview sub-section (`o3`, Q14), kind `overview`;  a phase (`p-epic-migrate`), kind `phase`, its status;
    * the summary (`summary`), kind `summary`, its own text the title (epic `airplane` P2);  a change mark (`ch3`,
-   * epic `epic-engine` P30), kind `change`, its words and question the title, `waiting` or `accepted`.
+   * epic `epic-engine` P30), kind `change`, its words and question the title, `new` or `older`.
    */
   describeItem(id: string): ItemDescription | null {
     const change = this.findChange(id)
     if (change) {
-      const status = change.hasAttribute("accepted") ? "accepted" : "waiting"
+      const status = this.isNewChange(change) ? "new" : "older"
       return { id: String(id).toUpperCase(), kind: "change", status, title: changeTitle(change) }
     }
     if (String(id).toLowerCase() === STAGE_ID) {
@@ -2259,6 +2259,16 @@ export class PlanDoc extends PlanReader {
   // ## Change marks (epic `epic-engine` P30)
   ////////////////
 
+  /**
+   * Is change mark `change` NEW:  stamped less than `CHANGE_NEW_DAYS` ago, and not `accepted` (a page from before
+   * changes needed no approval)?  As the page draws it:  orange while new (`<epic-change>`'s `isQuiet`).
+   */
+  isNewChange(change: Element): boolean {
+    if (change.hasAttribute("accepted")) return false
+    const at = Date.parse((change.getAttribute("at") ?? "").replace(" ", "T"))
+    return !Number.isFinite(at) || this.now.getTime() - at < CHANGE_NEW_DAYS * 24 * 60 * 60 * 1000
+  }
+
   /** Every change mark in the doc, `<epic-change>`, in page order. */
   get changes(): Element[] {
     return Array.from(this.document.querySelectorAll(CHANGE_TAG))
@@ -2577,6 +2587,9 @@ const CHANGE_HOSTS = [
   "epic-section > epic-item",
   "epic-page > epic-section[kind='log']"
 ].join(", ")
+
+/** How long a change mark stays NEW, in days (`isNewChange()`;  `<epic-change>`'s `NEW_DAYS`, the same). */
+const CHANGE_NEW_DAYS = 3
 
 /** The longest answer a change mark's chip keeps (`answer`):  a line or two. */
 const ANSWER_MAX = 160

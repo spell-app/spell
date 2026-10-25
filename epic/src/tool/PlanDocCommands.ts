@@ -547,7 +547,8 @@ export class PlanDocCommands {
    * wrote them by hand into the Overview's or a phase's text (a part, or a command's HTML).
    * - stamps them, as every edit does (`PlanDoc.updateChanges()`):  each new one's id (`ch3`), time and answer
    * - `--for q13`:  first, the marks that name no item take that one;  refused for an id the doc has no item for
-   * - then prints each, waiting first:  `CH3  Q13  waiting  "todos fold into it" (Q13)  in o2`, and how many wait
+   * - then prints each, new first:  `CH3  Q13  new  "todos fold into it" (Q13)  in o2`, and how many are new (3
+   *   days, orange on the page;  no approval:  Owen, 2026-10-25)
    */
   private async changeMarks(file: string, flags: Flags): Promise<void> {
     const given = flags.for
@@ -568,13 +569,13 @@ export class PlanDocCommands {
       facts: plan.describeItem(change.id)!,
       host: change.parentElement?.closest("[id]")?.id ?? ""
     }))
-    rows.sort((a, b) => Number(a.facts.status !== "waiting") - Number(b.facts.status !== "waiting"))
+    rows.sort((a, b) => Number(a.facts.status !== "new") - Number(b.facts.status !== "new"))
     for (const { change, facts, host } of rows) {
       const item = (change.getAttribute("item") ?? "?").toUpperCase()
       this.print(`${facts.id.padEnd(5)} ${item.padEnd(4)} ${facts.status.padEnd(8)} ${facts.title}  in ${host}`)
     }
-    const waiting = rows.filter((row) => row.facts.status === "waiting").length
-    this.print(`${waiting} change${waiting === 1 ? "" : "s"} to accept (${rows.length} marked)`)
+    const fresh = rows.filter((row) => row.facts.status === "new").length
+    this.print(`${fresh} new (${rows.length} marked)`)
   }
 
   /**
@@ -1057,7 +1058,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    Questions and Todos;  phases:  the Phases too;  building:
                                                    everything);  no stage reads as building;  logged
   change <name> [--for <item id>]                  stamp the change marks written by hand (<epic-change item>:
-                                                   id, time, answer;  every edit does too), list those waiting;
+                                                   id, time, answer;  every edit does too), list them, new first;
                                                    --for:  the item of the marks that name none
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)

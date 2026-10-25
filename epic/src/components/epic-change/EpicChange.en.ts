@@ -60,22 +60,15 @@ export const epicChangeVocabulary = {
       kind: "string",
       format: "time",
       description:
-        "When Owen accepted it (`2026-10-24 19:02`), written by `epic inbox apply`:  no orange any more, the chip " +
-        "stays.  None:  waiting for his Accept."
+        "When Owen accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no " +
+        "orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
     }
   ],
-  events: [
-    {
-      name: "epic-change-answered",
-      detail: "{ id }",
-      description:
-        "Accept or Reopen pressed (bubbles, composed;  `detail.id`):  the page lands on the next change waiting."
-    }
-  ],
+  events: [],
   slots: [{ name: "", description: "The changed or new words:  running text, links and code included." }],
   parts: [
     { name: "base", description: "The whole mark:  the words, the chip, its question and answer." },
-    { name: "words", description: "The changed words, a `<mark>`:  orange until accepted." },
+    { name: "words", description: "The changed words, a `<mark>`:  orange while new (3 days)." },
     { name: "chip", description: "The question's id (`Q16`), a `<button>`:  a click folds its question and answer." },
     {
       name: "qa",
@@ -89,24 +82,24 @@ export const epicChangeVocabulary = {
     }
   ],
   states: [
-    { name: "accepted", description: "Owen accepted it:  no orange, the chip muted." },
+    { name: "quiet", description: "No longer new (3 days), or accepted before:  no orange, the chip muted." },
     { name: "open", description: "Its chip unfolded:  the question and answer show (page state, never written)." }
   ],
   texts: [
     {
-      key: "waitingTip",
-      text: "Changed by {item}'s answer{when}:  Accept or Reopen",
-      description: "The words' tooltip while the change waits;  `when`, ` on 10/24/26 15:10`."
+      key: "newTip",
+      text: "Changed by {item}'s answer{when}:  Reopen to talk it over again",
+      description: "The words' tooltip while the change is new and the page reviewed;  `when`, ` on 10/24/26 15:10`."
     },
     {
-      key: "acceptedTip",
-      text: "Changed by {item}'s answer{when};  accepted {accepted}",
-      description: "The words' tooltip once accepted."
+      key: "changedTip",
+      text: "Changed by {item}'s answer{when}",
+      description: "The words' tooltip otherwise."
     },
     { key: "unfoldTip", text: "{item}:  show the question and its answer", description: "The chip's tooltip, folded." },
     { key: "foldTip", text: "{item}:  hide the question and its answer", description: "The chip's tooltip, open." },
     { key: "noAnswer", text: "not answered yet", description: "The answer's place when the change has none." },
-    { key: "buttonsLabel", text: "the change by {item}", description: "Accept and Reopen's group, spoken." }
+    { key: "buttonsLabel", text: "the change by {item}", description: "Reopen's group, spoken." }
   ],
   children: [{ tag: "flow", description: "The changed words." }],
   flow: true

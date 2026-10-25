@@ -25,7 +25,6 @@ import {
   TEST_START
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
-import { CHANGE_ANSWERED } from "spell-epic/components/epic-change/EpicChange.types"
 
 import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
@@ -381,26 +380,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * The CHANGE MARKS waiting for Owen's Accept (`<epic-change>`, epic `epic-engine` P30), by id, in page order;
-   * `[]` for none.
-   * - the skeleton's lists first (each body host's `to-accept`, written by the epic tool):  a body not loaded counts
-   * - and any mark in the page itself, not accepted (a doc in one file has no lists)
-   * - less those Owen has pressed Accept on (its mark in the inbox):  pressed, it's done as far as he's concerned
-   * - read again on every layout change and inbox change
-   */
-  readonly changesToAccept = createMemo((): string[] => {
-    this.signals.layout.get()
-    this.review.reviewing()
-    const ids = new Set<string>()
-    for (const element of this.domElement.querySelectorAll(CHANGES_WAITING)) {
-      if (element.localName === CHANGE_TAG) ids.add(element.id)
-      else for (const id of (element.getAttribute("to-accept") ?? "").split(/\s+/)) if (id) ids.add(id)
-    }
-    const marks = this.review.client?.inbox.marks ?? {}
-    return [...ids].filter((id) => marks[id]?.action !== "accept")
-  })
-
-  /**
    * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):  its words, its tooltip,
    * and whether it was pressed (its mark, `stage`, in the inbox);  `undefined` once building, or not reviewed.
    * - the tooltip says what's still open:  the open questions ("2 questions open"), a reminder, never a lock
@@ -414,7 +393,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const accepted = mark?.action === "accept" && mark.stage === stage
     const texts = STAGE_TEXTS[stage]
     const open = this.domElement.querySelectorAll(OPEN_QUESTIONS).length
-    const changes = this.changesToAccept().length
     const unsent = client.unsentMarkCount + client.unsentCommentCount - (accepted && !client.isSent(mark) ? 1 : 0)
     const still = open
       ? this.translationForKey(open === 1 ? "openQuestionsOne" : "openQuestionsMany", { count: open })
@@ -424,7 +402,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       : [
           this.translationForKey(texts.tip),
           still,
-          changes ? this.translationForKey(changes === 1 ? "changesOne" : "changesMany", { count: changes }) : "",
           unsent ? this.translationForKey("acceptSends", { count: unsent }) : ""
         ]
           .filter(Boolean)
@@ -694,16 +671,14 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 </ui-label>
               )}
             </Show>
-            {/* ONE pill (Owen, 2026-10-25:  "pencil and P36 should be pills -- can we combine them"):  the changes to
-                accept, while any wait, on its left;  the step label on its right */}
+            {/* ONE pill (Owen, 2026-10-25):  the step label, then the agents running;  one rim, the label's colour */}
             <span
               class={STEP_PILL}
               part={this.partForName("step-pill")}
               style={{
-                "--epic-pill-color": `var(--ui-${this.changesToAccept().length ? "orange" : (this.step()?.color ?? "grey")})`
+                "--epic-pill-color": `var(--ui-${this.step()?.color ?? "grey"})`
               }}
             >
-              <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
               <Show when={this.step()}>
                 {(step) => (
                   <ui-label
@@ -949,73 +924,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
     this.pickState(event.detail.state)
-  }
-
-  /**
-   * The changes to accept (epic `epic-engine` P30), before Send:  an orange label with how many, linking to the first
-   * (`#ch3`:  the runtime lands there, loading its part), so Owen finds them in a long page.
-   * - orange:  changed since he looked (T55);  gone once none waits
-   */
-  private changesLabel(): JSX.Element {
-    const ids = () => this.changesToAccept()
-    const words = () =>
-      this.translationForKey(ids().length === 1 ? "changesOne" : "changesMany", { count: ids().length })
-    return (
-      <ui-label
-        part={this.partForName("changes")}
-        basic=""
-        color="orange"
-        icon="highlighter"
-        href={`#${ids()[0]}`}
-        onClick={(event: MouseEvent) => {
-          event.preventDefault()
-          this.showChanges()
-        }}
-        title={this.translationForKey("changesTip", { changes: words(), next: ids()[0]!.toUpperCase() })}
-        aria-label={words()}
-      >
-        {ids().length}
-      </ui-label>
-    )
-  }
-
-  /**
-   * Show every change waiting (Owen, 2026-10-25:  "Clicking that should expand everything that I have to look at"):
-   * each block holding one unfolds (its part loads), and its parents with it;  then the page lands on the first.
-   */
-  @E.untracked
-  private showChanges() {
-    for (const host of this.domElement.querySelectorAll("[to-accept]")) {
-      for (let at: Element | null = host; at && at !== this.domElement; at = at.parentElement)
-        if (FOLDING_HOSTS.has(at.localName)) at.toggleAttribute("open", true)
-    }
-    this.goToChange(this.changesToAccept()[0])
-  }
-
-  /** Accept or Reopen pressed on a change (`epic-change-answered`):  on to the next one waiting, after it in the page. */
-  @E.on(CHANGE_ANSWERED)
-  protected onChangeAnswered(event: CustomEvent<{ id: string }>) {
-    const was = event.detail.id
-    // after its mark lands:  the list leaves an accepted one out
-    E.beforeNextPaint(() => {
-      const ids = this.changesToAccept().filter((id) => id !== was)
-      const order = Array.from(this.domElement.querySelectorAll(`[to-accept], ${CHANGE_TAG}[id]`))
-      const at = order.findIndex(
-        (element) => element.id === was || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(was)
-      )
-      const after = ids.find(
-        (id) =>
-          order.findIndex(
-            (element) => element.id === id || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(id)
-          ) > at
-      )
-      this.goToChange(after ?? ids[0])
-    })
-  }
-
-  /** Land on change `id` as a link to it does:  the runtime unfolds what hides it and loads its part. */
-  private goToChange(id: string | undefined) {
-    if (id) location.hash = `#${id}`
   }
 
   /**
@@ -1508,15 +1416,6 @@ const STAGE_TEXTS = {
 const STEP_PILL = "step-pill"
 
 const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
-
-/** A change mark's tag (epic `epic-engine` P30). */
-const CHANGE_TAG = "epic-change"
-
-/** What says a change waits for Accept:  a body host's list (`to-accept`), or a mark in the page not accepted. */
-/** The blocks that fold:  what `showChanges()` opens. */
-const FOLDING_HOSTS = new Set(["epic-section", "epic-phase", "epic-item", "epic-overview"])
-
-const CHANGES_WAITING = `[to-accept], ${CHANGE_TAG}[id]:not([accepted])`
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"

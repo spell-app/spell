@@ -9,7 +9,6 @@ import { EpicAddress, PageTargets } from "spell-epic/links"
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 
 import { epicChangeVocabulary } from "./EpicChange.en"
-import { CHANGE_ANSWERED } from "./EpicChange.types"
 
 import changeCSS from "./EpicChange.css?inline"
 import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
@@ -17,17 +16,18 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 /****************
  * ### `<epic-change>`
  * A CHANGE MARK (epic `epic-engine` P30;  Q13, B):  words an answer changed or added, marked in the text itself.
- * - The words on an orange ground (our colour for "changed since you looked"), until Owen accepts them.
+ * - The words on an orange ground (our colour for "changed since you looked") while the change is NEW:  stamped less
+ *   than `NEW_DAYS` ago.  No approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered
+ *   the question"):  then it goes quiet by itself.
  * - After them, a small chip naming the question (`Q16`), folded;  a click unfolds the question's title and its answer,
  *   in a line, after it.
  *   - the title from the page itself (`PageTargets`:  the item's line is in the skeleton, its body may not be loaded)
  *   - the answer from `answer`, which the epic tool copied when the words changed
- * - While the page is reviewed and the change waits:  Accept and Reopen (`<epic-review buttons="change">`), over the
- *   chip on hover or focus, and while it's unfolded (a phone has no hover).
- *   - their marks go under its id (`ch3`) in the page's inbox;  `epic inbox apply` makes Accept `accepted`, and
- *     reopens the question for Reopen
+ * - While the page is reviewed and the change is new:  Reopen (`<epic-review buttons="change">`), in a tooltip on the
+ *   words, for when Owen disagrees
+ *   - its mark goes under its id (`ch3`) in the page's inbox;  `epic inbox apply` reopens the question
  *   - none without an id:  just written by hand, the tool hasn't stamped it yet
- * - Accepted:  no orange, the chip muted, the buttons gone;  the chip stays for good (Q13, B).
+ * - Quiet (older, or `accepted` on a page from before):  no orange, the chip muted;  the chip stays for good (Q13, B).
  * - Inline, as running text:  the words wrap with the paragraph, the buttons float and never move a line.
  ****************/
 export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
@@ -57,22 +57,19 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   }
 
   /**
-   * Owen accepted it:  no orange.  `accepted` written, or his Accept pressed and not applied yet (Owen, 2026-10-25:
-   * "When I accept a mark, change highlight right away").
+   * QUIET:  no orange.  Older than `NEW_DAYS`, or `accepted` (written on a page from before changes needed no
+   * approval).
    */
-  @E.cssState("accepted")
-  get isAccepted(): boolean {
-    return this.isWrittenAccepted || this.review.mark()?.action === "accept"
+  @E.cssState("quiet")
+  get isQuiet(): boolean {
+    if (this.accepted !== undefined && this.accepted !== null) return true
+    const at = this.at ? Date.parse(this.at.replace(" ", "T")) : NaN
+    return Number.isFinite(at) && Date.now() - at > NEW_DAYS * DAY_MS
   }
 
-  /** `accepted` written:  the session applied his Accept. */
-  get isWrittenAccepted(): boolean {
-    return this.accepted !== undefined && this.accepted !== null
-  }
-
-  /** Accept and Reopen show:  reviewed, stamped (an id) and not accepted in the file (his Accept still undoable). */
+  /** Reopen shows:  reviewed, stamped (an id), still new. */
   get showsButtons(): boolean {
-    return !this.isWrittenAccepted && !!this.id && this.review.reviewing()
+    return !this.isQuiet && !!this.id && this.review.reviewing()
   }
 
   /** The question's id as people see it:  `Q16`. */
@@ -90,12 +87,10 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     }
   }
 
-  /** The words' tooltip:  which answer changed them, when, and whether Owen has accepted it. */
+  /** The words' tooltip:  which answer changed them, and when. */
   get wordsTip(): string {
     const when = this.at ? ` on ${PlanDates.format(this.at)}` : ""
-    if (!this.isWrittenAccepted) return this.translationForKey("waitingTip", { item: this.itemLabel, when })
-    const accepted = PlanDates.format(this.accepted)
-    return this.translationForKey("acceptedTip", { item: this.itemLabel, when, accepted })
+    return this.translationForKey(this.showsButtons ? "newTip" : "changedTip", { item: this.itemLabel, when })
   }
 
   render(): JSX.Element {
@@ -110,7 +105,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
           <slot />
         </mark>
         {/*
-          Accept and Reopen ON the words:  a tooltip with an arrow, on hover, kept 2 seconds after the pointer leaves so
+          Reopen ON the words:  a tooltip with an arrow, on hover, kept 2 seconds after the pointer leaves so
           it can reach them (Owen, 2026-10-25:  "hard to get to this because it's not attached to the text")
         */}
         <Show when={this.showsButtons}>
@@ -123,11 +118,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
             class={BUTTONS}
             part={this.partForName("buttons")}
           >
-            <span
-              class={TIP_WORDS}
-              // a native listener, capturing:  the press comes from inside `<epic-review>`, which stops it going further
-              ref={(element: HTMLElement) => this.wireAnswered(element)}
-            >
+            <span class={TIP_WORDS}>
               <span class={TIP_LINE}>{this.wordsTip}</span>
               <epic-review
                 of={this.id}
@@ -166,33 +157,6 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     )
   }
 
-  /**
-   * Accept or Reopen pressed:  `epic-change-answered` (bubbling, composed), so the page lands on the NEXT change
-   * waiting (Owen, 2026-10-25:  "Clicking 'accept or revisit' on one should jump to next one to revisit").
-   */
-  /** Listen on `buttons` for a press, once however often it's handed over. */
-  private wireAnswered(buttons: HTMLElement) {
-    if (this.wired === buttons) return
-    this.wired = buttons
-    buttons.addEventListener("click", () => this.answered(), true)
-  }
-
-  /** When a press was last told (`answered()`). */
-  private lastAnswered = -Infinity
-
-  /** The buttons' box listened on (`wireAnswered()`). */
-  private wired: HTMLElement | undefined
-
-  @E.untracked
-  private answered() {
-    // one press is two clicks (the button's host and the button in it):  told once
-    if (performance.now() - this.lastAnswered < ONE_PRESS_MS) return
-    this.lastAnswered = performance.now()
-    this.domElement.dispatchEvent(
-      new CustomEvent(CHANGE_ANSWERED, { bubbles: true, composed: true, detail: { id: this.id } })
-    )
-  }
-
   /** The chip clicked:  its question and answer unfold, or fold;  the click goes no further (an item would fold). */
   @E.untracked
   private toggle(event: MouseEvent) {
@@ -201,9 +165,6 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     this.unfolded = !this.unfolded
   }
 }
-
-/** Clicks closer together than this are one press (`answered()`). */
-const ONE_PRESS_MS = 300
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicChange extends E.AttributeValues<typeof epicChangeVocabulary> {}
@@ -217,6 +178,12 @@ const QA = "qa"
 
 /** The Q&A's id in its shadow root:  the chip's `aria-controls`. */
 const QA_ID = "qa"
+
+/** How long a change stays NEW, orange, in days (`isQuiet`). */
+const NEW_DAYS = 3
+
+/** A day, in ms. */
+const DAY_MS = 24 * 60 * 60 * 1000
 
 /** The changed words' id:  the buttons' tooltip points at them. */
 const WORDS_ID = "words"
