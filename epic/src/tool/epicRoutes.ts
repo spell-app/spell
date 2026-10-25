@@ -58,6 +58,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
+import { slug } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
@@ -140,13 +141,12 @@ export async function newEpic(root: string, title: string, prompt: string): Prom
   return name
 }
 
-/** `title`, lower-kebab-cased, as `/epic` names an epic (`Docs Index` -> `docs-index`);  at most 40 characters. */
+/**
+ * `title` as `/epic` names an epic (`Docs Index` -> `docs-index`):  the kit's id rule, at most 40 characters.
+ * - accents and apostrophes dropped:  `Café` -> `cafe`, `Owen's` -> `owens`
+ */
 export function epicName(title: string): string {
-  const name = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 40)
-    .replace(/^-+|-+$/g, "")
+  const name = slug(title).slice(0, 40).replace(/-+$/, "")
   if (!name) throw new SRV.HttpError(400, `nothing to name an epic by in "${title}"`)
   return RESERVED.has(name) ? `${name}-epic` : name
 }

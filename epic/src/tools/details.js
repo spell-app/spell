@@ -45,6 +45,8 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { clamp } from "spell/util/number.ts"
+import { localDate } from "spell/util/time.ts"
 import {
   ASK,
   CHOICES,
@@ -201,7 +203,7 @@ function pageDocument(docs, folder, { title, description, spec }) {
     title,
     description: description ?? `Details:  ${title}`,
     asked: "[data-details-asked]",
-    date: today()
+    date: localDate()
   })
   if (spec) fillFromSpec(document, spec)
   return document
@@ -230,7 +232,7 @@ export function newRound(docs, target, { title, description, spec } = {}) {
   const draft = !answer && readDraft(file)
   const typed = draft ? formatDraft(file, draft) : undefined
   const asked = askedOf(old)
-  const round = foldRound({ from: old, into: document, sent, typed, asked: today() })
+  const round = foldRound({ from: old, into: document, sent, typed, asked: localDate() })
   writeFileSync(file, serialize(document))
   archiveAnswer(file, { round, asked, sent, answer })
   dropSentDraft(file, answer)
@@ -595,7 +597,7 @@ export async function waitForAnswer(page, { since = Date.now(), timeout, poll = 
       }
     }
     if (Date.now() >= end) return undefined
-    await new Promise((done) => setTimeout(done, Math.min(poll, Math.max(0, end - Date.now()))))
+    await new Promise((done) => setTimeout(done, clamp(end - Date.now(), 0, poll)))
   }
 }
 
@@ -718,12 +720,6 @@ export function duration(text) {
 /** `file` as printed:  absolute, so it means the same wherever Claude reads it. */
 export function shown(file) {
   return resolve(file)
-}
-
-/** Today, `YYYY-MM-DD`, local time. */
-export function today() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
 }
 
 /** `--key value` flags (`--wait` alone is `true`), plus everything else in order;  flags go AFTER the page. */

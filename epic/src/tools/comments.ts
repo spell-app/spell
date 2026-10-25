@@ -45,6 +45,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { clamp } from "spell/util/number"
 import { CommentList, CommentsError } from "spell-epic/tool/CommentList"
 import { GuideInbox } from "spell-epic/tool/GuideInbox"
 import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
@@ -144,7 +145,7 @@ async function wait(pages: string[], flags: Record<string, string | true>): Prom
   const known = new Set(pageComments(inboxes(), "waiting").map(waitingKey))
   console.log(`waiting for a new comment on ${pages.length ? pages.join(", ") : "any docs page"}`)
   for (const end = Date.now() + timeout; Date.now() < end;) {
-    await new Promise((done) => setTimeout(done, Math.min(WAIT_POLL_MS, Math.max(0, end - Date.now()))))
+    await new Promise((done) => setTimeout(done, clamp(end - Date.now(), 0, WAIT_POLL_MS)))
     const fresh = pageComments(inboxes(), "waiting").filter((comment) => !known.has(waitingKey(comment)))
     if (!fresh.length) continue
     printComments(fresh)

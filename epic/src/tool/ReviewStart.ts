@@ -33,6 +33,7 @@ import { homedir } from "node:os"
 import { join, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { clockTime } from "spell/util/time"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
@@ -477,8 +478,7 @@ function sentence(words: string): string {
 
 /** ISO time `iso` as this machine's clock time, 24-hour:  `17:32`. */
 function clockOf(iso: string): string {
-  const date = new Date(iso)
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+  return clockTime(new Date(iso))
 }
 
 /** `path` with its links resolved, else as given (it may not exist). */

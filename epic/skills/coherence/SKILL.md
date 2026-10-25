@@ -54,8 +54,8 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
      takes it up.
    - **no epic, or done:**  a calm issue on the coherence epic's page,
      `epic add coherence#I "<title> (coherence)" --calm --details "..."`;  Owen marks which become its phases.
-   - Each item's details:  the finding in procedures.md's shape, its evidence in a folded `<epic-code>`, and a
-     **Net effect**.
+   - Each item's details:  the finding in procedures.md's shape, its **Net effect** right after "The one" and
+     BEFORE "Saves" (Owen, 2026-10-25), its places and evidence in a folded `<epic-code>`.
 6. **Reply:**  one line per finding, where it landed, with its link (`epic pages link ... --hash <id>`);  the
    "Considered, left out" line.
 7. **Learn,** whenever Owen gives a verdict on a finding (here or on the page):

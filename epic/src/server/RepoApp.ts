@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process"
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeSync } from "node:fs"
 import { delimiter, dirname, join } from "node:path"
 
+import { escapeHTML } from "spell/util/string"
 import type { SRV } from "spell/server"
 
 import { EpicConfig, type EpicApp } from "spell-epic/config/EpicConfig"
@@ -151,12 +152,12 @@ export class RepoApp {
 
   /** The page the click gets while the app isn't up:  starting (it polls), or why it can't. */
   page(status: AppStatus): string {
-    const name = escape(this.repo.name)
-    const log = `<code>${escape(this.logFile)}</code>`
-    const config = `<code>${escape(join(this.repo.checkout, EpicConfig.FILE))}</code>`
+    const name = escapeHTML(this.repo.name)
+    const log = `<code>${escapeHTML(this.logFile)}</code>`
+    const config = `<code>${escapeHTML(join(this.repo.checkout, EpicConfig.FILE))}</code>`
     const body = !status.declared
       ? `<h1>${name} has no app</h1>
-<p>The App tab opens a repo's app, and ${name} declares none${status.failed ? `:  its config won't read (${escape(status.failed)})` : ""}.</p>
+<p>The App tab opens a repo's app, and ${name} declares none${status.failed ? `:  its config won't read (${escapeHTML(status.failed)})` : ""}.</p>
 <p>To give it one, add <code>"app"</code> to ${config}:</p>
 <pre>"app": {
   "path": "/editor/",
@@ -165,7 +166,7 @@ export class RepoApp {
 }</pre>`
       : !status.canStart
         ? `<h1>${name}'s app isn't running</h1>
-<p>Nothing answers at <code>${escape(status.url ?? "(no URL yet)")}</code>, and ${config} names no <code>"start"</code> command to run.  Start it, then reload.</p>`
+<p>Nothing answers at <code>${escapeHTML(status.url ?? "(no URL yet)")}</code>, and ${config} names no <code>"start"</code> command to run.  Start it, then reload.</p>`
         : `<h1 id="title">Starting ${name}'s app…</h1>
 <p id="said">Its start command runs in the background;  this page goes to the app once it answers.</p>
 <p class="quiet">Output:  ${log}</p>
@@ -221,11 +222,6 @@ function startFailure(start: { since: number; exit?: number | null }, command: s
   if (Date.now() - start.since > RepoApp.TIMEOUT)
     return `It didn't answer within ${Math.round(RepoApp.TIMEOUT / 1000)} seconds of "${command}"`
   return undefined
-}
-
-/** `text` safe in HTML. */
-function escape(text: string): string {
-  return text.replace(/[&<>"]/g, (char) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot" }[char]};`)
 }
 
 /**

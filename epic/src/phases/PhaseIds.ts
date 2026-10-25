@@ -1,3 +1,5 @@
+import { slug } from "spell/util/string.ts"
+
 /****************
  * ### `PhaseIds`
  * A phase's ID, and the NUMBER people see and say (epic `epic-workflow` P15, I7 and J49).
@@ -23,15 +25,10 @@ export class PhaseIds {
    * - `Epic Migrate` -> `epic-migrate`;  `Owen's <epic-link>` -> `owens-epic-link`;  `Café 2.0` -> `cafe-2-0`
    * - an apostrophe joins its word (`Owen's` -> `owens`);  any other run of non-letters, non-digits splits words
    * - accents dropped;  a title with no letters or digits at all:  `phase`
+   * - the kit's id rule (`slug()`, moved there):  the ids are SAVED in epic pages, so it must never change
    */
   static slugOf(title: string): string {
-    const slug = title
-      .normalize("NFKD")
-      .toLowerCase()
-      .replace(/[̀-ͯ'’]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-    return slug || "phase"
+    return slug(title, { fallback: "phase" })
   }
 
   /**

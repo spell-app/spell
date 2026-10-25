@@ -60,8 +60,8 @@ export const epicReplyVocabulary = {
     }
   ],
   texts: [
-    { key: "foldTip", text: "Fold this reply", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold this reply", description: "Tooltip of its fold button while folded." },
+    { key: "foldTip", text: "Close this reply", description: "Tooltip of its fold button while open." },
+    { key: "unfoldTip", text: "Open this reply", description: "Tooltip of its fold button while folded." },
     { key: "re", text: "re: {re}", description: "What the reply is about, in its heading." },
     { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until Owen has seen it." },
     {

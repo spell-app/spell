@@ -1,3 +1,5 @@
+import { slug } from "spell/util/string"
+
 import {
   LINK_ID,
   LINK_NAME,
@@ -209,12 +211,12 @@ export class EpicAddress {
     return index >= 0 ? { phase: phases[index]!, number: numberOf(phases[index]!, index) } : undefined
   }
 
-  /** `title` as a slug:  lower case, a hyphen for every run of other characters (`Epic Migrate` -> `epic-migrate`). */
+  /**
+   * `title` as a slug (`Epic Migrate` -> `epic-migrate`):  the kit's id rule, `PhaseIds.slugOf()`'s,
+   * so `p-cafe` finds the phase "Café".
+   */
   static slugOf(title: string): string {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
+    return slug(title)
   }
 
   ////////////////

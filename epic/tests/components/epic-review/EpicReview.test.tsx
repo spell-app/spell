@@ -182,13 +182,13 @@ describe("<epic-item> review controls", () => {
     expect(deep(host).querySelector("textarea")).toBeNull()
   })
 
-  test("Approve, Revisit, Make Todo in a group, then Do Now apart (Q20);  Approve marks it, dashed green, and saves", async () => {
+  test("Make Todo, Revisit, Approve in a group, then Do Now apart (Q20);  Approve marks it, dashed green, and saves", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="q1" title="A question" status="open"><p>Text</p></epic-item>`)
-    expect(actions(host)).toEqual(["approve", "revisit", "todo", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "approve", "details"])
     expect(
       Array.from(deep(host).querySelectorAll("ui-buttons > ui-button"), (it) => (it as HTMLElement).dataset.action)
-    ).toEqual(["approve", "revisit", "todo"])
+    ).toEqual(["todo", "revisit", "approve"])
     // the wand, as the page header's Review Now (Owen, 2026-10-09:  the plane is a todo's "next phase" now)
     expect([button(host, "details").getAttribute("icon"), button(host, "details").dataset.color]).toEqual([
       "wand magic sparkles",
@@ -248,7 +248,7 @@ describe("<epic-item> review controls", () => {
     expect(routes.inbox.marks.c4).toBeUndefined()
     // other kinds keep theirs
     const call = await render(`<epic-item id="j4" title="A call" status="open"></epic-item>`)
-    expect(actions(call)).toEqual(["approve", "revisit", "todo", "details"])
+    expect(actions(call)).toEqual(["todo", "revisit", "approve", "details"])
   })
 
   test("a todo's note box:  the plane, Revisit Later, the x;  the plane takes the note along, as does the line's x", async () => {
@@ -391,7 +391,7 @@ describe("<epic-item> review controls", () => {
     ])
     expect(x.querySelector("ui-icon")!.getAttribute("name")).toBe("xmark")
     // the line keeps its Make Todo
-    expect(actions(host)).toEqual(["approve", "revisit", "todo", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "approve", "details"])
     const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
     note.value = "covered by P3"
     note.dispatchEvent(new InputEvent("input", { bubbles: true }))
@@ -724,7 +724,7 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
     const host = await render(
       `<epic-section id="o1" kind="overview-part" title="What changes" open><p>Prose</p></epic-section>`
     )
-    expect(actions(host)).toEqual(["revisit", "todo", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "details"])
     expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -748,7 +748,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
   test("a phase:  Revisit, Make Todo, Do Now in its title;  a note box at its body's end;  Make Todo marks it", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
-    expect(actions(host)).toEqual(["revisit", "todo", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "details"])
     expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -771,7 +771,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
         `<epic-section id="o1" kind="overview-part" title="Structure"><p>Hello</p></epic-section></epic-overview>`
     )
     // in the title row (`tools`), before the toggle-all and the fold;  folded or open
-    expect(actions(host)).toEqual(["revisit", "todo", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "details"])
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
     const [review, expand] = ['[part~="review-buttons"]', '[part~="toggle-all"]'].map((selector) =>
       tools.querySelector(selector)!

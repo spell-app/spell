@@ -60,6 +60,7 @@ import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
+import { kb } from "spell/util/number.ts"
 import { sourceNames } from "spell/toolchain/sourceNames"
 
 import { packageDir } from "./packageDir.ts"
@@ -662,9 +663,7 @@ async function writeLazyScripts() {
     })
     checkClassicScript(outfile)
     const code = readFileSync(outfile)
-    console.log(
-      `-- ${relative(DOCS, outfile)}  ${(code.length / 1024).toFixed(1)} KB  (gzip ${(gzipSync(code).length / 1024).toFixed(1)} KB)`
-    )
+    console.log(`-- ${relative(DOCS, outfile)}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
   }
 }
 
@@ -703,7 +702,6 @@ function lazyModule() {
 /** Prints a bundle's size (raw, gzip) and any esbuild warnings:  `file`, by default the main one. */
 function report(warnings, file = OUTFILE) {
   const code = readFileSync(file)
-  const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`
   console.log(`-- ${relative(DOCS, file)}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
   for (const warning of warnings) console.warn(`!! ${warning}`)
 }

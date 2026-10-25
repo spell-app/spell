@@ -25,6 +25,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { basename, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { localDate } from "spell/util/time.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 import { GUIDES, ROOT, findPages, pageFile, pagePath } from "./pages.js"
@@ -117,7 +118,7 @@ export function run(args: string[]): number {
   const named = args.filter((arg, at) => !arg.startsWith("--") && !(voiceAt !== -1 && at === voiceAt + 1))
   if (doneAt !== -1) {
     if (!named.length) return usage("--done <page>...?  the guides to stamp")
-    const date = new Date().toISOString().slice(0, 10)
+    const date = localDate()
     for (const page of named) {
       const file = pageFile(page)
       writeFileSync(file, PageVoice.withStamp(readFileSync(file, "utf8"), { voice, date }))

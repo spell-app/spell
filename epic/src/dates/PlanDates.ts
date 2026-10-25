@@ -1,3 +1,5 @@
+import { clockTime } from "spell/util/time.ts"
+
 import { PLAN_DATE, type ReadPlanDate } from "./dates.types.ts"
 
 /****************
@@ -10,8 +12,9 @@ import { PLAN_DATE, type ReadPlanDate } from "./dates.types.ts"
  * - formats at draw time:  the docs keep their attributes as they are, no migration
  * - NOT the log's (`<epic-event>` keeps `2026-10-08 14:34`), nor the agents panel's ages (`3m`)
  * - STATIC, pure, node-safe:  no DOM, no clock;  elements and node tools alike import it (`spell-epic/dates`)
- *   - plain `node` too, by path (the Epics page's cards, `spell-epic/list/EpicCards`):  its one import is by file
- *     name, and NEVER an `enum` or a parameter property here, which plain `node` can't strip
+ *   - plain `node` too, by path (the Epics page's cards, `spell-epic/list/EpicCards`):  its imports are by file
+ *     name (the kit's `spell/util/time.ts` is standalone),
+ *     and NEVER an `enum` or a parameter property here, which plain `node` can't strip
  ****************/
 export class PlanDates {
   /**
@@ -33,7 +36,7 @@ export class PlanDates {
 
   /** `date`'s local time of day, 24-hour:  `14:34`, `09:05`.  The format's time half, for a time shown alone. */
   static clock(date: Date): string {
-    return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+    return clockTime(date)
   }
 
   /**

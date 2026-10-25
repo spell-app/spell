@@ -6,7 +6,8 @@ import { parseHTML } from "linkedom"
 // Import directly:  the `spell/server/site` barrel is browser code (the site header);  this file imports nothing
 import { URGENT_SELECTOR } from "spell-epic/list/EpicState"
 import { PhaseIds } from "spell-epic/phases"
-import { FAVORITES_FILE, eventTimesIn, favoritesIn, isoLocal, lastWorked } from "spell-epic/list/EpicCards"
+import { localMinutes } from "spell/util/time"
+import { FAVORITES_FILE, eventTimesIn, favoritesIn, lastWorked } from "spell-epic/list/EpicCards"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
@@ -56,7 +57,7 @@ export class SagaEpics {
       if (epic?.saga !== saga) return []
       const log = join(epics, name, "parts", "log.html")
       const worked = lastWorked([epic.card.worked, ...(existsSync(log) ? eventTimesIn(readFileSync(log, "utf8")) : [])])
-      return [{ ...epic.card, worked: worked && isoLocal(worked), favorite: favorites.has(name) }]
+      return [{ ...epic.card, worked: worked && localMinutes(worked), favorite: favorites.has(name) }]
     })
     found.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" }))
     return { saga, epics: found }
@@ -107,6 +108,6 @@ export class SagaEpics {
   /** The latest of `values` (`lastWorked()`), local ISO;  `undefined` when none reads. */
   private static worked(values: (string | null)[]): string | undefined {
     const date = lastWorked(values)
-    return date && isoLocal(date)
+    return date && localMinutes(date)
   }
 }

@@ -192,6 +192,7 @@ import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { escapeRegExp } from "spell/util/string.ts"
 import { checkoutOf } from "spell/server/checkout"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
@@ -1881,8 +1882,7 @@ export function titledFor(title, name) {
   const epic = name.toLowerCase()
   if (!epic || !bare) return false
   if (bare === epic) return true
-  const escaped = epic.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  return new RegExp(`(^|[^a-z0-9_-])${escaped}($|[^a-z0-9_-])`, "u").test(bare)
+  return new RegExp(`(^|[^a-z0-9_-])${escapeRegExp(epic)}($|[^a-z0-9_-])`, "u").test(bare)
 }
 
 /** The registry entry of the window process `pid` runs in:  the nearest of it and its ancestors with one, else `null`. */

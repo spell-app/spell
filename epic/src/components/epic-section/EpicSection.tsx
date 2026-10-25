@@ -872,9 +872,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   private static stateOf(item: Element): ItemStateName {
     const state = item.getAttribute("state")
     const known = FILTER_STATES.find((it) => it.state === state)?.state
-    // a week-old decided or done item draws grey (`ItemAge`):  its count and chip with it
+    // a decided or done item a week old, or approved since it changed, draws grey (`ItemAge`):  its count and chip with it
     const written = known ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
-    return ItemAge.shown(written, item.getAttribute("changed")) as ItemStateName
+    return ItemAge.shown(written, item.getAttribute("changed"), item.getAttribute("reviewed")) as ItemStateName
   }
 
   /** The Phases toggles as last left on this page;  none without storage. */

@@ -1,5 +1,6 @@
 import { parseHTML } from "linkedom"
 
+import { escapeRegExp } from "spell/util/string"
 import {
   OVERVIEW_ID,
   OVERVIEW_PART_ID,
@@ -2622,8 +2623,3 @@ function changeTitle(change: Element): string {
 
 /** What keeps the numbers it said:  the log, an Original Discussion (`relabelPhaseNames()`). */
 const HISTORY = 'epic-section[kind="log"], epic-original'
-
-/** `text`, safe inside a regular expression. */
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}

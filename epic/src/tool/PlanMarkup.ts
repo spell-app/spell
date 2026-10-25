@@ -1,3 +1,5 @@
+import { escapeHTML } from "spell/util/string"
+
 /****************
  * ### `PlanMarkup`
  * Small helpers over HTML text and a parsed (linkedom) document, shared by `PlanDoc` and its helpers and by the
@@ -6,8 +8,8 @@
  * it.
  * - STATIC and instance-free on purpose:  no state, and nothing here knows what an epic page is, beyond
  *   `slot="title"`.
- * - Imports nothing:  the DOM it works on is whatever document it's handed (linkedom under node).  Plain DOM, no
- *   globals (`nodeType`, never `instanceof`).
+ * - Imports only the kit's standalone `spell/util/string` (its escaping):  the DOM it works on is whatever document
+ *   it's handed (linkedom under node).  Plain DOM, no globals (`nodeType`, never `instanceof`).
  * - From `src/tools/plan-doc.js`, `pages.js` (`serialize()`, `serializeHTML()`) and `to-ui-section.js`
  *   (`createElement()`), epic `epic-components` P7:  `epics` can't import `docs`.  The DOM edits were the
  *   converter's `domEdits.ts` (I5).
@@ -19,17 +21,17 @@ export class PlanMarkup {
 
   /** `value` escaped for HTML text. */
   static text(value: unknown): string {
-    return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    return escapeHTML(String(value))
   }
 
   /** `value` escaped for HTML text AND a double-quoted attribute:  placeholders sit in both. */
   static escapeAll(value: unknown): string {
-    return PlanMarkup.text(value).replace(/"/g, "&quot;")
+    return escapeHTML(String(value))
   }
 
   /** `value` escaped for a double-quoted attribute value. */
   static attribute(value: unknown): string {
-    return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    return escapeHTML(String(value))
   }
 
   ////////////////

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, watch, type FSWatcher } from "no
 import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
+import { escapeRegExp } from "spell/util/string"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RealPath } from "spell-epic/config/RealPath"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
@@ -341,8 +342,7 @@ export function titleNames(title: string, epic: string): boolean {
   const name = epic.toLowerCase()
   if (!name || !bare) return false
   if (bare === name) return true
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  return new RegExp(`(^|[^a-z0-9_-])${escaped}($|[^a-z0-9_-])`, "u").test(bare)
+  return new RegExp(`(^|[^a-z0-9_-])${escapeRegExp(name)}($|[^a-z0-9_-])`, "u").test(bare)
 }
 
 /** The fields `RunningEpics.liveSessions()` reads of a session's record, `~/.claude/sessions/<pid>.json`. */
@@ -546,11 +546,6 @@ function read(
     ...(urgent.length > 0 && { urgent }),
     ...(worked && { worked: worked.toISOString() })
   }
-}
-
-/** `value` with RegExp syntax escaped. */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 /** The few entities an epic page's `<title>` and headers hold, back to text. */
