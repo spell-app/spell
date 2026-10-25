@@ -414,7 +414,7 @@ describe("<ui-docs-api only>", () => {
     expect(marked(host)).toEqual([["states-pressed", "pressed", false]])
   })
 
-  it("heads each tag of a family that has the table, as an entry group;  its summary in the tooltip", async () => {
+  it("heads each tag of a family that has the table, as an entry group;  no summary, nor a tooltip", async () => {
     const parts = await inSection(`family="x-button" only="parts"`, "api-parts")
     expect(marked(parts)).toEqual([
       ["api-parts-x-button", "<x-button>", true],
@@ -423,13 +423,46 @@ describe("<ui-docs-api only>", () => {
       ["api-parts-x-or-or", "or", false]
     ])
     const header = parts.shadowRoot!.getElementById("api-parts-x-button")!
-    expect(header.getAttribute("title")).toBe("A button does things.")
+    expect(header.hasAttribute("title")).toBe(false)
     expect(parts.shadowRoot!.querySelector("[part~=description]")).toBeNull()
     expect(header.querySelector("a")!.getAttribute("href")).toBe("#x-button")
 
     const events = await inSection(`family="x-button" only="events"`, "api-events")
     expect(events.shadowRoot!.querySelectorAll("[part~=header]")).toHaveLength(1)
     expect(events.shadowRoot!.querySelectorAll("ui-table")).toHaveLength(1)
+  })
+
+  it("`tags`:  lists the family's tags with their summaries, each name a link to its first table", async () => {
+    const host = await inSection(`family="x-button" only="tags"`, "api-tags")
+    const root = host.shadowRoot!
+    expect(root.querySelectorAll("ui-table")).toHaveLength(1)
+    expect(root.querySelector("[part~=title]")).toBeNull()
+    expect(root.querySelector("[part~=header]")).toBeNull()
+    const table = root.querySelector("table")!
+    expect(table.getAttribute("aria-label")).toBe("Tags of the x-button family")
+    expect([...table.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual(["Tag", "Description"])
+    const rows = [...table.querySelectorAll("tbody tr")].map((row) => [
+      row.querySelector("th a")?.getAttribute("href"),
+      row.querySelector("th")!.textContent,
+      row.querySelector("td")!.textContent
+    ])
+    expect(rows).toEqual([
+      ["#x-button", "<x-button>", "A button does things."],
+      ["#x-or", "<x-or>", "An or."]
+    ])
+    // the summary's code span is drawn as code, as visible text
+    expect(table.querySelector("tbody td code")!.textContent).toBe("does")
+    expect(marked(host)).toEqual([
+      ["api-tags-x-button", "<x-button>", false],
+      ["api-tags-x-or", "<x-or>", false]
+    ])
+    await expectAccessible(host)
+  })
+
+  it("`tags`:  draws nothing for a single tag", async () => {
+    const host = await inSection(`tag="x-button" only="tags"`, "api-tags")
+    expect(host.shadowRoot!.querySelector("ui-table")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=message]")).toBeNull()
   })
 
   it("draws nothing, and no message, when the tag has no such table", async () => {

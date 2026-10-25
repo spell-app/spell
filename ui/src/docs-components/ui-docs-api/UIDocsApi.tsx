@@ -48,7 +48,10 @@ import apiCSS from "./UIDocsApi.css?inline"
  *   kind, written by `yarn site:sections`).
  *   - No table title:  the page's section has it.
  *   - A family's tags each under a small header, when it has more than one;  a tag without that table is left out.
- *     Their one-line summaries go in the header's tooltip, not under it:  seven sections would say them seven times.
+ *     No summaries under them:  seven sections would say them seven times.
+ *   - `only="tags"` says them once instead (epic `epic-engine` J127):  the family's table of its tags,
+ *     each with its summary, its name a link to its first table below (`#ui-or`, which the page lands on).
+ *     Drawn only for a family of 2+ tags, so it's a family page's first API section.
  *   - Every row's name cell has an id, `<anchor>-<name>` (`anchorFor()`), and marks itself an entry of the page's
  *     "On this page" list (`TOC_ENTRY_ATTRIBUTE`);  so do the tag headers, as groups.
  *   - The page lands on them (the site's `SiteSections`):  the browser can't reach an id in a shadow root.
@@ -134,9 +137,17 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     const only = this.onlyId
     const items = this.items ?? []
     if (!only) return items
+    if (only === TAGS) return []
     return items
       .map((item) => ({ ...item, sections: item.sections.filter((section) => section.id === only) }))
       .filter((item) => item.sections.length)
+  }
+
+  /** With `only="tags"`:  the family's table of its tags (2+ tags only). */
+  @E.derived
+  get tagsSection(): ApiSection | undefined {
+    if (this.onlyId !== TAGS || !this.family) return undefined
+    return ApiModel.tagsSectionFor((this.items ?? []).map((item) => item.tag))
   }
 
   /**
@@ -179,13 +190,15 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           )}
         </Show>
         <For each={this.shownItems}>{(item) => this.item(item)}</For>
+        <Show when={this.tagsSection}>{(section) => this.table(section(), this.tagsOwner)}</Show>
       </section>
     )
   }
 
   /** One tag:  its tables, under its own header and summary with `family`. */
   private item(item: ApiItem): JSX.Element {
-    if (!this.hasHeader(item)) return <For each={item.sections}>{(section) => this.table(item, section)}</For>
+    if (!this.hasHeader(item))
+      return <For each={item.sections}>{(section) => this.table(section, this.ownerFor(item))}</For>
     const only = !!this.onlyId
     const tag = `<${item.tag.tag}>`
     return (
@@ -195,7 +208,6 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           id={only ? this.anchorFor(item) : item.tag.tag}
           level={HeadingLevels.attributeFor(this.headingLevel)}
           dividing=""
-          title={only ? InlineCode.plain(item.tag.description ?? "") || undefined : undefined}
           {...(only ? { [TOC_ENTRY_ATTRIBUTE]: tag, [TOC_GROUP_ATTRIBUTE]: "" } : {})}
         >
           <a href={`#${item.tag.tag}`}>
@@ -207,22 +219,35 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
             {this.inline(item.tag.description ?? "")}
           </p>
         </Show>
-        <For each={item.sections}>{(section) => this.table(item, section)}</For>
+        <For each={item.sections}>{(section) => this.table(section, this.ownerFor(item))}</For>
       </section>
     )
   }
 
-  /** One table:  its title (none with `only`) and note, then the `<ui-table>`. */
-  private table(item: ApiItem, section: ApiSection): JSX.Element {
-    const tag = `<${item.tag.tag}>`
+  /** Whose tables these are:  `item`'s. */
+  private ownerFor(item: ApiItem): TableOwner {
+    return {
+      label: (section) => this.translationForKey("tableLabel", { section, tag: `<${item.tag.tag}>` }),
+      level: item.isGrouped ? this.headingLevel + 1 : this.headingLevel,
+      anchor: () => this.anchorFor(item)
+    }
+  }
+
+  /** The tags table's owner:  the family;  its rows' ids start with the section's (`api-tags-ui-or`). */
+  private get tagsOwner(): TableOwner {
+    return {
+      label: () => this.translationForKey("tagsTableLabel", { family: this.family ?? "" }),
+      level: this.headingLevel,
+      anchor: () => this.anchorBase
+    }
+  }
+
+  /** One table:  its title (none with `only`) and note, then the `<ui-table>`;  `owner` says whose. */
+  private table(section: ApiSection, owner: TableOwner): JSX.Element {
     return (
       <>
         <Show when={!this.onlyId}>
-          <ui-header
-            part={this.partForName("title")}
-            level={HeadingLevels.attributeFor(item.isGrouped ? this.headingLevel + 1 : this.headingLevel)}
-            size={SMALL}
-          >
+          <ui-header part={this.partForName("title")} level={HeadingLevels.attributeFor(owner.level)} size={SMALL}>
             {this.translationForKey(section.id)}
           </ui-header>
         </Show>
@@ -239,16 +264,14 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           stackable=""
           stack-by="container"
         >
-          <table
-            aria-label={this.translationForKey("tableLabel", { section: this.translationForKey(section.id), tag })}
-          >
+          <table aria-label={owner.label(this.translationForKey(section.id))}>
             <thead>
               <tr>
                 <For each={section.columns}>{(column) => <th scope="col">{this.translationForKey(column)}</th>}</For>
               </tr>
             </thead>
             <tbody>
-              <For each={section.rows}>{(row) => this.row(item, row)}</For>
+              <For each={section.rows}>{(row) => this.row(owner, row)}</For>
             </tbody>
           </table>
         </ui-table>
@@ -257,8 +280,8 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
   }
 
   /** One row;  with `only`, its name cell an anchor and an "On this page" entry, and the row flashing when landed on. */
-  private row(item: ApiItem, row: ApiRow): JSX.Element {
-    const id = this.onlyId ? `${this.anchorFor(item)}-${TocIndex.slug(row.name)}` : undefined
+  private row(owner: TableOwner, row: ApiRow): JSX.Element {
+    const id = this.onlyId ? `${owner.anchor()}-${TocIndex.slug(row.name)}` : undefined
     return (
       <tr class={{ [LANDED_CLASS]: !!id && this.landedId === id }}>
         <For each={row.cells}>{(cell) => this.cell(cell, id && { id, name: row.name })}</For>
@@ -281,6 +304,10 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
         >
           {cell.code === undefined ? (
             <em>{cell.label ? this.translationForKey(cell.label) : ""}</em>
+          ) : cell.href ? (
+            <a href={cell.href}>
+              <code>{cell.code}</code>
+            </a>
           ) : (
             <code>{cell.code}</code>
           )}
@@ -338,9 +365,14 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
    * - Read from the page as it's drawn:  the sections are written into the page, and never move.
    */
   private anchorFor(item: ApiItem): string {
-    const section = isServer ? undefined : this.domElement.closest(SECTION_TAG)?.id
-    const base = section || this.only || ""
+    const base = this.anchorBase
     return this.hasHeader(item) ? `${base}-${item.tag.tag}` : base
+  }
+
+  /** The id of the page's `<ui-section>` around this element, else `only`'s value (`anchorFor()`). */
+  private get anchorBase(): string {
+    const section = isServer ? undefined : this.domElement.closest(SECTION_TAG)?.id
+    return section || this.only || ""
   }
 
   ////////////////
@@ -435,6 +467,19 @@ type ItemsParams = {
   /** every tag of a family, each under its header;  wins over `tag` */
   family?: string
 }
+
+/** Whose table one is:  what `table()` and `row()` need of a tag, or of the family (the tags table). */
+type TableOwner = {
+  /** the table's accessible name, given its title */
+  label: (section: string) => string
+  /** its title's heading level, when it has one (no `only`) */
+  level: number
+  /** the start of its rows' ids, with `only` */
+  anchor: () => string
+}
+
+/** `only`'s family table:  its tags (`ApiModel.tagsSectionFor()`). */
+const TAGS = "tags"
 
 /** A page section:  `only`'s anchors start with the id of the one around this element. */
 const SECTION_TAG = "ui-section"

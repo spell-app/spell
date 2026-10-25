@@ -31,6 +31,8 @@
  * - A pane holding a lone `<ui-docs-api family|tag>` (a components page's API tab) becomes ONE SECTION PER KIND of
  *   table its tags have, in order (`ApiSections`, epic `epic-engine` P38):
  *   `<ui-section id="api-attributes" label="Attributes" ...>` holding `<ui-docs-api family="ui-menu" only="attributes">`.
+ *   - A family of 2+ tags gets a Tags section FIRST (`only="tags"`;  epic `epic-engine` J127):
+ *     each tag with its one-line summary, its name a link to its first table;  a single tag's page gets none.
  *   - So the tab gets a section row, and the "On this page" list its sections, as the Examples tab does;
  *     the rows themselves list under them (`<ui-docs-api only>`'s anchors).
  *   - Which kinds:  the site's data, `docs/__data/components.json5` (`ApiModel.sectionIdsFor()`).

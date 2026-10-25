@@ -13,6 +13,7 @@
  *     and `<ui-table part="table">` around a native `<table>`,
  *     whose row headers (`th[scope=row]`) hold the name and `<small class="ui-caption">` notes.
  *   - With `only`:  no title;  each row header is `part="member"`, and its row is `tr.landed` while it flashes.
+ *   - `only="tags"`:  one table of the family's tags, each row header's `<code>` inside an `<a>` to its first table.
  * - Public tokens (`--ui-docs-api-*`) are never declared:  each is read through a private alias
  *   (`notes/theming.md` "Component tokens").
  */
@@ -78,6 +79,16 @@
     text-decoration-line: none;
   }
   [part~="header"] > a:hover {
+    text-decoration-line: underline;
+  }
+
+  /* A tag's link in the tags table (`only="tags"`):  the page's link colour, underlined on hover. */
+  th > a {
+    color: var(--ui-link);
+    text-decoration-line: none;
+  }
+  th > a:hover {
+    color: var(--ui-link-hover);
     text-decoration-line: underline;
   }
 
