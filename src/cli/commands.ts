@@ -8,6 +8,8 @@
  * - `spell wwod [check]`:  WWOD's citations and paths
  * - `spell readme check | test [pages...]`:  every repo's README pages, checked, or their examples run
  *   (epic `readme` P16)
+ * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
+ *   docs, asked through graphify (epic `coherence` P1)
  * - `spell publish [--dry-run]`:  every repo's npm package, built, packed and checked, then published, lowest first
  *   (epic `repo-split` P19)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
@@ -136,6 +138,55 @@ export default function kitCommands(spell: Command): void {
     )
 
   ////////////////
+  // ## The maps
+  ////////////////
+
+  const map = spell
+    .command("map")
+    .description("a map of every repo's code, and one of the docs:  what already does this?  which pages say X?")
+    .addHelpText("after", MAP_HELP)
+
+  map
+    .command("install")
+    .description("install graphify, which maps the code, with uv -- optional:  nothing else needs it")
+    .action(() => mapCommand("install"))
+
+  map
+    .command("status")
+    .description("whether graphify is installed, and how old each map is")
+    .option("--json", "print it as JSON")
+    .action((options: CLI.MapOptions) => mapCommand("status", [], options))
+
+  map
+    .command("build")
+    .description("build the maps:  the code map with graphify, the docs map by itself")
+    .argument("[which]", "code or docs;  none:  both")
+    .option("--json", "print what each map holds as JSON")
+    .action((which: string | undefined, options: CLI.MapOptions) => mapCommand("build", which ? [which] : [], options))
+
+  map
+    .command("query")
+    .description('ask a map a question in words, graphify\'s own:  spell map query "tokenizer subclasses"')
+    .argument("<words...>", "the question")
+    .option("--docs", "ask the docs map")
+    .option("--budget <tokens>", "the answer, at most this many tokens (default 2000)")
+    .action((words: string[], options: CLI.MapOptions) => mapCommand("query", words, options))
+
+  map
+    .command("explain")
+    .description("a thing, and everything linked to it:  spell map explain PrefStore")
+    .argument("<name...>", "its name, as the map labels it:  PrefStore, readJSON5File()")
+    .option("--docs", "ask the docs map:  the pages and sections that name it")
+    .action((words: string[], options: CLI.MapOptions) => mapCommand("explain", words, options))
+
+  map
+    .command("uses")
+    .description('what uses a thing:  spell map uses "readJSON5File()"')
+    .argument("<name...>", "its name, as the map labels it")
+    .option("--docs", "ask the docs map")
+    .action((words: string[], options: CLI.MapOptions) => mapCommand("uses", words, options))
+
+  ////////////////
   // ## Publishing
   ////////////////
 
@@ -187,6 +238,16 @@ function serverCommand() {
 function passThrough(command: Command): Command {
   return command.allowUnknownOption().allowExcessArguments()
 }
+
+/** `spell map`'s verbs, run with the words and flags they were given. */
+function mapCommand(verb: string, words: string[] = [], options: CLI.MapOptions = {}): Promise<never> {
+  return CLI.runCommand(async () => (await import("spell/cli/commands/mapCommand")).mapCommand(verb, words, options))
+}
+
+/** After `spell map --help`'s verbs. */
+const MAP_HELP = `
+The maps are in the kit's graphify-out/ (git-ignored):  code.json, docs.json.
+A map older than the newest commit is rebuilt before it's asked.`
 
 /** After `spell server --help`'s verbs. */
 const SERVER_HELP = `

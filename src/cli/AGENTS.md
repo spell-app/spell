@@ -27,13 +27,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  readme  publish  pony        (help is the program's own)
+  server  bundle  commands  wwod  readme  map  publish  pony        (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:
   - it loads esbuild, Solid's compiler, Lightning CSS and Playwright when it runs
   - it names no child repo:  each says how it publishes in its `package.json`, `"spellPublish"`
     ([publish.types.ts](publish/publish.types.ts))
+- `spell map`'s work is a folder of its own too, [map/](map/) (`spell/cli/map`), with its own barrel
+  (epic `coherence` P1):
+  - the code map runs graphify, an optional Python install (`Graphify`), in each repo, then merges and links them
+    (`CodeMap`);  the docs map is ours, read by structure (`DocsMap`)
+  - [README-cli.md](../../README-cli.md), "Asking the map", says how to use it
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
   - Every repo's command list imports it, and `spell help` loads them all.
   - So it never exports a command's work:  [commands.ts](commands.ts) imports each one's file when it runs.
@@ -83,5 +88,7 @@ As WWOD §20, plus:
 - [repos.test.ts](../../tests/cli/repos.test.ts):  finding repos and hooks in a made-up kit.
 - [publish/](../../tests/cli/publish/):  `PackageBuild` and `PublishedPackage` on a made-up repo.
   - The real five packages and the scratch install:  `spell publish --dry-run`, too slow for a unit test.
+- [map/](../../tests/cli/map/):  imports read and resolved, a made-up checkout's maps merged and linked,
+  and a made-up content folder's docs map;  never graphify itself (`spell map build` runs it).
 - The other repos' commands are tested in their repos:  spell-parser's, Spell UI's, spell-app's.
   - spell-app's run every language command end to end, through the kit's bin.

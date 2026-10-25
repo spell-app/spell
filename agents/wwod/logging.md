@@ -57,4 +57,3 @@ From:  original WWOD §21 "Logging".
   - Never `console.log` for object inspection:  `setDebugGlobal({ project })` exposes state in the devtools console.
   - NEVER depend on a debug global in code:  it's for a human at the console, nothing else.
   - From `spell/util`.
-    - TODO:  `spell/util` has no `setDebugGlobal()` yet -- write it.

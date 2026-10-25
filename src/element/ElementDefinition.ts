@@ -43,6 +43,9 @@ export class ElementDefinition {
   /** Resolved attribute by the (localized) name authors write (`permitir-adiciones`). */
   private readonly byAttribute = new Map<string, E.ResolvedAttribute>()
 
+  /** Old names authors may still write (`AttributeSpec.replaces`), by that name:  `primary`, `href`, `primario`. */
+  private readonly byOldName = new Map<string, E.OldAttribute>()
+
   /** The vocabulary layer:  the page's runtime's (`SpellSolid.settings.words`). */
   private readonly words = E.SpellSolid.settings.words
 
@@ -73,6 +76,7 @@ export class ElementDefinition {
       }
       this.byName.set(spec.name, resolved)
       this.byAttribute.set(attribute, resolved)
+      this.addOldNames(resolved, dictionary)
       return resolved
     })
   }
@@ -111,6 +115,45 @@ export class ElementDefinition {
    */
   attributeNamed(attributeName: string): E.ResolvedAttribute | undefined {
     return this.byAttribute.get(attributeName)
+  }
+
+  /**
+   * What old name `attributeName` (`primary` on `<ui-button>`) stands for now:  its attribute, and a switch's value;
+   * `undefined` for a name that isn't an old one.
+   * - The name DOM API `attributeChangedCallback()` hands the DOM element.
+   */
+  oldAttributeNamed(attributeName: string): E.OldAttribute | undefined {
+    return this.byOldName.get(attributeName)
+  }
+
+  /** Every old name authors may still write on this tag:  observed, as its attributes are. */
+  get oldAttributeNames(): string[] {
+    return [...this.byOldName.keys()]
+  }
+
+  /**
+   * SIDE EFFECT:  note in the console, once per page per old name, that `old` was written, and what to write instead.
+   * - `<ui-button primary>:  primary is an old name;  write color="primary"`
+   */
+  noteOldName(old: E.OldAttribute) {
+    if (NOTED_OLD_NAMES.has(old.name)) return
+    NOTED_OLD_NAMES.add(old.name)
+    const instead = old.value === undefined ? old.attribute.attribute : `${old.attribute.attribute}="${old.value}"`
+    E.SpellSolid.settings.warn(`<${this.tag} ${old.name}>`, `${old.name} is an old name;  write ${instead}`)
+  }
+
+  /**
+   * The value `old`'s attribute takes from the old name's `text` (`null`:  removed), boxed (`{ value }`);
+   * `undefined` when it should keep the one it has.
+   * - a plain old name:  its text, converted as the attribute's own would be
+   * - an old switch turned on:  its value (`primary`);  turned off:  the default, but only if the value is still the one
+   *   the switch set (`current`), so turning `primary` off doesn't clear a `secondary` set since
+   */
+  valueFromOld(old: E.OldAttribute, text: string | null, current: unknown): { value: unknown } | undefined {
+    if (old.value === undefined) return { value: this.convert(old.attribute, text) }
+    const value = this.convert(old.attribute, old.value)
+    if (this.words.converters.boolean(text, old.name)) return { value }
+    return current === value ? { value: this.convert(old.attribute, null) } : undefined
   }
 
   /**
@@ -264,6 +307,21 @@ export class ElementDefinition {
     return this.localized.names.values.get(spec.name)?.get(text) ?? text
   }
 
+  /**
+   * Add `resolved`'s old names (`AttributeSpec.replaces`) to `byOldName`:  each under its canonical name,
+   * and under its translated one, if the dictionary has it (`primario`).
+   */
+  private addOldNames(resolved: E.ResolvedAttribute, dictionary: E.Dictionary | undefined) {
+    for (const replacement of resolved.spec.replaces ?? []) {
+      const { from, value } = typeof replacement === "string" ? { from: replacement, value: undefined } : replacement
+      const translated =
+        dictionary?.components?.[this.vocabulary.tag]?.attributes?.[from] ?? dictionary?.attributes?.[from]
+      for (const name of new Set([from, translated ?? from])) {
+        this.byOldName.set(name, { name, attribute: resolved, ...(value === undefined ? {} : { value }) })
+      }
+    }
+  }
+
   ////////////////
   // ## Statics
   ////////////////
@@ -286,6 +344,9 @@ export class ElementDefinition {
 
 /** The shared `visible` attribute's canonical name (`SharedVocabulary`). */
 const VISIBLE = "visible"
+
+/** The old names already noted in the console on this page (`noteOldName()`):  each is noted once. */
+const NOTED_OLD_NAMES = new Set<string>()
 
 /** Constructor props for `ElementDefinition`. */
 export type ElementDefinitionProps = {

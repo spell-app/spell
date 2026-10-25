@@ -79,6 +79,9 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **DRY:  extract logic duplicated more than ~3 lines** into a shared utility:
   - Before writing one, check `spell/util`, the package's own util folder (`spell-ui/util` ...) and lodash
     (re-exported by `spell/util`), e.g. lodash for dotted paths, `string.ts` for case conversion.
+  - Before writing a MECHANISM (a parser, a watcher, a fold, a poller, a command line), check the catalog of the ones
+    Spell has, `agents/coherence/catalog.md`, and ask the code map what already does it:  `spell map uses <name>`.
+    One word per idea:  `agents/coherence/words.md` (epic `coherence`).
   - After implementing a feature, look for duplicated blocks and lift them up:  constants and small pure helpers
     into the folder's types file (WWOD §8 › "`<folder>.types.ts`"), the rest into a util file.
   - Two functions doing generally the same thing:  consolidate into one, with arguments or dependency injection --

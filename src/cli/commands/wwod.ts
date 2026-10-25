@@ -8,7 +8,7 @@ import type { AgentRulesProblem, AgentRulesReport } from "spell/cli"
  * The agents' rules (epic `wwod`):  WWOD, the house style in `agents/wwod/*.md`, and the files that cite it
  * (`AGENTS.md`, `CLAUDE.md`, skills ...).  `checkAgentRules()` keeps them from rotting:
  * - every `WWOD §N` names a section, and every `WWOD §N › "title"` a rule in it
- * - every backticked repo path exists
+ * - every backticked repo path exists;  in the coherence catalog and word list, every file path
  * - ported from the epic's `cites.py`
  */
 
@@ -26,6 +26,16 @@ const CITERS = ["AGENTS.md", "CLAUDE.md", "*/AGENTS.md", "*/CLAUDE.md"]
  * with no link at the checkout's root.
  */
 const CONTENT_CITERS = ["goals/AGENTS.md", "guides/solid/solid-2.md"]
+
+/**
+ * The coherence catalog and word list (epic `coherence` P2):  every FILE they name must exist, wherever it is
+ * (`src/server/LiveReload.ts`, `spell-epic/src/window.mjs`), so a moved or renamed mechanism fails the check.
+ * - Only files with an extension:  an import name (`spell-parser/parser`) isn't a path.
+ */
+const COHERENCE = ["agents/coherence/catalog.md", "agents/coherence/words.md"]
+
+/** A backticked file path in the coherence files:  any folder, ending in a file's extension. */
+const FILE_PATH = /`([\w.-]+\/[^`\s*<>{}]+\.(?:ts|tsx|js|mjs|cjs|md|json5|css))`/g
 
 /** Files checked for citations ONLY:  a skill's paths are relative to its own folder, or the skill it calls. */
 const CITATIONS_ONLY = [".claude/skills/*/SKILL.md"]
@@ -68,8 +78,10 @@ export function checkAgentRules(checkout: string, files: string[] = []): AgentRu
   const sections = sectionsOf(wwod)
   const citationsOnly = CITATIONS_ONLY.flatMap((pattern) => expand(checkout, pattern))
   const fromContent = CONTENT_CITERS.flatMap((pattern) => expand(content, pattern))
+  const coherence = COHERENCE.flatMap((pattern) => expand(checkout, pattern))
   const citers = [
     ...CITERS.flatMap((pattern) => expand(checkout, pattern)),
+    ...coherence,
     ...fromContent,
     ...citationsOnly,
     ...files.map((file) => resolve(checkout, file))
@@ -91,7 +103,7 @@ export function checkAgentRules(checkout: string, files: string[] = []): AgentRu
             problems.push({ file, line, cite: `§${number} › "${title}"`, problem: "no such rule" })
         }
         if (checkPaths)
-          for (const [, found] of text.matchAll(REPO_PATH)) {
+          for (const [, found] of text.matchAll(coherence.includes(path) ? FILE_PATH : REPO_PATH)) {
             const target = found.replace(/[.,:;]+$/, "").replace(LINE_SUFFIX, "")
             if (target !== "SKILL.md" && !pathExists(checkout, path, target))
               problems.push({ file, line, cite: `\`${target}\``, problem: "no such path" })

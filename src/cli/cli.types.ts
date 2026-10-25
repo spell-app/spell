@@ -87,6 +87,18 @@ export type PublishOptions = GlobalOptions & {
 }
 
 /**
+ * `spell map` flags.
+ * - `docs`:  ask the docs map, not the code map
+ * - `budget`:  `query`'s answer, at most this many tokens (graphify's `--budget`)
+ * - `json`:  `status` and `build` print their report as JSON
+ */
+export type MapOptions = GlobalOptions & {
+  docs?: boolean
+  budget?: string
+  json?: boolean
+}
+
+/**
  * `spell pony` flags.
  * - `gallop`:  her legs gallop (epic `property-editor` P8)
  */

@@ -31,3 +31,6 @@ dist-types/
 
 # Claude Code's own worktrees (an agent's isolated copy):  never the kit's files
 /.claude/worktrees/
+
+# `spell map`'s maps (graphify's, and the merged code.json / docs.json, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/

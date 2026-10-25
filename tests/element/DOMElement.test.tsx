@@ -245,6 +245,74 @@ describe("DOMElement attributes", () => {
 // From solid-element's fix 3 (`props.test.tsx`):  what's left once the vocabulary decides each conversion.
 ////////////////
 
+////////////////
+// ## Old names
+//
+// `AttributeSpec.replaces`:  an attribute's old names, still read (epic `ui-gaps` P2).
+////////////////
+
+describe("DOMElement old names", () => {
+  /** A `color` that replaces the old switches `primary` / `secondary`, and an old plain name, `tint`. */
+  const COLOR = attribute("color", "enum", {
+    values: ["primary", "secondary", "red"],
+    replaces: ["tint", { from: "primary", value: "primary" }, { from: "secondary", value: "secondary" }]
+  })
+
+  test("an old switch sets the new attribute's value, and leaves the markup as written", async () => {
+    const { tag } = definedTag("old-switch", [COLOR])
+    const host = await renderTag(tag, "primary")
+    expect(host.color).toBe("primary")
+    expect(shown(host)).toBe("string:primary")
+    expect(host.hasAttribute("color")).toBe(false)
+  })
+
+  test("an old plain name passes its text on, converted as the new attribute's", async () => {
+    const { tag } = definedTag("old-plain", [COLOR])
+    const host = await renderTag(tag, `tint="red"`)
+    expect(host.color).toBe("red")
+  })
+
+  test("the NEW name wins when both are written", async () => {
+    const { tag } = definedTag("old-and-new", [COLOR])
+    const host = await renderTag(tag, `primary color="secondary"`)
+    expect(host.color).toBe("secondary")
+    host.setAttribute("primary", "")
+    expect(host.color).toBe("secondary")
+  })
+
+  test("an old switch turned off clears ONLY the value it set", async () => {
+    const { tag } = definedTag("old-off", [COLOR])
+    const host = await renderTag(tag, "primary")
+    host.removeAttribute("primary")
+    expect(host.color).toBe(undefined)
+    host.setAttribute("primary", "")
+    host.setAttribute("secondary", "")
+    host.removeAttribute("primary")
+    expect(host.color).toBe("secondary")
+  })
+
+  test("notes each old name ONCE per page, naming what to write", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    // a name of its own:  the notes are page-wide, so another test's old name may be noted already
+    const { tag } = definedTag("old-note", [
+      attribute("look", "enum", { values: ["raised"], replaces: [{ from: "raised", value: "raised" }] })
+    ])
+    await renderTag(tag, "raised")
+    await renderTag(tag, "raised")
+    const notes = warn.mock.calls.filter(([text]) => String(text).includes("raised is an old name"))
+    expect(notes).toHaveLength(1)
+    expect(String(notes[0]![0])).toContain(`write look="raised"`)
+    warn.mockRestore()
+  })
+
+  test("observes the old names, beside the attributes", () => {
+    const { Class } = definedTag("old-observed", [COLOR])
+    expect((Class as unknown as { observedAttributes: string[] }).observedAttributes).toEqual(
+      expect.arrayContaining(["color", "tint", "primary", "secondary"])
+    )
+  })
+})
+
 describe("DOMElement property values", () => {
   test("property writes convert as attribute text does, pre-upgrade ones included", async () => {
     const { tag, define } = testTag("from-property", [attribute("active", "boolean")])

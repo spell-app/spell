@@ -8,6 +8,8 @@ The house style for AI coding agents working in Spell's repos (Claude Code, Code
     todo deletes it.
 - The three logs beside it (`agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`) are links into the content
   repo, `../spell.epics/agents/`:  the logs live there (Q31).
+- Beside it too, `agents/coherence/` (epic `coherence`):  the mechanisms Spell already has (`catalog.md`) and one word
+  for each idea (`words.md`), which §2's DRY rule points to;  `spell wwod check` checks every file path they name.
 
 | File | What |
 | --- | --- |
