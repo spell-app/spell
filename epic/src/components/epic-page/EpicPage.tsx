@@ -516,7 +516,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The toolbar's state chips:  every section's filter (`DOMEpicSectionElement.stateFilter`) added up.
    * - a state is on while every section having it shows it
-   * - read again on every layout change and section filter change
+   * - read again on every layout change and section filter change, and after every mark (`followMarks`):
+   *   a marked item leaves its state's count
    */
   readonly filterChips = createMemo((): StateFilterEntry[] => {
     this.signals.layout.get()
@@ -532,6 +533,30 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
     return FILTER_STATES.flatMap((it) => totals.get(it.state) ?? [])
   })
+
+  /**
+   * Each section's `markedCount`, as one string (`"2 0 1"`):  what `followMarks()` follows.
+   * - read again on every layout change and section filter change too:  a section drawn later counts from then
+   * - a string, so an unchanged one stops there (the memo's `===`), and the bump it causes ends
+   */
+  readonly markedCounts = createMemo((): string => {
+    this.signals.layout.get()
+    void this.filterTick
+    if (isServer) return ""
+    return this.filterHosts()
+      .map((section) => section.markedCount ?? 0)
+      .join(" ")
+  })
+
+  /**
+   * The items marked in this pass, every section's added up (epic `epic-engine` P43):  the toolbar's blue badge.
+   * - tracked:  each section's `markedCount` follows the review inbox
+   */
+  readonly markedTotal = createMemo((): number =>
+    this.markedCounts()
+      .split(" ")
+      .reduce((total, count) => total + Number(count || 0), 0)
+  )
 
   ////////////////
   // ## Rendering
@@ -600,6 +625,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     E.afterSolidUpdate(() => {
       this.filterTick++
     })
+
+  /** Each section's `markedCount`, as one string (`markedCounts`):  what `followMarks()` follows. */
+  get sectionMarks(): string {
+    return this.markedCounts()
+  }
+
+  /**
+   * A mark came or went in any section (its `markedCount`, P43):  the toolbar's chips read again, once the sections'
+   * own counts have taken it (`bumpFilters()`).
+   * - not read in `filterChips` itself:  there the sections' counts could still be the old ones
+   */
+  @E.onChange("sectionMarks")
+  protected followMarks() {
+    this.bumpFilters()
+  }
 
   /** Follow the review inbox while connected (kept alive:  a removed page stops). */
   @E.whileConnected
@@ -934,11 +974,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
    * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
+   * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
    */
   private pageFilter(): JSX.Element {
     const chips = () => this.filterChips()
     return (
-      <Show when={chips().length}>
+      <Show when={chips().length || this.markedTotal()}>
         <span class={FILTER} part={this.partForName("filter")}>
           <epic-state-filter
             counts={chips()
@@ -952,6 +993,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     .map((chip) => chip.state)
                     .join(" ")
             }
+            marked={this.markedTotal() || undefined}
           />
         </span>
       </Show>
@@ -1433,6 +1475,7 @@ export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}
  */
 type FilterHost = E.DOMElement & {
   readonly stateFilter?: readonly StateFilterEntry[]
+  readonly markedCount?: number
   showStates?(states: readonly string[] | undefined): void
 }
 

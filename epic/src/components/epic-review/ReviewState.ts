@@ -70,6 +70,14 @@ export class ReviewState {
    */
   readonly newItems = (kind?: NewKind): NewItem[] => this.readPage((client) => client.newItems(kind)) ?? []
 
+  /**
+   * Has item `itemId` a mark in the inbox, sent or not (epic `epic-engine` P43:  marked in this pass)?
+   * - until Claude's `epic inbox apply` takes it off;  a draft being typed, or a comment, isn't a mark
+   * - the page's inbox, so any element reads it for any item:  a section counts its items with it
+   */
+  readonly isMarked = (itemId: string): boolean =>
+    this.readPage((client) => !!itemId && !!client.markOf(itemId.toLowerCase())) ?? false
+
   /** Its mark, if any. */
   readonly mark = (): InboxMark | undefined => this.read((client, id) => client.markOf(id))
 

@@ -821,6 +821,69 @@ describe("<epic-page> toolbar", () => {
   })
 })
 
+/** The blue badge `host` draws (its `<epic-state-filter>`'s marked count):  its count and tooltip;  none, `null`. */
+function markedBadge(host: Element): [string, string] | null {
+  const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
+  const badge = filter?.shadowRoot?.querySelector<HTMLElement>('[part~="marked"]')
+  return badge ? [badge.textContent!, badge.title] : null
+}
+
+// Owen, 2026-10-25:  "if any in that section have been actioned in this pass, remove from the red/green/etc and put in
+// a blue badge with dotted outline to the left.  These should always remain visible, no matter the status filter.  Do
+// the same thing at the top"
+describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
+  afterEach(() => {
+    ReviewClient.adopt(undefined)
+    localStorage.clear()
+  })
+
+  test("a mark takes its item out of its state's chip and into the blue badge, in its section and the toolbar;  a filter keeps both;  applied, it's gone", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = await render(filterPage(["attention", "open", "open"], ["open", "recent"]))
+    const questions = host.querySelector("#decisions")!
+    const caveats = host.querySelector("#caveats")!
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"]))
+    expect([markedBadge(host), markedBadge(questions)]).toEqual([null, null])
+    // Owen marks two questions and a caveat, one sent and two not:  each counts
+    const at = new Date().toISOString()
+    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at }, c1: { action: "approve", at } }
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1"]))
+    expect(markedBadge(host)).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
+    expect(markedBadge(questions)).toEqual(["2", "2 marked in this pass, waiting for Claude"])
+    // a section whose items are all marked keeps its badge alone
+    expect(chipsOf(caveats).map((chip) => chip.dataset.state)).toEqual(["recent"])
+    expect(markedBadge(caveats)?.[0]).toBe("1")
+    // filtered to recent:  the badges stay, and so do the marked items;  the hidden line leaves them out
+    await pickPageState(host, "recent")
+    expect(pageChips(host)).toEqual(["open-1", "recent+1"])
+    expect(markedBadge(host)?.[0]).toBe("3")
+    expect(markedBadge(questions)?.[0]).toBe("2")
+    expect(shownItems(host)).toEqual(["q1", "q2", "c1", "c2"])
+    const note = questions.shadowRoot!.querySelector('[part~="hidden-note"]')!.shadowRoot!.querySelector("button")!
+    expect(note.textContent).toBe("1 hidden · show all")
+    // Claude applies them:  the badges go, the counts come back
+    await pickPageState(host, "recent")
+    routes.inbox.marks = {}
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"])
+    expect([markedBadge(host), markedBadge(questions), markedBadge(caveats)]).toEqual([null, null, null])
+  })
+
+  test("outside a review (no inbox):  no badge, every count as before", async () => {
+    await adoptClient(new FakeRoutes(), { served: false })
+    const host = await render(filterPage(["attention", "open"], ["open"]))
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+2"]))
+    expect(markedBadge(host)).toBeNull()
+  })
+})
+
 /** Is `host` (a fold or an item) open, as drawn? */
 function isOpen(host: Element): boolean {
   return host.matches(":state(open)")

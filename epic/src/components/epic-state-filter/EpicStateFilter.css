@@ -60,6 +60,19 @@
     --_chip: var(--epic-state-recent, var(--ui-green));
     --_chip-on: var(--epic-state-recent-on, var(--ui-green-on));
   }
+  /*
+   * the items marked in this pass (epic `epic-engine` P43):  blue, a DOTTED outline over a light blue wash, first;
+   * not a filter, so no pointer and no hover ring
+   */
+  .chip.marked {
+    --_chip: var(--epic-state-progress, var(--ui-blue));
+    border-style: dotted;
+    background: color-mix(in srgb, var(--_chip) 14%, transparent);
+    cursor: default;
+  }
+  .chip.marked:hover {
+    box-shadow: none;
+  }
   .chip[aria-pressed="true"] {
     background: var(--_chip);
     color: var(--_chip-on);

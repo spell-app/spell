@@ -48,7 +48,7 @@
  * - a row too narrow for them all scrolls sideways (never the page);  what the page adds after them (the bullhorn, the
  *   spell syntax guide's Expand all) stays at its right
  * - badges (`<ui-label class="spell-toolbar-count">`):  how many items wait on Owen, red urgent, orange Claude's reply
- *   waiting on his pick;  none, no badge
+ *   waiting on his pick;  blue, the phases running now (the Phases button's, P43);  none, no badge
  * - EPIC PAGES (no `spell-toolbar-titled`):  slotted into the last row of `<epic-page>`'s sticky header (its `toolbar`
  *   slot), so it sticks with it, and the titles below stick under it;  the row's band, its rule and its tools at the
  *   right are `<epic-page>`'s (`EpicPage.css`, "The toolbar")
@@ -164,6 +164,11 @@
   background: var(--spell-state-replied);
   color: var(--spell-state-replied-on);
 }
+/* the Phases button's phases running now:  blue, Claude is working on it (epic `epic-engine` P43) */
+.spell-toolbar-count.running::part(label) {
+  background: var(--spell-state-progress);
+  color: var(--spell-state-progress-on);
+}
 /* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
 :is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
   gap: 6px;
@@ -186,10 +191,17 @@
   padding: calc((var(--_badge) - 1cap) / 2) 4px;
   font-size: 10px;
 }
-/* both kinds:  the orange one after the red, overlapping it a little */
+/* several kinds:  each after the one before, overlapping it a little */
 .spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count + .spell-toolbar-count::part(label) {
   margin: 0;
   left: calc(50% + 7px - var(--_badge) / 3 + var(--_badge) - 3px);
+}
+.spell-toolbar:not(.spell-toolbar-titled)
+  > ui-item
+  > .spell-toolbar-count
+  + .spell-toolbar-count
+  + .spell-toolbar-count::part(label) {
+  left: calc(50% + 7px - var(--_badge) / 3 + 2 * (var(--_badge) - 3px));
 }
 
 /*

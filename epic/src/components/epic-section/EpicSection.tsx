@@ -73,6 +73,14 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
     return this.section?.stateFilter()
   }
 
+  /**
+   * How many of its items Owen marked in this pass (epic `epic-engine` P43):  the page's toolbar adds them up.
+   * - read TRACKED:  the toolbar follows each mark (and reads `stateFilter` again with it)
+   */
+  get markedCount(): number {
+    return this.section?.marked().size ?? 0
+  }
+
   /** Show its items in `states` only (none:  every state), as if picked on its own chips;  remembered. */
   showStates(states: readonly string[] | undefined): void {
     this.section?.showStates(states)
@@ -225,16 +233,31 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       : []
   )
 
-  /** The states its items are in, in the filter's order:  its state chips. */
+  /**
+   * Its items Owen has MARKED in this pass, not applied yet (epic `epic-engine` P43;  `ReviewState.isMarked()`).
+   * - counted apart, in the blue badge left of the state chips, and left out of theirs:  the chips tick down
+   *   as he marks
+   * - never hidden by the filter:  a marked item stays in sight mid-pass
+   * - outside a review (no inbox):  none
+   */
+  readonly marked = createMemo((): ReadonlySet<Element> => {
+    const marked = this.itemStates().filter((it) => it.item.id && this.reviewState.isMarked(it.item.id))
+    return marked.length ? new Set(marked.map((it) => it.item)) : NOTHING_MARKED
+  })
+
+  /** Its items not marked in this pass:  what the state chips count and filter. */
+  readonly unmarked = createMemo(() => this.itemStates().filter((it) => !this.marked().has(it.item)))
+
+  /** The states its unmarked items are in, in the filter's order:  its state chips. */
   readonly present = createMemo((): FilterState[] => {
-    const states = new Set(this.itemStates().map((it) => it.state))
+    const states = new Set(this.unmarked().map((it) => it.state))
     return FILTER_STATES.filter((it) => states.has(it.state))
   })
 
-  /** How many of its items are in each state. */
+  /** How many of its unmarked items are in each state. */
   readonly stateCounts = createMemo((): ReadonlyMap<string, number> => {
     const counts = new Map<string, number>()
-    for (const { state } of this.itemStates()) counts.set(state, (counts.get(state) ?? 0) + 1)
+    for (const { state } of this.unmarked()) counts.set(state, (counts.get(state) ?? 0) + 1)
     return counts
   })
 
@@ -250,8 +273,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return new Set(this.chosen ? this.chosen.filter((state) => present.includes(state)) : present)
   })
 
-  /** The items the filter hides. */
-  readonly hidden = createMemo(() => this.itemStates().filter((it) => !this.showing().has(it.state)))
+  /** The items the filter hides:  never a marked one. */
+  readonly hidden = createMemo(() => this.unmarked().filter((it) => !this.showing().has(it.state)))
 
   /**
    * Its items (or the Phases section's phases, I96), read again whenever one folds, unfolds, or is hidden by its own
@@ -306,10 +329,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.isConnected && PageStages.hides(this.domElement)
   }
 
-  /** Its title has tools:  the Phases toggles, or a state filter with chips. */
+  /** Its title has tools:  the Phases toggles, or a state filter with chips (or the marked badge alone). */
   @E.cssState("tools")
   get hasTools(): boolean {
-    return this.kind === "phases" || this.present().length > 0
+    return this.kind === "phases" || this.hasFilter()
   }
 
   ////////////////
@@ -320,10 +343,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * Follow the review inbox while connected (kept alive:  a removed one stops):
    * - an Overview sub-section, for its marks
    * - the Todos and Questions sections, for their new items
+   * - every item section, for its items marked in this pass (epic `epic-engine` P43)
    */
   @E.whileConnected
   protected followReviews() {
-    const follows = this.kind === "overview-part" || !!this.newKind()
+    // an item section for its marked items too (P43)
+    const follows = this.kind === "overview-part" || this.holdsItems()
     return follows ? this.reviewState.connect() : undefined
   }
 
@@ -509,14 +534,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * The filter's chips:  one per state its items are in, with how many, solid while they show
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3);  a click comes back as `epic-state-changed`.
+   * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
    */
   private filter(): JSX.Element {
     return (
-      <Show when={this.present().length}>
+      <Show when={this.hasFilter()}>
         <span class={FILTER} part={this.partForName("filter")}>
           <epic-state-filter
             counts={[...this.stateCounts()].map(([state, count]) => `${state}:${count}`).join(" ")}
             shown={this.chosen ? [...this.showing()].join(" ") : undefined}
+            marked={this.marked().size || undefined}
           />
           {/* the hidden items, by id:  nothing in the doc changes */}
           <style>{this.hiddenRules()}</style>
@@ -792,6 +819,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Its state filter, for the page's toolbar (`DOMEpicSectionElement.stateFilter`):
    * each state its items are in, how many, and whether they show;  none without items.
+   * - the items marked in this pass left out:  `markedCount` counts them
    */
   @E.untracked
   stateFilter(): StateFilterEntry[] | undefined {
@@ -810,6 +838,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
   // ## Helpers
   ////////////////
+
+  /** It draws a state filter:  chips, or items marked in this pass (their badge). */
+  private hasFilter(): boolean {
+    return this.present().length > 0 || this.marked().size > 0
+  }
 
   /** Its children are drawn as runs:  an item section's items, the Phases section's phases (I96). */
   private hasRuns(): boolean {
@@ -907,6 +940,9 @@ export interface EpicSection extends E.AttributeValues<EpicSectionVocabulary> {}
 
 /** No counted children:  a kind that isn't counted, or a server render.  One list, so a recount keeps it. */
 const NOTHING_COUNTED: readonly Element[] = []
+
+/** No items marked in this pass.  One set, so a recount keeps it. */
+const NOTHING_MARKED: ReadonlySet<Element> = new Set()
 
 /** `<epic-item>`'s tokens for its line's rounded corners, top and bottom (`runRules()`). */
 const TOP_RADIUS = "--epic-item-top-radius"

@@ -282,6 +282,11 @@ export const FILTER_TEXTS = [
     text: "{count} {words}:  {does}",
     description: "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
   },
+  {
+    key: "markedWords",
+    text: "{count} marked in this pass, waiting for Claude",
+    description: "The blue badge's name and tooltip:  how many items Owen marked in this pass (epic `epic-engine` P43)."
+  },
   { key: "showAll", text: "show everything", description: "A state chip's click:  every state shows again." },
   { key: "chipOnly", text: "show only these", description: "A state chip's click:  only its state shows." },
   { key: "chipAlso", text: "show these too", description: "A state chip's click, hidden:  its state shows too." },

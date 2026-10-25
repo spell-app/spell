@@ -1318,10 +1318,21 @@ async function rewire(page, changed) {
 function railKey(outline, counts) {
   return JSON.stringify(outline.groups.map(entry))
 
-  /** One top-level entry:  its id, label, icon and state, and how many of its items need Owen (and how). */
+  /**
+   * One top-level entry:  its id, label, icon and state, how many of its items need Owen (and how), and how many of
+   * its phases run now.
+   */
   function entry(node) {
     const count = counts.get(node.element)
-    return [node.id, node.label, node.glyph, node.element.dataset.state, count?.attention ?? 0, count?.replied ?? 0]
+    return [
+      node.id,
+      node.label,
+      node.glyph,
+      node.element.dataset.state,
+      count?.attention ?? 0,
+      count?.replied ?? 0,
+      count?.running ?? 0
+    ]
   }
 }
 
@@ -1548,6 +1559,12 @@ const EPIC_ATTENTION =
  */
 const EPIC_REPLIED = ':scope > :is(epic-item, epic-phase)[state="replied"]'
 
+/**
+ * The Phases section's phases running now (`status="active"`):  the toolbar's blue badge on the Phases button
+ * (epic `epic-engine` P43;  Owen, 2026-10-25:  "blue badge for the number of things currently running")
+ */
+const EPIC_RUNNING = ':scope > epic-phase[status="active"]'
+
 /** A count pill's tooltip:  "2 need you", "1 needs you". */
 function needYou({ attention }) {
   return `${attention} ${attention === 1 ? "needs" : "need"} you`
@@ -1563,7 +1580,8 @@ function needYou({ attention }) {
  * - an epic page's sections count themselves (`<epic-section>`, on their titles):  their count is read from their
  *   hosts' `contentsEntry`, never written;
  *   its `attention` too, else the items' `state="attention"` (`EPIC_ATTENTION`);
- *   and `replied`, how many of those wait on Owen's pick (`EPIC_REPLIED`:  the toolbar's orange badge)
+ *   and `replied`, how many of those wait on Owen's pick (`EPIC_REPLIED`:  the toolbar's orange badge);
+ *   and `running`, the Phases section's phases at work now (`EPIC_RUNNING`:  the toolbar's blue badge, P43)
  * - SIDE EFFECT:  writes `open/total` on the section's title:  its `badge` (SECTIONS), or a `ui-label.spell-count`
  *   at the right of the h2 (HEADINGS);  callable again (it replaces both)
  */
@@ -1575,7 +1593,8 @@ function countItems(outline) {
       if (count) {
         const attention = count.attention ?? element.querySelectorAll(EPIC_ATTENTION).length
         const replied = Math.min(attention, element.querySelectorAll(EPIC_REPLIED).length)
-        counts.set(element, { ...count, attention, replied })
+        const running = element.querySelectorAll(EPIC_RUNNING).length
+        counts.set(element, { ...count, attention, replied, running })
       }
       continue
     }
@@ -1862,7 +1881,8 @@ function buildPageToolbar(main, outline, counts) {
  * - BADGES:  how many of the block's items wait on Owen, from `counts` (none:  no badge)
  *   - red:  urgent (`state="attention"`)
  *   - orange:  Claude answered with options, his turn to pick (`state="replied"`)
- *   - both kinds:  both badges, red first
+ *   - blue:  the Phases button's, how many phases run now (`status="active"`;  epic `epic-engine` P43)
+ *   - several kinds:  every one, red first, then orange, then blue
  *   - over the icon's top right, a third of a badge on the icon:  every button is the same width, badge or not
  *     (Owen, 2026-10-10:  "Make badge 1/3 way overlap the icon")
  * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header,
@@ -1880,6 +1900,7 @@ function buildToolbar(page, outline, counts) {
     const replied = count?.replied ?? 0
     const urgent = (count?.attention ?? 0) - replied
     const name = shortLabel(label)
+    const running = count?.running ?? 0
     const waits = replied === 1 ? "waits" : "wait"
     return toolbarItem({
       id,
@@ -1889,7 +1910,8 @@ function buildToolbar(page, outline, counts) {
       mark: glyph ? undefined : el("b", { slot: "icon" }, name.charAt(0)),
       badges: [
         ["urgent", urgent, `${urgent} urgent`],
-        ["replied", replied, `${replied} replied:  ${waits} for your pick`]
+        ["replied", replied, `${replied} replied:  ${waits} for your pick`],
+        ["running", running, `${running} running now`]
       ].filter(([, number]) => number > 0)
     })
   })
