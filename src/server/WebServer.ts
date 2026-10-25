@@ -25,6 +25,7 @@ import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell/server/
  *   -> static files -> Spell's favicon (`FAVICONS`, `/favicon.ico`) -> `fallback` (e.g. an SPA's `index.html`) -> 404
  * - websocket upgrades go:  host check -> `/api/server/live` (when `live`:  live reload) -> `upgrade()`'s, in order
  * - `live`:  watches nothing by itself -- call `live.watch(dir)`
+ *   - a page's change carries the page as served (`StaticHandler.render()`):  the page needn't fetch it
  *   - every `.html` page gets, before `</head>`:  Spell's favicon links (unless it links its own icon),
  *     `window.SPELL_SERVER` and the live client
  * - Spell's favicon on EVERY server, live or not, at the root:
@@ -77,6 +78,8 @@ export class WebServer {
       transforms,
       html: live ? [...html, (page, served) => this.inject(page, served)] : html
     })
+    // a page's change carries the page, as served (epic `epic-engine` P40)
+    if (this.live) this.live.pages = (path) => this.files.render(path, LiveReload.PAGE_LIMIT)
 
     const top = new Router()
     if (checkHost) top.use(this.guard.hostCheck)

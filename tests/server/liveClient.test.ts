@@ -87,6 +87,15 @@ describe("liveAction():  what a changed file means to a page", () => {
     expect(SRV.liveAction("/epics/x/x.plan.html", page)).toBe("page")
   })
 
+  // epic `epic-engine` P40:  a component set's page is reported where it's served, not as its file in the checkout
+  test("the file at its own address:  the page too, a folder's as its `index.html`", () => {
+    const setPage = { file: "/spell-ui/docs/ui-button.html", scripts: [], address: "/components/ui/ui-button.html" }
+    expect(SRV.liveAction("/components/ui/ui-button.html", setPage)).toBe("page")
+    expect(SRV.liveAction("/components/ui/ui-icon.html", setPage)).toBe("file")
+    const home = { file: "/spell-ui/docs/index.html", scripts: [], address: "/components/ui/" }
+    expect(SRV.liveAction("/components/ui/index.html", home)).toBe("page")
+  })
+
   test("a stylesheet:  swapped in place (when the page uses it)", () => {
     expect(SRV.liveAction("/packages/epics/tools/_assets/spell-doc.css", page)).toBe("style")
     expect(SRV.liveAction("/components/ui/_assets/site.css", page)).toBe("style")

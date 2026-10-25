@@ -163,7 +163,7 @@ describe("PageServer", () => {
   })
 
   it("adds its settings' page scripts before `</body>`:  only those built, never on pages they skip", async () => {
-    const tag = `<script type="module" src="/colours.js"></script>`
+    const tag = `<script type="module" src="/colours.js" data-spell-page-script></script>`
     const answer = await ask(port, "GET", "/docs/page.html")
     expect(answer.text).toContain(`${tag}\n</body>`)
     expect(answer.text).not.toContain("/unbuilt.js")
@@ -394,8 +394,9 @@ describe("PageServer", () => {
       })
       expect(patch.status).toBe(200)
       expect(readFileSync(plan, "utf8")).toContain("<p id=p>edited</p>")
-      expect(await changed).toEqual({ path: "/epics/x/x.plan.html" })
-      expect(await inWorktree).toEqual({ path: `${urlPathOf(main, worktrees)}w/epics/x/x.plan.html` })
+      // the page comes with its change, as served (epic `epic-engine` P40)
+      expect(await changed).toMatchObject({ path: "/epics/x/x.plan.html", html: expect.stringContaining("edited") })
+      expect(await inWorktree).toMatchObject({ path: `${urlPathOf(main, worktrees)}w/epics/x/x.plan.html` })
       events.close()
       const text = { ...headers, "content-type": "text/plain" }
       const saved = await ask(at, "PUT", "/api/files?path=/guides/new/notes.md", { headers: text, body: "# New\n" })
@@ -518,7 +519,12 @@ describe("PageServer", () => {
     const changed = events.next("change", "/components/ui/ui-button.html")
     await new Promise((done) => setTimeout(done, 100))
     writeFileSync(join(root, "packages", "ui", "docs", "ui-button.html"), "<!doctype html><head></head><p>UI 2</p>\n")
-    expect(await changed).toEqual({ path: "/components/ui/ui-button.html" })
+    // with the page, as served at the set's address, and its ETag (epic `epic-engine` P40)
+    expect(await changed).toMatchObject({
+      path: "/components/ui/ui-button.html",
+      html: expect.stringContaining("<p>UI 2</p>"),
+      etag: expect.stringMatching(/^"/)
+    })
     const rebuilt = events.next("change", "/components/ui/_assets/site.js")
     writeFileSync(join(root, "packages", "ui", "site", "_assets", "site.js"), "export { }\n")
     expect(await rebuilt).toEqual({ path: "/components/ui/_assets/site.js" })
@@ -578,7 +584,10 @@ describe("PageServer", () => {
     })
     expect(answer.status).toBe(200)
     expect(readFileSync(page, "utf8")).toBe("<!doctype html><p id=x>new</p>\n")
-    expect(await events.next("change", "/docs/page.html")).toEqual({ path: "/docs/page.html" })
+    // with the page as served:  its new markup, and the ETag the PUT answered
+    const change = (await events.next("change", "/docs/page.html")) as { path: string; html: string; etag: string }
+    expect(change).toMatchObject({ path: "/docs/page.html", html: expect.stringContaining("<p id=x>new</p>") })
+    expect(change.etag).toBe((JSON.parse(answer.text) as { etag: string }).etag)
     events.close()
   })
 

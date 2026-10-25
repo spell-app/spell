@@ -59,4 +59,22 @@ describe("LiveReload", () => {
     expect(send).toHaveBeenCalledTimes(2)
     live.close()
   })
+
+  // epic `epic-engine` P40:  the page that shows it patches itself without fetching it
+  it("sends a page's change WITH the page, as `pages` renders it;  anything else alone", async () => {
+    mkdirSync(join(temp, "push"), { recursive: true })
+    const page = join(temp, "push/page.html")
+    const style = join(temp, "push/page.css")
+    writeFileSync(page, "<p>new</p>")
+    writeFileSync(style, "p {}")
+    const live = new SRV.LiveReload({ root: join(temp, "push"), debounce: 10, heartbeat: 0 })
+    live.pages = async (path) => ({ html: `rendered ${path}`, etag: '"e1"' })
+    const send = vi.spyOn(live, "send")
+    live.changed(page)
+    live.changed(style)
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(2), { timeout: 3000 })
+    expect(send).toHaveBeenCalledWith("change", { path: "/page.html", html: "rendered /page.html", etag: '"e1"' })
+    expect(send).toHaveBeenCalledWith("change", { path: "/page.css" })
+    live.close()
+  })
 })

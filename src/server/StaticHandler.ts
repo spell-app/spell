@@ -1,8 +1,9 @@
 import type { Stats } from "node:fs"
 import { readFile } from "node:fs/promises"
+import type { IncomingMessage } from "node:http"
 import { extname, resolve } from "node:path"
 
-import type { FileTransform, Handler, HtmlTransform, Mount } from "spell/server"
+import type { FileTransform, Handler, HtmlTransform, Mount, PageSource } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { typeFor } from "./mime"
 import { Reply } from "./Reply"
@@ -134,6 +135,28 @@ export class StaticHandler {
     if (transform) ({ body, type } = transform(body, context))
     if (isHtml && typeof body === "string") for (const hook of this.html) body = hook(body, context)
     reply.type(type).send(body)
+  }
+
+  /**
+   * The page at URL path `path` (still percent-encoded), as a navigation to it gets it:  through the `html` hooks,
+   * with its `ETag`;  `undefined` when it's no `.html` file served here, or bigger than `limit` bytes.
+   * - what live reload pushes to a page with its change (`LiveReload`), so the page needn't fetch it
+   * - the hooks see a made-up `GET` of `path`, with no headers:  none reads more than the path and file
+   * - NEVER throws:  a file that can't be read is `undefined`
+   */
+  async render(path: string, limit = Infinity): Promise<PageSource | undefined> {
+    const resolved = this.resolve(path)
+    if (!resolved || !("file" in resolved) || !/\.html?$/i.test(resolved.file) || resolved.stat.size > limit)
+      return undefined
+    try {
+      const request = new Request({ method: "GET", url: path, headers: {} } as IncomingMessage)
+      const context = { path: decodeURIComponent(path), file: resolved.file, request }
+      let html = await readFile(resolved.file, "utf8")
+      for (const hook of this.html) html = hook(html, context)
+      return { html, etag: StaticHandler.etagOf(resolved.stat) }
+    } catch {
+      return undefined
+    }
   }
 
   /**
