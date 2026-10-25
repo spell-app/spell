@@ -5,6 +5,7 @@ import { EXIT, EpicCommandError } from "spell-epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell-epic/command/EpicTools"
 import { Git } from "spell-epic/command/Git"
 import { Hub } from "spell-epic/command/Hub"
+import { LinesOfCode } from "spell-epic/command/LinesOfCode"
 import { Parking } from "spell-epic/command/Parking"
 import { RepoInit } from "spell-epic/command/RepoInit"
 import { Repos } from "spell-epic/command/Repos"
@@ -37,6 +38,7 @@ import { GROUP_VERBS, type GroupName } from "./epicGroups"
  *     scripts passed through, their arguments verbatim (`EpicTools.run()`)
  *   - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
  *   - `pages`:  the docs pages' tools (spell-app's `spell dev docs` until epic `repo-split` P13;  epic `epic-eject` P9), passed through
+ *   - `loc`:  lines of code per repo and folder, and the LOC guide rewritten (`LinesOfCode`, epic `epic-engine` I122)
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
@@ -504,6 +506,17 @@ export class EpicProgram {
       "the docs pages:  the home and list pages (index), a new page, a page's links, opening one, its writing",
       (args) => EpicTools.runPages(args)
     )
+    epic
+      .command("loc")
+      .description(
+        "lines of code:  every repo of this checkout, per repo and per folder, code, tests and docs;  rewrites the " +
+          "LOC guide (guides/loc/loc.html) and prints its links and the totals"
+      )
+      .usage("[--print] [--json]")
+      .argument("[args...]")
+      .allowUnknownOption()
+      .addHelpText("after", LOC_HELP)
+      .action(() => runVerb(() => new LinesOfCode().run(rawArgs("loc"))))
     this.group(
       epic.command("repo"),
       "the repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
@@ -835,6 +848,18 @@ Examples:
   epic inbox wait seo
 
 epic <verb> --help says more about each;  an id always goes after a #, never as a word of its own.`
+
+/** After `epic loc --help`. */
+const LOC_HELP = `
+  --print    the by-repo table only, in the terminal;  the page is left as it is
+  --json     the numbers, every column, per repo and per row
+
+What counts:  guides/loc/loc.json5 in the content folder (written with the defaults when missing):
+which folders are rows, which files are tests, the code and doc extensions, what's left out.
+
+Examples:
+  epic loc
+  epic loc --print`
 
 /** After `epic config --help`. */
 const CONFIG_HELP = `

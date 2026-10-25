@@ -571,3 +571,18 @@ describe("Markup.place()", () => {
     expect(Markup.validate(reply)).toEqual([])
   })
 })
+
+describe("Markup.plain()", () => {
+  test("attributes as given, bare for true, left out for false;  strings are text, never markup", () => {
+    const { document } = parseHTML("<!doctype html><html><body></body></html>")
+    const code = Markup.plain(document, "code", {}, ["<b>x</b>"])
+    const cell = Markup.plain(document, "td", { class: "num", colspan: 2, hidden: false, title: undefined }, [
+      "n = ",
+      code
+    ])
+    const section = Markup.plain(document, "ui-section", { id: "s", collapsed: true })
+    expect(cell.outerHTML).toBe('<td class="num" colspan="2">n = <code>&lt;b&gt;x&lt;/b&gt;</code></td>')
+    expect(section.hasAttribute("collapsed")).toBe(true)
+    expect(section.getAttribute("collapsed")).toBe("")
+  })
+})
