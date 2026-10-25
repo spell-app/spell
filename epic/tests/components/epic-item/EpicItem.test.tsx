@@ -326,7 +326,7 @@ describe("<epic-item>", () => {
         `<epic-item id="i1" title="Old numbers" status="done" state="recent" taken-in="p-fix"></epic-item>`
       )
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
-      expect([mark.textContent, mark.getAttribute("href"), mark.title]).toEqual([
+      expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-fix",
         "Taken up in P2 · Fix Open Issues:  fixed or done there"

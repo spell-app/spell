@@ -37,7 +37,7 @@ SpellUI.registerPack({
     "epic-overview": "dbf922fcdf1bb0d2",
     "epic-page": "49bb492e8dbe4877",
     "epic-page-note-head": "7c02a3770be8e1a2",
-    "epic-phase": "90fc6232920f18f5",
+    "epic-phase": "69a8438555aa097f",
     "epic-prompt": "7eb94abc3060d39c",
     "epic-question": "bfa14159a839afc6",
     "epic-review": "e1276a8516a7e0eb",
@@ -53,7 +53,7 @@ SpellUI.registerPack({
     "epic-text-box": "4d7ca8d3954821bd",
     "epic-thread": "de59178717c5d46b",
     "epic-update": "bc96d5d6308a296a",
-    "epic-zoom": "10550360ba7649ef"
+    "epic-zoom": "bcc46557f4b270f7"
   },
   define: () =>
     Promise.all([

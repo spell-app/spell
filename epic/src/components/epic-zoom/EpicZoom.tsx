@@ -11,7 +11,7 @@ import zoomCSS from "./EpicZoom.css?inline"
  * ### `<epic-zoom>`
  * One image shown full size over the page (epic `epic-engine` I129;  Owen, 2026-10-25:  "bring it up in a
  * full-screen modal so I can `escape` to close it").
- * - a `<ui-modal basic>` over a dark backdrop, the image as large as fits the window (never cropped, never enlarged
+ * - a `<ui-modal appearance="basic">` over a dark backdrop, the image as large as fits the window (never cropped, never enlarged
  *   past its own size), its alt text under it
  * - shown while `src` is set;  Escape, a click anywhere (the image, the backdrop) or the close button close it,
  *   and it removes its own `src`
@@ -41,7 +41,7 @@ export class EpicZoom extends E.UIComponent<typeof epicZoomVocabulary> {
       <ui-modal
         class={this.rootClass}
         part={this.partForName("base")}
-        basic=""
+        appearance="basic"
         closable=""
         visible={this.src ? "" : undefined}
       >
