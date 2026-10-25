@@ -131,6 +131,13 @@ The catch, and it catches everybody once:  a body line ending in `</>` ends its 
 A `.spellx` file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
 and the two kinds use what each other declares.
 
+**One file per template.**
+A template lives in ONE file, `Card.spell` or `Card.spellx`, never both:  two copies drift apart.
+The other form is a read-only view, written when you ask for it:
+- on a `.spell` file, Show as Spellx (VS Code's title bar;  the editor app's Spellx tab)
+- on a `.spellx` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
+- Edits happen only in the real file, so the view always matches it.
+
 Its tree, for a tool or an agent walking it:
 
 ```ts
@@ -180,7 +187,9 @@ spell spellx convert @spell/examples/Solitaire --dry-run
 ```
 
 - `Card.spell` becomes `Card.spellx`, beside it;  `Carta.es.spell` becomes `Carta.es.spellx`, in Spanish spellx.
-  The `.spell` file stays:  move one of the two out, or the project declares everything twice.
+  The `.spell` file stays:  keep ONE of the two, and list it in the project's `__project.json5`.
+  Both, and the project declares everything twice.
+- To just look at a file as spellx, Show as Spellx writes it without a second file.
 - `--dry-run` prints each file instead of writing it.  Nothing is written inside the test projects.
 - Each declaration becomes its tag:  a template, and inside it
   `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<on ...>`.
@@ -197,7 +206,8 @@ spell spellx convert @spell/examples/Solitaire --dry-run
 </spell>
 ```
 
-- From code:  `SX.SpellxWriter.write({ text, match, scope })`, given the parsed file.
+- From code:  `SX.SpellxWriter.write({ text, match, scope })`, given the parsed file;
+  `SX.SpellxWriter.textOf(file)` for a parsed `SP.SpellFile`, Show as Spellx's view.
 
 ## The edges
 
@@ -235,7 +245,7 @@ it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `
 | [spellx.types.ts](src/spellx/spellx.types.ts) | the tree's nodes, spans and diagnostics |
 | [SpellxView.ts](src/spellx/SpellxView.ts) | a file's tree, built from its tokens |
 | [SpellxFile.ts](src/spellx/SpellxFile.ts) | a file's tree:  `walk()`, `toOutline()`, `positionOf()` |
-| [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx, `spell spellx convert` |
+| [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx:  `spell spellx convert`, and the editors' Show as Spellx |
 | [CodeSpellWriter.ts](src/spellx/CodeSpellWriter.ts) | a `.spellx` file written as plain Spell:  the editor's Show as Code Spell |
 | [Language.ts](src/spell/languages/Language.ts) | `SpellxWords`, the shape of a language's spellx words |
 | [en/words.ts](src/spell/languages/en/words.ts), [es/words.ts](src/spell/languages/es/words.ts) | each language's words, its `spellx` table:  the tags, and each tag's twin (`twins`) |
