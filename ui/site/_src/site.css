@@ -216,6 +216,11 @@
   .site-topbar::part(menu) {
     align-self: center;
     align-items: center;
+    /*
+     * no snapping to whole items:  its ONE item is the whole header, which held the row at its start,
+     * so `‹` / `›` and keeping the current tab in view (`site.ts`) couldn't move it (epic `epic-engine` I132)
+     */
+    scroll-snap-type: none;
   }
   .site-topbar-links {
     align-self: center;
@@ -323,6 +328,8 @@
     font: 600 19px / 1 var(--ui-font-family-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    /* one line:  "Epic UI", "App UI" broke after their first word (epic `epic-engine` I132) */
+    white-space: nowrap;
   }
 
   /* ## Masthead and body:  Fomantic's main column, left-aligned beside the nav */

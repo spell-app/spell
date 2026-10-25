@@ -81,6 +81,7 @@ document.addEventListener("click", (event) => {
 void SiteShell.mount(SITE_ROOT).then(async (content) => {
   // the hat before the top bar's brand (`site.css`, "Top bar"):  the site header's own mark, a constant SVG
   for (const hat of document.querySelectorAll(".site-hat")) hat.innerHTML = LOGO_MARK
+  keepCurrentTabInView()
   // the page's own edits, patched in:  listening at once, from the source as loaded
   const patch = content && new SitePatch({ main: () => content.querySelector<HTMLElement>(PAGE_MAIN) ?? undefined })
   patch?.start()
@@ -96,3 +97,37 @@ void SiteShell.mount(SITE_ROOT).then(async (content) => {
   if (packModules) packModules["spell-ui/components/ui-root"] = root
   router?.start()
 })
+
+/**
+ * The top bar's links scrolled so the CURRENT tab shows, centred where it can be,
+ * whenever the bar's size changes:  it draws, shows (below 1200px), or the window is resized.
+ * - the links are ONE row, scrolling sideways when the bar is too narrow (`site.css`, "Top bar"):
+ *   at the side bar's width, Epic/UI or App/UI would sit under the `›` button, or past it
+ * - the current tab:  the site header's `aria-current="page"` link, in its shadow root
+ * - first once the bar has drawn (its `ready`):  its items' box is in its shadow root, drawn after the links are
+ * - SIDE EFFECT:  a `ResizeObserver` on the bar, its links and its items' box, for the page's life
+ */
+function keepCurrentTabInView() {
+  const bar = document.querySelector<HTMLElement & { ready?: Promise<unknown> }>("ui-toolbar.site-topbar")
+  const links = bar?.querySelector<HTMLElement>(".site-topbar-links")
+  if (!bar || !links) return
+  let watchedBox: HTMLElement | undefined
+  const center = () => {
+    const box = bar.shadowRoot?.querySelector<HTMLElement>('[part~="menu"]')
+    const current = links.shadowRoot?.querySelector<HTMLElement>('[aria-current="page"]')
+    // the items' box too, once drawn:  it narrows as the brand's font loads
+    if (box && box !== watchedBox) sizes.observe((watchedBox = box))
+    if (!box || !current || box.scrollWidth <= box.clientWidth) return
+    const boxRect = box.getBoundingClientRect()
+    const tabRect = current.getBoundingClientRect()
+    box.scrollLeft += tabRect.left + tabRect.width / 2 - (boxRect.left + boxRect.width / 2)
+  }
+  const sizes = new ResizeObserver(center)
+  sizes.observe(bar)
+  sizes.observe(links)
+  void customElements
+    .whenDefined("ui-toolbar")
+    .then(() => bar.ready)
+    .then(() => E.beforeNextPaint(center))
+    .catch((error: unknown) => E.Warnings.warn("Spell UI site", "the top bar didn't draw", error))
+}
