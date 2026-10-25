@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-section&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -99,7 +99,7 @@
               </epic-item>
             </epic-section>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 11 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -166,22 +166,21 @@
                 ></epic-item>
                 <ui-button
                   slot="actions"
-                  circular
-                  basic
+                  appearance="circular basic"
                   size="mini"
                   icon="copy"
                   title="Copy a link to it"
                   aria-label="Copy a link to it"
                 ></ui-button>
               </epic-section>
-              <ui-accordion class="spell-code" styled>
+              <ui-accordion class="spell-code" appearance="styled">
                 <ui-title>The example above · 4 lines</ui-title>
                 <ui-content>
                   <ui-code language="html"
                     ><script type="text/plain">
                       <epic-section id="caveats-example" kind="caveats">
                         <epic-item id="c43" title="Show the slot on every element's page" status="open" state="open"></epic-item>
-                        <ui-button slot="actions" circular basic size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+                        <ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
                       </epic-section>
                     </script></ui-code
                   >
@@ -206,7 +205,7 @@
               >), cut short:
             </p>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>Sections · 11 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -251,7 +250,7 @@
             <ui-icon slot="icon" name="compass"></ui-icon>
 
             <ui-section id="epic-section-parents" label="Its parents" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -361,7 +360,7 @@
 
             <ui-section id="epic-section-children" label="Its children" sticky collapsible dividing collapsed>
               <p>What it takes depends on its <code>kind</code>:</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -462,7 +461,7 @@
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
 
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -542,7 +541,7 @@
             </ui-table>
             <ui-section id="epic-section-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -591,7 +590,7 @@
 
             <ui-section id="epic-section-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -663,7 +662,7 @@
 
             <ui-section id="epic-section-states" label="States" sticky collapsible dividing collapsed>
               <p>Custom states: CSS can match them with <code>epic-section:state(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -694,7 +693,7 @@
             </ui-section>
 
             <ui-section id="epic-section-events" label="Events" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

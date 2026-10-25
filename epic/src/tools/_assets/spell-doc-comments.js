@@ -35,6 +35,8 @@ import {
   sectionTitle
 } from "spell-epic/tools/BlockAnchors.js"
 import { ThreadFacts } from "spell-epic/comments"
+import { DraftSaver } from "spell-epic/answers"
+import { ServerLink } from "spell-epic/review"
 import {
   addBlockAction,
   BLOCK_ROW,
@@ -44,7 +46,6 @@ import {
   el,
   growField,
   noteToast,
-  postJSON,
   readJSON,
   titleInside,
   writeJSON
@@ -202,7 +203,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     - what's typed and not saved yet is sent first, as on leaving the page
  */
 export async function wireComments(main, { go, fitToolbar, signal } = {}) {
-  if (!window.SPELL_SERVER?.token || location.protocol === "file:") return
+  if (!ServerLink.isServed()) return
   const comments = new PageComments(main, { go, fitToolbar, signal })
   if (!(await comments.load()) || signal?.aborted) return
   pageComments = comments
@@ -210,16 +211,12 @@ export async function wireComments(main, { go, fitToolbar, signal } = {}) {
   const reload = () => void comments.load().then((takes) => takes && !signal?.aborted && comments.draw())
   const listening = { signal }
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
-  addEventListener(
-    "spell-server:changed",
-    (event) => {
-      if (comments.inboxPaths.includes(decodeURIComponent(event.detail?.path ?? ""))) reload()
-    },
-    listening
-  )
-  document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && reload(), listening)
-  // a docs page's Send says who is listening:  a session that stopped leaves no file change, only an old heartbeat
-  const poll = setInterval(() => comments.send && document.visibilityState === "visible" && reload(), SEND_POLL_MS)
+  // its inbox files changing, the page coming into view;  and, while a docs page's Send shows, every 30s:
+  // who is listening, as a session that stopped leaves no file change, only an old heartbeat
+  const unwatch = ServerLink.watch(window, (path) => comments.inboxPaths.includes(path), reload, {
+    every: SEND_POLL_MS,
+    polls: () => !!comments.send
+  })
   // leaving (a reload, another page):  what's typed in the pane or a reply box and not saved yet goes now
   const flush = () => {
     comments.open?.flush?.()
@@ -235,7 +232,7 @@ export async function wireComments(main, { go, fitToolbar, signal } = {}) {
     "abort",
     () => {
       flush()
-      clearInterval(poll)
+      unwatch()
       sizes?.disconnect()
       comments.stop()
       if (pageComments === comments) pageComments = null
@@ -445,10 +442,8 @@ class PageComments {
   /** Fetch the page's comments;  resolves to whether the page takes comments.  NEVER throws. */
   async load() {
     try {
-      const response = await fetch(`${COMMENTS_API}?page=${encodeURIComponent(location.pathname)}`, {
-        cache: "no-store"
-      })
-      const answer = response.ok ? await response.json() : {}
+      // the page now:  Epic UI's router swaps pages under one link
+      const answer = await ServerLink.forPage().get(COMMENTS_API, { query: { page: location.pathname }, missing: {} })
       if (answer.takesComments !== true) return false
       this.list = ThreadFacts.withTurns(answer.comments)
       this.keepSend(answer)
@@ -520,7 +515,7 @@ class PageComments {
     if (!send) return
     if (!send.unsent.length) return noteToast("Nothing new to send:  every comment here went with an earlier Send.")
     try {
-      const answer = await postJSON(`${COMMENTS_API}/send`, { page: location.pathname })
+      const answer = await ServerLink.forPage().post(`${COMMENTS_API}/send`, { page: location.pathname })
       this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
       this.keepSend(answer)
       const count = `${send.unsent.length} comment${send.unsent.length === 1 ? "" : "s"}`
@@ -1142,9 +1137,9 @@ class PageComments {
     }
   }
 
-  /** POST `change` to the comments route for this page, and keep the list it answers;  throws what `postJSON()` does. */
+  /** POST `change` to the comments route for this page, and keep the list it answers;  throws what `ServerLink.forPage().post()` does. */
   async post(change, options) {
-    const answer = await postJSON(COMMENTS_API, { page: location.pathname, ...change }, options)
+    const answer = await ServerLink.forPage().post(COMMENTS_API, { page: location.pathname, ...change }, options)
     this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
     this.keepSend(answer)
     return answer
@@ -1204,7 +1199,8 @@ class PageComments {
 
   /**
    * Wire reply box `replying` (`makeBox()`);  `saved`:  the words the server holds for it.
-   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops, as the pane does:
+   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops, as the pane does (a `DraftSaver`:  a failed save
+   *   tried again every 3s):
    *   his reply (`reply`;  emptied, his pending reply goes), or his first words (`edit`)
    *   - the floppy says how the last save went
    * - FOCUS LEAVING it (Tab, a click elsewhere):
@@ -1225,9 +1221,6 @@ class PageComments {
       const thread = this.threads.get(id)
       if (thread && box.parentElement === thread) this.showFloppy(thread, replying)
     }
-    let saving = Promise.resolve(true)
-    let timer = 0
-    let pending = 0
     field.value = readJSON(this.draftKey)[slot] ?? saved
     const keep = () => {
       const drafts = readJSON(this.draftKey)
@@ -1235,37 +1228,32 @@ class PageComments {
       else delete drafts[slot]
       writeJSON(this.draftKey, drafts)
     }
-    const save = async ({ keepalive = false } = {}) => {
-      const words = field.value.trim()
-      if (words === saved || (!words && how === "edit")) return true
-      try {
+    const drafts = new DraftSaver({
+      wait: COMMENT_SAVE_MS,
+      save: async ({ keepalive }) => {
+        const words = field.value.trim()
+        if (words === saved || (!words && how === "edit")) return
         await this.post({ action: how, id, text: words }, { keepalive })
         saved = words
         keep()
         showFloppy(words ? { tip: savedTip() } : null)
         // whose turn it is changed:  its header's buttons with it
         if (this.replyBoxes.get(id) === replying || this.editing === replying) this.draw()
-        return true
-      } catch (error) {
-        showFloppy({ tip: notSavedTip(error), failed: true })
-        return false
+      },
+      onChange: () => {
+        if (drafts.state.kind === "failed") showFloppy({ tip: notSavedTip(drafts.state.why), failed: true })
       }
-    }
-    const saveNow = () => {
-      clearTimeout(timer)
-      timer = 0
-      pending++
-      saving = saving.then(() => save())
-      void saving.finally(() => pending--)
-      return saving
-    }
+    })
+    // a draft kept in this browser differs from what's saved:  the next save sends it
+    drafts.isUnsaved = field.value.trim() !== saved
+    const saveNow = () => drafts.save()
     replying.saved = () => saved
-    replying.busy = () => document.activeElement === field || field.value.trim() !== saved || !!timer || pending > 0
-    replying.drop = () => clearTimeout(timer)
+    replying.busy = () =>
+      document.activeElement === field || field.value.trim() !== saved || drafts.isPending || drafts.isUnsaved
+    replying.drop = () => drafts.stop()
     replying.finish = async () => {
-      clearTimeout(timer)
-      timer = 0
       if (how === "edit" && !field.value.trim()) {
+        drafts.stop()
         this.forget(slot)
         if (this.editing === replying) this.editing = null
         await this.remove(id)
@@ -1276,15 +1264,11 @@ class PageComments {
       return ok
     }
     // the page is going:  a request that outlives it
-    replying.flush = () => {
-      clearTimeout(timer)
-      saving = saving.then(() => save({ keepalive: true }))
-    }
+    replying.flush = () => void drafts.save({ keepalive: true })
     field.addEventListener("input", () => {
       growField(field)
       keep()
-      clearTimeout(timer)
-      timer = setTimeout(saveNow, COMMENT_SAVE_MS)
+      drafts.changed()
     })
     field.addEventListener("keydown", (event) => {
       const leaving = event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))
@@ -1458,8 +1442,8 @@ class PageComments {
 
   /**
    * Wire the pane's field for `open`;  returns what closes it.
-   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops:
-   *   the first save adds the comment, the next ones edit it;  the floppy says how the last one went
+   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops (a `DraftSaver`:  a failed save tried again
+   *   every 3s):  the first save adds the comment, the next ones edit it;  the floppy says how the last one went
    *   - Owen, 2026-10-10:  "Save should just happen as I type"
    * - NEVER an empty comment (Owen, 2026-10-10:  "don't save an empty bullhorn comment"):
    *   - nothing typed (or only spaces) saves nothing
@@ -1477,8 +1461,6 @@ class PageComments {
     let floppy = ""
     // what the server holds;  one save at a time, in order, so a quick typist never adds the comment twice
     let saved = (open.text ?? "").trim()
-    let saving = Promise.resolve(true)
-    let timer = 0
     // deleted with the trash:  nothing more is saved
     let gone = false
     // where its draft is kept
@@ -1493,41 +1475,46 @@ class PageComments {
       else delete drafts[slot()]
       writeJSON(this.draftKey, drafts)
     }
-    const save = async ({ keepalive = false } = {}) => {
+    const save = async ({ keepalive }) => {
       const words = field.value.trim()
-      if (gone || words === saved) return true
-      if (!words && !open.id) return true
+      if (gone || words === saved) return
+      if (!words && !open.id) return
       const change = !words
         ? { action: this.waiting(open.id) ? "delete" : "clear", id: open.id }
         : open.id
           ? { action: "edit", id: open.id, text: words }
           : { action: "add", ...place, text: words }
-      try {
-        const answer = await postJSON(COMMENTS_API, { page: location.pathname, ...change }, { keepalive })
-        const before = slot()
-        open.id = words ? (open.id ?? answer.id) : undefined
-        saved = words
-        this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
-        this.keepSend(answer)
-        keep(before)
-        floppy = words ? savedTip() : ""
-        setOrDrop(pane, "saved", floppy || undefined)
-        pane.removeAttribute("failed")
-        pane.toggleAttribute("deletable", !!open.id)
-        // its highlight on the page, at once;  its thread waits until the pane closes
-        if (this.open === open) this.draw()
-        return true
-      } catch (error) {
-        floppy = notSavedTip(error)
+      const answer = await ServerLink.forPage().post(
+        COMMENTS_API,
+        { page: location.pathname, ...change },
+        { keepalive }
+      )
+      const before = slot()
+      open.id = words ? (open.id ?? answer.id) : undefined
+      saved = words
+      this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
+      this.keepSend(answer)
+      keep(before)
+      floppy = words ? savedTip() : ""
+      setOrDrop(pane, "saved", floppy || undefined)
+      pane.removeAttribute("failed")
+      pane.toggleAttribute("deletable", !!open.id)
+      // its highlight on the page, at once;  its thread waits until the pane closes
+      if (this.open === open) this.draw()
+    }
+    const drafts = new DraftSaver({
+      wait: COMMENT_SAVE_MS,
+      save,
+      onChange: () => {
+        if (drafts.state.kind !== "failed") return
+        floppy = notSavedTip(drafts.state.why)
         pane.setAttribute("saved", floppy)
         pane.setAttribute("failed", "")
-        return false
       }
-    }
-    const saveNow = () => {
-      clearTimeout(timer)
-      return (saving = saving.then(() => save()))
-    }
+    })
+    // a draft kept in this browser differs from what's saved:  the next save sends it
+    drafts.isUnsaved = field.value.trim() !== saved
+    const saveNow = () => drafts.save()
     open.finish = async () => {
       if (!(await saveNow())) return false
       this.forget(slot())
@@ -1535,14 +1522,11 @@ class PageComments {
       return true
     }
     // the page is going:  a request that outlives it
-    open.flush = () => {
-      clearTimeout(timer)
-      saving = saving.then(() => save({ keepalive: true }))
-    }
+    open.flush = () => void drafts.save({ keepalive: true })
     open.discard = async () => {
-      clearTimeout(timer)
+      drafts.stop()
       // a save on its way first:  it may bring the comment's id
-      await saving
+      await drafts.settled
       gone = true
       this.forget(slot())
       this.forget(key)
@@ -1552,8 +1536,7 @@ class PageComments {
     field.addEventListener("input", () => {
       growField(field)
       keep()
-      clearTimeout(timer)
-      timer = setTimeout(saveNow, COMMENT_SAVE_MS)
+      drafts.changed()
     })
     field.addEventListener("blur", () => void saveNow())
     return async () => {
@@ -1742,8 +1725,8 @@ function savedTip() {
 }
 
 /** The floppy's tooltip when a save failed:  why, and that the words are kept. */
-function notSavedTip(error) {
-  return `Not saved:  ${error.message} (kept in this browser)`
+function notSavedTip(why) {
+  return `Not saved:  ${why} (kept in this browser)`
 }
 
 /** Each bullhorn's block (`addBullhorn()`):  what `draw()` checks a kept one against. */

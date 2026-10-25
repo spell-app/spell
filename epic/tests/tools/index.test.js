@@ -189,7 +189,7 @@ describe("the list pages", () => {
   it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header root=".."></spell-site-header>`)
-    expect(html).toContain(`<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>`)
+    expect(html).toContain(`<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)

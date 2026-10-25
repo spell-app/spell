@@ -101,6 +101,27 @@ export const RUN_POLL_MS = 30_000
 export const FOLD_KEY_PREFIX = "spell-folds:"
 
 ////////////////
+// ## A draft that saves itself
+////////////////
+
+/**
+ * Where a `DraftSaver`'s draft stands (epic `coherence` C10):
+ * - `idle`:  nothing to say;  `unsaved`:  changed, waiting for typing to stop;  `saving`:  on its way
+ * - `saved`:  went through, `at` ISO;  `told`:  a word of the page's own (`text`, "draft from 14:02 put back"),
+ *   `isError` in red
+ * - `failed`:  didn't go through, `why`;  tried again every 3s
+ * - `off server`:  the page isn't on the page server:  only the browser's copy keeps it
+ */
+export type DraftState =
+  | { kind: "idle" }
+  | { kind: "unsaved" }
+  | { kind: "saving" }
+  | { kind: "saved"; at: string }
+  | { kind: "told"; text: string; isError?: boolean }
+  | { kind: "failed"; why: string }
+  | { kind: "off server" }
+
+////////////////
 // ## A details page's answer
 ////////////////
 

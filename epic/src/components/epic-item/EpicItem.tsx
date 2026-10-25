@@ -603,9 +603,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         class={FAILED}
         part={this.partForName("failed")}
         size="mini"
-        basic=""
+        appearance="basic"
         color="red"
-        href={issue() ? `#${issue()}` : undefined}
+        link={issue() ? `#${issue()}` : undefined}
         title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
@@ -634,8 +634,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         class={HANDLED}
         part={this.partForName("handled")}
         size="mini"
-        basic=""
-        href={`#${phaseId()}`}
+        appearance="basic"
+        link={`#${phaseId()}`}
         title={this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
@@ -737,6 +737,21 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   ////////////////
 
   /**
+   * Open or folded, as `open` (`isMarkedOpen`;  the kit's `Disclosure`):  only while it has details (`isOpen()`).
+   * - the cancelable `ui-opening` / `ui-closing` first;  folding keeps its line where it is on screen (`keepLinePut()`)
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isMarkedOpen",
+    isOpen: () => this.isOpen(),
+    canChange: () => this.hasDetails(),
+    detail: (open, originalEvent) => ({ open, item: this.domElement, originalEvent }),
+    beforeChange: (open) => {
+      if (!open) this.keepLinePut()
+    }
+  })
+
+  /**
    * Fold or unfold as the user would:  the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - true when applied
    * - without details:  folding its note box open under the line closes it, the draft kept;  else nothing
@@ -748,13 +763,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.reviewState.client?.closeBox(this.reviewState.id(), false)
       return true
     }
-    const opening = !this.isOpen()
-    const detail = { open: opening, item: this.domElement, originalEvent }
-    return this.requestChange("isMarkedOpen", opening, () => {
-      const applied = this.send(opening ? "ui-opening" : "ui-closing", detail)
-      if (applied && !opening) this.keepLinePut()
-      return applied
-    })
+    return this.disclosure.toggle(originalEvent)
   }
 
   /** Fold it, if open, as a click on its line would (`toggle()`);  true when it folded.  Collapse-all's. */
@@ -803,13 +812,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /** Unfold for a link or find-in-page:  `ui-opening` after the fact (not cancelable). */
-  @E.untracked
   private reveal() {
-    if (this.isOpen() || !this.hasDetails()) return
-    const detail = { open: true, item: this.domElement }
-    const init = { bubbles: true, composed: true, cancelable: false, detail }
-    this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-opening"), init))
-    this.isMarkedOpen = true
+    if (this.hasDetails()) this.disclosure.adopt(true)
   }
 
   /** The git icon, clicked:  its commits shown (it opens, loading its part) or hidden again;  the line doesn't fold. */

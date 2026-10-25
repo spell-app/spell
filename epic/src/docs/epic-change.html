@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-change&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -111,7 +111,7 @@
                 ><code title="spell-epic/src/tool/PLAN-DOC.md">PLAN-DOC.md</code></a
               >, "Change marks".
             </p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>what Claude writes, the question's id alone · 3 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -122,7 +122,7 @@
                 >
               </ui-content>
             </ui-accordion>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>after the tool's next write:  stamped · 3 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -134,7 +134,7 @@
                 >
               </ui-content>
             </ui-accordion>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>accepted, by epic inbox apply · 1 line</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -151,8 +151,8 @@
             <p><b>Its parents:</b> anywhere prose goes, inline, around the words that changed. It's a
               <dfn class="spell-term" tabindex="0">prose element</dfn
               ><ui-popup
-                header="prose element"
-                content="An &lt;epic-*&gt; element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."
+                heading="prose element"
+                label="An &lt;epic-*&gt; element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."
               ></ui-popup
               >: an Overview sub-section's text, a phase's fields, an item's text.</p>
             <p><b>Its children:</b> the changed words, running text: links and code too.</p>
@@ -169,7 +169,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="list check"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -220,7 +220,7 @@
               </table>
             </ui-table>
             <ui-section id="parts" label="Parts and states" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

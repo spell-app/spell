@@ -9,7 +9,7 @@ import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell-epic/list/E
 
 import { PlanDates } from "spell-epic/dates"
 import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
-import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, isAirplane, isImmediate } from "spell-epic/review"
+import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, ServerLink, isAirplane, isImmediate } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
@@ -26,7 +26,6 @@ import {
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
 
-import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
   ACTIVE,
@@ -663,24 +662,23 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.whileConnected
   protected followSeeAlso() {
-    if (isServer || location.protocol === "file:" || !this.epic || this.isSaga) return undefined
+    if (isServer || !ServerLink.canRead() || !this.epic || this.isSaga) return undefined
     const folder = `/epics/${this.epic}/`
     void this.loadSeeAlso()
-    const onFile = (event: Event) => {
-      const path = (event as CustomEvent<{ path: string }>).detail?.path ?? ""
-      if (path.includes(folder) && path.endsWith(".html")) void this.loadSeeAlso()
-    }
-    addEventListener("spell-server:changed", onFile)
-    return () => removeEventListener("spell-server:changed", onFile)
+    const isEpicPage = (path: string) => path.includes(folder) && path.endsWith(".html")
+    return ServerLink.watch(window, isEpicPage, () => void this.loadSeeAlso(), { every: 0 })
   }
 
   /** Ask the page server for the epic's pages;  a server without the route, or none at all:  none. */
   @E.untracked
   private async loadSeeAlso() {
     try {
-      const answer = await fetch(`/api/epics/pages?epic=${encodeURIComponent(this.epic ?? "")}`)
-      if (!answer.ok) return
-      const { pages, saga } = (await answer.json()) as { pages?: SeeAlsoLink[]; saga?: SagaLink | null }
+      const answer = await ServerLink.forPage().get<{ pages?: SeeAlsoLink[]; saga?: SagaLink | null }>(
+        "/api/epics/pages",
+        { query: { epic: this.epic ?? "" } }
+      )
+      if (!answer) return
+      const { pages, saga } = answer
       this.seeAlso = Array.isArray(pages) ? pages : []
       this.sagaLink = saga ?? undefined
     } catch {
@@ -740,7 +738,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               {(phases) => (
                 <ui-label
                   class="bedtime-label"
-                  basic=""
+                  appearance="basic"
                   color="violet"
                   icon="bed"
                   title={this.translationForKey("bedtimeTip", { phases: phases() })}
@@ -763,10 +761,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   <ui-label
                     part={this.state() ? this.partForName("state") : undefined}
                     data-state={this.state()?.name}
-                    basic={step().color === "green" ? undefined : ""}
+                    appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
                     icon={step().icon}
-                    href={step().href}
+                    link={step().href}
                     title={step().tip}
                   >
                     {step().words}
@@ -809,11 +807,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           size="small"
           aria-label={this.translationForKey("crumbs")}
         >
-          <ui-breadcrumb href={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
+          <ui-breadcrumb link={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
             {this.translationForKey("crumbDocs")}
           </ui-breadcrumb>
           <ui-breadcrumb
-            href={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
+            link={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
             target={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].target}
           >
             {this.translationForKey(this.isSaga ? "crumbSagas" : "crumbEpics")}
@@ -1219,7 +1217,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("notice")}
         state="info"
         size="small"
-        header={this.translationForKey("futureHeader")}
+        heading={this.translationForKey("futureHeader")}
       >
         <p>
           {this.translationForKey("futureBody")}{" "}
@@ -1368,7 +1366,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     const isStarting = Boolean(client && !client.listening && !isAirplane())
     if (isStarting) void client!.startReview()
-    if (!(await (isStarting ? Clipboard.copy(this.command()) : this.copyAndSay(this.command())))) return
+    if (!(await (isStarting ? E.copyText(this.command()) : this.copyAndSay(this.command())))) return
     // off first, so a second click flashes again
     this.isCopied = false
     this.flashTimer?.cancel()
@@ -1396,13 +1394,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.untracked
   private async copyAndSay(text: string): Promise<boolean> {
-    if (!(await Clipboard.copy(text))) return false
+    if (!(await E.copyText(text))) return false
     if (E.DOMElement.isAttached("ui-toast")) {
       UI.toast({
         id: COPIED_TOAST_ID,
         class: "blue",
         message: this.translationForKey("copiedText", { text }),
-        position: "bottom right",
         displayTime: COPIED_TOAST_MS
       })
     }

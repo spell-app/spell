@@ -322,7 +322,7 @@ describe("AnswerForm's draft (P18)", () => {
       { context: "why not" },
       "Q1 · Which?"
     ])
-    expect(form.draftText).toBe("draft not saved yet")
+    expect(form.draftText).toBe("not saved yet")
     expect(server.drafts).toHaveLength(0)
     await vi.advanceTimersByTimeAsync(2000)
     expect(server.drafts).toEqual([
@@ -335,7 +335,7 @@ describe("AnswerForm's draft (P18)", () => {
         kept: []
       }
     ])
-    expect(form.draftText).toMatch(/^draft saved \d\d:\d\d$/)
+    expect(form.draftText).toMatch(/^saved \d\d:\d\d$/)
     // a draft is not an answer
     expect(server.posts).toHaveLength(0)
     expect(form.fill).toBe("pending")
@@ -357,7 +357,7 @@ describe("AnswerForm's draft (P18)", () => {
     expect(storage.items.size).toBe(1)
     expect([offline.isDraftError, offline.draftText]).toEqual([
       true,
-      "draft kept in this browser only:  this page isn't on the page server"
+      "kept in this browser only:  this page isn't on the page server"
     ])
   })
 
@@ -564,7 +564,7 @@ describe("AnswerForm's draft (P18)", () => {
     await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
     expect([form.isDraftError, form.draftText]).toEqual([
       true,
-      "draft kept in this browser only:  no such route;  trying again every 3s"
+      "kept in this browser only:  no such route;  trying again every 3s"
     ])
     expect(storage.items.size).toBe(1)
     // tries again, with no change:  still failing, still said
@@ -574,7 +574,7 @@ describe("AnswerForm's draft (P18)", () => {
     server.failure = undefined
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
     expect([server.drafts.length, form.isDraftError]).toEqual([3, false])
-    expect(form.draftText).toMatch(/^draft saved \d\d:\d\d$/)
+    expect(form.draftText).toMatch(/^saved \d\d:\d\d$/)
     // nothing more to save:  no more tries
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS * 3)
     expect(server.drafts).toHaveLength(3)

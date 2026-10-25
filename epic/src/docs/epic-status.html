@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-status&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -160,7 +160,7 @@
                 ><code>epic-components.plan.html</code></a
               >). Status cards stay in the doc's skeleton beside the item's title, never in its part file.
             </p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>epics/epic-components/epic-components.plan.html, #t1 · 7 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -197,7 +197,7 @@
             </ul>
             <p>A later mark on the same item gets a new card after the old ones, which stay as the record.</p>
             <p>Its children:</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -224,7 +224,7 @@
 
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -269,7 +269,7 @@
                 A slot is a place in the drawing that a child goes to: a child with <code>slot="name"</code> goes to
                 that name's place, every other child to the default one (shown as <i>default</i>).
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -295,7 +295,7 @@
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-status::part(header)</code>.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -357,7 +357,7 @@
                 A state is a word the element sets on itself while something is true, for styling:
                 <code>epic-status:state(open)</code>. Never written in the file.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

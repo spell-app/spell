@@ -103,7 +103,7 @@ export class AgentsClient {
   /** Keep the list fresh on `window`'s page (`ServerLink.watch()`, on `agents.json5`).  Returns the undo. */
   watch(window: Window): () => void {
     const listFile = this.link.file.replace(/[^/]*$/, AGENTS_FILE)
-    return this.link.watch(window, listFile, () => void this.refresh())
+    return ServerLink.watch(window, listFile, () => void this.refresh())
   }
 
   /**
@@ -160,11 +160,9 @@ export class AgentsClient {
   /** Read the list;  true when it answered (a redirect in flight wins:  its answer is newer). */
   private async load(): Promise<boolean> {
     try {
-      const response = await this.options.fetch(`${AGENTS_API}?page=${encodeURIComponent(this.options.page)}`, {
-        cache: "no-store"
-      })
-      if (!response.ok) return false
-      const read = agentsOf(await response.json())
+      const reply = await this.link.getForPage<unknown>(AGENTS_API)
+      if (reply === undefined) return false
+      const read = agentsOf(reply)
       if (!this.writing) this.agents = read
       return true
     } catch {

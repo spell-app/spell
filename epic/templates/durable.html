@@ -23,8 +23,8 @@
           - Finish with the steps in spell-epic's `src/AGENTS.md`, "Finishing a page".
         -->
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb href="../pages/index.html" target="src-packages-docs-index-html">Docs</ui-breadcrumb>
-          <ui-breadcrumb active>Short Title</ui-breadcrumb>
+          <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Short Title</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head"><h1>Short Title</h1></header></ui-sticky
@@ -52,7 +52,7 @@
             <li>Every fact, number and caveat survives condensing.</li>
             <li>Headline numbers above: 2-4 of them, each also stated (with its caveat) in the body.</li>
           </ul>
-          <ui-message state="positive" header="Recommendation">
+          <ui-message state="positive" heading="Recommendation">
             <ul>
               <li>What to do, in one line.</li>
             </ul>
@@ -64,17 +64,17 @@
             A short lead, then a nested <code>&lt;ui-section&gt;</code> per distinct part. A
             <dfn class="spell-term" tabindex="0">coined term</dfn>
             <ui-popup
-              header="coined term"
-              content="What it means here, in one line:  hover or focus the term."
+              heading="coined term"
+              label="What it means here, in one line:  hover or focus the term."
             ></ui-popup>
             gets its meaning in a popup.
           </p>
 
           <ui-section id="how-it-flows" label="How it flows" sticky collapsible dividing collapsed>
             <ui-steps class="spell-steps" ordered>
-              <ui-step header="step one" description="What happens first, and when."></ui-step>
-              <ui-step header="step two" description="What it hands on."></ui-step>
-              <ui-step header="step three" description="Where it ends."></ui-step>
+              <ui-step heading="step one" description="What happens first, and when."></ui-step>
+              <ui-step heading="step two" description="What it hands on."></ui-step>
+              <ui-step heading="step three" description="Where it ends."></ui-step>
             </ui-steps>
           </ui-section>
 
@@ -96,7 +96,7 @@
           </ui-section>
 
           <ui-section id="today-vs-proposed" label="Today vs proposed" sticky collapsible dividing collapsed>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <tbody>
                   <tr>
@@ -126,7 +126,7 @@
             <ui-grid class="spell-pros-cons" columns="2" stackable>
               <ui-column>
                 <ui-segment>
-                  <ui-label attached="top" color="green"><ui-icon name="thumbs up"></ui-icon> For</ui-label>
+                  <ui-label attach="top" color="green"><ui-icon name="thumbs up"></ui-icon> For</ui-label>
                   <ul>
                     <li>What this choice buys.</li>
                   </ul>
@@ -134,7 +134,7 @@
               </ui-column>
               <ui-column>
                 <ui-segment>
-                  <ui-label attached="top" color="red"><ui-icon name="thumbs down"></ui-icon> Against</ui-label>
+                  <ui-label attach="top" color="red"><ui-icon name="thumbs down"></ui-icon> Against</ui-label>
                   <ul>
                     <li>What it costs, and who pays.</li>
                   </ul>
@@ -145,7 +145,7 @@
 
           <ui-section id="the-code" label="The code" sticky collapsible dividing collapsed>
             <p>Prefer an excerpt from a real, runnable file; say which.</p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>example.ts · 6 lines</ui-title>
               <ui-content>
                 <pre><code class="language-ts">// every code block starts folded:  no `open`
@@ -157,9 +157,9 @@ const message = greet("spell")</code></pre>
               </ui-content>
             </ui-accordion>
             <p>Variants of one snippet (before / after, TS / JS) go in tabs, one code block per tab.</p>
-            <ui-tabs class="spell-tabs" pointing secondary basic aria-label="Before and after">
+            <ui-tabs class="spell-tabs" appearance="pointing secondary basic" aria-label="Before and after">
               <ui-tab label="Before">
-                <ui-accordion class="spell-code" styled>
+                <ui-accordion class="spell-code" appearance="styled">
                   <ui-title>before.ts · 3 lines</ui-title>
                   <ui-content>
                     <pre><code class="language-ts">export function greet(name: string): string {
@@ -169,7 +169,7 @@ const message = greet("spell")</code></pre>
                 </ui-accordion>
               </ui-tab>
               <ui-tab label="After">
-                <ui-accordion class="spell-code" styled>
+                <ui-accordion class="spell-code" appearance="styled">
                   <ui-title>after.ts · 3 lines</ui-title>
                   <ui-content>
                     <pre><code class="language-ts">export function greet(name: string): string {
@@ -179,12 +179,12 @@ const message = greet("spell")</code></pre>
                 </ui-accordion>
               </ui-tab>
             </ui-tabs>
-            <ui-message state="warning" header="Heads up">
+            <ui-message state="warning" heading="Heads up">
               <ul>
                 <li>A trap the reader will fall into, and how to avoid it.</li>
               </ul>
             </ui-message>
-            <ui-accordion class="spell-aside" styled>
+            <ui-accordion class="spell-aside" appearance="styled">
               <ui-title>Aside: why not the obvious approach?</ui-title>
               <ui-content>
                 <p>A digression the main text can skip. Starts collapsed.</p>

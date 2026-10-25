@@ -774,8 +774,8 @@ export function skeleton(list) {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>
-<ui-breadcrumb active>${escapeHTML(list.title)}</ui-breadcrumb>
+<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb selected>${escapeHTML(list.title)}</ui-breadcrumb>
 </ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>
 <p class="lede">${list.lede}</p>

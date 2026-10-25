@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-question&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -117,7 +117,7 @@
                 ><code>q21.html</code></a
               >): the question, then its options.
             </p>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title title="epics/wwod/parts/q21.html">q21.html · 7 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -151,7 +151,7 @@
               </li>
             </ul>
             <p>Its children:</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -179,7 +179,7 @@
                 A slot is a place in the drawing that a child goes to: a child with <code>slot="name"</code> goes to
                 that name's place, every other child to the default one (shown as <i>default</i>).
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -201,7 +201,7 @@
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-question::part(header)</code>.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

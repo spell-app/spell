@@ -54,9 +54,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
 
   /** Can its star star it:  served by the page server with a write token, never from `file://`. */
   get canStar(): boolean {
-    if (isServer) return false
-    const server = (window as { SPELL_SERVER?: { token?: string } }).SPELL_SERVER
-    return !!server?.token && location.protocol !== "file:"
+    return !isServer && ServerLink.isServed()
   }
 
   ////////////////
@@ -81,7 +79,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 class={SAGA}
                 part={this.partForName("saga")}
                 size="mini"
-                basic=""
+                appearance="basic"
                 icon="bullseye"
                 title={this.sagaPurpose ?? ""}
               >
@@ -125,7 +123,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           />
         }
       >
-        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" basic="" title={state().tip}>
+        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" appearance="basic" title={state().tip}>
           {state().count || this.translationForKey("planning")}
         </ui-label>
       </Show>
@@ -143,7 +141,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
       <ui-button
         class={STAR}
         part={this.partForName("star")}
-        tertiary=""
+        appearance="tertiary"
         size="small"
         icon={this.favorite ? "star" : "star outline"}
         title={tip()}
@@ -201,7 +199,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   private toast(key: "starFailed" | "unstarFailed", epic: string, error: string) {
     const message = this.translationForKey(key, { epic, error })
     if (!E.DOMElement.isAttached("ui-toast")) return console.error(message)
-    UI.toast({ message, type: "error", position: "bottom right", displayTime: 3000, showIcon: true })
+    UI.toast({ message, type: "error" })
   }
 }
 

@@ -25,11 +25,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-phase&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -103,7 +103,7 @@
               >
             </epic-phase>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 16 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -178,22 +178,21 @@
                 <epic-field name="symptom">A block's bullhorn floated over its title row's buttons.</epic-field>
                 <ui-button
                   slot="actions"
-                  circular
-                  basic
+                  appearance="circular basic"
                   size="mini"
                   icon="copy"
                   title="Copy a link to it"
                   aria-label="Copy a link to it"
                 ></ui-button>
               </epic-phase>
-              <ui-accordion class="spell-code" styled>
+              <ui-accordion class="spell-code" appearance="styled">
                 <ui-title>The example above · 4 lines</ui-title>
                 <ui-content>
                   <ui-code language="html"
                     ><script type="text/plain">
                       <epic-phase id="p-actions-example" title="Header Actions Slot" status="active" estimate="2-3h">
                         <epic-field name="symptom">A block's bullhorn floated over its title row's buttons.</epic-field>
-                        <ui-button slot="actions" circular basic size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+                        <ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
                       </epic-phase>
                     </script></ui-code
                   >
@@ -216,7 +215,7 @@
               <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m">
                 <epic-field name="symptom">Each page server patched pages its own way.</epic-field>
               </epic-phase>
-              <ui-accordion class="spell-code" styled>
+              <ui-accordion class="spell-code" appearance="styled">
                 <ui-title>The example above · 3 lines</ui-title>
                 <ui-content>
                   <ui-code language="html"
@@ -247,7 +246,7 @@
               >, cut short).
             </p>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>A phase, and its part file · 9 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -277,7 +276,7 @@
             <ui-icon slot="icon" name="compass"></ui-icon>
 
             <ui-section id="epic-phase-parents" label="Its parents" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -307,7 +306,7 @@
               <p>
                 In THIS order, always: the tool puts each child where it belongs, and the check refuses another order.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -452,7 +451,7 @@
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
 
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -573,7 +572,7 @@
             </ui-table>
             <ui-section id="epic-phase-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -613,7 +612,7 @@
 
             <ui-section id="epic-phase-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -675,7 +674,7 @@
 
             <ui-section id="epic-phase-states" label="States" sticky collapsible dividing collapsed>
               <p>Custom states: CSS can match them with <code>epic-phase:state(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -702,7 +701,7 @@
             </ui-section>
 
             <ui-section id="epic-phase-events" label="Events" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

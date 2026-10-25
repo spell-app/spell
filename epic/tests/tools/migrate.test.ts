@@ -168,8 +168,8 @@ describe("migratePages", () => {
     expect(written).toEqual([bedtime, neat])
     const html = readFileSync(bedtime, "utf8")
     expect(html).toContain("<h1>Bedtime:  epic-workflow</h1>")
-    expect(html).toContain("<ui-table celled compact striped unstackable>")
-    expect(readFileSync(neat, "utf8")).toContain("<ui-table celled compact striped unstackable>")
+    expect(html).toContain(`<ui-table celled padding="compact" appearance="striped" unstackable>`)
+    expect(readFileSync(neat, "utf8")).toContain(`<ui-table celled padding="compact" appearance="striped" unstackable>`)
     expect(formattedAlready([bedtime, neat])).toEqual([neat])
   }, 60_000)
 
@@ -204,9 +204,9 @@ describe("migratePages", () => {
       "guides/own/own.html:  nothing to change",
       "  components-not-markup:  LEFT for a person:  <table>:  the page runs its own inline script",
       "guides/x/x.html:  would run components-not-markup",
-      "  components-not-markup:  1 tables -> <ui-table celled compact striped unstackable>",
+      `  components-not-markup:  1 tables -> <ui-table celled padding="compact" appearance="striped" unstackable>`,
       "  components-not-markup:  1 <ui-table>s made unstackable",
-      "  components-not-markup:  2 <details> -> <ui-accordion styled>",
+      `  components-not-markup:  2 <details> -> <ui-accordion appearance="styled">`,
       "  components-not-markup:  <details> in #one:  started open, now folded",
       "  components-not-markup:  LEFT for a person:  <ui-table> in #one:  asks to stack (a demo of stacking?)",
       "  components-not-markup:  LEFT for a person:  <table> in #one:  its own class (which <ui-table> look?)",
@@ -214,7 +214,7 @@ describe("migratePages", () => {
       "  components-not-markup:  LEFT for a person:  <details> in #one:  no <summary> first",
       // a template:  this step's too
       "templates/durable.html:  would run components-not-markup",
-      "  components-not-markup:  1 tables -> <ui-table celled compact striped unstackable>",
+      `  components-not-markup:  1 tables -> <ui-table celled padding="compact" appearance="striped" unstackable>`,
       "guides:  2 of 3 would change (components-not-markup 2)",
       "templates:  1 of 1 would change (components-not-markup 1)"
     ])
@@ -225,7 +225,9 @@ describe("migratePages", () => {
       join(root, "templates/durable.html")
     ])
     const html = readFileSync(join(root, "guides/x/x.html"), "utf8")
-    expect(html).toContain(`<p>Words.</p><ui-table celled compact striped unstackable>${table}</ui-table>`)
+    expect(html).toContain(
+      `<p>Words.</p><ui-table celled padding="compact" appearance="striped" unstackable>${table}</ui-table>`
+    )
     expect(html).toContain("<ui-table celled unstackable><table><tr><td>kept</td></tr></table></ui-table>")
     expect(html).toContain('<ui-table celled stack-by="container"><table>')
     expect(readFileSync(join(root, "guides/drawn/drawn.html"), "utf8")).toContain(
@@ -233,11 +235,11 @@ describe("migratePages", () => {
     )
     expect(html).toContain('<table class="ui very basic table">')
     expect(html).toContain(
-      '<ui-accordion id="why" class="spell-aside extra" styled><ui-title>Why <code>x</code>?</ui-title>' +
+      '<ui-accordion id="why" class="spell-aside extra" appearance="styled"><ui-title>Why <code>x</code>?</ui-title>' +
         "<ui-content><p>Because.</p></ui-content></ui-accordion>"
     )
     expect(html).toContain(
-      '<ui-accordion class="spell-code" styled><ui-title>a.ts · 1 line</ui-title>' +
+      '<ui-accordion class="spell-code" appearance="styled"><ui-title>a.ts · 1 line</ui-title>' +
         "<ui-content><pre><code>const a = 1</code></pre></ui-content></ui-accordion>"
     )
     expect(html).toContain("<details><p>No summary.</p></details>")
@@ -245,11 +247,11 @@ describe("migratePages", () => {
     expect(html).toContain("<epic-choice-rows><table>")
     // a table starting a line:  laid out inside, as written by hand
     expect(readFileSync(join(root, "templates/durable.html"), "utf8")).toContain(
-      `<main>\n  <ui-table celled compact striped unstackable>\n    ${table}\n  </ui-table>\n</main>`
+      `<main>\n  <ui-table celled padding="compact" appearance="striped" unstackable>\n    ${table}\n  </ui-table>\n</main>`
     )
     // every other byte:  the page as it was, the new elements taken out
     const unwrapped = html
-      .replace(/<ui-table celled compact striped unstackable>(.*?)<\/ui-table>/, "$1")
+      .replace(/<ui-table celled padding="compact" appearance="striped" unstackable>(.*?)<\/ui-table>/, "$1")
       .replace("<ui-table celled unstackable>", "<ui-table celled>")
       .replace(/<ui-accordion id="why"[^]*?<\/ui-accordion>/, "")
       .replace(/<ui-accordion class="spell-code"[^]*?<\/ui-accordion>/, "")

@@ -161,7 +161,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
         {this.withCode(this.purpose ?? "")}
         <Show when={this.isKept}>
           {" "}
-          <ui-label class={STAYS} size="mini" basic="">
+          <ui-label class={STAYS} size="mini" appearance="basic">
             {this.translationForKey("stays")}
           </ui-label>
         </Show>
@@ -300,12 +300,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   /** Its file at its line, for VS Code;  `#` off the page server. */
   get fileUrl(): string {
     if (isServer) return "#"
-    const server = (window as { SPELL_SERVER?: { root?: string; worktrees?: string } }).SPELL_SERVER
-    return ChoicesForm.fileUrl(this.file ?? "", this.line ?? 1, {
-      root: server?.root,
-      worktrees: server?.worktrees,
-      pathname: location.pathname
-    })
+    return ChoicesForm.fileUrlHere(this.file ?? "", this.line ?? 1)
   }
 
   /** `text` with its `` `code` `` spans as code. */
@@ -370,11 +365,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   }
 
   /** In VS Code's side bar the frame can't follow `vscode://`:  the view opens it (`DocView.open()`). */
-  private readonly onOpenFile = (event: MouseEvent) => {
-    if (window.parent === window) return
-    event.preventDefault()
-    window.parent.postMessage({ spell: "open", url: this.fileUrl, kind: "external" }, "*")
-  }
+  private readonly onOpenFile = (event: MouseEvent) => ChoicesForm.openFile(event, this.fileUrl)
 
   /** Its table's layout, from the `<epic-choice-rows>` it's in. */
   private static layoutOf(element: Element): { noFile: boolean; stacked: boolean; reorder: boolean; blank: boolean } {

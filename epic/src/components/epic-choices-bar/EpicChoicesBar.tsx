@@ -4,7 +4,6 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { ChoicesForm } from "spell-epic/answers"
-import { Clipboard } from "spell-epic/components/epic-page/Clipboard"
 import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
 // the feedback box:  its barrel first, so it's defined wherever the bar is
 import "spell-epic/components/epic-text-box"
@@ -99,8 +98,8 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
           <ui-button
             class={SEND}
             part={this.partForName("send")}
-            primary=""
-            circular=""
+            color="primary"
+            appearance="circular"
             icon="paper plane"
             loading={this.isSending ? "" : undefined}
             title={this.sendTip}
@@ -119,8 +118,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={COPY}
             part={this.partForName("copy")}
             size="mini"
-            basic=""
-            circular=""
+            appearance="basic circular"
             icon={this.copyState === "copied" ? "check" : "copy"}
             title={this.translationForKey(this.copyState === "failed" ? "copyFailed" : "copyTip")}
             onClick={this.onCopy}
@@ -131,8 +129,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={EXPAND}
             part={this.partForName("expand")}
             size="mini"
-            basic=""
-            circular=""
+            appearance="basic circular"
             icon={this.isAllOpen ? "angles up" : "angles down"}
             onClick={this.onExpand}
           >
@@ -206,7 +203,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   private readonly onCopy = async () => {
     const form = this.form
     if (!form) return
-    const isCopied = await Clipboard.copy(form.copyText())
+    const isCopied = await E.copyText(form.copyText())
     this.copyTimer?.cancel()
     this.copyState = isCopied ? "copied" : "failed"
     if (isCopied) this.copyTimer = E.after(COPIED_SECONDS, () => (this.copyState = ""))

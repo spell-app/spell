@@ -153,6 +153,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
+    - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
+      - `isServed()` (the write token, not `file://`) and `canRead()` (not `file://`):  the ONE "am I served?" test
+      - `get()` on the kit's `$fetch()`:  a 404 answers its `missing` default, any other failure throws;  no caller
+        checks a response itself
+      - `post()`:  the token, refreshed once from the page as served now after a restart;  the one stale-token rule
+      - `ServerLink.watch(window, files, refresh, { every, polls })`:  the one poll, the page coming into view, the
+        server's word that a file changed (a name, or a test of the path)
+      - `ServerLink.forPage()`:  the page's own link, for reads and writes with no client of their own (`<epic-page>`'s
+        See Also, `<epic-cards>`, `<epic-link>`, the docs pages' comments, the syntax page)
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
     as their elements keep them.
     - No Solid, no Spell UI:  node-safe at import.
@@ -167,6 +176,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
+    - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
+      what's typed and not sent:  the three forms, `<epic-review>`'s note, `<epic-test-run>`'s comment, the docs
+      pages' comments and the syntax page
+      - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
+        one save at a time, tries a failed one again every 3s, sends at once as the page hides or goes (`keepalive`)
+      - one wording of where it stands:  "not saved yet", "saving…", "saved 14:04", "kept in this browser only:  ..."
+      - its browser copy through the kit's `StoragePlace`:  blocked storage keeps it in memory, nothing throws
+      - plain timers, not the kit's `after()`:  `spell/element`'s leaves are neither a pack's shared module nor allowed
+        in the docs bundles
     - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
       - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
         second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
@@ -512,8 +530,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
     - A page-named filter is under `spell-filter:` too.
   - Stays raw:
-    - [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle
     - [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright
+    - the syntax page went through `PrefStore` once bundled (epic `coherence` C12)
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -521,7 +539,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The tooling's data files are JSON5, read and written through `DataFile` (`spell-epic/data/DataFile`, see "Overview"):
   never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop Owen's comments.
   - A new one:  `<name>.json5`, its path given to `DataFile`.
-  - A browser reader drops comments before `JSON.parse()` (`commands.js`' `parseData()`).
+  - A browser reader reads it with the kit's `parseJSON5()` (`commands.entry.js`, bundled since epic `coherence` C12).
 - A change to epic page markup adds its MIGRATION STEP in the SAME commit (epic `epic-workflow` P8).
   - epic page markup:  what the tool writes, or what an element reads
   - the step:  a class in [migrations/](tool/migrations/), last in `Migrations.all`, with its test
@@ -841,7 +859,7 @@ In `tools/`:
     - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine` I26):
       - Owen, 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
       - an icon button (the comments' `iconButton()`), its `title` on the inner button too (`titleInside()`):
-        `<ui-button circular basic size="mini" icon="..." title aria-label>`
+        `<ui-button appearance="circular basic" size="mini" icon="..." title aria-label>`
       - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it
         - measured:  within 0.4px of the button's centre, at 1200 and 390px, light and dark
         - the raw `<button>`s it replaced sat 1.3-1.7px off
@@ -851,10 +869,10 @@ In `tools/`:
       - on an epic page, the `<epic-*>` element's own controls
       - the page's chrome too (epic `epic-engine` P3), never an HTML string or a `createElement("div")` tree
         (the helpers' `el()` makes elements):
-        - the TOOLBAR, every page's:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`
+        - the TOOLBAR, every page's:  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`
           - its `<ui-item>` links (`data-rail`, `selected`), its badges `<ui-label>`s
-          - its bullhorn an item of it (`<ui-item link>`)
-        - the jump dialog:  a `<ui-modal>`, its waiting threads a `<ui-menu vertical secondary link>`
+          - its bullhorn an item of it (`<ui-item appearance="link">`)
+        - the jump dialog:  a `<ui-modal>`, its waiting threads a `<ui-menu direction="vertical" appearance="secondary link">`
         - the state chips and "N hidden · show all":  the epics pack's `<epic-state-filter>` and `<epic-hidden-note>`,
           the same elements an epic page's sections and toolbar draw
         - the one-line head's divider:  the breadcrumb's own (`oneLineHead()`)
@@ -899,6 +917,14 @@ In `tools/`:
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the content folder's `goals/`.
     - their look, and their live buttons:  PARKED since 2026-10-11, each says "TODO:  this will ..." (`parked()`)
     - `goals.css` holds every rule the saga pages took from `plan-doc.css`, which they no longer link.
+  - The DATA PAGES' scripts (epic `coherence` C12):  `commands.entry.js` -> `commands.js`,
+    `core-reference.entry.js` -> `core-reference.js`, `spell-syntax.entry.js` -> `spell-syntax.js`.
+    - BUNDLED by [bundle-spell-ui.js](tools/bundle-spell-ui.js) (`--data-pages`:  only them), classic scripts with no
+      Spell UI in them, as the comments' own;  edit the entries, NEVER the bundles.
+    - They import what exists instead of copying it:  the docs helpers' `el()`, `titleInside()`, notice, section
+      numbers and their one start, `drawThenBoot()`;  the kit's `slug()`, `parseJSON5()`, `clockTime()`;
+      `ChoicesForm`'s file links, `ServerLink`, `DraftSaver`.
+    - The pages load them by the same paths as before (`/_epic/assets/commands.js`):  no page changed.
   - `commands.js`:  command reference pages ([the commands template](../templates/commands.html)).
     - It draws their tables from the page's JSON, then loads `spell-ui.js` itself.
     - Built from Spell UI's elements (`<ui-section>`, `<ui-table>`, `<ui-statistic>`), never markup in strings
@@ -926,7 +952,7 @@ In `tools/`:
       - py's [not_ported_yet.json5](../../spell-parser/src/py/core/not_ported_yet.json5)
     - Both are read from the checkout serving the page, so each branch shows its own core.
     - Built from elements, never markup in strings (epic `epic-engine` P3, J19):
-      light-DOM `<ui-section>`s and `<ui-table>`s, as a page writes them;  each file's source link a `<ui-button href>`.
+      light-DOM `<ui-section>`s and `<ui-table>`s, as a page writes them;  each file's source link a `<ui-button link>`.
       - The files' sections take the place of `[data-core-modules]`, never go inside it:
         in the placeholder's box they took the reading column's indent twice.
     - Then it loads `spell-ui.js` itself, as `commands.js` does.
@@ -977,7 +1003,7 @@ In `tools/`:
         - in the table's actions row, right of its bullhorn (Owen, 2026-10-19:  "The expand button should be to the
           right of the bullhorn rather than in its own line");  pressed (`active`) while wide, the row moving with
           the table's right edge
-        - a `<ui-button circular basic size="mini">`, its icon arrows left right / to line, its tooltip on itself
+        - a `<ui-button appearance="circular basic" size="mini">`, its icon arrows left right / to line, its tooltip on itself
       - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column never wraps, the second takes the
         rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap");  too wide then (phone width), it
         scrolls sideways inside its own box, never the page.  `spell-doc.css`, "A TWO-COLUMN table".
@@ -1068,7 +1094,7 @@ In `tools/`:
     - An ivory band, edge to edge across the window, its buttons in the reading column ("The MEASURE"), square.
       - A rule under it, and none above (Owen, 2026-10-10).
       - The same band as an epic page's.
-    - Spell UI's menu (epic `epic-engine` P3):  `<ui-menu class="spell-toolbar" secondary>`, a `<ui-item>` link per
+    - Spell UI's menu (epic `epic-engine` P3):  `<ui-menu class="spell-toolbar" appearance="secondary">`, a `<ui-item>` link per
       section, its look through the menu's tokens (`spell-toolbar.css`);  an epic page's is the same element, and
       Epic UI's pages' (`spell-doc-toolbar.js`, epic `epic-engine` T11).
     - Each button:  the section's icon and its title.
@@ -1221,8 +1247,8 @@ In `tools/`:
   - Titles are short labels (they're the toolbar's labels and the address' ids):  the claim goes in the body.
 - Text:  SEE:  WWOD §6 › "Writing for people".
 - Widgets (see the templates for exact markup):
-  - recommendations / warnings:  `<ui-message state="positive|negative|warning|info" header="...">`
-  - comparisons:  `<ui-table celled compact striped unstackable>` around a native `<table>`
+  - recommendations / warnings:  `<ui-message state="positive|negative|warning|info" heading="...">`
+  - comparisons:  `<ui-table celled padding="compact" appearance="striped" unstackable>` around a native `<table>`
     - ALWAYS `unstackable`:  never stacked, at any width (epic `epic-engine` I36)
       - Owen, 2026-10-19, on a table drawn at the side bar's width as its header cells,
         then each row's cells one under another:  "I hate it"
@@ -1241,24 +1267,24 @@ In `tools/`:
     - meta lines (who it's for, status, how checked):  `<ui-list class="spell-meta">` of `<ui-item icon="...">`
   - headline numbers:  `<ui-statistics class="spell-stats" size="mini">` of `<ui-statistic value label>`
     - 2-4 of them, each also stated with its caveat in the body
-  - ordered flows:  `<ui-steps class="spell-steps" ordered>` of `<ui-step header description>`
+  - ordered flows:  `<ui-steps class="spell-steps" ordered>` of `<ui-step heading description>`
   - parts side by side:
     `<ui-cards class="spell-flow" stackable>` of `<ui-card><ui-content><ui-header>` + `<ui-description>`
   - for / against:  `<ui-grid class="spell-pros-cons" columns="2" stackable>` of `<ui-column><ui-segment>`
     - with a top-`attached` `<ui-label>`
   - variants of one snippet (before / after, TS / JS):
-    `<ui-tabs class="spell-tabs" pointing secondary basic>` of `<ui-tab label>`, each holding its code block
-  - a coined term:  `<dfn class="spell-term" tabindex="0">`, followed by `<ui-popup header content>`
+    `<ui-tabs class="spell-tabs" appearance="pointing secondary basic">` of `<ui-tab label>`, each holding its code block
+  - a coined term:  `<dfn class="spell-term" tabindex="0">`, followed by `<ui-popup heading label>`
   - history of the decision:  `<ui-feed class="spell-history">` of `<ui-event icon>` + `<ui-summary>` + `<ui-date>`
   - sources:  `<ui-items class="spell-sources" divided>` of `<ui-item><ui-content>`
     - with `<ui-header>`, `<ui-meta>`, `<ui-description>`
   - footer:  `<footer class="spell-doc-footer"><ui-divider>` + a `.meta` "last checked" line
-  - asides / digressions:  `<ui-accordion class="spell-aside" styled>`
+  - asides / digressions:  `<ui-accordion class="spell-aside" appearance="styled">`
     - with ONE `<ui-title>` / `<ui-content>` pair
     - collapsed (no `open`)
     - never a `<details>` / `<summary>`:  `components-not-markup` turns one into this
   - buttons:  ALWAYS the pill style, with an icon that says what they do:
-    `<ui-button circular icon="paper plane">Send</ui-button>`
+    `<ui-button appearance="circular" icon="paper plane">Send</ui-button>`
     - Icon-only buttons are circles (`circular`, no text).
       They MUST have an `aria-label`, and a tooltip.
     - ALWAYS a component (Owen, 2026-10-19):  `<ui-*>`, or `<epic-*>` on an epic page;  NEVER a raw `<button>`, in a
@@ -1278,7 +1304,7 @@ In `tools/`:
   - ALWAYS folded and colored:
 
     ```html
-    <ui-accordion class="spell-code" styled>
+    <ui-accordion class="spell-code" appearance="styled">
       <ui-title>What it is · N lines</ui-title>
       <ui-content><pre><code class="language-ts">
     ```
@@ -1931,7 +1957,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - A draft is kept in this browser while it differs from what's saved.
   - Owen's icon buttons outside the pill (the pen, the trash, the pane's ×) are plain:
     no ring, a tint under the pointer.
-    - `<ui-button circular basic size="mini">`s, plain through the component's tokens (`.tool` in
+    - `<ui-button appearance="circular basic" size="mini">`s, plain through the component's tokens (`.tool` in
       `EpicThread.css` / `EpicCommentPane.css`;  epic `epic-engine` I26)
   - TOOLTIPS:  the browser's own (`title`), a few words each;  the longer wording is the `aria-label`.
     - Owen, 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
@@ -2362,10 +2388,10 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     Today:
     - `components-not-markup` ([to-components.js](tools/to-components.js), epic `epic-engine` P3):
       a page's contents in components, not markup written by hand
-      - a bare `<table>` in `<ui-table celled compact striped unstackable>`, the table unchanged inside
+      - a bare `<table>` in `<ui-table celled padding="compact" appearance="striped" unstackable>`, the table unchanged inside
       - every `<ui-table>` without `unstackable` given it, after its own words;  one that asks to stack (`stackable`,
         `stack-by`) listed (epic `epic-engine` I36)
-      - a `<details>` aside as `<ui-accordion class="spell-aside" styled>` (`spell-code` round one code block),
+      - a `<details>` aside as `<ui-accordion class="spell-aside" appearance="styled">` (`spell-code` round one code block),
         its id and classes kept, folded
       - LEFT, and listed for a person:
         - a table with its own class, style or role (which look is a call)

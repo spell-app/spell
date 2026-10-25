@@ -31,10 +31,10 @@
             - The answer goes to `<slug>.answer.json` beside the page;  the page never locks.
           -->
           <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-            <ui-breadcrumb href="../pages/index.html" target="src-packages-docs-index-html"
+            <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html"
               >Docs</ui-breadcrumb
             >
-            <ui-breadcrumb active>Short Title</ui-breadcrumb>
+            <ui-breadcrumb selected>Short Title</ui-breadcrumb>
           </ui-breadcrumbs>
           <ui-sticky class="spell-h1"
             ><header class="spell-page-head">
@@ -47,7 +47,7 @@
             <epic-field label="Asked" data-details-asked>2026-01-01</epic-field>
           </div>
 
-          <ui-message class="spell-where" state="info" header="Where we are">
+          <ui-message class="spell-where" state="info" heading="Where we are">
             <epic-field label="Epic"><code>name</code> -- what that work is for, in one line.</epic-field>
             <epic-field label="Just now">what happened that led to this question.</epic-field>
             <epic-field label="This decides">what changes for you, whichever you pick.</epic-field>

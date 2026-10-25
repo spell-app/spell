@@ -4,6 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { EpicAddress, PageTargets, TARGET_API, type Landing, type TargetAnswer } from "spell-epic/links"
+import { ServerLink } from "spell-epic/review"
 
 import { epicLinkVocabulary } from "./EpicLink.en"
 
@@ -115,14 +116,14 @@ export class EpicLink extends E.UIComponent<typeof epicLinkVocabulary> {
   /** Ask the page server what `address` points at;  no server, or no route:  no answer (the short form stands). */
   @E.untracked
   private async loadAnswer(address: EpicAddress) {
-    const query = new URLSearchParams(
+    const query = Object.fromEntries(
       Object.entries({ saga: address.saga, epic: address.epic, item: address.item, phase: address.phase }).filter(
         (entry): entry is [string, string] => !!entry[1]
       )
     )
     try {
-      const answer = await fetch(`${TARGET_API}?${query}`)
-      if (answer.ok) this.answer = (await answer.json()) as TargetAnswer
+      const answer = await ServerLink.forPage().get<TargetAnswer>(TARGET_API, { query })
+      if (answer) this.answer = answer
     } catch {
       // no page server:  the short form, no tooltip
     }

@@ -94,7 +94,7 @@ describe("<epic-list>", () => {
     // newest first, none last
     expect(shown(host)).toEqual(["b", "a", "c"])
     expect(localStorage.getItem(SORT_KEY)).toBe("date")
-    expect(date!.hasAttribute("active")).toBe(true)
+    expect(date!.hasAttribute("selected")).toBe(true)
   })
 
   test("a chip per saga its cards name, in `sagas`' order, then No saga;  a click shows only that saga's;  remembered", async () => {

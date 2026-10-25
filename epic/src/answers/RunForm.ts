@@ -9,10 +9,12 @@ import type {
   RunStatus
 } from "spell/server/runs/runs.types"
 
+import { clockTime } from "spell/util/time"
 import { PlanDates } from "spell-epic/dates"
 import { ServerLink, sentence, type ServerLinkOptions } from "spell-epic/review"
 
-import { ANSWER_RETRY_MS, RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
+import { DraftSaver } from "./DraftSaver"
+import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
 
 /****************
  * ### `RunForm`
@@ -25,8 +27,10 @@ import { ANSWER_RETRY_MS, RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } fr
  *   file as answers arrive (P24).
  *   - kept here at once, so the page shows it;  posted `RUN_SAVE_MS` (half a second) after he stops typing, a pick or
  *     a tick at once;  one save at a time, in order
- *   - a save that fails says so (`saveError`), and tries again every `ANSWER_RETRY_MS` (3s) until one goes through:
+ *   - a save that fails says so (`saveError`), and tries again every 3s until one goes through:
  *     a page server back on its address takes it, its new token too (`ServerLink`)
+ *   - the saving is the page's `DraftSaver`'s (epic `coherence` C10), as every form's;  no browser copy:  the
+ *     answers are saved as given
  * - The run's EFFORT, when the command offers one (`pickEffort()`, P25):  kept at once, saved at once, in the
  *   answers' queue and with their retries;  the command reads it before its next pass.
  * - Send (`send()`):  what's waiting saved first, then `POST /api/runs/<id>/send`, which stamps `sent`;  the waiting
@@ -52,12 +56,6 @@ export class RunForm {
   /** Why the run couldn't be read, as a sentence;  `""` for none. */
   loadError = ""
 
-  /** Why the last save failed, as a sentence;  `""` for none:  it tries again every 3s. */
-  saveError = ""
-
-  /** When the last save went through, `14:04`;  `""` before one. */
-  savedAt = ""
-
   /** Why the last Send failed, as a sentence;  `""` for none. */
   sendError = ""
 
@@ -73,14 +71,8 @@ export class RunForm {
   /** The effort picked and not saved yet;  `undefined` for none. */
   private unsavedEffort: string | undefined
 
-  /** The save waiting for typing to stop. */
-  private timer: ReturnType<typeof setTimeout> | undefined
-
-  /** The next try after a save failed. */
-  private retryTimer: ReturnType<typeof setTimeout> | undefined
-
-  /** The saves queued, one at a time. */
-  private saving: Promise<void> = Promise.resolve()
+  /** The answers' saves:  one at a time, retried, sent as the page goes;  where they stand. */
+  private readonly saves: DraftSaver
 
   /** Called on every change. */
   private readonly listeners = new Set<() => void>()
@@ -90,9 +82,14 @@ export class RunForm {
 
   constructor(
     readonly runId: string,
-    private readonly options: ServerLinkOptions
+    options: ServerLinkOptions
   ) {
     this.link = new ServerLink(options)
+    this.saves = new DraftSaver({
+      save: (save) => this.saveUnsaved(save),
+      wait: RUN_SAVE_MS,
+      onChange: () => this.notify()
+    })
   }
 
   ////////////////
@@ -170,6 +167,17 @@ export class RunForm {
     return this.isStale ? "pending" : "sent"
   }
 
+  /** Why the last save failed, as a sentence;  `""` for none:  it tries again every 3s. */
+  get saveError(): string {
+    return this.saves.isError ? `Not saved:  ${sentence(this.saves.text)}` : ""
+  }
+
+  /** When the last save went through, `14:04`;  `""` before one. */
+  get savedAt(): string {
+    const state = this.saves.state
+    return state.kind === "saved" ? clockTime(new Date(state.at)) : ""
+  }
+
   /** The words beside Send:  how many answered, and where the Send stands. */
   get stateLine(): string {
     const { answered, total } = this.counts
@@ -200,9 +208,7 @@ export class RunForm {
     this.answers = { ...this.answers, rows: { ...this.answers.rows, [rowId]: answer } }
     this.unsaved.set(rowId, answer)
     this.notify()
-    clearTimeout(this.timer)
-    if (now) void this.flush()
-    else this.timer = setTimeout(() => void this.flush(), RUN_SAVE_MS)
+    this.saves.changed({ now })
   }
 
   /**
@@ -217,43 +223,29 @@ export class RunForm {
     this.answers = { ...this.answers, effort }
     this.unsavedEffort = effort
     this.notify()
-    void this.flush()
+    this.saves.changed({ now: true })
   }
 
   /** Save every answer given and not saved yet, one at a time;  resolves once they're through (or failed). */
-  flush({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
-    clearTimeout(this.timer)
-    this.timer = undefined
-    this.saving = this.saving.then(() => this.saveUnsaved(keepalive))
-    return this.saving
+  async flush({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    await this.saves.save({ keepalive })
   }
 
-  /** Post each unsaved answer, then the effort;  a failure keeps it, says why, and tries again in `ANSWER_RETRY_MS`. */
-  private async saveUnsaved(keepalive: boolean): Promise<void> {
-    try {
-      for (const [rowId, answer] of Array.from(this.unsaved)) {
-        await this.link.post(`${this.api}/answer`, { rowId, ...answer }, { keepalive })
-        if (this.unsaved.get(rowId) === answer) this.unsaved.delete(rowId)
-        this.saved()
-      }
-      const effort = this.unsavedEffort
-      if (effort !== undefined) {
-        await this.link.post(`${this.api}/effort`, { effort }, { keepalive })
-        if (this.unsavedEffort === effort) this.unsavedEffort = undefined
-        this.saved()
-      }
-    } catch (failure) {
-      this.saveError = `Not saved:  ${sentence((failure as Error).message)}`
-      clearTimeout(this.retryTimer)
-      this.retryTimer = setTimeout(() => void this.flush(), ANSWER_RETRY_MS)
+  /**
+   * `DraftSaver`'s save:  post each unsaved answer, then the effort;  a failure keeps what's left, and throws
+   * (it says why, and tries again in 3s).
+   */
+  private async saveUnsaved({ keepalive }: { keepalive: boolean }): Promise<undefined> {
+    for (const [rowId, answer] of Array.from(this.unsaved)) {
+      await this.link.post(`${this.api}/answer`, { rowId, ...answer }, { keepalive })
+      if (this.unsaved.get(rowId) === answer) this.unsaved.delete(rowId)
     }
-    this.notify()
-  }
-
-  /** A save went through:  no error, and its time. */
-  private saved() {
-    this.saveError = ""
-    this.savedAt = PlanDates.clock(new Date())
+    const effort = this.unsavedEffort
+    if (effort !== undefined) {
+      await this.link.post(`${this.api}/effort`, { effort }, { keepalive })
+      if (this.unsavedEffort === effort) this.unsavedEffort = undefined
+    }
+    return undefined
   }
 
   /** Send:  everything given saved first, then `sent` stamped;  the waiting command wakes on it. */
@@ -284,9 +276,11 @@ export class RunForm {
   /** Read the run:  what's asked, what's answered (his unsaved answers kept over it), who waits.  NEVER rejects. */
   async load(): Promise<void> {
     try {
-      const response = await this.options.fetch(this.api, { cache: "no-store" })
-      const reply = (await response.json().catch(() => ({}))) as Partial<RunReply> & { error?: string }
-      if (!response.ok || !reply.page) throw new Error(reply.error ?? `couldn't read the run (${response.status})`)
+      const reply = await this.link.get<Partial<RunReply>>(this.api)
+      if (!reply?.page)
+        throw new Error(
+          this.link.isServed ? "couldn't read the run (no such run)" : "this page isn't on the page server"
+        )
       this.page = reply.page
       this.answers = this.withUnsaved(reply.answers ?? { rows: {} })
       this.isWaiting = !!reply.waiting
@@ -310,28 +304,22 @@ export class RunForm {
    * - a file of the run's folder changed (`spell-server:changed`):  `run.json5` (rows, progress, passes, taken rows,
    *   how it ended), `waiting.json5`
    * - the page coming into view, and every `RUN_POLL_MS` while it is:  a heartbeat goes stale with no file changing
-   * - the page going away:  what's unsaved goes at once, as a request that outlives it
+   * - the page going away (or hidden):  what's unsaved goes at once, as a request that outlives it
    */
   watch(window: Window): () => void {
-    const { document } = window
     const folder = `/pages/runs/${this.runId}/`
-    const onFile = (event: Event) => {
-      const path = decodeURIComponent((event as CustomEvent<{ path?: string }>).detail?.path ?? "")
-      if (path.includes(folder)) void this.load()
-    }
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void this.load()
-    }
-    const onHide = () => void this.flush({ keepalive: true })
-    const timer = window.setInterval(onVisible, RUN_POLL_MS)
-    window.addEventListener("spell-server:changed", onFile)
-    window.addEventListener("pagehide", onHide)
-    document.addEventListener("visibilitychange", onVisible)
+    const unwatch = ServerLink.watch(
+      window,
+      (path) => path.includes(folder),
+      () => void this.load(),
+      {
+        every: RUN_POLL_MS
+      }
+    )
+    const unsave = this.saves.watch(window)
     return () => {
-      window.clearInterval(timer)
-      window.removeEventListener("spell-server:changed", onFile)
-      window.removeEventListener("pagehide", onHide)
-      document.removeEventListener("visibilitychange", onVisible)
+      unwatch()
+      unsave()
     }
   }
 

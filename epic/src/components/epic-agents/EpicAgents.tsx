@@ -205,7 +205,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           <b>
             <code class={AGENT_NAME}>{agent().name}</code>
           </b>
-          <ui-label size="mini" basic="" color={statusColorOf(agent().status)}>
+          <ui-label size="mini" appearance="basic" color={statusColorOf(agent().status)}>
             {agent().status}
           </ui-label>
           <span class={AGENT_AGE} title={this.startedTip(agent())}>

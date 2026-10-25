@@ -498,7 +498,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         class={START_TESTING}
         part={this.partForName("start-testing")}
         color="blue"
-        basic=""
+        appearance="basic"
         size="mini"
         icon="flask"
         title={this.translationForKey("startTestingTip", { count: open })}
