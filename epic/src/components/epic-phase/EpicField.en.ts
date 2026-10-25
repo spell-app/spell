@@ -9,6 +9,7 @@ import type { EpicVocabulary } from "spell-epic/definitions"
 /****************
  * ### `<epic-field>`
  * One named field of a phase (Symptom, Changes, Goal ...), or a labelled block in prose (`Where:`).
+ * - A REQUEST (a labelled field in a Requests field) folds, and its screenshots zoom (epic `epic-engine`, r31).
  ****************/
 export const epicFieldVocabulary = {
   tag: "epic-field",
@@ -19,7 +20,9 @@ export const epicFieldVocabulary = {
   description:
     "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's " +
     'prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label="Where">` draws `Where:` ' +
-    "before its prose, no icon (epic `epic-components` P14).",
+    "before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE " +
+    "REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, " +
+    "a click shows one full size in a modal.",
   attributes: [
     {
       name: "name",
@@ -42,7 +45,15 @@ export const epicFieldVocabulary = {
       kind: "string",
       description:
         "A labelled block's label, WITHOUT its colon (drawn):  `Where`, `What should happen`, `Step`.  For a field " +
-        "in prose, never in a phase:  a field has `name` or `label`."
+        "in prose, never in a phase:  a field has `name` or `label`.  In a Requests field:  the request's title, " +
+        "`r31 · 🚧 debut (ad62dff0)`, drawn without a colon."
+    },
+    {
+      name: "open",
+      kind: "boolean",
+      description:
+        "A request (a labelled field in a Requests field):  unfolded.  Page state only:  the tool never writes it, " +
+        "so a page opens with every request folded, and the live patch keeps it."
     }
   ],
   events: [],
@@ -50,9 +61,15 @@ export const epicFieldVocabulary = {
   parts: [
     { name: "base", description: "The field:  its icon column, then its label and prose." },
     { name: "icon", description: "Its icon, centred on its first line:  none on a labelled block." },
-    { name: "label", description: "Its label:  `Symptom:`, `Where:` ..." }
+    { name: "label", description: "Its label:  `Symptom:`, `Where:` ..." },
+    { name: "toggle", description: "A request's fold button, before its label." },
+    { name: "body", description: 'A request\'s prose, under its label:  folded, `hidden="until-found"`.' },
+    { name: "zoom", description: "A request's modal, a screenshot full size." }
   ],
-  states: [],
+  states: [
+    { name: "request", description: "One request in a Requests field:  it folds." },
+    { name: "open", description: "A request, unfolded." }
+  ],
   texts: [
     { key: "symptom", text: "Symptom:" },
     { key: "changes", text: "Changes:" },
@@ -64,7 +81,10 @@ export const epicFieldVocabulary = {
     { key: "files", text: "Files:" },
     { key: "verify", text: "Verify:" },
     { key: "toReview", text: "To review:" },
-    { key: "labelled", text: "{label}:", description: "A labelled block's label (`label`)." }
+    { key: "labelled", text: "{label}:", description: "A labelled block's label (`label`)." },
+    { key: "foldTip", text: "Fold this request", description: "A request's fold button, while open." },
+    { key: "unfoldTip", text: "Open this request", description: "A request's fold button, while folded." },
+    { key: "zoomed", text: "{alt}, full size", description: "The zoomed screenshot's alt text (its own `alt`)." }
   ],
   children: [{ tag: "flow", description: "The field's prose." }],
   flow: true

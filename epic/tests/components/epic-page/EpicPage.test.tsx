@@ -13,7 +13,7 @@ import "spell-ui/components/ui-section"
 import "spell-ui/components/ui-label"
 import "spell-ui/components/ui-message"
 import "spell-ui/components/ui-code"
-import "spell-ui/components/ui-breadcrumb"
+import "spell-ui/components/ui-breadcrumbs"
 import "spell-ui/components/ui-toast"
 import "spell-epic/components/epic-page"
 import "spell-epic/components/epic-overview"
@@ -125,7 +125,7 @@ describe("<epic-page>", () => {
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
     expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe("Copy /epic review SAGA:/epics")
-    const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb-section"), (crumb) => [
+    const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
       crumb.getAttribute("href")
     ])
@@ -226,7 +226,7 @@ describe("<epic-page>", () => {
     const host = await render(page("", ["todo"]))
     const crumbs = host.shadowRoot!.querySelector('[part~="crumbs"]')!
     expect(
-      Array.from(crumbs.querySelectorAll("ui-breadcrumb-section"), (crumb) => [
+      Array.from(crumbs.querySelectorAll("ui-breadcrumb"), (crumb) => [
         crumb.textContent,
         crumb.getAttribute("href"),
         crumb.hasAttribute("active")
@@ -239,7 +239,7 @@ describe("<epic-page>", () => {
     expect(crumbs.nextElementSibling!.textContent).toBe("demo")
 
     const old = await render(
-      `<main><ui-breadcrumb class="spell-crumbs"><ui-breadcrumb-section active>Demo</ui-breadcrumb-section></ui-breadcrumb>` +
+      `<main><ui-breadcrumbs class="spell-crumbs"><ui-breadcrumb active>Demo</ui-breadcrumb></ui-breadcrumbs>` +
         `${page("", ["todo"])}</main>`
     )
     expect(old.querySelector("epic-page")!.shadowRoot!.querySelector('[part~="crumbs"]')).toBeNull()

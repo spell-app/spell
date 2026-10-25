@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { dirname, join, posix, relative } from "node:path"
 
+import { escapeHTML } from "spell/util/string"
 import { PhaseIds } from "spell-epic/phases"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { CommentList, type IdentifiedComment } from "spell-epic/tool/CommentList"
@@ -140,10 +141,10 @@ export class GuideChanges {
           })
         } else {
           phase = plan.addPhase(page.title, {
-            symptom: `Owen left ${many(count)} on <a href="${link}">${escape(page.title)}</a> (<code>${escape(page.page)}</code>).`,
+            symptom: `Owen left ${many(count)} on <a href="${link}">${escapeHTML(page.title)}</a> (<code>${escapeHTML(page.page)}</code>).`,
             changes:
               `Work each into the page, or say why not;  then answer it under the comment:  ` +
-              `<code>epic comments answer ${escape(page.page)}#&lt;id&gt; --file reply.html</code>.`,
+              `<code>epic comments answer ${escapeHTML(page.page)}#&lt;id&gt; --file reply.html</code>.`,
             goal: list
           })
           plan.log(`${plan.phaseLabel(phase)} added:  ${page.title} (${many(count)}, epic comments gather)`)
@@ -203,21 +204,21 @@ export class GuideChanges {
           ? comment.label
           : `${comment.kind}${comment.label ? ` in ${comment.label}` : ""}`
     const about = comment.quote
-      ? ` on <q>${escape(comment.quote)}</q>`
+      ? ` on <q>${escapeHTML(comment.quote)}</q>`
       : comment.excerpt && comment.kind !== "section"
-        ? ` (<q>${escape(comment.excerpt)}</q>)`
+        ? ` (<q>${escapeHTML(comment.excerpt)}</q>)`
         : ""
     const words = htmlOf(comment.text).join("")
     // a reply on its thread since Claude answered:  his latest words are the work now
     const reply = comment.replies?.findLast((each) => each.by === "Owen" && each.text)
     const replied = reply ? `<p>Owen replied on the thread:</p>${htmlOf(reply.text!).join("")}` : ""
-    return `<li><a href="${this.hrefTo(page, targetOf(comment.anchor))}">${escape(where || comment.anchor)}</a>${about}, <code>${CommentList.label(comment.id)}</code>:  ${words}${replied}</li>`
+    return `<li><a href="${this.hrefTo(page, targetOf(comment.anchor))}">${escapeHTML(where || comment.anchor)}</a>${about}, <code>${CommentList.label(comment.id)}</code>:  ${words}${replied}</li>`
   }
 
   /** A page note (before P11), as its line in the phase's goal. */
   private noteItem(page: string, note: PageNote): string {
     const target = note.for === "page" ? "" : note.for
-    return `<li><a href="${this.hrefTo(page, target)}">${escape(note.label)}</a>, page note <code>${note.id}</code>:  ${htmlOf(note.text).join("")}</li>`
+    return `<li><a href="${this.hrefTo(page, target)}">${escapeHTML(note.label)}</a>, page note <code>${note.id}</code>:  ${htmlOf(note.text).join("")}</li>`
   }
 
   /** Mark what went into a phase as taken:  the comments in the page's inbox, the notes answered with a link. */
@@ -285,9 +286,4 @@ function titleOf(file: string): string {
     ?.replace(/&amp;/g, "&")
     .trim()
   return title || file.replace(/^.*\/|\.html$/g, "")
-}
-
-/** Escape for HTML text. */
-function escape(value: string): string {
-  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }

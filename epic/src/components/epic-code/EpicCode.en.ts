@@ -56,8 +56,8 @@ export const epicCodeVocabulary = {
   ],
   states: [...PANEL_STATES],
   texts: [
-    { key: "foldTip", text: "Fold this code", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold this code", description: "Tooltip of its fold button while folded." },
+    { key: "foldTip", text: "Close this code", description: "Tooltip of its fold button while open." },
+    { key: "unfoldTip", text: "Open this code", description: "Tooltip of its fold button while folded." },
     { key: "code", text: "Code", description: "The heading, without a title." }
   ],
   children: [

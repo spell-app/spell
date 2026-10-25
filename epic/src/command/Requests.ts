@@ -2,6 +2,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFil
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
+import { escapeHTML } from "spell/util/string"
+import { localDate, localMinutes } from "spell/util/time"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import { PhaseIds } from "spell-epic/phases"
@@ -241,7 +243,7 @@ export class Requests {
       id,
       epic,
       from: sender,
-      at: localTime(),
+      at: localMinutes(),
       status: "new",
       text,
       context,
@@ -395,7 +397,7 @@ export class Requests {
     if (!existsSync(join(this.epics, epic, `${epic}.plan.html`))) {
       throw new EpicCommandError(`no epic '${epic}':  epics/${epic}/${epic}.plan.html isn't there`)
     }
-    const set = new Date().toISOString().slice(0, 10)
+    const set = localDate()
     DataFile.write(this.homeFile, { epic, set })
   }
 
@@ -634,21 +636,4 @@ function requestLine(request: EpicRequest): string {
   const status = request.filed ? `filed:  ${request.filed}` : request.status
   const words = request.text.replace(/\s+/g, " ")
   return `${request.id}  ${status}  ${request.from}  ${words.length > 60 ? `${words.slice(0, 59)}…` : words}`
-}
-
-/** `text` safe inside HTML. */
-function escapeHTML(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-}
-
-/** Now, to the minute, in local time with its offset:  `2026-10-11T06:10-04:00`, as the epic page's log writes it. */
-function localTime(date = new Date()): string {
-  const pad = (n: number) => String(Math.abs(n)).padStart(2, "0")
-  const offset = -date.getTimezoneOffset()
-  const sign = offset >= 0 ? "+" : "-"
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}` +
-    `${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`
-  )
 }

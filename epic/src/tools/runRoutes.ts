@@ -38,6 +38,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { escapeHTML } from "spell/util/string"
 import { DataFile } from "spell-epic/data/DataFile"
 import { RUNS_API } from "spell-epic/answers"
 import { SRV } from "spell/server"
@@ -203,7 +204,7 @@ export function runPageHtml(template: string, page: RunPage): string {
   const { document } = parseHTML(template)
   const title = page.title || page.command
   // `<title>` is raw text, which linkedom writes as it is:  escaped here, and the browser reads the escapes back
-  document.title = title.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+  document.title = escapeHTML(title)
   const heading = document.querySelector("h1")
   if (heading) heading.textContent = title
   document.querySelector("epic-run")?.setAttribute("run", page.id)

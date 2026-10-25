@@ -89,8 +89,8 @@ export const epicStatusVocabulary = {
     { name: "thread-end", description: "Last in the thread's block:  its bottom corners rounded." }
   ],
   texts: [
-    { key: "foldTip", text: "Fold this status card", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold this status card", description: "Tooltip of its fold button while folded." },
+    { key: "foldTip", text: "Close this status card", description: "Tooltip of its fold button while open." },
+    { key: "unfoldTip", text: "Open this status card", description: "Tooltip of its fold button while folded." },
 
     { key: "underway", text: "Claude • Underway", description: "The heading while Claude is on it." },
     { key: "done", text: "Claude • Done", description: "The heading once work was done." },

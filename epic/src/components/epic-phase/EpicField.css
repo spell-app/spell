@@ -9,6 +9,8 @@
  * - `<epic-updated>`:  fenced, a dashed orange box (Owen, 2026-10-06:  never an "Updated" word buried in the text)
  *   - a fold column before the icon (`fold.button()`, Owen, 2026-10-08)
  *   - what changed BELOW its heading, folded `until-found`
+ * - A request (a labelled field in a Requests field, r31):  a fold, its chevron and label the title row,
+ *   its prose below, folded `until-found`;  its screenshots' thumbnails are the page sheet's (`EpicField.requests.css`)
  * - Public tokens (`--epic-field-*`) are never declared here:  read through private aliases.
  */
 
@@ -178,5 +180,39 @@
     padding-inline-start: 8px;
     border-inline-start: 3px solid var(--ui-orange, #f2711c);
     border-radius: 2px;
+  }
+
+  /* ## A request (r31):  folds by its title row;  its prose below, lined up with the label */
+  .field.request {
+    display: block;
+  }
+  .request > .head {
+    display: flex;
+    align-items: flex-start;
+  }
+  .request > .body {
+    padding-inline-start: var(--_epic-request-indent, 18px);
+  }
+  .request > .body[hidden="until-found"] {
+    display: block;
+    content-visibility: hidden;
+  }
+  :host(:state(request)) ::slotted(p:first-child) {
+    display: block;
+    margin: 4px 0 0;
+  }
+  :host(:state(request)) ::slotted(blockquote) {
+    margin: 4px 0;
+  }
+  .zoom::part(modal) {
+    width: auto;
+    max-width: calc(100vw - 32px);
+  }
+  .zoomed {
+    display: block;
+    max-width: 100%;
+    max-height: 85vh;
+    margin: 0 auto;
+    border-radius: 6px;
   }
 }

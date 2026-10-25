@@ -52,7 +52,7 @@ describe("epicCardHtml()", () => {
       /^<epic-card id="epic-seo" epic="seo" data-status="open" phases="done active" updated="2026-10-08" urgent="q1" active="P2 · Site Map" worked="2026-10-09T07:05[+-]\d\d:\d\d" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics &lt;3">\n/
     )
     expect(html).toContain(`<a href="seo/seo.plan.html" target="seo">SEO &amp; &lt;co&gt;</a>\n`)
-    expect(html).toContain(`<span slot="description">Meta "tags"</span>\n`)
+    expect(html).toContain(`<span slot="description">Meta &quot;tags&quot;</span>\n`)
     expect(html).toMatch(/<span slot="meta">P2 · Site Map · epics\/seo\/seo.plan.html<\/span>\n<\/epic-card>$/)
   })
 

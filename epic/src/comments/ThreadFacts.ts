@@ -1,3 +1,4 @@
+import { clockTime, localDate } from "spell/util/time"
 import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell-epic/tool/CommentList"
 
 /****************
@@ -123,9 +124,7 @@ export class ThreadFacts {
   static localStamp(iso: string | undefined): string {
     const date = new Date(iso ?? "")
     if (Number.isNaN(date.getTime())) return iso ?? ""
-    const two = (value: number) => String(value).padStart(2, "0")
-    const day = `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`
-    return `${day} ${two(date.getHours())}:${two(date.getMinutes())}`
+    return `${localDate(date)} ${clockTime(date)}`
   }
 
   /** A local `YYYY-MM-DD HH:MM` (`localStamp()`) as a thread or a note shows it, no year:  `10/10 14:02`. */

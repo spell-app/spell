@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, statSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
+import { localMinutes } from "spell/util/time"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RealPath } from "spell-epic/config/RealPath"
 
@@ -393,19 +394,7 @@ export class Stock {
    * - static:  pure;  `Sessions.live()` stamps with it too
    */
   static iso(ms: number): string {
-    const date = new Date(ms)
-    const offset = -date.getTimezoneOffset()
-    const sign = offset >= 0 ? "+" : "-"
-    return (
-      `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}` +
-      `T${two(date.getHours())}:${two(date.getMinutes())}` +
-      `${sign}${two(Math.floor(Math.abs(offset) / 60))}:${two(Math.abs(offset) % 60)}`
-    )
-
-    /** `value` as two digits. */
-    function two(value: number): string {
-      return String(value).padStart(2, "0")
-    }
+    return localMinutes(new Date(ms))
   }
 
   /**

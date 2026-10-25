@@ -34,6 +34,8 @@
  * - those files:  `./EpicState.ts`
  * - NEVER an alias, an `enum` or a parameter property:  plain `node` can't strip those
  */
+import { escapeHTML } from "spell/util/string.ts"
+import { localMinutes } from "spell/util/time.ts"
 import { PlanDates } from "spell-epic/dates/PlanDates.ts"
 import { epicStateFor, type EpicFacts, type EpicState } from "./EpicState.ts"
 
@@ -123,22 +125,24 @@ export function epicCardHtml(card: EpicCard, now: Date = new Date()): PlacedCard
   const { name, title, facts, worked, favorite = false, saga } = card
   const state = epicStateFor(facts, now)
   const attributes =
-    `id="epic-${attr(name)}" epic="${attr(name)}" data-status="${state.name === "done" ? "done" : "open"}"` +
-    ` phases="${attr(facts.phases.join(" "))}"` +
-    (facts.updated ? ` updated="${attr(facts.updated)}"` : "") +
-    (facts.urgent?.length ? ` urgent="${attr(facts.urgent.join(" "))}"` : "") +
+    `id="epic-${escapeHTML(name)}" epic="${escapeHTML(name)}" data-status="${state.name === "done" ? "done" : "open"}"` +
+    ` phases="${escapeHTML(facts.phases.join(" "))}"` +
+    (facts.updated ? ` updated="${escapeHTML(facts.updated)}"` : "") +
+    (facts.urgent?.length ? ` urgent="${escapeHTML(facts.urgent.join(" "))}"` : "") +
     (facts.future ? " future" : "") +
     (facts.standing ? " standing" : "") +
-    (facts.active ? ` active="${attr(facts.active)}"` : "") +
-    (worked ? ` worked="${isoLocal(worked)}"` : "") +
-    (saga ? ` saga="${attr(saga.id)}" saga-title="${attr(saga.title)}" saga-purpose="${attr(saga.purpose)}"` : "") +
+    (facts.active ? ` active="${escapeHTML(facts.active)}"` : "") +
+    (worked ? ` worked="${localMinutes(worked)}"` : "") +
+    (saga
+      ? ` saga="${escapeHTML(saga.id)}" saga-title="${escapeHTML(saga.title)}" saga-purpose="${escapeHTML(saga.purpose)}"`
+      : "") +
     (favorite ? " favorite" : "")
-  const target = card.target ? ` target="${attr(card.target)}"` : ""
+  const target = card.target ? ` target="${escapeHTML(card.target)}"` : ""
   const html =
     `<epic-card ${attributes}>\n` +
-    `<a href="${attr(card.href)}"${target}>${text(title)}</a>\n` +
-    (card.description ? `<span slot="description">${text(card.description)}</span>\n` : "") +
-    `<span slot="meta">${text(card.meta)}</span>\n` +
+    `<a href="${escapeHTML(card.href)}"${target}>${escapeHTML(title)}</a>\n` +
+    (card.description ? `<span slot="description">${escapeHTML(card.description)}</span>\n` : "") +
+    `<span slot="meta">${escapeHTML(card.meta)}</span>\n` +
     `</epic-card>`
   return { group: favorite ? "favorites" : epicGroupFor(state), title, html }
 }
@@ -156,7 +160,7 @@ export function epicListHtml(cards: readonly PlacedCard[], sagas: readonly SagaL
     (a, b) => EPIC_GROUPS.indexOf(a.group) - EPIC_GROUPS.indexOf(b.group) || byTitle(a.title, b.title)
   )
   return (
-    `<epic-list class="spell-epics"${sagas.length ? ` sagas="${attr(sagas.map((saga) => saga.id).join(" "))}"` : ""}>\n` +
+    `<epic-list class="spell-epics"${sagas.length ? ` sagas="${escapeHTML(sagas.map((saga) => saga.id).join(" "))}"` : ""}>\n` +
     `${EPIC_CARDS_START}\n${ordered.map((card) => card.html).join("\n")}\n${EPIC_CARDS_END}\n` +
     `</epic-list>`
   )
@@ -205,27 +209,3 @@ export function favoritesIn(list: unknown): Set<string> {
 
 /** A log line's time:  `<epic-event at="2026-10-09T00:26-04:00">`, `$1`. */
 const EVENT_TIME = /<epic-event\b[^>]*?\sat="([^"]+)"/g
-
-/**
- * `date` as local ISO with its offset, to the minute:  `2026-10-09T14:34-04:00`:  a card's `worked`, which the newest-first
- * sort compares as text.
- */
-export function isoLocal(date: Date): string {
-  const two = (value: number) => String(Math.floor(Math.abs(value))).padStart(2, "0")
-  const offset = -date.getTimezoneOffset()
-  return (
-    `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}` +
-    `T${two(date.getHours())}:${two(date.getMinutes())}` +
-    `${offset < 0 ? "-" : "+"}${two(offset / 60)}:${two(offset % 60)}`
-  )
-}
-
-/** `value` as HTML text. */
-function text(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-}
-
-/** `value` as a double-quoted attribute. */
-function attr(value: string): string {
-  return text(value).replace(/"/g, "&quot;")
-}

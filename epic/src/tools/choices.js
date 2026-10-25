@@ -39,6 +39,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { localDate } from "spell/util/time.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { ROWS, TOOL_TEMPLATES, choiceSections, fillHead, fillWords } from "./answerPages.js"
 import {
@@ -51,7 +52,6 @@ import {
   parseArgs,
   readAnswer,
   shown,
-  today,
   waitForAnswer
 } from "./details.js"
 import { CONTENT, ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
@@ -168,7 +168,7 @@ export function newRound(docs, target, { title, description, data } = {}) {
   const typed = draft ? formatAnswer(file, { ...draft, answered: draft.saved, changes: 0 }) : undefined
   const document = pageDocument(docs, file, { title, description, checked })
   const asked = askedOf(old)
-  const round = foldRound({ from: old, into: document, sent, typed, asked: today() })
+  const round = foldRound({ from: old, into: document, sent, typed, asked: localDate() })
   writeFileSync(file, serialize(document))
   writeRows(file, checked)
   archiveAnswer(file, { round, asked, sent, answer })
@@ -186,7 +186,7 @@ function pageDocument(docs, file, { title, description, checked }) {
     title,
     description: description ?? `Syntax choices:  ${title}`,
     asked: "[data-choices-asked]",
-    date: today()
+    date: localDate()
   })
   const rowsName = document.querySelector("[data-choices-rows] code")
   if (rowsName) rowsName.textContent = basename(rowsFile(file))

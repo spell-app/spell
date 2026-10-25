@@ -38,6 +38,7 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "n
 import { extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { escapeRegExp } from "spell/util/string.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 /**
@@ -466,7 +467,7 @@ function maskLines(lines: string[]): string[] {
 
 /** A banned word as a pattern:  whole, any case. */
 function wordPattern(word: string): RegExp {
-  return new RegExp(`(?<![\\w-])${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w-])`, "i")
+  return new RegExp(`(?<![\\w-])${escapeRegExp(word)}(?![\\w-])`, "i")
 }
 
 /** `word` in quotes, for a `why`. */

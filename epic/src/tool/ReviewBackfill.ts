@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
+import { localDate } from "spell/util/time"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
 
@@ -97,7 +98,7 @@ export class ReviewBackfill {
           for (const id of idsIn(text)) {
             if (!wanted.has(id)) continue
             const quote = quoteAround(text, id)
-            ;(evidence[id] ??= []).push({ session: session.id, date: localDate(entry.timestamp), kind, quote })
+            ;(evidence[id] ??= []).push({ session: session.id, date: dayOf(entry.timestamp), kind, quote })
           }
         }
       }
@@ -214,11 +215,10 @@ function quoteAround(text: string, id: string): string {
  * An ISO timestamp's LOCAL date, `YYYY-MM-DD`, as the epic page's dates are;  `null` without one.
  * - transcripts stamp UTC:  an evening's answer would otherwise land on tomorrow
  */
-function localDate(timestamp: string | undefined): string | null {
+function dayOf(timestamp: string | undefined): string | null {
   const date = timestamp ? new Date(timestamp) : null
   if (!date || Number.isNaN(date.getTime())) return null
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  return `${date.getFullYear()}-${month}-${String(date.getDate()).padStart(2, "0")}`
+  return localDate(date)
 }
 
 /** A JSON line, or `null`. */

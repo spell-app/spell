@@ -1,5 +1,6 @@
 import { parseHTML } from "linkedom"
 
+import { escapeRegExp } from "spell/util/string"
 import {
   OVERVIEW_ID,
   OVERVIEW_PART_ID,
@@ -442,6 +443,7 @@ export class PlanDoc extends PlanReader {
    *   updates to prose outside a phase;  once it's finished, those changes are just the plan.
    *   A phase's own plan changes stay.
    * - `done` with `{ done }` (HTML:  a `<ul>` of what was built, what Owen will ask about first):  its Done field
+   * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
@@ -451,6 +453,8 @@ export class PlanDoc extends PlanReader {
     if (status === "done") {
       this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
+      // built, so its plan was accepted:  a plan rewritten after the Accept never leaves a done phase "waiting"
+      if (this.phase(n).getAttribute("plan") === "waiting") this.acceptPlan(this.phase(n))
     }
     this.updateEstimate()
     this.log(`${this.phaseLabel(n)} ${status}`)
@@ -2622,8 +2626,3 @@ function changeTitle(change: Element): string {
 
 /** What keeps the numbers it said:  the log, an Original Discussion (`relabelPhaseNames()`). */
 const HISTORY = 'epic-section[kind="log"], epic-original'
-
-/** `text`, safe inside a regular expression. */
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}

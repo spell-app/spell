@@ -79,7 +79,7 @@ export function htmlIn(document, tag, html) {
 export function fillHead(document, { title, description, asked, date }) {
   document.querySelector("title").textContent = title
   document.querySelector("h1").textContent = title
-  const crumb = document.querySelector("ui-breadcrumb-section[active]")
+  const crumb = document.querySelector("ui-breadcrumb[active]")
   if (crumb) crumb.textContent = title
   document.querySelector('meta[name="description"]').setAttribute("content", description)
   const line = document.querySelector(asked)

@@ -61,8 +61,8 @@ export const epicUpdateVocabulary = {
     { name: "open", description: "A block, unfolded:  it starts so (page state, never written)." }
   ],
   texts: [
-    { key: "foldTip", text: "Fold this update", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold this update", description: "Tooltip of its fold button while folded." },
+    { key: "foldTip", text: "Close this update", description: "Tooltip of its fold button while open." },
+    { key: "unfoldTip", text: "Open this update", description: "Tooltip of its fold button while folded." },
 
     { key: "title", text: "Update", description: "A block's title, in bold, before `: <summary>`." },
     { key: "during", text: "Written during P{phase}", description: "The date's tooltip, after the full date." },

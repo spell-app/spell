@@ -22,6 +22,8 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { escapeHTML } from "spell/util/string.ts"
+import { localDate } from "spell/util/time.ts"
 import { ENGINE_ROUTES } from "spell-epic/server/server.types.ts"
 import { packageDir } from "./packageDir.ts"
 import { CONTENT, ROOT, pageFile, pagePath } from "./pages.js"
@@ -146,7 +148,7 @@ export function pullBoard(source, file, { title, from, board } = {}) {
   const depth = pagePath(file).split("/").length - 1
   const up = depth ? Array.from({ length: depth }, () => "..").join("/") : "."
   const name = title ?? document.querySelector("title")?.textContent.trim() ?? basename(file, ".html")
-  const stamp = new Date().toISOString().slice(0, 10)
+  const stamp = localDate()
   const origin = `pulled from Claude Design${from ? `, ${from}` : ""}${board ? `, board ${board}` : ""}, ${stamp}`
   const html = [
     "<!doctype html>",
@@ -154,7 +156,7 @@ export function pullBoard(source, file, { title, from, board } = {}) {
     "  <head>",
     '    <meta charset="utf-8" />',
     '    <meta name="viewport" content="width=device-width, initial-scale=1" />',
-    `    <title>${escapeText(name)}</title>`,
+    `    <title>${escapeHTML(name)}</title>`,
     `    <script src="${ENGINE_ROUTES.assets.prefix}spell-ui.js"></script>`,
     ...head.map((line) => `    ${line}`),
     "  </head>",
@@ -196,11 +198,6 @@ function fillHoles(text, defaults, notes) {
     notes.push(`left ${hole} as written:  it comes from renderVals(), which a page doesn't run`)
     return hole
   })
-}
-
-/** `text` safe inside an element. */
-function escapeText(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;")
 }
 
 ////////////////

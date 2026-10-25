@@ -46,6 +46,7 @@ import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { escapeHTML } from "spell/util/string.ts"
 // By name with its `.ts`, its types stripped by `node` itself:  this tool runs under plain `node`
 import {
   EPIC_GROUPS,
@@ -598,16 +599,16 @@ export function homeSkeleton() {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${text(title)}</title>
-<meta name="description" content="${attr(`${REPO}'s docs:  guides, sagas and epics, one card each.`)}" />
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(`${REPO}'s docs:  guides, sagas and epics, one card each.`)}" />
 <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
 <spell-site-header root=".."></spell-site-header>
 <div class="spell-doc">
 <main class="spell-doc-main">
-<ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${text(title)}</h1></header></ui-sticky>
-<p class="lede">Everything written about ${text(REPO)}, one card per area.</p>
+<ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(title)}</h1></header></ui-sticky>
+<p class="lede">Everything written about ${escapeHTML(REPO)}, one card per area.</p>
 ${HOME_START}
 ${HOME_END}
 
@@ -658,13 +659,13 @@ ${cards.map(areaCard).join("\n")}
  */
 function areaCard(area) {
   const title = area.href
-    ? `<a href="${attr(area.href)}" target="_self">${text(area.title)}</a>`
-    : `<span>${text(area.title)}</span>`
-  const meta = [area.count, area.meta].filter(Boolean).map(text).join(" · ")
+    ? `<a href="${escapeHTML(area.href)}" target="_self">${escapeHTML(area.title)}</a>`
+    : `<span>${escapeHTML(area.title)}</span>`
+  const meta = [area.count, area.meta].filter(Boolean).map((part) => escapeHTML(part)).join(" · ")
   return `<ui-card id="${area.id}"><ui-content>
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
-<ui-description>${text(area.description)}</ui-description>
+<ui-description>${escapeHTML(area.description)}</ui-description>
 </ui-content></ui-card>`
 }
 
@@ -714,19 +715,19 @@ export function skeleton(list) {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${text(list.title)}</title>
-<meta name="description" content="${attr(list.description)}" />
+<title>${escapeHTML(list.title)}</title>
+<meta name="description" content="${escapeHTML(list.description)}" />
 <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
 <spell-site-header root=".."></spell-site-header>
 <div class="spell-doc">
 <main class="spell-doc-main">
-<ui-breadcrumb class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb-section href="../pages/index.html" target="_self">Docs</ui-breadcrumb-section>
-<ui-breadcrumb-section active>${text(list.title)}</ui-breadcrumb-section>
-</ui-breadcrumb>
-<ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${text(list.title)}</h1></header></ui-sticky>
+<ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb active>${escapeHTML(list.title)}</ui-breadcrumb>
+</ui-breadcrumbs>
+<ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>
 <p class="lede">${list.lede}</p>
 ${START}
 ${END}
@@ -761,9 +762,9 @@ export function listSection(list, pages, favorites = readFavorites(), sagas = re
       )
     : pages.length
       ? `<ui-cards class="spell-grid" stackable>\n${pages.map((page) => card(page, from)).join("\n")}\n</ui-cards>`
-      : `<p class="meta">${text(list.none)}</p>`
+      : `<p class="meta">${escapeHTML(list.none)}</p>`
   const section = list.section ?? { id: list.id, title: list.title }
-  return `<ui-section id="${section.id}" label="${attr(section.title)}" sticky collapsible dividing>
+  return `<ui-section id="${section.id}" label="${escapeHTML(section.title)}" sticky collapsible dividing>
 <ui-icon slot="icon" name="${list.icon}"></ui-icon>
 ${body}
 </ui-section>`
@@ -780,7 +781,7 @@ ${body}
  * - a saga with no guides yet says so
  */
 export function guideSections(list, pages, sagas) {
-  if (!pages.length) return `<p class="meta">${text(list.none)}</p>`
+  if (!pages.length) return `<p class="meta">${escapeHTML(list.none)}</p>`
   const from = pagePath(list.dir)
   const ids = new Set(sagas.map((saga) => saga.id))
   const cards = (mine) =>
@@ -788,11 +789,11 @@ export function guideSections(list, pages, sagas) {
       ? `<ui-cards class="spell-grid" stackable>\n${mine.map((page) => card(page, from)).join("\n")}\n</ui-cards>`
       : `<p class="meta">No guides name this saga yet.</p>`
   const sections = sagas.map((saga) => {
-    const link = `<a href="${attr(href(Sagas.pageOf(saga.id), from))}">${text(saga.title)}</a>`
+    const link = `<a href="${escapeHTML(href(Sagas.pageOf(saga.id), from))}">${escapeHTML(saga.title)}</a>`
     return `<ui-section id="saga-${saga.id}" sticky collapsible dividing>
 <ui-icon slot="icon" name="bullseye"></ui-icon>
 <span slot="label">${link}</span>
-<p class="meta">${text(saga.purpose)}</p>
+<p class="meta">${escapeHTML(saga.purpose)}</p>
 ${cards(pages.filter((page) => page.saga === saga.id))}
 </ui-section>`
   })
@@ -820,14 +821,14 @@ export function sagaSection(list, pages, sagas) {
           const page = Sagas.pageOf(saga.id)
           const counts = [plural(count(saga.id, "epics"), "epic"), plural(count(saga.id, "guides"), "guide"), page]
           return `<ui-card id="${saga.id}"><ui-content>
-<ui-header><ui-icon name="bullseye"></ui-icon> <a href="${attr(href(page, from))}">${text(saga.title)}</a></ui-header>
-<ui-description>${text(saga.purpose)}</ui-description>
-<ui-meta>${text(counts.join(" · "))}</ui-meta>
+<ui-header><ui-icon name="bullseye"></ui-icon> <a href="${escapeHTML(href(page, from))}">${escapeHTML(saga.title)}</a></ui-header>
+<ui-description>${escapeHTML(saga.purpose)}</ui-description>
+<ui-meta>${escapeHTML(counts.join(" · "))}</ui-meta>
 </ui-content></ui-card>`
         })
         .join("\n")}\n</ui-cards>`
-    : `<p class="meta">${text(list.none)}</p>`
-  return `<ui-section id="${list.id}" label="${attr(list.title)}" sticky collapsible dividing>
+    : `<p class="meta">${escapeHTML(list.none)}</p>`
+  return `<ui-section id="${list.id}" label="${escapeHTML(list.title)}" sticky collapsible dividing>
 <ui-icon slot="icon" name="${list.icon}"></ui-icon>
 ${body}
 </ui-section>`
@@ -850,9 +851,9 @@ function href(path, from) {
 /** A page's card, on the list page in folder `from`:  linked title, description, path. */
 function card(page, from) {
   return `<ui-card><ui-content>
-<ui-header><a href="${attr(href(page.path, from))}">${text(page.title)}</a></ui-header>
-${page.description ? `<ui-description>${text(page.description)}</ui-description>` : ""}
-<ui-meta>${text(page.path)}</ui-meta>
+<ui-header><a href="${escapeHTML(href(page.path, from))}">${escapeHTML(page.title)}</a></ui-header>
+${page.description ? `<ui-description>${escapeHTML(page.description)}</ui-description>` : ""}
+<ui-meta>${escapeHTML(page.path)}</ui-meta>
 </ui-content></ui-card>`
 }
 
@@ -878,14 +879,4 @@ function epicCard(page, from, favorites, sagas = []) {
     favorite: favorites.has(name),
     saga
   })
-}
-
-/** Escape for HTML text. */
-function text(value) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-}
-
-/** Escape for a double-quoted attribute value. */
-function attr(value) {
-  return text(value).replace(/"/g, "&quot;")
 }
