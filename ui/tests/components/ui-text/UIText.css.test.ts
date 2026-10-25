@@ -50,7 +50,7 @@ describe("UIText.css source", () => {
   it("parses with replaceSync", () => {
     for (const css of [textCSS, textRaw]) {
       const selectors = Sheets.selectors(css)
-      expect(selectors).toContain("span.ui.inverted.text")
+      expect(selectors).toContain(":is(span, p).ui.inverted.text")
       expect(selectors).toContain(":host")
     }
   })

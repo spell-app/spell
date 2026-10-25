@@ -1,0 +1,31 @@
+/*
+ * The style sheet of `<ui-term>`:  a label, then its value.
+ * - Shadow markup:  `<span class="label" part="label" role="term">` then
+ *   `<span class="value" part="value" role="definition">`, each round its slot.
+ * - In a `<ui-terms>` (`:state(in-terms)`):  a subgrid row of the group's two columns.
+ *   Alone, or in a horizontal group (`:state(in-row)`):  the two on one line.
+ * - The look:  the label muted, as a field's label;  the value plain.
+ * - Public tokens (`--ui-terms-label-color`, `--ui-terms-label-weight`, `--ui-terms-value-color`) are NEVER declared
+ *   here:  each is read where it's used.
+ */
+
+@layer ui.components.terms.types {
+  :host {
+    display: inline-flex;
+    gap: var(--ui-space-xs);
+    align-items: baseline;
+  }
+  :host(:state(in-terms):not(:state(in-row))) {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+  .label {
+    color: var(--ui-terms-label-color, var(--ui-text-muted));
+    font-weight: var(--ui-terms-label-weight, 500);
+  }
+  .value {
+    min-inline-size: 0;
+    color: var(--ui-terms-value-color, inherit);
+  }
+}

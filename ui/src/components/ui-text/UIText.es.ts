@@ -10,5 +10,6 @@ export const textEs = {
   lang: "es",
   tag: "ui-text",
   name: "texto",
-  aka: ["texto", "texto en línea", "texto de color", "etiqueta de texto"]
+  aka: ["texto", "texto en línea", "texto de color", "etiqueta de texto", "párrafo"],
+  attributes: { paragraph: "parrafo" }
 } as const satisfies E.TagDictionary

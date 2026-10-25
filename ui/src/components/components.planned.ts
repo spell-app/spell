@@ -7,46 +7,8 @@
  *   that's already in the root catalog.
  * - Pure data, no imports:  any tool can read it, node included.
  */
-export const PLANNED_COMPONENTS: readonly PlannedComponent[] = [
-  { tag: "ui-link", es: "enlace", gap: "links", phase: "text-blocks", description: "A link inside running text." },
-  {
-    tag: "ui-keys",
-    es: "teclas",
-    gap: "text",
-    phase: "text-blocks",
-    description: "Key caps for a shortcut:  `mod+S` shows ⌘S on a Mac, Ctrl+S elsewhere."
-  },
-  {
-    tag: "ui-quote",
-    es: "cita",
-    gap: "text",
-    phase: "text-blocks",
-    description: "A quotation:  a block, or `inline`."
-  },
-  {
-    tag: "ui-page",
-    es: "pagina",
-    gap: "page frame",
-    phase: "page-frame",
-    description: "The whole window:  header, nav, main, aside and footer, the regions screen readers jump between."
-  },
-  { tag: "ui-video", es: "video", gap: "media", phase: "video-and-audio", description: "A video file, played." },
-  { tag: "ui-audio", es: "audio", gap: "media", phase: "video-and-audio", description: "A sound file, played." },
-  {
-    tag: "ui-terms",
-    es: "terminos",
-    gap: "term list",
-    phase: "terms-and-figures",
-    description: "Terms and their values, lined up:  `Suit:  hearts`."
-  },
-  {
-    tag: "ui-term",
-    es: "termino",
-    gap: "term list",
-    phase: "terms-and-figures",
-    description: "One term and its value."
-  }
-]
+// empty since epic `ui-gaps` P12:  every planned tag is built
+export const PLANNED_COMPONENTS: readonly PlannedComponent[] = []
 
 /** A tag Spell UI plans, and doesn't have yet. */
 export type PlannedComponent = {

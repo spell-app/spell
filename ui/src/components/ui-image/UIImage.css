@@ -390,3 +390,29 @@
     opacity: var(--_ui-image-disabled-opacity);
   }
 }
+
+/*******************************
+            Figure
+*******************************/
+
+/*
+ * `caption` (epic `ui-gaps` P12):  a `<figure>` round the image and a `<figcaption>` under it.
+ * - `display: table`, the caption a `table-caption` under it:  the caption wraps at the picture's width.
+ */
+@layer ui.components.image.content {
+  .figure {
+    display: table;
+    margin: 0 0 1em;
+  }
+  :host(:last-child) > .figure {
+    margin-block-end: 0;
+  }
+  .figure > figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    padding-block-start: var(--ui-space-xs);
+    color: var(--ui-text-muted);
+    font-size: 0.875em;
+    line-height: var(--ui-line-height);
+  }
+}

@@ -198,11 +198,20 @@ export class TocIndex {
   /**
    * Run `then` once the `<ui-root>` around `element` is ready (every component drawn),
    * or on the next frame when it already is or there is none.
+   * - Its OWN `ui-ready`:  a root inside it (a `<ui-page>` in an example) sends one too, which bubbles up first.
    */
   static whenReady(element: Element, then: () => void): void {
     const root = element.closest("ui-root")
-    if (!root || TocIndex.hasState(root, "ready")) beforeNextPaint(then)
-    else root.addEventListener("ui-ready", () => beforeNextPaint(then), { once: true })
+    if (!root || TocIndex.hasState(root, "ready")) {
+      beforeNextPaint(then)
+      return
+    }
+    const onReady = (event: Event) => {
+      if (event.target !== root) return
+      root.removeEventListener("ui-ready", onReady)
+      beforeNextPaint(then)
+    }
+    root.addEventListener("ui-ready", onReady)
   }
 
   /**

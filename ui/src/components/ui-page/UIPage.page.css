@@ -1,0 +1,10 @@
+/*
+ * `<ui-page>`'s PAGE sheet:  registered into the document by the component (`UI.styles.register(..., { page: true })`).
+ * - A page frame is the whole window:  the body round it loses its margin.
+ */
+
+@layer ui.components.page.types {
+  body:has(> ui-page) {
+    margin: 0;
+  }
+}

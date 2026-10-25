@@ -120,7 +120,7 @@ describe("<ui-images>", () => {
     ["", "ui images"],
     ['size="tiny"', "ui tiny images"],
     ["avatar circular", "ui avatar circular images"],
-    ['floated="left" vertical-align="bottom"', "ui left floated bottom aligned images"]
+    ['vertical-align="bottom"', "ui bottom aligned images"]
   ])("<ui-images %s>", async (attributes, classes) => {
     const group = await ElementFixture.render<DOMElement>(`<ui-images ${attributes}></ui-images>`)
     const root = group.shadowRoot!.querySelector("[part~=group]")!
@@ -257,5 +257,30 @@ describe("<ui-image> old names", () => {
     expect(await classesOf(`<ui-images rounded circular centered>A</ui-images>`)).toBe(
       await classesOf(`<ui-images appearance="rounded circular" align="center">A</ui-images>`)
     )
+  })
+})
+
+/** A 120 x 80 picture, as a data URL. */
+const PICTURE = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="teal"/></svg>')}`
+
+describe("<ui-image caption>", () => {
+  it("is a figure:  the picture, then its caption under it, no wider than the picture", async () => {
+    const host = await ElementFixture.render<DOMElement>(
+      `<ui-image src="${PICTURE}" width="120" height="80" alt="" caption="A quiet street at dawn, long before anyone is up"></ui-image>`
+    )
+    await ElementFixture.settle()
+    const figure = host.shadowRoot!.querySelector<HTMLElement>("[part~=figure]")!
+    const caption = figure.querySelector<HTMLElement>("[part~=caption]")!
+    const image = figure.querySelector<HTMLImageElement>("img")!
+    expect([figure.localName, caption.localName]).toEqual(["figure", "figcaption"])
+    expect(caption.textContent).toBe("A quiet street at dawn, long before anyone is up")
+    expect(caption.getBoundingClientRect().top).toBeGreaterThanOrEqual(image.getBoundingClientRect().bottom - 1)
+    expect(caption.getBoundingClientRect().width).toBeLessThanOrEqual(image.getBoundingClientRect().width + 1)
+  })
+
+  it("stays a plain image without one", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-image src="x.png" alt=""></ui-image>`)
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector("figure")).toBeNull()
   })
 })

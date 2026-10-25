@@ -17,9 +17,9 @@ import type { E } from "spell-ui/core"
 export const textVocabulary = {
   tag: "ui-text",
   topics: ["text", "typography", "basic", "elements"],
-  aka: ["span", "inline text", "colored text", "label text"],
+  aka: ["span", "inline text", "colored text", "label text", "paragraph", "p"],
   noun: "text",
-  description: "A text is used to style some inline text with a simple color.",
+  description: "A text is used to style some inline text with a simple color, or to hold a paragraph.",
   attributes: [
     {
       name: "size",
@@ -36,11 +36,21 @@ export const textVocabulary = {
       description: "Semantic colour of a status message."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "The hue as it reads on a dark surface." },
+    {
+      name: "paragraph",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "A paragraph:  a block (`<p>`) with the body's line height and a line's space under it, not inline text."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Faded:  shown as unavailable." }
   ],
   events: [],
   slots: [{ name: "", description: "The text." }],
   parts: [{ name: "text", description: "The inline text box." }],
-  states: [{ name: "disabled", description: "Faded:  shown as unavailable." }],
+  states: [
+    { name: "disabled", description: "Faded:  shown as unavailable." },
+    { name: "paragraph", description: "Set while it's a paragraph (`paragraph`)." }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

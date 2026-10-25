@@ -1293,6 +1293,228 @@
       "href": "ui-ad.html"
     },
     {
+      "tag": "ui-audio",
+      "name": "Audio",
+      "folder": "ui-video",
+      "topics": [
+        "media",
+        "elements"
+      ],
+      "aka": [
+        "audio",
+        "sound",
+        "music",
+        "sound effect",
+        "audio player"
+      ],
+      "description": "An audio plays a sound file:  in the browser's own player, or unseen, when the page says.",
+      "noun": "audio",
+      "attributes": [
+        {
+          "name": "src",
+          "kind": "string",
+          "description": "The file to play, relative to the page."
+        },
+        {
+          "name": "autoplay",
+          "kind": "boolean",
+          "description": "Starts playing as soon as it can.  A browser allows that only when `muted`, or after the reader has clicked on the page."
+        },
+        {
+          "name": "muted",
+          "kind": "boolean",
+          "description": "Starts with the sound off."
+        },
+        {
+          "name": "loop",
+          "kind": "boolean",
+          "description": "Starts again at the end."
+        },
+        {
+          "name": "controls",
+          "kind": "boolean",
+          "description": "Shows the browser's player.  Without it, nothing shows:  the page plays it (`play()`)."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-play",
+          "detail": "{ currentTime: number }",
+          "description": "It started playing (or went on)."
+        },
+        {
+          "name": "ui-pause",
+          "detail": "{ currentTime: number }",
+          "description": "It paused."
+        },
+        {
+          "name": "ui-ended",
+          "detail": "{ currentTime: number }",
+          "description": "It played to the end."
+        }
+      ],
+      "parts": [
+        {
+          "name": "audio",
+          "description": "The `<audio>`."
+        }
+      ],
+      "states": [
+        {
+          "name": "silent",
+          "description": "No `controls`:  nothing shows."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-video",
+      "main": false,
+      "page": true,
+      "href": "ui-audio.html"
+    },
+    {
       "tag": "ui-author",
       "name": "Author",
       "folder": "ui-parts",
@@ -2329,16 +2551,6 @@
           "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`."
         },
         {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
-        },
-        {
           "name": "icon",
           "kind": "icon",
           "description": "Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button."
@@ -2547,14 +2759,6 @@
         {
           "name": "fluid",
           "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)."
-        },
-        {
-          "name": "left-floated",
-          "description": "The host floats left (`floated=\"left\"`)."
-        },
-        {
-          "name": "right-floated",
-          "description": "The host floats right (`floated=\"right\"`)."
         },
         {
           "name": "ellipsis",
@@ -2807,16 +3011,6 @@
           "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`."
         },
         {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
-        },
-        {
           "name": "width",
           "kind": "width",
           "values": [
@@ -2964,14 +3158,6 @@
         {
           "name": "fluid",
           "description": "The host is block-level:  `fluid`, `width`, or attached top, bottom or both."
-        },
-        {
-          "name": "left-floated",
-          "description": "The host floats left."
-        },
-        {
-          "name": "right-floated",
-          "description": "The host floats right."
         },
         {
           "name": "disabled",
@@ -5305,16 +5491,6 @@
           "description": "Width while the grid is 1920px wide or more."
         },
         {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Pushed to the `left` or `right` end."
-        },
-        {
           "name": "attach",
           "kind": "valueOnly",
           "values": [
@@ -6439,16 +6615,6 @@
           "name": "scrolling",
           "kind": "keyOnly",
           "description": "In a modal:  a capped height that scrolls."
-        },
-        {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
         },
         {
           "name": "align",
@@ -11667,16 +11833,6 @@
           "description": "With `attached`:  no line where it meets the segment."
         },
         {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
-        },
-        {
           "name": "align",
           "kind": "textAlign",
           "values": [
@@ -12889,6 +13045,11 @@
           "description": "Image URL, as the native `<img src>`."
         },
         {
+          "name": "caption",
+          "kind": "string",
+          "description": "A caption under the picture:  the image becomes a figure (`<figure>` and `<figcaption>`).  The `caption` slot is its rich version."
+        },
+        {
           "name": "alt",
           "kind": "string",
           "description": "Text alternative, as the native `<img alt>`;  `alt=\"\"` marks the image decorative."
@@ -13006,9 +13167,22 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
+      "slots": [
+        {
+          "name": "caption",
+          "description": "The rich version of `caption`:  links, emphasis."
+        }
+      ],
       "events": [],
       "parts": [
+        {
+          "name": "figure",
+          "description": "The `<figure>` round the picture and its caption, with `caption`."
+        },
+        {
+          "name": "caption",
+          "description": "The `<figcaption>` under the picture."
+        },
         {
           "name": "image",
           "description": "The image box:  the `<img>`, or the `<a>` with `link`."
@@ -13148,16 +13322,6 @@
           "name": "fluid",
           "kind": "keyOnly",
           "description": "Every image fills the group's width, one per row."
-        },
-        {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats the group `left` or `right`."
         },
         {
           "name": "vertical-align",
@@ -14634,6 +14798,239 @@
       "href": "ui-items.html"
     },
     {
+      "tag": "ui-keys",
+      "name": "Keys",
+      "folder": "ui-keys",
+      "topics": [
+        "text",
+        "typography"
+      ],
+      "aka": [
+        "kbd",
+        "keyboard shortcut",
+        "key caps",
+        "hotkey",
+        "accelerator"
+      ],
+      "description": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",
+      "noun": "keys",
+      "attributes": [
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "The keys, joined by `+`:  `\"mod+S\"`, `\"shift+mod+P\"`, `\"escape\"`.  `mod` is ⌘ on a Mac and Ctrl elsewhere;  `ctrl`, `alt` (Option), `shift` and `meta` are those keys.  Two shortcuts, a space apart, show both."
+        },
+        {
+          "name": "platform",
+          "kind": "enum",
+          "values": [
+            "auto",
+            "apple",
+            "other"
+          ],
+          "default": "auto",
+          "description": "Whose keys to draw:  the reader's own (`auto`), a Mac's (`apple`) or everyone else's (`other`)."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "keys",
+          "description": "The whole shortcut (`<kbd>`)."
+        },
+        {
+          "name": "key",
+          "description": "One key cap (`<kbd>`)."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "command",
+          "text": "Command",
+          "description": "What a screen reader says for ⌘."
+        },
+        {
+          "key": "control",
+          "text": "Control",
+          "description": "What a screen reader says for Ctrl."
+        },
+        {
+          "key": "option",
+          "text": "Option",
+          "description": "What a screen reader says for ⌥ (Alt on a Mac)."
+        },
+        {
+          "key": "alt",
+          "text": "Alt",
+          "description": "What a screen reader says for Alt."
+        },
+        {
+          "key": "shift",
+          "text": "Shift",
+          "description": "What a screen reader says for Shift."
+        },
+        {
+          "key": "meta",
+          "text": "Meta",
+          "description": "What a screen reader says for the Meta key, off a Mac."
+        },
+        {
+          "key": "or",
+          "text": "or",
+          "description": "Between two shortcuts, as a screen reader says them."
+        }
+      ],
+      "mainTag": "ui-keys",
+      "main": true,
+      "page": true,
+      "href": "ui-keys.html"
+    },
+    {
       "tag": "ui-label",
       "name": "Label",
       "folder": "ui-label",
@@ -15352,6 +15749,233 @@
       "href": "ui-label.html#ui-labels"
     },
     {
+      "tag": "ui-link",
+      "name": "Link",
+      "folder": "ui-text",
+      "topics": [
+        "text",
+        "navigation",
+        "basic"
+      ],
+      "aka": [
+        "a",
+        "anchor",
+        "hyperlink",
+        "text link"
+      ],
+      "description": "A link takes the reader somewhere else from inside a sentence.",
+      "noun": "text",
+      "attributes": [
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size relative to the surrounding text, `mini` (0.4em) ... `massive` (8em);  `medium` is 1em."
+        },
+        {
+          "name": "color",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "Hue of the link;  the page's link colour by default."
+        },
+        {
+          "name": "inverted",
+          "kind": "keyOnly",
+          "description": "The hue as it reads on a dark surface."
+        },
+        {
+          "name": "disabled",
+          "kind": "keyOnly",
+          "description": "Faded, and no longer a link."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The link's words."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "text",
+          "description": "The link (`<a>`), or a span without a `link` or while `disabled`."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "Faded, and no longer a link."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-text",
+      "main": false,
+      "page": false,
+      "href": "ui-text.html#ui-link"
+    },
+    {
       "tag": "ui-list",
       "name": "List",
       "folder": "ui-list",
@@ -15493,16 +16117,6 @@
           "name": "inverted",
           "kind": "keyOnly",
           "description": "For dark backgrounds:  the dark scheme."
-        },
-        {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
         },
         {
           "name": "vertical-align",
@@ -16492,15 +17106,6 @@
           "name": "inverted",
           "kind": "keyOnly",
           "description": "The dark scheme;  with `color`, filled with the colour."
-        },
-        {
-          "name": "floated",
-          "kind": "keyOrValueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "description": "Floats beside the content;  `right` floats right."
         },
         {
           "name": "padding",
@@ -18209,6 +18814,376 @@
       "main": false,
       "page": false,
       "href": "ui-button.html#ui-or"
+    },
+    {
+      "tag": "ui-page",
+      "name": "Page",
+      "folder": "ui-page",
+      "topics": [
+        "layout",
+        "containers",
+        "navigation"
+      ],
+      "aka": [
+        "page",
+        "app shell",
+        "body",
+        "layout",
+        "frame",
+        "landmarks",
+        "holy grail layout"
+      ],
+      "description": "A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It's a root too:  it loads the components inside it.",
+      "noun": "page",
+      "attributes": [
+        {
+          "name": "display",
+          "kind": "enum",
+          "values": [
+            "skeleton",
+            "when-ready",
+            "immediately"
+          ],
+          "default": "skeleton",
+          "description": "While components load:  `skeleton` -- a placeholder per component that describes one (else nothing), then the content;  `when-ready` -- nothing (space kept) until everything is ready;  `immediately` -- draw as things arrive."
+        },
+        {
+          "name": "loading",
+          "kind": "string",
+          "description": "A loader with this message while components load (bare `loading`:  the default text).  Not with `immediately`."
+        },
+        {
+          "name": "timeout",
+          "kind": "string",
+          "default": "5s",
+          "description": "Longest wait before showing the content anyway:  `5s`, `500ms`, or milliseconds.  A component that didn't load fires `ui-error` and shows its native fallback."
+        },
+        {
+          "name": "theme",
+          "kind": "enum",
+          "values": [
+            "light",
+            "dark"
+          ],
+          "description": "Colour scheme of everything inside."
+        },
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size of everything inside, `mini` ... `massive`."
+        },
+        {
+          "name": "stack-with",
+          "kind": "enum",
+          "values": [
+            "container",
+            "page"
+          ],
+          "description": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several)."
+        },
+        {
+          "name": "height",
+          "kind": "string",
+          "description": "Height as a CSS length or `window` (the viewport's, following a phone's address bar)."
+        },
+        {
+          "name": "icons",
+          "kind": "string",
+          "description": "Icon packs for everything inside, comma-separated:  built-in ids (`fa7-free`, `fa7-brands`, `fomantic`) or `pack.js` URLs, later wins.  Added over the outer root's packs (or the page's)."
+        },
+        {
+          "name": "emoji",
+          "kind": "enum",
+          "values": [
+            "cldr",
+            "fomantic"
+          ],
+          "description": "Emoji names for everything inside:  `cldr` (the default) or `fomantic`."
+        },
+        {
+          "name": "assets",
+          "kind": "string",
+          "description": "Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library."
+        },
+        {
+          "name": "fixed",
+          "kind": "boolean",
+          "description": "Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A full-page app shell.  On iOS the keyboard can cover fields near the bottom."
+        },
+        {
+          "name": "pure",
+          "kind": "boolean",
+          "description": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-changed={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The main content (`<main>`)."
+        },
+        {
+          "name": "header",
+          "description": "The page's header, across the top (`<header>`):  a title, a logo, a search."
+        },
+        {
+          "name": "nav",
+          "description": "The site's navigation (`<nav>`):  a column beside the content, on the start side."
+        },
+        {
+          "name": "aside",
+          "description": "Related content (`<aside>`):  a column on the end side."
+        },
+        {
+          "name": "footer",
+          "description": "The page's footer, across the bottom (`<footer>`)."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-ready",
+          "detail": "{ failed: { tag: string, reason: 'unknown' | 'failed' | 'timeout', error?: unknown, source?: string }[] }",
+          "description": "Everything inside is ready (or the timeout passed):  the content shows.  `failed` lists what didn't load."
+        },
+        {
+          "name": "ui-error",
+          "detail": "{ tag: string, reason: 'unknown' | 'failed' | 'timeout', error?: unknown, source?: string }",
+          "cancelable": true,
+          "description": "A tag inside couldn't load:  no such component (`unknown`), its family didn't load (`failed`), or it wasn't ready in time (`timeout`);  or a component pack didn't load (`tag` `ui-components`, with its `source`).  Cancel it to skip the console warning."
+        }
+      ],
+      "parts": [
+        {
+          "name": "loading",
+          "description": "The `<ui-loader>` shown with `loading`."
+        },
+        {
+          "name": "skeleton",
+          "description": "The box of `<ui-placeholder>`s shown with `display=\"skeleton\"`."
+        },
+        {
+          "name": "scroller",
+          "description": "With `width` / `height` / `fixed`:  the region around the content that scrolls (a tab stop, named by the host's `aria-label`, else \"Content\")."
+        },
+        {
+          "name": "page",
+          "description": "The grid of regions."
+        },
+        {
+          "name": "skip",
+          "description": "The \"Skip to content\" link, shown only while it has the keyboard's focus."
+        },
+        {
+          "name": "header",
+          "description": "The header region."
+        },
+        {
+          "name": "nav",
+          "description": "The navigation region."
+        },
+        {
+          "name": "main",
+          "description": "The main content region."
+        },
+        {
+          "name": "aside",
+          "description": "The side region."
+        },
+        {
+          "name": "footer",
+          "description": "The footer region."
+        }
+      ],
+      "states": [
+        {
+          "name": "loading",
+          "description": "Components inside are still loading."
+        },
+        {
+          "name": "ready",
+          "description": "Everything inside is ready (or the timeout passed)."
+        },
+        {
+          "name": "light",
+          "description": "`theme=\"light\"`."
+        },
+        {
+          "name": "dark",
+          "description": "`theme=\"dark\"`."
+        },
+        {
+          "name": "box",
+          "description": "A `width` or `height` is set:  a block box that scrolls its content."
+        },
+        {
+          "name": "fixed",
+          "description": "Pinned to the viewport."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        }
+      ],
+      "texts": [
+        {
+          "key": "loading",
+          "text": "Loading…",
+          "description": "The loader's message for a bare `loading`."
+        },
+        {
+          "key": "label",
+          "text": "Content",
+          "description": "Name of the scrolling region of a root with a box, when the host has no `aria-label`."
+        },
+        {
+          "key": "skip",
+          "text": "Skip to content",
+          "description": "The first link of the page, for keyboards."
+        }
+      ],
+      "mainTag": "ui-page",
+      "main": true,
+      "page": true,
+      "href": "ui-page.html"
     },
     {
       "tag": "ui-panel",
@@ -22734,6 +23709,202 @@
       "href": "ui-sidebar.html#ui-pusher"
     },
     {
+      "tag": "ui-quote",
+      "name": "Quote",
+      "folder": "ui-quote",
+      "topics": [
+        "text",
+        "typography"
+      ],
+      "aka": [
+        "blockquote",
+        "quotation",
+        "q",
+        "pull quote",
+        "citation"
+      ],
+      "description": "A quote holds someone else's words:  a block of its own, or a few words inside a sentence.",
+      "noun": "quote",
+      "attributes": [
+        {
+          "name": "inline",
+          "kind": "boolean",
+          "description": "Inside a sentence (`<q>`):  quotation marks round it, the language's own, not a block."
+        },
+        {
+          "name": "cite",
+          "kind": "string",
+          "description": "The address the words come from:  for readers' tools, not shown."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The quoted words."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "quote",
+          "description": "The quotation (`<blockquote>`, or `<q>` inline)."
+        }
+      ],
+      "states": [
+        {
+          "name": "inline",
+          "description": "Set while it's `inline`."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-quote",
+      "main": true,
+      "page": true,
+      "href": "ui-quote.html"
+    },
+    {
       "tag": "ui-radio",
       "name": "Radio",
       "folder": "ui-checkbox",
@@ -26156,16 +27327,6 @@
           "description": "Contains its floated children."
         },
         {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats `left` or `right`."
-        },
-        {
           "name": "align",
           "kind": "textAlign",
           "values": [
@@ -28433,16 +29594,6 @@
           "name": "fluid",
           "kind": "keyOnly",
           "description": "Takes the full width of its container."
-        },
-        {
-          "name": "floated",
-          "kind": "valueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "valueSet": "floats",
-          "description": "Floats to the `left` / `right` of the content after it."
         },
         {
           "name": "value",
@@ -31107,6 +32258,413 @@
       "href": "ui-tab.html#ui-tabs"
     },
     {
+      "tag": "ui-term",
+      "name": "Term",
+      "folder": "ui-terms",
+      "topics": [
+        "text",
+        "data display"
+      ],
+      "aka": [
+        "dt",
+        "dd",
+        "term",
+        "key value",
+        "property",
+        "name value"
+      ],
+      "description": "A term is one fact:  a label, and its value.",
+      "noun": "term",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What it is:  `Suit`."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "Its value:  `hearts`.  Or write it inside."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The value, when it's more than text:  an icon, a link, a label."
+        },
+        {
+          "name": "label",
+          "description": "The label, when it's more than text."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "label",
+          "description": "The label (`role=term`)."
+        },
+        {
+          "name": "value",
+          "description": "The value (`role=definition`)."
+        }
+      ],
+      "states": [
+        {
+          "name": "in-terms",
+          "description": "Set while it's in a `<ui-terms>`."
+        },
+        {
+          "name": "in-row",
+          "description": "Set while its `<ui-terms>` is `direction=\"horizontal\"`."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-terms",
+      "main": false,
+      "page": false,
+      "href": "ui-terms.html#ui-term"
+    },
+    {
+      "tag": "ui-terms",
+      "name": "Terms",
+      "folder": "ui-terms",
+      "topics": [
+        "text",
+        "data display",
+        "collections"
+      ],
+      "aka": [
+        "dl",
+        "definition list",
+        "description list",
+        "key value list",
+        "properties",
+        "details"
+      ],
+      "description": "Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen.",
+      "noun": "terms",
+      "attributes": [
+        {
+          "name": "direction",
+          "kind": "enum",
+          "values": [
+            "vertical",
+            "horizontal"
+          ],
+          "default": "vertical",
+          "description": "`vertical` (the default):  a term a line, the labels in one column and the values in the next.  `horizontal`:  the terms side by side, wrapping."
+        },
+        {
+          "name": "spacing",
+          "kind": "enum",
+          "values": [
+            "sm",
+            "md",
+            "lg"
+          ],
+          "default": "md",
+          "description": "The space between terms."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "`<ui-term>`s."
+        }
+      ],
+      "events": [],
+      "parts": [],
+      "states": [
+        {
+          "name": "horizontal",
+          "description": "`direction=\"horizontal\"`."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-terms",
+      "main": true,
+      "page": true,
+      "href": "ui-terms.html"
+    },
+    {
       "tag": "ui-text",
       "name": "Text",
       "folder": "ui-text",
@@ -31120,9 +32678,11 @@
         "span",
         "inline text",
         "colored text",
-        "label text"
+        "label text",
+        "paragraph",
+        "p"
       ],
-      "description": "A text is used to style some inline text with a simple color.",
+      "description": "A text is used to style some inline text with a simple color, or to hold a paragraph.",
       "noun": "text",
       "attributes": [
         {
@@ -31181,6 +32741,11 @@
           "name": "inverted",
           "kind": "keyOnly",
           "description": "The hue as it reads on a dark surface."
+        },
+        {
+          "name": "paragraph",
+          "kind": "boolean",
+          "description": "A paragraph:  a block (`<p>`) with the body's line height and a line's space under it, not inline text."
         },
         {
           "name": "disabled",
@@ -31305,6 +32870,10 @@
         {
           "name": "disabled",
           "description": "Faded:  shown as unavailable."
+        },
+        {
+          "name": "paragraph",
+          "description": "Set while it's a paragraph (`paragraph`)."
         },
         {
           "name": "loading",
@@ -33088,15 +34657,6 @@
           "description": "The dark scheme;  with `color`, filled with the colour."
         },
         {
-          "name": "floated",
-          "kind": "keyOrValueAndKey",
-          "values": [
-            "left",
-            "right"
-          ],
-          "description": "Floats beside the content;  `right` floats right."
-        },
-        {
           "name": "padding",
           "kind": "valueOnly",
           "values": [
@@ -34105,6 +35665,246 @@
       "main": false,
       "page": true,
       "href": "ui-value.html"
+    },
+    {
+      "tag": "ui-video",
+      "name": "Video",
+      "folder": "ui-video",
+      "topics": [
+        "media",
+        "elements"
+      ],
+      "aka": [
+        "video",
+        "movie",
+        "clip",
+        "player",
+        "video player"
+      ],
+      "description": "A video plays a video file in the browser's own player.",
+      "noun": "video",
+      "attributes": [
+        {
+          "name": "src",
+          "kind": "string",
+          "description": "The file to play, relative to the page."
+        },
+        {
+          "name": "autoplay",
+          "kind": "boolean",
+          "description": "Starts playing as soon as it can.  A browser allows that only when `muted`, or after the reader has clicked on the page."
+        },
+        {
+          "name": "muted",
+          "kind": "boolean",
+          "description": "Starts with the sound off."
+        },
+        {
+          "name": "loop",
+          "kind": "boolean",
+          "description": "Starts again at the end."
+        },
+        {
+          "name": "poster",
+          "kind": "string",
+          "description": "A picture shown before it plays."
+        },
+        {
+          "name": "controls",
+          "kind": "boolean",
+          "default": true,
+          "description": "The browser's play, pause and volume controls;  `controls=\"false\"` hides them."
+        },
+        {
+          "name": "captions",
+          "kind": "string",
+          "description": "A captions file (WebVTT, `.vtt`), in the page's language:  the player offers them."
+        },
+        {
+          "name": "ratio",
+          "kind": "string",
+          "description": "Its shape, width to height:  `\"16/9\"`, `\"4/3\"`, `\"1\"`.  By default, the video's own."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-play",
+          "detail": "{ currentTime: number }",
+          "description": "It started playing (or went on)."
+        },
+        {
+          "name": "ui-pause",
+          "detail": "{ currentTime: number }",
+          "description": "It paused."
+        },
+        {
+          "name": "ui-ended",
+          "detail": "{ currentTime: number }",
+          "description": "It played to the end."
+        }
+      ],
+      "parts": [
+        {
+          "name": "video",
+          "description": "The `<video>`."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "captions",
+          "text": "Captions",
+          "description": "The captions track's name in the player's menu."
+        }
+      ],
+      "mainTag": "ui-video",
+      "main": true,
+      "page": true,
+      "href": "ui-video.html"
     },
     {
       "tag": "ui-visibility",
@@ -40908,6 +42708,44 @@
         }
       ]
     },
+    "ui-keys": {
+      "folder": "ui-keys",
+      "mainTag": "ui-keys",
+      "title": "Keys",
+      "summary": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-keys"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-keys-border-color",
+          "default": "var(--ui-border-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-keys-background",
+          "default": "var(--ui-surface)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-keys-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-keys-radius",
+          "default": "0.375em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-keys-font-size",
+          "default": "0.875em",
+          "type": "length"
+        }
+      ]
+    },
     "ui-label": {
       "folder": "ui-label",
       "mainTag": "ui-label",
@@ -42708,6 +44546,49 @@
         }
       ]
     },
+    "ui-page": {
+      "folder": "ui-page",
+      "mainTag": "ui-page",
+      "title": "Page",
+      "summary": "A page frames a whole window:  a header, navigation, the main content, a side column and a footer.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-page"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-page-gap",
+          "default": "var(--ui-space-l)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-padding",
+          "default": "var(--ui-space-l)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-nav-width",
+          "default": "16em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-aside-width",
+          "default": "16em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-max-width",
+          "default": "none",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-min-height",
+          "default": "100dvh",
+          "type": "length"
+        }
+      ]
+    },
     "ui-panel": {
       "folder": "ui-panel",
       "mainTag": "ui-panel",
@@ -43479,6 +45360,29 @@
         "ui-property-group"
       ],
       "tokens": []
+    },
+    "ui-quote": {
+      "folder": "ui-quote",
+      "mainTag": "ui-quote",
+      "title": "Quote",
+      "summary": "A quote holds someone else's words:  a block of its own, or a few words inside a sentence.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-quote"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-quote-color",
+          "default": "var(--ui-markdown-blockquote-color, var(--ui-text-muted))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-quote-border",
+          "default": "var(--ui-markdown-blockquote-border, var(--ui-border-color-strong))",
+          "type": "other"
+        }
+      ]
     },
     "ui-rail": {
       "folder": "ui-rail",
@@ -45307,6 +47211,40 @@
         }
       ]
     },
+    "ui-terms": {
+      "folder": "ui-terms",
+      "mainTag": "ui-terms",
+      "title": "Terms",
+      "summary": "Terms list facts as a label and a value each, lined up.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-terms",
+        "ui-term"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-terms-column-gap",
+          "default": "var(--ui-space-l)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-terms-label-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-terms-label-weight",
+          "default": "500",
+          "type": "number"
+        },
+        {
+          "name": "--ui-terms-value-color",
+          "default": "inherit",
+          "type": "color"
+        }
+      ]
+    },
     "ui-text": {
       "folder": "ui-text",
       "mainTag": "ui-text",
@@ -45315,7 +47253,8 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-text"
+        "ui-text",
+        "ui-link"
       ],
       "tokens": [
         {
@@ -45690,6 +47629,32 @@
           "name": "--ui-tree-diagram-slot-color",
           "default": "var(--ui-text-muted)",
           "type": "color"
+        }
+      ]
+    },
+    "ui-video": {
+      "folder": "ui-video",
+      "mainTag": "ui-video",
+      "title": "Video",
+      "summary": "A video plays a video file in the browser's own player.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-video",
+        "ui-audio"
+      ],
+      "pages": {
+        "ui-audio": {
+          "title": "Audio",
+          "summary": "An audio plays a sound file:  in the browser's own player, or unseen, when the page says.",
+          "status": "done"
+        }
+      },
+      "tokens": [
+        {
+          "name": "--ui-video-radius",
+          "default": "var(--ui-radius)",
+          "type": "length"
         }
       ]
     },

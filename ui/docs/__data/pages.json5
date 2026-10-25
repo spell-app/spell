@@ -217,6 +217,11 @@
       "summary": "A group of items presents a set of site content for display, each an image beside its text.",
       "status": "done"
     },
+    "ui-keys": {
+      "title": "Keys",
+      "summary": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",
+      "status": "done"
+    },
     "ui-label": {
       "title": "Label",
       "summary": "A label displays content classification.",
@@ -267,6 +272,11 @@
     "ui-nag": {
       "title": "Nag",
       "summary": "A nag is a persistent message that stays until dismissed, and can remember the dismissal.",
+      "status": "done"
+    },
+    "ui-page": {
+      "title": "Page",
+      "summary": "A page frames a whole window:  a header, navigation, the main content, a side column and a footer.",
       "status": "done"
     },
     "ui-panel": {
@@ -366,6 +376,11 @@
       "title": "Property Editor",
       "summary": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
       "status": "in-progress"
+    },
+    "ui-quote": {
+      "title": "Quote",
+      "summary": "A quote holds someone else's words:  a block of its own, or a few words inside a sentence.",
+      "status": "done"
     },
     "ui-rail": {
       "title": "Rail",
@@ -517,6 +532,11 @@
       "summary": "A table displays a collection of data grouped into rows.",
       "status": "done"
     },
+    "ui-terms": {
+      "title": "Terms",
+      "summary": "Terms list facts as a label and a value each, lined up.",
+      "status": "done"
+    },
     "ui-text": {
       "title": "Text",
       "summary": "A text is used to style some inline text with a simple color.",
@@ -546,6 +566,18 @@
       "title": "Tree diagram",
       "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
       "status": "done"
+    },
+    "ui-video": {
+      "title": "Video",
+      "summary": "A video plays a video file in the browser's own player.",
+      "status": "done",
+      "pages": {
+        "ui-audio": {
+          "title": "Audio",
+          "summary": "An audio plays a sound file:  in the browser's own player, or unseen, when the page says.",
+          "status": "done"
+        }
+      }
     },
     "ui-visibility": {
       "title": "Visibility",

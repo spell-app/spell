@@ -1268,6 +1268,253 @@
       ]
     },
     {
+      "name": "ui-audio",
+      "description": {
+        "kind": "markdown",
+        "value": "An audio plays a sound file:  in the browser's own player, or unseen, when the page says.\n\nAlso known as:  audio, sound, music, sound effect, audio player.\n\n**Events:**  `ui-play`, `ui-pause`, `ui-ended`"
+      },
+      "attributes": [
+        {
+          "name": "src",
+          "description": {
+            "kind": "markdown",
+            "value": "The file to play, relative to the page.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "autoplay",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts playing as soon as it can.  A browser allows that only when `muted`, or after the reader has clicked on the page.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "muted",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts with the sound off.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loop",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts again at the end.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "controls",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows the browser's player.  Without it, nothing shows:  the page plays it (`play()`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-author",
       "description": {
         "kind": "markdown",
@@ -2549,21 +2796,6 @@
           }
         },
         {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
-        },
-        {
           "name": "icon",
           "description": {
             "kind": "markdown",
@@ -3161,21 +3393,6 @@
             "kind": "markdown",
             "value": "An old name:  write `attach=\"both\"`.  It still works until every page is rewritten."
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "width",
@@ -6235,21 +6452,6 @@
           ]
         },
         {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Pushed to the `left` or `right` end.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
-        },
-        {
           "name": "attach",
           "description": {
             "kind": "markdown",
@@ -7621,21 +7823,6 @@
             "kind": "markdown",
             "value": "In a modal:  a capped height that scrolls.\n\nTakes:  flag (present / absent)"
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "align",
@@ -13691,21 +13878,6 @@
           }
         },
         {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
-        },
-        {
           "name": "align",
           "description": {
             "kind": "markdown",
@@ -14989,7 +15161,7 @@
       "name": "ui-image",
       "description": {
         "kind": "markdown",
-        "value": "An image is a graphic representation of something.\n\nAlso known as:  picture, img, photo, avatar, thumbnail."
+        "value": "An image is a graphic representation of something.\n\nAlso known as:  picture, img, photo, avatar, thumbnail.\n\n**Slots:**  `caption`"
       },
       "attributes": [
         {
@@ -15174,6 +15346,13 @@
           "description": {
             "kind": "markdown",
             "value": "Image URL, as the native `<img src>`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "caption",
+          "description": {
+            "kind": "markdown",
+            "value": "A caption under the picture:  the image becomes a figure (`<figure>` and `<figcaption>`).  The `caption` slot is its rich version.\n\nTakes:  text"
           }
         },
         {
@@ -15521,21 +15700,6 @@
             "kind": "markdown",
             "value": "Every image fills the group's width, one per row.\n\nTakes:  flag (present / absent)"
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats the group `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "vertical-align",
@@ -17329,6 +17493,243 @@
       ]
     },
     {
+      "name": "ui-keys",
+      "description": {
+        "kind": "markdown",
+        "value": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.\n\nAlso known as:  kbd, keyboard shortcut, key caps, hotkey, accelerator."
+      },
+      "attributes": [
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "The keys, joined by `+`:  `\"mod+S\"`, `\"shift+mod+P\"`, `\"escape\"`.  `mod` is ⌘ on a Mac and Ctrl elsewhere;  `ctrl`, `alt` (Option), `shift` and `meta` are those keys.  Two shortcuts, a space apart, show both.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Whose keys to draw:  the reader's own (`auto`), a Mac's (`apple`) or everyone else's (`other`).\n\nTakes:  `auto` · `apple` · `other`\nDefault:  `auto`"
+          },
+          "values": [
+            {
+              "name": "auto"
+            },
+            {
+              "name": "apple"
+            },
+            {
+              "name": "other"
+            }
+          ]
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-label",
       "description": {
         "kind": "markdown",
@@ -18298,6 +18699,318 @@
       ]
     },
     {
+      "name": "ui-link",
+      "description": {
+        "kind": "markdown",
+        "value": "A link takes the reader somewhere else from inside a sentence.\n\nAlso known as:  a, anchor, hyperlink, text link.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Size relative to the surrounding text, `mini` (0.4em) ... `massive` (8em);  `medium` is 1em.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "color",
+          "description": {
+            "kind": "markdown",
+            "value": "Hue of the link;  the page's link colour by default.\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "inverted",
+          "description": {
+            "kind": "markdown",
+            "value": "The hue as it reads on a dark surface.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Faded, and no longer a link.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-list",
       "description": {
         "kind": "markdown",
@@ -18486,21 +19199,6 @@
             "kind": "markdown",
             "value": "For dark backgrounds:  the dark scheme.\n\nTakes:  flag (present / absent)"
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "vertical-align",
@@ -19692,21 +20390,6 @@
             "kind": "markdown",
             "value": "The dark scheme;  with `color`, filled with the colour.\n\nTakes:  flag (present / absent)"
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats beside the content;  `right` floats right.\n\nTakes:  flag, or `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "padding",
@@ -21759,6 +22442,363 @@
           "description": {
             "kind": "markdown",
             "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-page",
+      "description": {
+        "kind": "markdown",
+        "value": "A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It's a root too:  it loads the components inside it.\n\nAlso known as:  page, app shell, body, layout, frame, landmarks, holy grail layout.\n\n**Slots:**  default, `header`, `nav`, `aside`, `footer`\n\n**Events:**  `ui-ready`, `ui-error`"
+      },
+      "attributes": [
+        {
+          "name": "display",
+          "description": {
+            "kind": "markdown",
+            "value": "While components load:  `skeleton` -- a placeholder per component that describes one (else nothing), then the content;  `when-ready` -- nothing (space kept) until everything is ready;  `immediately` -- draw as things arrive.\n\nTakes:  `skeleton` · `when-ready` · `immediately`\nDefault:  `skeleton`"
+          },
+          "values": [
+            {
+              "name": "skeleton"
+            },
+            {
+              "name": "when-ready"
+            },
+            {
+              "name": "immediately"
+            }
+          ]
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "A loader with this message while components load (bare `loading`:  the default text).  Not with `immediately`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "timeout",
+          "description": {
+            "kind": "markdown",
+            "value": "Longest wait before showing the content anyway:  `5s`, `500ms`, or milliseconds.  A component that didn't load fires `ui-error` and shows its native fallback.\n\nTakes:  text\nDefault:  `5s`"
+          }
+        },
+        {
+          "name": "theme",
+          "description": {
+            "kind": "markdown",
+            "value": "Colour scheme of everything inside.\n\nTakes:  `light` · `dark`"
+          },
+          "values": [
+            {
+              "name": "light"
+            },
+            {
+              "name": "dark"
+            }
+          ]
+        },
+        {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Size of everything inside, `mini` ... `massive`.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "stack-with",
+          "description": {
+            "kind": "markdown",
+            "value": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins.\n\nTakes:  `container` · `page`"
+          },
+          "values": [
+            {
+              "name": "container"
+            },
+            {
+              "name": "page"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "description": {
+            "kind": "markdown",
+            "value": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Height as a CSS length or `window` (the viewport's, following a phone's address bar).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "icons",
+          "description": {
+            "kind": "markdown",
+            "value": "Icon packs for everything inside, comma-separated:  built-in ids (`fa7-free`, `fa7-brands`, `fomantic`) or `pack.js` URLs, later wins.  Added over the outer root's packs (or the page's).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "emoji",
+          "description": {
+            "kind": "markdown",
+            "value": "Emoji names for everything inside:  `cldr` (the default) or `fomantic`.\n\nTakes:  `cldr` · `fomantic`"
+          },
+          "values": [
+            {
+              "name": "cldr"
+            },
+            {
+              "name": "fomantic"
+            }
+          ]
+        },
+        {
+          "name": "assets",
+          "description": {
+            "kind": "markdown",
+            "value": "Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "fixed",
+          "description": {
+            "kind": "markdown",
+            "value": "Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A full-page app shell.  On iOS the keyboard can cover fields near the bottom.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "pure",
+          "description": {
+            "kind": "markdown",
+            "value": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-changed={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
           }
         }
       ]
@@ -26660,6 +27700,232 @@
       ]
     },
     {
+      "name": "ui-quote",
+      "description": {
+        "kind": "markdown",
+        "value": "A quote holds someone else's words:  a block of its own, or a few words inside a sentence.\n\nAlso known as:  blockquote, quotation, q, pull quote, citation.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "inline",
+          "description": {
+            "kind": "markdown",
+            "value": "Inside a sentence (`<q>`):  quotation marks round it, the language's own, not a block.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "cite",
+          "description": {
+            "kind": "markdown",
+            "value": "The address the words come from:  for readers' tools, not shown.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-radio",
       "description": {
         "kind": "markdown",
@@ -30723,21 +31989,6 @@
           }
         },
         {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats `left` or `right`.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
-        },
-        {
           "name": "align",
           "description": {
             "kind": "markdown",
@@ -33507,21 +34758,6 @@
             "kind": "markdown",
             "value": "Takes the full width of its container.\n\nTakes:  flag (present / absent)"
           }
-        },
-        {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats to the `left` / `right` of the content after it.\n\nTakes:  `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
         },
         {
           "name": "value",
@@ -36918,10 +38154,474 @@
       ]
     },
     {
+      "name": "ui-term",
+      "description": {
+        "kind": "markdown",
+        "value": "A term is one fact:  a label, and its value.\n\nAlso known as:  dt, dd, term, key value, property, name value.\n\n**Slots:**  default, `label`"
+      },
+      "attributes": [
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "What it is:  `Suit`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "Its value:  `hearts`.  Or write it inside.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-terms",
+      "description": {
+        "kind": "markdown",
+        "value": "Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen.\n\nAlso known as:  dl, definition list, description list, key value list, properties, details.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "direction",
+          "description": {
+            "kind": "markdown",
+            "value": "`vertical` (the default):  a term a line, the labels in one column and the values in the next.  `horizontal`:  the terms side by side, wrapping.\n\nTakes:  `vertical` · `horizontal`\nDefault:  `vertical`"
+          },
+          "values": [
+            {
+              "name": "vertical"
+            },
+            {
+              "name": "horizontal"
+            }
+          ]
+        },
+        {
+          "name": "spacing",
+          "description": {
+            "kind": "markdown",
+            "value": "The space between terms.\n\nTakes:  `sm` · `md` · `lg`\nDefault:  `md`"
+          },
+          "values": [
+            {
+              "name": "sm"
+            },
+            {
+              "name": "md"
+            },
+            {
+              "name": "lg"
+            }
+          ]
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-text",
       "description": {
         "kind": "markdown",
-        "value": "A text is used to style some inline text with a simple color.\n\nAlso known as:  span, inline text, colored text, label text.\n\n**Slots:**  default"
+        "value": "A text is used to style some inline text with a simple color, or to hold a paragraph.\n\nAlso known as:  span, inline text, colored text, label text, paragraph, p.\n\n**Slots:**  default"
       },
       "attributes": [
         {
@@ -37043,6 +38743,13 @@
           "description": {
             "kind": "markdown",
             "value": "The hue as it reads on a dark surface.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "paragraph",
+          "description": {
+            "kind": "markdown",
+            "value": "A paragraph:  a block (`<p>`) with the body's line height and a line's space under it, not inline text.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -38741,21 +40448,6 @@
           }
         },
         {
-          "name": "floated",
-          "description": {
-            "kind": "markdown",
-            "value": "Floats beside the content;  `right` floats right.\n\nTakes:  flag, or `left` · `right`"
-          },
-          "values": [
-            {
-              "name": "left"
-            },
-            {
-              "name": "right"
-            }
-          ]
-        },
-        {
           "name": "padding",
           "description": {
             "kind": "markdown",
@@ -39685,6 +41377,274 @@
           "description": {
             "kind": "markdown",
             "value": "In a statistic:  a word value, smaller and bold.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-video",
+      "description": {
+        "kind": "markdown",
+        "value": "A video plays a video file in the browser's own player.\n\nAlso known as:  video, movie, clip, player, video player.\n\n**Events:**  `ui-play`, `ui-pause`, `ui-ended`"
+      },
+      "attributes": [
+        {
+          "name": "src",
+          "description": {
+            "kind": "markdown",
+            "value": "The file to play, relative to the page.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "autoplay",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts playing as soon as it can.  A browser allows that only when `muted`, or after the reader has clicked on the page.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "muted",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts with the sound off.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loop",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts again at the end.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "poster",
+          "description": {
+            "kind": "markdown",
+            "value": "A picture shown before it plays.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "controls",
+          "description": {
+            "kind": "markdown",
+            "value": "The browser's play, pause and volume controls;  `controls=\"false\"` hides them.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
+          "name": "captions",
+          "description": {
+            "kind": "markdown",
+            "value": "A captions file (WebVTT, `.vtt`), in the page's language:  the player offers them.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "ratio",
+          "description": {
+            "kind": "markdown",
+            "value": "Its shape, width to height:  `\"16/9\"`, `\"4/3\"`, `\"1\"`.  By default, the video's own.\n\nTakes:  text"
           }
         },
         {

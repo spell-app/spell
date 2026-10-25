@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Image">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-image%3A%20%20"
               icon="bug"
@@ -81,6 +81,18 @@
                     link="#image-link"
                     src="images/wireframe/image-text.png"
                     alt="Image link"
+                  ></ui-image>
+                </ui-docs-example>
+              </ui-section>
+              <ui-section id="examples-types-figure" label="Figure" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`caption` puts a caption under the picture:  the image becomes a figure (`<figure>`, `<figcaption>`), the caption no wider than the picture.  The `caption` slot is its rich version."
+                >
+                  <ui-image
+                    size="medium"
+                    src="images/wireframe/image.png"
+                    alt="A wireframe picture"
+                    caption="A wireframe stands in for a picture while a page is planned."
                   ></ui-image>
                 </ui-docs-example>
               </ui-section>

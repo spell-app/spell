@@ -95,6 +95,14 @@ export const imageVocabulary = {
     },
     { name: "src", group: "link", kind: "string", description: "Image URL, as the native `<img src>`." },
     {
+      name: "caption",
+      group: "content",
+      kind: "string",
+      description:
+        "A caption under the picture:  the image becomes a figure (`<figure>` and `<figcaption>`).  The `caption` " +
+        "slot is its rich version."
+    },
+    {
       name: "alt",
       group: "content",
       kind: "string",
@@ -130,8 +138,10 @@ export const imageVocabulary = {
     }
   ],
   events: [],
-  slots: [],
+  slots: [{ name: "caption", description: "The rich version of `caption`:  links, emphasis." }],
   parts: [
+    { name: "figure", description: "The `<figure>` round the picture and its caption, with `caption`." },
+    { name: "caption", description: "The `<figcaption>` under the picture." },
     { name: "image", description: "The image box:  the `<img>`, or the `<a>` with `link`." },
     { name: "img", description: "With `link`:  the `<img>` inside the link." }
   ],

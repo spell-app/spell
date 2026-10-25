@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Components">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=Components%3A%20%20"
               icon="bug"
@@ -138,6 +138,12 @@
                 description="A label displays content classification."
               ></ui-card>
               <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
+              ></ui-card>
+              <ui-card
                 link="ui-list.html"
                 heading="List"
                 meta="&lt;ui-list&gt;"
@@ -177,7 +183,7 @@
                 link="ui-text.html"
                 heading="Text"
                 meta="&lt;ui-text&gt;"
-                description="A text is used to style some inline text with a simple color."
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
               ></ui-card>
             </ui-cards>
           </ui-section>
@@ -245,16 +251,22 @@
                 description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view."
               ></ui-card>
               <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
+              ></ui-card>
+              <ui-card
                 link="ui-panel.html"
                 heading="Panel"
                 meta="&lt;ui-panel&gt;"
-                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every &lt;ui-section&gt; attribute."
+                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every &lt;ui-section&gt; attribute."
               ></ui-card>
               <ui-card
                 link="ui-property-editor.html#ui-property-group"
                 heading="Property group"
                 meta="&lt;ui-property-group&gt;"
-                description="A property group is a folding band of properties in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
+                description="A property group is a band of properties that opens and closes, in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -291,14 +303,14 @@
                 link="ui-section.html"
                 heading="Section"
                 meta="&lt;ui-section&gt;"
-                description="A section is a titled block of content that can fold away and keep its title in view."
+                description="A section is a titled block of content that can close and keep its title in view."
                 extra="In progress"
               ></ui-card>
               <ui-card
                 link="ui-section.html#ui-sections"
                 heading="Sections"
                 meta="&lt;ui-sections&gt;"
-                description="A group of sections:  with collapsing, every section in it folds, and folded ones stack with no space between."
+                description="A group of sections:  with collapsing, every section in it can close, and closed ones stack with no space between."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -379,10 +391,16 @@
                 description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view."
               ></ui-card>
               <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
+              ></ui-card>
+              <ui-card
                 link="ui-panel.html"
                 heading="Panel"
                 meta="&lt;ui-panel&gt;"
-                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every &lt;ui-section&gt; attribute."
+                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every &lt;ui-section&gt; attribute."
               ></ui-card>
               <ui-card
                 link="ui-rail.html"
@@ -400,14 +418,14 @@
                 link="ui-section.html"
                 heading="Section"
                 meta="&lt;ui-section&gt;"
-                description="A section is a titled block of content that can fold away and keep its title in view."
+                description="A section is a titled block of content that can close and keep its title in view."
                 extra="In progress"
               ></ui-card>
               <ui-card
                 link="ui-section.html#ui-sections"
                 heading="Sections"
                 meta="&lt;ui-sections&gt;"
-                description="A group of sections:  with collapsing, every section in it folds, and folded ones stack with no space between."
+                description="A group of sections:  with collapsing, every section in it can close, and closed ones stack with no space between."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -464,10 +482,22 @@
                 description="A breadcrumb is used to show hierarchy between content."
               ></ui-card>
               <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
+              ></ui-card>
+              <ui-card
                 link="ui-menu.html"
                 heading="Menu"
                 meta="&lt;ui-menu&gt;"
                 description="A menu displays grouped navigation actions."
+              ></ui-card>
+              <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
               ></ui-card>
               <ui-card
                 link="ui-sidebar.html#ui-pushable"
@@ -647,7 +677,7 @@
                 link="ui-property-editor.html#ui-property-group"
                 heading="Property group"
                 meta="&lt;ui-property-group&gt;"
-                description="A property group is a folding band of properties in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
+                description="A property group is a band of properties that opens and closes, in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -1021,10 +1051,22 @@
                 description="An input is a field used to elicit a response from a person."
               ></ui-card>
               <ui-card
+                link="ui-keys.html"
+                heading="Keys"
+                meta="&lt;ui-keys&gt;"
+                description="Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it."
+              ></ui-card>
+              <ui-card
                 link="ui-label.html"
                 heading="Label"
                 meta="&lt;ui-label&gt;"
                 description="A label displays content classification."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
               ></ui-card>
               <ui-card
                 link="ui-markdown.html"
@@ -1039,16 +1081,34 @@
                 description="Metadata about the content, e.g. a date or a category;  a comment&#39;s metadata."
               ></ui-card>
               <ui-card
+                link="ui-quote.html"
+                heading="Quote"
+                meta="&lt;ui-quote&gt;"
+                description="A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence."
+              ></ui-card>
+              <ui-card
                 link="ui-statistic.html"
                 heading="Statistic"
                 meta="&lt;ui-statistic&gt;"
                 description="A statistic emphasizes the current value of an attribute."
               ></ui-card>
               <ui-card
+                link="ui-terms.html#ui-term"
+                heading="Term"
+                meta="&lt;ui-term&gt;"
+                description="A term is one fact:  a label, and its value."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
+              ></ui-card>
+              <ui-card
                 link="ui-text.html"
                 heading="Text"
                 meta="&lt;ui-text&gt;"
-                description="A text is used to style some inline text with a simple color."
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
               ></ui-card>
               <ui-card
                 link="ui-textarea.html"
@@ -1080,6 +1140,12 @@
                 description="A header provides a short summary of content."
               ></ui-card>
               <ui-card
+                link="ui-keys.html"
+                heading="Keys"
+                meta="&lt;ui-keys&gt;"
+                description="Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it."
+              ></ui-card>
+              <ui-card
                 link="ui-list.html"
                 heading="List"
                 meta="&lt;ui-list&gt;"
@@ -1092,10 +1158,16 @@
                 description="Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site."
               ></ui-card>
               <ui-card
+                link="ui-quote.html"
+                heading="Quote"
+                meta="&lt;ui-quote&gt;"
+                description="A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence."
+              ></ui-card>
+              <ui-card
                 link="ui-text.html"
                 heading="Text"
                 meta="&lt;ui-text&gt;"
-                description="A text is used to style some inline text with a simple color."
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
               ></ui-card>
               <ui-card
                 link="ui-theme-editor.html"
@@ -1120,6 +1192,12 @@
                 heading="Ad"
                 meta="&lt;ui-ad&gt;"
                 description="An ad displays third-party promotional content."
+              ></ui-card>
+              <ui-card
+                link="ui-audio.html"
+                heading="Audio"
+                meta="&lt;ui-audio&gt;"
+                description="An audio plays a sound file:  in the browser&#39;s own player, or unseen, when the page says."
               ></ui-card>
               <ui-card
                 link="ui-embed.html"
@@ -1156,6 +1234,12 @@
                 heading="Shape"
                 meta="&lt;ui-shape&gt;"
                 description="A shape is a three dimensional object displayed on a two dimensional plane."
+              ></ui-card>
+              <ui-card
+                link="ui-video.html"
+                heading="Video"
+                meta="&lt;ui-video&gt;"
+                description="A video plays a video file in the browser&#39;s own player."
               ></ui-card>
               <ui-card
                 link="ui-visibility.html"
@@ -1327,6 +1411,18 @@
                 heading="Table"
                 meta="&lt;ui-table&gt;"
                 description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html#ui-term"
+                heading="Term"
+                meta="&lt;ui-term&gt;"
+                description="A term is one fact:  a label, and its value."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
               ></ui-card>
               <ui-card
                 link="ui-tree-diagram.html"
@@ -1985,6 +2081,12 @@
           <ui-section id="elements" label="Elements" sticky collapsible dividing>
             <ui-cards>
               <ui-card
+                link="ui-audio.html"
+                heading="Audio"
+                meta="&lt;ui-audio&gt;"
+                description="An audio plays a sound file:  in the browser&#39;s own player, or unseen, when the page says."
+              ></ui-card>
+              <ui-card
                 link="ui-button.html"
                 heading="Button"
                 meta="&lt;ui-button&gt;"
@@ -2156,13 +2258,19 @@
                 link="ui-text.html"
                 heading="Text"
                 meta="&lt;ui-text&gt;"
-                description="A text is used to style some inline text with a simple color."
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
               ></ui-card>
               <ui-card
                 link="ui-textarea.html"
                 heading="Textarea"
                 meta="&lt;ui-textarea&gt;"
                 description="A textarea is a multi-line field used to elicit a longer response."
+              ></ui-card>
+              <ui-card
+                link="ui-video.html"
+                heading="Video"
+                meta="&lt;ui-video&gt;"
+                description="A video plays a video file in the browser&#39;s own player."
               ></ui-card>
             </ui-cards>
           </ui-section>
@@ -2253,6 +2361,12 @@
                 heading="Table"
                 meta="&lt;ui-table&gt;"
                 description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
               ></ui-card>
               <ui-card
                 link="ui-toolbar.html"

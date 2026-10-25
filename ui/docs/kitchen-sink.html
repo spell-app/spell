@@ -30,7 +30,7 @@
     <main id="main" class="site-main" data-toc-header="Kitchen Sink">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=Kitchen%20Sink%3A%20%20"
               icon="bug"
@@ -796,6 +796,26 @@
                 </p>
               </ui-docs-example>
             </ui-section>
+
+            <ui-section id="elements-video" label="Video" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A video plays a video file in the browser&#39;s own player.
+                  <a href="ui-video.html">Video page</a>
+                  &middot; <a href="ui-audio.html">Audio page</a>
+                </p>
+                <ui-video
+                  src="examples/media/sample.webm"
+                  captions="examples/media/sample.vtt"
+                  ratio="16/9"
+                  label="A ball rolls across the screen"
+                  style="max-width: 32em"
+                ></ui-video>
+              </ui-docs-example>
+              <ui-docs-example description="Audio">
+                <ui-audio src="examples/media/chime.wav" controls label="A chime"></ui-audio>
+              </ui-docs-example>
+            </ui-section>
           </ui-section>
 
           <ui-section id="collections" label="Collections" sticky collapsible dividing>
@@ -1082,6 +1102,27 @@
                     </tbody>
                   </table>
                 </ui-table>
+              </ui-docs-example>
+            </ui-section>
+
+            <ui-section id="collections-terms" label="Terms" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  Terms list facts as a label and a value each, lined up.
+                  <a href="ui-terms.html">Terms page</a>
+                </p>
+                <ui-terms>
+                  <ui-term label="Suit" value="hearts"></ui-term>
+                  <ui-term label="Rank" value="queen"></ui-term>
+                  <ui-term label="Played by"><ui-label color="blue">Jamie</ui-label></ui-term>
+                </ui-terms>
+              </ui-docs-example>
+              <ui-docs-example description="Horizontal">
+                <ui-terms direction="horizontal">
+                  <ui-term label="Score" value="42"></ui-term>
+                  <ui-term label="Moves" value="17"></ui-term>
+                  <ui-term label="Time" value="3:05"></ui-term>
+                </ui-terms>
               </ui-docs-example>
             </ui-section>
 
@@ -2223,6 +2264,25 @@
               </ui-docs-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-keys" label="Keys" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it.
+                  <a href="ui-keys.html">Keys page</a>
+                </p>
+                <p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
+              </ui-docs-example>
+              <ui-docs-example description="On a Mac, and elsewhere">
+                <p>
+                  <ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac,
+                  <ui-keys shortcut="shift+mod+P" platform="other"></ui-keys> elsewhere.
+                </p>
+              </ui-docs-example>
+              <ui-docs-example description="Two shortcuts">
+                <p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
+              </ui-docs-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-markdown" label="Markdown" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
@@ -2237,6 +2297,28 @@
                     Smaller text, the _same_ look.
                   </script>
                 </ui-markdown>
+              </ui-docs-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-page" label="Page" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A page frames a whole window:  a header, navigation, the main content, a side column and a footer.
+                  <a href="ui-page.html">Page page</a>
+                </p>
+                <div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+                  <ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+                    <ui-header slot="header" level="2">Inbox</ui-header>
+                    <ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">
+                      <ui-item selected>Inbox</ui-item>
+                      <ui-item>Sent</ui-item>
+                      <ui-item>Drafts</ui-item>
+                    </ui-menu>
+                    <ui-text paragraph>Three new messages since this morning.</ui-text>
+                    <ui-segment slot="aside">Tip: press <ui-keys shortcut="mod+K"></ui-keys> to search.</ui-segment>
+                    <ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
+                  </ui-page>
+                </div>
               </ui-docs-example>
             </ui-section>
 
@@ -2271,6 +2353,21 @@
                     <ui-panel label="Tweak"><p>Sub-panels follow.</p></ui-panel>
                   </ui-panel>
                 </div>
+              </ui-docs-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-quote" label="Quote" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence.
+                  <a href="ui-quote.html">Quote page</a>
+                </p>
+                <ui-quote cite="https://en.wikipedia.org/wiki/Alan_Kay">
+                  The best way to predict the future is to invent it.
+                </ui-quote>
+              </ui-docs-example>
+              <ui-docs-example description="Inline">
+                <p>She looked up and said <ui-quote inline>not today</ui-quote>, then went back to her book.</p>
               </ui-docs-example>
             </ui-section>
 

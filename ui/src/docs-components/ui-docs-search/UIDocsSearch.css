@@ -8,13 +8,13 @@
  *     - `<span class="glyph">` around its icon
  *     - `<input part="input">`
  *     - while there's text, a `<button class="clear">`
- *     - `<span class="keys" part="keys">` of `<kbd>`s (shown while empty and not focused)
+ *     - `<span class="keys" part="keys">` round a `<ui-keys>` (shown while empty and not focused)
  *   - `<div class="results" part="results" popover>` (top layer, anchored under the pill):
  *     - `<div class="list" role=listbox>` of `<div class="group" part="group">`s,
  *       each `<div class="label" part="label">` over `<a class="option [kind] [active]" part="option">`s
  *       (`.glyph`, `.text` > `.title` (`.name` with `<mark>`s, a `<code>` tag) + `.context`, `.enter`)
  *     - `<p class="note">`
- *     - `<div class="hints" part="hints">` of `<kbd>`s
+ *     - `<div class="hints" part="hints">` of `<ui-keys>`
  * - The card:  as wide as `--ui-docs-search-results-width` (or the pill, if wider), never past the viewport.
  *   - On a phone it spans the screen less a gutter.
  *   - It scrolls inside, under a max height.
@@ -161,19 +161,12 @@
     display: inline-flex;
     gap: 1px;
   }
-  kbd {
-    box-sizing: border-box;
-    display: inline-grid;
-    place-items: center;
-    min-width: 1.5em;
-    height: 1.5em;
-    padding-inline: 0.3em;
-    border: 1px solid var(--_ui-docs-search-border-color);
-    border-block-end-width: 2px;
-    border-radius: 0.375em;
-    background: var(--_ui-docs-search-results-background);
-    color: var(--_ui-docs-search-muted-color);
-    font: 500 0.6875em / 1 var(--ui-font-family-mono);
+  /* the keys:  `<ui-keys>`, in the pill's colours */
+  ui-keys {
+    --ui-keys-border-color: var(--_ui-docs-search-border-color);
+    --ui-keys-background: var(--_ui-docs-search-results-background);
+    --ui-keys-color: var(--_ui-docs-search-muted-color);
+    --ui-keys-font-size: 0.6875em;
   }
 
   /* ## The card:  a popover anchored under the pill, its left edges lined up. */
@@ -332,8 +325,8 @@
     gap: 0.25em;
     align-items: center;
   }
-  .hints kbd {
-    font-size: 0.875em;
+  .hints ui-keys {
+    --ui-keys-font-size: 0.875em;
   }
 }
 

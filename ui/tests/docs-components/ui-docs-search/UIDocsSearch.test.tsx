@@ -139,7 +139,7 @@ describe("<ui-docs-search>", () => {
       placeholder: "Search",
       "aria-keyshortcuts": "/ Meta+K Control+K"
     })
-    expect([...find(field, "[part~=keys]").querySelectorAll("kbd")].map((key) => key.textContent)).toHaveLength(2)
+    expect(find(field, "[part~=keys] > ui-keys").getAttribute("shortcut")).toBe("mod+K")
     expect(find(field, ".ui.finder").getAttribute("part")).toBe("search")
     expect(open(field)).toBe(false)
   })

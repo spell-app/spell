@@ -64,6 +64,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { width: "18em", height: "15em" },
     attributes: ["unit", "align", "centered", "test"]
   },
+  "ui-audio": { folder: "ui-video", attributes: ["src", "autoplay", "muted", "loop", "controls"] },
   "ui-author": { folder: "ui-parts", attributes: ["link", "href", "target"] },
   "ui-avatar": { folder: "ui-parts", attributes: ["src", "tooltip", "alt"] },
   "ui-breadcrumb": { folder: "ui-breadcrumbs", attributes: ["selected", "active", "link", "href", "target"] },
@@ -106,7 +107,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "animated",
       "attach",
       "attached",
-      "floated",
       "icon",
       "icon-position",
       "label",
@@ -153,7 +153,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "stackable",
       "attach",
       "attached",
-      "floated",
       "width"
     ]
   },
@@ -289,7 +288,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "width-computer",
       "width-large",
       "width-widescreen",
-      "floated",
       "attach",
       "attached",
       "centered",
@@ -319,10 +317,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-container",
     attributes: ["text", "fluid", "wide", "grid", "spacing", "relaxed", "align", "text-align", "scrolling", "resizable"]
   },
-  "ui-content": {
-    folder: "ui-parts",
-    attributes: ["image", "scrolling", "floated", "align", "text-align", "vertical-align"]
-  },
+  "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "text-align", "vertical-align"] },
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },
   "ui-description": { folder: "ui-parts", attributes: [] },
   "ui-detail": { folder: "ui-parts", attributes: ["link", "href"] },
@@ -619,7 +614,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "attach",
       "attached",
       "seamless",
-      "floated",
       "align",
       "text-align",
       "padding",
@@ -694,6 +688,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "spaced",
       "vertical-align",
       "src",
+      "caption",
       "alt",
       "width",
       "height",
@@ -715,7 +710,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "centered",
       "disabled",
       "fluid",
-      "floated",
       "vertical-align"
     ]
   },
@@ -808,6 +802,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled"
     ]
   },
+  "ui-keys": { folder: "ui-keys", attributes: ["shortcut", "platform"] },
   "ui-label": {
     folder: "ui-label",
     skeleton: { display: "inline", width: "4em", height: "1.8em" },
@@ -865,6 +860,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled"
     ]
   },
+  "ui-link": { folder: "ui-text", attributes: ["size", "color", "inverted", "disabled"] },
   "ui-list": {
     folder: "ui-list",
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
@@ -887,7 +883,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "padding",
       "fitted",
       "inverted",
-      "floated",
       "vertical-align"
     ]
   },
@@ -939,7 +934,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "wrap",
       "wrapped",
       "inverted",
-      "floated",
       "padding",
       "fitted",
       "compact",
@@ -1018,6 +1012,24 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ]
   },
   "ui-or": { folder: "ui-button", attributes: ["label", "text"] },
+  "ui-page": {
+    folder: "ui-page",
+    attributes: [
+      "display",
+      "loading",
+      "timeout",
+      "theme",
+      "size",
+      "stack-with",
+      "width",
+      "height",
+      "icons",
+      "emoji",
+      "assets",
+      "fixed",
+      "pure"
+    ]
+  },
   "ui-panel": {
     folder: "ui-panel",
     skeleton: { parts: [{ shape: "header" }, { shape: "paragraph" }] },
@@ -1249,6 +1261,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-pushable": { folder: "ui-sidebar", attributes: [] },
   "ui-pusher": { folder: "ui-sidebar", attributes: [] },
+  "ui-quote": { folder: "ui-quote", attributes: ["inline", "cite"] },
   "ui-radio": {
     folder: "ui-checkbox",
     skeleton: { display: "inline", width: "6em", height: "1.25em" },
@@ -1444,7 +1457,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "compact",
       "padded",
       "clearing",
-      "floated",
       "align",
       "text-align",
       "attach",
@@ -1542,7 +1554,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-statistic": {
     folder: "ui-statistic",
     skeleton: { display: "inline", width: "6em", height: "4em" },
-    attributes: ["size", "color", "direction", "horizontal", "inverted", "fluid", "floated", "value", "text", "label"]
+    attributes: ["size", "color", "direction", "horizontal", "inverted", "fluid", "value", "text", "label"]
   },
   "ui-statistics": {
     folder: "ui-statistic",
@@ -1690,7 +1702,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "history"
     ]
   },
-  "ui-text": { folder: "ui-text", attributes: ["size", "color", "state", "inverted", "disabled"] },
+  "ui-term": { folder: "ui-terms", attributes: ["label", "value"] },
+  "ui-terms": { folder: "ui-terms", attributes: ["direction", "spacing"] },
+  "ui-text": { folder: "ui-text", attributes: ["size", "color", "state", "inverted", "paragraph", "disabled"] },
   "ui-textarea": {
     folder: "ui-input",
     skeleton: { width: "20em", height: "6em" },
@@ -1763,7 +1777,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "wrap",
       "wrapped",
       "inverted",
-      "floated",
       "padding",
       "fitted",
       "compact",
@@ -1793,5 +1806,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-tree-diagram": { folder: "ui-tree-diagram", skeleton: { height: "12em" }, attributes: ["tree"] },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
+  "ui-video": {
+    folder: "ui-video",
+    attributes: ["src", "autoplay", "muted", "loop", "poster", "controls", "captions", "ratio"]
+  },
   "ui-visibility": { folder: "ui-visibility", attributes: ["once", "continuous", "offset", "type", "duration"] }
 }

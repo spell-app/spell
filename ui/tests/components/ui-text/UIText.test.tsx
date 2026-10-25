@@ -176,3 +176,45 @@ describe("<ui-text> link and font", () => {
     expect([root.querySelector("strong"), root.querySelector("code > slot")]).toEqual([null, expect.anything()])
   })
 })
+
+describe("<ui-text paragraph> and <ui-link>", () => {
+  it("`paragraph`:  a `<p>`, a block with the body's line height and a line's space under it", async () => {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div><ui-text paragraph>One.</ui-text><ui-text paragraph>Two.</ui-text></div>`
+    )
+    await ElementFixture.settle()
+    const [first, second] = [...wrapper.querySelectorAll("ui-text")].map((host) =>
+      host.shadowRoot!.querySelector<HTMLElement>("[part~=text]")!
+    )
+    expect(first!.localName).toBe("p")
+    expect(getComputedStyle(first!).display).toBe("block")
+    expect(second!.getBoundingClientRect().top).toBeGreaterThan(first!.getBoundingClientRect().bottom)
+    expect(getComputedStyle(second!).marginBlockEnd).toBe("0px")
+  })
+
+  it("`paragraph` with `link`:  a link inside the paragraph", async () => {
+    const { root } = await text(`<ui-text paragraph link="help.html">the help</ui-text>`)
+    expect(root.localName).toBe("p")
+    expect(root.querySelector("a")!.getAttribute("href")).toBe("help.html")
+  })
+
+  it("`disabled` drops the link", async () => {
+    const { root } = await text(`<ui-text link="help.html" disabled>the help</ui-text>`)
+    expect(root.localName).toBe("span")
+  })
+
+  it("`<ui-link>`:  a link of its own, in the text's look", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-link link="help.html" font="bold">help</ui-link>`)
+    await ElementFixture.settle()
+    const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=text]")!
+    expect([root.localName, root.className, root.getAttribute("href")]).toEqual(["a", "ui text", "help.html"])
+    expect(root.querySelector("strong > slot")).not.toBe(null)
+    await expectAccessible(host)
+  })
+
+  it("`<ui-link disabled>`:  no longer a link", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-link link="help.html" disabled>help</ui-link>`)
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector("[part~=text]")!.localName).toBe("span")
+  })
+})

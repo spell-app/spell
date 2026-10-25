@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UIT } from "spell-ui/core"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { docsSearchVocabulary } from "./UIDocsSearch.en"
 import { PageOutline } from "./PageOutline"
@@ -65,7 +65,7 @@ export class DOMDocsSearchElement extends E.DOMElement<UIDocsSearch> {
  * - Its shadow DOM:  `<div class="ui [size] finder" part="search">` holding
  *   - `<div class="field" part="field">` (the pill, the results' anchor):
  *     an icon, `<input role="combobox" part="input">`, a clear `<button>` while there's text,
- *     and the shortcut hint `<span part="keys">` of `<kbd>`s
+ *     and the shortcut hint `<span part="keys">` round a `<ui-keys>`
  *   - `<div class="results" part="results" popover="manual">` (in the top layer, so no panel or drawer clips it):
  *     - a `<div role="listbox">` of `<div role="group" part="group">`s,
  *       each a mono eyebrow (`part="label"`) over `<a role="option" part="option" href>`s
@@ -513,8 +513,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
           </Show>
           <Show when={this.hasShortcuts}>
             <span class={KEYS} part={this.partForName("keys")} aria-hidden="true">
-              <kbd>{this.modifierKeyLabel}</kbd>
-              <kbd>K</kbd>
+              <ui-keys shortcut={PILL_SHORTCUT} />
             </span>
           </Show>
         </div>
@@ -537,14 +536,13 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
           </Show>
           <div class={HINTS} part={this.partForName("hints")} aria-hidden="true">
             <span>
-              <kbd>↑</kbd>
-              <kbd>↓</kbd> {this.translationForKey("move")}
+              <ui-keys shortcut="up down" /> {this.translationForKey("move")}
             </span>
             <span>
-              <kbd>↵</kbd> {this.translationForKey("go")}
+              <ui-keys shortcut="enter" /> {this.translationForKey("go")}
             </span>
             <span>
-              <kbd>esc</kbd> {this.translationForKey("close")}
+              <ui-keys shortcut="escape" /> {this.translationForKey("close")}
             </span>
           </div>
         </div>
@@ -615,11 +613,6 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
   /** `/` and Cmd / Ctrl+K summon this field:  `shortcuts` isn't off. */
   private get hasShortcuts(): boolean {
     return this.shortcuts !== false
-  }
-
-  /** The modifier key the hint shows:  `⌘` on Apple platforms, else `Ctrl`. */
-  get modifierKeyLabel(): string {
-    return this.isReady && UI.browser.isApple ? "⌘" : "Ctrl"
   }
 
   /** Show the field (opening its drawer if it's hidden in one) and focus it, its text selected. */
@@ -747,6 +740,9 @@ const INDEX_ATTRIBUTE = "data-index"
 
 /** The input's `aria-keyshortcuts`, while shortcuts are on. */
 const KEY_SHORTCUTS = "/ Meta+K Control+K"
+
+/** The shortcut the pill shows, as `<ui-keys>` draws it:  ⌘K on a Mac, Ctrl K elsewhere. */
+const PILL_SHORTCUT = "mod+K"
 
 /** Class word of an icon's box (the field's, a result's). */
 const GLYPH = "glyph"

@@ -22,6 +22,9 @@ import imageCSS from "./UIImage.css?inline"
  *   - a linked image's `alt` names the link
  * - `width` / `height` are the native intrinsic size (they reserve space before it loads);
  *   `size` sets the drawn width.
+ * - `caption` (or the `caption` slot) makes it a FIGURE (epic `ui-gaps` P12):
+ *   `<figure part="figure">` round the image (or its link), then `<figcaption part="caption">` under it,
+ *   no wider than the picture.
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, the image (or its link) inert, `aria-disabled`;  a link also loses its link.
  ****************/
@@ -33,7 +36,29 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
     loading: "its own"
   } satisfies Partial<E.ElementSetup>
 
+  /** Which named slots have content (the `caption` slot). */
+  readonly slots = new E.SlotContent(this.domElement)
+
+  /** A figure:  `caption`, or something in the `caption` slot. */
+  get hasCaption(): boolean {
+    return !!this.caption || this.slots.hasContent(this.slotForName("caption"))
+  }
+
   render(): JSX.Element {
+    return (
+      <Show when={this.hasCaption} fallback={this.picture()}>
+        <figure class={FIGURE} part={this.partForName("figure")}>
+          {this.picture()}
+          <figcaption part={this.partForName("caption")}>
+            <slot name={this.slotForName("caption")}>{this.caption}</slot>
+          </figcaption>
+        </figure>
+      </Show>
+    )
+  }
+
+  /** The image, or its link round it. */
+  private picture(): JSX.Element {
     return (
       <Show when={this.link} fallback={this.image("image")}>
         <a
@@ -66,3 +91,6 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIImage extends E.AttributeValues<typeof imageVocabulary> {}
+
+/** The figure's class. */
+const FIGURE = "figure"

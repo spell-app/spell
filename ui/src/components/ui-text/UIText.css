@@ -55,7 +55,7 @@
   }
 
   /* Tokens:  one per `text.variables` entry that still matters, each the private alias of its public token. */
-  :is(span, a).ui.text {
+  :is(span, a, p).ui.text {
     --_ui-text-line-height: var(--ui-text-line-height, 1);
     --_ui-text-disabled-opacity: var(--ui-text-disabled-opacity, var(--ui-disabled-opacity));
     /* A link (`link`), and code and highlight inside text (`font`;  epic `ui-gaps` P3). */
@@ -85,24 +85,36 @@
   }
 
   /* Text:  inline, coloured by its hue or state, sized against the text around it. */
-  :is(span, a).ui.text {
+  :is(span, a, p).ui.text {
     color: var(--ui-color-text, inherit);
     font-size: calc(1em * var(--ui-scale, 1));
     line-height: var(--_ui-text-line-height);
   }
 
-  /* A link in running text (`link`):  the page's link colour, unless the text has a hue;  underlined. */
-  a.ui.text {
+  /* A paragraph (`paragraph`):  a block, the body's line height, a line's space under it (none after the last). */
+  p.ui.text {
+    margin-block: 0 1em;
+    line-height: var(--ui-line-height);
+  }
+  :host(:last-child) > p.ui.text {
+    margin-block-end: 0;
+  }
+
+  /* A link in running text (`link`), or in a paragraph:  the page's link colour, unless it has a hue;  underlined. */
+  a.ui.text,
+  p.ui.text > a {
     color: var(--ui-color-text, var(--_ui-text-link-color));
     text-decoration-line: underline;
     text-decoration-thickness: 0.06em;
     text-underline-offset: 0.15em;
   }
-  a.ui.text:hover {
+  a.ui.text:hover,
+  p.ui.text > a:hover {
     color: var(--ui-color-text, var(--_ui-text-link-hover-color));
   }
   /* The text's line is only as tall as its letters:  a ring a little away from them, lightly rounded. */
-  a.ui.text:focus-visible {
+  a.ui.text:focus-visible,
+  p.ui.text > a:focus-visible {
     outline-offset: 1px;
     border-radius: 2px;
   }
@@ -127,7 +139,7 @@
 
 @layer ui.components.text.variations {
   /* Inverted:  the hue as it reads on a dark surface. */
-  span.ui.inverted.text {
+  :is(span, p).ui.inverted.text {
     color: var(--ui-color-inverted, inherit);
   }
 }
@@ -138,7 +150,7 @@
 
 @layer ui.components.text.states {
   /* Disabled:  faded. */
-  span.ui.disabled.text {
+  :is(span, p).ui.disabled.text {
     opacity: var(--_ui-text-disabled-opacity);
   }
 }

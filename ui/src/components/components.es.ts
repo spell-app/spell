@@ -122,10 +122,18 @@ import { stepsEs } from "spell-ui/components/ui-step/UISteps.es"
 import { stickyEs } from "spell-ui/components/ui-sticky/UISticky.es"
 import { tabEs } from "spell-ui/components/ui-tab/UITab.es"
 import { tabsEs } from "spell-ui/components/ui-tab/UITabs.es"
+import { quoteEs } from "spell-ui/components/ui-quote/UIQuote.es"
+import { keysEs } from "spell-ui/components/ui-keys/UIKeys.es"
+import { pageEs } from "spell-ui/components/ui-page/UIPage.es"
+import { videoEs } from "spell-ui/components/ui-video/UIVideo.es"
+import { audioEs } from "spell-ui/components/ui-video/UIAudio.es"
+import { termsEs } from "spell-ui/components/ui-terms/UITerms.es"
+import { termEs } from "spell-ui/components/ui-terms/UITerm.es"
 import { stackEs } from "spell-ui/components/ui-stack/UIStack.es"
 import { tableEs } from "spell-ui/components/ui-table/UITable.es"
 import { cellEs } from "spell-ui/components/ui-table/UICell.es"
 import { textEs } from "spell-ui/components/ui-text/UIText.es"
+import { linkEs } from "spell-ui/components/ui-text/UILink.es"
 import { themeEditorEs } from "spell-ui/components/ui-theme-editor/UIThemeEditor.es"
 import { toastEs } from "spell-ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell-ui/components/ui-toolbar/UIToolbar.es"
@@ -137,6 +145,7 @@ import { visibilityEs } from "spell-ui/components/ui-visibility/UIVisibility.es"
 export const sharedEs = {
   lang: "es",
   attributes: {
+    caption: "leyenda",
     styled: "estilizado",
     fluid: "fluido",
     inverted: "invertido",
@@ -325,6 +334,7 @@ export const sharedEs = {
     "ui-navigating": "navegando"
   },
   slots: {
+    caption: "leyenda",
     icon: "icono",
     label: "etiqueta",
     reply: "respuesta",
@@ -335,6 +345,7 @@ export const sharedEs = {
     badge: "insignia"
   },
   parts: {
+    caption: "leyenda",
     title: "titulo",
     icon: "icono",
     content: "contenido",
@@ -739,9 +750,17 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   tabEs,
   tabsEs,
   stackEs,
+  quoteEs,
+  keysEs,
+  pageEs,
+  videoEs,
+  audioEs,
+  termsEs,
+  termEs,
   tableEs,
   cellEs,
   textEs,
+  linkEs,
   themeEditorEs,
   toastEs,
   toolbarEs,

@@ -1,0 +1,28 @@
+/*
+ * The style sheet of `<ui-video>` and `<ui-audio>`:  the browser's own players, as wide as their box allows.
+ * - Shadow markup:  `<video class="ui video" part="video">` (or `<audio class="ui audio" part="audio">`).
+ * - A video is a block, never wider than its container;  `ratio` is its own `aspect-ratio` (`hostLayout`).
+ * - An audio without `controls` draws nothing (`:state(silent)`):  a sound the page plays.
+ */
+
+@layer ui.components.video.types {
+  :host {
+    display: block;
+    max-inline-size: 100%;
+  }
+  /* an audio without `controls`:  nothing shows */
+  :host(:state(silent)) {
+    display: none;
+  }
+  .ui.video {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    border-radius: var(--ui-video-radius, var(--ui-radius));
+    background: black;
+  }
+  .ui.audio {
+    display: block;
+    inline-size: 100%;
+  }
+}
