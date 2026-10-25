@@ -153,6 +153,16 @@
     font-variant-numeric: tabular-nums;
   }
   /*
+   * the robot on the digit's middle (Owen, 2026-10-25:  "these icons don't line up"):  its box a flex item, not a
+   * line of text, so it sits on the button's middle;  was 1.5px above the digit
+   */
+  .robot {
+    display: inline-flex;
+  }
+  .robot ui-icon::part(icon) {
+    vertical-align: 0;
+  }
+  /*
    * Narrow (the side bar, a phone):  the spinner alone in its pill, so the toolbar's own buttons keep their room;
    * the words stay in the names a screen reader hears
    */

@@ -19,8 +19,9 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  * - Owen, 2026-10-22:  "Make the magic wand near the plane a toggle -- when it is on, you wait for 2 minutes of
  *   inactivity from me ... and when that is reached you submit the answers.  When it's off, I have to press the plane."
  * - the PLANE asks its owner to send (`epic-send-saving`, `auto` false)
- *   - from `state`:  grey with nothing to send, blue with something not sent;  the group's outline grey, blue
- *     once sent, never dashed (Owen, 2026-10-22)
+ *   - from `state`:  grey with nothing to send, blue with something not sent
+ *   - the group's outline:  none with nothing to send, the grey plane alone (Owen, 2026-10-25:  "no boder around
+ *     plane in this mode");  grey with something not sent, blue once sent;  never dashed (Owen, 2026-10-22)
  *   - countdown off with something not sent:  FILLED blue, so it plainly waits for a press (`:state(waiting)`)
  * - the WAND (`wand` only) turns countdown mode on and off, for every page in this browser (the page's `SendCountdown`)
  *   - on:  filled light blue, its icon white;  off:  grey
