@@ -85,7 +85,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       const grouped = epic(["ask", "bogus"])
       expect(grouped.status).toBe(1)
       expect(grouped.stderr).toContain(
-        "epic ask bogus?  no such verb.  The verbs:\n  create, show, wait, answer, draft, list, sweep"
+        "epic ask bogus?  no such verb.  The verbs:\n  create, round, show, wait, answer, draft, list, sweep, fold"
       )
     })
 

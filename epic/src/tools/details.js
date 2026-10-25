@@ -8,6 +8,9 @@
  *     so a skill with many questions to ask (`/worktrees`, `/bedtime`) needn't hand-write it
  *   - scratch:  `pages/details/<slug>.html`, ignored by version control, swept after 14 days
  *   - `--epic <name>`:  `epics/<name>/details/<slug>.html`, committed with the epic page
+ * - `round <page> [--title "..."] [--description "..."] [--from <questions.json>]` -- the page's NEXT ROUND:  the one
+ *   page rewritten in place (from `--from`, else left for Claude to edit), the round before folded at its bottom, with
+ *   what was sent (`newRound()`, epic `epic-engine` P37);  `create` refuses a second page on the same question
  * - `show <page> [--wait]` -- start the page server if needed, and show the page in THIS session's VS Code window
  *   - the right side bar's "Review" view, where Owen answers things (epic `windows-and-review` P6, Owen 2026-10-06)
  *   - Chrome outside VS Code
@@ -17,7 +20,8 @@
  *   - while it waits, the page's Send says it's listening (a heartbeat in `~/.spell-epic/asks/`, `AskListeners`)
  *   - run it in the BACKGROUND:  its exit wakes the session
  *   - timeout:  exit 2, saying so
- * - `answer <page>` -- print the answer already sent (exit 1 if none)
+ * - `answer <page> [--round <n>]` -- print the answer already sent (exit 1 if none);  `--round`:  an earlier round's,
+ *   as it was sent
  * - `draft <page>` -- print what Owen typed on the page and hasn't sent (exit 1 if nothing):  its draft,
  *   `<slug>.draft.json5`, newer than the answer (epic `epic-workflow` P18).  Run it BEFORE rewriting a page he may
  *   have open:  the page puts the draft back by id, and keeps text whose id the rewrite removes in a box of its own
@@ -25,6 +29,8 @@
  *   (`epics/<epic>/details/`), as `epic choices list <epic>`
  * - `sweep [--days 14]` -- delete scratch pages (and their answers) older than that;  never an epic's
  *   - `create` sweeps first, by itself
+ * - `fold [--dry-run]` -- once:  every epic's near-copies made before `round` (`event-names-2`, `-3` ...) folded into
+ *   their first page as its rounds (`foldCopies()`)
  * - `<page>`:  a slug (`pick-layout`), `<epic>/<slug>`, or a path
  *   (absolute, or from the content folder, its `pages/`, or the checkout's root)
  * - paths print absolute:  they mean the same in whichever checkout Claude reads them
@@ -34,7 +40,7 @@
  *   - the draft into `<slug>.draft.json5`, which Send deletes
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs"
-import { basename, join, relative, resolve } from "node:path"
+import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
@@ -54,6 +60,18 @@ import {
 import { AskListeners } from "./AskListeners.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { CONTENT, ROOT, atDepth, inContent, openInVSCode, serialize } from "./pages.js"
+import {
+  archiveAnswer,
+  askedOf,
+  copyNumber,
+  currentRound,
+  dropSentDraft,
+  foldRound,
+  formatRound,
+  nearCopyOf,
+  refuseNearCopy,
+  roundsOf
+} from "./rounds.js"
 
 /** How long `wait` waits by default:  8 hours (decision D9). */
 const DEFAULT_TIMEOUT = "8h"
@@ -82,6 +100,16 @@ async function main(argv) {
       console.log(shown(createPage(CONTENT, target, { ...flags, spec })))
       return 0
     }
+    if (command === "round") {
+      const spec = flags.from ? DataFile.parse(readFileSync(findFile(flags.from), "utf8")) : undefined
+      console.log(shown(newRound(CONTENT, target, { ...flags, spec })))
+      return 0
+    }
+    if (command === "fold") {
+      const lines = await foldCopies(CONTENT, { dryRun: !!flags["dry-run"] })
+      console.log(lines.length ? lines.join("\n") : "no near-copies to fold")
+      return 0
+    }
     if (command === "show") {
       const file = findPage(CONTENT, target)
       await openInVSCode(file, { view: "review" })
@@ -90,8 +118,9 @@ async function main(argv) {
     if (command === "wait") return await waitAndPrint(findPage(CONTENT, target), flags)
     if (command === "answer") {
       const file = findPage(CONTENT, target)
+      if (flags.round) return printRound(file, flags.round)
       const answer = readAnswer(file)
-      console.log(answer ? formatAnswer(file, answer) : `no answer yet:  ${shown(file)}`)
+      console.log(answer ? formatAnswer(file, answer) : noAnswerYet(file))
       return answer ? 0 : 1
     }
     if (command === "draft") {
@@ -124,12 +153,14 @@ async function main(argv) {
 
 /** `epic ask` with no or a wrong command. */
 const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]
+        epic ask round <page> [--title "..."] [--description "..."] [--from <questions.json>]
         epic ask show <page> [--wait] [--timeout 8h]
         epic ask wait <page> [--timeout 8h]
-        epic ask answer <page>
+        epic ask answer <page> [--round <n>]
         epic ask draft <page>
         epic ask list [<epic>]
-        epic ask sweep [--days 14]`
+        epic ask sweep [--days 14]
+        epic ask fold [--dry-run]`
 
 ////////////////
 // ## Pages
@@ -140,15 +171,29 @@ const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [-
  * template (`answerPages.js` `TOOL_TEMPLATES`);  its absolute path.
  * - `--epic <name>`:  in that epic's `details/` (the epic must exist);  else the scratch `details/`
  * - sets `<title>`, the h1, the breadcrumb, the description and the "Asked" date;  refuses to overwrite
+ * - refuses a NEAR-COPY (epic `epic-engine` P37):  `event-names-2` beside `event-names` is its second round,
+ *   `epic ask round event-names` (`rounds.js` `refuseNearCopy()`)
  * - `spec`:  the whole page (`fillFromSpec()`)
  */
 export function createPage(docs, slug, { title, epic, description, spec } = {}) {
-  title ??= spec?.title ?? "Details"
   if (!slug || !SLUG.test(slug)) throw new Error(`a slug is lower-kebab-case:  '${slug ?? ""}'`)
   if (epic && !existsSync(join(docs, "epics", epic))) throw new Error(`no epic '${epic}' (epics/${epic}/)`)
   const folder = epic ? join(docs, "epics", epic, "details") : join(docs, "pages", "details")
   const file = join(folder, `${slug}.html`)
   if (existsSync(file)) throw new Error(`${relative(docs, file)} already exists`)
+  refuseNearCopy(folder, slug, epic)
+  const document = pageDocument(docs, folder, { title, description, spec })
+  mkdirSync(folder, { recursive: true })
+  writeFileSync(file, serialize(document))
+  return file
+}
+
+/**
+ * A details page for `folder` (in content folder `docs`), parsed, from the tool's template:  its head filled
+ * (`title`, `description`, today's date), and the whole page from `spec` when given.
+ */
+function pageDocument(docs, folder, { title, description, spec }) {
+  title ??= spec?.title ?? "Details"
   const depth = relative(docs, folder).split("/").length
   const { document } = parseHTML(atDepth(readFileSync(join(TOOL_TEMPLATES, "details.html"), "utf8"), depth))
   // the date up top, under "Asked by":  the notes are the page's bottom, so no footer
@@ -159,8 +204,36 @@ export function createPage(docs, slug, { title, epic, description, spec } = {}) 
     date: today()
   })
   if (spec) fillFromSpec(document, spec)
-  mkdirSync(folder, { recursive: true })
+  return document
+}
+
+/**
+ * Start the next ROUND of details page `target` (epic `epic-engine` P37):  the ONE page rewritten in place, never a
+ * second one;  its absolute path.
+ * - the round it was on folds into the page, at the bottom, with what was sent (`rounds.js` `foldRound()`)
+ * - its answer moves into the answer file's `rounds` (`answer --round <n>` prints it);  a new answer is the new
+ *   round's
+ * - `spec`:  the page rewritten from it, as `create --from`;  none:  the page as it is, for Claude to edit by hand
+ * - a draft typed and not sent stays, and comes back over the new round;  a sent one goes
+ * - a choice page:  refused, naming `epic choices round`
+ * - SIDE EFFECT:  writes the page and its answer file;  may delete its draft
+ */
+export function newRound(docs, target, { title, description, spec } = {}) {
+  const file = findPage(docs, target)
+  if (DataFile.exists(DataFile.besidePage(file, "rows")))
+    throw new Error(`a choice page:  epic choices round ${target} --rows <rows.json5>`)
+  const { document: old } = parseHTML(readFileSync(file, "utf8"))
+  title ??= spec?.title ?? old.querySelector("h1")?.textContent?.trim()
+  const document = spec ? pageDocument(docs, dirname(file), { title, description, spec }) : old
+  const answer = readAnswer(file)
+  const sent = answer && formatAnswer(file, answer)
+  const draft = !answer && readDraft(file)
+  const typed = draft ? formatDraft(file, draft) : undefined
+  const asked = askedOf(old)
+  const round = foldRound({ from: old, into: document, sent, typed, asked: today() })
   writeFileSync(file, serialize(document))
+  archiveAnswer(file, { round, asked, sent, answer })
+  dropSentDraft(file, answer)
   return file
 }
 
@@ -280,6 +353,163 @@ export function sweep(docs, days, now = Date.now()) {
 }
 
 ////////////////
+// ## Folding near-copies
+////////////////
+
+/**
+ * `epic ask fold`, once (epic `epic-engine` P37):  every epic's NEAR-COPIES (`event-names-2`, `-3` ... beside
+ * `event-names`, made before `round` was) folded into their first page as its rounds;  what it did, as lines.
+ * - the newest copy's page becomes the page, its round on top;  each older one folds below, with what was sent
+ * - their answers into the answer file's `rounds`, the newest copy's answer (and draft) the page's own;  a choice
+ *   page's rows the newest copy's
+ * - the copies' files go;  the epic's own pages' links to them (its epic page, parts, details pages) point at the page
+ * - details pages and choice pages alike;  a group mixing the two is skipped, saying so
+ * - `dryRun`:  only says what it would do
+ * - SIDE EFFECT:  writes and deletes pages and data files in the epics' folders
+ */
+export async function foldCopies(docs, { dryRun = false } = {}) {
+  // here, not at the top:  `choices.js` imports this file
+  const choices = await import("./choices.js")
+  const epics = join(docs, "epics")
+  if (!existsSync(epics)) return []
+  const lines = []
+  for (const epic of readdirSync(epics).sort()) {
+    const folder = join(epics, epic, "details")
+    if (!existsSync(folder)) continue
+    for (const { base, copies } of nearCopies(folder)) {
+      const where = relative(docs, folder)
+      const kinds = new Set([base, ...copies].map((slug) => choices.isChoicesPage(join(folder, `${slug}.html`))))
+      if (kinds.size > 1) {
+        lines.push(`skipped ${where}/${base}.html:  its copies aren't all the same kind of page`)
+        continue
+      }
+      const kind = kinds.has(true) ? choices : undefined
+      const top = currentRound(parseHTML(readFileSync(join(folder, `${base}.html`), "utf8")).document) + copies.length
+      lines.push(
+        `${dryRun ? "would fold" : "folded"} ${where}/${base}.html <- ${copies.map((copy) => `${copy}.html`).join(", ")}:` +
+          `  round ${top} (${copies.at(-1)}) on top, rounds ${top - 1}-1 folded below`
+      )
+      for (const file of relinkCopies(join(epics, epic), base, copies, { dryRun }))
+        lines.push(`  ${dryRun ? "would relink" : "relinked"} ${relative(docs, file)}`)
+      const gone = dryRun ? copyFiles(folder, copies) : foldGroup(folder, base, copies, kind)
+      for (const file of gone) lines.push(`  ${dryRun ? "would remove" : "removed"} ${relative(docs, file)}`)
+    }
+  }
+  return lines
+}
+
+/** The near-copies in details folder `folder`:  `{ base, copies }` per first page, its copies by round. */
+function nearCopies(folder) {
+  const groups = new Map()
+  for (const name of readdirSync(folder).filter((each) => each.endsWith(".html"))) {
+    const slug = name.slice(0, -".html".length)
+    const base = nearCopyOf(folder, slug)
+    if (!base || nearCopyOf(folder, base)) continue
+    groups.set(base, [...(groups.get(base) ?? []), slug])
+  }
+  return [...groups]
+    .sort(([one], [other]) => one.localeCompare(other))
+    .map(([base, copies]) => ({ base, copies: copies.sort((one, other) => copyNumber(one) - copyNumber(other)) }))
+}
+
+/**
+ * Fold `copies` into page `base` in details folder `folder` (`foldCopies()`);  the files removed.
+ * - `kind`:  `choices.js`, for choice pages;  `undefined` for details pages
+ */
+function foldGroup(folder, base, copies, kind) {
+  const page = join(folder, `${base}.html`)
+  const format = kind ? kind.formatAnswer : formatAnswer
+  const rounds = roundsOf(page)
+  let file = page
+  let { document } = parseHTML(readFileSync(page, "utf8"))
+  for (const copy of copies) {
+    const next = join(folder, `${copy}.html`)
+    const { document: into } = parseHTML(readFileSync(next, "utf8"))
+    const answer = readAnswer(file)
+    const sent = answer && format(file, answer)
+    const typed = answer ? undefined : typedOn(file, kind)
+    const asked = askedOf(document)
+    const round = foldRound({ from: document, into, sent, typed, asked: askedOf(into) })
+    rounds.push({ round, asked, ...(sent && { sent, answer: withoutRounds(answer) }) })
+    file = next
+    document = into
+  }
+  const rowsName = document.querySelector("[data-choices-rows] code")
+  if (rowsName) rowsName.textContent = basename(DataFile.besidePage(page, "rows"))
+  writeFileSync(page, serialize(document))
+  // the newest copy's answer, rows and draft are the page's own now
+  const answer = readAnswer(file)
+  const path = (data) => ({ ...data, page: data.page?.replace(/[^/]+\.html$/, `${base}.html`) })
+  DataFile.write(answerFile(page), { ...(answer && path(withoutRounds(answer))), rounds })
+  if (kind) DataFile.write(DataFile.besidePage(page, "rows"), DataFile.read(DataFile.besidePage(file, "rows")))
+  const draft = DataFile.read(draftFile(file))
+  const unsent = draft && !(answer && !(Date.parse(draft.saved) > Date.parse(answer.answered)))
+  if (unsent) DataFile.write(draftFile(page), path(draft))
+  else DataFile.remove(draftFile(page))
+  const gone = copyFiles(folder, copies)
+  for (const each of gone) rmSync(each)
+  return gone
+}
+
+/** What was typed on `file` and not sent, as its kind prints it;  `undefined` for nothing. */
+function typedOn(file, kind) {
+  if (!kind) {
+    const draft = readDraft(file)
+    return draft ? formatDraft(file, draft) : undefined
+  }
+  const draft = DataFile.read(kind.draftFile(file))
+  return draft ? kind.formatAnswer(file, { ...draft, answered: draft.saved, changes: 0 }) : undefined
+}
+
+/** `answer` without its `rounds`:  one round's answer, as it was sent. */
+function withoutRounds(answer) {
+  const copy = { ...answer }
+  delete copy.rounds
+  return copy
+}
+
+/** Every file of the pages `copies` in `folder`:  each page and its answer, draft and rows, as they're there. */
+function copyFiles(folder, copies) {
+  return copies.flatMap((copy) => {
+    const page = join(folder, `${copy}.html`)
+    const data = ["answer", "draft", "rows"].map((kind) => DataFile.found(DataFile.besidePage(page, kind)))
+    return [page, ...data].filter((file) => file && existsSync(file))
+  })
+}
+
+/**
+ * Point epic folder `epicFolder`'s own pages' links at `copies` (`details/event-names-2.html`, and a link's
+ * `target`, `...-details-event-names-2-html`) at page `base`;  the files changed (or, `dryRun`, that would be).
+ * - its epic page, its parts, its other details pages
+ * - SIDE EFFECT:  rewrites those files, unless `dryRun`
+ */
+function relinkCopies(epicFolder, base, copies, { dryRun }) {
+  const folders = [epicFolder, join(epicFolder, "parts"), join(epicFolder, "details")].filter((each) =>
+    existsSync(each)
+  )
+  const files = folders.flatMap((folder) =>
+    readdirSync(folder)
+      .filter((name) => name.endsWith(".html") && !copies.includes(name.slice(0, -".html".length)))
+      .map((name) => join(folder, name))
+  )
+  const changed = []
+  for (const file of files) {
+    const before = readFileSync(file, "utf8")
+    let after = before
+    for (const copy of copies)
+      after = after
+        .split(`details/${copy}.html`)
+        .join(`details/${base}.html`)
+        .split(`details-${copy}-html`)
+        .join(`details-${base}-html`)
+    if (after === before) continue
+    changed.push(file)
+    if (!dryRun) writeFileSync(file, after)
+  }
+  return changed
+}
+
+////////////////
 // ## Answers
 ////////////////
 
@@ -288,9 +518,36 @@ export function answerFile(page) {
   return DataFile.besidePage(page, "answer")
 }
 
-/** The answer sent for `page` (its old `.json` too), or `undefined`. */
+/**
+ * The answer sent for `page`'s round now (its old `.json` too), or `undefined`.
+ * - a file holding only the earlier rounds' (`rounds`, `rounds.js`) is no answer yet
+ */
 export function readAnswer(page) {
-  return DataFile.read(answerFile(page))
+  const answer = DataFile.read(answerFile(page))
+  return isAnswer(answer) ? answer : undefined
+}
+
+/** Is answer file data `data` an answer:  anything but the earlier rounds alone (`rounds`, `epic ask round`)? */
+function isAnswer(data) {
+  return !!data && Object.keys(data).some((key) => key !== "rounds")
+}
+
+/**
+ * "No answer yet" for `page`, naming the round before's when it has one (`epic ask answer <page> --round <n>`);
+ * `tool`:  `ask`, or `choices` for a choice page.
+ */
+export function noAnswerYet(page, tool = "ask") {
+  const before = roundsOf(page).at(-1)
+  if (!before) return `no answer yet:  ${shown(page)}`
+  const command = `epic ${tool} answer ${basename(page, ".html")} --round ${before.round}`
+  return `no answer yet to round ${before.round + 1}:  ${shown(page)}  (round ${before.round}'s:  ${command})`
+}
+
+/** `answer --round <n>`:  print round `n` of `file` as it was sent;  exit code 0, or 1 for a round it hasn't had. */
+function printRound(file, round) {
+  const text = formatRound(file, Number(round))
+  console.log(text ?? `no round ${round} of ${shown(file)}`)
+  return text ? 0 : 1
 }
 
 /** `<slug>.draft.json5` beside page `<slug>.html`:  what's typed and not sent (`detailsRoutes.ts`). */
@@ -330,7 +587,9 @@ export async function waitForAnswer(page, { since = Date.now(), timeout, poll = 
     const found = DataFile.found(file)
     if (found && statSync(found).mtimeMs > since) {
       try {
-        return DataFile.parse(readFileSync(found, "utf8"))
+        const answer = DataFile.parse(readFileSync(found, "utf8"))
+        // a new round's file holds only the rounds before:  no answer yet
+        if (isAnswer(answer)) return answer
       } catch {
         // mid-write (the route renames a whole file in, so this is unlikely):  look again next time
       }
@@ -480,6 +739,7 @@ export function parseArgs(argv) {
 }
 
 // run as a script (`epic ask`), not when a test imports it;  last, so every `const` above is set
+// - NOT a top-level `await`:  `fold` imports `choices.js`, which imports this file, and would wait for it forever
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  process.exitCode = await main(process.argv.slice(2))
+  void main(process.argv.slice(2)).then((code) => (process.exitCode = code))
 }

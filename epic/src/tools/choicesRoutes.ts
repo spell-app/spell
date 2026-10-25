@@ -36,7 +36,7 @@ import { DataFile } from "spell-epic/data/DataFile"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { answerFile, draftFile, isDetailsPage, saveData, servedPage } from "./detailsRoutes"
+import { answerFile, draftFile, isDetailsPage, saveData, sentAnswer, servedPage, withRounds } from "./detailsRoutes"
 
 export { answerFile, draftFile }
 
@@ -55,7 +55,9 @@ const choicesRoutes: RouteModule = {
       reply.set("Cache-Control", "no-store").json({ draft })
     })
     api.get("/answer", (request, reply) => {
-      const answer = readJson<ChoicesAnswer>(answerFile(choicesPage(web.files, request.query.page)))
+      const answer = sentAnswer(
+        readJson<ChoicesAnswer>(answerFile(choicesPage(web.files, request.query.page))) ?? undefined
+      )
       reply.set("Cache-Control", "no-store").json({ answer })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
@@ -134,7 +136,9 @@ export async function saveAnswer(
 ): Promise<ChoicesAnswer> {
   await saveDraft(file, page, values, feedback, order)
   let answer!: ChoicesAnswer
-  await saveData<ChoicesAnswer>(answerFile(file), (before) => {
+  await saveData<ChoicesAnswer>(answerFile(file), (file) => {
+    // a new round's file holds only the rounds before (`rounds`):  this is the round's first answer
+    const before = sentAnswer(file)
     answer = {
       page,
       answered: new Date().toISOString(),
@@ -143,7 +147,7 @@ export async function saveAnswer(
       feedback,
       ...(order && { order })
     }
-    return answer
+    return withRounds(answer, file)
   })
   return answer
 }
@@ -234,6 +238,8 @@ export type ChoicesDraft = {
  * A page's `<slug>.answer.json5`:  what "Do it" sent.
  * - `answered`:  when, ISO;  `changes`:  how often it was sent again (0:  the first time)
  * - `values`, `feedback`, `order`:  as the draft's
+ * - `rounds`:  the earlier rounds' answers (`epic choices round`, epic `epic-engine` P37), kept through every send;
+ *   never served to the page
  */
 export type ChoicesAnswer = {
   page: string
@@ -242,4 +248,5 @@ export type ChoicesAnswer = {
   values: ChoicesValues
   feedback: string
   order?: ChoicesOrder
+  rounds?: unknown[]
 }

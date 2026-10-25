@@ -1533,11 +1533,32 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - The commands ([details.js](tools/details.js)):
 
   ```sh
-  epic ask create | show [--wait] | wait | answer | draft | list | sweep
+  epic ask create | round | show [--wait] | wait | answer [--round <n>] | draft | list | sweep | fold
   ```
 
   - `show` opens a page in the side bar's "Review" tab (epic `windows-and-review` P6).
   - `draft` prints what Owen typed and hasn't sent (below):  read it before rewriting a page he may have open.
+- ONE PAGE PER QUESTION (epic `epic-engine` P37;  Owen, 2026-10-24:  "you updated the Event Names document several
+  times, leaving multiple copies viable.  Better to replace the one file."):
+  - asked again:  `epic ask round <page> [--from <spec.json>]` (a choice page:  `epic choices round <page> --rows ...`)
+    rewrites the ONE page in place;  without `--from`, a details page stays as it is, for Claude to edit
+  - the round before folds into the page, at its bottom, above the notes box or the bar:
+    a `<ui-section data-round="1" id="round-1" collapsed>`, "Round 1 · 10/24 · what you sent"
+    - what it asked (its lede), and what was sent as `answer` prints it, as a list:  no live question, so the form
+      never sends an old round again
+    - nothing sent:  "nothing sent", or what was typed ("typed, not sent")
+    - the "Asked" line says the round:  `2026-10-25 · round 2`
+  - the answer file keeps every round's:  the earlier ones under `rounds` (`{ round, asked, sent?, answer? }`),
+    its top the newest round's alone
+    - `answer` prints the newest round's;  `--round <n>` an earlier one, as it was sent
+    - the routes serve no answer while the file holds only `rounds`, and keep them through every send
+  - a draft typed after the send (or with nothing sent) stays, and comes back over the new round;  a sent one goes
+  - `create` refuses a NEAR-COPY's slug:  `<slug>-2`, `-round2`, `-r2`, `-v2` (2 to 99) beside `<slug>.html`,
+    naming the `round` command;  a dated slug (`bedtime-2026-10-25`) never reads as one
+  - `epic ask fold [--dry-run]`, once:  every epic's near-copies made before (elemental-spell's `event-names-2`,
+    `-3`, `-4`) folded into their first page as its rounds, their files merged and removed, the epic's links to them
+    pointed at it;  so its See Also lists one link per question
+  - the code:  [rounds.js](tools/rounds.js)
 - Written in the epics pack's `<epic-*>` elements (epic `epic-workflow` P12), so a question reads as an epic page's.
   - Each element has its page in Epic UI (`/components/epics/`, "Pages Owen answers on").
   - a question:  a `<ui-section id>` holding an `<epic-ask>`
@@ -1623,8 +1644,12 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - The commands ([choices.js](tools/choices.js);  the rows' shape is in its comment):
 
   ```sh
-  epic choices create <slug> --rows <rows.json5> | show [--wait] | wait | answer | list
+  epic choices create <slug> --rows <rows.json5> | round <slug> --rows <rows.json5> | show [--wait] | wait
+  epic choices answer [--round <n>] | list
   ```
+
+  - Asked again:  `round`, never a second page (see "Details pages", ONE PAGE PER QUESTION):  the new rows in the
+    page and beside it, the round before folded at the bottom with its changed rows and feedback.
 
   - Pages go where details pages do.
   - `<slug>.rows.json5`, beside the page, holds the rows.

@@ -12,7 +12,10 @@
  *   `--wait`:  then `wait`
  * - `wait <page> [--timeout 8h]` -- block until Owen presses "Do it" (an answer NEWER than the wait's start), print
  *   it as plain text, exit 0.  Run it in the BACKGROUND:  its exit wakes the session.  Timeout:  exit 2
- * - `answer <page>` -- print the answer already sent (exit 1 if none)
+ * - `round <page> --rows <rows.json5> [--title "..."] [--description "..."]` -- the page's NEXT ROUND, the one page
+ *   rewritten in place with the new rows, the round before folded at its bottom (`newRound()`, epic `epic-engine`
+ *   P37);  `create` refuses a second page on the same question (`event-names-2`)
+ * - `answer <page> [--round <n>]` -- print the answer already sent (exit 1 if none);  `--round`:  an earlier round's
  * - `list [<epic>]` -- every choice page:  answered, draft (typed, not sent) or waiting;  with an epic, only
  *   that epic's (`epics/<epic>/details/`)
  * - `<page>`:  a slug, `<epic>/<slug>`, or a path, as `epic ask` takes them
@@ -44,6 +47,7 @@ import {
   findPage,
   isEpicsPage,
   listPages,
+  noAnswerYet,
   parseArgs,
   readAnswer,
   shown,
@@ -51,6 +55,7 @@ import {
   waitForAnswer
 } from "./details.js"
 import { CONTENT, ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
+import { archiveAnswer, askedOf, dropSentDraft, foldRound, formatRound, refuseNearCopy } from "./rounds.js"
 
 /** How long `wait` waits by default:  8 hours, as `epic ask wait`. */
 const DEFAULT_TIMEOUT = "8h"
@@ -66,6 +71,12 @@ async function main(argv) {
       console.log(shown(createPage(CONTENT, target, { ...flags, data })))
       return 0
     }
+    if (command === "round") {
+      if (!flags.rows || flags.rows === true) throw new Error("round needs --rows <rows.json5>")
+      const data = DataFile.parse(readFileSync(findFile(flags.rows), "utf8"))
+      console.log(shown(newRound(CONTENT, target, { ...flags, data })))
+      return 0
+    }
     if (command === "show") {
       const file = findChoicesPage(CONTENT, target)
       await openInVSCode(file)
@@ -74,8 +85,13 @@ async function main(argv) {
     if (command === "wait") return await waitAndPrint(findChoicesPage(CONTENT, target), flags)
     if (command === "answer") {
       const file = findChoicesPage(CONTENT, target)
+      if (flags.round) {
+        const text = formatRound(file, Number(flags.round))
+        console.log(text ?? `no round ${flags.round} of ${shown(file)}`)
+        return text ? 0 : 1
+      }
       const answer = readAnswer(file)
-      console.log(answer ? formatAnswer(file, answer) : `no answer yet:  ${shown(file)}`)
+      console.log(answer ? formatAnswer(file, answer) : noAnswerYet(file, "choices"))
       return answer ? 0 : 1
     }
     if (command === "list") {
@@ -93,9 +109,10 @@ async function main(argv) {
 
 /** `epic choices` with no or a wrong command. */
 const USAGE = `usage:  epic choices create <slug> --rows <rows.json5> [--title "..."] [--epic <name>] [--description "..."]
+        epic choices round <page> --rows <rows.json5> [--title "..."] [--description "..."]
         epic choices show <page> [--wait] [--timeout 8h]
         epic choices wait <page> [--timeout 8h]
-        epic choices answer <page>
+        epic choices answer <page> [--round <n>]
         epic choices list [<epic>]`
 
 ////////////////
@@ -108,18 +125,61 @@ const USAGE = `usage:  epic choices create <slug> --rows <rows.json5> [--title "
  * - `data`:  `ChoicesData`, checked (`checkData()`);  `title` / `description` flags beat its own
  * - `epic`:  in that epic's `details/` (the epic must exist);  else the scratch `pages/details/`
  * - refuses to overwrite either file
+ * - refuses a NEAR-COPY (epic `epic-engine` P37):  `event-names-2` beside `event-names` is its second round,
+ *   `epic choices round event-names --rows ...` (`rounds.js` `refuseNearCopy()`)
  * - SIDE EFFECT:  writes `<slug>.html` and `<slug>.rows.json5`
  */
 export function createPage(docs, slug, { title, epic, description, data } = {}) {
   const checked = checkData(data)
-  title ??= checked.title ?? "Syntax choices"
   if (!slug || !SLUG.test(slug)) throw new Error(`a slug is lower-kebab-case:  '${slug ?? ""}'`)
   if (epic && !existsSync(join(docs, "epics", epic))) throw new Error(`no epic '${epic}' (epics/${epic}/)`)
   const folder = epic ? join(docs, "epics", epic, "details") : join(docs, "pages", "details")
   const file = join(folder, `${slug}.html`)
   for (const each of [file, rowsFile(file)])
     if (DataFile.exists(each)) throw new Error(`${relative(docs, each)} already exists`)
-  const depth = relative(docs, folder).split("/").length
+  refuseNearCopy(folder, slug, epic)
+  const document = pageDocument(docs, file, { title, description, checked })
+  mkdirSync(folder, { recursive: true })
+  writeFileSync(file, serialize(document))
+  writeRows(file, checked)
+  return file
+}
+
+/**
+ * Start the next ROUND of choice page `target` (epic `epic-engine` P37):  the ONE page rewritten in place with the
+ * rows `data`, never a second page;  its absolute path.
+ * - the round it was on folds into the page, at the bottom, with what was sent (`rounds.js` `foldRound()`)
+ * - its answer moves into the answer file's `rounds` (`answer --round <n>` prints it)
+ * - a draft typed after the send (or with nothing sent) stays, and comes back over the new rows by id;
+ *   a sent one goes
+ * - `title`:  the flag, the data's, else the page's own
+ * - SIDE EFFECT:  writes the page, its rows and its answer file;  may delete its draft
+ */
+export function newRound(docs, target, { title, description, data } = {}) {
+  const checked = checkData(data)
+  const file = findChoicesPage(docs, target)
+  if (!DataFile.exists(rowsFile(file))) throw new Error(`a page naming its own rows takes no rounds:  ${file}`)
+  const { document: old } = parseHTML(readFileSync(file, "utf8"))
+  title ??= checked.title ?? old.querySelector("h1")?.textContent?.trim()
+  // what was sent reads the rows it was sent against:  before the new ones are written
+  const answer = readAnswer(file)
+  const sent = answer && formatAnswer(file, answer)
+  const draft = !answer && DataFile.read(draftFile(file))
+  const typed = draft ? formatAnswer(file, { ...draft, answered: draft.saved, changes: 0 }) : undefined
+  const document = pageDocument(docs, file, { title, description, checked })
+  const asked = askedOf(old)
+  const round = foldRound({ from: old, into: document, sent, typed, asked: today() })
+  writeFileSync(file, serialize(document))
+  writeRows(file, checked)
+  archiveAnswer(file, { round, asked, sent, answer })
+  dropSentDraft(file, answer)
+  return file
+}
+
+/** Choice page `file` (in content folder `docs`), parsed, from the template:  its head, words and rows. */
+function pageDocument(docs, file, { title, description, checked }) {
+  title ??= checked.title ?? "Syntax choices"
+  const depth = relative(docs, dirname(file)).split("/").length
   const template = readFileSync(join(TOOL_TEMPLATES, "syntax-choices.html"), "utf8")
   const { document } = parseHTML(atDepth(template, depth))
   fillHead(document, {
@@ -134,8 +194,11 @@ export function createPage(docs, slug, { title, epic, description, data } = {}) 
   // the rows, as elements, where the template's example section is
   const example = [...document.querySelectorAll("ui-section")].find((section) => section.querySelector(ROWS))
   example?.replaceWith(...choiceSections(document, checked))
-  mkdirSync(folder, { recursive: true })
-  writeFileSync(file, serialize(document))
+  return document
+}
+
+/** Write `checked`'s rows beside page `file`, `<slug>.rows.json5`. */
+function writeRows(file, checked) {
   const { sections, rows, fileColumn, stacked, blank, noun } = checked
   // the layout flags, kept only when they change the default (the migration redraws a page from them:  `migrate.js`)
   const kept = {
@@ -146,7 +209,6 @@ export function createPage(docs, slug, { title, epic, description, data } = {}) 
     rows
   }
   DataFile.write(rowsFile(file), kept)
-  return file
 }
 
 /**
