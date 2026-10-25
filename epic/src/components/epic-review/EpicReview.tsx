@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
+import { DraftSaver } from "spell-epic/answers"
 import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, NOBODY_LISTENING, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
@@ -341,8 +342,16 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** The note's `<textarea>`, once drawn. */
   private noteInput: HTMLTextAreaElement | undefined
 
-  /** The timer saving a draft once typing stops;  `undefined` with nothing pending. */
-  private saveTimer: E.CancelablePromise<unknown> | undefined
+  /**
+   * The note's saves (epic `coherence` C10):  `DRAFT_SAVE_MS` after the last key, one at a time, retried every 3s
+   * after a failure, sent as the page goes;  the floppy follows where they stand (`showSave()`).
+   * - no browser copy of its own:  the client backs every key up (`ReviewClient.type()`)
+   */
+  private readonly drafts = new DraftSaver({
+    save: (save) => this.saveNote(save),
+    wait: DRAFT_SAVE_MS,
+    onChange: () => this.showSave()
+  })
 
   /**
    * The note box (Owen, 2026-10-06, Q8):  Owen's voice, on ivory.
@@ -355,7 +364,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   the plane (green), Revisit Later, the x (grey:  drop it)
    * - Do Now is the line's (decision Q20):  it takes the note along
    * - SAVED as typed, `DRAFT_SAVE_MS` after the last key, and at once when the box loses focus or the page goes away
-   *   (`watchPageHide()`)
+   *   (`watchPageHide()`), by its `DraftSaver`:  a failed save tried again every 3s
    *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
    *     the first key, so Send and the countdown hand them over;  the box stays open under the cursor
    *   - a request at work, or an emptied box with no revisit:  a draft, as before
@@ -445,10 +454,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.whileConnected
   protected watchPageHide() {
     if (this.shows !== "note") return undefined
-    const onPageHide = () => this.flush({ keepalive: true })
-    window.addEventListener("pagehide", onPageHide)
+    const unwatch = this.drafts.watch(window)
     return () => {
-      window.removeEventListener("pagehide", onPageHide)
+      unwatch()
       this.flush()
     }
   }
@@ -463,9 +471,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const id = this.review.id()
     const text = this.noteInput!.value
     client?.type(id, text)
-    this.saved = undefined
-    this.saveTimer?.cancel()
-    this.saveTimer = E.after(DRAFT_SAVE_MS / 1000, () => void this.saveDraft())
+    this.drafts.changed()
     const made = client?.typedMark(id, text)
     if (made && made !== "draft" && made.action !== client?.markOf(id)?.action) this.flush()
   }
@@ -483,8 +489,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** A note box button:  the note becomes a mark (an action chosen:  `epic-chosen`);  the box empties. */
   @E.untracked
   private use(how: NoteHow) {
-    this.saveTimer?.cancel()
-    this.saveTimer = undefined
+    this.drafts.done()
     const note = this.noteInput!
     const text = note.value.trim()
     note.value = ""
@@ -509,22 +514,28 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /** Save a pending draft now (`keepalive`:  the page is going away). */
   private flush({ keepalive = false } = {}) {
-    if (!this.saveTimer) return
-    this.saveTimer.cancel()
-    void this.saveDraft({ keepalive })
+    void this.drafts.save({ keepalive })
   }
 
-  /** Save the note as the mark it makes, else as the element's draft (`ReviewClient.saveTyped()`);  the floppy says how. */
-  private async saveDraft({ keepalive = false } = {}) {
-    this.saveTimer = undefined
+  /**
+   * `DraftSaver`'s save:  the note as the mark it makes, else as the element's draft (`ReviewClient.saveTyped()`).
+   * - throws the client's last write error when it didn't go through
+   */
+  private async saveNote({ keepalive }: { keepalive: boolean }): Promise<undefined> {
     const client = this.review.client
     const note = this.noteInput
-    if (!client || !note) return
-    const text = note.value
-    const ok = await client.saveTyped(this.review.id(), text, { keepalive })
-    if (note.value !== text) return
-    if (!ok) this.saved = { ok: false }
-    else this.saved = text.trim() ? { ok: true, at: new Date().toISOString() } : undefined
+    if (!client || !note) return undefined
+    const ok = await client.saveTyped(this.review.id(), note.value, { keepalive })
+    if (!ok) throw new Error(this.review.lastWriteError || "not saved")
+    return undefined
+  }
+
+  /** The floppy, as the saves stand:  hidden while typing;  Saved (with when) once through, red when not. */
+  private showSave() {
+    const state = this.drafts.state
+    if (state.kind === "unsaved" || state.kind === "idle") this.saved = undefined
+    else if (state.kind === "saved") this.saved = this.noteInput?.value.trim() ? { ok: true, at: state.at } : undefined
+    else if (this.drafts.isError) this.saved = { ok: false }
   }
 
   /** The floppy's tooltip:  when it was saved, or why not. */

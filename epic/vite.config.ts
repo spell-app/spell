@@ -13,10 +13,13 @@ import { fmtConfig, packageLint, patternLintIn } from "spell/toolchain/lint"
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated
  *   - in the docs tools' `_assets/`:  the bundles `epic pages update` writes (`spell-ui.js`, `spell-comments.js`,
- *     `lazy/`, `emoji/`),
+ *     the data pages' `commands.js`, `core-reference.js` and `spell-syntax.js`, `lazy/`, `emoji/`),
  *     and the vendored highlight.js
  *   - the extension's build (`vscode/out`)
  */
+/** The data pages' bundles (epic `coherence` C12):  built from their `<name>.entry.js` by `bundle-spell-ui.js`. */
+const DATA_PAGE_BUNDLES = ["commands", "core-reference", "spell-syntax"].map((name) => `src/tools/_assets/${name}.js`)
+
 /**
  * The generated files in the docs tools' `_assets/`.
  * - the shared patterns for them (`**\/epics/tools/_assets/...`, spell-app's layout) don't match `src/tools/_assets/`
@@ -24,6 +27,7 @@ import { fmtConfig, packageLint, patternLintIn } from "spell/toolchain/lint"
 const GENERATED_ASSETS = [
   "src/tools/_assets/spell-ui.js",
   "src/tools/_assets/spell-comments.js",
+  ...DATA_PAGE_BUNDLES,
   "src/tools/_assets/lazy/**",
   "src/tools/_assets/emoji/**",
   "src/tools/_assets/highlight.min.js"
@@ -52,6 +56,7 @@ export default defineConfig({
         "src/components/__pack",
         "src/tools/_assets/spell-ui.js",
         "src/tools/_assets/spell-comments.js",
+        ...DATA_PAGE_BUNDLES,
         "src/tools/_assets/lazy",
         "src/tools/_assets/emoji",
         "src/tools/_assets/highlight.min.js"

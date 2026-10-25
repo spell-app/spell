@@ -48,6 +48,17 @@
  * - A classic script (IIFE) with NO Spell UI and no Solid in it, and no global of its own:  it runs beside the page's
  *   Spell UI, never with a second one (`checkNoSpellUI()`)
  *
+ * The DATA PAGES' own scripts (epic `coherence` C12), built after the comments':  each `_assets/<name>.entry.js` into
+ * `_assets/<name>.js` (`DATA_PAGES`:  the commands page, the core reference, the syntax page)
+ *
+ *   node tools/bundle-spell-ui.js --data-pages     (only them:  they need no UI build)
+ *
+ * - each loads INSTEAD of `spell-ui.js`:  draws its tables, then adds `spell-ui.js` (`drawThenBoot()`)
+ * - classic scripts (IIFE) with NO Spell UI and no Solid in them, as the comments' (`checkNoSpellUI()`):  the page's
+ *   `spell-ui.js` draws their `<ui-*>` markup;  they bundle the helpers they import (the docs helpers, `ServerLink`,
+ *   `DraftSaver` ...) instead of copying them
+ * - the same paths the pages always loaded (`/_epic/assets/commands.js` ...), so no page changes
+ *
  * NOT the claude.ai design bundle (Claude Design's `components/bundle.js`, with the brand's elements):  spell-brand's
  * `yarn design:bundle` since epic `repo-split` P10 (Q32), whose resolver and checks are a copy of these.
  */
@@ -89,6 +100,10 @@ const COMMENTS_ONLY = args.includes("--comments")
 /** The comments' own script:  its entry, and the classic script it's built into. */
 const COMMENTS_ENTRY = join(ASSETS, "spell-comments.entry.js")
 const COMMENTS_OUT = join(ASSETS, "spell-comments.js")
+/** Building ONLY the data pages' own scripts (`--data-pages`). */
+const DATA_PAGES_ONLY = args.includes("--data-pages")
+/** The data pages' scripts, by name:  `_assets/<name>.entry.js` into `_assets/<name>.js`. */
+const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
@@ -282,14 +297,19 @@ const LAZY = [
   }
 ]
 
-if (!COMMENTS_ONLY) {
+if (!COMMENTS_ONLY && !DATA_PAGES_ONLY) {
   if (!args.includes("--skip-ui-build")) buildUI()
   writeEmojiChunks()
   await writeLazyScripts()
   const warnings = await bundle()
   report(warnings)
 }
-report(await bundleComments(), COMMENTS_OUT)
+if (!DATA_PAGES_ONLY) report(await bundleComments(), COMMENTS_OUT)
+if (!COMMENTS_ONLY)
+  for (const name of DATA_PAGES) {
+    const out = join(ASSETS, `${name}.js`)
+    report(await bundleShared(join(ASSETS, `${name}.entry.js`), out), out)
+  }
 
 ////////////////
 // ## UI build
@@ -358,16 +378,21 @@ async function bundle() {
   return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
 }
 
+/** Bundles the comments' own script, `COMMENTS_ENTRY` into `COMMENTS_OUT` (`bundleShared()`). */
+async function bundleComments() {
+  return bundleShared(COMMENTS_ENTRY, COMMENTS_OUT)
+}
+
 /**
- * Bundles the comments' own script, `COMMENTS_ENTRY` into `COMMENTS_OUT`, then checks it has no Spell UI or Solid in it
- * and runs as a classic script.
+ * Bundles `entry` into `outfile`, a script that runs BESIDE the page's Spell UI (the comments', a data page's), then
+ * checks it has no Spell UI or Solid in it and runs as a classic script.
  * - no `globalName`:  `window.SpellUI` stays the page's
  * - Returns esbuild's warnings, as text.
  */
-async function bundleComments() {
+async function bundleShared(entry, outfile) {
   const result = await build({
-    entryPoints: [COMMENTS_ENTRY],
-    outfile: COMMENTS_OUT,
+    entryPoints: [entry],
+    outfile,
     bundle: true,
     format: "iife",
     platform: "browser",
@@ -379,8 +404,8 @@ async function bundleComments() {
     logLevel: "silent",
     plugins: [sourceNames(SPELL_EPIC)]
   })
-  checkNoSpellUI(result.metafile)
-  checkClassicScript(COMMENTS_OUT)
+  checkNoSpellUI(result.metafile, outfile)
+  checkClassicScript(outfile)
   return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
 }
 
@@ -581,16 +606,17 @@ function checkNoElementSource(metafile) {
 }
 
 /**
- * Fails if the comments' own script took in any of Spell UI, spell-element or Solid:  the page it runs on has its own,
+ * Fails if `outfile` (the comments' own script, a data page's) took in any of Spell UI, spell-element or Solid:  the
+ * page it runs on has its own,
  * and two copies handle every event twice (epic `epic-engine` I18).
  */
-function checkNoSpellUI(metafile) {
+function checkNoSpellUI(metafile, outfile = COMMENTS_OUT) {
   const shared = Object.keys(metafile.inputs).filter(
     (input) =>
       [UI_DIR, ELEMENT_DIR].some((dir) => isInside(RealPath.of(resolve(input)), dir)) ||
       /node_modules\/(?:solid-js|@solidjs)\//.test(input)
   )
-  if (shared.length) fail(`${relative(DOCS, COMMENTS_OUT)} took in what the page shares:\n  ${shared.join("\n  ")}`)
+  if (shared.length) fail(`${relative(DOCS, outfile)} took in what the page shares:\n  ${shared.join("\n  ")}`)
 }
 
 /**

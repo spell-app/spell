@@ -9,7 +9,7 @@ import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell-epic/list/E
 
 import { PlanDates } from "spell-epic/dates"
 import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
-import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, isAirplane, isImmediate } from "spell-epic/review"
+import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, ServerLink, isAirplane, isImmediate } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
@@ -620,24 +620,23 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.whileConnected
   protected followSeeAlso() {
-    if (isServer || location.protocol === "file:" || !this.epic || this.isSaga) return undefined
+    if (isServer || !ServerLink.canRead() || !this.epic || this.isSaga) return undefined
     const folder = `/epics/${this.epic}/`
     void this.loadSeeAlso()
-    const onFile = (event: Event) => {
-      const path = (event as CustomEvent<{ path: string }>).detail?.path ?? ""
-      if (path.includes(folder) && path.endsWith(".html")) void this.loadSeeAlso()
-    }
-    addEventListener("spell-server:changed", onFile)
-    return () => removeEventListener("spell-server:changed", onFile)
+    const isEpicPage = (path: string) => path.includes(folder) && path.endsWith(".html")
+    return ServerLink.watch(window, isEpicPage, () => void this.loadSeeAlso(), { every: 0 })
   }
 
   /** Ask the page server for the epic's pages;  a server without the route, or none at all:  none. */
   @E.untracked
   private async loadSeeAlso() {
     try {
-      const answer = await fetch(`/api/epics/pages?epic=${encodeURIComponent(this.epic ?? "")}`)
-      if (!answer.ok) return
-      const { pages, saga } = (await answer.json()) as { pages?: SeeAlsoLink[]; saga?: SagaLink | null }
+      const answer = await ServerLink.forPage().get<{ pages?: SeeAlsoLink[]; saga?: SagaLink | null }>(
+        "/api/epics/pages",
+        { query: { epic: this.epic ?? "" } }
+      )
+      if (!answer) return
+      const { pages, saga } = answer
       this.seeAlso = Array.isArray(pages) ? pages : []
       this.sagaLink = saga ?? undefined
     } catch {

@@ -251,6 +251,18 @@ export type ServerInfo = {
   token: string
   /** the page's file, as the server announces changes (`spell-server:changed`'s `path`) */
   file?: string
+  /** the checkout it serves, on disk:  a file's `vscode://` link (`ChoicesForm.fileUrl()`) */
+  root?: string
+  /** the folder it serves worktrees from, `/worktrees/<w>/` pages' checkouts */
+  worktrees?: string
+}
+
+/** The browser's storage, or what finds it (`StoragePlace` calls it, and keeps memory when it throws). */
+export type StorageFinder = Storage | (() => Storage) | null | undefined
+
+/** `storage` as `StoragePlace` takes it:  the storage, found now;  none for none (memory). */
+export function storageNow(storage: StorageFinder): Storage | undefined {
+  return (typeof storage === "function" ? storage() : storage) ?? undefined
 }
 
 /** What a `ServerLink` (and an `AgentsClient`) is made from:  the page's facts, and `fetch` (stubbed in tests). */
@@ -274,8 +286,11 @@ export type ServerLinkOptions = {
 
 /** What a `ReviewClient` is made from:  its link's facts, plus the browser's storage and the page's items. */
 export type ReviewClientOptions = ServerLinkOptions & {
-  /** `localStorage`, for the note backups;  `null`:  none (blocked, private window) */
-  storage?: Storage | null
+  /**
+   * `localStorage`, for the note backups, or what finds it;  `null`:  none (private window, tests)
+   * - a finder that throws (blocked site data):  this page's memory (`StoragePlace`)
+   */
+  storage?: StorageFinder
   /**
    * Is `id` an item or section of this page?
    * - a backup for one that's gone is dropped

@@ -137,6 +137,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
+    - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
+      - `isServed()` (the write token, not `file://`) and `canRead()` (not `file://`):  the ONE "am I served?" test
+      - `get()` on the kit's `$fetch()`:  a 404 answers its `missing` default, any other failure throws;  no caller
+        checks a response itself
+      - `post()`:  the token, refreshed once from the page as served now after a restart;  the one stale-token rule
+      - `ServerLink.watch(window, files, refresh, { every, polls })`:  the one poll, the page coming into view, the
+        server's word that a file changed (a name, or a test of the path)
+      - `ServerLink.forPage()`:  the page's own link, for reads and writes with no client of their own (`<epic-page>`'s
+        See Also, `<epic-cards>`, `<epic-link>`, the docs pages' comments, the syntax page)
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
     as their elements keep them.
     - No Solid, no Spell UI:  node-safe at import.
@@ -151,6 +160,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
+    - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
+      what's typed and not sent:  the three forms, `<epic-review>`'s note, `<epic-test-run>`'s comment, the docs
+      pages' comments and the syntax page
+      - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
+        one save at a time, tries a failed one again every 3s, sends at once as the page hides or goes (`keepalive`)
+      - one wording of where it stands:  "not saved yet", "saving…", "saved 14:04", "kept in this browser only:  ..."
+      - its browser copy through the kit's `StoragePlace`:  blocked storage keeps it in memory, nothing throws
+      - plain timers, not the kit's `after()`:  `spell/element`'s leaves are neither a pack's shared module nor allowed
+        in the docs bundles
     - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
       - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
         second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
@@ -490,8 +508,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
     - A page-named filter is under `spell-filter:` too.
   - Stays raw:
-    - [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle
     - [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright
+    - the syntax page went through `PrefStore` once bundled (epic `coherence` C12)
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -499,7 +517,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The tooling's data files are JSON5, read and written through `DataFile` (`spell-epic/data/DataFile`, see "Overview"):
   never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop Owen's comments.
   - A new one:  `<name>.json5`, its path given to `DataFile`.
-  - A browser reader drops comments before `JSON.parse()` (`commands.js`' `parseData()`).
+  - A browser reader reads it with the kit's `parseJSON5()` (`commands.entry.js`, bundled since epic `coherence` C12).
 - A change to epic page markup adds its MIGRATION STEP in the SAME commit (epic `epic-workflow` P8).
   - epic page markup:  what the tool writes, or what an element reads
   - the step:  a class in [migrations/](tool/migrations/), last in `Migrations.all`, with its test
@@ -875,6 +893,14 @@ In `tools/`:
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the content folder's `goals/`.
     - their look, and their live buttons:  PARKED since 2026-10-11, each says "TODO:  this will ..." (`parked()`)
     - `goals.css` holds every rule the saga pages took from `plan-doc.css`, which they no longer link.
+  - The DATA PAGES' scripts (epic `coherence` C12):  `commands.entry.js` -> `commands.js`,
+    `core-reference.entry.js` -> `core-reference.js`, `spell-syntax.entry.js` -> `spell-syntax.js`.
+    - BUNDLED by [bundle-spell-ui.js](tools/bundle-spell-ui.js) (`--data-pages`:  only them), classic scripts with no
+      Spell UI in them, as the comments' own;  edit the entries, NEVER the bundles.
+    - They import what exists instead of copying it:  the docs helpers' `el()`, `titleInside()`, notice, section
+      numbers and their one start, `drawThenBoot()`;  the kit's `slug()`, `parseJSON5()`, `clockTime()`;
+      `ChoicesForm`'s file links, `ServerLink`, `DraftSaver`.
+    - The pages load them by the same paths as before (`/_epic/assets/commands.js`):  no page changed.
   - `commands.js`:  command reference pages ([the commands template](../templates/commands.html)).
     - It draws their tables from the page's JSON, then loads `spell-ui.js` itself.
     - Built from Spell UI's elements (`<ui-section>`, `<ui-table>`, `<ui-statistic>`), never markup in strings

@@ -88,7 +88,6 @@ import {
   growField,
   nextFrames,
   noteToast,
-  postJSON,
   readJSON,
   titleInside,
   writeJSON
@@ -106,6 +105,7 @@ import {
 import { readingTime } from "spell-epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell-epic/links"
 import { PageStages } from "spell-epic/phases"
+import { ServerLink } from "spell-epic/review"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
@@ -1061,7 +1061,9 @@ function wireLiveUpdate(main) {
       return reload()
     }
     if (!patched) {
-      console.warn(`live update:  can't patch this page in place (${before === null ? "its source as loaded is unknown" : "its head or shell changed, or too much of it"});  it reloads once out of sight`)
+      console.warn(
+        `live update:  can't patch this page in place (${before === null ? "its source as loaded is unknown" : "its head or shell changed, or too much of it"});  it reloads once out of sight`
+      )
       return reload()
     }
     base = Promise.resolve(html)
@@ -3001,7 +3003,7 @@ const OLD_NEW_EPIC_DRAFT_KEY = "spell-new-epic-draft"
  */
 function wireNewEpic(main) {
   if (!/(^|\/)epics\/(index\.html)?$/.test(location.pathname)) return
-  if (!window.SPELL_SERVER?.token || location.protocol === "file:") return
+  if (!ServerLink.isServed()) return
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
   // the browser's own tooltip, a `title` (Owen, 2026-10-10:  never a `<ui-popup>` as a tooltip)
@@ -3059,7 +3061,10 @@ function newEpicBox() {
     if (!title.value.trim()) return title.focus()
     save.setAttribute("loading", "")
     try {
-      const { name } = await postJSON(NEW_EPIC_API, { title: title.value.trim(), prompt: prompt.value.trim() })
+      const { name } = await ServerLink.forPage().post(NEW_EPIC_API, {
+        title: title.value.trim(),
+        prompt: prompt.value.trim()
+      })
       writeJSON(NEW_EPIC_DRAFT_KEY, {})
       close()
       noteToast(`Future epic ${name} written down`, "success")
