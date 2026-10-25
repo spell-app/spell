@@ -53,6 +53,20 @@ describe("spellx groups", () => {
     ])
   })
 
+  test("the converter writes a heading back as its <group>, its comment its description", () => {
+    const text = [
+      'a "card" is a view where:',
+      "\t// Face up or face down",
+      '\t- group "direction"',
+      '\t- its "direction" is one of up, down',
+      ""
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Card.spell", contents: text }]).files
+    const spellx = SX.SpellxWriter.write({ text, match: file!.match!, scope: file!.scope })
+    expect(spellx).toContain('\t<group "direction" description="Face up or face down" />\n')
+    expect(compiled(spellx, "/Card.spellx").code).toBe(compiled(text, "/Card.spell").code)
+  })
+
   test('in Spanish:  `<grupo>`, `grupo=`, and its twin `- grupo "..."`', () => {
     const text = [
       '<encanto-vista "carta">',
