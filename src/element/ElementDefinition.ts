@@ -1,3 +1,4 @@
+// spell ui rename: leave this file (it documents the old-name mechanism, with old names as its examples)
 import { E } from "spell/element"
 
 /****************
