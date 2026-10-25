@@ -250,6 +250,8 @@
   .extras {
     gap: 4px;
     margin-inline-start: auto;
+    /* 1px of the line's fill right of the review buttons' ring (Owen, 2026-10-25:  "1px white gap, not 3ish px like now") */
+    margin-inline-end: -1.34px;
   }
   ::slotted([slot="actions"]) {
     flex: none;
