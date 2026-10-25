@@ -76,6 +76,7 @@
  */
 
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { PagePatch } from "spell/server/site"
 import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
@@ -927,7 +928,7 @@ function highlight() {
 /**
  * Elements the runtime adds INSIDE `main`, so not in the page's source:  the patch steps around them.
  * - NOTE: anything else the runtime (or a page script) adds in `main` should carry `data-spell-added`;
- *   an unknown extra is stepped around too when its tag doesn't collide with its source siblings' (`liveKids()`)
+ *   an unknown extra of another tag than its source siblings doesn't shift their addresses either (`PagePatch`)
  */
 const ADDED = ".spell-item-filter, .spell-hidden-note, [data-spell-added]"
 
@@ -941,33 +942,55 @@ const EPIC_PAGE_STATE = ["open", "reviewing"]
 
 /**
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):
- * a patch keeps them (`planAttributes()`).
+ * a patch keeps them (`PagePatch`'s `keptAttributes`, beside the shared `collapsed` and `open`).
  */
-const KEPT_ATTRIBUTES = new Set(["collapsed", "badge", "data-show", ...EPIC_PAGE_STATE])
+const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", ...EPIC_PAGE_STATE]
 
 /**
  * Elements that manage their children (panels and tabs by index, options):  a change inside replaces the whole
- * element, its open panels carried over (`carryState()`).
+ * element, its open panels carried over (the kit's shared rules, `PagePatch.keepReaderState()`).
  */
 const MANAGERS = "ui-accordion, ui-tabs, ui-select, ui-dropdown"
 
 /**
  * A tag of the `epics` pack's elements (`<epic-page>`, `<epic-item>` ...):  NEVER replaced by a patch while its tag
- * stays (`planMorph()`):  each keeps its fold, its loaded part and what's typed in it.
+ * stays:  each keeps its fold, its loaded part and what's typed in it.
+ * - patched in place like any element, attributes and children, text by text (`PagePatch`);
+ *   even a body file changing (`source`) doesn't replace one
  */
 const EPIC_TAG = /^epic-/
 
-/** `squash()`ed `outerHTML` of source nodes, computed once per patch. */
-const squashed = new WeakMap()
+/**
+ * The page patch, the kit's ONE patcher (`PagePatch`, `spell/server/site`;  epic `epic-engine` P40), with this
+ * runtime's rules laid over the shared ones:
+ * - `ADDED`:  what this runtime adds in `main`, stepped around
+ * - `KEPT_ATTRIBUTES`:  the reader's
+ * - `MANAGERS`:  replaced whole, their open panels carried over
+ * - a host whose body comes from a file (`<ui-section source>`, an epic page's parts:  `isSourceHost()`):  only its
+ *   slotted children (icon, header) are the page's;  the body is the file's (`wireSourceBodies()`)
+ *   - its `source` changing:  replaced, so it loads the new file (never an `<epic-*>`:  `EPIC_TAG`)
+ * - a copy brought in:  folded as the reader has it, its `<epic-*>` page state kept (`carryState()`)
+ */
+const patcher = new PagePatch({
+  skip: ADDED,
+  keptAttributes: KEPT_ATTRIBUTES,
+  replacedWhole: MANAGERS,
+  slotsOnly: isSourceHost,
+  mustReplace: (before, after) =>
+    !EPIC_TAG.test(after.localName) && before.getAttribute("source") !== after.getAttribute("source"),
+  prepare: carryState
+})
 
 /**
  * An edit to this page's file updates it IN PLACE, instead of reloading it (epic page `review-review`, D10).
- * - `liveClient()` (`spell/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
- *   and fires a cancelable `spell-server:reloading` on `window`, `detail` `{ path, html, etag, reload() }`:
- *   taking it (`preventDefault()`) stops its reload
+ * - `liveClient()` (`spell/server`, the kit's `src/server/liveClient.ts`) hands over the new version when the file
+ *   changes (the page server sends it with the change), and fires a cancelable `spell-server:reloading` on `window`,
+ *   `detail` `{ path, html, etag, own, reload() }`:  taking it (`preventDefault()`) stops its reload
+ *   - `own`:  the version this page's own save wrote, which it shows already:  only taken as the new baseline
  * - the patch compares the page's source as it LOADED (fetched once, `SPELL_SERVER.readPage()`, trusted only when
- *   its `ETag` is the one served) with the new source, and changes only what differs in the live page
- *   (`patchPage()`):  everything else keeps its scroll, folds, open panels, focus and typed text
+ *   its `ETag` is the one served) with the new source, and changes only what differs in the live page:
+ *   the kit's patcher (`patcher`, `PagePatch.page()`), a list of small steps, text edited in place;
+ *   everything else keeps its scroll, folds, open panels, focus and typed text
  * - then re-wires what the runtime built from the markup (`rewire()`) and fires `spell-doc:updated` on `window`,
  *   `detail.changed`:  the elements added, replaced or re-attributed
  * - a full reload instead (`reload()`, which keeps the scroll) when the page can't be patched safely:
@@ -978,10 +1001,10 @@ const squashed = new WeakMap()
  *     doc's `data-recent-since`, which every edit may move;  not its `class`), more than half of `main` changed,
  *     the source as loaded couldn't be read, or the patch threw
  * - BODIES from files (`<ui-section source>`, `<ui-accordion source>`:  a split epic page's parts) live their own
- *   life (`wireSourceBodies()`):  the patch leaves what a host loaded alone (`planHost()`), a changed body file
+ *   life (`wireSourceBodies()`):  the patch leaves what a host loaded alone (`isSourceHost()`), a changed body file
  *   re-fetches its open host in place, and each body that loads re-wires the page (`refresh()`)
  * - an epic page in `<epic-*>` markup (epic `epic-components`):  its elements are patched, never replaced
- *   (`planMorph()`), their page state kept (`EPIC_PAGE_STATE`);
+ *   (`EPIC_TAG`), their page state kept (`EPIC_PAGE_STATE`);
  *   their parts (`<epic-item source>` ...) live the bodies' life above
  * - returns `{ ready(page), refresh(changed) }`:  `start()` hands over what it wired;  a change waits for it.
  *   `refresh()` re-wires after `changed` elements changed under the runtime (a body loaded), in turn with updates
@@ -1001,19 +1024,35 @@ function wireLiveUpdate(main) {
     () => null
   )
   addEventListener("spell-server:reloading", (event) => {
-    const { html, reload } = event.detail ?? {}
+    const { html, reload, own } = event.detail ?? {}
     if (typeof html !== "string" || typeof reload !== "function") return
     event.preventDefault()
-    queue = queue.then(() => update(html, reload)).catch(() => reload())
+    queue = queue.then(() => update(html, reload, own)).catch(() => reload())
   })
   return live
 
-  /** Patch the page to `html`, then re-wire it;  reload when it can't be patched. */
-  async function update(html, reload) {
+  /**
+   * Patch the page to `html`, then re-wire it;  reload when it can't be patched.
+   * - `own`:  the page shows it already (its own save):  only the new baseline
+   */
+  async function update(html, reload, own) {
+    if (own) {
+      base = Promise.resolve(html)
+      return
+    }
     const [before, page] = await Promise.all([base, started])
     // no motion while the page takes the change:  it's the file, not the reader, moving things
     quietFor(QUIET_PATCH_MS)
-    const patched = before === null ? null : patchPage(page.main, parse(before), parse(html))
+    const patched =
+      before === null
+        ? null
+        : patcher.page({
+            before: parse(before),
+            after: parse(html),
+            live: page.main,
+            mainOf: mainIn,
+            top: () => stuckBottom(page.main)
+          })
     if (!patched) return reload()
     base = Promise.resolve(html)
     await rewire(page, patched.changed)
@@ -1036,25 +1075,16 @@ function wireLiveUpdate(main) {
  * - no CHEATSHEET filter
  * - no script but the bundle, highlight.js, what the page server injects,
  *   component packs (`<ui-components source="x.pack.js">`'s script, which only defines elements)
- *   and inert data blocks (`isInert()`)
+ *   and inert data blocks (`PagePatch.isInert()`:  epic pages' "Plan hung?" notice keeps its prompt in one)
  */
 function canPatch(main) {
   if (!main.querySelector(":scope > :is(ui-section, epic-page)")) return false
   if (document.querySelector("[data-spell-filter], [data-spell-filter-badge]")) return false
   return Array.from(document.scripts).every((script) => {
     const src = script.getAttribute("src")
-    if (!src) return isInert(script) || script.textContent.includes("SPELL_SERVER")
+    if (!src) return PagePatch.isInert(script) || script.textContent.includes("SPELL_SERVER")
     return /^\/api\/server\//.test(src) || /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src)
   })
-}
-
-/**
- * Is `script` INERT:  a data block the browser never runs (`type="text/plain"`, JSON ...), not JavaScript or a
- * module?  Epic pages' "Plan hung?" notice keeps its prompt in one.
- */
-function isInert(script) {
-  const type = (script.getAttribute("type") ?? "").trim().toLowerCase()
-  return type !== "" && type !== "module" && !/^(text|application)\/(x-)?(java|ecma)script$/.test(type)
 }
 
 ////////////////
@@ -1069,7 +1099,7 @@ function isInert(script) {
  *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
  * - a body's FILE changed (the page server's `spell-server:changed`, `liveClient.ts`):  a host that has loaded it
- *   re-fetches it in place (`reload()`), the reading position kept (`readingAnchor()`);  one that hasn't drops the
+ *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`);  one that hasn't drops the
  *   cached copy, so its first open fetches the new one
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
  */
@@ -1097,7 +1127,7 @@ function wireSourceBodies(main, live, enqueue) {
    *     an `<epic-item>`'s is in its shadow root, which the reload may hide for a moment
    */
   async function reloadBody(host) {
-    const anchor = readingAnchor(main)
+    const anchor = PagePatch.readingAnchor(main, stuckBottom(main))
     const active = host.contains(document.activeElement) ? deepActiveElement() : null
     const caret = active && "selectionStart" in active ? [active.selectionStart, active.selectionEnd] : null
     // the body goes in on the host's `ui-loaded`, which can come after `reload()` resolves;
@@ -1109,7 +1139,7 @@ function wireSourceBodies(main, live, enqueue) {
         setTimeout(done, 2000)
       })
     await host.reload?.()
-    keepAnchor(anchor)
+    PagePatch.keepAnchor(anchor)
     if (!active) return
     await loaded
     for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrames(1)
@@ -1181,303 +1211,24 @@ function mainIn(root) {
 }
 
 /**
- * Patch the live page from source `before` to source `after` (parsed documents);  the plan, or null when it
- * can't be done safely (see `wireLiveUpdate()`).
- * - plans everything first (`planMorph()`), so a patch too big is refused before anything changes
- * - keeps the line being read where it is (`readingAnchor()`), whatever changed above it
- * - the `<title>` follows
- */
-function patchPage(main, before, after) {
-  const was = mainIn(before)
-  const now = mainIn(after)
-  if (!was || !now || headKey(before) !== headKey(after) || shellKey(before) !== shellKey(after)) return null
-  const plan = { ops: [], weight: 0, changed: [] }
-  planBodyAttributes(before.body, after.body, plan)
-  if (planMorph(was, now, main, plan) !== main || plan.weight > now.outerHTML.length / 2) return null
-  const anchor = readingAnchor(main)
-  if (after.title !== before.title) document.title = after.title
-  for (const op of plan.ops) op()
-  keepAnchor(anchor)
-  return plan
-}
-
-/**
- * What a page loads:  its stylesheets and scripts (not what the page server injects, nor inert data blocks:
- * `isInert()`), one line each.
- */
-function headKey(doc) {
-  const parts = Array.from(
-    doc.querySelectorAll('link[rel~="stylesheet"]'),
-    (link) => `css ${link.getAttribute("href")}`
-  )
-  for (const script of doc.querySelectorAll("script")) {
-    const src = script.getAttribute("src")
-    if (src?.startsWith("/api/server/") || (!src && script.textContent.includes("SPELL_SERVER"))) continue
-    if (!src && isInert(script)) continue
-    parts.push(src ? `js ${src}` : `inline ${squash(script.textContent)}`)
-  }
-  return parts.join("\n")
-}
-
-/**
- * Everything in a page's `<body>` but `main`'s content, the scripts and `<body>`'s attributes (bar its `class`:
- * the runtime adds classes of its own), whitespace squashed.  The attributes are patched (`planBodyAttributes()`).
- */
-function shellKey(doc) {
-  const body = doc.body.cloneNode(true)
-  mainIn(body)?.replaceChildren()
-  for (const script of body.querySelectorAll("script")) script.remove()
-  for (const name of body.getAttributeNames()) if (name !== "class") body.removeAttribute(name)
-  return squash(body.outerHTML)
-}
-
-/**
- * Plan setting the `<body>` attributes whose source changed from `before` to `after` (`data-recent-since`,
- * `data-bedtime` ...) on the live `<body>`;  never `class` (`shellKey()` holds it).
- */
-function planBodyAttributes(before, after, plan) {
-  for (const name of new Set([...before.getAttributeNames(), ...after.getAttributeNames()])) {
-    const value = after.getAttribute(name)
-    if (name === "class" || value === before.getAttribute(name)) continue
-    plan.ops.push(() =>
-      value === null ? document.body.removeAttribute(name) : document.body.setAttribute(name, value)
-    )
-  }
-}
-
-/**
- * Plan turning `live` (whose source was `before`) into `after`;  returns the node that ends up in `live`'s place:
- * `live` itself when it's patched in place, else its replacement.
- * - unchanged (`sameNode()`):  nothing
- * - in place:  its source attributes that changed (not `KEPT_ATTRIBUTES`), then its children, matched by `id`, else
- *   in order by tag (`matchOf()`):  each patched in turn, new ones added, gone ones removed
- * - REPLACED, its reader's state carried over (`carryState()`):  a tag change, text of its own (a paragraph, a
- *   title:  the smallest thing that holds the changed text), a `MANAGERS` element, or children the live page
- *   doesn't line up with
- * - an `<epic-*>` element (`EPIC_TAG`) is NEVER replaced while its tag stays (P10 of `epic-components`):
- *   it keeps its fold, its loaded part and its controller.
- *   Its attributes are patched in place (its page state kept:  `EPIC_PAGE_STATE`), its children morphed as above;
- *   only where they can't be (text of its own changed, children that don't line up)
- *   are its CHILDREN replaced (`planContent()`), never the element
- * - SIDE EFFECT:  pushes the live changes onto `plan.ops`, and what's new onto `plan.changed`
- */
-function planMorph(before, after, live, plan) {
-  if (sameNode(before, after)) return live
-  if (isHost(before, after, live)) return planHost(before, after, live, plan)
-  const sameTag = live.localName === after.localName && before.localName === after.localName
-  const epic = sameTag && EPIC_TAG.test(after.localName)
-  if (!sameTag || (!epic && (live.matches(MANAGERS) || hasText(before) || hasText(after))))
-    return planReplace(after, live, plan)
-  const was = Array.from(before.children)
-  const kids = liveKids(was, live)
-  if (epic && (!kids || hasText(before) || hasText(after))) return planContent(before, after, live, plan)
-  if (!kids) return planReplace(after, live, plan)
-  planAttributes(before, after, live, plan)
-  const now = Array.from(after.children)
-  const free = new Set(was)
-  let cursor = 0
-  const slots = now.map((kid, index) => {
-    const match = matchOf(kid, index)
-    if (!match) return planNew(kid, plan)
-    free.delete(match)
-    const at = was.indexOf(match)
-    if (!kid.id) cursor = at + 1
-    return planMorph(match, kid, kids[at], plan)
-  })
-  if (slots.length !== kids.length || slots.some((slot, index) => slot !== kids[index]))
-    plan.ops.push(() => placeChildren(live, kids, slots))
-  return live
-
-  /**
-   * The old child new child `kid` (at `index`) is:  by `id`;  else the next unmatched one of its tag, preferring
-   * one that's unchanged, but never one a LATER new child is identical to (then `kid` was inserted before it).
-   */
-  function matchOf(kid, index) {
-    if (kid.id) {
-      const match = was.find((old) => old.id === kid.id)
-      return match && free.has(match) && match.localName === kid.localName ? match : undefined
-    }
-    const candidates = was.slice(cursor).filter((old) => free.has(old) && !old.id && old.localName === kid.localName)
-    const equal = candidates.find((old) => sameNode(old, kid))
-    if (equal) return equal
-    const first = candidates[0]
-    const later = now.slice(index + 1)
-    if (first && !later.some((next) => !next.id && sameNode(first, next))) return first
-    return undefined
-  }
-}
-
-/**
- * Is `live` a section whose body comes from a file (`source`), the same file before and after?
- * Its body is the file's (`wireSourceBodies()`), not the page source's:  `planHost()`.
+ * Is `element` a host whose body comes from a file (`source`), so that only its SLOTTED children (icon, header) are
+ * the page's source?  Its body is the file's (`wireSourceBodies()`):  the patch leaves it alone.
  * - not an accordion host (`<ui-accordion source>`):  a `MANAGERS` element, replaced whole as ever, its open panel
  *   carried over, so it loads its body again
  */
-function isHost(before, after, live) {
-  const source = after.getAttribute("source")
-  return (
-    source !== null &&
-    before.getAttribute("source") === source &&
-    live.getAttribute("source") === source &&
-    live.localName === after.localName &&
-    before.localName === after.localName &&
-    !live.matches(MANAGERS)
-  )
+function isSourceHost(element) {
+  return element.hasAttribute("source") && !element.matches(MANAGERS)
 }
 
 /**
- * Plan patching host `live` (`isHost()`):  its attributes, and its SLOTTED children (icon, header), each patched in
- * turn;  the body (every other child:  what the file put there, or the placeholder) is left alone.
- * - slotted children that don't line up:  the whole host is replaced, and loads its body again when open
- */
-function planHost(before, after, live, plan) {
-  const was = slottedOf(before)
-  const now = slottedOf(after)
-  const kids = slottedOf(live).filter((kid) => !kid.matches(ADDED))
-  const lined =
-    was.length === now.length &&
-    kids.length === was.length &&
-    was.every((kid, at) => kid.localName === now[at].localName && kids[at].localName === kid.localName)
-  if (!lined) return planReplace(after, live, plan)
-  planAttributes(before, after, live, plan)
-  was.forEach((kid, at) => {
-    const slot = planMorph(kid, now[at], kids[at], plan)
-    if (slot !== kids[at]) plan.ops.push(() => kids[at].replaceWith(slot))
-  })
-  return live
-}
-
-/** `element`'s children headed for a named slot (`slot="icon"` ...). */
-function slottedOf(element) {
-  return Array.from(element.children).filter((kid) => kid.hasAttribute("slot"))
-}
-
-/**
- * `live`'s children that stand for source children `was`, in order:  the next live child of each one's tag (and
- * `id`), stepping over what the runtime added (`ADDED`) and other extras;  null when they don't line up.
- */
-function liveKids(was, live) {
-  const kids = Array.from(live.children).filter((kid) => !kid.matches(ADDED))
-  const mapped = []
-  let at = 0
-  for (const old of was) {
-    while (at < kids.length && (kids[at].localName !== old.localName || (old.id && kids[at].id !== old.id))) at++
-    if (at === kids.length) return null
-    mapped.push(kids[at++])
-  }
-  return mapped
-}
-
-/** Plan setting the source attributes that changed from `before` to `after` on `live`. */
-function planAttributes(before, after, live, plan) {
-  const changes = []
-  for (const name of new Set([...before.getAttributeNames(), ...after.getAttributeNames()])) {
-    const value = after.getAttribute(name)
-    if (!KEPT_ATTRIBUTES.has(name) && value !== before.getAttribute(name)) changes.push([name, value])
-  }
-  if (!changes.length) return
-  plan.changed.push(live)
-  plan.ops.push(() => {
-    for (const [name, value] of changes)
-      if (value === null) live.removeAttribute(name)
-      else live.setAttribute(name, value)
-  })
-}
-
-/**
- * Plan giving `<epic-*>` element `live` the children of `after`, the element itself kept (`planMorph()`):
- * its source attributes patched, then its children replaced by copies of `after`'s, the reader's state carried over
- * (`carryState()`);  what the runtime or the page's review controls added (`ADDED`) stays.  Returns `live`.
- */
-function planContent(before, after, live, plan) {
-  planAttributes(before, after, live, plan)
-  const nodes = Array.from(after.childNodes, (node) => {
-    const copy = node.cloneNode(true)
-    if (copy.nodeType === Node.ELEMENT_NODE) carryState(live, copy)
-    return document.importNode(copy, true)
-  })
-  plan.weight += after.innerHTML.length
-  plan.changed.push(...nodes.filter((node) => node.nodeType === Node.ELEMENT_NODE))
-  plan.ops.push(() => {
-    const kept = Array.from(live.children).filter((kid) => kid.matches(ADDED))
-    live.replaceChildren(...nodes, ...kept)
-  })
-  return live
-}
-
-/** Plan replacing `live` with a copy of `after`, the reader's state carried over;  returns the copy. */
-function planReplace(after, live, plan) {
-  const copy = after.cloneNode(true)
-  carryState(live, copy)
-  return adopt(copy, after, plan)
-}
-
-/** Plan adding a copy of source element `after`, folded as a new section should be;  returns the copy. */
-function planNew(after, plan) {
-  const copy = after.cloneNode(true)
-  carryFolds(copy)
-  return adopt(copy, after, plan)
-}
-
-/**
- * `copy` (still in the parsed document) brought into this one, counted in the plan's weight.
- * - NOTE: its folds and panels are set BEFORE it's imported, so it draws that way first:  nothing animates
- */
-function adopt(copy, source, plan) {
-  const node = document.importNode(copy, true)
-  plan.weight += source.outerHTML.length
-  plan.changed.push(node)
-  return node
-}
-
-/**
- * Put `slots` in `parent` in that order:  `kids` (its children as they were) not among them go, the rest stay where
- * they are when already in order, new ones go in after the slot before them.
- * - extras (`ADDED`, or anything else not in the source) stay where they are
- */
-function placeChildren(parent, kids, slots) {
-  for (const kid of kids) if (!slots.includes(kid)) kid.remove()
-  let previous = null
-  for (const node of slots) {
-    const placed =
-      node.parentNode === parent &&
-      (!previous || previous.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)
-    if (!placed) {
-      if (previous) previous.after(node)
-      else {
-        const next = slots.find((slot) => slot !== node && slot.parentNode === parent)
-        if (next) next.before(node)
-        else parent.prepend(node)
-      }
-    }
-    previous = node
-  }
-}
-
-/**
- * Carry the reader's state from `live` to `copy`, its replacement (not yet imported):
+ * Give `copy`, a new or replacing element not yet in the page, the reader's state (the patcher's `prepare()`):
  * - folds:  every section keeps its fold, new ones fold as `carryFolds()` says
- * - open panels:  each accordion's, matched by its nearest ancestor with an `id` and its order under it
  * - `<epic-*>` page state:  `carryEpicState()`
- * - typed text:  fields with an `id`
+ * - the kit's shared rules carry the rest:  open panels, typed text (`PagePatch.keepReaderState()`)
  */
-function carryState(live, copy) {
+function carryState(copy) {
   carryFolds(copy)
   carryEpicState(copy)
-  const panels = accordionsOf(live)
-  for (const [key, accordion] of accordionsOf(copy)) {
-    const old = panels.get(key)
-    if (!old) continue
-    const open = openIndexes(old).join(" ")
-    if (open) accordion.setAttribute("open", open)
-    else accordion.removeAttribute("open")
-  }
-  for (const field of withSelf(copy, "textarea[id], input[id]")) {
-    const old = document.getElementById(field.id)
-    if (!old || !live.contains(old) || old.value === undefined) continue
-    if (field.localName === "textarea") field.textContent = old.value
-    else field.setAttribute("value", old.value)
-  }
 }
 
 /**
@@ -1487,7 +1238,7 @@ function carryState(live, copy) {
 function carryFolds(copy) {
   const saved = readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`)
   const planDoc = document.body.classList.contains("plan-doc")
-  for (const section of withSelf(copy, "ui-section[collapsible]")) {
+  for (const section of PagePatch.withSelf(copy, "ui-section[collapsible]")) {
     const old = section.id ? document.getElementById(section.id) : null
     if (old?.localName === "ui-section") section.toggleAttribute("collapsed", isCollapsed(old))
     else if (section.id && section.id in saved) section.toggleAttribute("collapsed", !!saved[section.id])
@@ -1500,7 +1251,7 @@ function carryFolds(copy) {
  * with that `id` and tag;  a new one starts as its markup says (folded:  `open` is never in the file).
  */
 function carryEpicState(copy) {
-  for (const element of withSelf(copy, "[id]")) {
+  for (const element of PagePatch.withSelf(copy, "[id]")) {
     if (!EPIC_TAG.test(element.localName)) continue
     const old = document.getElementById(element.id)
     if (old?.localName !== element.localName) continue
@@ -1510,62 +1261,6 @@ function carryEpicState(copy) {
       else element.setAttribute(name, value)
     }
   }
-}
-
-/** `root`'s accordions (itself included), by `<owner id>:<n>`:  the nearest ancestor with an `id` inside `root`. */
-function accordionsOf(root) {
-  const byKey = new Map()
-  const counts = new Map()
-  for (const accordion of withSelf(root, "ui-accordion")) {
-    let owner = accordion === root ? null : accordion.parentElement
-    while (owner && owner !== root && !owner.id) owner = owner.parentElement
-    const name = accordion === root ? "" : (owner?.id ?? "")
-    const n = counts.get(name) ?? 0
-    counts.set(name, n + 1)
-    byKey.set(`${name}:${n}`, accordion)
-  }
-  return byKey
-}
-
-/** `root` (when it matches `selector`) and every element under it that does, in document order. */
-function withSelf(root, selector) {
-  return [...(root.matches(selector) ? [root] : []), ...root.querySelectorAll(selector)]
-}
-
-/** Are two source elements the same, ignoring how whitespace falls (a reformat re-wraps lines)? */
-function sameNode(a, b) {
-  return a.isEqualNode(b) || squashedOf(a) === squashedOf(b)
-}
-
-/** `squash()`ed `outerHTML` of source node `node`, cached. */
-function squashedOf(node) {
-  let value = squashed.get(node)
-  if (value === undefined) squashed.set(node, (value = squash(node.outerHTML)))
-  return value
-}
-
-/** Markup with every run of whitespace one space, and none between tags. */
-function squash(html) {
-  return html.replace(/\s+/g, " ").replace(/> </g, "><").trim()
-}
-
-/** Does `element` hold text of its own (not just whitespace between its children)? */
-function hasText(element) {
-  return Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.data.trim())
-}
-
-/** What the reader is looking at:  the element just below the stuck titles, mid-column, and its top. */
-function readingAnchor(main) {
-  const box = main.getBoundingClientRect()
-  const element = document.elementFromPoint(box.left + box.width / 2, Math.min(innerHeight - 1, stuckBottom(main) + 8))
-  return element && main.contains(element) ? { element, top: element.getBoundingClientRect().top } : null
-}
-
-/** Scroll so `anchor` (`readingAnchor()`) is where it was, if it's still in the page. */
-function keepAnchor(anchor) {
-  if (!anchor?.element.isConnected) return
-  const moved = anchor.element.getBoundingClientRect().top - anchor.top
-  if (Math.abs(moved) >= 1) scrollBy({ top: moved, behavior: "instant" })
 }
 
 /**
@@ -1589,7 +1284,8 @@ async function rewire(page, changed) {
   const entries = railKey(outline, counts)
   if (entries !== page.entries) page.rail = buildNavigation(main, outline, counts)
   page.entries = entries
-  if (changed.some((node) => withSelf(node, "ui-section").length)) page.sticky = trackStickyHeights(main, outline)
+  if (changed.some((node) => PagePatch.withSelf(node, "ui-section").length))
+    page.sticky = trackStickyHeights(main, outline)
   page.follow.rescan(page.rail)
   await nextFrames(UNFOLD_FRAMES)
   page.sticky.measure()
@@ -1613,7 +1309,7 @@ function highlightIn(elements) {
   const hljs = globalThis.hljs
   if (!hljs?.highlightElement) return
   for (const element of elements)
-    for (const code of withSelf(element, "pre code"))
+    for (const code of PagePatch.withSelf(element, "pre code"))
       try {
         if (!code.dataset.highlighted) hljs.highlightElement(code)
       } catch {
