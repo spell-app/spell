@@ -44,7 +44,7 @@ export class Tokenizer {
    * - Its head is a PHRASE up to its `>`, not attributes:  the phrase is its `phrase`, a `JSXExpressionToken` as if
    *   written `{...}`.
    * - A branch ends where the next branch of its chain starts, unclosed;  the chain's last branch ends at `</>`
-   *   (in any form of spell) or a named closer, `</if>`:  ONE closer for the whole chain.
+   *   (in any form of spell) or a closer naming a chain word, `</if>`, `</otherwise>`:  ONE closer for the chain.
    * - e.g. spell's English and Spanish words, `if`, `otherwise if`, `si no` ...
    * - None by default:  `<if>` is then an element like any other.
    */
@@ -663,10 +663,13 @@ export class Tokenizer {
     return children
   }
 
-  /** The closer ending a chain at `start`:  `</>`, or `</if>` in any of `chainTags`' words for an `if`. */
+  /**
+   * The closer ending a chain at `start`:  `</>`, or one naming a word of `chainTags`, `</if>`, `</otherwise>` (as code
+   * spell's writer names an element's closer).
+   */
   private matchJSXChainEnd(text: string, start: number, end: number): P.JSXEndTagToken | undefined {
     const at = this.eatWhitespace(text, start, end)
-    const closers = ["", ...Object.keys(this.chainTags).filter((word) => this.chainTags[word] === "if")]
+    const closers = ["", ...this.chainWords]
     const word = closers.find((candidate) => text.startsWith(`</${candidate}>`, at))
     if (word === undefined) return undefined
     return new P.JSXEndTagToken({ raw: text.slice(start, at + word.length + 3), tagName: word, start })
