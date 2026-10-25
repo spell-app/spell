@@ -87,3 +87,37 @@ export type PrefForgetRequest = {
   /** The keys' shared start, e.g. `layout/`. */
   under: string
 }
+
+////////////////
+// ## Undo
+////////////////
+
+/**
+ * One change `UndoStack` can undo and redo:  what it holds is whoever records it's (Spell's runtime records the
+ * properties an action set).
+ * - Both run at once, and must NOT wait:  an async action's redo puts its end state back, it doesn't run it again.
+ */
+export type UndoRecord = {
+  /** Put things back as they were before the change. */
+  undo(): void
+  /** Put the change back. */
+  redo(): void
+}
+
+/** One step people undo and redo:  a title for the Edit menu, and its records, undone last first. */
+export type UndoStep = {
+  /** What people see after "Undo":  short, capitalized like a menu item, e.g. `Change Margin`, `Turn Card`. */
+  title: string
+  /**
+   * What it changed, so a run of steps with the same title AND target folds into one (typing into one field);
+   * none:  it never folds.
+   */
+  target?: unknown
+  /** Its changes, in the order they were made. */
+  records: UndoRecord[]
+}
+
+/** The two ways through the history, as `UndoStack.titleFor()` names them. */
+export const UndoActions = ["undo", "redo"] as const
+/** One of `UndoActions`. */
+export type UndoAction = (typeof UndoActions)[number]

@@ -238,6 +238,30 @@ prefs.set("width", 250)      //                          spell-site:width  = 250
 - It's generic, but not in Spell UI's core bundle:  there it cost every page 1.9 kB,
   so Spell UI's few stores import it by file, `spell/util/persist/PrefStore`.
 
+### `UndoStack`:  one step for everything an action does
+
+```ts
+import { UndoStack } from "spell/util"
+
+const history = new UndoStack({ limit: 100 })
+await history.transaction("Deal", async () => {
+  for (const card of deck) await moveCard(card)   // each move records its change:  all of them join "Deal"
+})
+history.undoTitle   // "Undo Deal"
+history.undo()      // every card back, at once
+history.redo()      // dealt again, at once:  the moves aren't run again, their end state is put back
+```
+
+- A step is a title and its records, each saying how to undo and redo itself:  the stack knows nothing of what's kept.
+- A transaction stays open until its function returns, or its promise settles:
+  anything recorded meanwhile, nested or begun while it waits, joins it.
+- A run of steps with the same title AND target folds into one:  typing "hello" into one field undoes in one go.
+- `canUndo`, `undoTitle`, `redoTitle` are Spell cells:  a menu reading them redraws by itself.
+- The edges:
+  - while it undoes or redoes, nothing records, so the changes it puts back aren't new steps
+  - something else that changes state while an action waits joins that action's step
+  - the titles are English by default;  `titleFor` words them whole in another language
+
 ## Spell cells:  a read after a write is always fresh
 
 If you know Solid's signals or MobX, cells will feel familiar:
@@ -497,7 +521,7 @@ Where a new helper goes, in order:
    - Add it to [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts) and the element framework's,
      which import these files one by one.
 4. Part of the engine:  `reactive/`, still with no lodash, no Solid and nothing Spell-specific.
-   Values kept across visits (`PrefStore`, the places it keeps them):  `persist/`, generic too.
+   What an app keeps for people (`PrefStore`, `UndoStack`):  `persist/`, generic too.
 5. Spell-specific, or it needs lodash, `chalk`, `pluralize` ...:  `spell/`.
 6. It needs node:  `node/`, imported by its own path.
 
@@ -526,7 +550,7 @@ And when you're in there:
 | [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [persist/](src/util/persist/) | values kept across visits:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
+| [persist/](src/util/persist/) | what an app keeps for people:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`;  `UndoStack`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
 | [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
