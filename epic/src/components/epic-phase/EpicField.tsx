@@ -1,16 +1,20 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
 import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
+// the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
+import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
 
 import fieldCSS from "./EpicField.css?inline"
+import requestsPageCSS from "./EpicField.requests.css?inline"
+import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
 import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
@@ -24,12 +28,26 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - To review:  each `#link` shows as a chip in its item's state colour.
  *   SIDE EFFECT:  writes `data-spell-state` on those links (light DOM), as today's runtime did,
  *   again whenever the page's layout changes.
+ * - A REQUEST (a labelled field right inside a Requests field, as `epic file` writes it;  Owen, 2026-10-25, r31:
+ *   "this needs to be collapsable.  Don't need to show image at full size, smaller with click to show in modal"):
+ *   - a fold:  the chevron (`fold.button()`) and its label as the title row, folded to start with
+ *   - open or folded is its `open` attribute (`Fold`'s `kept`):  page state the live patch keeps, never written
+ *   - its screenshots are thumbnails, a page sheet's (`EpicField.requests.css`:  they're light DOM, out of reach of
+ *     the shadow sheet);  a click shows one full size in a `<ui-modal>`, never its link
+ *     (kept for a page without scripts, or opened from disk)
  ****************/
 export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
   @E.proto static vocabulary = epicFieldVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-field": fieldCSS }
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-field": fieldCSS },
+    delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
+
+  /** `open`:  a request unfolded (a boolean is always the DOM element's, see `@controlled`). */
+  @E.controlled("open") accessor isMarkedOpen = false
+
+  /** The screenshot shown full size (its address and its alt text), while the zoom shows. */
+  @E.state accessor zoomed: Zoomed | undefined = undefined
 
   /** Its look:  icon and label key;  Symptom's for an unknown name. */
   get look(): FieldLook {
@@ -61,7 +79,70 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
     return !this.name && !!this.label
   }
 
+  /**
+   * One request in a phase's Requests field (r31):  a labelled field right inside `<epic-field name="requests">`.
+   * - its parent is read once connected:  `epic file` writes it there, nothing moves it
+   */
+  @E.cssState("request")
+  get isRequest(): boolean {
+    return this.isConnected && this.isLabelled && !!this.domElement.parentElement?.matches(REQUESTS)
+  }
+
+  /** A request's fold, kept in its `open` attribute;  never read for any other field. */
+  private readonly requestFold = new Fold(() => false, {
+    isOpen: () => !!this.isMarkedOpen,
+    setOpen: (open) => (this.isMarkedOpen = open)
+  })
+
+  /** Its fold, when it's a request:  collapse-all and expand-all reach it here (`foldAllUnder()`). */
+  get fold(): Fold | undefined {
+    return this.isRequest ? this.requestFold : undefined
+  }
+
+  /** A request, unfolded. */
+  @E.cssState("open")
+  get isOpen(): boolean {
+    return this.isRequest && this.requestFold.isOpen()
+  }
+
+  /** A request's screenshots are thumbnails:  the page sheet that draws them, registered once per page. */
+  @E.onChange("isRequest")
+  protected onRequest(request: boolean) {
+    if (request && !UI.styles.has(REQUESTS_PAGE_SHEET))
+      UI.styles.register(REQUESTS_PAGE_SHEET, requestsPageCSS, { page: true })
+  }
+
+  /**
+   * A click on a request's screenshot (or Enter on its link):  shown full size in the modal, not opened as its link.
+   * - with a modifier key (or not the main button):  the link's, as usual (a new tab)
+   */
+  @E.on("click")
+  protected onClick(event: MouseEvent) {
+    if (!this.isRequest || event.defaultPrevented || event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const target = event.target instanceof Element ? event.target : null
+    const image = target?.closest("img") ?? target?.closest("a")?.querySelector("img")
+    if (!image || image.closest("epic-field") !== this.domElement) return
+    event.preventDefault()
+    this.zoomed = { src: image.currentSrc || image.src, alt: image.alt }
+  }
+
+  /** The zoom closed (Escape, its close button, a click outside). */
+  @E.on("ui-closed", { target: "renderRoot" })
+  protected onZoomClosed() {
+    this.zoomed = undefined
+  }
+
   render(): JSX.Element {
+    return (
+      <Show when={this.isRequest} fallback={this.field()}>
+        {this.request()}
+      </Show>
+    )
+  }
+
+  /** Every field but a request:  its icon (or none, labelled), its label, its prose. */
+  private field(): JSX.Element {
     return (
       <div class={[this.rootClass, FIELD, this.isLabelled && LABELLED]} part={this.partForName("base")}>
         <Show when={!this.isLabelled}>
@@ -77,6 +158,47 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
           </b>{" "}
           <slot />
         </div>
+      </div>
+    )
+  }
+
+  /** A request:  its title row (the fold chevron, its label), its prose under it, folded;  the zoom's modal. */
+  private request(): JSX.Element {
+    return (
+      <div class={[this.rootClass, FIELD, REQUEST]} part={this.partForName("base")}>
+        <div ref={this.requestFold.heading} class={[HEAD, FOLDS]}>
+          {this.requestFold.button({
+            controls: BODY_ID,
+            labelledBy: LABEL_ID,
+            part: this.partForName("toggle"),
+            tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+          })}
+          <b id={LABEL_ID} class={LABEL} part={this.partForName("label")}>
+            {this.label}
+          </b>
+        </div>
+        <div
+          ref={this.requestFold.watch}
+          id={BODY_ID}
+          class={[TEXT, BODY]}
+          part={this.partForName("body")}
+          hidden={this.requestFold.hidden()}
+        >
+          <slot />
+        </div>
+        <ui-modal
+          class={ZOOM}
+          part={this.partForName("zoom")}
+          basic=""
+          closable=""
+          visible={this.zoomed ? "" : undefined}
+        >
+          <Show when={this.zoomed}>
+            {(zoomed) => (
+              <img class={ZOOMED} src={zoomed().src} alt={this.translationForKey("zoomed", { alt: zoomed().alt })} />
+            )}
+          </Show>
+        </ui-modal>
       </div>
     )
   }
@@ -133,3 +255,23 @@ const FIELD = "field"
 
 /** Class word of a labelled block's box:  no icon column. */
 const LABELLED = "labelled"
+
+/** A request's parent:  a phase's Requests field. */
+const REQUESTS = 'epic-field[name="requests"]'
+
+/** Name of the page sheet that draws a request's screenshots as thumbnails. */
+const REQUESTS_PAGE_SHEET = "epic-field-requests"
+
+/** A screenshot zoomed:  its address and its own alt text. */
+type Zoomed = { src: string; alt: string }
+
+/** Classes of a request's shadow markup:  its box, the title row, its prose, the modal and its image. */
+const REQUEST = "request"
+const HEAD = "head"
+const BODY = "body"
+const ZOOM = "zoom"
+const ZOOMED = "zoomed"
+
+/** Ids of a request's shadow markup:  its label (the fold button's name), the box it folds. */
+const LABEL_ID = "label"
+const BODY_ID = "body"

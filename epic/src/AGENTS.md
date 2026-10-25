@@ -1152,6 +1152,8 @@ In `tools/`:
     They unfold what hides the target, and open its panel.
   - The address follows the section being read (`#id`, replaced, not pushed), so a reload lands there.
   - Served by the page server, an edit to the page's file updates it IN PLACE (`wireLiveUpdate()`).
+    - The patch is the kit's ONE patcher (`PagePatch`, `spell/server/site`;  epic `epic-engine` P40), with this
+      runtime's rules (`patcher`):  a list of small steps, text edited in place;  the page comes with the change.
     - Scroll, folds, open panels and typed text stay.
     - Anything the runtime adds inside `main` must carry `data-spell-added`, so the patch steps around it.
     - Pages with scripts of their own still reload.
@@ -1210,7 +1212,7 @@ In `tools/`:
     - verdict cells:  `yes positive` / `no negative` / `meh warning`
   - small badges:  `<ui-label size="mini">`
     - a legend of them:  `<ui-labels class="spell-legend" size="mini">`
-  - page top:  `<ui-breadcrumb class="spell-crumbs">`, back to the index
+  - page top:  `<ui-breadcrumbs class="spell-crumbs">`, back to the index
     - meta lines (who it's for, status, how checked):  `<ui-list class="spell-meta">` of `<ui-item icon="...">`
   - headline numbers:  `<ui-statistics class="spell-stats" size="mini">` of `<ui-statistic value label>`
     - 2-4 of them, each also stated with its caveat in the body

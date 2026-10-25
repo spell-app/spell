@@ -227,6 +227,13 @@
     margin-inline: calc(var(--epic-drawer-inset, 4px) + 1px - var(--epic-inset, 16px));
     margin-block-end: -10px;
   }
+  /* the note box sticks to the window's bottom while its block is open and taller than the window, as an item's does
+     (Owen, 2026-10-25:  "The comment at the bottom should be sticky like it is in questions") */
+  .body > [part~="note-box"] {
+    position: sticky;
+    z-index: 1;
+    bottom: 4px;
+  }
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
     border-radius: 10px 10px calc(var(--epic-drawer-radius, 8px) - 1px) calc(var(--epic-drawer-radius, 8px) - 1px);

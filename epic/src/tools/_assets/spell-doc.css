@@ -425,11 +425,11 @@ body.spell-one-line-head .spell-page-head > h1 {
   margin: 0;
 }
 /* the page's own crumb, emptied (the title after it says its words):  only the divider before it, at phone width none */
-.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb-section[active]::part(divider) {
+.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[active]::part(divider) {
   margin-inline-start: 8px;
 }
 @media (max-width: 720px) {
-  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb-section[active]::part(divider) {
+  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[active]::part(divider) {
     display: none;
   }
 }
@@ -805,7 +805,7 @@ ui-section .lede code {
   font-size: 0.9rem;
 }
 /*
- * The breadcrumb above the h1 (`ui-breadcrumb.spell-crumbs`) is the page's EYEBROW, as the brand's docs put one
+ * The breadcrumb above the h1 (`ui-breadcrumbs.spell-crumbs`) is the page's EYEBROW, as the brand's docs put one
  * over every title:  small mono capitals, tracked out, the links in the accent and the page itself muted
  */
 .spell-crumbs {

@@ -19,9 +19,6 @@ import {
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
-  REVIEW_ACCEPT,
-  REVIEW_DEFER,
-  REVIEW_PLAN,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -155,12 +152,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    */
   private controls(): JSX.Element {
     const specs = () => BUTTONS_OF[this.buttons ?? "item"]
-    // a waiting plan's Accept plan, in WORDS, apart from the icons:  the page asks for it (Owen, 2026-10-25:  "p37 not
-    // asking me to accept";  a small grey check before)
-    const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
-    // ... and Defer Phase beside it (Owen, 2026-10-25)
-    const defer = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "defer") : undefined)
-    const group = () => specs().filter((spec) => spec.action !== "details" && spec !== accept() && spec !== defer())
+    const group = () => specs().filter((spec) => spec.action !== "details")
     const doNow = () => specs().find((spec) => spec.action === "details")
     return (
       <span
@@ -185,17 +177,23 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             </span>
           )}
         </Show>
-        <Show when={accept()}>
-          <span class={REVIEW_PLAN}>
-            <Show when={accept()}>
-              {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
-            </Show>
-            <Show when={defer()}>
-              {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
-            </Show>
-          </span>
-        </Show>
-        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+        {/* a waiting plan's Accept, Revisit and Defer:  icons like every row's, so they line up row to row;  the group
+            ringed 3px solid while it waits on Owen, dotted once he's pressed one (Owen, 2026-10-25:  "Make the entire
+            group just icons, black border.  Dotted when action is being taken, 3px solid when you're waiting on input
+            from me") */}
+        <ui-buttons
+          class={REVIEW_GROUP}
+          basic=""
+          icon=""
+          size="mini"
+          data-asks={
+            this.buttons === "plan"
+              ? group().some((spec) => this.fillOf(spec) !== "none")
+                ? "taken"
+                : "waiting"
+              : undefined
+          }
+        >
           <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
         <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>

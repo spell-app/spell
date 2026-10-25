@@ -16,6 +16,8 @@ import { ACTIONS_SLOT } from "./Fold.types"
  *   - NOT `<epic-item>`:  it folds through its `open` attribute, as links and P9 open it from outside
  * - Starts as `initial()` says, and follows it until the reader toggles it:
  *   an option panel opens while its option is the chosen one.
+ * - Or KEPT outside it (`kept`):  the element's own `open` attribute, page state the live patch keeps
+ *   (a request in a phase's Requests field, `<epic-field>`);  then `initial()` is never read.
  * - The content box takes `hidden()`, and `watch` as its ref:
  *   folded, it's `hidden="until-found"`, so find-in-page reaches the text and unfolds it (`beforematch`).
  * - A card's heading band takes `heading` as its ref, with its fold button (`button()`) first in it:
@@ -36,40 +38,49 @@ export class Fold {
   /** The reader's choice, once made;  `undefined` until then. */
   @E.state private accessor toggled: boolean | undefined = undefined
 
-  constructor(private readonly initial: Accessor<boolean>) {}
+  constructor(
+    private readonly initial: Accessor<boolean>,
+    private readonly kept?: KeptFold
+  ) {}
 
   ////////////////
   // ## Open or folded
   ////////////////
 
   /** Open?  Tracked. */
-  readonly isOpen = (): boolean => this.toggled ?? this.initial()
+  readonly isOpen = (): boolean => (this.kept ? this.kept.isOpen() : (this.toggled ?? this.initial()))
+
+  /** The reader's choice:  into `kept`, when it's kept outside. */
+  private choose(open: boolean) {
+    if (this.kept) this.kept.setOpen(open)
+    else this.toggled = open
+  }
 
   /** The content box's `hidden`:  `until-found` while folded;  tracked. */
   readonly hidden = (): "until-found" | undefined => (this.isOpen() ? undefined : "until-found")
 
   /** Open if folded, fold if open:  a click on its header. */
   readonly toggle = () => {
-    this.toggled = !this.isOpen()
+    this.choose(!this.isOpen())
   }
 
   /** Fold it, if open (collapse-all, `foldAllUnder()`);  true when it was open. */
   readonly close = (): boolean => {
     if (!this.isOpen()) return false
-    this.toggled = false
+    this.choose(false)
     return true
   }
 
   /** Open it, if folded, as the reader would (expand-all, `expandAllUnder()`);  true when it was folded. */
   readonly open = (): boolean => {
     if (this.isOpen()) return false
-    this.toggled = true
+    this.choose(true)
     return true
   }
 
   /** The content box's ref:  find-in-page matched inside the folded box, which the browser has revealed. */
   readonly watch = (content: HTMLElement) => {
-    content.addEventListener("beforematch", () => (this.toggled = true))
+    content.addEventListener("beforematch", () => this.choose(true))
   }
 
   ////////////////
@@ -295,6 +306,14 @@ export const FOLDING_CARDS =
 
 /** Tag prefix of the epic page's elements:  only those fold. */
 const EPIC_PREFIX = "epic-"
+
+/** Where a `Fold` keeps its state when not in itself:  its element's `open` attribute (`<epic-field>`'s requests). */
+export type KeptFold = {
+  /** open?  tracked */
+  isOpen: () => boolean
+  /** the reader opened or folded it */
+  setOpen: (open: boolean) => void
+}
 
 /** What `Fold.collapseAllButton()` takes. */
 export type CollapseAllOptions = {

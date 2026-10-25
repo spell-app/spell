@@ -759,22 +759,22 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private crumbs(): JSX.Element {
     return (
       <span class={CRUMBS} part={this.partForName("crumbs")}>
-        <ui-breadcrumb
+        <ui-breadcrumbs
           class={CRUMBS}
           part={this.partForName("crumbs")}
           size="small"
           aria-label={this.translationForKey("crumbs")}
         >
-          <ui-breadcrumb-section href={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
+          <ui-breadcrumb href={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
             {this.translationForKey("crumbDocs")}
-          </ui-breadcrumb-section>
-          <ui-breadcrumb-section
+          </ui-breadcrumb>
+          <ui-breadcrumb
             href={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
             target={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].target}
           >
             {this.translationForKey(this.isSaga ? "crumbSagas" : "crumbEpics")}
-          </ui-breadcrumb-section>
-        </ui-breadcrumb>
+          </ui-breadcrumb>
+        </ui-breadcrumbs>
         <span class="crumb-divider" aria-hidden="true">
           /
         </span>

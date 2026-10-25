@@ -177,7 +177,7 @@ export const CRUMB_LINKS = {
 export const SAGA_KIND = "saga"
 
 /**
- * The crumbs a doc may still hold before the page, from before P14 (`ui-breadcrumb.spell-crumbs` in `<main>`):
+ * The crumbs a doc may still hold before the page, from before P14 (`ui-breadcrumbs.spell-crumbs` in `<main>`):
  * while they're there, the page draws none of its own, so they never show twice.
  * - REFACTOR:  goes once every doc is migrated (P14's second pass).
  */

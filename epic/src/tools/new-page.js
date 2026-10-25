@@ -45,7 +45,7 @@ const html = atDepth(readFileSync(template, "utf8"), pagePath(file).split("/").l
 const { document } = parseHTML(html)
 document.querySelector("title").textContent = title
 document.querySelector("h1").textContent = title
-const crumb = document.querySelector("ui-breadcrumb-section[active]")
+const crumb = document.querySelector("ui-breadcrumb[active]")
 if (crumb) crumb.textContent = title
 document.querySelector('meta[name="description"]').setAttribute("content", flags.description ?? "One sentence.")
 // a data-driven template (`commands`) has its data beside it:  the page gets a copy, named after the page
