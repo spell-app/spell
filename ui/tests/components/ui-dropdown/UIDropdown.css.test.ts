@@ -58,14 +58,13 @@ describe("UIDropdown.css source", () => {
     expect(withoutComments(dropdownRaw).trim().replace(/\s+/g, " ").startsWith(LAYERS)).toBe(true)
   })
 
-  it("parses with replaceSync, keeping the anchor positioning", () => {
+  it("parses with replaceSync, keeping the popover positioning", () => {
     for (const css of [dropdownCSS, dropdownRaw]) {
       const sheet = new CSSStyleSheet()
       sheet.replaceSync(css)
       const rules = styleRules(sheet)
       expect(rules.length).toBeGreaterThan(80)
       expect(rules.some((rule) => rule.style.getPropertyValue("position-area") !== "")).toBe(true)
-      expect(rules.some((rule) => rule.style.getPropertyValue("anchor-name") !== "")).toBe(true)
       expect(rules.some((rule) => rule.selectorText.includes(":has(> .menu:popover-open)"))).toBe(true)
     }
   })
@@ -96,7 +95,6 @@ describe("UIDropdown.css examples", () => {
     for (const dropdown of dropdowns) {
       const style = getComputedStyle(dropdown)
       expect(style.position, dropdown.className).toBe("relative")
-      expect(style.anchorName).toBe("--ui-dropdown")
       expect(parseFloat(style.fontSize)).toBeGreaterThan(0)
     }
     for (const menu of root.querySelectorAll<HTMLElement>(".ui.dropdown > .menu[popover]")) {
@@ -108,13 +106,10 @@ describe("UIDropdown.css examples", () => {
     adoptIntoPage(SHEETS)
     const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
     const dropdown = root.querySelector<HTMLElement>(".ui.selection.dropdown")!
-    dropdown.style.setProperty("--_ui-dropdown-anchor", "--test-anchor")
     const menu = open(dropdown)
     const style = getComputedStyle(menu)
     expect(style.positionArea).not.toBe("")
     expect(style.positionArea).not.toBe("none")
-    expect(style.positionAnchor).toBe("--test-anchor")
-    expect(getComputedStyle(dropdown).anchorName).toBe("--test-anchor")
     const box = dropdown.getBoundingClientRect()
     const rect = menu.getBoundingClientRect()
     expect(rect.top).toBeGreaterThanOrEqual(box.bottom)
@@ -214,7 +209,7 @@ describe("UIDropdown.css examples", () => {
 ////////////////
 
 describe("UIDropdown.css in a shadow root", () => {
-  it("anchors the menu to its root with the fallback name", () => {
+  it("places the menu under its root, by the anchor the component names inline", () => {
     adoptIntoPage(foundationCSS)
     const host = Fixture.render(`<span></span>`)
     const shadow = host.attachShadow({ mode: "open" })
@@ -228,7 +223,6 @@ describe("UIDropdown.css in a shadow root", () => {
     const dropdown = shadow.querySelector<HTMLElement>(".ui.dropdown")!
     const menu = open(dropdown)
     expect(getComputedStyle(host).display).toBe("inline-block")
-    expect(getComputedStyle(menu).positionAnchor).toBe("--ui-dropdown")
     expect(menu.getBoundingClientRect().top).toBeGreaterThanOrEqual(dropdown.getBoundingClientRect().bottom)
     expect(Math.abs(menu.getBoundingClientRect().left - dropdown.getBoundingClientRect().left)).toBeLessThan(1)
   })
@@ -284,12 +278,19 @@ describe("UIDropdown.css in a shadow root", () => {
  * Open `dropdown`'s popover menu;  return it.
  * - SIDE EFFECT:  closed again when the test finishes.
  */
-function open(dropdown: Element): HTMLElement {
+function open(dropdown: HTMLElement): HTMLElement {
   const menu = dropdown.querySelector<HTMLElement>(":scope > .menu")!
+  // the anchor, inline, as the component's `PopoverPanel` names it
+  const anchor = `--test-dropdown-${++anchors}`
+  dropdown.style.setProperty("anchor-name", anchor)
+  menu.style.setProperty("position-anchor", anchor)
   menu.showPopover()
   onTestFinished(() => close(dropdown))
   return menu
 }
+
+/** How many anchors `open()` has named:  each its own. */
+let anchors = 0
 
 /** Close `dropdown`'s popover menu, if open. */
 function close(dropdown: Element) {

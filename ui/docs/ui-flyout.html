@@ -523,7 +523,7 @@
                   <ui-flyout
                     visible={open()}
                     position="right"
-                    header="Help"
+                    heading="Help"
                     on-ui-closing={() => setOpen(false)}
                   >
                     ...
@@ -598,7 +598,21 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-flyout" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-flyout" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="flyout-types-standard-playground" command="--show">Show</button>
+                <ui-flyout id="flyout-types-standard-playground" closable>
+                  <ui-header>Archive old messages</ui-header>
+                  <ui-content>
+                    <p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</p>
+                  </ui-content>
+                  <ui-actions>
+                    <ui-button class="cancel" color="red">No</ui-button>
+                    <ui-button class="ok" color="green">Yes</ui-button>
+                  </ui-actions>
+                </ui-flyout>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

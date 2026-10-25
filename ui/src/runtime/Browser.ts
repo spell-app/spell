@@ -1,3 +1,5 @@
+// Import directly:  the one dark-mode query, with no pref store
+import { DARK_QUERY } from "spell/util/persist/persist.types"
 import { isBrowser, lazy } from "spell-ui/util"
 
 import type { BrowserSupports } from "./runtime.types"
@@ -73,9 +75,9 @@ export class Browser {
     return this.matches("(prefers-reduced-motion: reduce)")
   }
 
-  /** The OS / browser is in dark mode (`prefers-color-scheme`).  Live. */
+  /** The OS / browser is in dark mode (`DARK_QUERY`, the kit's one dark-mode query).  Live. */
   get isDark(): boolean {
-    return this.matches("(prefers-color-scheme: dark)")
+    return this.matches(DARK_QUERY)
   }
 
   ////////////////

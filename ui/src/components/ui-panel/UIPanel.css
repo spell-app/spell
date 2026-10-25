@@ -28,8 +28,9 @@
 @layer ui.components.panel.types, ui.components.panel.content, ui.components.panel.states;
 
 @layer ui.components.panel.types {
-  /* No `color` on a top-level panel:  `primary`'s mixes (a sub-panel without one follows its panel instead) */
-  .ui.section.panel:not(.sub):not(
+  /* No `color` on a top-level panel, or on a band with no panel around it (`loose`:  a `<ui-property-group>` in a
+     bare editor):  `primary`'s mixes (a sub-panel without one follows its panel instead) */
+  .ui.section.panel:is(:not(.sub), .loose):not(
       :is(
         .primary,
         .secondary,

@@ -1981,7 +1981,7 @@ export interface UIButtonEventMap {
 /** `<ui-button>`'s own attributes, from its vocabulary. */
 export interface UIButtonAttributes {
   /**
-   * Size, `mini` ... `massive`;  `medium` is the default.
+   * How big it is, from `mini` to `massive`.  The default is `medium`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    * - default:  `medium`
    */
@@ -1992,7 +1992,7 @@ export interface UIButtonAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, `positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Those four also work written alone, their old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2052,7 +2052,7 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), `tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone.
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Each word also works written alone, its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
@@ -2084,7 +2084,7 @@ export interface UIButtonAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.
+   * Each click turns `selected` on or off, and `aria-pressed` with it.  It sends `ui-selected` or `ui-deselected` as it turns.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
@@ -2108,7 +2108,7 @@ export interface UIButtonAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
+   * The text shown while `selected`, instead of the content:  `Following`.  It's Fomantic's `state` behaviour.  With either state text the label says the state, so a toggle button leaves `aria-pressed` off (WAI-ARIA APG).
    * - takes:  text
    */
   "active-text"?: string
@@ -2118,7 +2118,7 @@ export interface UIButtonAttributes {
    */
   "prop:activeText"?: string
   /**
-   * Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content.
+   * The text shown while NOT `selected`, instead of the content:  `Follow`.  It's Fomantic's `state` behaviour, as `active-text` is.
    * - takes:  text
    */
   "inactive-text"?: string
@@ -2200,7 +2200,7 @@ export interface UIButtonAttributes {
    */
   "prop:ellipsis"?: boolean | ""
   /**
-   * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `badge`:  which side the badge goes, `labeled` (end) or `labeled="left"`.
+   * With `icon`, the icon gets a block of its own:  at the start, or at the end with `labeled="right"`.  With `badge`, it picks which side the badge goes:  the end, or the start with `labeled="left"`.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
@@ -2210,7 +2210,7 @@ export interface UIButtonAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  Its old name is `animated`.
+   * On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name is `animated`.
    * - takes:  `slide` · `fade` · `vertical`
    */
   reveal?: "slide" | "fade" | "vertical"
@@ -2224,7 +2224,7 @@ export interface UIButtonAttributes {
    */
   "prop:reveal"?: "slide" | "fade" | "vertical"
   /**
-   * Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
@@ -2248,7 +2248,7 @@ export interface UIButtonAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the `icon` class (square padding);  with `labeled` it becomes a `labeled icon` button.
+   * Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button.
    * - takes:  icon name
    */
   icon?: string
@@ -2258,7 +2258,7 @@ export interface UIButtonAttributes {
    */
   "prop:icon"?: string
   /**
-   * Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`.
+   * Which side of the text the icon goes:  `left` (the default) or `right`.  `right` is Fomantic's right icon, as in `Next →`.  The space between them is `--ui-button-icon-spacing`.  A labeled icon block takes its side from `labeled` instead.
    * - takes:  `left` · `right`
    */
   "icon-position"?: "left" | "right"
@@ -2268,7 +2268,7 @@ export interface UIButtonAttributes {
    */
   "prop:iconPosition"?: "left" | "right"
   /**
-   * Shorthand for the button's text, instead of the default slot;  slotted children win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`.
+   * The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.
    * - takes:  text
    */
   label?: string
@@ -2282,7 +2282,7 @@ export interface UIButtonAttributes {
    */
   "prop:label"?: string
   /**
-   * Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  It was `label` (no old name:  `label` is the text now).
+   * A badge joined to the button, such as a count:  it draws a `ui labeled button` round the button.  It used to be `label`, which is the button's text now, so it has no old name.
    * - takes:  text
    */
   badge?: string
@@ -2292,7 +2292,7 @@ export interface UIButtonAttributes {
    */
   "prop:badge"?: string
   /**
-   * Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`.
+   * What it does in a form, as the native `<button type>`.  `submit` calls `form.requestSubmit()`.
    * - takes:  `button` · `submit` · `reset`
    * - default:  `button`
    */
@@ -2303,7 +2303,7 @@ export interface UIButtonAttributes {
    */
   "prop:type"?: "button" | "submit" | "reset"
   /**
-   * Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in commands itself.
+   * The id of the element `command` acts on, as the native `<button commandfor>`.  It's looked up in the button's own tree.  The inner button gets the element itself (`commandForElement`), since a shadow button can't see a light-DOM id.  In a browser without invoker commands (`UI.browser.supports.invokers`), a click runs the built-in commands itself.
    * - takes:  text
    */
   commandfor?: string
@@ -2313,7 +2313,7 @@ export interface UIButtonAttributes {
    */
   "prop:commandFor"?: string
   /**
-   * Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a `<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`).
+   * The invoker command to run, as the native `<button command>`.  A dialog takes `show-modal / close / request-close`, a popover `show-popover / hide-popover / toggle-popover`.  Any other is a custom `--name`, which the target hears as a `command` event.  `<ui-modal>` answers `--show / --close / --toggle`.
    * - takes:  text
    */
   command?: string
@@ -2515,7 +2515,7 @@ export interface UIButtonsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Those four also work written alone, their old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2575,7 +2575,7 @@ export interface UIButtonsAttributes {
     | "positive"
     | "negative"
   /**
-   * The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` (text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`.
+   * The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Each word also works written alone, its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
@@ -2617,7 +2617,7 @@ export interface UIButtonsAttributes {
    */
   "prop:icon"?: boolean | ""
   /**
-   * With `icon`:  `labeled icon` buttons;  `labeled="right"` puts the icons at the end.
+   * With `icon`, labeled icon buttons.  `labeled="right"` puts the icons at the end.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
@@ -2719,7 +2719,7 @@ export interface UIButtonsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
@@ -2743,7 +2743,7 @@ export interface UIButtonsAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width="3"` => `three`) or `"equal"` (`equal width`).
+   * The older, count-based way to write `equal fluid`:  equal-width buttons that fill the row.  A count draws its word (`width="3"` draws `three buttons`).  `"equal"` draws `equal width buttons`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */
   width?:
@@ -12196,6 +12196,18 @@ export interface UIIconPickerEventMap {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
 }
 
 /** `<ui-icon-picker>`'s own attributes, from its vocabulary. */
@@ -12445,6 +12457,18 @@ export interface UIIconPickerAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UIIconPickerEventMap["ui-changed"]) => void
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-opening"?: (event: UIIconPickerEventMap["ui-opening"]) => void
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIIconPickerEventMap["ui-closing"]) => void
 }
 
 /** `<ui-icon-picker>` in JSX:  its own attributes, and HTML's global ones. */
@@ -18443,24 +18467,24 @@ export interface UIOrJSXAttributes
 /** `<ui-panel>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPanelEventMap {
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -18519,6 +18543,16 @@ export interface UIPanelAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -18539,7 +18573,7 @@ export interface UIPanelAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -18549,7 +18583,7 @@ export interface UIPanelAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -18559,7 +18593,7 @@ export interface UIPanelAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -18569,7 +18603,7 @@ export interface UIPanelAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
+   * Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -18786,7 +18820,7 @@ export interface UIPanelAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -18954,24 +18988,24 @@ export interface UIPanelAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPanelEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPanelEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPanelEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPanelEventMap["ui-closed"]) => void
@@ -21206,24 +21240,24 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-cancelled": CustomEvent<{ changes: UIT.FormChange[] }>
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -21492,6 +21526,16 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -21512,7 +21556,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -21522,7 +21566,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -21532,7 +21576,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -21542,7 +21586,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -21921,24 +21965,24 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-cancelled"?: (event: UIPropertyEditorEventMap["ui-cancelled"]) => void
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPropertyEditorEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyEditorEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPropertyEditorEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyEditorEventMap["ui-closed"]) => void
@@ -21974,24 +22018,24 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-saved": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -22099,6 +22143,16 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -22119,7 +22173,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -22129,7 +22183,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -22139,7 +22193,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -22149,7 +22203,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -22366,7 +22420,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -22520,24 +22574,24 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-saved"?: (event: UIPropertyGroupEventMap["ui-saved"]) => void
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPropertyGroupEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyGroupEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPropertyGroupEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyGroupEventMap["ui-closed"]) => void
@@ -25488,24 +25542,24 @@ export interface UISearchJSXAttributes
 /** `<ui-section>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISectionEventMap {
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -25564,6 +25618,16 @@ export interface UISectionAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -25584,7 +25648,7 @@ export interface UISectionAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -25594,7 +25658,7 @@ export interface UISectionAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -25604,7 +25668,7 @@ export interface UISectionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -25614,7 +25678,7 @@ export interface UISectionAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -25831,7 +25895,7 @@ export interface UISectionAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -25999,24 +26063,24 @@ export interface UISectionAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UISectionEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UISectionEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UISectionEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UISectionEventMap["ui-closed"]) => void
@@ -26047,7 +26111,7 @@ export interface UISectionJSXAttributes
 /** `<ui-sections>`'s own attributes, from its vocabulary. */
 export interface UISectionsAttributes {
   /**
-   * Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded ones stack with no space between.  A section opts out with `collapsible="false"`.
+   * Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed ones stack with no space between.  A section opts out with `collapsible="false"`.
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
@@ -29124,6 +29188,16 @@ export interface UIStepAttributes {
    */
   "prop:description"?: string
   /**
+   * Id of the `<ui-steps>` this step belongs to, when it's written outside them (`parent="checkout"`):  it joins them, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
@@ -30108,6 +30182,16 @@ export interface UITabAttributes {
    */
   "prop:attach"?: "both" | "top" | "bottom"
   /**
+   * Id of the `<ui-tabs>` this pane belongs to, when it's written outside them (`parent="types"`):  it joins them, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * The look:  `basic`, no segment box;  inside `<ui-tabs>`, the tabs decide.  Old name:  `basic`.
    * - takes:  space-separated:  `basic`
    */
@@ -30460,7 +30544,7 @@ export interface UITableAttributes {
    */
   "prop:appearance"?: string
   /**
-   * Never stacks rows into blocks, even on a viewport below 768px.
+   * Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
@@ -30512,7 +30596,7 @@ export interface UITableAttributes {
    */
   "prop:stackable"?: boolean | "" | "tablet"
   /**
-   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
+   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
    * - takes:  `viewport` · `container` · `none`
    */
   "stack-by"?: "viewport" | "container" | "none"
@@ -34476,7 +34560,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
        * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
-       * - events:  `ui-changing`, `ui-changed`
+       * - events:  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`
        */
       "ui-icon-picker": UIIconPickerJSXAttributes
       /**
@@ -34614,7 +34698,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-or": UIOrJSXAttributes
       /**
-       * `<ui-panel>`:  A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.
+       * `<ui-panel>`:  A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.
        * - also known as:  inspector, property panel, properties, settings panel, fieldset, property sheet
        * - slots:
        *   - default:  The content:  anything, nested `<ui-section>`s included.
@@ -34622,7 +34706,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
@@ -34697,13 +34781,13 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
        */
       "ui-property-editor": UIPropertyEditorJSXAttributes
       /**
-       * `<ui-property-group>`:  A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.
+       * `<ui-property-group>`:  A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.
        * - also known as:  property group, fieldset, settings group, inspector section
        * - slots:
        *   - `output`:  Rich output (instead of `output`).
@@ -34712,7 +34796,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`
        */
@@ -34792,7 +34876,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-search": UISearchJSXAttributes
       /**
-       * `<ui-section>`:  A section is a titled block of content that can fold away and keep its title in view.
+       * `<ui-section>`:  A section is a titled block of content that can close and keep its title in view.
        * - also known as:  section, panel, collapsible, disclosure, fieldset, expander
        * - slots:
        *   - default:  The content:  anything, nested `<ui-section>`s included.
@@ -34800,13 +34884,13 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
       "ui-section": UISectionJSXAttributes
       /**
-       * `<ui-sections>`:  A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.
+       * `<ui-sections>`:  A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.
        * - also known as:  accordion, section group, collapsible group, outline
        * - slots:
        *   - default:  `<ui-section>`s, and anything between them.

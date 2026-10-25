@@ -15,6 +15,8 @@
 
 import type { JSX } from "@solidjs/web"
 
+// Import directly:  the scheme's key, with no pref store
+import { COLOR_SCHEME_KEY } from "spell/util/persist/persist.types"
 import { clamp } from "spell-ui/util"
 import type { UIHeaderAttributes } from "spell-ui/jsx"
 
@@ -509,27 +511,13 @@ export const DOCS_SCHEME_SWITCHING = "ui-scheme-switching"
 
 /**
  * `localStorage` keys of the viewer's look (`ThemePreference`).
- * - `scheme`:  ONE key for every doc site:  `light` / `dark`, absent for `system` (follow the OS).
+ * - `scheme`:  the kit's ONE key for every Spell site (`COLOR_SCHEME_KEY`, kept by `ColorScheme`):
+ *   `light` / `dark`, absent for `system` (follow the OS).
  *   `<spell-site-header>` on the docs, epic pages and saga pages reads and writes it too.
- *   - MUST equal `SCHEME_KEY` in the kit's server (`spell/server/site/site.types`):
- *     `ui` can't import it, as its shipped code stays clear of the server.
- *     `UIDocsThemes.test.tsx` pins the two equal.
  * - `theme`:  a `UI.themes` name (`github`, `classic`), `DOCS_PLAIN_THEME` for our own look,
  *   absent for `DOCS_DEFAULT_THEME`.  Spell UI's site only.
  */
-export const DOCS_LOOK_KEYS = { scheme: "spell-site:scheme", theme: "spell-ui-site:theme" } as const
-
-/**
- * The scheme keys used before there was one (2026-10-04):
- * read once when `DOCS_LOOK_KEYS.scheme` is absent, copied to it, then removed;  first valid one wins.
- * - `spell-site:theme`:  `<spell-site-header>`'s (docs, epic pages, saga pages)
- * - `spell-ui-site:scheme`:  Spell UI's site (and the Astro site before it)
- * - MUST equal `LEGACY_SCHEME_KEYS` in the kit's server (`spell/server/site/site.types`)
- */
-export const DOCS_LEGACY_SCHEME_KEYS = ["spell-site:theme", "spell-ui-site:scheme"] as const
-
-/** Media query of the OS's dark scheme:  what `system` follows. */
-export const DOCS_DARK_QUERY = "(prefers-color-scheme: dark)"
+export const DOCS_LOOK_KEYS = { scheme: COLOR_SCHEME_KEY, theme: "spell-ui-site:theme" } as const
 
 ////////////////
 // ## What the docs elements share

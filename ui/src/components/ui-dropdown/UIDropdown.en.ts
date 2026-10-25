@@ -9,6 +9,7 @@
  */
 
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-dropdown>`
@@ -93,14 +94,7 @@ export const dropdownVocabulary = {
       kind: "keyOnly",
       description: "Busy, e.g. fetching options;  the caret spins."
     },
-    {
-      name: "readonly",
-      group: "form",
-      kind: "keyOnly",
-      property: "readOnly",
-      key: "read-only",
-      description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
-    },
+    UIT.FormControlAttributes.readonly,
     {
       name: "inverted",
       group: "appearance",
@@ -176,7 +170,7 @@ export const dropdownVocabulary = {
         "Old name:  `upward`."
     },
     { name: "icon", group: "content", kind: "icon", description: "Icon name for a `labeled` dropdown's icon block." },
-    { name: "placeholder", group: "form", kind: "string", description: "Text shown while nothing is chosen." },
+    { ...UIT.FormControlAttributes.placeholder, description: "Text shown while nothing is chosen." },
     {
       name: "value",
       group: "form",
@@ -194,13 +188,8 @@ export const dropdownVocabulary = {
         "Text shown for the current value, e.g. before `options` arrive.  Property only by default.  " +
         "Old name:  `text`."
     },
-    {
-      name: "name",
-      group: "name",
-      kind: "string",
-      description: "Form field name;  `multiple` submits one entry per value."
-    },
-    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    { ...UIT.FormControlAttributes.name, description: "Form field name;  `multiple` submits one entry per value." },
+    UIT.FormControlAttributes.required,
     {
       name: "allow-additions",
       group: "form",
@@ -295,7 +284,7 @@ export const dropdownVocabulary = {
     { name: "open", description: "The menu is open." },
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
-    { name: "invalid", description: "Fails validation (`required` ...)." },
+    { ...UIT.FormControlStates.invalid, description: "Fails validation (`required` ...)." },
     { name: "fluid", description: "The host is block-level (`fluid`)." }
   ],
   texts: [

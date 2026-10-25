@@ -58,6 +58,7 @@ export class EmojiData {
   static reset() {
     EmojiData.set = DEFAULT_SET
     EmojiData.sets.clear()
+    EmojiData.loads.forget()
   }
 
   /** The set `element` draws from:  its nearest `<ui-root emoji>`'s (`RootSettings`), else the page's. */
@@ -151,8 +152,8 @@ export class EmojiData {
   /** The same, keyed by `loose()`. */
   private static readonly registeredLoose = new Map<string, string>()
 
-  /** `<set>/<chunk>` => its load, so each chunk is requested once at a time. */
-  private static readonly loads = new Map<string, Promise<void>>()
+  /** `<set>/<chunk>` => its load, so each chunk is requested once;  a failure is forgotten. */
+  private static readonly loads = new E.LoadOnce<string, void>({ failures: "forgotten" })
 
   /** `set`'s loaded names, created on first use. */
   private static dataFor(set: string): EmojiSetData {
@@ -185,26 +186,19 @@ export class EmojiData {
    */
   private static load(set: string, chunk: string): Promise<void> {
     const id = `${set}/${chunk}`
-    let load = EmojiData.loads.get(id)
-    if (!load) {
-      const own = LOADERS[`./data/${id}.json`]
-      if (!own) return Promise.resolve()
-      const names = EmojiData.chunkLoader ? EmojiData.chunkLoader(set, chunk) : own().then((module) => module.default)
-      load = names
-        .then((names) => {
-          const { cache, looseCache, loaded } = EmojiData.dataFor(set)
-          for (const [name, emoji] of Object.entries(names)) {
-            if (!cache.has(name)) cache.set(name, emoji)
-            const loose = EmojiData.loose(name)
-            if (!looseCache.has(loose)) looseCache.set(loose, emoji)
-          }
-          loaded.add(chunk)
-        })
-        .catch(() => undefined)
-        .finally(() => EmojiData.loads.delete(id))
-      EmojiData.loads.set(id, load)
-    }
-    return load
+    const own = LOADERS[`./data/${id}.json`]
+    if (!own) return Promise.resolve()
+    const load = EmojiData.loads.get(id, async () => {
+      const names = EmojiData.chunkLoader ? await EmojiData.chunkLoader(set, chunk) : (await own()).default
+      const { cache, looseCache, loaded } = EmojiData.dataFor(set)
+      for (const [name, emoji] of Object.entries(names)) {
+        if (!cache.has(name)) cache.set(name, emoji)
+        const loose = EmojiData.loose(name)
+        if (!looseCache.has(loose)) looseCache.set(loose, emoji)
+      }
+      loaded.add(chunk)
+    })
+    return load.catch(() => undefined)
   }
 }
 

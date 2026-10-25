@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
+import { OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
+
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell-ui/runtime"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import {
-  DOCS_LEGACY_SCHEME_KEYS,
   DOCS_LOOK_KEYS,
   DOCS_PLAIN_THEME,
   type DocsScheme,
@@ -125,7 +126,7 @@ function htmlScheme() {
 
 /** Back to no stored look (so the default theme, in memory), nothing applied, the system scheme. */
 async function clean() {
-  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...DOCS_LEGACY_SCHEME_KEYS]) {
+  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
     localStorage.removeItem(key)
   }
   ThemePreference.reset()

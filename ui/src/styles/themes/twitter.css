@@ -27,6 +27,9 @@
   *******************************/
 
   :root {
+    /* groups stay joined, as each button draws its own ring:  no inset track, square joints */
+    --ui-button-group-padding: 0px;
+    --ui-button-group-item-radius: 0px;
     --ui-button-font-weight: var(--ui-font-weight-bold);
     --ui-button-color: light-dark(oklch(0.321 0 0), var(--ui-text-color));
     --ui-button-color-hover: light-dark(oklch(0.301 0.011 237), var(--ui-text-hovered));

@@ -216,7 +216,7 @@ export class UIPropertyEditor extends UIForm {
       made.setAttribute(MADE_ATTRIBUTE, MADE_FROM.source)
       this.domElement.append(made)
     }
-    for (const group of this.domElement.querySelectorAll(`${GROUP_SELECTOR}[select]`)) {
+    for (const group of this.domElement.querySelectorAll(`${GROUP_SELECTOR}:is([selector], [select])`)) {
       if (group.children.length) continue
       const part = page.querySelector((group.getAttribute("selector") ?? group.getAttribute("select"))!)
       for (const child of part?.children ?? []) group.append(document.importNode(child, true))
@@ -435,7 +435,7 @@ export class UIPropertyEditor extends UIForm {
 const SECTION_ATTRIBUTES = new Set(
   sectionVocabulary.attributes
     .map((spec) => spec.name as string)
-    .filter((name) => !["source", "selector", "size", "inverted", "loading", "disabled"].includes(name))
+    .filter((name) => !["source", "selector", "size", "inverted", "loading", "disabled", "parent"].includes(name))
 )
 
 /** The section's named slots the editor passes on. */

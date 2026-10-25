@@ -178,19 +178,6 @@ export type ItemOwner = {
 }
 
 ////////////////
-// ## CSS contracts
-////////////////
-
-/**
- * Custom property `UIDropdown.css` reads for the anchor name, e.g. `--_ui-dropdown-anchor: --ui-dropdown-7`.
- * - The element sets it INLINE on its root, to a per-instance dashed ident (`UI.ids`);
- *   the root's `anchor-name` and the menu's `position-anchor` both read it.
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- * - Falls back to `--ui-dropdown`, which is enough inside one shadow root.
- */
-export const DROPDOWN_ANCHOR_PROPERTY = "--_ui-dropdown-anchor"
-
-////////////////
 // ## Icon
 ////////////////
 
@@ -812,13 +799,6 @@ export type SearchChangeDetail = {
   /** event of the person's action, when there was one */
   originalEvent?: Event
 }
-
-/**
- * Custom property `UISearch.css` reads for the anchor name, e.g. `--_ui-search-anchor: --ui-search-3`.
- * - The element sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- */
-export const SEARCH_ANCHOR_PROPERTY = "--_ui-search-anchor"
 
 ////////////////
 // ## Toast
@@ -1568,6 +1548,45 @@ export const WHITESPACE = /\s+/
 
 /** A duration of bare digits, in ms (`duration="300"`). */
 export const DIGITS = /^\d+(\.\d+)?$/
+
+////////////////
+// ## Form controls:  the attributes and states every control with a value shares (`FormComponent`)
+////////////////
+
+/**
+ * The form attributes every control with a value declares, ONE shape each:  its vocabulary takes them by name.
+ * - `UIT.FormControlAttributes.name` as it is, or `{ ...UIT.FormControlAttributes.required, description: "..." }`
+ *   where the control says more.
+ * - `readonly` is the same everywhere:  the `readOnly` property, a plain boolean, as the platform's;
+ *   its class word `read-only` is what the controls' sheets style.
+ */
+export const FormControlAttributes = {
+  name: { name: "name", group: "name", kind: "string", description: "Form field name." },
+  required: {
+    name: "required",
+    group: "form",
+    kind: "boolean",
+    description: "Form validation:  a value must be chosen."
+  },
+  readonly: {
+    name: "readonly",
+    group: "form",
+    kind: "keyOnly",
+    property: "readOnly",
+    key: "read-only",
+    description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
+  },
+  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." }
+} as const
+
+/** The states every control with a value has (`FormComponent`):  its vocabulary takes them by name, as above. */
+export const FormControlStates = {
+  readonly: { name: "readonly", description: "`readonly`:  can't be changed." },
+  invalid: {
+    name: "invalid",
+    description: "Fails validation, once a person has interacted (`:user-invalid` semantics)."
+  }
+} as const
 
 ////////////////
 // ## Sources:  shared by ui-include, ui-code, ui-markdown (`LoadableComponent`)

@@ -2,7 +2,7 @@
 
 ```html
 <ui-root>
-  <ui-button primary icon="rocket">Launch</ui-button>
+  <ui-button color="primary" icon="rocket">Launch</ui-button>
 </ui-root>
 ```
 
@@ -460,7 +460,7 @@ Here's a page, the command, and what came out:
   <ui-card>
     <ui-header>Team</ui-header>
     <ui-label color="green">Popular</ui-label>
-    <ui-button primary>Choose</ui-button>
+    <ui-button color="primary">Choose</ui-button>
   </ui-card>
   <ui-modal id="terms">
     <ui-header>Terms</ui-header>
@@ -620,7 +620,7 @@ and hands the framework its runtime, words and styles as its core loads.
 | `LoadableComponent`, `DOMLoadableElement` | elements that show a text file:  `source` or inline text, loading and error looks, `save()` |
 | `LoadableBody` | a section's body, loaded from `source` the first time it opens |
 | `NativeFallback` | the plain-DOM stand-in a form control shows if its render throws, so it still submits |
-| `ClassBuilder` | attributes to Fomantic's class words:  `<ui-button size="small" primary>` → `ui small primary button` |
+| `ClassBuilder` | attributes to Fomantic's class words:  `<ui-button size="small" color="primary">` → `ui small primary button` |
 | `Validator`, `MenuOptions` | form rules;  the options of dropdowns, selects and searches |
 | `IconGlyph`, `RootSettings` | one icon, drawn from the packs of the root it's in;  what each `<ui-root>` sets for what's inside |
 | `SpellUISettings` | what Spell UI hands the kit's element framework as it loads:  the runtime, the words, the styles |

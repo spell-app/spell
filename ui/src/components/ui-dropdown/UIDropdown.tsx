@@ -160,7 +160,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       const next = [...values, option.value]
       this.commit(next, originalEvent, () => this.send("ui-added", { value: option.value, originalEvent }))
       this.query = ""
-      this.highlightedIndex = 0
+      this.highlighted.index = 0
     } else {
       this.commit([option.value], originalEvent, () => {
         if (isAddition) this.send("ui-added", { value: option.value, originalEvent })
@@ -240,8 +240,8 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     this.typeAheadTimer = E.after(this.typeAheadDelay / 1000, () => (this.typedSoFar = ""))
     if (!this.isOpen) this.requestOpen(true, event)
     const options = this.visibleOptions
-    const index = options.selectionForKey(this.typedSoFar, this.highlightedIndex)
-    if (index >= 0) this.highlightedIndex = index
+    const index = options.selectionForKey(this.typedSoFar, this.highlighted.index)
+    if (index >= 0) this.highlighted.index = index
   }
 
   ////////////////
@@ -272,28 +272,14 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   }
 
   /**
-   * Highlighted index into `visibleOptions.options`;  `-1` for none.
+   * The highlighted row of `visibleOptions.options`.
    * - Fomantic's `selected` class marks it;  its `active` is the CHOSEN option.
    */
-  @E.state accessor highlightedIndex = -1
+  readonly highlighted = new F.HighlightedOption(() => this.visibleOptions.options)
 
   /** Highlighted option. */
   get highlightedOption(): E.MenuOption | undefined {
-    return this.visibleOptions.options[this.highlightedIndex] as E.MenuOption | undefined
-  }
-
-  /** Highlight `option` if it's visible. */
-  @E.untracked
-  private highlight(option: E.MenuOption) {
-    const index = this.visibleOptions.options.indexOf(option)
-    if (index >= 0 && index !== this.highlightedIndex) this.highlightedIndex = index
-  }
-
-  /** Move the highlight by `delta` enabled options. */
-  @E.untracked
-  private move(delta: number) {
-    const options = this.visibleOptions
-    this.highlightedIndex = options.nextEnabledIndex(this.highlightedIndex, delta)
+    return this.highlighted.option as E.MenuOption | undefined
   }
 
   /** Open:  keep the highlighted row in view. */
@@ -323,37 +309,39 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   @E.controlled("open")
   accessor isOpen = false
 
-  /** This element's `UI.overlays` entry. */
-  private readonly overlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
-    restoreFocus: false,
-    onDismiss: () => void this.requestOpen(false)
-  }
-
   /**
-   * Open or close, dispatching the cancelable `ui-opening` / `ui-closing` first.
-   * - Opening highlights the chosen option, else the first enabled one.
-   * - Returns true when it changed.
+   * The menu, a popover panel on `isOpen`:  `ui-opening` / `ui-closing`, the overlay entry, the anchor.
+   * - Never opens while disabled or readonly.
+   * - Opening highlights the chosen option, else the first enabled one;  closing clears the query.
    */
-  @E.untracked
+  readonly popover = new F.PopoverPanel({
+    component: this,
+    member: "isOpen",
+    restoreFocus: false,
+    canChange: (open) => !open || !(this.isDisabled || this.readonly),
+    onChange: (open) => this.onOpenedOrClosed(open)
+  })
+
+  /** Open or close as a person would (`popover.request()`);  true when it changed. */
   requestOpen(open: boolean, originalEvent?: Event): boolean {
-    if (open === this.isOpen) return false
-    if (open && (this.isDisabled || this.readonly)) return false
-    const done = this.requestChange("isOpen", open, () =>
-      this.send(open ? "ui-opening" : "ui-closing", { open, originalEvent })
-    )
-    if (done && open) {
-      const options = this.visibleOptions
-      const chosen = options.options.findIndex((option) => this.chosenValueSet.has(option.value))
-      this.highlightedIndex = chosen >= 0 ? chosen : options.nextEnabledIndex(-1, 1)
+    return this.popover.request(open, originalEvent)
+  }
+
+  /** Opened:  highlight the chosen option, else the first enabled one;  closed:  clear the query. */
+  @E.untracked
+  private onOpenedOrClosed(open: boolean) {
+    if (!open) {
+      this.query = ""
+      return
     }
-    if (done && !open) this.query = ""
-    return done
+    const options = this.visibleOptions
+    const chosen = options.options.findIndex((option) => this.chosenValueSet.has(option.value))
+    if (chosen >= 0) this.highlighted.index = chosen
+    else this.highlighted.moveTo("first")
   }
 
   /**
-   * Popover + overlay registration while open AND connected, once rendered.
+   * The menu shows while open AND connected, once rendered (`PopoverPanel.follow()`).
    * - `isConnected`:  `keepAlive` keeps an open dropdown's state when it's removed,
    *   but the page must not keep its overlay entry (Escape / outside clicks) for an element that isn't there;
    *   reconnecting re-registers.
@@ -361,14 +349,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
    */
   @E.onChange("isOpen", "isConnected", "isReady")
   protected onOpenChanged(isOpen: boolean, isConnected: boolean, isReady: boolean) {
-    const { menu } = this
-    if (!isOpen || !isConnected || !isReady || !menu || !menu.popover) return undefined
-    if (!menu.matches(":popover-open")) menu.showPopover()
-    UI.overlays.open(this.overlay)
-    return () => {
-      if (menu.matches(":popover-open")) menu.hidePopover()
-      UI.overlays.close(this.overlay)
-    }
+    return this.popover.follow(this.menu, isOpen && isConnected && isReady)
   }
 
   ////////////////
@@ -392,8 +373,8 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Ids / anchor name, from `UI.ids` once rendering. */
-  private ids = { menu: "", text: "", anchor: "" }
+  /** Ids, from `UI.ids` once rendering. */
+  private ids = { menu: "", text: "" }
 
   /** The combobox:  the trigger button, or the search input. */
   private combobox?: HTMLElement
@@ -402,13 +383,9 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   private menu?: HTMLElement
 
   render(): JSX.Element {
-    this.ids = { menu: UI.ids.next(ID_PREFIX), text: UI.ids.next(ID_PREFIX), anchor: `--${UI.ids.next(ID_PREFIX)}` }
+    this.ids = { menu: UI.ids.next(ID_PREFIX), text: UI.ids.next(ID_PREFIX) }
     return (
-      <div
-        class={this.rootClass}
-        style={{ [UIT.DROPDOWN_ANCHOR_PROPERTY]: this.ids.anchor }}
-        onClick={this.onRootClick}
-      >
+      <div class={this.rootClass} style={this.popover.anchorStyle} onClick={this.onRootClick}>
         <Show when={this.multiple}>
           <For each={this.chosenValues}>{(value) => this.chip(value)}</For>
         </Show>
@@ -484,7 +461,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     const highlighted = this.highlightedOption
     return {
       role: "combobox",
-      "aria-expanded": this.isOpen ? "true" : "false",
+      "aria-expanded": this.popover.ariaExpanded,
       "aria-controls": this.ids.menu,
       "aria-haspopup": "listbox",
       "aria-activedescendant": this.isOpen && highlighted ? this.idFor(highlighted) : undefined,
@@ -588,6 +565,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
         ref={(element) => (this.menu = element)}
         id={this.ids.menu}
         class={[MENU, { [UIT.LEFT]: this.opensLeft }]}
+        style={this.popover.panelStyle}
         role="listbox"
         // a server render can't show a popover:  an open menu is a plain one, shown by the root's `active`
         popover={this.isSimple || (isServer && this.isOpen) ? undefined : "manual"}
@@ -632,7 +610,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
         part={this.partForName("item")}
         aria-selected={this.chosenValueSet.has(option.value) ? "true" : "false"}
         aria-disabled={option.disabled ? "true" : undefined}
-        onPointerMove={() => this.highlight(option)}
+        onPointerMove={() => this.highlighted.highlight(option)}
         onClick={(event) => this.select(option, event)}
       >
         <Show when={slot} fallback={this.optionContent(option)}>
@@ -688,7 +666,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
         role="option"
         part={this.partForName("item")}
         aria-selected="false"
-        onPointerMove={() => this.highlight(option)}
+        onPointerMove={() => this.highlighted.highlight(option)}
         onClick={(event) => this.select(option, event)}
       >
         {before}
@@ -759,7 +737,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     const query = (event.currentTarget as HTMLInputElement).value
     this.query = query
     this.requestOpen(true, event)
-    this.highlightedIndex = 0
+    this.highlighted.index = 0
     this.send("ui-searched", { query, originalEvent: event })
   }
 
@@ -789,19 +767,19 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       case UIT.Key.arrowUp:
         event.preventDefault()
         if (!isOpen) this.requestOpen(true, event)
-        else this.move(key === UIT.Key.arrowDown ? 1 : -1)
+        else this.highlighted.move(key === UIT.Key.arrowDown ? 1 : -1)
         return
       case UIT.Key.home:
       case UIT.Key.end:
         if (!isOpen) return
         event.preventDefault()
-        this.highlightedIndex = this.visibleOptions.nextEnabledIndex(-1, key === UIT.Key.home ? 1 : -1)
+        this.highlighted.moveTo(key === UIT.Key.home ? "first" : "last")
         return
       case UIT.Key.pageDown:
       case UIT.Key.pageUp:
         if (!isOpen) return
         event.preventDefault()
-        this.move(key === UIT.Key.pageDown ? this.pageSize : -this.pageSize)
+        this.highlighted.move(key === UIT.Key.pageDown ? this.pageSize : -this.pageSize)
         return
       case UIT.Key.enter: {
         if (!isOpen) {

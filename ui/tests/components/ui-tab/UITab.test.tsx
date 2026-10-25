@@ -8,6 +8,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell-ui/runtime"
 import type { DOMElement } from "spell/element"
 import type { TabChangeDetail, TabShowDetail } from "spell-ui/components/components.types"
+import { ParentLink } from "spell-ui/core"
 
 import "spell-ui/components/ui-tab"
 import "spell-ui/components/ui-segment"
@@ -654,3 +655,55 @@ describe("<ui-tabs> old names", () => {
     expect([before.root.className, before.menu.className]).toEqual([after.root.className, after.menu.className])
   })
 })
+
+////////////////
+// ## Parent
+////////////////
+
+describe("<ui-tab parent>", () => {
+  afterEach(() => {
+    ParentLink.reset()
+    vi.restoreAllMocks()
+  })
+
+  it("joins the <ui-tabs> it names, in PAGE ORDER, written before and after them", async () => {
+    const page = await ElementFixture.render(
+      `<div><ui-tab parent="flat-tabs" value="zero" label="Zero">0</ui-tab>` +
+        `<ui-tabs id="flat-tabs" aria-label="Test"><ui-tab value="one" label="One">1</ui-tab></ui-tabs>` +
+        `<p>Between</p>` +
+        `<ui-tab parent="flat-tabs" value="two" label="Two">2</ui-tab>` +
+        `<ui-tab parent="flat-tabs" value="three" label="Three">3</ui-tab></div>`
+    )
+    await joined(page)
+    const host = page.querySelector<TabsHost>("ui-tabs")!
+    expect([...host.children].map((pane) => pane.getAttribute("value"))).toEqual(["zero", "one", "two", "three"])
+    const { buttons, panes } = parts(host)
+    expect(buttons.map((button) => button.textContent)).toEqual(["Zero", "One", "Two", "Three"])
+    expect(buttons[2]!.ariaControlsElements).toEqual([panes[2]])
+    expect(panes[2]!.matches(":state(in-tabs)")).toBe(true)
+    // the keyboard walks them as nested ones
+    buttons[0]!.focus()
+    await userEvent.keyboard("{ArrowRight}{ArrowRight}")
+    await expect.poll(() => shown(panes)).toEqual([2])
+    expect(host.value).toBe("two")
+  })
+
+  it("warns ONCE for an id no element has, and stays where it is", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const page = await ElementFixture.render(
+      `<div><ui-tab parent="no-such-tabs" label="A">A</ui-tab><ui-tab parent="no-such-tabs" label="B">B</ui-tab></div>`
+    )
+    await joined(page)
+    const warnings = warn.mock.calls.filter(([message]) => String(message).includes("no-such-tabs"))
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]![0]).toContain('<ui-tab parent="no-such-tabs">')
+    expect([...page.children].map((pane) => pane.localName)).toEqual(["ui-tab", "ui-tab"])
+  })
+})
+
+/** Let flat elements join their containers, and the containers hear of it. */
+async function joined(page: Element) {
+  await ElementFixture.tick()
+  await ElementFixture.settle(page)
+  await ElementFixture.tick()
+}

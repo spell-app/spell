@@ -98,6 +98,19 @@
                 </ui-docs-example>
               </ui-section>
 
+              <ui-section id="examples-groups-flat-markup" label="Flat markup" sticky collapsible dividing>
+                <ui-docs-example>
+                  <p slot="description">
+                    A step can be written outside its steps:  <code>parent</code> names the steps' id, and the step
+                    joins them, in page order, as if it were nested there.
+                  </p>
+                  <ui-steps id="demo-order-steps" ordered></ui-steps>
+                  <ui-step parent="demo-order-steps" completed heading="Shipping"></ui-step>
+                  <ui-step parent="demo-order-steps" selected heading="Billing"></ui-step>
+                  <ui-step parent="demo-order-steps" heading="Confirm"></ui-step>
+                </ui-docs-example>
+              </ui-section>
+
               <ui-section id="examples-groups-circular-steps" label="Circular Steps" sticky collapsible dividing>
                 <ui-docs-example
                   description="Circular steps show a series of steps with a connection line between them."
@@ -1259,7 +1272,13 @@
                 </script>
               </ui-code>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-step" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-step" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-steps>
+                  <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                </ui-steps>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

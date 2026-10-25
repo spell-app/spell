@@ -57,6 +57,9 @@
     --ui-border-color-selected: light-dark(oklch(0.703 0.127 243.9), oklch(from var(--ui-ink-on-dark) l c h / 0.45));
 
     /* Button */
+    /* groups stay joined, as each button draws its own ring:  no inset track, square joints */
+    --ui-button-group-padding: 0px;
+    --ui-button-group-item-radius: 0px;
     --ui-button-font-weight: var(--ui-font-weight-normal);
     --ui-button-color: light-dark(oklch(0.178 0 0), var(--ui-text-color));
     --ui-button-color-hover: light-dark(oklch(0.178 0 0), var(--ui-text-hovered));

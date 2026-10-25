@@ -14,9 +14,11 @@
  *     - `ClassBuilder`, `Shorthand`
  *     - `NativeFallback` (the fallbacks' base)
  *     - `StickyWatch` (`<ui-sticky>` and `<ui-section sticky>`)
+ *     - `ParentLink` (the `parent` attribute of `<ui-tab>`, `<ui-step>` and `<ui-section>`)
  *   - from `spell-ui/elements`, Spell UI's own on Solid:
  *     - `SpellUISettings`:  what Spell UI hands `spell/element` (a side effect, below)
  *     - `IconGlyph`, `PartComponent` (the generic content parts)
+ *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
  *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji)
  *     - the elements that show a text file:
  *       `DOMLoadableElement` + `LoadableComponent`, `SourceMarkup`,
@@ -56,6 +58,7 @@ export * from "spell-ui/elements/ClassBuilder"
 export * from "spell-ui/elements/Shorthand"
 export * from "spell-ui/elements/NativeFallback"
 export * from "spell-ui/elements/StickyWatch"
+export * from "spell-ui/elements/ParentLink"
 export * from "spell-ui/runtime"
 export * from "spell-ui/icons"
 export * as UIT from "spell-ui/components/components.types"
@@ -63,6 +66,7 @@ export * as UIT from "spell-ui/components/components.types"
 export * from "spell-ui/elements/PartComponent"
 export * from "spell-ui/elements/RootSettings"
 export * from "spell-ui/elements/IconGlyph"
+export * from "spell-ui/elements/ClipboardCopy"
 export * from "spell-ui/elements/DOMLoadableElement"
 export * from "spell-ui/elements/LoadableComponent"
 export * from "spell-ui/elements/SourceMarkup"

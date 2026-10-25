@@ -6,6 +6,7 @@
  * - A word only ONE class uses sits below that class instead.
  */
 
+import * as UIT from "spell-ui/components/components.types"
 import type { checkboxVocabulary } from "./UICheckbox.en"
 import type { radioVocabulary } from "./UIRadio.en"
 
@@ -47,13 +48,7 @@ export const SHARED_ATTRIBUTES = [
     description: "`right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`."
   },
   { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, left out of the form." },
-  {
-    name: "readonly",
-    kind: "keyOnly",
-    property: "readOnly",
-    key: "read-only",
-    description: "Shows its state but can't be changed;  still submitted."
-  },
+  { ...UIT.FormControlAttributes.readonly, description: "Shows its state but can't be changed;  still submitted." },
   { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
   {
     name: "selected",
@@ -66,8 +61,11 @@ export const SHARED_ATTRIBUTES = [
     description:
       "Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`)."
   },
-  { name: "name", kind: "string", description: "Form field name." },
-  { name: "required", kind: "boolean", description: "Form validation:  must be chosen (a radio:  one of its group)." },
+  UIT.FormControlAttributes.name,
+  {
+    ...UIT.FormControlAttributes.required,
+    description: "Form validation:  must be chosen (a radio:  one of its group)."
+  },
   { name: "label", kind: "string", description: "Label text;  slotted content is the rich version." }
 ] as const
 

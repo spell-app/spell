@@ -60,7 +60,7 @@ export class CalendarFallback extends E.NativeFallback<Vocabulary> {
       this.sync()
       domElement.value = control.value
       const detail: UIT.CalendarChangeDetail = { value: control.value, originalEvent: event }
-      domElement.dispatchEvent(new CustomEvent(CHANGE_EVENT, { bubbles: true, composed: true, detail }))
+      this.send(CHANGE_EVENT, detail)
     })
     this.control = control
     return [root]

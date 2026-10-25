@@ -37,15 +37,16 @@ import panelCSS from "./UIPanel.css?inline"
 export class UIPanel extends UISection {
   // the section's names under the panel's tag:  same shape, but TypeScript only knows the section's literals
   @E.proto static vocabulary = panelVocabulary as unknown as SectionVocabulary
-  @E.protoMerged static elementSetup = {
+  // a base class too (`<ui-property-group>` is a panel band):  typed as one, so a subclass may state other keys
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { ...UISection.prototype.elementSetup.styleSheets, panel: panelCSS }
-  } satisfies Partial<E.ElementSetup>
+  }
   // the band's chevron at its far end, after any actions (`fold-icon="start"` moves it back)
   @E.proto static defaultFoldIcon = FoldIconPlace.end
 
   /** `panel`, and `sub` inside another panel. */
   protected get extraClass(): string | undefined {
-    const sub = this.parent instanceof UIPanel ? SUB_PANEL : undefined
+    const sub = this.enclosingSection instanceof UIPanel ? SUB_PANEL : undefined
     return [super.extraClass, PANEL, sub].filter(Boolean).join(" ")
   }
 }

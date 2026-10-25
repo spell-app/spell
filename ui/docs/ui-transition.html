@@ -655,7 +655,26 @@
                 </script>
               </ui-code>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-transition" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-transition" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="transition-demo-fade-playground" command="--toggle">Fade up</button>
+                <button type="button" class="ui button" commandfor="transition-demo-scale-playground" command="--toggle">Scale</button>
+                <button type="button" class="ui button" commandfor="transition-demo-flip-playground" command="--toggle">
+                  Horizontal flip
+                </button>
+                <div class="ui-cluster">
+                  <ui-transition id="transition-demo-fade-playground" animation="fade up" inline visible>
+                    <ui-segment>Fade up</ui-segment>
+                  </ui-transition>
+                  <ui-transition id="transition-demo-scale-playground" animation="scale" inline visible>
+                    <ui-segment>Scale</ui-segment>
+                  </ui-transition>
+                  <ui-transition id="transition-demo-flip-playground" animation="horizontal flip" duration="500" inline visible>
+                    <ui-segment>Horizontal flip</ui-segment>
+                  </ui-transition>
+                </div>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

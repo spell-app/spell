@@ -154,6 +154,33 @@ describe("<ui-icon-picker> panel", () => {
     expect(panel.getBoundingClientRect().top).toBeGreaterThanOrEqual(field.getBoundingClientRect().bottom)
   })
 
+  test("sends the cancelable ui-opening / ui-closing, as the other popovers do;  a cancelled one changes nothing", async () => {
+    const { host, field, panel } = await picker(`<ui-icon-picker aria-label="Icon"></ui-icon-picker>`)
+    const heard: string[] = []
+    for (const name of ["ui-opening", "ui-closing"]) {
+      host.addEventListener(name, (event) => heard.push(`${name} ${(event as CustomEvent).detail.open}`))
+    }
+    await userEvent.click(field)
+    await ElementFixture.tick()
+    expect(heard).toEqual(["ui-opening true"])
+    expect(panel.matches(":popover-open")).toBe(true)
+    expect(field.getAttribute("aria-expanded")).toBe("true")
+
+    const keepOpen = (event: Event) => event.preventDefault()
+    host.addEventListener("ui-closing", keepOpen)
+    await userEvent.keyboard("{Escape}")
+    await ElementFixture.tick()
+    expect(heard).toEqual(["ui-opening true", "ui-closing false"])
+    expect(panel.matches(":popover-open")).toBe(true)
+
+    host.removeEventListener("ui-closing", keepOpen)
+    await userEvent.keyboard("{Escape}")
+    await ElementFixture.tick()
+    expect(heard).toEqual(["ui-opening true", "ui-closing false", "ui-closing false"])
+    expect(panel.matches(":popover-open")).toBe(false)
+    expect(field.getAttribute("aria-expanded")).toBe("false")
+  })
+
   test("its first cell is `none`;  every cell's name is its tooltip", async () => {
     const { field, cells } = await picker(`<ui-icon-picker aria-label="Icon"></ui-icon-picker>`)
     await openGrid(field, cells)

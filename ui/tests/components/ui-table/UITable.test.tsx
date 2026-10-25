@@ -203,6 +203,48 @@ describe("<ui-table> shadow markup", () => {
     expect(box.hasAttribute("tabindex")).toBe(false)
   })
 
+  it("scrolls SIDEWAYS in its own box, height uncapped, while it doesn't stack and is too wide;  never the page", async () => {
+    const wide = `<tbody><tr><td style="white-space: nowrap">${"wide ".repeat(80)}</td><td>1</td></tr></tbody>`
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: 300px"><ui-table unstackable><table aria-label="Wide">${HEAD}${wide}</table>` +
+        `</ui-table><ui-table unstackable><table>${HEAD}${BODY}</table></ui-table></div>`
+    )
+    await settle()
+    const [tooWide, fits] = [...wrapper.querySelectorAll("ui-table")].map(scroller)
+    expect(tooWide!.className).toBe("scroller sideways")
+    expect([tooWide!.getAttribute("role"), tooWide!.getAttribute("tabindex")]).toEqual(["region", "0"])
+    // named by the table's own name, after the DOM element's and the caption
+    expect(tooWide!.getAttribute("aria-label")).toBe("Wide")
+    expect(getComputedStyle(tooWide!).overflowX).toBe("auto")
+    expect(getComputedStyle(tooWide!).maxBlockSize).toBe("none")
+    expect(tooWide!.scrollWidth).toBeGreaterThan(tooWide!.clientWidth)
+    expect(tooWide!.getBoundingClientRect().width).toBeLessThanOrEqual(300)
+    expect(wrapper.scrollWidth).toBeLessThanOrEqual(300)
+    // a table that fits:  no scroller of its own, no region
+    expect(fits!.className).toBe("scroller")
+    expect(fits!.hasAttribute("tabindex")).toBe(false)
+    expect(getComputedStyle(fits!).overflowX).toBe("visible")
+    // wide enough again:  it stops
+    wrapper.style.width = "4000px"
+    // two frames:  the size observer answers after the first frame's layout
+    await Viewport.frame()
+    await Viewport.frame()
+    await settle()
+    expect(tooWide!.className).toBe("scroller")
+    expect(tooWide!.hasAttribute("role")).toBe(false)
+  })
+
+  it("never scrolls sideways while it STACKS:  a stacked table fits its box", async () => {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: 300px"><ui-table stack-by="container"><table>${HEAD}${BODY}</table></ui-table></div>`
+    )
+    await settle()
+    expect(getComputedStyle(wrapper.querySelector("td")!).display).toBe("block")
+    const box = scroller(wrapper.querySelector("ui-table")!)
+    expect(box.className).toBe("scroller")
+    expect(box.hasAttribute("tabindex")).toBe(false)
+  })
+
   it("caps the height and keeps the head stuck while scrolling", async () => {
     const rows = Array.from({ length: 30 }, (_, index) => `<tr><td>${index}</td><td>x</td><td>y</td></tr>`).join("")
     const { host, table: element } = await table("scrolling", `${HEAD}<tbody>${rows}</tbody>`)

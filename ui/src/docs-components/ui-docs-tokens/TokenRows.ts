@@ -88,7 +88,7 @@ export class TokenRows {
     if (!family.tokens.length) {
       return { kind: "message", text: text("noTokens", { tag: `<${family.mainTag}>` }), isError: false }
     }
-    return [{ id: family.folder, rows: family.tokens }]
+    return [{ id: family.folder, family: family.title, rows: family.tokens }]
   }
 
   /** Space-separated words of an attribute;  none when unset. */

@@ -7,6 +7,7 @@
 
 import type { E } from "spell-ui/core"
 import { LEADING_ATTRIBUTES, SHARED_ATTRIBUTES, SHARED_EVENTS, SHARED_PARTS } from "./UICheckbox.types"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-radio>`
@@ -40,7 +41,7 @@ export const radioVocabulary = {
     { name: "selected", description: "Chosen." },
     { name: "disabled", description: "Can't be used." },
     {
-      name: "invalid",
+      ...UIT.FormControlStates.invalid,
       description: "Fails validation, once someone has interacted with it (`:user-invalid` semantics)."
     }
   ],

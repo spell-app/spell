@@ -4,13 +4,13 @@
  * - Adopted after the foundation, AFTER `UIInput.css` (the field is a real `.ui.input`).
  * - The shadow markup it expects (class grammar on semantic elements):
  *
- *     <div class="ui [size color] [inverted compact fluid] calendar [active] [disabled]" part="calendar"
- *          style="--_ui-calendar-anchor: --ui-calendar-7">
- *       <div class="ui left icon input [fluid] [disabled]" part="input">          (popup calendars)
+ *     <div class="ui [size color] [inverted compact fluid] calendar [active] [disabled read-only]" part="calendar">
+ *       <div class="ui left icon input [fluid] [disabled]" part="input" style="anchor-name: --ui-calendar-7">
  *         <input part="control">
  *         <button class="icon" part="trigger" aria-haspopup="dialog"><svg></button>
  *       </div>
- *       <div class="ui calendar popup [bottom | top] [left | right]" popover role="dialog" part="popup">
+ *       <div class="ui calendar popup [bottom | top] [left | right]" popover role="dialog" part="popup"
+ *            style="position-anchor: --ui-calendar-7">
  *         ...the picker...
  *       </div>
  *       <div class="calendar">...the picker...</div>                              (inline calendars)
@@ -32,8 +32,9 @@
  *   - the table's last class is the view:  `year`, `month`, `day`, `hour`, `minute` (Fomantic's widths key on it)
  *   - NOTE: `.ui.calendar` also matches the popup (`ui calendar popup`, Fomantic's own class list),
  *     so rules for the ROOT say `.ui.calendar:not(.popup)`
- * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor (`anchor-name: var(--_ui-calendar-anchor)`,
- *   set per instance by the component);  `position-area` from the position words, flipping when there's no room.
+ * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor:  its name, and the popup hung from it,
+ *   are inline, per element (the component's `PopoverPanel`);
+ *   `position-area` from the position words, flipping when there's no room.
  *   A popup WITHOUT `popover` (static markup) shows in flow while `visible`.
  * - Header:  a row of buttons ABOVE the table, not Fomantic's first `<th colspan>` row:  a grid's rows are its
  *   cells' rows (WAI-ARIA APG date picker), and the title names the grid.
@@ -51,7 +52,6 @@
  *   `::part(calendar)` / `::part(popup)` or in the app stylesheet reaches the box
  *   (`notes/theming.md` "Component tokens").  The popup re-declares them,
  *   so `compact` writes a private `--_calendar-cell-padding` read in front of the alias.
- *   `--_ui-calendar-anchor` (the field's anchor name, set inline by the component) is a private switch.
  * - NOTE: left out, on purpose:
  *   - multi-month (`.ui.grid` of tables), week numbers (`andweek`), event dates:  no element support yet
  *   - Fomantic's `touchReadonly` field and the `.inline.field` append target
@@ -147,7 +147,6 @@
   /* The field:  the anchor;  its icon box is a real button that opens the popup. */
   .ui.calendar > .ui.input {
     display: flex;
-    anchor-name: var(--_ui-calendar-anchor, --ui-calendar);
   }
   /*
    * The field's own width (it grows in a `fluid` one):  Fomantic leaves it to the browser's `<input>` default,
@@ -211,7 +210,6 @@
     box-shadow: var(--_ui-calendar-shadow);
   }
   .ui.calendar > .ui.popup[popover] {
-    position-anchor: var(--_ui-calendar-anchor, --ui-calendar);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     inset: auto;
@@ -454,5 +452,10 @@
   }
   .ui.disabled.calendar > .ui.input.disabled {
     opacity: 1;
+  }
+
+  /* Read-only:  shown, not changed;  the arrow, as every control's `read-only`. */
+  .ui.read-only.calendar > .ui.input > input {
+    cursor: default;
   }
 }

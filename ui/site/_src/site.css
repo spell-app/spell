@@ -837,8 +837,10 @@
   /*
    * a section's first nested title sits right under its own, open:  no gap
    * (Owen, 2026-10-23:  "No space between header and first section when expanded")
+   * - only when it's the first thing in its section:  after a paragraph, its title keeps the usual gap above
+   *   (`:first-of-type` also took it from a title after a paragraph, a third of the gap under it)
    */
-  .site-main ui-section > ui-section[sticky]:first-of-type::part(section) {
+  .site-main ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(section) {
     margin-block-start: 0;
   }
   /* ... nor the parent body's own top padding, when that nested section is the first thing in it */
@@ -938,8 +940,12 @@
     --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
-  /* an example's buttons that wrap keep apart, row from row:  their rows touched */
-  ui-docs-example > :is(ui-button, ui-buttons, ui-label) {
+  /*
+   * an example's buttons that wrap keep apart, row from row:  their rows touched
+   * - also inside the example's own segment (Button's Inverted example:  0px between rows, 8px between columns)
+   */
+  ui-docs-example > :is(ui-button, ui-buttons, ui-label),
+  ui-docs-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
     margin-block: 0.25em;
   }
   /* a message given as an example's description runs the frame's width, as every other message does */

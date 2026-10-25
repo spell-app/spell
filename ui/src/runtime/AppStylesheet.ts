@@ -1,6 +1,6 @@
 import { after, Warnings, type CancelablePromise } from "spell-ui/util"
 
-import { APP_STYLESHEET_ID, LAYER_ORDER } from "./runtime.types"
+import { answerOf, APP_STYLESHEET_ID, fetchText, LAYER_ORDER, type FetchFailure } from "./runtime.types"
 
 /****************
  * ### `AppStylesheet`
@@ -189,10 +189,10 @@ export class AppStylesheet {
     const sheet = await this.loadedSheet(link)
     let text: string
     try {
-      text = sheet ? this.serialize(sheet.cssRules) : await this.fetchText(link.href, link.href)
+      text = sheet ? this.serialize(sheet.cssRules) : await this.fetchSheetText(link.href, link.href)
     } catch {
       // cross-origin CSSOM throws SecurityError -- fall back to fetching the text
-      text = await this.fetchText(link.href, link.href)
+      text = await this.fetchSheetText(link.href, link.href)
     }
     return this.wrap(text, { media: link.media.trim() })
   }
@@ -241,7 +241,7 @@ export class AppStylesheet {
     const bodies = await Promise.all(
       imports.map(async (match) => {
         const href = new URL(match[2] ?? match[4] ?? "", base).href
-        const body = await this.fetchText(href, href)
+        const body = await this.fetchSheetText(href, href)
         return this.wrap(body, this.importConditionsFor(match[5] ?? ""))
       })
     )
@@ -253,12 +253,9 @@ export class AppStylesheet {
    * Fetch a stylesheet's text, with relative `url()`s made absolute against `base`.
    * - Throws when the server says no;  `sync()` warns and keeps the last sheet.
    */
-  private async fetchText(href: string, base: string): Promise<string> {
-    const response = await fetch(href)
-    if (!response.ok) {
-      throw new Error(`AppStylesheet.fetchText():  ${href} answered ${response.status};  check the stylesheet's URL`)
-    }
-    const text = this.absolutizeUrls(await response.text(), base)
+  private async fetchSheetText(href: string, base: string): Promise<string> {
+    const { text: fetched } = await fetchText(href, AppStylesheet.failed)
+    const text = this.absolutizeUrls(fetched, base)
     if (IMPORT_RULE.test(text)) {
       Warnings.warn(WARNING_SOURCE, `nested @import in ${href} is ignored (only one level is inlined)`)
     }
@@ -303,6 +300,17 @@ export class AppStylesheet {
         return match
       }
     })
+  }
+
+  /**
+   * What fetching a sheet throws:  the server said no, or nothing answered (as `fetch()` threw it).
+   * - STATIC:  pure, needs no instance.
+   */
+  private static failed({ url, response, error }: FetchFailure): Error {
+    if (!response) return error instanceof Error ? error : new Error(String(error))
+    return new Error(
+      `AppStylesheet.fetchSheetText():  ${url} answered ${answerOf(response)};  check the stylesheet's URL`
+    )
   }
 }
 

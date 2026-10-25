@@ -1,6 +1,6 @@
 import { onCleanup } from "solid-js"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell-ui/core"
 import { F } from "spell-ui/forms"
 import { radioVocabulary } from "./UIRadio.en"
 import { CheckControl } from "./CheckControl"
@@ -101,19 +101,31 @@ export class UIRadio extends CheckControl<typeof radioVocabulary> implements Rad
     for (const other of group.others(this)) if (other.isSelected) other.isSelected = false
   }
 
-  /** Arrow keys move the choice through the group, focus following. */
+  /**
+   * Arrow keys move the choice through the group, wrapping, focus following;  Home / End to the ends.
+   * - The group's tab stop is its own (`inputTabIndex`), so the arrows only move focus (`tabindex: "left alone"`).
+   */
   @E.untracked
   protected onKeyDown(event: KeyboardEvent) {
-    const delta = NEXT.has(event.key) ? 1 : PREVIOUS.has(event.key) ? -1 : 0
     const group = this.group
-    if (!delta || !group) return
-    event.preventDefault()
+    if (!group) return
     // `readonly` never changes the choice, from either end of the move
-    if (this.readonly) return
-    const target = group.step(this, delta) as UIRadio | undefined
-    if (!target || target.readonly) return
-    target.focus()
-    target.choose(true, event)
+    if (this.readonly) {
+      if (ARROW_KEYS.has(event.key)) event.preventDefault()
+      return
+    }
+    const members = group.membersInOrder.filter((member) => member === this || !member.isDisabled) as UIRadio[]
+    if (members.length < 2) return
+    UI.focus.arrowKey(event, {
+      container: this.domElement,
+      items: () => members.map((member) => member.domElement),
+      orientation: "both",
+      tabindex: "left alone",
+      onChange: (_item, index) => {
+        const target = members[index]!
+        if (!target.readonly) target.choose(true, event)
+      }
+    })
   }
 
   /** The group's tab stop is tabbable, the others aren't;  alone, it is. */
@@ -164,8 +176,5 @@ export interface UIRadio extends E.AttributeValues<typeof radioVocabulary> {}
 /** The `name` attribute's key, as the DOM element's change callbacks report it. */
 const NAME: E.AttributeName<typeof radioVocabulary> = "name"
 
-/** Keys that move to the next radio. */
-const NEXT = new Set<string>([UIT.Key.arrowDown, UIT.Key.arrowRight])
-
-/** Keys that move to the previous radio. */
-const PREVIOUS = new Set<string>([UIT.Key.arrowUp, UIT.Key.arrowLeft])
+/** The keys that move through the group:  a `readonly` radio swallows them. */
+const ARROW_KEYS = new Set<string>([UIT.Key.arrowDown, UIT.Key.arrowRight, UIT.Key.arrowUp, UIT.Key.arrowLeft])

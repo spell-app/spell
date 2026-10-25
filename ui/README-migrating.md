@@ -5,7 +5,7 @@
 <button class="ui small primary basic button">Save</button>
 
 <!-- Spell UI:  you write the same words, as attributes -->
-<ui-button size="small" primary basic>Save</ui-button>
+<ui-button size="small" color="primary" appearance="basic">Save</ui-button>
 ```
 
 And this is what the second one draws inside its shadow root, read back from a headless Chrome:
@@ -95,7 +95,7 @@ writes them:
 <ui-card>
   <img src="kristy.png" alt="Kristy" />
   <ui-content>
-    <ui-header href="#kristy">Kristy</ui-header>
+    <ui-header link="#kristy">Kristy</ui-header>
     <ui-meta><span>Joined in 2013</span></ui-meta>
     <ui-description>Kristy is an art director living in New York.</ui-description>
   </ui-content>
@@ -113,11 +113,11 @@ _That card, drawn by Spell UI:  the docs site's snapshot of it, in the site's ow
   - Each styles itself by what it's in:  inside a card, it takes the `in-card` state and draws a card's part.
 - `href` on a header draws an `<a class="header">`:  no `as="a"`.
 - A simple card can take its parts as attributes instead:
-  `<ui-card header="Kristy" meta="Joined in 2013" description="..." image="kristy.png">`.
+  `<ui-card heading="Kristy" meta="Joined in 2013" description="..." image="kristy.png">`.
 
 ## Every class word becomes an attribute
 
-`class="ui small primary basic button"` becomes `<ui-button size="small" primary basic>`, by four rules:
+`class="ui small primary basic button"` becomes `<ui-button size="small" color="primary" appearance="basic">`, by four rules:
 
 - A bare word becomes a bare attribute:  `basic`, `raised`, `fluid`, `circular`, `inverted`.
 - A word with a side or a direction takes it as a value:
@@ -134,22 +134,22 @@ its shadow root carries the words on the left, except the icon's, which is an SV
 | Fomantic UI | Spell UI |
 | --- | --- |
 | `<button class="ui button">` | `<ui-button>` |
-| `class="ui primary button"` | `<ui-button primary>` |
-| `class="ui small basic button"` | `<ui-button size="small" basic>` |
+| `class="ui primary button"` | `<ui-button color="primary">` |
+| `class="ui small basic button"` | `<ui-button size="small" appearance="basic">` |
 | `class="ui red button"` | `<ui-button color="red">` |
 | `class="ui labeled icon button"` + `<i class="save icon">` | `<ui-button labeled icon="save">` |
 | `class="ui left floated segment"` | `<ui-segment floated="left">` |
-| `class="ui raised segment"` | `<ui-segment raised>` |
-| `class="ui top attached segment"` | `<ui-segment attached="top">` |
-| `class="ui center aligned segment"` | `<ui-segment text-align="center">` |
+| `class="ui raised segment"` | `<ui-segment appearance="raised">` |
+| `class="ui top attached segment"` | `<ui-segment attach="top">` |
+| `class="ui center aligned segment"` | `<ui-segment align="center">` |
 | `class="ui warning message"` | `<ui-message state="warning">` |
 | `<h2 class="ui dividing header">` | `<ui-header level="2" dividing>`:  it draws the `<h2>` |
 | `class="ui left pointing label"` | `<ui-label pointing="left">` |
-| `class="ui vertical menu"` | `<ui-menu vertical>`:  it draws a `<nav>` |
+| `class="ui vertical menu"` | `<ui-menu direction="vertical">`:  it draws a `<nav>` |
 | `class="active item"` | `<ui-item selected>` |
 | `class="ui three column grid"` | `<ui-grid columns="3">` |
 | `class="four wide column"` | `<ui-column width="4">`, or `width="1/4"`, or `width="25%"` |
-| `class="ui toggle checkbox"` | `<ui-checkbox type="toggle">` |
+| `class="ui toggle checkbox"` | `<ui-checkbox appearance="toggle">` |
 | `class="ui disabled button"` | `<ui-button disabled>` |
 | `class="ui loading form"` | `<ui-form loading>` |
 | `<i class="user icon">` | `<ui-icon name="user">`:  an SVG from Font Awesome 7 Free, not a font glyph |
@@ -299,7 +299,7 @@ After, the same object, as a property:
   <form>
     <ui-field label="E-mail"><ui-input name="email"></ui-input></ui-field>
     <ui-field label="Password"><ui-input name="password" type="password"></ui-input></ui-field>
-    <ui-button primary type="submit">Sign up</ui-button>
+    <ui-button color="primary" type="submit">Sign up</ui-button>
   </form>
 </ui-form>
 
@@ -396,7 +396,7 @@ After, with Spell UI:
       <ui-dropdown selection options={OPTIONS} value={fruit} onui-change={(event) => setFruit(event.detail.value)} />
     </ui-field>
     <ui-checkbox label="I agree" selected={agreed} onui-change={(event) => setAgreed(event.detail.selected)} />
-    <ui-button primary type="submit">Save</ui-button>
+    <ui-button color="primary" type="submit">Save</ui-button>
   </form>
 </ui-form>
 ```
@@ -455,7 +455,7 @@ Planned, not started;  what someone migrating would want from it:
 - a dry run first, that changes nothing and shows the diff
 - one file at a time, as well as a whole folder
 - class-grammar markup rewritten to `ui-*` tags:
-  `<div class="ui small primary button">` → `<ui-button size="small" primary>`
+  `<div class="ui small primary button">` → `<ui-button size="small" color="primary">`
 - a codemod that does the same for Semantic UI React's JSX
 - a report of every class it couldn't map, file by file, and why:  so you know what's left
 - your theme carried over:  `.variables` to tokens, `.overrides` into the app stylesheet

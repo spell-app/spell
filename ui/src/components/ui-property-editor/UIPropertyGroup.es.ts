@@ -12,5 +12,5 @@ export const propertyGroupEs = {
   tag: "ui-property-group",
   name: "grupo-propiedades",
   aka: ["sección", "grupo de propiedades", "grupo de ajustes", "sección del inspector"],
-  texts: { loading: "Cargando…", fold: "Plegar", unfold: "Desplegar" }
+  texts: { loading: "Cargando…", closeSection: "Cerrar esta sección", openSection: "Abrir esta sección" }
 } as const satisfies E.TagDictionary

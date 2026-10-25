@@ -170,11 +170,11 @@
                     <ul>
                       <li>
                         approve:  <code>approve</code> / <code>ok</code> / <code>positive</code>, or
-                        <code>&lt;ui-button positive&gt;</code>
+                        <code>&lt;ui-button color=&quot;positive&quot;&gt;</code>
                       </li>
                       <li>
                         deny:  <code>deny</code> / <code>cancel</code> / <code>negative</code>, or
-                        <code>&lt;ui-button negative&gt;</code>
+                        <code>&lt;ui-button color=&quot;negative&quot;&gt;</code>
                       </li>
                     </ul>
                     Each fires the cancelable <code>ui-approving</code> / <code>ui-denying</code>, then closes the
@@ -711,7 +711,7 @@
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-modal
                     visible={open()}
-                    header="Delete?"
+                    heading="Delete?"
                     on-ui-closing={() => setOpen(false)}
                     on-ui-approving={remove}
                   >
@@ -790,7 +790,24 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-modal" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-modal" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="modal-types-standard-playground" command="--show">Show</button>
+                <ui-modal id="modal-types-standard-playground" closable>
+                  <ui-header>Profile Picture</ui-header>
+                  <ui-content>
+                    <ui-description>
+                      <p>We've found the following gravatar image associated with your e-mail address.</p>
+                      <p>Is it okay to use this photo?</p>
+                    </ui-description>
+                  </ui-content>
+                  <ui-actions>
+                    <ui-button class="deny" color="black">Nope</ui-button>
+                    <ui-button class="approve" color="positive">Yep, that's me</ui-button>
+                  </ui-actions>
+                </ui-modal>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

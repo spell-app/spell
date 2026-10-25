@@ -167,7 +167,7 @@ _The page shows once its layout, its theme and every element on it are ready:  n
   An example whose markup changes as it runs holds it in a `<template>` child instead.
 - After the first page, a click on another page of the site doesn't load a page.
   The site's router fetches it, loads the families it uses, swaps only the `main`
-  (through a `<ui-include select="main#main">`) and pushes its real URL:
+  (through a `<ui-include selector="main#main">`) and pushes its real URL:
   inside a View Transition, where the browser has them.
   - The chrome stays;  back, forward, deep links and reloads work as with plain pages.
   - A swap that fails falls back to a full load.
@@ -296,6 +296,8 @@ The other three panes:
     a click lands on the row (`#api-attributes-size`), which flashes.
   - Rerun `yarn site:sections` after `yarn site:data`:  a tag's first event adds an Events section.
 - Theming:  keep `<ui-docs-tokens family="ui-button" playground>`, and explain the family's tokens around it.
+  - `yarn site:kitchen` fills the playground with the family's main example, so a token edited there shows at once.
+  - A playground with children of your own (and no markers) is yours:  the script leaves it alone.
 
 <details>
 <summary>The pages guide in five lines, and the sub-tag pages</summary>
@@ -338,7 +340,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 | --- | --- |
 | `yarn site:data [--check]` | the site's data, from the vocabularies and the families' sheets:  `components.json5`;  `icons.json5`, the icon browser's search terms;  `search.json5`, every page's sections for the site search (rerun after renaming or moving a section);  the editors' manifests, `custom-elements.json`, `html-custom-data.json` and `css-custom-data.json`, and the JSX types, `src/jsx.ts`;  and a new family's entry in `pages.json5` |
 | `yarn site:index [--check]` | the component index's cards, [components.html](docs/components.html):  every tag under each of its topics, A-Z |
-| `yarn site:kitchen [--check]` | the kitchen sink's examples, [kitchen-sink.html](docs/kitchen-sink.html), from each family's main example file (`examples/elements/types.html`), three sections a family at most |
+| `yarn site:kitchen [--check]` | the kitchen sink's examples, [kitchen-sink.html](docs/kitchen-sink.html), from each family's main example file (`examples/elements/types.html`), three sections a family at most;  and each component page's Theming playground, its family's main example (the first of those sections), between `playground:start` / `playground:end` markers |
 | `yarn site:bundle` | `site/_assets/`, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
 | `yarn site:build` | the four above, in turn |
 | `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) serves `/components/ui/` while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |

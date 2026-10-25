@@ -65,12 +65,26 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     return this.isShowing ? UIT.ACTIVE : undefined
   }
 
+  /**
+   * Shown or hidden, as `visible` (`isVisible`):  `ui-opening` / `ui-closing` first, `ui-opened` / `ui-closed` once
+   * its transition ends (`onVisibleChange()`).
+   * - A disabled dimmer never shows.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isVisible",
+    canChange: (visible) => !visible || !this.disabled,
+    detail: (visible, originalEvent): UIT.DimmerOpenDetail | UIT.DimmerCloseDetail =>
+      visible ? { visible, originalEvent } : { visible, reason: this.closeReason, originalEvent },
+    afterDetail: (visible): UIT.DimmerOpenDetail => ({ visible })
+  })
+
+  /** Why the latest close was asked for:  `ui-closing`'s `reason`. */
+  private closeReason: UIT.DimmerCloseReason = "escape"
+
   /** Show for a person's action, dispatching the cancelable `ui-opening` first;  true when applied. */
-  @E.untracked
   requestOpen(originalEvent?: Event): boolean {
-    if (this.isVisible || this.disabled) return false
-    const detail: UIT.DimmerOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.send("ui-opening", detail))
+    return this.disclosure.open(originalEvent)
   }
 
   /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
@@ -79,8 +93,8 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     if (!this.isVisible) return false
     this.isDismissing = true
     E.soon(() => (this.isDismissing = false))
-    const detail: UIT.DimmerCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.send("ui-closing", detail))
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
   }
 
   /** An invoker command aimed at the DOM element (`UIT.ToggleCommands`). */
@@ -189,11 +203,8 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     this.place()
     if (visible ? !this.shown : !wasShown) return
     if (visible && keyframes && box) await UI.transitions.animate({ element: box, name: keyframes, direction: UIT.IN })
-    const detail: UIT.DimmerOpenDetail = { visible }
     if (!(await this.transitionsEnd())) return
-    if (visible ? this.isShowing : !this.isShowing && this.domElement.isConnected) {
-      this.send(visible ? "ui-opened" : "ui-closed", detail)
-    }
+    if (visible ? this.isShowing : !this.isShowing && this.domElement.isConnected) this.disclosure.sendAfter(visible)
   }
 
   /** Placed again whenever what decides it changes:  connected, `page`, `disabled`, drawn. */
@@ -344,10 +355,8 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
   private readonly onClose = (event: Event) => {
     const box = this.box
     if ((box instanceof HTMLDialogElement && box.open) || !this.domElement.isConnected) return
-    if (!this.isVisible) return
-    const detail: UIT.DimmerCloseDetail = { visible: false, reason: "escape", originalEvent: event }
-    this.send("ui-closing", detail)
-    this.isVisible = false
+    this.closeReason = "escape"
+    this.disclosure.adopt(false, event)
   }
 }
 

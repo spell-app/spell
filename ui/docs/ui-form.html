@@ -1804,7 +1804,26 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-form" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-form" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-form>
+                  <form>
+                    <ui-field>
+                      <label for="fm-types-first-playground">First Name</label>
+                      <ui-input id="fm-types-first-playground" name="first-name" placeholder="First Name"></ui-input>
+                    </ui-field>
+                    <ui-field>
+                      <label for="fm-types-last-playground">Last Name</label>
+                      <ui-input id="fm-types-last-playground" name="last-name" placeholder="Last Name"></ui-input>
+                    </ui-field>
+                    <ui-field>
+                      <ui-checkbox name="terms">I agree to the Terms and Conditions</ui-checkbox>
+                    </ui-field>
+                    <ui-button type="submit">Submit</ui-button>
+                  </form>
+                </ui-form>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

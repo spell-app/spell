@@ -8,6 +8,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-rating>`
@@ -36,11 +37,7 @@ export const ratingVocabulary = {
       description: "Can't be used:  left out of the form, not focusable.  Shows its value."
     },
     {
-      name: "readonly",
-      group: "form",
-      kind: "keyOnly",
-      property: "readOnly",
-      key: "read-only",
+      ...UIT.FormControlAttributes.readonly,
       description: "Shows its value but can't be changed;  still focusable and submitted."
     },
     {
@@ -72,8 +69,8 @@ export const ratingVocabulary = {
       kind: "boolean",
       description: "Choosing the current rating again clears it (as do Backspace / Delete);  always, with one icon."
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name." },
-    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a rating must be given." }
+    UIT.FormControlAttributes.name,
+    { ...UIT.FormControlAttributes.required, description: "Form validation:  a rating must be given." }
   ],
   events: [
     {
@@ -88,10 +85,7 @@ export const ratingVocabulary = {
     { name: "icon", description: "One icon:  a `<label>` around its radio and glyph." },
     { name: "control", description: "One native radio (invisible, over its icon)." }
   ],
-  states: [
-    { name: "disabled", description: "Can't be used." },
-    { name: "invalid", description: "Fails validation, once a person has interacted (`:user-invalid` semantics)." }
-  ],
+  states: [{ name: "disabled", description: "Can't be used." }, UIT.FormControlStates.invalid],
   texts: [
     { key: "ratingItem", text: "{value} of {max}", description: "Accessible name of each icon's radio." },
     { key: "ratingValue", text: "Rated {value} of {max}", description: "Description of a fractional rating." }

@@ -147,9 +147,13 @@ export class ThemeFamilies {
   // ## Internals
   ////////////////
 
-  /** Sheet `name`'s text. */
+  /**
+   * Sheet `name`'s text, as the browser gets it:  each `@import "./<sheet>.css"` replaced by that sheet's text.
+   * - e.g. `spell-brand.css` sits on `spell.css` (Vite inlines the import), so it touches every family `spell` does
+   */
   private css(name: string): string {
-    return readFileSync(join(this.folder, `${name}.css`), "utf8")
+    const css = readFileSync(join(this.folder, `${name}.css`), "utf8")
+    return css.replace(SHEET_IMPORT, (_, imported: string) => this.css(imported))
   }
 
   /** Folders one selector names:  by class-grammar compounds and by tag. */
@@ -263,6 +267,9 @@ export type ThemeFamiliesProps = {
   /** foundation token names:  never a family's, whatever their name says */
   foundation?: Iterable<string>
 }
+
+/** A theme's `@import` of a sheet beside it:  `@import "./spell.css";`, the sheet's name in group 1. */
+const SHEET_IMPORT = /@import\s+["']\.\/([\w-]+)\.css["']\s*;/g
 
 /** A `ui-*` TAG in a selector (not a `.ui-dark` class, not a `--ui-` token);  group 1 is the tag. */
 const TAG_NAME = /(?<![\w.-])(ui-[a-z]+(?:-[a-z]+)*)\b/g

@@ -501,7 +501,46 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-sticky" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-sticky" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <div
+                  style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)"
+                  tabindex="0"
+                  role="region"
+                  aria-label="Sticky rail example"
+                >
+                  <div style="display: flex; gap: 1em; padding: 0 1em">
+                    <div style="flex: 1">
+                      <p>
+                        Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does
+                        it: the box is <code>position: sticky</code>, and the element only reports when it is stuck.
+                      </p>
+                      <p>
+                        Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does
+                        it: the box is <code>position: sticky</code>, and the element only reports when it is stuck.
+                      </p>
+                      <p>
+                        Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does
+                        it: the box is <code>position: sticky</code>, and the element only reports when it is stuck.
+                      </p>
+                      <p>
+                        Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does
+                        it: the box is <code>position: sticky</code>, and the element only reports when it is stuck.
+                      </p>
+                      <p>
+                        Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does
+                        it: the box is <code>position: sticky</code>, and the element only reports when it is stuck.
+                      </p>
+                    </div>
+                    <div style="width: 8em">
+                      <ui-sticky offset="8">
+                        <p style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)">I stick 8px from the top</p>
+                      </ui-sticky>
+                    </div>
+                  </div>
+                </div>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

@@ -34,6 +34,7 @@ import buttonCSS from "./UIButton.css?inline"
  * - Icons come from the page's icon packs (`IconGlyph`), asynchronously.
  *   - CSS sizes the `.icon` box, so the SVG arriving shifts nothing.
  *   - `icon-position="right"` puts the box after the text, as Fomantic's `<i class="right … icon">`.
+ *   - An icon-only button shows its `aria-label` as the browser's tooltip (`iconTooltip`).
  *
  * - `click()` on the DOM element (`<ui-input>`'s implicit submission sends one) presses the inner control,
  *   as `click()` on a native button does;  the page sees only the DOM element's own click (`onDOMElementClick`).
@@ -88,6 +89,16 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
   /** The DOM element's `aria-label`, passed on to the inner control (an icon-only button's name). */
   private get ariaLabel(): string | undefined {
     return this.attributes["aria-label"] ?? undefined
+  }
+
+  /**
+   * The inner control's `title`, the browser's own tooltip:
+   * an icon-only button (no text of its own) shows its name (`aria-label`) when pointed at.
+   * - Not when the DOM element has a `title` (the page's, or `tooltip`'s):  that one shows already.
+   */
+  private get iconTooltip(): string | undefined {
+    if (this.hasText || this.attributes.title != null) return undefined
+    return this.ariaLabel
   }
 
   /** Has text content (slotted, the `label` shorthand, or a state text)? */
@@ -195,6 +206,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
             aria-pressed={this.toggle && !this.hasStateText ? (this.isActive ? "true" : "false") : undefined}
             aria-busy={this.loading ? "true" : undefined}
             aria-label={this.ariaLabel}
+            title={this.iconTooltip}
             command={isServer || this.hasNativeInvokers ? this.command : undefined}
             onClick={this.onClick}
           >
@@ -213,6 +225,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
           aria-disabled={this.isDisabled ? "true" : undefined}
           aria-busy={this.loading ? "true" : undefined}
           aria-label={this.ariaLabel}
+          title={this.iconTooltip}
           onClick={this.onClick}
         >
           {iconAndText()}

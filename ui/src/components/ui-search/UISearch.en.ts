@@ -102,10 +102,7 @@ export const searchVocabulary = {
       description: "Can't be used;  dimmed, and left out of the form."
     },
     {
-      name: "readonly",
-      group: "form",
-      kind: "boolean",
-      property: "readOnly",
+      ...UIT.FormControlAttributes.readonly,
       description: "Shows its value but can't be typed in, and the results never open;  still focusable and submitted."
     },
     {
@@ -115,15 +112,15 @@ export const searchVocabulary = {
       description:
         "The results are showing.  Controlled:  `ui-opening` / `ui-closing` can veto;  shown only with something to show."
     },
-    { name: "placeholder", group: "form", kind: "string", description: "Placeholder text of the input." },
+    { ...UIT.FormControlAttributes.placeholder, description: "Placeholder text of the input." },
     {
       name: "value",
       group: "form",
       kind: "string",
       description: "The input's text:  the query, or a chosen result's title."
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name:  submits the input's text." },
-    { name: "required", group: "form", kind: "boolean", description: "Form validation:  the input can't be empty." },
+    { ...UIT.FormControlAttributes.name, description: "Form field name:  submits the input's text." },
+    { ...UIT.FormControlAttributes.required, description: "Form validation:  the input can't be empty." },
     {
       name: "url",
       group: "link",
@@ -247,9 +244,9 @@ export const searchVocabulary = {
   states: [
     { name: "open", description: "The results are showing." },
     { name: "disabled", description: "Can't be used." },
-    { name: "readonly", description: "`readonly`:  can't be changed." },
+    UIT.FormControlStates.readonly,
     { name: "loading", description: "Busy (`loading`, or a remote query running)." },
-    { name: "invalid", description: "Fails validation (`required`)." },
+    { ...UIT.FormControlStates.invalid, description: "Fails validation (`required`)." },
     { name: "fluid", description: "The host is block-level (`fluid`)." }
   ],
   // NOTE: text keys share ONE namespace across components (`UI.i18n`, first registration wins), hence the prefix

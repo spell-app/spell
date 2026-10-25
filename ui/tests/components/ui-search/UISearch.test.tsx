@@ -130,7 +130,8 @@ describe("<ui-search> markup", () => {
     expect(results.getAttribute("popover")).toBe("manual")
     expect(results.hasAttribute("role")).toBe(false)
     expect(status.textContent).toBe("")
-    expect(root.style.getPropertyValue("--_ui-search-anchor")).toMatch(/^--ui-search-\d+$/)
+    expect(root.style.getPropertyValue("anchor-name")).toMatch(/^--ui-search-\d+$/)
+    expect(results.style.getPropertyValue("position-anchor")).toBe(root.style.getPropertyValue("anchor-name"))
     await expect.poll(() => root.querySelector(".search.icon svg")).not.toBeNull()
   })
 
