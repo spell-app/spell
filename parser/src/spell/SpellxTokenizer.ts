@@ -55,7 +55,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     const groupLines = this.breakIntoIndentedBlocks
     this.breakIntoIndentedBlocks = (tokens: P.Token[]) =>
       groupLines(tokens)
-        .map(unwrapCode)
+        .map((block) => unwrapCode(block, this.unwrapsHtml))
         .map((block) => (this.liftsNotebooks ? liftNotebooks(block) : block))
   }
 
@@ -86,6 +86,12 @@ export class SpellxTokenizer extends P.Tokenizer {
    * there (`liftNotebooks()`)?  Yes for a parse;  a view of the file's chunks keeps them where they're written.
    */
   liftsNotebooks = true
+
+  /**
+   * Does `breakIntoIndentedBlocks()` unwrap each `<html>` block, so its markup is the drawing's own lines, as written
+   * (`unwrapCode()`)?  Yes for a parse;  a view of the file's chunks keeps the block, a cell of its own.
+   */
+  unwrapsHtml = true
 
   /** The tags open at the line being read, outermost first. */
   private frames: Frame[] = []
@@ -199,6 +205,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     // a chunk of code spell, as written:  the bare prefix (epic `elemental-spell` P12)
     if (lower === prefix) return { category: "code", kind: "code", word: first, wordEnd }
+    // markup drawn as written, `<ui-button>` (epic `elemental-spell` P16):  the web's word, in every language
+    if (lower === HTML_WORD) return { category: "code", kind: "html", word: first, wordEnd }
     if (declarations[lower]) return { category: "declaration", kind: declarations[lower]!, word: first, wordEnd }
     if (notes[lower]) return { category: "note", kind: notes[lower]!, word: first, wordEnd }
     // the longest handler or control word written here
@@ -240,6 +248,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (isNotebook(owner)) return word.category !== "unknown"
     if (!owner || owner.category === "template") return true
     if (owner.category === "note" || owner.category === "code") return false
+    if (word.category === "code" && word.kind === "html") return this.isInDrawing()
     if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
@@ -306,7 +315,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     // a notebook holds templates of its own, `<spell-view "counter">` (P16)
     if (word.category === "template" && owner && !isNotebook(owner))
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
-    if (word.category === "code" && owner && owner.category !== "template")
+    if (word.category === "code" && owner && owner.category !== "template" && word.kind !== "html")
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
     if (word.category !== "template" && word.category !== "note" && word.category !== "code" && !owner)
       return [this.message("spellx-outside-template", { tag, template: `<${this.words.prefix}-view>` })]
@@ -707,18 +716,22 @@ type TagWord = {
  * - A file's top level:  its functions, tests and starting code;  a template's:  members with no tag of their own.
  * - Its closer stays, as a closer line, which compiles to nothing.
  * - Its JSX is code spell's:  `<div>` the web's, never a pack's component (`SP.markCodeSpell()`, J83).
+ * - An `<html>` block in a drawing is one too (P16):  its markup the drawing's own lines, drawn as written,
+ *   `<ui-button>`;  its code-spell twin is that markup, with nothing around it.
+ *   - `html`:  unwrap those too;  a view of the file's chunks keeps them (`unwrapsHtml`).
  * - SIDE EFFECT:  changes `block` (and the blocks in it) in place;  returns it.
  */
-function unwrapCode(block: P.BlockToken): P.BlockToken {
+function unwrapCode(block: P.BlockToken, html = true): P.BlockToken {
   const items = block.tokens
   for (let index = 0; index < items.length; index++) {
     const item = items[index]
-    if (item instanceof P.BlockToken) unwrapCode(item)
+    if (item instanceof P.BlockToken) unwrapCode(item, html)
     if (!(item instanceof P.LineToken)) continue
     const [head] = item.tokens
     if (!(head instanceof SP.SpellxTagToken) || head.tag.category !== "code") continue
+    if (head.tag.kind === "html" && !html) continue
     const next = items[index + 1]
-    const body = next instanceof P.BlockToken ? unwrapCode(next).tokens : []
+    const body = next instanceof P.BlockToken ? unwrapCode(next, html).tokens : []
     // its drawings name tags as code spell does:  `<div>` is the web's (J83)
     for (const line of body) SP.markCodeSpell(line)
     items.splice(index, next instanceof P.BlockToken ? 2 : 1, ...body)
@@ -831,6 +844,9 @@ const CLOSER = /^<\/([\p{L}\p{M}\d_-]*)[ \t]*>/u
 
 /** The most words a handler's or control's word has:  `de lo contrario si`. */
 const MOST_WORDS_IN_A_TAG_WORD = 4
+
+/** An `<html>` block's word:  markup drawn as written, `<ui-button>`, the same in every language (P16). */
+const HTML_WORD = "html"
 
 /** Is `frame` a notebook's tag, `<spell-notebook>`:  its body a drawing, with templates of its own (P16)? */
 function isNotebook(frame: { category: string; kind: string } | undefined): boolean {

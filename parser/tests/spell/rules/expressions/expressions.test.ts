@@ -50,6 +50,7 @@ describe("priority and precedence", () => {
         "create_viewable_list_type:  Priority.declaration",
         "css_block:  Priority.declaration",
         "declare_event:  Priority.declaration",
+        "define_group:  Priority.declaration",
         "define_menu:  Priority.declaration",
         "define_property_has:  Priority.declaration",
         "divided_by:  Precedence.product",

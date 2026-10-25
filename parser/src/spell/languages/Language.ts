@@ -553,6 +553,11 @@ export type SpellxTwinWords = {
   /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
   menuBar: string
   /**
+   * A group of a template's members, a heading over the members after it (epic `elemental-spell` P16):
+   * `group {name}`;  its `description=` a comment ending the line.
+   */
+  group: string
+  /**
    * A notebook's body, a drawing of prose, markup and examples (epic `elemental-spell` P16):
    * its part's drawing, `to draw its content :`.
    */
@@ -571,7 +576,7 @@ export type SpellxTwinWords = {
 export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook"
 
 /** What a spellx member tag declares. */
-export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu"
+export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
 
 /** A spellx block of prose:  a member's long description, or a comment among its lines. */
 export type SpellxNoteKind = "description" | "comment"

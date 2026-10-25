@@ -36,6 +36,35 @@ export class SpellxFile {
     return this.diagnostics.filter((diagnostic) => diagnostic.severity === "error")
   }
 
+  /**
+   * Template `template`'s members by GROUP, in order (epic `elemental-spell` P16):  each `<group "...">` and the
+   * members after it, up to the next, as text sits under a heading.
+   * - First, with no `group`, the members before any group:  left out when there are none.
+   * - A member saying `group="direction"` is that group's, wherever it's written:  listed with it, in its place among
+   *   that group's members.  A group it names that's never declared gets an entry of its own, with no `group` node.
+   * - Members:  its declarations (not the groups themselves), handlers and notes;  prose and code are left out.
+   */
+  static groupsOf(template: SX.SpellxTemplate): SpellxGroup[] {
+    const groups: SpellxGroup[] = [{ name: undefined, members: [] }]
+    const named = (name: string) => {
+      let group = groups.find((each) => each.name === name)
+      if (!group) groups.push((group = { name, members: [] }))
+      return group
+    }
+    let current = groups[0]!
+    for (const node of template.children) {
+      if (node.kind === "declaration" && node.type === "group") {
+        current = named(node.name ?? "")
+        current.group = node
+        continue
+      }
+      if (node.kind !== "declaration" && node.kind !== "handler" && node.kind !== "note") continue
+      const own = node.kind === "declaration" ? node.attributes.find((each) => each.name === "group")?.value : undefined
+      ;(own ? named(own) : current).members.push(node)
+    }
+    return groups[0]!.members.length ? groups : groups.slice(1)
+  }
+
   /** The line and column of `offset`, both from 1. */
   positionOf(offset: number): SX.SpellxPosition {
     const starts = (this._lineStarts ??= lineStartsOf(this.text))
@@ -142,6 +171,16 @@ export class SpellxFile {
 }
 
 /** What a `SpellxFile` is made of -- see `SX.SpellxView`. */
+/** A group of a template's members:  see `SpellxFile.groupsOf()`. */
+export type SpellxGroup = {
+  /** its name, `direction`;  none for the members before any group */
+  name: string | undefined
+  /** its `<group>` tag, with its `description=`;  none for a group only a member names */
+  group?: SX.SpellxDeclaration
+  /** its members, in order */
+  members: SX.SpellxNode[]
+}
+
 export type SpellxFileProps = {
   /** its path, if it has one */
   path: string | undefined

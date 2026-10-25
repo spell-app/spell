@@ -148,7 +148,8 @@ export const spanishWords: SP.LanguageWords = {
       evento: "event",
       probar: "test",
       menú: "menu",
-      menu: "menu"
+      menu: "menu",
+      grupo: "group"
     },
     notes: { descripción: "description", descripcion: "description", comentario: "comment" },
     handlers: { al: "on", cuando: "when", mientras: "while" },
@@ -178,7 +179,8 @@ export const spanishWords: SP.LanguageWords = {
       icono: "icon",
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
-      bloqueado: "locked"
+      bloqueado: "locked",
+      grupo: "group"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
@@ -224,6 +226,7 @@ export const spanishWords: SP.LanguageWords = {
       menu: "su {name} es un menú de",
       menuAnd: "y",
       menuBar: "su barra de menú es {quoted menu-bar}",
+      group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
       start: "iniciar {words}",

@@ -27,7 +27,11 @@ export class SpellxView {
     const parser = language.parser.clone({ module: "spellx view", form: "spellx" } as P.ParserProps) as SP.SpellParser
     const { tokenizer } = parser
     // a notebook's templates stay where they're written:  its cells, in order (P16)
-    if (tokenizer instanceof SP.SpellxTokenizer) tokenizer.liftsNotebooks = false
+    if (tokenizer instanceof SP.SpellxTokenizer) {
+      tokenizer.liftsNotebooks = false
+      // and an `<html>` block stays one, its markup inside it
+      tokenizer.unwrapsHtml = false
+    }
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const view = new SpellxView(text)
     const nodes = view.nodesOf(root?.tokens ?? [], "file")

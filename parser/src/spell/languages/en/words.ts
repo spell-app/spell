@@ -156,7 +156,9 @@ export const englishWords: SP.LanguageWords = {
       draw: "draw",
       event: "event",
       test: "test",
-      menu: "menu"
+      menu: "menu",
+      // a heading over the members after it (epic `elemental-spell` P16)
+      group: "group"
     },
     notes: { description: "description", comment: "comment" },
     handlers: { on: "on", when: "when", while: "while" },
@@ -181,7 +183,8 @@ export const englishWords: SP.LanguageWords = {
       "undone-as": "undone-as",
       icon: "icon",
       "menu-bar": "menu-bar",
-      locked: "locked"
+      locked: "locked",
+      group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -226,6 +229,7 @@ export const englishWords: SP.LanguageWords = {
       menu: "its {name} is a menu of",
       menuAnd: "and",
       menuBar: "its menu bar is {quoted menu-bar}",
+      group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
       start: "start {words}",

@@ -33,6 +33,7 @@ import { DrawnMarkup } from "./DrawnMarkup"
 import { DrawPart } from "./DrawPart"
 import { HasParts } from "./HasParts"
 import { DefineMenu } from "./DefineMenu"
+import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -1820,6 +1821,63 @@ classesEs.addRule(HasParts, {
   syntax: `${A} {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]`
 })
 
+// un grupo de los miembros de una plantilla, un encabezado en su esquema (épica `elemental-spell` P16):
+// `- grupo "dirección"`
+classesEs.addRule(DefineGroup, {
+  syntax: "{type:subject_implied} grupo {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un encabezado sobre los miembros que lo siguen:  no compila a nada",
+          input: [
+            "una carta es una vista donde:",
+            '\t- grupo "dirección"',
+            "\t- su dirección es uno de arriba o abajo"
+          ],
+          js: [
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  // su dirección es uno de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"]',
+            '  static { this.declareProp("dirección", { oneOf: Carta.Direcciones }) }',
+            '  get dirección() { return this.getProp("dirección") }',
+            '  set dirección(value) { this.setProp("dirección", value) }',
+            "}"
+          ],
+          ts: [
+            "export type Dirección = (typeof Carta.Direcciones)[number]",
+            "",
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  // su dirección es uno de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"] as const',
+            "  @prop({ oneOf: () => Carta.Direcciones })",
+            "  accessor dirección!: Dirección",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-carta>`:  a carta, drawn in its own element, e.g. by `draw the carta`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its carta's properties;  its methods call its carta's.",
+            " * - What every view's element does, e.g. drawing its carta, is `SpellElement`'s.",
+            " */",
+            "export class CartaElement extends SpellElement<Carta> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-carta", "carta", [',
+            '    { name: "dirección", kind: "string", description: "Its dirección." }',
+            "  ])",
+            "}",
+            "core.useElement(Carta, CartaElement)"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
 // el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
 // `- su "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
@@ -1917,6 +1975,15 @@ classesEs.addRule(DrawPart, {
 })
 
 // una línea de un dibujo que ES el dibujo:  marcado, o una parte puesta
+// - el ejemplo de un cuaderno, o un bloque de markdown, en una línea propia:  los suyos, no los de un elemento (P16)
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:example_block}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:markdown_block}"
+})
+
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:jsxElement}"
 })

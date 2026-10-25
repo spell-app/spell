@@ -5033,6 +5033,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DefineGroup",
+          "ruleNames": ["define_group"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineGroup.ts",
+          "line": 20,
+          "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} grupo {group:text}",
+              "example": "una carta es una vista donde:\n\t- grupo \"dirección\"\n\t- su dirección es uno de arriba o abajo",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Direcciones = [\"arriba\", \"abajo\"]\n  static { this.declareProp(\"dirección\", { oneOf: Carta.Direcciones }) }\n  get dirección() { return this.getProp(\"dirección\") }\n  set dirección(value) { this.setProp(\"dirección\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [\n    { name: \"dirección\", kind: \"string\", description: \"Its dirección.\" }\n  ])\n}\ncore.useElement(Carta, CartaElement)"
+                },
+                "py": {
+                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DefineMenu",
           "ruleNames": ["define_menu"],
           "internal": false,
@@ -5467,6 +5493,12 @@
           "line": 28,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
+            {
+              "syntax": "{markup:example_block}"
+            },
+            {
+              "syntax": "{markup:markdown_block}"
+            },
             {
               "syntax": "{markup:jsxElement}"
             },

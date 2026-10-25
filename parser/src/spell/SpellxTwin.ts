@@ -159,6 +159,9 @@ export class SpellxTwin {
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    */
   private template(): SpellxTwinLine {
+    const regrouped = this.block && SpellxTwin.withGroupsOpened(this.block)
+    if (regrouped)
+      return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
     if (kind === "notebook") return this.notebook()
     const singleton = kind === "page" || kind === "app"
@@ -210,8 +213,13 @@ export class SpellxTwin {
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
         (first instanceof SP.SpellxProseToken && !!first.note)
-      if (!isCloser) last = isMember ? members : drawing
-      ;(last ?? drawing).push(item)
+      // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
+      if (isCloser) {
+        if (last === members) members.push(item)
+        continue
+      }
+      last = isMember ? members : drawing
+      last.push(item)
     }
     endProse()
     const indent = this.block?.indent ?? (this.line.indent ?? 0) + 1
@@ -303,6 +311,66 @@ export class SpellxTwin {
     })
   }
 
+  /**
+   * Template `block` with a group opened above each member written away from its group, `group="direction"`, and the
+   * group it's among opened again below it (epic `elemental-spell` P16):  code spell's twin has no word for a member's
+   * group, only the headings, `- group "direction"`, each member under the nearest above it.
+   * - `undefined` when no member needs it:  `block` as it is.
+   * - The headings it adds are `<group>` tags of their own, standing at the member, with no text of their own.
+   */
+  private static withGroupsOpened(block: P.BlockToken): P.BlockToken | undefined {
+    const items = block.tokens
+    let current: SP.SpellxTagToken | undefined
+    let changed = false
+    const out: Array<P.LineToken | P.BlockToken> = []
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index]!
+      const head = item instanceof P.LineToken ? item.tokens[0] : undefined
+      if (!SP.isSpellxTag(head)) {
+        out.push(item)
+        continue
+      }
+      if (head.tag.category === "declaration" && head.tag.kind === "group") {
+        current = head
+        out.push(item)
+        continue
+      }
+      const group = head.tag.attributes.find((attribute) => attribute.name === "group")?.value
+      if (!group || group.text === current?.tag.name?.text) {
+        out.push(item)
+        continue
+      }
+      // this member, its block and its closer:  under its own group, then back to the one it's among
+      let count = items[index + 1] instanceof P.BlockToken ? 2 : 1
+      const closer = items[index + count]
+      if (
+        closer instanceof P.LineToken &&
+        closer.tokens.length === 1 &&
+        closer.tokens[0] instanceof SP.SpellxCloserToken
+      )
+        count++
+      out.push(SpellxTwin.groupLine(head, group, item as P.LineToken), ...items.slice(index, index + count))
+      if (current?.tag.name) out.push(SpellxTwin.groupLine(head, current.tag.name, item as P.LineToken))
+      index += count - 1
+      changed = true
+    }
+    return changed ? new P.BlockToken({ ...block.record, tokens: out }) : undefined
+  }
+
+  /** A `<group>` line opening group `name`, standing at member `head`'s line. */
+  private static groupLine(head: SP.SpellxTagToken, name: SP.SpellxText, line: P.LineToken): P.LineToken {
+    const tag: SP.SpellxTag = {
+      category: "declaration",
+      kind: "group",
+      word: "group",
+      name,
+      attributes: [],
+      selfClosing: true
+    }
+    const token = new SP.SpellxTagToken({ start: head.start, raw: "", value: "", tag })
+    return new P.LineToken({ ...line.record, tokens: [token] })
+  }
+
   /** A member:  a property, an alias, an action, a drawing, an event or a test. */
   private declaration(): SpellxTwinLine {
     const { words, tag } = this
@@ -323,6 +391,8 @@ export class SpellxTwin {
         return this.lineAndBlock(this.event())
       case "menu":
         return this.menu()
+      case "group":
+        return this.lineAndBlock(this.expand(words.group))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
@@ -645,4 +715,4 @@ function spaceAfter(tokens: P.Token[]) {
 const MARKDOWN = "markdown"
 
 /** A tag's attributes that are never an event's parameters. */
-const NOT_PARAMS = new Set(["name", "description"])
+const NOT_PARAMS = new Set(["name", "description", "group"])
