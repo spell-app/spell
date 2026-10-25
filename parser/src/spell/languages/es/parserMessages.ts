@@ -24,6 +24,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
+  "not-a-property-body-line":
+    "Bajo una propiedad van solo sus reglas y sus frases:  esta línea funciona igual, pero escríbela después de la propiedad, no debajo",
   "named-twice": 'Hay más de una cosa de tipo {type} llamada "{name}":  esto encuentra la primera que se creó',
   "position-not-a-kind": '"{text}":  {aKind} no es uno de unos valores fijos;  di en qué lista, "... en ..."',
   "example-text": "texto",

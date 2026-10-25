@@ -15,12 +15,14 @@ import { Synonyms, Wording } from "spell-parser/spell/rules/expressions"
 
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
+import { ActionDetail } from "./ActionDetail"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
 import { QuotedSignatureWords } from "./QuotedSignatureWords"
 import { QuotedTypeExpression } from "./QuotedTypeExpression"
+import { ShortcutKeys } from "./ShortcutKeys"
 import { ToDoSomething } from "./ToDoSomething"
 import { TypedMethodArg } from "./TypedMethodArg"
 import { TypeMethodArg } from "./TypeMethodArg"
@@ -1062,3 +1064,70 @@ methodsEs.addRule(CreateHook, {
     }
   ]
 })
+
+// one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `atajo`
+methodsEs.addRule(ShortcutKeys)
+
+// an ACTION's description, indented under it (epic `elemental-spell` P5):  `- para voltearla:`, then each line
+methodsEs.addRule(ActionDetail, {
+  syntax: "atajo {keys:shortcut_keys}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "una carta es una cosa donde:",
+            "\t- su dirección es una de arriba o abajo",
+            "\t- para voltearla:",
+            "\t\t- atajo meta+T",
+            "\t\t- activa cuando su dirección es abajo",
+            '\t\t- se deshace como "Voltear carta"',
+            "\t\tponer su dirección en arriba"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"]',
+            '  static { this.declareProp("dirección", { oneOf: Carta.Direcciones }) }',
+            '  get dirección() { return this.getProp("dirección") }',
+            '  set dirección(value) { this.setProp("dirección", value) }',
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "",
+            "  get voltearIsEnabled() {",
+            '    return this.dirección === "abajo"',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
+          ],
+          ts: [
+            "export type Dirección = (typeof Carta.Direcciones)[number]",
+            "",
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"] as const',
+            "  @prop({ oneOf: () => Carta.Direcciones })",
+            "  accessor dirección!: Dirección",
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "",
+            "  get voltearIsEnabled() {",
+            '    return this.dirección === "abajo"',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+methodsEs.addRule(ActionDetail, { syntax: "activa cuando {enabled:expression}" })
+methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:expression}" })
+methodsEs.addRule(ActionDetail, { syntax: "se deshace como {undoneAs:text}" })
+methodsEs.addRule(ActionDetail, { syntax: "icono {icon:text}" })

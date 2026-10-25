@@ -144,9 +144,9 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/reorderItemsAfter = 0/)
     })
 
-    test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
-      const { errors } = compiled("no-sides", ["una carta es una vista:", '\t- para "dibujar su frente": <b/>'])
-      expect(errors).toHaveLength(1)
+    test("a view draws its parts:  `dibujar su frente` is `drawFrente()` (epic `elemental-spell` P5)", () => {
+      const { errors } = compiled("parts", ["una carta es una vista:", '\t- para "dibujar su frente": <b/>'])
+      expect(errors).toHaveLength(0)
     })
   })
 

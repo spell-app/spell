@@ -1043,10 +1043,11 @@ describe("outline style", () => {
       expect(js).toContain('h("u")')
     })
 
-    test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
+    test("only a list draws each item, or a placeholder;  any view draws its parts (epic `elemental-spell` P5)", () => {
       expect(errorsOf(["a card is a view where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
       expect(errorsOf(["a card is a view where:", '\t- to "draw its placeholder": <b/>'])).toHaveLength(1)
-      expect(errorsOf(["a card is a view where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
+      // a part, `drawFront()` -- see `codeSpellGrows.test.ts`
+      expect(errorsOf(["a card is a view where:", '\t- to "draw its front": <b/>'])).toHaveLength(0)
     })
   })
 

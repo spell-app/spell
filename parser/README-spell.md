@@ -189,6 +189,7 @@ and the JavaScript they become.
 | `solitaire is an app` | `export class Solitaire extends App`, its element `<solitaire-app>`, and `export const solitaire = new Solitaire()` |
 | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = ["clubs", "diamonds", "hearts", "spades"]`, and the property |
 | `the color of a card is red if ... otherwise it is black` | `get color() { ... }` |
+| `- its "color" is one of red, black:` + its value lines below | `static Colors = ["red", "black"]`, then `get color() { ... }` |
 | `the value of a card is the position of its rank in card ranks` | `get value() { return spellPosition(positionOf(Card.Ranks, this.rank)) }` |
 | `- its "suit" is a card suit`, in a foundation's outline | `static { this.declareProp("suit", { oneOf: () => Card.Suits }) }` |
 | `card suits`, `every card suit` | `Card.Suits` |
@@ -198,6 +199,8 @@ and the JavaScript they become.
 - After `a card is a thing`, "card" is a word every line knows, in every file of the project:
   each template a project declares is known before its first line is read, so a line may use one declared further down.
 - A stored property is declared with its choices;  a worked-out one is a getter, read when you ask for it.
+  - A worked-out one can have choices too:  `- its "color" is one of red, black:`, its value lines indented under it,
+    then its aliases, bulleted, under those.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
   - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
@@ -230,6 +233,8 @@ every later line can use the alias, in this project and in any project that impo
 | `a card "is the (rank) of (suits)" for its ranks and its suits` | `the card is the queen of spades` | `isTheRankOfSuits(rank, suit)` |
 
 - A blank in brackets is one alias per value of a list:  `(suit)` reads each suit, `(rank)` each rank.
+- An alias may sit indented under its property, `- it "is a (suit)"` under `- its "suit" is one of ...`:
+  it reads as if written after it.
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
   the Solitaire example's card wrote `(suits)`, and answers to `the queen of spades`.
@@ -266,6 +271,22 @@ Its first line is how you call it, with each blank's type in brackets:
   and its caller waits for it only when it says `wait for`:  that's what makes Solitaire's deal animate, card by card.
 - An action can be used above its definition, or from an earlier file:
   every action's first line is registered before the project's first line is read.
+- An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
+
+  ```spell
+  	- to turn it over:
+  		- shortcut meta+T
+  		- enabled when it is face down
+  		- undone as "Turn Card"
+  		set its direction to up
+  ```
+
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as` and `icon` are the lines it may have;
+    `meta` is command on a Mac, control elsewhere.
+  - They're the template's data, kept beside the class:
+    `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
+    each condition a getter of its own, `turnOverIsEnabled`.
+  - Nothing runs from them yet:  menus, buttons and keys that run an action come later.
 
 ### Lists count from 1, and `where`
 
@@ -320,6 +341,18 @@ export class Tableau extends Pile {
   ([Solitaire's Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell)).
   - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
     `- to draw it:` unquoted takes a method's body, which returns it.
+  - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
+    `if it is face up`, then markup, `otherwise`, then other markup.
+- A view can have PARTS, named drawings it places:
+  - `- it has parts "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
+  - `draw its front` places it, on a line of its own or inside markup:  `<div>{draw its front}</div>`
+  - the part's element carries its name as a CSS part, `part="front"`, so a page can style it with `::part(front)`
+- `a card is a two sided view` gives the card a front and a back:
+  - its direction, `up` or `down` (a new one starts up), `it is face up`, `it is face down`
+  - `turn it face up`, `turn it face down`, `turn it over`
+  - a drawing that shows its front face up and its back face down
+  - So the card says only `- to draw its front:` and `- to draw its back:`.
+    In Spanish:  `una carta es una vista reversible`, `para dibujar su frente`, `voltear la carta`.
 - A viewable list has three:
   - its `to draw it` is the WRAPPER around its items, by default nothing but the place they show
   - its `to draw each item` is the wrapper each item is drawn in, by default just the item's own drawing:
@@ -345,6 +378,15 @@ export class Tableau extends Pile {
   [README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
   stage of the parse.
 - The handler is [Solitaire's](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell):  a click on a card plays it.
+- In a template's outline, an event is the template's own:
+  - `- on mouse down:` is each of its things' handler, `onMouseDown(event)`, with `it` the thing.
+    A view's element runs it when the view hears its own `mousedown`, and the innermost thing with a handler takes
+    the event:  a card's runs, not its pile's too.
+    So far only English's mouse words do:  `click`, `double click`, `right click`, `center click`, `mouse down`,
+    `mouse up`, `mouse enter`, `mouse leave`.
+  - `- it sends "flipped" with side as a direction` says an event its things send, and what comes with it:
+    `core.describeEvent(Card, "flipped", { params: { side: "Direction" } })`.
+    Sending it is still `send flipped with side = its direction`.
 
 ### Tests, in English
 
@@ -376,6 +418,8 @@ export function testCardSetup() {
 ```
 
 - Each check keeps its words, so a failure says in English what was wrong, as the alias edge above showed.
+- In a template's outline, `- to test card setup:` tests that template:  a test like any other, starting with a new
+  one of it as its `it`, `const it = new Card()`.
 - A program runs its own tests the first time it loads, and never on a hot reload:
   `if (!core.isCarryingOver) testCardSetup()`.
 - `spell test` runs them.

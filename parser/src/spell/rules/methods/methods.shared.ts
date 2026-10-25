@@ -60,6 +60,13 @@ export type MethodSignatureData = {
    * - Set by `QuotedTypeExpression.processSignature()`;  postfix only.
    */
   valueKindOf?: string
+  /**
+   * A test in a template's outline, e.g. `card` for `- to test card setup:` in a card's (epic `elemental-spell` P5):
+   * the template it tests.
+   * - Set by `MethodDefinition.processSignature()`.
+   * - Then its `it` is a new one of the template, and it runs as every test does, not as a method of a thing.
+   */
+  testOf?: string
 }
 
 /**

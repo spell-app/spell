@@ -16,6 +16,7 @@ import type { carryMethods } from "./carry"
 import type { classesMethods } from "./classes"
 import type { deprecatedMethods } from "./deprecated"
 import type { messageMethods } from "./messages"
+import type { describedMethods } from "./described"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -86,6 +87,7 @@ export type Core = typeof coreMethods &
   typeof carryMethods &
   typeof classesMethods &
   typeof messageMethods &
+  typeof describedMethods &
   typeof deprecatedMethods
 
 // ## Tests

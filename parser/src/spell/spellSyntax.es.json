@@ -1376,6 +1376,7 @@
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
+            "draw_its_part",
             "create_method",
             "create_hook_words",
             "pause_units",
@@ -1428,6 +1429,9 @@
             },
             {
               "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento)|(draw_its_placeholder:dibujar su marcador))"
+            },
+            {
+              "syntax": "((draw_its_part:dibujar su|dibujar el|dibujar la))"
             },
             {
               "syntax": "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
@@ -3535,6 +3539,20 @@
           "aliases": ["expression"]
         },
         {
+          "className": "DrawPart",
+          "ruleNames": ["draw_part"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawPart.ts",
+          "line": 23,
+          "purpose": "PLACE one of a view's parts in its drawing (epic `elemental-spell` P5, Q55, Q56).",
+          "syntaxes": [
+            {
+              "syntax": "dibujar su {part:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "NamedThing",
           "ruleNames": ["named_thing"],
           "internal": false,
@@ -3751,7 +3769,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -4367,7 +4385,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 54,
+          "line": 56,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -4633,7 +4651,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 26,
+          "line": 44,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -4665,6 +4683,15 @@
             },
             {
               "syntax": "(el|la|los|las) {property:quoted_member} (de|del) (un|una) {type:known_type} es :? {expression_body}?"
+            },
+            {
+              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "(el|la|los|las) {property:member_words} (de|del) (un|una) {type:known_type} es {specifier:outline_specifier_enum} : {expression_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5006,7 +5033,7 @@
           "ruleNames": ["draw_it"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 44,
+          "line": 51,
           "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
@@ -5014,6 +5041,49 @@
             },
             {
               "syntax": "para {phrase:draw_method} :? {statement_body}?"
+            },
+            {
+              "syntax": "para dibujar su {part:member_words} :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "HasParts",
+          "ruleNames": ["has_parts"],
+          "internal": false,
+          "file": "src/spell/rules/classes/HasParts.ts",
+          "line": 20,
+          "purpose": "A view's PARTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (las)? partes [parts:{part:text} (,|y)]"
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (las)? partes [parts:{part:text} (,|y)]"
+            },
+            {
+              "syntax": "(un|una) {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DrawnMarkup",
+          "ruleNames": ["drawn_markup"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawnMarkup.ts",
+          "line": 26,
+          "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
+          "syntaxes": [
+            {
+              "syntax": "{markup:jsxElement}"
+            },
+            {
+              "syntax": "{markup:jsxFragment}"
+            },
+            {
+              "syntax": "{markup:draw_part}"
             }
           ],
           "aliases": ["statement"]
@@ -5889,7 +5959,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 20,
+          "line": 25,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -5921,6 +5991,50 @@
                   "code": "core.on(\"card-click\")"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DeclareEvent",
+          "ruleNames": ["declare_event"],
+          "internal": false,
+          "file": "src/spell/rules/events/DeclareEvent.ts",
+          "line": 20,
+          "purpose": "Says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} (envía|envia) {event:text} {props:with_props_arg}?",
+              "example": "una carta es una cosa donde:\n\t- envía \"volteada\" con lado como texto",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {}\ncore.describeEvent(Carta, \"volteada\", { params: { lado: \"text\" } })"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {}\ncore.describeEvent(Carta, \"volteada\", { params: { lado: \"text\" } })"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    pass\n\ncore.describe_event(Carta, \"volteada\", {\"params\": {\"lado\": \"text\"}})"
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {type} (envía|envia) {event:text} {props:with_props_arg}?",
+              "example": "una carta es una cosa\nuna carta envía \"volteada\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {}\ncore.describeEvent(Carta, \"volteada\", {})"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {}\ncore.describeEvent(Carta, \"volteada\", {})"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    pass\n\ncore.describe_event(Carta, \"volteada\", {})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} (envía|envia) {event:text} {props:with_props_arg}?"
             }
           ],
           "aliases": ["statement"]
@@ -6116,7 +6230,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -6252,6 +6366,44 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ActionDetail",
+          "ruleNames": ["action_detail"],
+          "internal": false,
+          "file": "src/spell/rules/methods/ActionDetail.ts",
+          "line": 26,
+          "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
+          "syntaxes": [
+            {
+              "syntax": "atajo {keys:shortcut_keys}",
+              "example": "una carta es una cosa donde:\n\t- su dirección es una de arriba o abajo\n\t- para voltearla:\n\t\t- atajo meta+T\n\t\t- activa cuando su dirección es abajo\n\t\t- se deshace como \"Voltear carta\"\n\t\tponer su dirección en arriba",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"]\n  static { this.declareProp(\"dirección\", { oneOf: Carta.Direcciones }) }\n  get dirección() { return this.getProp(\"dirección\") }\n  set dirección(value) { this.setProp(\"dirección\", value) }\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
+                },
+                "ts": {
+                  "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "activa cuando {enabled:expression}"
+            },
+            {
+              "syntax": "seleccionada cuando {selected:expression}"
+            },
+            {
+              "syntax": "se deshace como {undoneAs:text}"
+            },
+            {
+              "syntax": "icono {icon:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "MethodKeyword",
           "ruleNames": ["method_keyword"],
           "internal": false,
@@ -6376,6 +6528,16 @@
           "file": "src/spell/rules/methods/QuotedMethodSignature.ts",
           "line": 19,
           "purpose": "Method signature surrounded by quotes.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "ShortcutKeys",
+          "ruleNames": ["shortcut_keys"],
+          "internal": false,
+          "file": "src/spell/rules/methods/ShortcutKeys.ts",
+          "line": 11,
+          "purpose": "ONE keyboard shortcut, written as its keys joined by `+`, no spaces: `meta+T`, `meta+shift+Z`, `F2`, `meta+,` (epic `elemental-spell` P5).",
           "syntaxes": [],
           "aliases": []
         }

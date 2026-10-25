@@ -59,6 +59,13 @@ export class TypeScope extends BlockScope {
    */
   declare valueKind?: ValueKind
   /**
+   * A view's PARTS:  the named drawings it places, which it or a type built on it draws (epic `elemental-spell` P5),
+   * e.g. a two sided view's `front` and `back` -- `undefined` if it has none.
+   * - Declared by spell's `- it has parts "front" and "back"`, or by a part's own drawing, `- to draw its front:`.
+   * - Journaled:  see `declarePart()`.  Read through `hasPart()`, which walks the super-type chain.
+   */
+  declare parts?: string[]
+  /**
    * Name of our class when the code runs, if not `name` -- e.g. `Card` for a type imported as `Playingcard`.
    * - Why:  runtime type checks compare class names as strings, e.g. `core.isOfType(thing, 'Card')`.
    *   Compiled code names the class by `name` -- `import { Card as Playingcard }` -- but that doesn't rename it.
@@ -92,6 +99,20 @@ export class TypeScope extends BlockScope {
   ////////////////
   // ## Declaring
   ////////////////
+
+  /**
+   * SIDE EFFECT:  `name` is one of our parts -- see `parts`.  Journaled, so incremental parsing can take it back.
+   * - Once only:  a second declaration of the same part changes nothing.
+   */
+  declarePart(name: string, declaredBy: P.Match): void {
+    if (this.parts?.includes(name)) return
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { parts: [...(this.parts ?? []), name] })
+  }
+
+  /** Is `name` a part of ours, or of a type we're built on?  See `parts`. */
+  hasPart(name: string): boolean {
+    return this.chain().some((type) => type.parts?.includes(name))
+  }
 
   /**
    * Type `name` in `scope.types`, or a new STUB for it if there isn't one yet.

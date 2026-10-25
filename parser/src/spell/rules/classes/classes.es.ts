@@ -29,6 +29,9 @@ import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
+import { DrawnMarkup } from "./DrawnMarkup"
+import { DrawPart } from "./DrawPart"
+import { HasParts } from "./HasParts"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -180,6 +183,12 @@ classesEs.addRule(
   }
 )
 
+// el dibujo de una parte, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la parte
+// (épica `elemental-spell` P5)
+classesEs.addRule(Wording.specialize({ ruleName: "draw_its_part", meanings: ["draw_its_part"] }), {
+  syntax: "((draw_its_part:dibujar su|dibujar el|dibujar la))"
+})
+
 classesEs.addRule(WithNestedStatements, {
   syntax: "(donde|con)? :",
   tests: [
@@ -222,11 +231,8 @@ classesEs.addRule(CreateType, {
           viewClass("Carta", "View"),
           [...viewClass("Carta", "View"), ...viewElement("Carta", "carta")]
         ],
-        [
-          "una card es una vista reversible",
-          viewClass("Card", "TwoSidedView"),
-          [...viewClass("Card", "TwoSidedView"), ...viewElement("Card", "card")]
-        ],
+        // `una card es una vista reversible` gets the two sided view's own lines (epic `elemental-spell` P5):
+        // see `parserTests/codeSpellGrows.test.ts`
         [
           "una home es una página",
           viewClass("Home", "Page"),
@@ -1766,6 +1772,22 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type:known_type} es :? {expression_body}?`
 })
 
+// un valor calculado de una lista propia (épica `elemental-spell` P5):  `- su "color" es uno de rojo, negro:`,
+// luego sus líneas de valor -- y sus frases, con viñeta, debajo
+classesEs.addRule(PropertyValueGetter, {
+  syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
+})
+
+// ... y sin el sujeto:  `- "color" es uno de rojo, negro:`
+classesEs.addRule(PropertyValueGetter, {
+  syntax: `{type:subject_implied} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
+})
+
+// ... y en el estilo de oraciones (Q20):  `el color de una carta es uno de rojo, negro:`
+classesEs.addRule(PropertyValueGetter, {
+  syntax: `${THE} {property:member_words} ${OF} ${A} {type:known_type} es {specifier:outline_specifier_enum} : {expression_body}?`
+})
+
 // quoted:  its body is markup, which IS the drawing -- `- para "dibujarla": <div>[rango]</div>`
 classesEs.addRule(DrawIt, {
   syntax: "para {alias:text} :? ({inline_expression}|{nested_expression})?"
@@ -1774,6 +1796,44 @@ classesEs.addRule(DrawIt, {
 // unquoted:  a method's body, which returns it -- `- para dibujar cada elemento:` + `devolver <div>...</div>`
 classesEs.addRule(DrawIt, {
   syntax: "para {phrase:draw_method} :? {statement_body}?"
+})
+
+// el dibujo propio de una parte (épica `elemental-spell` P5):  `- para dibujar su frente:`, sus líneas lo dibujan
+classesEs.addRule(DrawIt, {
+  syntax: "para dibujar su {part:member_words} :? {statement_body}?"
+})
+
+// las partes de una vista:  `- ella tiene las partes "frente" y "dorso"`
+classesEs.addRule(HasParts, {
+  syntax: "{type:subject_it} tiene (las)? partes [parts:{part:text} (,|y)]"
+})
+
+// ... sin el sujeto, como se dice en español:  `- tiene las partes "frente" y "dorso"`
+classesEs.addRule(HasParts, {
+  syntax: "{type:subject_implied} tiene (las)? partes [parts:{part:text} (,|y)]"
+})
+
+// ... y en el estilo de oraciones:  `una carta tiene las partes "frente" y "dorso"`
+classesEs.addRule(HasParts, {
+  syntax: `${A} {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]`
+})
+
+// poner una parte en un dibujo:  `dibujar su frente`
+classesEs.addRule(DrawPart, {
+  syntax: "dibujar su {part:member_words}"
+})
+
+// una línea de un dibujo que ES el dibujo:  marcado, o una parte puesta
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:jsxElement}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:jsxFragment}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_part}"
 })
 
 classesEs.addRule(QuotedPropertyFormula, {

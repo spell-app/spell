@@ -2,6 +2,7 @@
 
 exports[`testing spell module events, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
+  "declare_event": "type|event|props?",
   "on": "eventName|props?|body?",
   "trigger": "eventName|props?",
 }

@@ -11,8 +11,10 @@ import {
   OutlineSpecifierEnum,
   OutlineSpecifierList,
   PropertyBodyMust,
+  QuotedPropertyFormula,
   TypeSpecifierTextKind
 } from "spell-parser/spell/rules/classes"
+import { QuotedTypeExpression } from "spell-parser/spell/rules/methods"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
@@ -127,16 +129,16 @@ export class DefinePropertyHas extends SpellStatement<
    * - Returns its name, e.g. `CardSuit` -- `undefined` when another type has it.
    */
   private static declareKind(
-    match: P.MatchFor<DefinePropertyHas>,
+    match: P.Match,
     typeScope: P.TypeScope,
     values: Array<string | number>,
-    listName: string
+    listName: string,
+    property: { name: string; written: string }
   ): string | undefined {
     const { scope } = match
     const language = SP.Language.of(scope)
-    const { property } = match.groups
-    const name = language.propertyKindType(typeScope.name, `${property.raw ?? property.value}`)
-    const valueKind = { values, listOn: typeScope.name, listName, property: DefinePropertyHas.propertyName(match) }
+    const name = language.propertyKindType(typeScope.name, property.written)
+    const valueKind = { values, listOn: typeScope.name, listName, property: property.name }
     const existing = scope.types?.get(name)
     if (!existing) scope.types?.add({ name, valueKind, declaredBy: match })
     // a stub, or ours from an earlier parse of this statement -- see `P.TypeScope.sameStatement()`
@@ -161,27 +163,49 @@ export class DefinePropertyHas extends SpellStatement<
 
     // If there is a specifier as enumerated values, add rules to match it
     if (specifierAST instanceof P.ASTEnumeration) {
-      const groupName = P.pluralize(upperFirst(property.value))
-
-      const { values } = specifierAST
-      // the kind of its values, e.g. `card suit`:  its list is a list of them, so a loop over it knows each is one
-      const kind = DefinePropertyHas.declareKind(match, typeScope, values, groupName)
-      const varProps: P.ScopeVariableProps & { enumeration: Array<string | number> } = {
-        name: groupName,
-        datatype: kind && P.listOfType(kind),
-        enumeration: values,
-        initializer: P.enumerationInitializer(values),
-        declaredBy: match
-      }
-      // Add variables to scope for lookup elsewhere
-      typeScope.classVariables.add({ ...varProps })
-      typeScope.variables.add({ ...varProps })
-
-      // Add enumeration string values to scope as constants.
-      values.forEach((value) => {
-        if (typeof value === "string") scope.constants?.add({ name: value, declaredBy: match })
-      })
+      DefinePropertyHas.declareEnumeration(
+        match,
+        typeScope,
+        { name, written: `${property.raw ?? property.value}` },
+        specifierAST.values
+      )
     }
+  }
+
+  /**
+   * SIDE EFFECT:  declares a property's own list of values on `typeScope`, e.g. a card's `one of clubs, diamonds ...`:
+   * - its class variable, by the property's name made plural (`Suits`), and its instance twin -- `card suits`,
+   *   `the suits of the card`
+   * - the kind of its values, e.g. `card suit` -- see `declareKind()`
+   * - each text value as a constant, so `it is clubs` reads it
+   * - Shared with `property_value_getter`'s worked-out value from its own list, `- its "color" is one of red, black:`
+   *   (epic `elemental-spell` P5).
+   */
+  static declareEnumeration(
+    match: P.Match,
+    typeScope: P.TypeScope,
+    property: { name: string; written: string },
+    values: Array<string | number>
+  ): void {
+    const { scope } = match
+    const groupName = P.pluralize(upperFirst(property.name))
+    // the kind of its values, e.g. `card suit`:  its list is a list of them, so a loop over it knows each is one
+    const kind = DefinePropertyHas.declareKind(match, typeScope, values, groupName, property)
+    const varProps: P.ScopeVariableProps & { enumeration: Array<string | number> } = {
+      name: groupName,
+      datatype: kind && P.listOfType(kind),
+      enumeration: values,
+      initializer: P.enumerationInitializer(values),
+      declaredBy: match
+    }
+    // Add variables to scope for lookup elsewhere
+    typeScope.classVariables.add({ ...varProps })
+    typeScope.variables.add({ ...varProps })
+
+    // Add enumeration string values to scope as constants.
+    values.forEach((value) => {
+      if (typeof value === "string") scope.constants?.add({ name: value, declaredBy: match })
+    })
   }
 
   /**
@@ -197,12 +221,45 @@ export class DefinePropertyHas extends SpellStatement<
    * - Returns them, as text, so an edit changing them re-parses what follows.
    */
   mutateScopeFromBody(match: P.Match): string | undefined {
+    DefinePropertyHas.warnAboutOtherLines(match as P.MatchFor<DefinePropertyHas>)
     const rules = DefinePropertyHas.rulesOf(match as P.MatchFor<DefinePropertyHas>)
     if (!rules.length) return undefined
     const { type } = (match as P.MatchFor<DefinePropertyHas>).groups
     const name = DefinePropertyHas.propertyName(match as P.MatchFor<DefinePropertyHas>)
     P.TypeScope.getOrStub(match.scope, `${type.value}`, match).addPropertyRules(name, rules, match)
     return JSON.stringify(rules)
+  }
+
+  /**
+   * The statements of `match`'s body, one per line that has one:  its rules (`- it must ...`), its aliases
+   * (`- it "is a (suit)"`) and anything else written there.
+   */
+  static bodyStatementsOf(match: P.MatchFor<DefinePropertyHas>): P.Match[] {
+    const lines = (match.rule as DefinePropertyHas).getBody(match)?.matched ?? []
+    return lines.flatMap((line) => {
+      const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
+      return statement ? [statement] : []
+    })
+  }
+
+  /**
+   * Is `statement` one a property's body is for:  one of its rules, or one of its aliases (epic `elemental-spell` Q13)?
+   * - e.g. under `- its "suit" is one of clubs, ...`:  `- it must not be empty`, `- it "is a (suit)"`
+   */
+  static isPropertyBodyStatement(statement: P.Match): boolean {
+    return statement.is(PropertyBodyMust) || statement.is(QuotedPropertyFormula) || statement.is(QuotedTypeExpression)
+  }
+
+  /**
+   * SIDE EFFECT:  warns about each line under a property that is neither one of its rules nor one of its aliases,
+   * e.g. a `- to turn it over:` indented by mistake:  it still compiles, as if it were written after the property.
+   */
+  private static warnAboutOtherLines(match: P.MatchFor<DefinePropertyHas>): void {
+    const language = SP.Language.of(match.scope)
+    for (const statement of DefinePropertyHas.bodyStatementsOf(match)) {
+      if (DefinePropertyHas.isPropertyBodyStatement(statement)) continue
+      SP.SpellWarnings.note(statement, language.parserMessage("not-a-property-body-line"))
+    }
   }
 
   /**
@@ -215,9 +272,8 @@ export class DefinePropertyHas extends SpellStatement<
     // `as a url` / `as an email`:  text that must be one
     if (specifier?.is(TypeSpecifierTextKind)) rules.push(TypeSpecifierTextKind.ruleOf(specifier))
     if (rule) rules.push(MustRule.ruleOf(rule as P.MatchFor<MustRule>))
-    for (const line of (match.rule as DefinePropertyHas).getBody(match)?.matched ?? []) {
-      const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
-      if (statement?.is(PropertyBodyMust)) rules.push(MustRule.ruleOf(statement.groups.rule as P.MatchFor<MustRule>))
+    for (const statement of DefinePropertyHas.bodyStatementsOf(match)) {
+      if (statement.is(PropertyBodyMust)) rules.push(MustRule.ruleOf(statement.groups.rule as P.MatchFor<MustRule>))
     }
     return rules
   }
@@ -255,7 +311,7 @@ export class DefinePropertyHas extends SpellStatement<
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const { type, property } = match.groups
     const typeAST = P.matchAST<P.ASTTypeExpression>(type)
-    const statements: P.ASTClassMember[] = []
+    const statements: NonNullable<P.ASTStatementGroup["statements"]> = []
     // what its setter warns about -- see `SC.PropCheck`
     const check = new P.ASTObjectLiteral(match)
     let initializer: P.ASTExpression | undefined
@@ -308,6 +364,14 @@ export class DefinePropertyHas extends SpellStatement<
         initializer
       })
     )
+    // what its body says besides its rules, e.g. its aliases (epic `elemental-spell` Q13):  compiled after it,
+    // as if written after its line
+    for (const line of (this.getBody(match)?.matched ?? []) as P.Match[]) {
+      const statement = (line.data as { statement?: P.Match }).statement
+      if (statement?.is(PropertyBodyMust)) continue
+      const ast = line.AST
+      if (ast) statements.push(ast as P.ASTStatement)
+    }
     return new P.ASTStatementGroup(match, { statements })
   }
 
