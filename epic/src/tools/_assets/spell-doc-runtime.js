@@ -1081,6 +1081,9 @@ function canPatch(main) {
   if (!main.querySelector(":scope > :is(ui-section, epic-page)")) return false
   if (document.querySelector("[data-spell-filter], [data-spell-filter-badge]")) return false
   return Array.from(document.scripts).every((script) => {
+    // one the page server added to every page (`PageServer.withPageScripts()`, spell-app's spell colours):  in the
+    // source the patch compares too;  without this, every epic page reloaded on every edit (2026-10-25)
+    if (script.hasAttribute("data-spell-page-script")) return true
     const src = script.getAttribute("src")
     if (!src) return PagePatch.isInert(script) || script.textContent.includes("SPELL_SERVER")
     return /^\/api\/server\//.test(src) || /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src)
