@@ -8,6 +8,8 @@
  *   - `--epic-chip-font-size`, `--epic-chip-height`
  *   - `--epic-band-row`:  the line's band
  *   - `--epic-stack`:  how far below the window's top an open item's line sticks (the stuck section titles)
+ *   - `--epic-item-top-radius` / `--epic-item-bottom-radius`:  its line's corners, set by its section
+ *     on the first and last line of each run of lines (`EpicSection.runRules()`)
  * - Every box on the line sits in a `.cell` one line tall, centred in it:
  *   so the chevron, chip and label centre on the title's FIRST line, however many lines it wraps to.
  * - Public tokens (`--epic-item-*`) are never declared here:  read through private aliases.
@@ -31,6 +33,9 @@
     --_epic-item-muted: var(--ui-text-muted, GrayText);
     --_epic-chip-size: var(--epic-chip-font-size, 0.8em);
     --_epic-chip-height: var(--epic-chip-height, 1.6em);
+    /* its line's corners:  square, but at a run's ends, which its section rounds (`EpicSection.runRules()`) */
+    --_epic-item-top-radius: var(--epic-item-top-radius, 0px);
+    --_epic-item-bottom-radius: var(--epic-item-bottom-radius, 0px);
     display: block;
     border-top: 1px solid var(--_epic-item-rule);
   }
@@ -56,6 +61,10 @@
     align-items: flex-start;
     gap: 0 6px;
     padding: 5px 6px 5px 2px;
+    border-start-start-radius: var(--_epic-item-top-radius);
+    border-start-end-radius: var(--_epic-item-top-radius);
+    border-end-start-radius: var(--_epic-item-bottom-radius);
+    border-end-end-radius: var(--_epic-item-bottom-radius);
     background: var(--_epic-item-band);
     font-size: var(--_epic-item-line-size);
     line-height: var(--_epic-item-line-height);
