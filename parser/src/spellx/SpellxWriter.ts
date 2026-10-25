@@ -39,6 +39,22 @@ export class SpellxWriter {
     return `${writer.out.join("\n")}\n`
   }
 
+  /**
+   * The spellx `file` reads as, for people to look at:  the editors' "Show as Spellx" view of a `.spell` file.
+   * - A `.spell` file:  written as spellx from its last parse, so unsaved edits show.
+   * - A `.spellx` file:  its own text.
+   * - A view only, never saved:  a template lives in ONE file, `.spell` or `.spellx`, never both
+   *   (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
+   * - Throws `TypeError` if a `.spell` file hasn't been parsed yet.
+   */
+  static textOf(file: SP.SpellFile): string {
+    if (file.form === "spellx") return file.contents ?? ""
+    const { match, scope } = file
+    if (!match || !scope)
+      throw new TypeError(`SpellxWriter.textOf():  ${file.file} hasn't been parsed;  parse it first`)
+    return SpellxWriter.write({ text: file.parseText, match, scope })
+  }
+
   /** The lines written so far. */
   private readonly out: string[] = []
   /** The source's lines. */
