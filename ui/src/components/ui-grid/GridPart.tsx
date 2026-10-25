@@ -22,10 +22,10 @@ import gridCSS from "./UIGrid.css?inline"
  * - Nothing focusable in the shadow root:  no `delegatesFocus`.
  ****************/
 export abstract class GridPart<V extends E.ComponentVocabulary = E.ComponentVocabulary> extends E.UIComponent<V> {
-  @E.protoMerged static elementSetup = {
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { grid: gridCSS },
     delegatesFocus: false
-  } satisfies Partial<E.ElementSetup>
+  }
 
   render(): JSX.Element {
     return (

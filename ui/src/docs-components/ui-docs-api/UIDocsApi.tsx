@@ -12,7 +12,8 @@ import {
   type SiteTag
 } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-// A leaf, not the barrel:  its slugs are the page's section ids' words, and the barrel would define `<ui-docs-toc>`
+// Leaves, not the barrel, which would define `<ui-docs-toc>`:  the landing, and the slugs the page's section ids use
+import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
@@ -43,8 +44,9 @@ import apiCSS from "./UIDocsApi.css?inline"
  * - `family`:  each tag in its own `<section part="tag">`, under a `dividing` `<ui-header>`
  *   whose id is the tag and whose text links to itself.
  *   - The link is an `<a>` INSIDE the heading, not `<ui-header link>` (its `<a role="heading">` fails axe).
- *   - Fragment links can't reach ids inside a shadow root, so the component scrolls to `location.hash` itself:
- *     once its tables are drawn, and on every `hashchange` while connected.
+ *   - Fragment links can't reach ids inside a shadow root, so the component lands on `location.hash` itself
+ *     (`HashLanding`):  once its tables are drawn, and on every `hashchange` while connected;
+ *     unless the page lands its hashes itself (the site).
  * - `only` (`only="attributes"`):  ONE kind of table, as one section of a page (the site's API tab:  a section per
  *   kind, written by `yarn site:sections`).
  *   - No table title:  the page's section has it.
@@ -412,12 +414,12 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
   private readonly onHashChange = () => void this.reveal(location.hash)
 
   /**
-   * Scroll the tag header `hash` names into view, if it's in this shadow root.
-   * - With `only`, the page lands instead (the site's `SiteSections`, below its stuck titles):
-   *   this only flashes the row `hash` names, if it's one of its own.
+   * Land on the tag header `hash` names, if it's in this shadow root (`HashLanding`:  below the stuck titles).
+   * - Not on a page that lands its hashes itself (the site's `SiteSections`):  one landing, not two.
+   * - With `only`, the page lands:  this only flashes the row `hash` names, if it's one of its own.
    * - Waits for the widgets in the shadow root to render first (`ready`):
    *   until they do, the tables above it are still growing, and the scroll would land short.
-   * - Scrolls the header's `<section>` when the `<ui-header>` draws no box of its own (`display: contents`).
+   * - Lands on the header's `<section>` when the `<ui-header>` draws no box of its own (`display: contents`).
    */
   private async reveal(hash: string): Promise<void> {
     const id = UIDocsApi.idForHash(hash)
@@ -428,9 +430,12 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
       if (header.localName === "th") this.flash(id)
       return
     }
+    const landing = HashLanding.forDocument(this.domElement.ownerDocument)
+    if (landing.isPageOwned) return
     const elements = [...root.querySelectorAll("*")].filter((element) => "ready" in element)
     await Promise.all(elements.map((element) => (element as Element & { ready: Promise<void> }).ready))
-    E.beforeNextPaint(() => (header.getClientRects().length ? header : header.parentElement)?.scrollIntoView())
+    const box = header.getClientRects().length ? header : header.parentElement
+    if (box) void landing.land(box)
   }
 
   /**

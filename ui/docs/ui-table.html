@@ -457,6 +457,38 @@
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
+              <ui-section id="examples-content-rows-and-cells" label="Rows and cells" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`<ui-row>`s of `<ui-cell>`s, with no native table:  `header` on a row makes its cells the column headers, on a cell the row's name;  `footer` is a footer row;  `span` covers columns.  Click a header to sort."
+                >
+                  <ui-table celled appearance="striped" sortable client-sort caption="Team members">
+                    <ui-row header>
+                      <ui-cell header>Name</ui-cell>
+                      <ui-cell header>Joined</ui-cell>
+                      <ui-cell header>Projects</ui-cell>
+                    </ui-row>
+                    <ui-row>
+                      <ui-cell header>John Lilki</ui-cell>
+                      <ui-cell>September 14, 2013</ui-cell>
+                      <ui-cell align="right">12</ui-cell>
+                    </ui-row>
+                    <ui-row>
+                      <ui-cell header>Jamie Harington</ui-cell>
+                      <ui-cell>January 11, 2014</ui-cell>
+                      <ui-cell align="right">7</ui-cell>
+                    </ui-row>
+                    <ui-row>
+                      <ui-cell header>Jill Lewis</ui-cell>
+                      <ui-cell>May 11, 2014</ui-cell>
+                      <ui-cell align="right">21</ui-cell>
+                    </ui-row>
+                    <ui-row footer>
+                      <ui-cell span="2">3 members</ui-cell>
+                      <ui-cell align="right">40</ui-cell>
+                    </ui-row>
+                  </ui-table>
+                </ui-docs-example>
+              </ui-section>
               <ui-section
                 id="examples-content-caption-and-row-headers"
                 label="Caption and row headers"
@@ -3123,7 +3155,28 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <!-- USAGE:  the native table, stacking, sorting, data mode, keyboard, accessibility, frameworks. -->
+            <!-- USAGE:  rows and cells, the native table, stacking, sorting, data mode, keyboard, accessibility, frameworks. -->
+            <ui-section id="usage-rows-and-cells" label="Rows and cells" sticky collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A table can be built from tags alone:  `<ui-row>`s of `<ui-cell>`s, with no native `<table>`.
+                  That's how a drawing writes one, since a drawing holds no native HTML.
+
+                  - `header` on a row makes it the header row:  its cells name the columns.
+                  - `header` on a cell in a body row makes it that row's name (the first cell, say).
+                  - `footer` on a row makes it a footer row:  totals, notes.
+                  - `span="2"` makes a cell cover two columns.  Cells never span rows.
+                  - `caption` names the table, above its rows.
+                  - Every class word works as on a native table:  `celled`, `appearance="striped"`, `padding="compact"`,
+                    `selectable`, `inverted`, a colour.
+                  - Sorting works the same:  click a header cell;  with `client-sort` the rows themselves move.
+                  - Screen readers hear a real table:  rows, column headers, row headers and cells.
+
+                  `<ui-row>` is also the grid's row:  inside a `<ui-grid>` it lays out columns, as before.
+                </script>
+              </ui-markdown>
+            </ui-section>
+
             <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
@@ -3338,6 +3391,10 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-table" only="tags"></ui-docs-api>
+            </ui-section>
+
             <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
               <ui-docs-api family="ui-table" only="attributes"></ui-docs-api>
             </ui-section>

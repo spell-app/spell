@@ -7,6 +7,8 @@
  *   `<ui-column width="4" width-mobile="16">` => `ui four wide sixteen wide mobile column`.
  * - Rows and columns keep the leading `ui` (unlike Fomantic's bare `.column`), so the generic colour remap reaches
  *   them;  see `UIGrid.css`.
+ * - In a `<ui-table>` it's a TABLE row instead (epic `ui-gaps` P7):  its `<ui-cell>`s, `header` or `footer`;
+ *   the grid's attributes then do nothing, and the table's class words style it.
  * - No `ownsParts`:  Fomantic's grid styles no content parts.  What a grid hands its rows and columns is
  *   inherited tokens (`--_grid-*`), see `UIGrid.css`.
  */
@@ -19,15 +21,28 @@ const ROW_REVERSALS = ["mobile", "tablet", "computer"] as const
 
 /****************
  * ### `rowVocabulary`
- * The names of `<ui-row>`, a line of columns:  `<div class="ui ... row" part="row">` around a slot.
+ * The names of `<ui-row>`, a line of columns:  `<div class="ui ... row" part="row">` around a slot;
+ * in a `<ui-table>`, a table row of `<ui-cell>`s.
  ****************/
 export const rowVocabulary = {
   tag: "ui-row",
   topics: ["layout", "collections"],
-  aka: ["grid row"],
+  aka: ["grid row", "table row", "tr"],
   noun: "row",
-  description: "A row is a horizontal grouping of columns.",
+  description: "A row is a horizontal grouping of columns;  in a table, of cells.",
   attributes: [
+    {
+      name: "header",
+      group: "content",
+      kind: "boolean",
+      description: "In a table:  the header row, its cells the column headers."
+    },
+    {
+      name: "footer",
+      group: "content",
+      kind: "boolean",
+      description: "In a table:  a footer row, under the body (totals, notes)."
+    },
     {
       name: "color",
       group: "appearance",
@@ -100,8 +115,12 @@ export const rowVocabulary = {
     }
   ],
   events: [],
-  slots: [{ name: "", description: "`<ui-column>`s." }],
+  slots: [{ name: "", description: "`<ui-column>`s;  in a table, `<ui-cell>`s." }],
   parts: [{ name: "row", description: "The row box (a flex line)." }],
-  states: [],
+  states: [
+    { name: "header", description: "Set while it's a table's header row (`header`)." },
+    { name: "footer", description: "Set while it's a table's footer row (`footer`)." },
+    { name: "in-table", description: "Set while it's a row of a `<ui-table>`." }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

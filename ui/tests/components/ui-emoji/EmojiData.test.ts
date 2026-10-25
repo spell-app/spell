@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, onTestFinished, test } from "vite-plus/test"
 
 import { EmojiData } from "spell-ui/components/ui-emoji/EmojiData"
+import { emojiChunkFor } from "spell-ui/components/ui-emoji/UIEmoji.types"
 
 // every test leaves the default name set on
 afterEach(() => {
@@ -20,14 +21,14 @@ describe("EmojiData.normalize()", () => {
 })
 
 ////////////////
-// ## EmojiData.chunkFor()
+// ## emojiChunkFor()
 ////////////////
 
-describe("EmojiData.chunkFor()", () => {
+describe("emojiChunkFor()", () => {
   test("chunks by first letter, digits together", () => {
-    expect(EmojiData.chunkFor("smile")).toBe("s")
-    expect(EmojiData.chunkFor("100")).toBe("0")
-    expect(EmojiData.chunkFor("8ball")).toBe("0")
+    expect(emojiChunkFor("smile")).toBe("s")
+    expect(emojiChunkFor("100")).toBe("0")
+    expect(emojiChunkFor("8ball")).toBe("0")
   })
 })
 

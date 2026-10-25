@@ -1,14 +1,20 @@
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { nextFrame } from "spell-ui/util"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-// A leaf, not the barrel:  the barrel defines `<ui-docs-toc>`, which `<ui-root>` does on first use
+// Leaves, not the barrel:  the barrel defines `<ui-docs-toc>`, which `<ui-root>` does on first use
+import {
+  HashLanding,
+  type HashLandingRules,
+  type LandingScroll
+} from "spell-ui/docs-components/ui-docs-toc/HashLanding"
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { FOLDS_KEY } from "./site.types"
 
 /****************
  * ### `SiteSections`
  * The page side of the site's nested `<ui-section>`s (written into the pages by `yarn site:sections`):
- * where their titles stick, which sections the reader closed, and LANDING on a `#hash`.
+ * where their titles stick, which sections the viewer closed, and LANDING on a `#hash`.
  * - ONE per page (`SiteSections.instance`), following whichever `main` the router shows (`show()`).
  * - Sticky:  the page header's title line sticks under the top bar, and the tabs' bar under it
  *   (`site.css`, "The page header" and "Sections and tabs").
@@ -21,18 +27,20 @@ import { FOLDS_KEY } from "./site.types"
  *   - A page's own sticky bar (`PAGE_BAR`) stacks between.
  * - Closed sections:  remembered per page, in `localStorage` through `PrefStore`
  *   (`FOLDS_KEY` + the path:  `{ [section id]: closed }`).
- *   - The reader's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
+ *   - The viewer's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
  *   - Everything else starts OPEN.
  *   - An opening made by a landing, or by find-in-page, is never saved.
- * - Landing (`land()`):
+ * - Landing (`land()`), through Spell UI's `HashLanding`, by the site's rules (`landingRules()`):
  *   - the target's pane selected (the first word of a section id IS its tab:  `#usage-keyboard`)
  *   - every section around it (and itself) opened without animation
  *   - then scrolled so its title sits just below the stuck ones
- *   - once more after `SETTLE_MS` (late layout, the toc's own first scroll),
- *     unless the reader scrolled, clicked or typed meanwhile
+ *   - once more as the page settles, unless the viewer scrolled, clicked or typed meanwhile
+ *   - The site lands every hash itself:  `<ui-docs-toc>` and `<ui-docs-api>` leave them to it, so a page opened at
+ *     a `#hash` scrolls once, not once per element.
  *   - Old hashes still land (`resolve()`).
  * - SIDE EFFECTS:
  *   - document `ui-opening` / `ui-closing` and window `hashchange` / `resize` listeners, a `ResizeObserver`
+ *   - the page's `HashLanding` set to the site's rules
  *   - the probe `<div>` in `<body>`
  *   - `offset` attributes on the sections, an inline `--site-sections-top` on `main`
  *   - `history.replaceState()` of an old hash to the id it found
@@ -56,11 +64,8 @@ export class SiteSections {
   /** Re-measures when the tabs' bar resizes (its labels wrap, the font loads). */
   private readonly resized = new ResizeObserver(() => this.measure())
 
-  /** Bumped by every landing:  an older one, still waiting, stops. */
-  private landings = 0
-
-  /** The reader scrolled, clicked or typed since the last landing began:  its settle doesn't land again. */
-  private hasReaderMoved = false
+  /** The page's landing, by the site's rules. */
+  private readonly landing: HashLanding
 
   private constructor() {
     this.probe = document.createElement("div")
@@ -70,9 +75,7 @@ export class SiteSections {
     document.addEventListener("ui-opening", (event) => this.onToggle(event as CustomEvent<{ open: boolean }>))
     document.addEventListener("ui-closing", (event) => this.onToggle(event as CustomEvent<{ open: boolean }>))
     window.addEventListener("hashchange", () => this.onHash())
-    // the reader moving on:  a landing's second try must not pull the page back
-    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"])
-      window.addEventListener(type, () => (this.hasReaderMoved = true), { capture: true, passive: true })
+    this.landing = HashLanding.forDocument(document).use(this.landingRules())
     window.addEventListener("resize", () => this.measure(), { passive: true })
     window.addEventListener("scroll", () => this.markTabsStuck(), { passive: true })
   }
@@ -239,7 +242,7 @@ export class SiteSections {
   // ## Open and closed
   ////////////////
 
-  /** Open or close `main`'s sections as the reader left them on this page;  `isInstant`:  without the animation. */
+  /** Open or close `main`'s sections as the viewer left them on this page;  `isInstant`:  without the animation. */
   private restoreClosed(main: HTMLElement, { isInstant }: { isInstant: boolean }): void {
     const saved = SiteSections.readClosed()
     let hasChanged = false
@@ -254,7 +257,7 @@ export class SiteSections {
   }
 
   /**
-   * The reader opened or closed a section:  remember it.
+   * The viewer opened or closed a section:  remember it.
    * - Not ours:
    *   - another element's, demo sections inside examples, a vetoed toggle
    *   - a `ui-opening` that can't be cancelled (find-in-page's reveal:  never saved, as a landing's opening isn't)
@@ -294,7 +297,7 @@ export class SiteSections {
    * Land on `hash` in `main`, if it names something there.
    * - False when it doesn't (or names a pane:  the tabs show it themselves),
    *   so the caller can scroll to the top instead.
-   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the opened sections have drawn.
+   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the opened sections have drawn (`HashLanding`).
    * - `scroll`:  `"jump"` (a page arriving at its address) or `"glide"` (a link on the page)
    *   - glide:  a smooth scroll, the stuck bars staying put;  a jump all the same under reduced motion
    */
@@ -307,8 +310,7 @@ export class SiteSections {
     if (!found) return false
     // an old link:  the URL names what it found
     if ("id" in found && found.id !== id) history.replaceState(history.state, "", `#${encodeURIComponent(found.id)}`)
-    this.hasReaderMoved = false
-    void this.go(main, found, ++this.landings, scroll)
+    void this.landing.land("apis" in found ? SiteSections.drawnTarget(found) : found.target, { scroll })
     return true
   }
 
@@ -353,44 +355,45 @@ export class SiteSections {
     return undefined
   }
 
-  /** Bring `found` on screen (see `land()`), unless a newer landing (`landing`) started meanwhile. */
-  private async go(main: HTMLElement, found: Found, landing: number, scroll: LandingScroll): Promise<void> {
-    await new Promise<void>((resolve) => TocIndex.whenReady(main, resolve))
-    if (landing !== this.landings) return
-    const target = "apis" in found ? await SiteSections.drawnTarget(found) : found.target
-    if (!target || landing !== this.landings) return
-    const holder = TocIndex.lightElementOf(target)
-    const tabs = SiteSections.tabsOf(main)
-    const pane = tabs && TocIndex.paneOf(tabs, holder)
-    if (tabs && pane && TocIndex.shownPane(tabs) !== pane)
-      (tabs as HTMLElement & { value?: string }).value = TocIndex.paneValue(tabs, pane)
-    const hasOpened = SiteSections.openAround(main, holder)
-    for (let frame = 0; frame < SHOW_FRAMES && !SiteSections.boxOf(target); frame++) await SiteSections.frames(1)
-    // after the toc's own first-load scroll (`<ui-docs-toc>` lands a hash a frame after the root is ready)
-    await SiteSections.frames(hasOpened ? OPEN_FRAMES : 2)
-    if (landing !== this.landings) return
-    this.measure()
-    this.scrollTo(target, holder, scroll)
-    setTimeout(() => {
-      if (landing === this.landings && !this.hasReaderMoved) this.scrollTo(target, holder, scroll)
-    }, SETTLE_MS)
+  /**
+   * How the site lands (`HashLanding`'s rules):
+   * - ready:  once the page's `<ui-root>` is
+   * - opens:  the target's pane, then every section around it (and itself), without animation
+   * - its line:  below the stuck bar and the titles of the sections around it (`lineFor()`)
+   * - its top:  a section's where its title would be, even while stuck (`boxOf()`)
+   */
+  private landingRules(): Partial<HashLandingRules> {
+    return {
+      whenReady: (target) => new Promise((resolve) => TocIndex.whenReady(this.main ?? target, resolve)),
+      reveal: (target) => {
+        const main = this.main
+        if (!main) return false
+        const holder = TocIndex.lightElementOf(target)
+        const tabs = SiteSections.tabsOf(main)
+        const pane = tabs && TocIndex.paneOf(tabs, holder)
+        const hasSwapped = !!tabs && !!pane && TocIndex.shownPane(tabs) !== pane
+        if (hasSwapped) (tabs as HTMLElement & { value?: string }).value = TocIndex.paneValue(tabs, pane)
+        return SiteSections.openAround(main, holder) || hasSwapped
+      },
+      lineFor: (target) => this.lineFor(target),
+      topOf: (target) => SiteSections.boxOf(target)?.top
+    }
   }
 
   /**
-   * Scroll so `target`'s top sits on its line:  below the stuck bar and the titles of the sections around `holder`.
-   * - `holder`:  `target` itself, or the element whose shadow root holds it.
-   * - A section's own title sits right on the line, where it sticks.
+   * Where `target`'s top lands, px from the viewport's top:  below the stuck bar and the titles of the sections
+   * around it (or around the element whose shadow root holds it).
+   * - A section's own title sits right on the line, where it sticks;  anything else `GAP` below.
+   * - Measures first:  the bars may have changed since.
    */
-  private scrollTo(target: Element, holder: Element, scroll: LandingScroll): void {
-    const box = SiteSections.boxOf(target)
-    if (!box) return
+  private lineFor(target: Element): number {
+    this.measure()
     let line = this.top
+    const holder = TocIndex.lightElementOf(target)
     for (let section = SiteSections.sectionAround(holder); section; section = SiteSections.sectionAround(section)) {
       if (section.hasAttribute("sticky")) line += SiteSections.titleHeight(section)
     }
-    if (target.localName !== SECTION_TAG) line += GAP
-    const glides = scroll === "glide" && !matchMedia("(prefers-reduced-motion: reduce)").matches
-    window.scrollTo({ top: Math.max(0, scrollY + box.top - line), behavior: glides ? "smooth" : "instant" })
+    return target.localName === SECTION_TAG ? line : line + GAP
   }
 
   /** The hash changed on this page (a toc or `#id` link, back / forward):  land again, through ours. */
@@ -419,7 +422,7 @@ export class SiteSections {
         const target = api.shadowRoot && found.find(api.shadowRoot)
         if (target) return target
       }
-      await SiteSections.frames(1)
+      await nextFrame()
     }
     return undefined
   }
@@ -510,12 +513,7 @@ export class SiteSections {
   /** Opening and closing in `main` skip their animation for a few frames:  a landing measures right after. */
   private static instantly(main: HTMLElement): void {
     main.style.setProperty(SECTION_DURATION, "0s")
-    void SiteSections.frames(OPEN_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
-  }
-
-  /** Resolves after `count` animation frames. */
-  private static async frames(count: number): Promise<void> {
-    for (let frame = 0; frame < count; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
+    void nextFrame(OPEN_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
   }
 
   /** This page's saved closed sections, `{}` when none. */
@@ -549,17 +547,8 @@ type DrawnFound = {
 /** An API section's table (`yarn site:sections` writes one per kind):  its rows' ids start with its section's. */
 const API_SECTION = "ui-docs-api[only]"
 
-/** Frames a section takes to draw what an opening revealed (the write lands on a microtask, the render next frame). */
+/** Frames a section takes to draw what an opening revealed:  its animation stays off that long (`instantly()`). */
 const OPEN_FRAMES = 3
-
-/** Frames to wait at most for a target to get a box (its pane swapping in, inside a View Transition). */
-const SHOW_FRAMES = 30
-
-/** Land once more after this long, ms:  late layout (images, a close's last frame) moves the target a little. */
-const SETTLE_MS = 400
-
-/** How a landing scrolls:  a page arriving jumps;  a link on the page glides (`land()`). */
-type LandingScroll = "jump" | "glide"
 
 /** Gap between the stuck titles and a target that isn't a section (an example, a heading), px. */
 const GAP = 8

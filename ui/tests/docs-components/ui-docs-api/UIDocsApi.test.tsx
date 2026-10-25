@@ -6,6 +6,7 @@ import type { DOMElement } from "spell/element"
 import { SiteData, type SiteDataFile, type SiteTag } from "spell-ui/docs-components"
 
 import type { UIDocsApi } from "spell-ui/docs-components/ui-docs-api/UIDocsApi"
+import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
 
 import "spell-ui/docs-components/ui-docs-api"
 
@@ -363,10 +364,11 @@ describe("<ui-docs-api family>", () => {
     expect(host.shadowRoot!.querySelector("[part~=title]")!.getAttribute("level")).toBe("3")
   })
 
-  it("scrolls to the tag `location.hash` names, at start and on `hashchange`", async () => {
+  it("lands on the tag `location.hash` names, at start and on `hashchange`", async () => {
     const scrolled: Element[] = []
-    const spy = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(function (this: Element) {
-      scrolled.push(this)
+    const spy = vi.spyOn(HashLanding.prototype, "land").mockImplementation(async (target) => {
+      scrolled.push((await target)!)
+      return true
     })
     try {
       history.replaceState(null, "", "#x-or")

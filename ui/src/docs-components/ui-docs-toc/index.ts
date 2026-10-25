@@ -1,6 +1,6 @@
 /**
  * The docs table of contents family:  defines `<ui-docs-toc>` and exports its component, `UIDocsToc`,
- * and `TocIndex`.
+ * `TocIndex` and `HashLanding`.
  * - A DOC-ONLY family (`src/docs-components/`):  no lib entry;  `<ui-root>` loads it on first use.
  * - SIDE EFFECT:  importing it defines the tag, and the widgets its shadow DOM is built of:
  *   `<ui-menu>` + `<ui-item>` (`ui-menu`, `ui-item`), `<ui-header>` (`ui-parts`).
@@ -10,6 +10,7 @@
 
 import { UIDocsToc } from "./UIDocsToc"
 import { TocIndex } from "./TocIndex"
+import { HashLanding } from "./HashLanding"
 
 import "spell-ui/components/ui-menu"
 import "spell-ui/components/ui-item"
@@ -17,4 +18,4 @@ import "spell-ui/components/ui-parts"
 
 UIDocsToc.define()
 
-export { UIDocsToc, TocIndex }
+export { UIDocsToc, TocIndex, HashLanding }

@@ -8,14 +8,6 @@
  * - Pure data, no imports:  any tool can read it, node included.
  */
 export const PLANNED_COMPONENTS: readonly PlannedComponent[] = [
-  { tag: "ui-cell", es: "celda", gap: "tables", phase: "table-rows", description: "One cell of a table's row." },
-  {
-    tag: "ui-stack",
-    es: "pila",
-    gap: "layout",
-    phase: "layout-stack",
-    description: "A plain box that lays its children out in a column or a row, with spacing, and no look of its own."
-  },
   { tag: "ui-link", es: "enlace", gap: "links", phase: "text-blocks", description: "A link inside running text." },
   {
     tag: "ui-keys",

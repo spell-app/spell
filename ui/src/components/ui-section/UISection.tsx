@@ -8,6 +8,22 @@ import { FoldIconPlace, type SectionVocabulary } from "./UISection.types"
 
 import sectionCSS from "./UISection.css?inline"
 
+/**
+ * The DOM element of a `<ui-section>` (and of a panel, which is one):  a loadable body's, plus the old `collapsed`
+ * property, `open` turned round (epic `ui-gaps`).
+ * - `section.collapsed = true` folds it, as `section.open = false` does;  code written before `open` keeps working.
+ */
+export class DOMSectionElement extends E.DOMLoadableBodyElement {
+  /** DEPRECATED:  `open` turned round, its old name.  `true` while folded. */
+  get collapsed(): boolean {
+    return (this as unknown as { open?: boolean }).open === false
+  }
+
+  set collapsed(value: boolean) {
+    ;(this as unknown as { open: boolean }).open = !value
+  }
+}
+
 /****************
  * ### `UISection`
  * The component behind `<ui-section>`:  a titled block of content that can fold away,
@@ -32,11 +48,11 @@ import sectionCSS from "./UISection.css?inline"
  * - *Folding* (`collapsible`):  the toggle becomes a `<button>`;  its `disclosure` (the kit's `Disclosure`) folds.
  *   - Its accessible name is the label;  its `title` (the `fold` / `unfold` text) is only a tooltip.
  *   - Click, Enter and Space send the cancelable `ui-opening` / `ui-closing`,
- *     then flip `collapsed` (controlled, like the accordion's `open`).
+ *     then flip `open` (controlled, like the accordion's).
  *   - Once it has folded or unfolded, by any route:  `ui-closed` / `ui-opened`.
  *   - Folded content is `hidden="until-found"`, so find-in-page can reveal a match:
  *     `beforematch` unfolds it, and announces `ui-opening` after the fact (not cancelable).
- *   - Not collapsible:  `collapsed` is ignored.
+ *   - Not collapsible:  `open` is ignored.
  * - `fold-icon="end"` moves the chevron out of the button, to the far end of the title bar.
  *   - It stays `aria-hidden` (the button is still the control), and a click on it folds as the button does.
  *   - A subclass moves the default with `defaultFoldIcon` (`<ui-panel>`:  `end`).
@@ -56,7 +72,7 @@ import sectionCSS from "./UISection.css?inline"
  *
  * - *Source* (`source`, `select`):  the content comes from a file the first time the section unfolds, by any route:
  *   - a click
- *   - the page removing `collapsed` (a `#id` link)
+ *   - the page setting `open` (a `#id` link)
  *   - starting unfolded (then at once)
  *   - `LoadableBody` fetches it (`UI.sources`),
  *     and puts its `<body>` in the LIGHT DOM, in place of the placeholder (the children without a `slot`).
@@ -84,7 +100,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { section: sectionCSS },
     cssStates: ["inverted"],
-    DOMElement: E.DOMLoadableBodyElement,
+    DOMElement: DOMSectionElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false,
     // `loading`:  Fomantic's veil
@@ -168,10 +184,11 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   ////////////////
 
   /**
-   * `collapsed`:  the DOM element's (a boolean is always the DOM element's, see `@controlled`).
+   * `open`:  the DOM element's (a boolean is always the DOM element's, see `@controlled`);  `false` folds it.
    * - Folds only `isCollapsible`.
+   * - Its old name is `collapsed`, turned round:  the attribute (`replaces`) and the property (`DOMSectionElement`).
    */
-  @E.controlled("collapsed") accessor isCollapsed = false
+  @E.controlled("open") accessor isMarkedOpen = true
 
   /**
    * Can it fold?
@@ -189,10 +206,10 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return !!this.collapsible || !!this.group?.collapsing
   }
 
-  /** Folded:  `isCollapsible` and `isCollapsed`. */
+  /** Folded:  `isCollapsible`, and `open` turned off. */
   @E.cssState("collapsed")
   get isFolded(): boolean {
-    return this.isCollapsible && !!this.isCollapsed
+    return this.isCollapsible && !this.isMarkedOpen
   }
 
   /** Glyph of the fold button, while `isCollapsible`. */
@@ -204,15 +221,14 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   }
 
   /**
-   * Open unless folded, on `collapsed` (`isCollapsed`, true while closed):
+   * Open unless folded, on `open` (`isMarkedOpen`):
    * the cancelable `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed` (`onFoldedChanged()`);
    * the toggle's `aria-expanded`;  find-in-page opening the folded content.
    * - Folds only `isCollapsible`, and never while `disabled`.
    */
   readonly disclosure = new E.Disclosure({
     component: this,
-    member: "isCollapsed",
-    memberMeans: "closed",
+    member: "isMarkedOpen",
     isOpen: () => !this.isFolded,
     canChange: () => this.isCollapsible && !this.isDisabled,
     detail: (open, originalEvent): UIT.SectionToggleDetail => ({ open, section: this.domElement, originalEvent }),
@@ -221,7 +237,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
 
   /**
    * Fold or unfold as a person would:
-   * the cancelable `ui-opening` / `ui-closing` first, then `collapsed`.
+   * the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - True when applied.
    * - Does nothing unless `collapsible`, or while `disabled`.
    */

@@ -5,6 +5,7 @@ import { E } from "spell-ui/core"
 import type { UIMenuAttributes } from "spell-ui/jsx"
 import { TOC_SHADOW_HOSTS } from "spell-ui/docs-components/docs-components.types"
 import { docsTocVocabulary } from "./UIDocsToc.en"
+import { HashLanding } from "./HashLanding"
 import { TocIndex } from "./TocIndex"
 import { TocPreferences } from "./TocPreferences"
 import {
@@ -31,7 +32,7 @@ import tocCSS from "./UIDocsToc.css?inline"
  *   - Each section is a `<div part="section-row">`:  its fold `<button part="fold">` (when it has entries), its link.
  *   - Under an open section, an item holds a `<ui-menu part="entries">` of its entries' links.
  * - Folds (Owen, 2026-10-25, r31:  "Make these TOCs expandable with a expandall/collapseall icon in the header"):
- *   - a section the reader folded or opened by hand stays so (`handFolds`, kept per page)
+ *   - a section the viewer folded or opened by hand stays so (`handFolds`, kept per page)
  *   - else what the header's toggle last did, on ANY page (`allFolds`, one for this browser)
  *   - else `expanded`, else open while it's in view (P38's J128)
  *   - kept through `TocPreferences`, read again on every connect:  a page move makes a new toc
@@ -45,8 +46,10 @@ import tocCSS from "./UIDocsToc.css?inline"
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
  *   and its section opens;  `ui-scrolled-to { value }` when that changes.
  * - Links are plain `#id` links:  the browser scrolls (below the document's `scroll-padding-top`).
- *   - A hash naming an element in a HIDDEN pane of the followed tabs (a link from elsewhere, or a page opened on it)
- *     shows that pane first, then scrolls to it:  `<ui-tabs history>` ignores hashes that aren't pane values.
+ *   - As the page opens and on `hashchange`, it lands on the hash through `HashLanding`:  a target in a HIDDEN pane
+ *     of the tabs shows that pane first (`<ui-tabs history>` ignores hashes that aren't pane values), its folds open,
+ *     then it scrolls there, and once more as the page settles.
+ *   - Not on a page that lands its hashes itself (the site's sections, the epic pages):  one landing, not two.
  * - It scans again when the tabs show another pane (`ui-opened`),
  *   when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`),
  *   and when a `TOC_SHADOW_HOSTS` element in it has drawn (`ui-drawn`):  the observer can't see into its shadow root.
@@ -54,7 +57,7 @@ import tocCSS from "./UIDocsToc.css?inline"
  *   (a `ResizeObserver`:  components drawing late move the headings without any scroll).
  * - SIDE EFFECTS:
  *   - gives each listed heading / example without an `id` one (a slug of its text), so its link works
- *   - the reader's folds, in `localStorage` (`TocPreferences`)
+ *   - the viewer's folds, in `localStorage` (`TocPreferences`)
  *   - while connected:  `window` `scroll` / `resize` / `hashchange` listeners, and the two observers.
  ****************/
 export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
@@ -99,13 +102,13 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
   // ## Folds
   ////////////////
 
-  /** The reader's own folds on this page, by section id (`TocPreferences.foldsFor()`). */
+  /** The viewer's own folds on this page, by section id (`TocPreferences.foldsFor()`). */
   @E.state accessor handFolds: TocFolds = {}
 
   /** What the header's toggle last did, on any page;  `undefined` until it's pressed. */
   @E.state accessor allFolds: TocAllFolds | undefined = undefined
 
-  /** Is `section`'s list open?  The reader's own fold, else the toggle's, else `expanded`, else while it's in view. */
+  /** Is `section`'s list open?  The viewer's own fold, else the toggle's, else `expanded`, else while it's in view. */
   isSectionOpen(section: TocSection): boolean {
     const own = this.handFolds[section.id]
     if (own !== undefined) return own
@@ -327,7 +330,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const onDrawn = (event: Event) => {
       if ((event.target as Element).matches?.(TOC_SHADOW_HOSTS)) this.schedule("rescan")
     }
-    const onHash = () => this.reveal("hash change")
+    const onHash = () => this.reveal()
     this.loadFolds()
     let followed: FollowedContent | undefined
     const start = () => (followed = this.observe({ observer, resized, onShow, onDrawn }))
@@ -368,7 +371,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     followed.tabs?.addEventListener(UI_SHOW, onShow)
     followed.root.addEventListener(UI_DRAWN, onDrawn)
     this.rescan()
-    this.reveal("page load")
+    this.reveal()
     return followed
   }
 
@@ -409,25 +412,14 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
   }
 
   /**
-   * Show what `location.hash` names:  its pane first when it's in a hidden pane of the followed tabs,
-   * then scroll to it.
-   * - On `"page load"`, scroll again once the page's root is ready (components arriving move the target down).
+   * Land on what `location.hash` names (`HashLanding`):  its pane shown, its folds opened, below the stuck titles;
+   * once the page is ready, and once more as it settles.
+   * - Not on a page that lands its hashes itself (the site, the epic pages):  `landOnHash()` leaves it to the page.
    */
-  private reveal(moment: RevealMoment): void {
+  private reveal(): void {
     const document = this.domElement.ownerDocument
-    const hash = document.defaultView!.location.hash.slice(1)
-    if (!hash) return
-    const target = TocIndex.elementById(document, TocIndex.decode(hash))
-    if (!target) return
-    const tabs = this.followedContent()?.tabs
-    const pane = tabs && TocIndex.paneOf(tabs, TocIndex.lightElementOf(target))
-    const scroll = () => target.scrollIntoView({ block: "start" })
-    const isPageLoad = moment === "page load"
-    if (tabs && pane && TocIndex.shownPane(tabs) !== pane) {
-      ;(tabs as HTMLElement & { value?: string }).value = TocIndex.paneValue(tabs, pane)
-      E.beforeNextPaint(() => E.beforeNextPaint(scroll))
-    } else if (isPageLoad || !target.getClientRects().length) E.beforeNextPaint(scroll)
-    if (isPageLoad) TocIndex.whenReady(this.domElement, scroll)
+    const hash = document.defaultView!.location.hash
+    if (hash) void HashLanding.forDocument(document).landOnHash(hash)
   }
 
   /** What `for` names (else the page's `main`), and its tabs;  `undefined` while it doesn't exist. */
@@ -447,9 +439,6 @@ export interface UIDocsToc extends E.AttributeValues<DocsTocVocabulary> {}
 
 /** What a scheduled frame does:  scan the followed content again, or just re-follow the scroll. */
 type TocUpdate = "rescan" | "follow"
-
-/** When `reveal()` runs:  as the page opens (scroll again once it's ready), or on a hash change. */
-type RevealMoment = "page load" | "hash change"
 
 /** What `observe()` hooks the followed content up to:  `watch()`'s observers and tabs listener. */
 type Observers = {

@@ -117,7 +117,10 @@ export class PerfRun {
     return { min: Math.min(...values), avg, max: Math.max(...values) }
   }
 
-  /** Next animation frame. */
+  /**
+   * Next animation frame.
+   * - A copy of the kit's `nextFrame()` on purpose:  this file has NO imports (it's served as plain JS).
+   */
   private static nextFrame(): Promise<number> {
     return new Promise((resolve) => requestAnimationFrame(resolve))
   }

@@ -1531,3 +1531,208 @@
     }
   }
 }
+
+/*******************************
+         Rows and cells
+*******************************/
+
+/*
+ * Rows mode (epic `ui-gaps` P7):  `<ui-row>`s of `<ui-cell>`s, with no native table.
+ * - The DOM element is the table box:  the element mirrors its class words onto ITSELF, so the rules above that
+ *   style `.ui.table` (border, fill, colour edge, basic, inverted) style it as they style a native table.
+ * - The shadow scroller is a CSS grid of `--_table-columns` columns (the element sets it);
+ *   each row is a subgrid of all of them, so columns line up;  a cell spans its own (`<ui-cell span>`).
+ * - Rows and cells are LIGHT DOM, styled here by this PAGE sheet:  `:state(header)` / `:state(footer)` on a row,
+ *   `:state(header)` on a cell.
+ * - NOTE: the caption (`caption`) sits inside the table's border, at its top;  a native `<caption>` sits above it.
+ */
+
+@layer ui.components.table.content {
+  /* Shadow:  the grid, and the caption above it. */
+  :host(:state(rows)) > .scroller {
+    display: grid;
+    grid-template-columns: repeat(var(--_table-columns, 1), auto);
+    margin: 0;
+  }
+  :host(:state(rows)) > .caption,
+  :host > .caption {
+    padding: var(--ui-space-xs) var(--_ui-table-cell-padding-inline, 0.785714em);
+    color: var(--ui-text-muted);
+    text-align: start;
+  }
+
+  /* Light DOM:  rows span every column, as subgrids;  cells are its items. */
+  /* `container: none`:  the grid's sheet makes a row a size container, and a contained box can't be a subgrid */
+  .ui.table:state(rows) > ui-row {
+    container: none;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    --_table-mark-shadow: 0 0 transparent;
+  }
+  .ui.table:state(rows) > ui-row > ui-cell {
+    --ui-color: initial;
+    --ui-color-text: initial;
+    --ui-color-header: initial;
+    --ui-color-border: initial;
+    --ui-color-background: initial;
+    --ui-color-inverted: initial;
+    --ui-color-on: initial;
+    --ui-color-inverted-on: initial;
+    --ui-scale: initial;
+    --_table-hosted: initial;
+    --_table-stack-by: initial;
+    display: block;
+    min-inline-size: 0;
+    padding: var(--_ui-table-cell-padding-block) var(--_ui-table-cell-padding-inline);
+    border-block-start: var(--_ui-table-row-border);
+    transition:
+      background var(--_ui-table-duration) var(--ui-ease),
+      color var(--_ui-table-duration) var(--ui-ease);
+  }
+  .ui.table:state(rows) > ui-row:first-child > ui-cell,
+  .ui.table:state(rows) > ui-row:state(header) + ui-row > ui-cell {
+    border-block-start: none;
+  }
+
+  /* Header row:  the column headers. */
+  .ui.table:state(rows) > ui-row:state(header) > ui-cell {
+    padding-block: var(--_ui-table-header-padding-block);
+    border-block-end: var(--_ui-table-header-border);
+    background: var(--_ui-table-header-background);
+    color: var(--_ui-table-header-color);
+    font-weight: var(--ui-font-weight-bold);
+  }
+  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:first-child {
+    border-start-start-radius: var(--_ui-table-radius);
+  }
+  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:last-child {
+    border-start-end-radius: var(--_ui-table-radius);
+  }
+
+  /* A header cell in a body row:  its row's name. */
+  .ui.table:state(rows) > ui-row:not(:state(header)) > ui-cell:state(header) {
+    font-weight: var(--ui-font-weight-bold);
+  }
+
+  /* Footer row */
+  .ui.table:state(rows) > ui-row:state(footer) > ui-cell {
+    border-block-start: var(--_ui-table-footer-border);
+    background: var(--_ui-table-footer-background);
+    color: var(--_ui-table-footer-color);
+  }
+}
+
+@layer ui.components.table.variations {
+  /* Celled */
+  .ui.celled.table:state(rows) > ui-row > ui-cell + ui-cell {
+    border-inline-start: var(--_ui-table-cell-border);
+  }
+
+  /* Striped:  every other body row. */
+  .ui.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+    background-color: var(--_ui-table-striped-background);
+  }
+  .ui.inverted.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+    background-color: var(--_ui-table-inverted-striped-background);
+  }
+
+  /* Basic */
+  .ui.basic.table:state(rows) > ui-row:state(header) > ui-cell {
+    background: transparent;
+  }
+
+  /* Very basic:  no padding at the edges. */
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:first-child {
+    padding-inline-start: 0;
+  }
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:last-child {
+    padding-inline-end: 0;
+  }
+
+  /* Padding */
+  .ui.padded.table:state(rows) > ui-row > ui-cell {
+    padding: var(--_ui-table-padded);
+  }
+  .ui[class*="very padded"].table:state(rows) > ui-row > ui-cell {
+    padding: var(--_ui-table-very-padded);
+  }
+  .ui.compact.table:state(rows) > ui-row > ui-cell {
+    padding: var(--_ui-table-compact-padding-block) var(--_ui-table-compact-padding-inline);
+  }
+  .ui[class*="very compact"].table:state(rows) > ui-row > ui-cell {
+    padding: var(--_ui-table-very-compact-padding-block) var(--_ui-table-very-compact-padding-inline);
+  }
+
+  /* Single line */
+  .ui[class*="single line"].table:state(rows) > ui-row > ui-cell {
+    white-space: nowrap;
+  }
+}
+
+@layer ui.components.table.states {
+  /* Selectable:  body rows light up on hover. */
+  .ui.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+    background: var(--_ui-table-selectable-background);
+    color: var(--_ui-table-selectable-color);
+  }
+  .ui.inverted.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+    background: var(--_ui-table-inverted-selectable-background);
+  }
+
+  /* Sortable:  a header cell is a control. */
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]) {
+    cursor: pointer;
+    user-select: none;
+  }
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]):hover {
+    background: var(--_ui-table-sortable-hover-background);
+    color: var(--_ui-table-sortable-hover-color);
+  }
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort] {
+    background: var(--_ui-table-sortable-active-background);
+    color: var(--_ui-table-sortable-active-color);
+  }
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[tabindex]:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(-1 * var(--ui-focus-width));
+  }
+  /* The direction caret, drawn only on the sorted header:  the native table's. */
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="ascending"] {
+    --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 2l4 6H1z'/%3E%3C/svg%3E");
+  }
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="descending"] {
+    --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8L1 2h8z'/%3E%3C/svg%3E");
+  }
+  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort]::after {
+    content: "";
+    display: inline-block;
+    inline-size: 0.8em;
+    block-size: 0.8em;
+    margin-inline-start: 0.5em;
+    background-color: currentColor;
+    opacity: var(--_ui-table-sortable-icon-opacity);
+    vertical-align: -0.05em;
+    mask: var(--_table-caret) center / contain no-repeat;
+  }
+
+  /* Stacked (see "Stackable"):  the grid, its rows and cells, blocks;  a line under each row. */
+  @container style(--_table-stack: 1) {
+    :host(:state(rows)) > .scroller {
+      display: block;
+    }
+    .ui.table:state(rows) > ui-row {
+      display: block;
+      padding-block: var(--_ui-table-responsive-row-padding);
+      box-shadow: var(--_ui-table-responsive-row-shadow);
+    }
+    .ui.table:state(rows) > ui-row > ui-cell {
+      padding: var(--_ui-table-responsive-cell-padding);
+      border: none;
+      background: none;
+    }
+    .ui.table:state(rows) > ui-row > ui-cell:first-child {
+      font-weight: var(--ui-font-weight-bold);
+    }
+  }
+}

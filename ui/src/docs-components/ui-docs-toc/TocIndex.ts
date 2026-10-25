@@ -1,11 +1,12 @@
 // `spell-ui/util` by name, never the `spell-ui/core` entry:  node scripts load this file (see the class docs)
 import { beforeNextPaint, slug } from "spell-ui/util"
-import * as UIT from "spell-ui/components/components.types"
 import {
   TOC_ENTRY_ATTRIBUTE,
   TOC_GROUP_ATTRIBUTE,
   TOC_SHADOW_HOSTS
 } from "spell-ui/docs-components/docs-components.types"
+// A leaf, not the barrel:  the barrel defines `<ui-docs-search>`
+import { PageOutline } from "spell-ui/docs-components/ui-docs-search/PageOutline"
 import {
   EXAMPLE_TAG,
   HEADING_SELECTOR,
@@ -26,6 +27,7 @@ import {
  * - Static only:  pure reads (and id writes) of the DOM it's given.
  * - Entries form a tree:  level 2 headings and top-level `<ui-section>`s,
  *   then what's under each (examples, level 3 headings, nested sections), as deep as the sections nest.
+ * - Read on top of the search's `PageOutline`:  its titles, and the demo markup it leaves out.
  * - Light DOM only, but for the shadow roots of `TOC_SHADOW_HOSTS` (`<ui-docs-api>`):
  *   their marked elements (`TOC_ENTRY_ATTRIBUTE`) are entries of the section around the host,
  *   a group's (`TOC_GROUP_ATTRIBUTE`) nesting the ones after it.
@@ -172,12 +174,31 @@ export class TocIndex {
       return all.at(-1)!.id
     const padding = parseFloat(view.getComputedStyle(document.documentElement).scrollPaddingTop) || 0
     const line = padding + view.innerHeight * READING_LINE
-    let current = all[0]!
-    for (const entry of all) {
-      if (entry.target.getBoundingClientRect().top <= line) current = entry
-      else break
+    const reached = TocIndex.reached(
+      all.map((entry) => entry.target),
+      () => line
+    )
+    return (all.find((entry) => entry.target === reached) ?? all[0]!).id
+  }
+
+  /**
+   * The last of `targets` (in page order) whose top has reached its line, px from the viewport's top (`lineFor()`);
+   * `undefined` above the first.
+   * - Skipped:  a target without a box (a hidden pane, filtered out), or one `isShown()` says isn't shown
+   * - The section being read:  `current()` with the reading line;  the epic pages with each target's landing line.
+   */
+  static reached<T extends Element>(
+    targets: readonly T[],
+    lineFor: (target: T) => number,
+    isShown: (target: T) => boolean = () => true
+  ): T | undefined {
+    let reached: T | undefined
+    for (const target of targets) {
+      if (!target.getClientRects().length || !isShown(target)) continue
+      if (target.getBoundingClientRect().top > lineFor(target)) break
+      reached = target
     }
-    return current.id
+    return reached
   }
 
   /** The top-level section holding the entry `id`, at any depth (or being it). */
@@ -226,29 +247,16 @@ export class TocIndex {
     return id
   }
 
-  /**
-   * A heading's link text:  an example's `header`, else its text, whitespace collapsed.
-   * - A nested heading of the same tag is its SUB header
-   *   (`<ui-header>Title<ui-header>sub</ui-header></ui-header>`):  left out, so the link says `Title`, not `Title sub`.
-   */
+  /** A heading's link text:  an example's `header`, else its title as the search reads it (`PageOutline.titleOf()`). */
   private static text(heading: Element): string {
-    let text: string | null | undefined
-    if (heading.localName === EXAMPLE_TAG) text = heading.getAttribute(HEADER)
-    else if (heading.localName === SECTION_TAG) text = UIT.SectionTitle.textOf(heading)
-    else
-      text = [...heading.childNodes]
-        // `localName`, not `instanceof Element`:
-        // node scripts run this on linkedom, which has no `Element` global;  a text node has no `localName`
-        .filter((node) => (node as Element).localName !== heading.localName)
-        .map((node) => node.textContent)
-        .join("")
+    const text = heading.localName === EXAMPLE_TAG ? heading.getAttribute(HEADER) : PageOutline.titleOf(heading)
     return (text ?? "").replace(/\s+/g, " ").trim()
   }
 
-  /** `heading` is part of an example's live markup (or a template), below `root`. */
+  /** `heading` is part of demo markup (an example's, a template), below `root` (`PageOutline.demoAround()`). */
   private static insideExample(heading: Element, root: Element): boolean {
-    const example = heading.parentElement?.closest(`${EXAMPLE_TAG}, template`)
-    return !!example && root.contains(example)
+    const demo = PageOutline.demoAround(heading)
+    return !!demo && root.contains(demo)
   }
 
   /** The listed `<ui-section>` (`ofSection`) nearest around `element`, below `root`;  `undefined` at the top. */

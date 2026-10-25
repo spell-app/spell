@@ -31,8 +31,8 @@ export class TableSort {
     return cells
   }
 
-  /** Can `header` sort?  Not with `data-sortable="false"` or Fomantic's `class="disabled"`. */
-  static isSortable(header: HTMLTableCellElement): boolean {
+  /** Can `header` (a native one, or a `<ui-cell>`) sort?  Not with `data-sortable="false"` or Fomantic's `class="disabled"`. */
+  static isSortable(header: Element): boolean {
     return (
       header.getAttribute(UIT.TABLE_SORT_OPT_OUT.attribute) !== UIT.TABLE_SORT_OPT_OUT.value &&
       !header.classList.contains(UIT.DISABLED)
@@ -89,7 +89,7 @@ export class TableSort {
   }
 
   /** `header`'s `data-key`, for `ui-sorting`'s detail. */
-  static key(header: HTMLTableCellElement): string | undefined {
+  static key(header: Element): string | undefined {
     return header.getAttribute(UIT.TABLE_SORT_KEY) ?? undefined
   }
 

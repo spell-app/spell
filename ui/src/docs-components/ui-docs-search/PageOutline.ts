@@ -1,6 +1,5 @@
 import type { SiteSearchSection } from "spell-ui/docs-components/docs-components.types"
 import * as UIT from "spell-ui/components/components.types"
-import { SearchIndex } from "./SearchIndex"
 import { TRAIL, type SearchEntry } from "./UIDocsSearch.types"
 
 /****************
@@ -24,6 +23,10 @@ import { TRAIL, type SearchEntry } from "./UIDocsSearch.types"
  *   - NEVER imports a value from `spell-ui/core`, which node can't load.
  *   - Cheap enough to read on every search.
  * - Static only:  pure reads of the DOM it's given.
+ * - It imports nothing of the search (`SearchIndex` reads it):  the site's sticky sections and table of contents load
+ *   it with the page, the search only once it's used.
+ * - The table of contents reads a page on top of it (`TocIndex.scan()`):  the same titles, the same demo markup left
+ *   out (`titleOf()`, `demoAround()`).
  ****************/
 export class PageOutline {
   /** `root`'s sections as search entries of the page shown, in document order;  none without a root. */
@@ -31,7 +34,7 @@ export class PageOutline {
     if (!root) return []
     const { sections, tabs } = PageOutline.sections(root)
     return sections.map((section, at) => {
-      const trail = SearchIndex.trail(sections, at, tabs)
+      const trail = PageOutline.trail(sections, at, tabs)
       return {
         kind: "here" as const,
         title: section.title,
@@ -48,7 +51,7 @@ export class PageOutline {
    */
   static sections(root: Element): { sections: SiteSearchSection[]; tabs: Record<string, string> } {
     const found = [...root.querySelectorAll(SECTIONS)].filter(
-      (element) => !element.closest(NOT_PAGE) && PageOutline.titleOf(element)
+      (element) => !PageOutline.demoAround(element) && PageOutline.titleOf(element)
     )
     const index = new Map(found.map((element, at) => [element, at]))
     const tabs: Record<string, string> = {}
@@ -77,6 +80,34 @@ export class PageOutline {
     const copy = element.cloneNode(true) as Element
     for (const inner of copy.querySelectorAll(NOT_TITLE)) inner.remove()
     return PageOutline.clean(copy.textContent ?? "")
+  }
+
+  /**
+   * The demo markup `element` is part of, if any:  an example's live markup, a token playground's preview, a
+   * `<template>` or `<script>` around it (`NOT_PAGE`).
+   */
+  static demoAround(element: Element): Element | undefined {
+    return element.parentElement?.closest(NOT_PAGE) ?? undefined
+  }
+
+  /**
+   * Where a section sits:  its tab's label, then the titles of the sections around it, outermost first (not its own).
+   * - `sections` are a page's (`SiteSearchSection`s or the live outline's), `at` the section's index.
+   */
+  static trail(
+    sections: readonly { title: string; parent?: number; tab?: string }[],
+    at: number,
+    tabs?: Readonly<Record<string, string>>
+  ): string[] {
+    const titles: string[] = []
+    let tab: string | undefined
+    for (let index = sections[at]!.parent; index !== undefined; index = sections[index]!.parent) {
+      titles.unshift(sections[index]!.title)
+      tab = sections[index]!.tab ?? tab
+    }
+    tab = sections[at]!.parent === undefined ? sections[at]!.tab : tab
+    const label = tab && tabs && Object.hasOwn(tabs, tab) ? tabs[tab] : undefined
+    return label ? [label, ...titles] : titles
   }
 
   /** Index of the nearest listed section around `element`, if any. */

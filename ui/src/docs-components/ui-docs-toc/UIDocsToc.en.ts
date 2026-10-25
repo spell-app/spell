@@ -23,7 +23,7 @@ export const docsTocVocabulary = {
   description:
     "A table of contents lists the page's sections and examples as links, opens the one in view and follows the " +
     "scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  " +
-    "the reader's folds are kept.",
+    "the viewer's folds are kept.",
   attributes: [
     {
       name: "for",
@@ -44,7 +44,7 @@ export const docsTocVocabulary = {
       kind: "keyOnly",
       description:
         "Show every section's entries, not only the current section's (Fomantic opens the one in view).  " +
-        "The reader's own folds, and the header's toggle, win."
+        "The viewer's own folds, and the header's toggle, win."
     }
   ],
   events: [
