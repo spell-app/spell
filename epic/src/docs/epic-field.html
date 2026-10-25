@@ -51,7 +51,7 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            <code>&lt;epic-field&gt;</code> is one named field of a phase: Symptom, Changes, Goal, Done, Files, Verify
+            <code>&lt;epic-field&gt;</code> is one named field of a phase: Symptom, Changes, Requests, Goal, Done, Files, Verify
             or To review.
           </p>
           <ul>
@@ -97,9 +97,19 @@
                 <code>Color Set Chooser.spell.html</code>: the page script moves <code>active</code> by hand.
               </p></epic-field
             >
+            <epic-field name="requests"
+              ><epic-field label="r31 · 🚧 debut (ad62dff0)"
+                ><blockquote><p>Make these TOCs expandable with an expand all / collapse all icon in the header.</p></blockquote>
+                <p>Looking at: Spell UI docs pages' 'On this page' side column.</p>
+                <p>Sent 2026-10-25 14:05-04:00</p>
+                <p>
+                  <a href="../ui/images/hello-light.png"
+                    ><img src="../ui/images/hello-light.png" alt="r31, screenshot 1" style="max-width: 100%"
+                  /></a></p></epic-field></epic-field
+            >
 
             <ui-accordion class="spell-code" styled>
-              <ui-title>The example above · 10 lines</ui-title>
+              <ui-title>The example above · 19 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
@@ -113,6 +123,14 @@
                     <epic-field label="Where"
                       ><p><code>Color Set Chooser.spell.html</code>:  the page script moves <code>active</code> by hand.</p></epic-field
                     >
+                    <epic-field name="requests"
+                      ><epic-field label="r31 · 🚧 debut (ad62dff0)"
+                        ><blockquote><p>Make these TOCs expandable ...</p></blockquote>
+                        <p>Looking at: Spell UI docs pages' 'On this page' side column.</p>
+                        <p>Sent 2026-10-25 14:05-04:00</p>
+                        <p><a href="../requests/r31/image-1.png"><img src="../requests/r31/image-1.png" alt="r31, screenshot 1" style="max-width: 100%" /></a></p></epic-field
+                      ></epic-field
+                    >
                   </script></ui-code
                 >
               </ui-content>
@@ -122,7 +140,12 @@
                 A phase's fields: an icon in a column, then the bold label and the prose beside it. A list drops below
                 the label.
               </li>
-              <li>The last one is a labelled block, as items use it: no icon column.</li>
+              <li>The third is a labelled block, as items use it: no icon column.</li>
+              <li>
+                The last is a phase's Requests field, as <code>epic file</code> writes it: each request in it folds,
+                its label the title, folded to start with. Open it, and its screenshot is a thumbnail; a click shows
+                it full size in a modal, which Escape, a click outside or its close button closes.
+              </li>
             </ul>
           </ui-section>
 
