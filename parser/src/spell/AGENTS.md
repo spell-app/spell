@@ -127,13 +127,14 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
     - committed beside its source, and marked generated in spell-app's `.gitattributes`:
       a merge recompiles `@spell/library`
   - What a target builds goes in the project's build folder, `build/` at the repo root, never committed.
-    - That's its compiled code, and the scope pack, `.scopes.js`:
+    - That's its compiled code, the scope pack, `.scopes.js`, its declarations and its words (since epic
+      `elemental-spell` P4):
 
       ```text
-      <Project>.spell.js  .spell.tsx  .spell.py  .elements.spell.js  .scopes.js
+      <Project>.spell.js  .spell.tsx  .spell.py  .elements.spell.js  .scopes.js  .declarations.json5  .en.js
       ```
 
-    - The rest goes beside its source:  declarations, words, `.lib.ts`, `.app.py`.
+    - The rest goes beside its source:  `.lib.ts`, `.app.py`.
     - See "Projects" in [PARSING.md](PARSING.md).
     - Built when needed:
       - the page server compiles `@spell/examples` and `@spell/library` as it starts

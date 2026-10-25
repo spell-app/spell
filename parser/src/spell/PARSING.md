@@ -1341,16 +1341,19 @@ A kind that says so is saved in a file of its own.
       - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
     - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
     - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../spell-app/src/spaces/AGENTS.md), "Projects".
-  - The files:  its compiled code and its scope pack.
+  - The files:  its compiled code, its scope pack, its declarations and its words, in every language.
 
     ```text
     <Project>.spell.js  .spell.tsx  .spell.py  .elements.spell.js  .scopes.js
+    <Project>.declarations.json5  .en.js  .es.js  .py.en.json5
     ```
 
-  - Committed beside the source:  everything else.
+    - Its declarations and words were committed beside the source until epic `elemental-spell` P4:
+      every compile rewrote them, so test and README runs left changed files in every checkout.
+  - Committed beside the source:  only code others import or edit.
 
     ```text
-    <Project>.declarations.json5  .en.js  .py.en.json5  .lib.ts  .app.py
+    <Project>.lib.ts  .app.py
     ```
 
   - Every reader asks for a file by project and name, as for any file.
@@ -1363,10 +1366,12 @@ A kind that says so is saved in a file of its own.
       - `@spell/examples` and `@spell/library`
       - `spell compile --stale --all @spell/examples @spell/library`
     - spaces' routes:  a request for a built file that isn't there compiles its project first, then serves it
-      - e.g. `/spaces/<project>/<project>.spell.js`, `.scopes.js` ...
+      - e.g. `/spaces/<project>/<project>.spell.js`, `.scopes.js`, `.declarations.json5` ...
       - one compile per project at a time, a request waits at most a minute
     - Both are `ProjectBuild`, in the editor's server ([ProjectBuild.ts](../../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts)),
       running the checkout's own `spell compile` as a child.
+    - The `spell` command:  a project it parses compiles first each import with no `.spell.js` or declarations
+      (`CliSession.compileImports()`).
     - By hand:  `spell compile --all <root>`.
     - Add `--stale` for only what's out of date (`CLI.staleBecause()`).
       Out of date means something is newer than its build, or a built file is missing:
@@ -1425,7 +1430,7 @@ A kind that says so is saved in a file of its own.
     (`SP.SpellWords.of(declarations, writer, lang)`), the declarations naming them all (`languages`).
     A runner reads them as one.
 - Another project can come in WITHOUT its sources, as its declarations (`SP.SpellDeclarations`).
-  - They're in `<Project>.declarations.json5`, committed beside its source (epic `output-targets` P5).
+  - They're in `<Project>.declarations.json5` (epic `output-targets` P5), in its build folder (epic `elemental-spell` P4).
   - Before that they were inline in the compiled JS, and `fromComments()` still reads those.
   - While compiling, `Block.getAST()` puts a MARKER right on each declaring statement's code.
     - It's a `/*! SPELL: DECLARES {...} */` comment.

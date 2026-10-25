@@ -480,17 +480,17 @@ Here's Solitaire's project file, its files in the order they run:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   project["solitaire/<br/>__project.json5 · Card.spell"] --> compile["SpellProject.compile()"]
-  compile --> build["the build folder<br/>.spell.js · .spell.tsx · .spell.py · .scopes.js"]
-  compile --> beside["beside the source<br/>.declarations.json5 · .en.js"]
-  beside -->|read by| importer["a project that imports it"]
+  compile --> build["the build folder<br/>.spell.js · .scopes.js · .declarations.json5 · .en.js"]
+  build -->|read by| importer["a project that imports it"]
+  compile --> beside["beside the source<br/>.lib.ts · .app.py"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef folder fill:#E6EAF5,stroke:#8E96B5,stroke-width:1.5px,color:#1A1C27,rx:4px,ry:4px
   class project folder
 ```
 
-_A compile writes code to a build folder, never committed,
-and what other projects need beside the source, committed with it._
+_A compile writes everything it builds to a build folder, never committed:
+only code that others import or edit stays beside the source._
 
 What a compile writes, for a project `<Project>`:
 - Code, in the build folder (spell-app's `build/`), which mirrors the project's path and is never committed:
@@ -499,11 +499,12 @@ What a compile writes, for a project `<Project>`:
   - for a Python program that draws, its drawing half too, `<Project>.elements.spell.js`
   - the scope pack, `<Project>.scopes.js`:  what the Type Explorer shows, for pages that have no parser;
     written after a clean compile
-- Beside the source, and committed with it:
   - `<Project>.declarations.json5`:  what other projects import, so they needn't parse this one
   - `<Project>.en.js`:  Spell's English for each member, for a runner's Thing Explorer
     (a Spanish project's is `<Project>.es.js`);
     and Python's own copy of those words, `<Project>.py.en.json5`
+  - A project that imports one never compiled compiles it first;  so does the page server, when a page asks for one.
+- Beside the source, and committed with it:
   - `<Project>.lib.ts`, for a library (`ts/lib`)
   - `<Project>.app.py`, a Python program's web app, rewritten only while nobody has edited it
 - Outside every group, the build folder is the project's own folder.

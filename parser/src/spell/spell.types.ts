@@ -73,8 +73,8 @@ export const COMPILED_PY_SUFFIX = ".spell.py"
 
 /**
  * End of a project's declarations file's name, e.g. `Solitaire.declarations.json5`.
- * - The file:  what it offers importers, committed beside its source.
- *   See `SpellProject.declarationsFile`.
+ * - The file:  what it offers importers.  See `SpellProject.declarationsFile`.
+ * - In the project's build folder, as `COMPILED_JS_SUFFIX` (epic `elemental-spell` P4:  committed beside its source before).
  * - Its shape:  `SP.SpellDeclarationsData`.
  * - NEVER one of a project's own files:  the server lists only `.spell`, `.css`, `.js`, `.jsx`
  *   and property editor pages (`EDITOR_PAGE_SUFFIX`).
@@ -123,6 +123,7 @@ export const SCOPES_JS_SUFFIX = ".scopes.js"
  * - See `SpellProject.wordsFile`, `SP.SpellWords`.
  * - NEVER one of a project's own files:
  *   the server leaves any language's out of the manifest (`SP.SpellWords.isWordsFile()`).
+ * - In the project's build folder, as `COMPILED_JS_SUFFIX` (epic `elemental-spell` P4).
  */
 export const WORDS_JS_SUFFIX = ".en.js"
 
