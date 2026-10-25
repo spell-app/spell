@@ -27,6 +27,7 @@ import {
 import { CheckoutPatches } from "./CheckoutPatches"
 import { CheckoutServers } from "./CheckoutServers"
 import { Git } from "./Git"
+import { LeftoverFolders } from "./LeftoverFolders"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
@@ -282,11 +283,20 @@ export class Worktrees {
   /**
    * `git worktree remove [--force] <path>` in main checkout `main`, then its saved-session link, if it's one to
    * `sessions`' (the main checkout whose folder they're saved in);  a line each.  Throws git's refusal.
+   * - git couldn't EMPTY the folder (its window's language servers still writing into it, r22):  not a refusal;
+   *   what's left is deleted, or moved to the epic home's trash (`LeftoverFolders`), and git's record pruned
    */
   static removeOne(path: string, main: string, { force = false, sessions = main } = {}): string[] {
     const removed = Git.run(["worktree", "remove", ...(force ? ["--force"] : []), path], main)
-    if (!removed.ok) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
+    const leftover = !removed.ok && LeftoverFolders.isLeftover(removed.err)
+    if (!removed.ok && !leftover) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
     const lines = [`removed ${path}`]
+    if (leftover) {
+      const cleared = LeftoverFolders.clear(path, { home: CheckoutServers.homeFolder() })
+      Git.run(["worktree", "prune"], main)
+      const said = LeftoverFolders.said(path, cleared)
+      if (said) lines.push(said)
+    }
     if (SessionFolders.unlink(path, sessions).action === "removed") lines.push("  and its session-folder link")
     return lines
   }

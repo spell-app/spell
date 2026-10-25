@@ -19,6 +19,7 @@ import {
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
+  REVIEW_ACCEPT,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -152,7 +153,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    */
   private controls(): JSX.Element {
     const specs = () => BUTTONS_OF[this.buttons ?? "item"]
-    const group = () => specs().filter((spec) => spec.action !== "details")
+    // a waiting plan's Accept plan, in WORDS, apart from the icons:  the page asks for it (Owen, 2026-10-25:  "p37 not
+    // asking me to accept";  a small grey check before)
+    const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
+    const group = () => specs().filter((spec) => spec.action !== "details" && spec !== accept())
     const doNow = () => specs().find((spec) => spec.action === "details")
     return (
       <span
@@ -176,6 +180,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               {pick()}
             </span>
           )}
+        </Show>
+        <Show when={accept()}>
+          {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
         </Show>
         <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
           <For each={group()}>{(spec) => this.button(spec)}</For>
@@ -227,8 +234,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     this.send(THREAD_ANSWER, { act: spec.act })
   }
 
-  /** One review button, as its action stands. */
-  private button(spec: ReviewButtonSpec, extra?: string): JSX.Element {
+  /** One review button, as its action stands;  `words`:  its label shown beside its icon (Accept plan). */
+  private button(spec: ReviewButtonSpec, extra?: string, words?: string): JSX.Element {
     const busy = () => this.review.busyButton() === spec.action
     return (
       <ui-button
@@ -245,7 +252,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         }
         aria-label={`${this.translationForKey(spec.label)} · ${this.stateOf(spec)}`}
         onClick={(event: MouseEvent) => this.press(event, spec)}
-      />
+      >
+        {words}
+      </ui-button>
     )
   }
 

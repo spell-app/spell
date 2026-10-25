@@ -54,7 +54,7 @@
      * an open block's DRAWER (an item, a phase, an Overview part:  I104, I115):  its fill, how far in from its title's
      * edges its sides run, its rounded corners
      */
-    --epic-drawer-fill: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03));
+    --epic-drawer-fill: light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02));
     --epic-drawer-inset: 4px;
     --epic-drawer-radius: 8px;
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));
@@ -230,9 +230,16 @@
   }
   .step-pill ui-label::part(label) {
     border-color: var(--epic-pill-color);
+    background: var(--_epic-pill-fill);
+  }
+  /* both halves one height and one fill, so they read as one pill (Owen, 2026-10-25:  "looks like crap") */
+  .step-pill {
+    --_epic-pill-fill: var(--ui-background, Canvas);
   }
   .step-pill epic-agents {
     --epic-agents-rule: var(--epic-pill-color);
+    --epic-agents-height: var(--epic-control-size);
+    --epic-agents-fill: var(--_epic-pill-fill);
   }
   /* the step label, with the agents right after it:  square on its right */
   .step-pill:has(ui-label + epic-agents:state(running)) ui-label {

@@ -49,10 +49,15 @@ import * as uiForms from "spell-ui/forms"
 import * as uiRoot from "spell-ui/components/ui-root"
 import * as uiCode from "spell-ui/components/ui-code"
 import * as uiMarkdown from "spell-ui/components/ui-markdown"
+import { PackHotSwap } from "spell-ui/hot"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
 import { defineSite } from "spell/server/site"
+
+// a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
+// installed now, before any pack defines its tags
+PackHotSwap.install()
 
 export { UI }
 export { registerPack } from "spell-ui"

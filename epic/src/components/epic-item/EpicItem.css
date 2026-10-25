@@ -22,8 +22,8 @@
     /* the line's text:  rows to scan, a little under the page's prose */
     --_epic-item-line-size: var(--epic-item-line-size, 0.92em);
     --_epic-item-line-height: 1.45;
-    /* where the details start:  under the id chip (the chevron's 18px, the line's 2px padding, a 6px gap) */
-    --_epic-item-indent: var(--epic-item-indent, 26px);
+    /* where the details start:  under the id chip (the line's 14px padding, the chevron's 18px, a 6px gap) */
+    --_epic-item-indent: var(--epic-item-indent, 38px);
     --_epic-item-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
     /* an open item's drawer (I104):  in from the line's edges, its bottom corners */
     --_epic-drawer-inset: var(--epic-drawer-inset, 4px);
@@ -66,7 +66,11 @@
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 0 6px;
-    padding: 5px 6px 5px 2px;
+    /*
+     * its chevron, id chip and title in the same columns as a phase's chevron, status icon and title (Owen,
+     * 2026-10-25:  "icon / Q# and text should line up horizontally between the two sections";  2px in, before)
+     */
+    padding: 5px 6px 5px 14px;
     border-start-start-radius: var(--_epic-item-top-radius);
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
@@ -107,7 +111,7 @@
     border-top: none;
     border-end-start-radius: var(--_epic-item-bottom-radius);
     border-end-end-radius: var(--_epic-item-bottom-radius);
-    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
+    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02)));
   }
   /*
    * the note box, last:  the drawer's bottom, side to side, its rounded corners the drawer's;  one thin rule above it,
@@ -285,9 +289,11 @@
   /*
    * failed in a test run (`failed`, epic `epic-engine` P4):  red, needs Owen;  never wraps
    * handled in a phase (`handled`, P31):  grey, quiet
+   * - by its part, not its class:  the item's own box carries `handled` too (its state), and a `.handled` rule made
+   *   its details' every line `nowrap`, running out of their box (Owen, 2026-10-25:  "text broke out of container")
    */
   .failed,
-  .handled {
+  [part~="handled"] {
     flex: none;
     white-space: nowrap;
   }

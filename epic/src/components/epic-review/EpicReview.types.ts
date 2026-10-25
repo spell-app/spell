@@ -329,6 +329,8 @@ export const DO_IT_ID = /^[jc]\d+$/i
 export const REVIEW_CONTROLS = "review-controls"
 export const REVIEW_GROUP = "review-group"
 export const REVIEW_DO_NOW = "review-do-now"
+/** A waiting plan's Accept plan:  a worded pill of its own (epic `epic-engine` I118). */
+export const REVIEW_ACCEPT = "review-accept"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"

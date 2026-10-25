@@ -19,10 +19,29 @@
    * where nothing scrolls under
    */
   :host(:state(open):not([kind="overview-part"])) ui-section::part(title) {
-    /* rounder, and a darker line than the bars' (I105;  Owen, 2026-10-25), still 1px */
+    /* rounder, and a darker line than the bars' (I105;  Owen, 2026-10-25), still 1px;  a faint one over its top too
+       ("needs a slight top shadow when expanded") */
     border-end-start-radius: var(--epic-section-radius, 14px);
     border-end-end-radius: var(--epic-section-radius, 14px);
-    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.18), rgb(0 0 0 / 0.65));
+    box-shadow:
+      0 1px 0 light-dark(rgb(40 30 90 / 0.18), rgb(0 0 0 / 0.65)),
+      0 -1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+  }
+  /*
+   * a top-level section's title bar in the page's COLUMN, not edge to edge (Owen, 2026-10-25:  "Phases header no
+   * longer needs to be full width"):  out past the column by the cards' inset, its words where they were;  open,
+   * rounded all round while it's in place
+   */
+  :host(:not([kind="overview-part"])) ui-section::part(title) {
+    /* never past the page's edge, where its inset is narrower than a card's (a phone;  `--epic-inset` 8px):  the words
+       still start at the inset, margin plus padding */
+    margin-inline: max(0px, calc(var(--epic-inset, 16px) - var(--epic-card-inset, 16px)));
+    padding-inline: min(var(--epic-inset, 16px), var(--epic-card-inset, 16px))
+      calc(min(var(--epic-inset, 16px), var(--epic-card-inset, 16px)) + var(--epic-controls-in, 26px));
+  }
+  :host(:state(open):not([kind="overview-part"])) ui-section:not(:state(stuck))::part(title) {
+    border-start-start-radius: var(--epic-section-radius, 14px);
+    border-start-end-radius: var(--epic-section-radius, 14px);
   }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
@@ -39,6 +58,20 @@
     --_epic-fold-gap: 14px;
     /* inside its section's inset, a card as phases are (I115):  open, a drawer (`EpicFold.css`) */
     --_epic-fold-bleed: 0px;
+    /* its own inset, not the page column's again (as `<epic-phase>`'s) */
+    --epic-inset: var(--epic-card-inset, 16px);
+  }
+  /*
+   * an Overview part's title row:  square, but at a run's ends, which the Overview rounds (`EpicOverview.runEnds`;
+   * Owen, 2026-10-25:  "1.3 top and 1.4 bottom should be rounded");  square while stuck, flush under the titles above
+   */
+  :host([kind="overview-part"]) ui-section:not(:state(stuck))::part(title) {
+    border-start-start-radius: var(--epic-part-top-radius, 0px);
+    border-start-end-radius: var(--epic-part-top-radius, 0px);
+  }
+  :host([kind="overview-part"]:not(:state(open))) ui-section:not(:state(stuck))::part(title) {
+    border-end-start-radius: var(--epic-part-bottom-radius, 0px);
+    border-end-end-radius: var(--epic-part-bottom-radius, 0px);
   }
   :host([kind="overview-part"]) ui-section {
     --ui-section-title-padding: 8px var(--epic-inset, 16px);
@@ -105,8 +138,8 @@
   }
 
   /*
-   * ## The title's end:  the count badge, then its tools (toggles, the state filter) ending in collapse-all,
-   * then the chevron:  collapse-all beside the chevron (Owen, 2026-10-10)
+   * ## The title's end:  the count badge, then its tools (toggles, the state filter) ending in collapse-all;
+   * the chevron at the row's START, before the icon (Owen, 2026-10-25:  "put it on the left")
    */
   ui-section::part(badge) {
     order: 1;
@@ -115,11 +148,11 @@
     order: 2;
   }
   ui-section::part(fold-icon) {
-    order: 3;
+    order: -1;
   }
   /*
    * Narrow (VS Code's side bar, a phone):  a section with tools (Phases, the item sections)
-   * puts its title on a row of its own, and the tools, badge and chevron together on the next, at the right.
+   * puts its title (and its chevron) on a row of its own, and the tools and badge together on the next, at the right.
    * - why:  squeezed onto one row, the title broke inside its words ("Questio / ns"),
    *   and wrapping item by item split the badge from the tools
    */
@@ -131,7 +164,7 @@
     :host(:state(tools)) ui-section::part(heading) {
       flex-basis: 100%;
     }
-    /* the badge leads the wrapped row (badge, tools, chevron) at the right:  a section with tools has a badge */
+    /* the badge leads the wrapped row (badge, tools) at the right:  a section with tools has a badge */
     ui-section::part(badge) {
       margin-inline-start: auto;
     }
@@ -140,8 +173,7 @@
     }
     /* on a row of their own, under the title:  centred on that row, not on the title's line */
     :host(:state(tools)) ui-section::part(badge),
-    :host(:state(tools)) ui-section::part(actions),
-    :host(:state(tools)) ui-section::part(fold-icon) {
+    :host(:state(tools)) ui-section::part(actions) {
       align-self: center;
       translate: none;
     }

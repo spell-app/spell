@@ -474,6 +474,8 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
   backdrop-filter: var(--ui-bar-filter, none);
 }
 ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
+  /* its track the panel's glass, as the tabs' above it:  only the selected item its thumb (Owen, 2026-10-25) */
+  --ui-menu-segmented-background: transparent;
   position: relative;
   box-sizing: border-box;
   /* room for its two concave curves inside the top band, however long its row:  it scrolls instead */
@@ -483,6 +485,9 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
   border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
   background: var(--_panel-glass);
   backdrop-filter: var(--ui-bar-filter, none);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::part(menu) {
+  --ui-menu-segmented-background: transparent;
 }
 /* the concave curves where the lower band meets the top band:  a band's width of glass outside a quarter circle */
 ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before,

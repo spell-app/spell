@@ -5,7 +5,7 @@ import { E } from "spell-ui/core"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
-import { STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
+import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
@@ -86,7 +86,9 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
     for (const link of this.domElement.querySelectorAll(':scope > a[href^="#"]')) {
       const item = document.getElementById(decodeURIComponent(link.getAttribute("href")!.slice(1)))
       if (!item) continue
-      const state = item.getAttribute("state") ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
+      const written = item.getAttribute("state") ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
+      // a week-old decided or done item draws grey (`ItemAge`)
+      const state = ItemAge.shown(written as ItemState, item.getAttribute("changed"))
       if (link.getAttribute(LINK_STATE) !== state) link.setAttribute(LINK_STATE, state)
     }
   }
