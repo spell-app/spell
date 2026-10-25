@@ -1866,7 +1866,8 @@
             },
             {
               "name": "--ui-button-or-gap",
-              "default": "0.3em"
+              "default": "0px",
+              "description": "the gap `<ui-or>` leaves between its buttons: none, its badge overlapping both"
             },
             {
               "name": "--ui-button-or-size",
@@ -1879,6 +1880,16 @@
             {
               "name": "--ui-button-or-color",
               "default": "var(--ui-text-light)"
+            },
+            {
+              "name": "--ui-button-group-padding",
+              "default": "var(--ui-space-3xs)",
+              "description": "a group's inset: how far its buttons sit in from its edge"
+            },
+            {
+              "name": "--ui-button-group-item-radius",
+              "default": "the group's corner, less its border and inset",
+              "description": "the corners where a group's buttons meet; by default its inner radius, so every tile is rounded all round"
             }
           ]
         },

@@ -172,6 +172,56 @@ describe("<ui-button> padding and text", () => {
     const { control } = await narrow("ellipsis wrapped")
     expect(getComputedStyle(control).whiteSpace).toBe("nowrap")
   })
+
+  it("a lone icon-only button is SQUARE, the icon centred;  one in a group keeps the group's padding", async () => {
+    const { control } = await button(`<ui-button icon="cloud" aria-label="Cloud"></ui-button>`)
+    const bounds = control.getBoundingClientRect()
+    expect(bounds.width).toBeCloseTo(bounds.height, 1)
+    const icon = control.querySelector(".icon")!.getBoundingClientRect()
+    expect(icon.left + icon.width / 2).toBeCloseTo(bounds.left + bounds.width / 2, 0)
+    const { control: small } = await button(`<ui-button size="small" icon="cloud" aria-label="Cloud"></ui-button>`)
+    const smallBounds = small.getBoundingClientRect()
+    expect(smallBounds.width).toBeCloseTo(smallBounds.height, 1)
+    const group = await ElementFixture.render(
+      `<ui-buttons icon><ui-button icon="bold" aria-label="Bold"></ui-button></ui-buttons>`
+    )
+    const grouped = group.querySelector("ui-button")!.shadowRoot!.querySelector("[part~=button]")!
+    expect(parseFloat(getComputedStyle(grouped).paddingLeft)).toBeGreaterThan(0)
+  })
+
+  it("`attach` top / bottom:  as wide as what it's joined to;  its corners the theme's, never a pill's", async () => {
+    const box = await ElementFixture.render(
+      `<div style="width: 400px; --ui-button-radius: 9999px; --ui-radius: 6px">` +
+        `<ui-button attach="top">Top</ui-button></div>`
+    )
+    const control = box.querySelector("ui-button")!.shadowRoot!.querySelector<HTMLElement>("[part~=button]")!
+    expect(control.getBoundingClientRect().width).toBeCloseTo(400, 0)
+    const style = getComputedStyle(control)
+    expect([style.borderTopLeftRadius, style.borderBottomLeftRadius]).toEqual(["6px", "0px"])
+  })
+})
+
+////////////////
+// ## Tooltip
+////////////////
+
+describe("<ui-button> tooltip", () => {
+  it("an icon-only button shows its `aria-label` as the browser's tooltip, and follows it", async () => {
+    const { host, control } = await button(`<ui-button icon="cloud" aria-label="Cloud"></ui-button>`)
+    expect(control.getAttribute("title")).toBe("Cloud")
+    host.setAttribute("aria-label", "Upload")
+    await ElementFixture.settle()
+    expect(control.getAttribute("title")).toBe("Upload")
+  })
+
+  it("leaves the title alone with text of its own, or a `title` of the page's", async () => {
+    const { control: withText } = await button(`<ui-button icon="cloud" aria-label="Cloud">Upload</ui-button>`)
+    expect(withText.hasAttribute("title")).toBe(false)
+    const { control: titled } = await button(`<ui-button icon="cloud" aria-label="Cloud" title="Send"></ui-button>`)
+    expect(titled.hasAttribute("title")).toBe(false)
+    const { control: link } = await button(`<ui-button href="#x" icon="cloud" aria-label="Cloud"></ui-button>`)
+    expect(link.getAttribute("title")).toBe("Cloud")
+  })
 })
 
 ////////////////
@@ -426,6 +476,47 @@ describe("<ui-buttons> / <ui-or>", () => {
   })
 })
 
+describe("<ui-buttons> track", () => {
+  it("`<ui-or>` leaves no gap:  the buttons beside it meet under its badge", async () => {
+    const group = await ElementFixture.render(
+      `<ui-buttons><ui-button>Cancel</ui-button><ui-or></ui-or><ui-button>Save</ui-button></ui-buttons>`
+    )
+    const [cancel, save] = [...group.querySelectorAll("ui-button")].map((it) => it.getBoundingClientRect())
+    expect(save!.left - cancel!.right).toBeCloseTo(0, 1)
+    const badge = group.querySelector("ui-or")!.shadowRoot!.querySelector(".or")!
+    expect(getComputedStyle(badge, "::before").width).not.toBe("0px")
+  })
+
+  it("`wrapping`:  a track behind each row, round at both ends, with a gap between rows", async () => {
+    const words = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"]
+    const box = await ElementFixture.render(
+      `<div style="width: 300px"><ui-buttons wrapping>` +
+        words.map((word) => `<ui-button>${word}</ui-button>`).join("") +
+        `</ui-buttons></div>`
+    )
+    const host = box.querySelector<DOMElement>("ui-buttons")!
+    const track = host.shadowRoot!.firstElementChild as HTMLElement
+    await expect.poll(() => track.querySelectorAll(".row").length).toBeGreaterThan(1)
+    const rows = [...track.querySelectorAll<HTMLElement>(".row")].map((row) => row.getBoundingClientRect())
+    for (const [above, below] of rows.slice(0, -1).map((row, at) => [row, rows[at + 1]!] as const)) {
+      expect(below.top - above.bottom).toBeGreaterThan(0)
+    }
+    // every button sits inside a row's track
+    for (const button of host.querySelectorAll("ui-button")) {
+      const bounds = button.getBoundingClientRect()
+      expect(rows.some((row) => bounds.top >= row.top && bounds.bottom <= row.bottom)).toBe(true)
+    }
+    // the rows draw the track now, not the group's own box
+    expect(getComputedStyle(track).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(getComputedStyle(track.querySelector(".row")!).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+  })
+
+  it("a group that doesn't wrap draws no rows", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-buttons><ui-button>A</ui-button></ui-buttons>`)
+    expect(host.shadowRoot!.querySelectorAll(".row")).toHaveLength(0)
+  })
+})
+
 /** Width of the box `group()` renders a button group in. */
 const GROUP_WIDTH = 800
 
@@ -514,14 +605,26 @@ describe("<ui-button> tokens from outside", () => {
     expect(getComputedStyle(compact).paddingTop).toBe("15px")
   })
 
-  it("reaches the members of a group, set on the group", async () => {
+  it("reaches the members of a group, set on the group:  their corners are the track's, inside its inset", async () => {
     const group = await ElementFixture.render<DOMElement>(
-      `<ui-buttons style="--ui-button-radius: 20px"><ui-button>A</ui-button><ui-button>B</ui-button></ui-buttons>`
+      `<ui-buttons style="--ui-button-radius: 20px; --ui-button-group-padding: 3px">` +
+        `<ui-button>A</ui-button><ui-button>B</ui-button></ui-buttons>`
     )
     const [first, last] = [...group.querySelectorAll("ui-button")]
-    expect(radius(first!)).toBe("20px")
-    expect(getComputedStyle(last!.shadowRoot!.querySelector("[part~=button]")!).borderTopRightRadius).toBe("20px")
+    expect(getComputedStyle(group.shadowRoot!.firstElementChild!).borderTopLeftRadius).toBe("20px")
+    expect(radius(first!)).toBe("17px")
+    expect(getComputedStyle(last!.shadowRoot!.querySelector("[part~=button]")!).borderTopRightRadius).toBe("17px")
+  })
+
+  it("`--ui-button-group-item-radius` rounds only the joined corners of a group's buttons", async () => {
+    const group = await ElementFixture.render<DOMElement>(
+      `<ui-buttons style="--ui-button-radius: 20px; --ui-button-group-padding: 3px; --ui-button-group-item-radius: 0px">` +
+        `<ui-button>A</ui-button><ui-button>B</ui-button></ui-buttons>`
+    )
+    const [first, last] = [...group.querySelectorAll("ui-button")]
+    expect(radius(first!)).toBe("17px")
     expect(getComputedStyle(first!.shadowRoot!.querySelector("[part~=button]")!).borderTopRightRadius).toBe("0px")
+    expect(getComputedStyle(last!.shadowRoot!.querySelector("[part~=button]")!).borderTopLeftRadius).toBe("0px")
   })
 })
 

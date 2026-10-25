@@ -20,6 +20,7 @@
  *       `labeled icon`
  *     - `active` / `disabled` / `loading` / `toggle` are keyOnly attributes, so `ClassBuilder` emits them
  *   - `<ui-buttons>`:  `<div class="ui ... buttons" role="group" part="group"><slot></slot></div>`
+ *     - `wrapping`:  a `<span class="row">` after the slot for each row, the row's track (`UIButtons.rows`)
  *   - `<ui-or>`:  `<span class="or" part="or" data-text="or">` -- `data-text` from the vocabulary text `or`
  * - The `:state()`s the components must set (the DOM element's own layout can't come from inside):
  *   - `:state(fluid)` -- the DOM element is block-level:  `fluid`, bare / `top` / `bottom` `attached`,
@@ -43,14 +44,20 @@
  *     - values derived from a public token (`compact`'s ratio, tertiary's margin) read its alias,
  *       so the page's base value flows through
  *   - colours (`--ui-color*`) and sizes (`--ui-scale`) inherit the same way
- *   - `.ui.buttons` sets position tokens on each child (light DOM `> *`, shadow `::slotted(*)`):
- *     `--_ui-buttons-{ss,se,es,ee}` (corner factors 0 / 1), `--_ui-buttons-flex`, `--_ui-buttons-margin`,
- *     `--_ui-buttons-divider` (a box-shadow drawing the separator line);  `UIInput.css` sets the corner ones too
+ *   - `.ui.buttons` is a TRACK (the buttons' resting fill, set in by `--ui-button-group-padding`;  "Groups" below),
+ *     and sets position tokens on each child (light DOM `> *`, shadow `::slotted(*)`):
+ *     - `--_ui-buttons-{ss,se,es,ee}`:  corner factors, 1 an outer corner, 0 a joined one;
+ *       `UIInput.css` sets them too
+ *     - `--_buttons-outer-radius` / `--_buttons-joint-radius`:  what an outer / a joined corner is, in a track
+ *     - `--_buttons-background` (see-through on the track), `--_buttons-trim` (padding given up to the inset)
+ *     - `--_ui-buttons-flex`, `--_ui-buttons-margin`
+ *     - `--_ui-buttons-divider`:  a box-shadow drawing a class-grammar child's separator line;
+ *       a `<ui-button>`'s is its DOM element's start border instead
  *   - NEVER set `--_button-*` or `--_ui-*` from outside;  theme with `--ui-button-*`
  * - NOTE: left out, on purpose:
  *   - social buttons (`facebook`, `twitter` ...):  colour a button with `color` / `--ui-color` instead
  *   - Fomantic's `wrapped` groups (a corner tweak for multi-row basic groups) and the stacked-border tricks of
- *     basic / inverted groups (overlapping negative margins):  groups draw one border plus dividers instead
+ *     basic / inverted groups (overlapping negative margins):  a group's track draws one border, plus dividers
  *     - `<ui-button wrapped>` is ours:  a label that may wrap, where a button's text stays on one line by default
  *   - pointing / tag / corner shapes of the `labeled` button's label -- they belong to `label.less`
  *   - a child's OWN colour inside a basic / inverted / tertiary GROUP:  the group resolves those looks where
@@ -165,7 +172,8 @@
     --_ui-button-loader-width: var(--ui-button-loader-width, 0.2em);
     --_ui-button-loader-speed: var(--ui-button-loader-speed, 0.6s);
     /* ## `<ui-or>` */
-    --_ui-button-or-gap: var(--ui-button-or-gap, 0.3em);
+    /* the gap `<ui-or>` leaves between its buttons:  none, its badge overlapping both */
+    --_ui-button-or-gap: var(--ui-button-or-gap, 0px);
     --_ui-button-or-size: var(--ui-button-or-size, calc(1em + var(--_ui-button-padding-block)));
     --_ui-button-or-background: var(--ui-button-or-background, var(--ui-surface));
     --_ui-button-or-color: var(--ui-button-or-color, var(--ui-text-light));
@@ -180,7 +188,11 @@
     min-width: var(--_button-min-width, auto);
     min-height: 1em;
     margin: var(--_ui-buttons-margin, var(--_button-margin, 0 var(--_ui-button-margin-inline) 0 0));
-    padding-block: calc(var(--_button-pad-block, var(--_ui-button-padding-block)) * var(--_button-density, 1));
+    /* less the group's inset (`--_buttons-trim`), so a group stands as tall as a lone button */
+    padding-block: max(
+      0px,
+      var(--_button-pad-block, var(--_ui-button-padding-block)) * var(--_button-density, 1) - var(--_buttons-trim, 0px)
+    );
     padding-inline-start: calc(
       var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1) +
         var(--_button-pad-start, 0em)
@@ -191,11 +203,28 @@
     );
     overflow: var(--_button-overflow, visible);
     border: none;
-    border-start-start-radius: calc(var(--_button-radius, var(--_ui-button-radius)) * var(--_ui-buttons-ss, 1));
-    border-start-end-radius: calc(var(--_button-radius, var(--_ui-button-radius)) * var(--_ui-buttons-se, 1));
-    border-end-start-radius: calc(var(--_button-radius, var(--_ui-button-radius)) * var(--_ui-buttons-es, 1));
-    border-end-end-radius: calc(var(--_button-radius, var(--_ui-button-radius)) * var(--_ui-buttons-ee, 1));
-    background-color: var(--_button-bg, var(--ui-color, var(--_ui-button-background)));
+    /*
+     * Each corner:  an OUTER one (factor 1) takes the button's radius, or in a group its track's inner radius;
+     * a JOINED one (factor 0) takes the group's item radius, else none (`--_ui-buttons-ss` ... are 0 or 1).
+     */
+    border-start-start-radius: calc(
+      var(--_buttons-outer-radius, var(--_button-radius, var(--_ui-button-radius))) * var(--_ui-buttons-ss, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-ss, 1))
+    );
+    border-start-end-radius: calc(
+      var(--_buttons-outer-radius, var(--_button-radius, var(--_ui-button-radius))) * var(--_ui-buttons-se, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-se, 1))
+    );
+    border-end-start-radius: calc(
+      var(--_buttons-outer-radius, var(--_button-radius, var(--_ui-button-radius))) * var(--_ui-buttons-es, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-es, 1))
+    );
+    border-end-end-radius: calc(
+      var(--_buttons-outer-radius, var(--_button-radius, var(--_ui-button-radius))) * var(--_ui-buttons-ee, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-ee, 1))
+    );
+    /* in a group's track, a plain button is see-through at rest (`--_buttons-background`):  the track is its fill */
+    background-color: var(--_button-bg, var(--ui-color, var(--_buttons-background, var(--_ui-button-background))));
     background-image: none;
     color: var(--_button-fg, var(--ui-color-on, var(--_ui-button-color)));
     box-shadow: var(--_button-edge, 0 0 #0000), var(--_ui-buttons-divider, 0 0 #0000);
@@ -293,6 +322,22 @@
     --_button-icon-margin: 0;
     --_button-icon-opacity: 0.9;
     --_button-icon-align: top;
+  }
+  /*
+   * A lone icon-only button is SQUARE:  as wide as it is tall, the icon centred
+   * (so a theme with pill-shaped buttons draws it as a circle).
+   * - In a group (`--_buttons-icon-pad-inline` set), it keeps the group's square padding instead.
+   * - Its height:  one line of text plus its padding, top and bottom.
+   */
+  .ui.icon.button:not(.labeled) {
+    --_button-pad-inline: var(--_buttons-icon-pad-inline, 0px);
+    --_button-min-width: var(
+      --_buttons-icon-min-width,
+      calc(
+        var(--_ui-button-line-height) * 1em + 2 * var(--_button-pad-block, var(--_ui-button-padding-block)) *
+          var(--_button-density, 1)
+      )
+    );
   }
 
   /* Labeled icon:  the icon sits in its own tinted block on the start (or `right labeled`:  end) side. */
@@ -404,16 +449,48 @@
               Groups
   *******************************/
 
+  /*
+   * A group is a TRACK, as a segmented control is (`UIMenu.css`, "Segmented"):
+   * it draws the buttons' resting fill (and a basic group's border), set in a little all round,
+   * and its buttons are see-through on it until hovered, pressed or `selected`.
+   * - So the fill a hover or a press lights is a rounded tile inside the track, never a square one.
+   * - Its corners:  the track's, inside its border and inset (`--_buttons-inner-radius`), as the segmented options'.
+   * - Tokens, as the segmented control's:
+   *   - `--ui-button-group-padding`:  the inset (`0.125em`)
+   *   - `--ui-button-group-item-radius`:  the corners where its buttons meet;
+   *     by default the inner radius, so every tile is rounded all round
+   * - Its buttons lose the inset from their own padding (`--_buttons-trim`), so it stands as tall as a lone button.
+   * - Separate buttons (`circular`, `spacing="md"`) and `tertiary` ones (no fill) have no track.
+   */
   .ui.buttons {
+    /* a group's inset:  how far its buttons sit in from its edge */
+    --_ui-button-group-padding: var(--ui-button-group-padding, var(--ui-space-3xs));
+    /* the track's corner;  vertical and attached groups take the theme's, never a pill */
+    --_buttons-radius: var(--_button-radius, var(--_ui-button-radius));
+    /* a basic or inverted group's border */
+    --_buttons-edge-width: 0px;
+    --_buttons-inner-radius: max(
+      0px,
+      var(--_buttons-radius) - var(--_buttons-edge-width) - var(--_ui-button-group-padding)
+    );
+    /* the corners where a group's buttons meet;  by default its inner radius, so every tile is rounded all round */
+    --_ui-button-group-item-radius: var(--ui-button-group-item-radius, var(--_buttons-inner-radius));
     box-sizing: border-box;
     display: inline-flex;
     flex-direction: row;
     margin: 0 var(--_ui-button-margin-inline) 0 0;
+    padding: var(--_ui-button-group-padding);
+    border-radius: var(--_buttons-radius);
+    background-color: var(--_button-bg, var(--ui-color, var(--_ui-button-background)));
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     vertical-align: baseline;
   }
 
-  /* Every child:  square corners, no gap.  Light-DOM children are the buttons;  slotted ones are `<ui-button>`s. */
+  /*
+   * Every child:  no gap, see-through on the track, its corners the track's.
+   * Light-DOM children are the buttons;  slotted ones are `<ui-button>`s.
+   * - Declared on the child, so each value is worked out from the GROUP's tokens, not the button's own.
+   */
   .ui.buttons > *,
   .ui.buttons > ::slotted(*) {
     --_ui-buttons-margin: 0;
@@ -421,6 +498,12 @@
     --_ui-buttons-se: 0;
     --_ui-buttons-es: 0;
     --_ui-buttons-ee: 0;
+    --_buttons-outer-radius: var(--_buttons-inner-radius);
+    --_buttons-joint-radius: var(--_ui-button-group-item-radius);
+    --_buttons-background: transparent;
+    --_buttons-trim: calc(var(--_ui-button-group-padding) + var(--_buttons-edge-width));
+    --_buttons-icon-pad-inline: var(--_ui-button-padding-block);
+    --_buttons-icon-min-width: auto;
   }
   /* Buttons (not `or`s) share the free space. */
   .ui.buttons > :not(.or),
@@ -446,7 +529,8 @@
     flex: none;
     box-sizing: border-box;
     width: var(--_ui-button-or-gap);
-    height: calc(1em + 2 * var(--_ui-button-padding-block));
+    /* as tall as the buttons beside it, which lose the track's inset (`--_buttons-trim`) */
+    height: calc(1em + 2 * max(0px, var(--_ui-button-padding-block) - var(--_buttons-trim, 0px)));
     z-index: 3;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -614,43 +698,57 @@
     margin-right: 0;
   }
 
-  /* Attached:  a single button joined to the edge of a segment (or another attached element). */
+  /*
+   * Attached:  a single button joined to the edge of a segment (or another attached element).
+   * - `top`, `bottom` and both:  as wide as what it's joined to, as Fomantic's.
+   * - Its free corners take the theme's corner (`--ui-radius`), never a pill's:  they meet a segment's square edge.
+   */
   .ui.attached.button {
     --_button-edge: 0 0 0 var(--ui-border-width) var(--ui-border-color);
+    --_button-attached-radius: min(var(--_ui-button-radius), var(--ui-radius));
     display: block;
+    width: 100%;
     margin: 0;
     border-radius: 0;
   }
   .ui.top.attached.button {
-    border-start-start-radius: var(--_ui-button-radius);
-    border-start-end-radius: var(--_ui-button-radius);
+    border-start-start-radius: var(--_button-attached-radius);
+    border-start-end-radius: var(--_button-attached-radius);
   }
   .ui.bottom.attached.button {
-    border-end-start-radius: var(--_ui-button-radius);
-    border-end-end-radius: var(--_ui-button-radius);
+    border-end-start-radius: var(--_button-attached-radius);
+    border-end-end-radius: var(--_button-attached-radius);
   }
   .ui.left.attached.button {
     display: inline-block;
+    width: auto;
     padding-inline-end: var(--_ui-button-attached-padding-inline);
-    border-start-start-radius: var(--_ui-button-radius);
-    border-end-start-radius: var(--_ui-button-radius);
+    border-start-start-radius: var(--_button-attached-radius);
+    border-end-start-radius: var(--_button-attached-radius);
     text-align: end;
   }
   .ui.right.attached.button {
     display: inline-block;
+    width: auto;
     padding-inline-start: var(--_ui-button-attached-padding-inline);
-    border-start-end-radius: var(--_ui-button-radius);
-    border-end-end-radius: var(--_ui-button-radius);
+    border-start-end-radius: var(--_button-attached-radius);
+    border-end-end-radius: var(--_button-attached-radius);
     text-align: start;
   }
 
-  /* Vertical group */
+  /*
+   * Vertical group:  the track's corners are the theme's (`--ui-radius`), never a pill's:
+   * a tall capsule reads as one long button.
+   * - Its buttons keep their full padding:  only a row of buttons must match a lone button's height.
+   */
   .ui.vertical.buttons {
+    --_buttons-radius: min(var(--_button-radius, var(--_ui-button-radius)), var(--ui-radius));
     display: inline-flex;
     flex-direction: column;
   }
   .ui.vertical.buttons > *,
   .ui.vertical.buttons > ::slotted(*) {
+    --_buttons-trim: 0px;
     --_ui-buttons-ss: 0;
     --_ui-buttons-se: 0;
     --_ui-buttons-es: 0;
@@ -698,39 +796,72 @@
     flex: 1 1 0%;
   }
 
-  /* Basic group:  one outer border, hairline dividers between children. */
-  .ui.basic.buttons {
+  /*
+   * Basic group:  one outer border on the track, hairline dividers between children.
+   * - A `<ui-button>`'s divider is its DOM element's start border:  a straight line beside its rounded tile,
+   *   where an inset shadow on the tile would bend round its corners.
+   */
+  .ui.basic.buttons,
+  .ui.basic.buttons > .row {
+    --_buttons-edge-width: var(--_ui-button-basic-border-width);
     border: var(--_ui-button-basic-border-width) solid var(--ui-color-border, var(--ui-border-color));
-    border-radius: var(--_ui-button-radius);
   }
-  .ui.basic.buttons > :not(:first-child),
-  .ui.basic.buttons > ::slotted(:not(:first-child)) {
+  .ui.basic.buttons > :not(:first-child, .row) {
     --_ui-buttons-divider: inset var(--_ui-button-basic-border-width) 0 0 0
       var(--ui-color-border, var(--ui-border-color));
   }
-  .ui.basic.vertical.buttons > :not(:first-child),
-  .ui.basic.vertical.buttons > ::slotted(:not(:first-child)) {
+  .ui.basic.buttons > ::slotted(:not(:first-child)) {
+    border-inline-start: var(--_ui-button-basic-border-width) solid var(--ui-color-border, var(--ui-border-color));
+  }
+  .ui.basic.vertical.buttons > :not(:first-child, .row) {
     --_ui-buttons-divider: inset 0 var(--_ui-button-basic-border-width) 0 0
       var(--ui-color-border, var(--ui-border-color));
   }
-
-  /* Inverted group:  neighbouring outlines overlap instead of doubling. */
-  .ui.inverted.buttons:not(.basic) > :not(:first-child),
-  .ui.inverted.buttons:not(.basic) > ::slotted(:not(:first-child)) {
-    --_ui-buttons-margin: 0 0 0 calc(var(--_ui-button-inverted-border-width) * -1);
-  }
-  .ui.inverted.vertical.buttons:not(.basic) > :not(:first-child),
-  .ui.inverted.vertical.buttons:not(.basic) > ::slotted(:not(:first-child)) {
-    --_ui-buttons-margin: calc(var(--_ui-button-inverted-border-width) * -1) 0 0 0;
+  .ui.basic.vertical.buttons > ::slotted(:not(:first-child)) {
+    border-inline-start: none;
+    border-block-start: var(--_ui-button-basic-border-width) solid var(--ui-color-border, var(--ui-border-color));
   }
 
-  /* Circular / spaced groups:  separate round buttons. */
-  .ui.circular.buttons > *,
-  .ui.circular.buttons > ::slotted(*) {
+  /*
+   * Inverted group:  ONE outline, on the track, in the `onDark` colour;  its buttons draw none of their own.
+   * A basic inverted one keeps its buttons' outline on hover.
+   */
+  .ui.inverted.buttons:not(.basic),
+  .ui.inverted.buttons:not(.basic) > .row {
+    --_buttons-edge-width: var(--_ui-button-inverted-border-width);
+    border: var(--_ui-button-inverted-border-width) solid var(--_button-inverted);
+  }
+  .ui.basic.inverted.buttons,
+  .ui.basic.inverted.buttons > .row {
+    border-color: oklch(from var(--ui-ink-on-dark) l c h / 0.5);
+  }
+  .ui.inverted.buttons > *,
+  .ui.inverted.buttons > ::slotted(*) {
+    --_button-edge: initial;
+  }
+
+  /* Tertiary group:  text only, so no track to set its buttons in from. */
+  .ui.tertiary.buttons {
+    --_ui-button-group-padding: 0px;
+  }
+
+  /* Circular / spaced groups:  separate round buttons, each with its own fill and corners;  no track. */
+  .ui:is(.circular, .spaced).buttons {
+    --_ui-button-group-padding: 0px;
+    background-color: transparent;
+  }
+  .ui:is(.circular, .spaced).buttons > *,
+  .ui:is(.circular, .spaced).buttons > ::slotted(*) {
     --_ui-buttons-ss: 1;
     --_ui-buttons-se: 1;
     --_ui-buttons-es: 1;
     --_ui-buttons-ee: 1;
+    --_buttons-outer-radius: initial;
+    --_buttons-background: initial;
+    --_buttons-trim: 0px;
+  }
+  .ui.circular.buttons > *,
+  .ui.circular.buttons > ::slotted(*) {
     --_ui-buttons-margin: 0 var(--_ui-button-margin-inline) 0 0;
   }
   .ui.circular.vertical.buttons > *,
@@ -739,16 +870,41 @@
   }
   .ui.spaced.buttons > *,
   .ui.spaced.buttons > ::slotted(*) {
-    --_ui-buttons-ss: 1;
-    --_ui-buttons-se: 1;
-    --_ui-buttons-es: 1;
-    --_ui-buttons-ee: 1;
     --_ui-buttons-margin: 0 var(--_ui-button-spaced-margin) var(--_ui-button-spaced-margin) 0;
   }
 
-  /* Wrapping:  children wrap onto more rows. */
+  /*
+   * Wrapping:  children wrap onto more rows, each row a track of its own, with a gap between rows.
+   * - `<ui-buttons>` measures its rows and draws a `.row` box behind each (`UIButtons.rows`);
+   *   once it has, the group's own box drops its fill and border.
+   * - Without its script (a static render), the whole group is one track.
+   */
   .ui.wrapping.buttons {
     flex-wrap: wrap;
+  }
+  .ui.wrapping.buttons:not(.circular, .spaced) {
+    position: relative;
+    isolation: isolate;
+    row-gap: calc(2 * (var(--_ui-button-group-padding) + var(--_buttons-edge-width)) + var(--ui-space-2xs));
+  }
+  /* a basic one draws no dividers:  CSS can't tell which button starts a row, and a row's own border is its start */
+  .ui.basic.wrapping.buttons > ::slotted(*) {
+    border-inline-start: none;
+  }
+  .ui.wrapping.buttons:not(.circular, .spaced):has(> .row) {
+    border-color: transparent;
+    background-color: transparent;
+  }
+  .ui.buttons > .row {
+    position: absolute;
+    z-index: -1;
+    box-sizing: border-box;
+    border-radius: var(--_buttons-radius);
+    background-color: var(--_button-bg, var(--ui-color, var(--_ui-button-background)));
+    pointer-events: none;
+  }
+  .ui:is(.circular, .spaced).buttons > .row {
+    display: none;
   }
   .ui.compact.wrapping.buttons > :not(.or),
   .ui.compact.wrapping.buttons > ::slotted(:not(:state(or))) {
@@ -756,12 +912,32 @@
     flex: none;
   }
 
-  /* Attached group:  full width, joined to a segment's top or bottom edge. */
+  /*
+   * Attached group:  full width, joined to a segment's top or bottom edge.
+   * - The track's free corners take the theme's corner (`--ui-radius`), never a pill's;  the joined ones are square.
+   */
   .ui.attached.buttons {
+    --_buttons-radius: min(var(--_button-radius, var(--_ui-button-radius)), var(--ui-radius));
     position: relative;
     display: flex;
     margin-inline: calc(var(--ui-border-width) * -1);
     border-radius: 0;
+  }
+  .ui[class*="top attached"].buttons {
+    border-start-start-radius: var(--_buttons-radius);
+    border-start-end-radius: var(--_buttons-radius);
+  }
+  .ui[class*="bottom attached"].buttons {
+    border-end-start-radius: var(--_buttons-radius);
+    border-end-end-radius: var(--_buttons-radius);
+  }
+  .ui[class*="left attached"].buttons {
+    border-start-start-radius: var(--_buttons-radius);
+    border-end-start-radius: var(--_buttons-radius);
+  }
+  .ui[class*="right attached"].buttons {
+    border-start-end-radius: var(--_buttons-radius);
+    border-end-end-radius: var(--_buttons-radius);
   }
   .ui.attached.buttons > *,
   .ui.attached.buttons > ::slotted(*) {
@@ -814,6 +990,7 @@
   /* Stackable:  horizontal groups stack on mobile. */
   @media (--ui-mobile) {
     .ui.stackable.buttons {
+      --_buttons-radius: min(var(--_button-radius, var(--_ui-button-radius)), var(--ui-radius));
       flex-direction: column;
     }
     .ui.stackable.buttons > *,

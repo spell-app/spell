@@ -558,7 +558,7 @@
       "name": "--ui-button-or-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-button>`'s token.  Default:  `0.3em`"
+        "value": "the gap `<ui-or>` leaves between its buttons: none, its badge overlapping both\n\n`<ui-button>`'s token.  Default:  `0px`"
       }
     },
     {
@@ -580,6 +580,20 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-button>`'s token.  Default:  `var(--ui-text-light)`"
+      }
+    },
+    {
+      "name": "--ui-button-group-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "a group's inset: how far its buttons sit in from its edge\n\n`<ui-button>`'s token.  Default:  `var(--ui-space-3xs)`"
+      }
+    },
+    {
+      "name": "--ui-button-group-item-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "the corners where a group's buttons meet; by default its inner radius, so every tile is rounded all round\n\n`<ui-button>`'s token.  Default:  `the group's corner, less its border and inset`"
       }
     },
     {
