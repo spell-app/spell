@@ -137,6 +137,8 @@ const INPUT = "input"
  * The built-in control kinds.
  * - `buttons` is a row of radios for now:  Spell UI has no segmented control a form reads (epic `property-editor` I3).
  * - `color` is the browser's own picker for now:  Spell UI's colour pickers come later (epic `property-editor` T4).
+ * - `icon` draws `<ui-icon-picker>`:  every `icon` attribute (a button's, a rating's) is picked from a grid of glyphs,
+ *   not typed (epic `debut` P14).
  */
 const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   input: { tag: "ui-input", types: ["text", "data"] },
@@ -144,6 +146,7 @@ const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   number: { tag: "ui-input", attributes: { type: "number" }, types: ["number"] },
   date: { tag: "ui-input", attributes: { type: "date" }, types: ["date"] },
   select: { tag: "ui-select", choices: "items", types: ["choice"] },
+  icon: { tag: "ui-icon-picker", types: ["icon"] },
   buttons: { tag: "ui-radio", choices: "radios" },
   range: { tag: "ui-slider" },
   checkbox: { tag: "ui-checkbox", types: ["boolean"] },

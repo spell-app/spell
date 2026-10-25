@@ -80,6 +80,7 @@ export const COMPONENTS = [
   "ui-search",
   "ui-progress",
   "ui-rating",
+  "ui-icon-picker",
   "ui-slider",
   "ui-accordion",
   "ui-tab",

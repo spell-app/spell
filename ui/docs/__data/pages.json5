@@ -170,6 +170,11 @@
       "summary": "An icon is a glyph used to represent something else.",
       "status": "done"
     },
+    "ui-icon-picker": {
+      "title": "Icon Picker",
+      "summary": "An icon picker lets people choose an icon by searching for it and clicking its glyph.",
+      "status": "done"
+    },
     "ui-image": {
       "title": "Image",
       "summary": "An image is a graphic representation of something.",
