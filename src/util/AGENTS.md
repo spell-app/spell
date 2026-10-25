@@ -28,11 +28,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - So nothing spell-specific may land here.
 - What does NOT belong:
   - anything spell-specific
-  - anything needing a dependency `ui` doesn't already have (`pluralize`, CommonJS `lodash` ...):
+  - anything needing a dependency Spell UI doesn't already have (`pluralize`, CommonJS `lodash` ...):
     it goes in `spell/`, never beside the generic files
   - anything only ONE package uses:
-    - `ui`'s `core.ts` re-exports its `spell-ui/util` wholesale, which imports every GENERIC file here
-    - so each lands in `ui`'s `core` bundle (`yarn measure`), used or not
+    - Spell UI's `core.ts` re-exports its `spell-ui/util` wholesale, which imports every GENERIC file here
+    - so each lands in Spell UI's `core` bundle (`yarn measure`), used or not
   - when in doubt, leave it in the package
 - Commands:  the kit's, at its root (`yarn kit:review`, `kit:ts`, `kit:lint`, `kit:format`, `kit:test`).
   - Its tests alone:  `yarn vp test run --project util --project util:node`, at the kit's root.
@@ -41,7 +41,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   [ui's util barrel](../../spell-ui/src/util/index.ts) imports the generic files one by one
   (`spell/util/class` ...).
   - Why:  so spell's utilities never reach `ui`'s bundles or published declarations.
-  - `ui` keeps its own `util` barrel (`spell-ui/util`) for package-specific helpers.
+  - Spell UI keeps its own util barrel (`spell-ui/util`) for package-specific helpers.
 
 ## Node-only helpers (`node/`)
 
@@ -64,10 +64,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The bottom of the spell chain:  every spell-family package may import it, and it imports nothing above it.
   - Formerly the package `spell-util`.
   - A sub-folder, not loose files:
-    - `string.ts` / `DOM.ts` would clash with the generic `string.ts` / `dom.ts` (macOS is case-insensitive)
+    - its `string.ts` and `DOM.ts` would clash with the generic ones a folder up (macOS is case-insensitive)
     - and nothing in `ui` may import it
-  - Its dependencies (lodash, `chalk`, `pluralize` ...) are the kit's `dependencies` (its root `package.json`).
-    - `ui` bundles none of them:  `yarn measure` and `yarn smoke` (declarations) prove it.
+  - Its dependencies (lodash, chalk, pluralize ...) are the kit's own, in its root `package.json`.
+    - Spell UI bundles none of them:  `yarn measure` and `yarn smoke` (declarations) prove it.
 - Files in `spell/` import the generic helpers by deep path (`spell/util/class`).
   - NEVER the `spell/util` barrel:  it re-exports this folder, so that's a cycle.
 - NOTE: [ResponseErrors.ts](spell/ResponseErrors.ts) is deliberately NOT in [the folder's barrel](spell/index.ts):
@@ -100,30 +100,35 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - So Spell UI may import it file by file, once it moves onto spell cells
     (caveat C12 of `output-targets`;  epic `spell-element`, which that waited on, is in `main`).
 - Its files import each other as peers.
-  - `spell/` imports it as `spell/util/reactive`, never through `spell/util`.
+  - Spell's utilities (`spell/`) import it as `spell/util/reactive`, never through the barrel.
 - It's Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL first.
 
 ## Kept values (`persist/`)
 
-- `spell/util/persist`:  what an app keeps for people (epic `prefs-and-undo`):  preferences across visits, and the
-  history they undo and redo.
+- `spell/util/persist`:  what an app keeps for people (epic `prefs-and-undo`):
+  preferences across visits, and the history they undo and redo.
   - Flattened into the `spell/util` barrel too.
-  - `PrefStore`:  one app's preferences, every key `<store>:<key>`, values as text people can read (`values.ts`).
+  - [PrefStore](persist/PrefStore.ts):  one app's preferences.
+    - every key `<store>:<key>`, e.g. `spell-site:scheme`
+    - values as text people can read, e.g. `dark` ([values.ts](persist/values.ts))
   - `PrefPlace`:  where a store keeps them.
-    - quick:  `StoragePlace` over a web `Storage`, `MemoryStorage` for memory
-    - waited on (`WaitedOnPlace`):  `DatabasePlace`, the browser's IndexedDB;  `ServerPlace`, the page server's `/api/prefs`
-      (spell-app's spaces answer it, in the person's space;  the protocol's types are `persist.types.ts`'s)
-  - `UndoStack`:  undo and redo, with transactions (one step for everything an action does, waits included) and
-    folding;  its records say how to undo themselves, so it knows nothing of what's kept.
+    - quick:  the browser's storage (`StoragePlace`), or memory (`MemoryStorage`)
+    - waited on (`WaitedOnPlace`):
+      - `DatabasePlace`:  the browser's IndexedDB, one database for the site, `spell-prefs`
+      - `ServerPlace`:  the page server's `/api/prefs`, which spell-app's spaces answer, in the person's space
+      - the protocol's types:  [persist.types.ts](persist/persist.types.ts)
+  - [UndoStack](persist/UndoStack.ts):  undo and redo, with transactions and folding.
+    - a transaction:  one step for everything an action does, waits included
+    - its records say how to undo themselves, so it knows nothing of what's kept
     - On the reactive engine (`spell/util/reactive`), for its live titles:  the folder's one import from outside it.
-- GENERIC, like the files beside `index.ts`:  nothing spell-specific;  the pref store imports nothing from outside
-  the folder.
+- GENERIC, like the files beside `index.ts`:  nothing spell-specific.
+  - The pref store imports nothing from outside the folder.
   - NOT in Spell UI's util barrel:  in its `core` bundle it cost every page 1.9 kB (`yarn measure`, 2026-10-24).
     Spell UI's files that keep preferences import `spell/util/persist/PrefStore` by file.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `util`):  they use the browser's own storage.
-- Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written byte
-  for byte as before:  a store's name is the key's part before its first colon.
+- Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written
+  byte for byte as before:  a store's name is the key's part before its first colon.
 
 ## Decorators
 

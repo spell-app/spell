@@ -2,12 +2,12 @@ import { PrefPlace } from "./PrefPlace"
 
 /****************
  * ### `WaitedOnPlace`
- * A `PrefPlace` whose every read must be waited on:  the browser's database (`DatabasePlace`), a server
- * (`ServerPlace`).
+ * A `PrefPlace` whose every read must be waited on:
+ * the browser's database (`DatabasePlace`), a server (`ServerPlace`).
  * - A quick read (`read()`, `keys()`) throws `TypeError`, naming `load()`:  `PrefStore` refuses one first.
  * - A quick write (`write()`, `remove()`) is done later, without waiting:  a failure is logged by `save()`.
- * - A subclass writes the waited-on methods:  `load()`, `save()`, `loadKeys()`, `removeUnder()`,
- *   and `update()` when it can do it in one step.
+ * - A subclass writes the waited-on methods:
+ *   `load()`, `save()`, `loadKeys()`, `removeUnder()`, and `update()` when it can do it in one step.
  ****************/
 export abstract class WaitedOnPlace extends PrefPlace {
   readonly isAsync = true

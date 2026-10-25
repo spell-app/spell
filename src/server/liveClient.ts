@@ -11,14 +11,15 @@ import type { SiteTab } from "spell/server/site/site.types"
  * What a served page knows about its server:  `window.SPELL_SERVER`, injected before `</head>`.
  * - `token`:  this run's write token (see `Guard`)
  * - `events`:  URL path of the live-reload websocket (`LiveReload.events`)
- * - `run`:  the server run that served the page (`LiveReload.run`):  a socket that says `hello` from another run
- *   means the server restarted, and the page reloads
+ * - `run`:  the server run that served the page (`LiveReload.run`):
+ *   a socket that says `hello` from another run means the server restarted, and the page reloads
  * - `file`:  URL path of the FILE served, e.g. `/guides/solid/index.html` for `/guides/solid/`
  * - `etag`:  the file's `ETag` when served, for `If-Match` on edits
  * - `source`:  the served file's absolute path on disk, e.g. `/Users/x/spell-app.epics/guides/solid/index.html`
  *   - what the site header's "open in VS Code" opens (`SiteHeader.sourceFile`)
- *   - `root` + `file` isn't always it:  a content folder's page (`file` is from the content folder), a worktree's
- *     on the main checkout's server, spell-epic's server's `/r/<repo>/...` (epic `epic-engine` I42)
+ *   - `root` + `file` isn't always it (epic `epic-engine` I42):
+ *     a content folder's page (`file` is from the content folder), a worktree's on the main checkout's server,
+ *     spell-epic's server's `/r/<repo>/...`
  * - `root`:  absolute folder served
  * - `branch` / `worktree`:  of that checkout, when known
  * - `editPage`, `saveFile`, `readPage`, `takeScroll`:  added by `liveClient()`
@@ -40,8 +41,8 @@ export type ServerConfig = {
   branch?: string
   worktree?: string
   /**
-   * the folder holding this page's worktree, served at `/worktrees/<w>/` on the main checkout's server, else the
-   * first such folder (`PageServer.serveWorktrees()`)
+   * the folder holding this page's worktree, served at `/worktrees/<w>/` on the main checkout's server,
+   * else the first such folder (`PageServer.serveWorktrees()`)
    */
   worktrees?: string
   /**
@@ -56,8 +57,8 @@ export type ServerConfig = {
    */
   siteTabs?: SiteTab[]
   /**
-   * airplane mode is on:  Owen works with no Claude, everything waits for `/airplane land` (epics' `AirplaneMode`,
-   * told by its route module)
+   * airplane mode is on:  Owen works with no Claude, everything waits for `/airplane land`
+   * (epics' `AirplaneMode`, told by its route module)
    */
   airplane?: boolean
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
@@ -522,16 +523,17 @@ export function liveClient(): void {
   }
 
   /**
-   * The edit keys, handled by the page itself while it's framed (VS Code's side-bar views):  Cmd / Ctrl + A, C, X, V,
-   * Z (Shift + Z, or Ctrl + Y:  redo).
-   * - why:  `edit()` alone hangs on VS Code turning its Edit commands into `document.execCommand()` on the view's
-   *   wrapper (`DocView.ts`), which is VS Code's own behaviour, not a promise:  it stopped reaching the page more than
-   *   once (epic `windows-and-review` I2, then epic `airplane`, 2026-10-10).  The page sees its keys FIRST, so it acts
-   *   on them, and `preventDefault()` keeps VS Code from doing it again (`edit()` drops a repeat anyway)
+   * The edit keys, handled by the page itself while it's framed (VS Code's side-bar views):
+   * Cmd / Ctrl + A, C, X, V, Z (Shift + Z, or Ctrl + Y:  redo).
+   * - why:  `edit()` alone hangs on VS Code turning its Edit commands into `document.execCommand()`
+   *   on the view's wrapper (`DocView.ts`), which is VS Code's own behaviour, not a promise:
+   *   it stopped reaching the page more than once (epic `windows-and-review` I2, then epic `airplane`, 2026-10-10).
+   *   - The page sees its keys FIRST, so it acts on them,
+   *     and `preventDefault()` keeps VS Code from doing it again (`edit()` drops a repeat anyway).
    * - select all, undo, redo:  here, as `edit()` does them
    * - copy, cut:  the selection to the view (`{ spell: "clipboard" }`), which the extension puts on the clipboard
-   * - paste:  asks the extension for the clipboard (`{ spell: "edit", command: "paste" }`, which the view passes
-   *   on);  it answers with `edit("paste", text)`
+   * - paste:  asks the extension for the clipboard (`{ spell: "edit", command: "paste" }`, which the view passes on);
+   *   it answers with `edit("paste", text)`
    * - nothing selected to copy or cut:  left alone
    * - Shift with any of them but Z and G:  left alone, for VS Code (`forwardKey()`):
    *   Cmd + Shift + F searches every file, + Shift + X shows the extensions, + Shift + V previews markdown ...
@@ -577,11 +579,11 @@ export function liveClient(): void {
   }
 
   /**
-   * An image the extension read off the clipboard (`edit("paste")`, a `data:` URL), pasted as the browser would:  a
-   * `paste` event carrying it as a file, on the focused element.
+   * An image the extension read off the clipboard (`edit("paste")`, a `data:` URL), pasted as the browser would:
+   * a `paste` event carrying it as a file, on the focused element.
    * - why:  in VS Code's side bar the page takes Cmd / Ctrl + V itself (`editKey()`), and may not read the clipboard;
-   *   VS Code's own clipboard is text only, so the extension reads the image (`DocView.ts` `clipboardImage()`) --
-   *   a test run's failure screenshot (epic `epic-engine` I75)
+   *   VS Code's own clipboard is text only, so the extension reads the image (`DocView.ts` `clipboardImage()`):
+   *   e.g. a test run's failure screenshot (epic `epic-engine` I75)
    */
   async function pasteImage(url: string) {
     const blob = await (await fetch(url)).blob()
@@ -598,8 +600,8 @@ export function liveClient(): void {
    * Cmd + Shift + P the command palette, Cmd + P quick open, Cmd + Shift + O go to symbol, Cmd + B the side bar ...
    * - why:  VS Code hears keys on the view's own page only, and this page is a frame inside it, from another origin:
    *   its keys never reach that page, so VS Code never saw them (epic `airplane`, 2026-10-10)
-   * - sent once every handler has had the key:  one the page took (`preventDefault()`:  Cmd + K jump, Cmd + I comment,
-   *   a `UI.keyboard` shortcut) stays the page's
+   * - sent once every handler has had the key:  one the page took stays the page's
+   *   (`preventDefault()`:  Cmd + K jump, Cmd + I comment, a `UI.keyboard` shortcut)
    */
   function forwardKey(event: KeyboardEvent) {
     const apple = /Mac|iPhone|iPad/.test(navigator.userAgent)
@@ -635,8 +637,10 @@ export function liveClient(): void {
   }
 
   /**
-   * What kind of field a key or click went to:  `"rich"` (contenteditable), `"text"` (a text input, a textarea, a
-   * select), `undefined` (none:  the page itself, a button, a checkbox ...).
+   * What kind of field a key or click went to.
+   * - `"rich"`:  contenteditable
+   * - `"text"`:  a text input, a textarea, a select
+   * - `undefined`:  none -- the page itself, a button, a checkbox ...
    * - through shadow roots:  `ui-textarea`'s own textarea
    */
   function fieldKind(event: Event): KeyPlace["field"] {
@@ -708,10 +712,10 @@ export function liveClient(): void {
   }
 
   /**
-   * Find the find bar's text again:  the next match, or the one before (`back`);  `fresh`, from the top of the page
-   * (the text just changed).
-   * - the selection moves to the match, so focus goes back to the box for the next keystroke (`showMatch()` too, for
-   *   a match it selects later)
+   * Find the find bar's text again:  the next match, or the one before (`back`).
+   * - `fresh`:  from the top of the page (the text just changed)
+   * - the selection moves to the match, so focus goes back to the box for the next keystroke
+   *   (`showMatch()` too, for a match it selects later)
    */
   function findNext(back = false, fresh = false) {
     const input = findBar?.querySelector("input")

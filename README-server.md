@@ -867,13 +867,15 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
   `params`, `query`, `body` (default `{}`), `originalUrl`, `baseUrl` and `status().send()` are Express's;
   `send(string)` is `text/html`, and `sendFile` skips dot files.
   Express 4 put only the first segment in `:name*`, which broke nested paths.
-- What it imports:  node's own modules, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded on its first
-  call);  of the kit, util's JSON5 editor and the toolchain's format settings.
-  So anything node-side may import it.
-  The page server's own entry, `spell/server/page`, adds parse5, which finds an element's bytes for the page editor.
+- What it imports, so anything node-side may import it:
+  - node's own modules, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded on its first call)
+  - of the kit:  util's JSON5 editor, util's preferences (`spell/util/persist`, for the site header)
+    and the toolchain's format settings
+  - The page server's own entry, `spell/server/page`, adds parse5, which finds an element's bytes for the page editor.
 - The site header, every page's fixed top bar, is browser code beside them (`spell/server/site`):
   - `<spell-site-header>`:  the hat logo, the worktree and branch badge, "open in VS Code", the edit pencil,
-    the light / dark switch;  its tabs are data, from the settings' `siteTabs`
+    the light / dark switch, which remembers its choice under `spell-site:scheme`, the key Spell UI's docs read too;
+    its tabs are data, from the settings' `siteTabs`
   - `<spell-section-editor>`:  the edit mode above
   - `defineSite()` defines both, for every set's site bundle
 - Test helpers:

@@ -1,11 +1,14 @@
 /**
  * Property types:  a schema per class, saying what each property holds.
- * - DECLARED props:  compiled spell's `static { this.declareProp("suit", { type: "text" }) }`, or a hand-written
- *   class's `@prop({ type: "text" })` -- both land HERE, the same runtime shape (`guides/solid/solid-2.md`).
- *   Declared types win.
- * - UNDECLARED props, e.g. a hand-written class's bare `setProp("contents", ...)`:  their types are OBSERVED, per
- *   class, and WIDENED on a mismatch (`number | text`) with a dev warning -- never thrown.  `nothing` never counts;
- *   an object counts by its class, compared with `instanceof` (a `UIError` where an `Error` was is no widening).
+ * - DECLARED props:  both of these land HERE, in the same runtime shape (`guides/solid/solid-2.md`).
+ *   - compiled spell's `static { this.declareProp("suit", { type: "text" }) }`
+ *   - a hand-written class's `@prop({ type: "text" })`
+ *   - Declared types win.
+ * - UNDECLARED props, e.g. a hand-written class's bare `setProp("contents", ...)`:
+ *   their types are OBSERVED, per class.
+ *   - WIDENED on a mismatch (`number | text`), with a dev warning:  never thrown
+ *   - `nothing` never counts
+ *   - an object counts by its class, compared with `instanceof`:  a `UIError` where an `Error` was is no widening
  */
 
 import type { PropRule } from "./PropRules"
@@ -51,8 +54,9 @@ export class Schema {
   }
 
   /**
-   * `name` was just set to `value`:  `name`'s declaration, if it declares a type or legal values, for its class to
-   * check `value` against -- else observe `value`'s type, widening it with a dev warning if it's new.
+   * `name` was just set to `value`:  answers `name`'s declaration, if it declares a type or legal values,
+   * for its class to check `value` against.
+   * - Else it observes `value`'s type, widening it with a dev warning if it's new, and answers `undefined`.
    * - `nothing` (`undefined`, `null`) never counts.
    */
   observe(name: string, value: unknown, owner: string): PropInfo | undefined {
@@ -168,14 +172,15 @@ export type PropInfo = {
   /** Declared type, as the runtime names it, e.g. `text`, `number`, `choice`, `Card`. */
   type?: string
   /**
-   * Legal values, e.g. `Card.Suits` -- or a function returning them, read when set, e.g. `() => Deck.Suits` for a
-   * list on a class defined after ours.
+   * Legal values, e.g. `Card.Suits` -- or a function returning them, read when set,
+   * e.g. `() => Deck.Suits` for a list on a class defined after ours.
    */
   oneOf?: readonly unknown[] | (() => readonly unknown[])
   /**
-   * Its value while unset -- NOT stored, so it isn't one of `keys()`.  Primitives only:  objects use `init`.
-   * - None declared:  its first choice (`oneOf`), else its type's:  `number` 0, `text` "", `choice` false;
-   *   a thing's type has none (`defaultFor()`, epic `prefs-and-undo` P7).
+   * Its value while unset -- NOT stored, so it isn't one of `keys()`.
+   * - Primitives only:  objects use `init`.
+   * - None declared:  its first choice (`oneOf`), else its type's (`defaultFor()`, epic `prefs-and-undo` P7):
+   *   `number` 0, `text` "", `choice` false;  a thing's type has none.
    */
   default?: unknown
   /**
@@ -191,8 +196,8 @@ export type PropInfo = {
    */
   early?: boolean
   /**
-   * What a LIST prop holds, as the runtime names it:  a class name, e.g. `"Task"` for
-   *   `a project has tasks as a new list of tasks`, or a value's type, e.g. `"text"`.
+   * What a LIST prop holds, as the runtime names it:
+   * a class name, e.g. `"Task"` for `a project has tasks as a new list of tasks`, or a value's type, e.g. `"text"`.
    * - Compiled spell:  `this.declareProp("tasks", { itemType: "Task", init: () => new List() })`.
    * - For the saver (epic `people-and-orgs`), which needs each item's kind:  nothing checks it yet.
    */

@@ -7,8 +7,8 @@ import { WaitedOnPlace } from "./WaitedOnPlace"
  * - Values are kept as the browser copies them, not as text:
  *   a `Blob`, a `Date`, a `Map`, a file handle (`FileSystemFileHandle`) come back as they went in.
  * - `update()` reads, changes and saves in ONE database transaction:  two tabs never read the same value.
- * - No database (node, a server drawing a page) or one the browser refuses:  values are kept in memory for the
- *   visit, and a refusal is logged once.
+ * - No database (node, a server drawing a page), or one the browser refuses:
+ *   values are kept in memory for the visit, and a refusal is logged once.
  * - NEVER throws on a storage failure:  it logs, and a read answers `undefined`.
  * - `DatabasePlace.shared`:  the one every store on the page uses, unless a test makes its own.
  ****************/

@@ -1,5 +1,5 @@
 import { hasOwnProp } from "spell/util/class"
-// A leaf of persist/, importing only types:  the defaults rule a pref and a prop share
+// Import directly:  the defaults rule a pref and a prop share, from a leaf of persist/ that imports only types
 import { defaultFor } from "spell/util/persist/values"
 
 import { isTrackingCells } from "./cells"
@@ -81,12 +81,14 @@ export function initializeExtended(target: any, ..._what: Array<"derived" | "pro
 
 /**
  * Prop `property` of `target`, tracked:  a reader re-runs when it changes, even if it's unset now.
- * - Unset:  `initializer()`'s value, stored once per object;  when it makes nothing, its declared default.
- *   - Else what its class's schema declares (see `PropInfo`):
- *     its `init`, stored the same way, or its default, NOT stored (`defaultFor()`):
- *     its `default`, else its first choice (`oneOf`), else its type's (`number` 0, `text` "", `choice` false).
+ * - Unset, with an `initializer`:  its value, stored once per object;  when it makes nothing, the declared default.
+ * - Unset, without one:  what its class's schema declares (see `PropInfo`):
+ *   - its `init`, stored the same way
+ *   - else its default, NOT stored (`defaultFor()`):
+ *     its `default`, else its first choice (`oneOf`), else its type's (`number` 0, `text` "", `choice` false)
  * - An initializer is called with `this` ~== `target`, and its value stored WITHOUT notifying the prop's readers:
- *   nobody can have read another value.  The key set does change, so `keysOf()` readers hear of it.
+ *   nobody can have read another value.
+ *   The key set does change, so `keysOf()` readers hear of it.
  */
 export function getProp<T>(target: any, property: string): T | undefined
 export function getProp<T>(target: any, property: string, initializer?: () => T): T
@@ -145,13 +147,14 @@ export function peekProp<T>(target: any, property: string): T | undefined {
 }
 
 /**
- * Is `value`, read from prop `property` of `target`, only its IMPLIED default:  the prop declared, unset, with no
- * `default` of its own, and `value` its first choice or its type's (`0`, `""`, `false`;  `defaultFor()`)?
- * - For what shows only what was SET, as HTML's attributes do:  a drawn thing's element shows no attribute for it
- *   (epic `prefs-and-undo` P7).
+ * Is `value`, read from prop `property` of `target`, only its IMPLIED default?
+ * - Implied:  the prop is declared and unset, with no `default` or `init` of its own,
+ *   and `value` is its first choice or its type's (`0`, `""`, `false`;  `defaultFor()`).
+ * - For what shows only what was SET, as HTML's attributes do:
+ *   a drawn thing's element shows no attribute for it (epic `prefs-and-undo` P7).
  * - A getter that always gives another value isn't:  its value shows.
- *   One that always gives the default itself (a stock pile's `layout`, `stacked`, its first choice) can't be told
- *   apart here:  the caller checks for a getter with no setter (`SpellElement.isReadOnly()`).
+ *   One that always gives the default itself (a stock pile's `layout`, `stacked`, its first choice)
+ *   can't be told apart here:  the caller checks for a getter with no setter (`SpellElement.isReadOnly()`).
  * - UNTRACKED.
  */
 export function readsAsImpliedDefault(target: any, property: string, value: unknown): boolean {
@@ -194,14 +197,17 @@ export function reactiveObject<T extends object>(init: T): T {
   return target
 }
 
-/** Set several `props` of `target`, in order.  NOTE: no batching needed:  readers re-run once anyway, later. */
+/**
+ * Set several `props` of `target`, in order.
+ * - NOTE: no batching needed:  readers re-run once anyway, later.
+ */
 export function setProps(target: any, props: Record<string, any>) {
   for (const [property, value] of Object.entries(props)) setProp(target, property, value)
 }
 
 /**
- * Names of `target`'s props, in the order they were first set -- tracked:  a reader re-runs when a key comes or
- * goes, NOT when a value changes.
+ * Names of `target`'s props, in the order they were first set.
+ * - Tracked:  a reader re-runs when a key comes or goes, NOT when a value changes.
  * - A `Map`, so `"2"` and `"10"` keep their places:  a plain object would hoist integer-like keys to the front.
  */
 export function keysOf(target: any): string[] {
@@ -227,13 +233,13 @@ export function getProps(target: any): Record<string, any> {
 
 /**
  * Key a typed object's JSON names its class under:  `"$type"`, JSON-LD's spelling.
- * - No prop can be named `@...` (spell's names are words), so it never collides, where `"type"` would.
+ * - No prop can be named `$...` (spell's names are words), so it never collides, where `"type"` would.
  */
 export const TYPE_KEY = "$type"
 
 /**
  * Key a list's JSON holds its items under:  `"$items"`, after its own props.
- * - `@`, as `TYPE_KEY`'s:  no prop can be named `@...`, so a list type's own `items` property is kept too.
+ * - `$`, as `TYPE_KEY`'s:  no prop can be named `$...`, so a list type's own `items` property is kept too.
  */
 export const ITEMS_KEY = "$items"
 
@@ -272,9 +278,10 @@ export function getState<T>(target: any, property: string, initializer?: () => T
 
 /**
  * Set state `property` of `target` to `value` -- returns `value`.
- * - `undefined` deletes it.  `===` its current value:  nothing happens.
- * - `property` may be a dotted path, e.g. `loadState.isDirty`:  sets it IN the object under `loadState` (made if
- *   missing), and notifies `loadState`'s readers.
+ * - `undefined` deletes it.
+ * - `===` its current value:  nothing happens.
+ * - `property` may be a dotted path, e.g. `loadState.isDirty`:
+ *   sets it IN the object under `loadState` (made if missing), and notifies `loadState`'s readers.
  */
 export function setState<T>(target: any, property: string, value: T): T {
   const extended = extendedFor(target)
@@ -361,8 +368,8 @@ export function getDerived<T>(target: any, property: string, getter: () => T): T
 /**
  * Cached `property` of `target`, calling `getter()` to get initial value or whenever `dependencies` change.
  * - To reset the value:
- *   - Call `this.clearDerived()` to reset all derived properties.
- *   - Call `this.clearDerived(property)` to reset just that property.
+ *   - Call `clearDerived(target)` to reset all derived properties.
+ *   - Call `clearDerived(target, property)` to reset just that property.
  */
 export function getDerivedFrom<T>(target: any, property: string, getter: () => T, dependencies?: unknown[]): T {
   if (!dependencies) {
@@ -417,8 +424,8 @@ export function overrideProp(target: any, property: string, value: any) {
 
 /**
  * Wrap `thing` in a `WeakRef` if it's an object, otherwise pass it through unchanged.
- * - Used to store `dependencies` arrays (see `getDerivedFrom()`) without holding strong
- *   references, so a dependency doesn't leak or create circular references.
+ * - Used to store `dependencies` arrays (see `getDerivedFrom()`) without holding strong references,
+ *   so a dependency doesn't leak or create circular references.
  */
 export function objectToWeakRef(thing: any) {
   if (thing instanceof Object) return new WeakRef(thing)
@@ -436,8 +443,8 @@ export function objectFromWeakRef(thing: any) {
 }
 
 /**
- * Return `true` if EVERY corresponding item of `list1` and `list2` is `===` equal, after
- * unwrapping any `WeakRef`s (see `objectFromWeakRef()`).
+ * Return `true` if EVERY corresponding item of `list1` and `list2` is `===` equal,
+ * after unwrapping any `WeakRef`s (see `objectFromWeakRef()`).
  * - Returns `false` if either isn't an array, or their lengths differ.
  */
 export function dependenciesMatch(list1: any[], list2: any[]) {
