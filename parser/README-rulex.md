@@ -237,8 +237,8 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell) has the
-same `it "is a (rank)"` line, and Spell writes it the same syntax:
+[The Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx) has the
+same alias, written `alias="is a (rank)"` on its rank, and Spell writes it the same syntax:
 
 ```sh
 spell parse --in @spell/examples/Solitaire $'set the card to a new card\nprint the card is a queen'

@@ -244,7 +244,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell),
+  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -252,7 +252,7 @@ Six ideas carry most of the language, and each reads both ways:
   ([positions count from 1](README-core.md#positions-count-from-1)).
 - **Ids and addresses.**  Every thing has an `id`, built in, and saves as readable JSON;
   `a person is saved in its own file` gives each person a file of their own.
-  Projects and files have addresses too, like `@spell/examples/Solitaire/Solitaire.spell`
+  Projects and files have addresses too, like `@spell/examples/Solitaire/Solitaire.spellx`
   ([ids, names and addresses](README-spell.md#ids-names-and-addresses)).
 
 Every rule, and what each target writes for it:  [README-spell](README-spell.md).

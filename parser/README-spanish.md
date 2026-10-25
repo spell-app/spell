@@ -27,7 +27,8 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/) is the Solitaire example
-written again in Spanish, line for line, cards and all, and it deals, plays and passes the same six tests.
+written again in Spanish, line for line, cards and all, as Solitaire was in the outline style before it was spellx:
+it deals, plays and passes six tests, two of them its jokers', which Solitaire has since dropped.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
 
@@ -41,7 +42,7 @@ You need the kit's checkout with its child repos, and `spell` on your `PATH`:
 the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) does both.
 
 **Run Solitario's tests.**
-They're Solitaire's six, in Spanish:
+Six, in Spanish:
 
 ```sh
 spell test @spell/examples/Solitario
@@ -64,7 +65,7 @@ spell test @spell/examples/Solitario
 
 </details>
 
-- `spell test @spell/examples/Solitaire` runs the English six:  the same counts, `card setup` for `la preparación de la carta`.
+- `spell test @spell/examples/Solitaire` runs the English four, without the jokers:  `card setup` for `la preparación de la carta`.
 - `--verbose` prints each check, in the program's language:
   ``✅ Como se esperaba, `su rango` es `dama` ``, and a failing one `❌ Inesperado: 2 + 2 debería ser 5 pero en realidad es 4`.
 - The command's own lines, `✓ Compiling`, stay English:  the program speaks Spanish, the tool doesn't.
