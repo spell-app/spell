@@ -31,6 +31,9 @@
  */
 import { parseHTML } from "linkedom"
 
+import { dedent } from "spell/util/string.ts"
+import { clockTime, localDate } from "spell/util/time.ts"
+
 /** What a note's `status` may be. */
 export const NOTE_STATUSES = ["new", "answered", "done"]
 
@@ -398,26 +401,12 @@ function labelOf(document, anchor) {
 
 /** `date` as a note's `at`:  local `YYYY-MM-DD HH:MM`. */
 export function stamp(date = new Date()) {
-  const two = (value) => String(value).padStart(2, "0")
-  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`
+  return `${localDate(date)} ${clockTime(date)}`
 }
 
 /** `lines`, each two spaces deeper. */
 function indent(lines) {
   return lines.map((line) => (line ? `  ${line}` : line))
-}
-
-/** `text` without the indent all its (non-blank) lines share:  a reply's markup, from a file. */
-function dedent(text) {
-  const pads = text
-    .split("\n")
-    .filter((line) => line.trim())
-    .map((line) => /^[ \t]*/.exec(line)[0].length)
-  const cut = Math.min(...pads)
-  return text
-    .split("\n")
-    .map((line) => line.slice(cut))
-    .join("\n")
 }
 
 /**
@@ -467,7 +456,10 @@ function inline(value) {
   return text(value).replace(/`([^`]+)`/g, "<code>$1</code>")
 }
 
-/** Escape for HTML text. */
+/**
+ * Escape for HTML text.
+ * - not the kit's `escapeHTML()`:  a note is written into the page's source, where Owen reads it, so `'` stays `'`
+ */
 function text(value) {
   return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }

@@ -13,6 +13,7 @@ import {
 import { homedir } from "node:os"
 import { basename, join, relative } from "node:path"
 
+import { clockTime, localDate } from "spell/util/time"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RealPath } from "spell-epic/config/RealPath"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
@@ -876,12 +877,7 @@ function run(command: string, args: string[]): string {
 /** `ms` as local `MM-DD HH:MM`. */
 function stamp(ms: number): string {
   const date = new Date(ms)
-  return `${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`
-
-  /** `value` as two digits. */
-  function two(value: number): string {
-    return String(value).padStart(2, "0")
-  }
+  return `${localDate(date).slice(5)} ${clockTime(date)}`
 }
 
 /** `text` cut to `limit` characters, marked when cut. */

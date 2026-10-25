@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
+import { escapeRegExp } from "spell/util/string"
+
 import { PlanDocError } from "./planDoc.types"
 
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
@@ -216,7 +218,7 @@ export class SagaCommands {
    * - an address only as a whole id:  `SAGA:/epics` never matches `SAGA:/epics-old`
    */
   private rewriteLinks(from: string, to: string): [path: string, count: number][] {
-    const id = from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    const id = escapeRegExp(from)
     const pattern = new RegExp(`(SAGA:/)${id}(?![\\w-])|(\\ssaga=")${id}(")`, "g")
     const changed: [string, number][] = []
     const walk = (dir: string) => {

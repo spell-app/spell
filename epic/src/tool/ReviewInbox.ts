@@ -1,3 +1,4 @@
+import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
 import { DataFile } from "spell-epic/data/DataFile"
@@ -1342,20 +1343,11 @@ function toChoices(choices: unknown): { choices?: number } {
 
 /**
  * `date` as ISO local time with its offset, to the MILLISECOND:  `2026-10-04T15:02:11.042-04:00`.
- * - as `PlanDoc`'s `isoTime()`, plus milliseconds
+ * - the kit's `localTime()`, plus milliseconds
  * - why milliseconds:  `unsentMarks` compares a mark's `at` with `sent`;
  *   to the second, a mark made in the same second as a send would pass for sent
  */
 export function isoTime(date = new Date()): string {
-  const minutes = -date.getTimezoneOffset()
-  const sign = minutes < 0 ? "-" : "+"
-  const offset = `${sign}${pad(Math.floor(Math.abs(minutes) / 60))}:${pad(Math.abs(minutes) % 60)}`
-  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-  const clock = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-  return `${day}T${clock}.${pad(date.getMilliseconds(), 3)}${offset}`
-
-  /** `7` -> `07` (`width` 2), or `007` (3). */
-  function pad(value: number, width = 2) {
-    return String(value).padStart(width, "0")
-  }
+  const milliseconds = String(date.getMilliseconds()).padStart(3, "0")
+  return localTime(date).replace(/(?=[+-]\d\d:\d\d$)/, `.${milliseconds}`)
 }

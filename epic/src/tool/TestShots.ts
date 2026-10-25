@@ -1,5 +1,6 @@
 import { dirname, join } from "node:path"
 
+import { compactTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
 import { InboxError } from "./ReviewInbox"
@@ -38,7 +39,7 @@ export class TestShots {
   static async saveShot(file: string, id: string, bytes: Buffer, now = new Date()): Promise<string> {
     const key = id.toLowerCase()
     if (!TEST_ID.test(key)) throw new InboxError(`only a test takes a screenshot:  ${id}`)
-    const stem = `${TEST_SHOTS}/${key}-${stampOf(now)}`
+    const stem = `${TEST_SHOTS}/${key}-${compactTime(now)}`
     for (let n = 1; ; n++) {
       const shot = n === 1 ? `${stem}.png` : `${stem}-${n}.png`
       try {
@@ -65,12 +66,3 @@ const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
 /** How many screenshots of one test one minute may hold:  a sanity bound for `saveShot()`'s `-2`, `-3` ... */
 const MAX_SAME_MINUTE = 99
-
-/** `date` as a screenshot's stamp, local time to the minute:  `20261019-1432`. */
-function stampOf(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, "0")
-  return (
-    `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-` +
-    `${pad(date.getHours())}${pad(date.getMinutes())}`
-  )
-}

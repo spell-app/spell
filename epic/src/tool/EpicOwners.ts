@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
+import { escapeRegExp } from "spell/util/string"
 import { Git } from "spell-epic/command/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { PageStages } from "spell-epic/phases"
@@ -128,8 +129,7 @@ export class EpicOwners {
    */
   static names(text: string, path: string): boolean {
     if (!path) return false
-    const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-    return new RegExp(`(?<![\\w-])(?<![\\w-]/)${escaped}(?![\\w/-]|\\.\\w)`).test(text)
+    return new RegExp(`(?<![\\w-])(?<![\\w-]/)${escapeRegExp(path)}(?![\\w/-]|\\.\\w)`).test(text)
   }
 
   /**

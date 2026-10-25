@@ -1,3 +1,5 @@
+import { clockTime, localDate, localMidnight, localMinutes, localTime } from "spell/util/time"
+
 import type { Duration } from "./planDoc.types"
 
 /****************
@@ -6,6 +8,7 @@ import type { Duration } from "./planDoc.types"
  * offset for machines;  phase estimates (`1-2h`) as minutes and back.
  * - STATIC and instance-free on purpose:  pure functions of their arguments, no clock unless passed one.
  * - From `src/tools/plan-doc.js` (epic `epic-components`, P7).
+ * - Its dates and times are the kit's (`spell/util/time`, epic `coherence` I5):  these keep the names its callers use.
  ****************/
 export class PlanTime {
   ////////////////
@@ -14,9 +17,7 @@ export class PlanTime {
 
   /** `date`'s local date, `YYYY-MM-DD`. */
   static isoDate(date = new Date()): string {
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const day = String(date.getDate()).padStart(2, "0")
-    return `${date.getFullYear()}-${month}-${day}`
+    return localDate(date)
   }
 
   /**
@@ -24,16 +25,7 @@ export class PlanTime {
    * - an item's change stamp (`data-changed`):  compared with a commit time (`git log --format=%cI`), same form
    */
   static isoTime(date = new Date()): string {
-    const minutes = -date.getTimezoneOffset()
-    const sign = minutes < 0 ? "-" : "+"
-    const offset = `${sign}${pad(Math.floor(Math.abs(minutes) / 60))}:${pad(Math.abs(minutes) % 60)}`
-    const clock = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-    return `${PlanTime.isoDate(date)}T${clock}${offset}`
-
-    /** `7` -> `07`. */
-    function pad(value: number): string {
-      return String(value).padStart(2, "0")
-    }
+    return localTime(date)
   }
 
   /**
@@ -41,18 +33,17 @@ export class PlanTime {
    * - a log line's time (`<epic-event at>`), which the element shows as `2026-09-30 23:30`
    */
   static isoMinutes(date = new Date()): string {
-    return PlanTime.isoTime(date).replace(/:\d\d(?=[+-]\d\d:\d\d$)/, "")
+    return localMinutes(date)
   }
 
   /** `date`, local, as `YYYY-MM-DD HH:MM`:  an Original Discussion version's "As of". */
   static clockTime(date: Date): string {
-    return `${PlanTime.isoDate(date)} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+    return `${localDate(date)} ${clockTime(date)}`
   }
 
   /** `YYYY-MM-DD` as a `Date`:  local midnight that day. */
   static localDay(day: string): Date {
-    const [year, month, date] = day.split("-").map(Number)
-    return new Date(year, month - 1, date)
+    return localMidnight(day)
   }
 
   ////////////////
