@@ -26,6 +26,15 @@
     --_epic-fold-line: calc(var(--ui-font-size, 16px) * var(--ui-section-h3) * var(--ui-section-title-line-height));
   }
 
+  /*
+   * open:  the title's band rounded at the bottom, a card over its body (Owen, 2026-10-24);  square while stuck
+   * under the titles above it, flush against them (as an item's line, I93)
+   */
+  :host(:state(open)) ui-section:not(:state(stuck))::part(title) {
+    border-end-start-radius: var(--epic-phase-radius, 8px);
+    border-end-end-radius: var(--epic-phase-radius, 8px);
+  }
+
   .icon.todo {
     color: var(--ui-grey-text, var(--ui-text-muted));
   }
