@@ -8,6 +8,10 @@
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
     "confirm-default": "{question} (yes)",
-    "drop-event": "{thing}-drop"
+    "drop-event": "{thing}-drop",
+    "undo": "Undo",
+    "undo-step": "Undo {step}",
+    "redo": "Redo",
+    "redo-step": "Redo {step}"
   }
 }

@@ -30,6 +30,45 @@ export class App extends View {
     return property
   }
 
+  ////////////////
+  // ## Undo and redo
+  ////////////////
+
+  /**
+   * Undo the newest step:  what the program's last undoable action changed, put back (epic `prefs-and-undo` P6).
+   * - False with nothing to undo.
+   * - ⌘Z does it too, while the app has the focus.
+   * - The run's history, `core.RUNTIME.history`:  see `undoing.ts`.
+   */
+  undo(): boolean {
+    return core.RUNTIME.history.undo()
+  }
+
+  /** Redo the step undone last;  false with none.  ⇧⌘Z does it too. */
+  redo(): boolean {
+    return core.RUNTIME.history.redo()
+  }
+
+  /** Is there a step to undo?  Live:  a menu item drawn from it greys out by itself. */
+  get canUndo(): boolean {
+    return core.RUNTIME.history.canUndo
+  }
+
+  /** Is there a step to redo?  Live. */
+  get canRedo(): boolean {
+    return core.RUNTIME.history.canRedo
+  }
+
+  /** The Edit menu's undo item, in the program's language:  `Undo Turn Card`, or `Undo` with nothing to undo.  Live. */
+  get undoTitle(): string {
+    return core.RUNTIME.history.undoTitle
+  }
+
+  /** The Edit menu's redo item:  `Redo Turn Card`, or `Redo`.  Live. */
+  get redoTitle(): string {
+    return core.RUNTIME.history.redoTitle
+  }
+
   /**
    * Mount this app's drawing into `core.appElement()` (`core.mountApp()`), creating a
    * `core.REACT_APP_ROOT_ID` container `div` if there's none.

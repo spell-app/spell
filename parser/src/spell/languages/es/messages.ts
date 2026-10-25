@@ -16,5 +16,9 @@ export const spanishMessages: CoreMessages = {
   "test-threw": "Error en la prueba {test}:",
   "cant-draw": "⚠ {type} no se puede dibujar",
   "confirm-default": "{question} (sí)",
-  "drop-event": "soltar-{thing}"
+  "drop-event": "soltar-{thing}",
+  undo: "Deshacer",
+  "undo-step": "Deshacer {step}",
+  redo: "Rehacer",
+  "redo-step": "Rehacer {step}"
 }

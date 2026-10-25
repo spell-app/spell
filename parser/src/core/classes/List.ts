@@ -3,12 +3,22 @@
  */
 import _ from "lodash"
 
-import { Cell, isTrackingCells, ITEMS_KEY, Observable, runsCreate, typedJSON, type PropInfo } from "spell/util"
-import { registerThing, noteSetting, core } from "spell-parser/core/core"
+import {
+  Cell,
+  isTrackingCells,
+  ITEMS_KEY,
+  Observable,
+  peekState,
+  runsCreate,
+  typedJSON,
+  type PropInfo
+} from "spell/util"
+import { registerThing, noteItems, noteSetting, core } from "spell-parser/core/core"
 import type { CollectionIterationCallback } from "spell-parser/core/collection-other"
 import type { Drawing } from "spell-parser/core/drawing"
 import type { PropCheck } from "spell-parser/core/core.types"
 import { zeroIndexOf } from "spell-parser/core/positions"
+import { declareAction, type ActionInfo } from "spell-parser/core/undoing"
 
 import { ID_PROP } from "./ids"
 
@@ -54,6 +64,16 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
 
   /** `a hand is saved inline.`:  saying the default, since decision Q42.  See `Thing.savedInline`. */
   static savedInline = false
+
+  /**
+   * Make our method `name` an action:  ONE undo step, or one that can't be undone (epic `prefs-and-undo` P6).
+   * - In a static block after the method:  `static { this.declareAction("shuffle", { undoneAs: "Shuffle" }) }`.
+   * - Or `{ cantBeUndone: "clears history" }`, e.g. a new game -- see `ActionInfo`, `undoing.ts`.
+   * - throws `TypeError` if `name` isn't one of our methods, or `info` says neither kind, or both
+   */
+  static declareAction(name: string, info: ActionInfo): void {
+    declareAction(this, name, info)
+  }
 
   static {
     this.declareProp("id", ID_PROP)
@@ -574,6 +594,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    * - SIDE EFFECT:  the list it left changes too, and readers of each item's owner re-run
    */
   private writeItems(next: T[]): void {
+    noteItems(this, peekState<T[]>(this, "items") ?? [], next)
     const { family } = this
     if (!family) {
       this.setState("items", next)

@@ -23,6 +23,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
 | `confirm-default` | `confirm` with no page:  the JavaScript core's only, so far | `question` |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
+| `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
+| `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
 """
 
 import re
@@ -37,6 +39,10 @@ MESSAGES: dict[str, str] = {
     "cant-draw": "⚠ {type} can't draw",
     "confirm-default": "{question} (yes)",
     "drop-event": "{thing}-drop",
+    "undo": "Undo",
+    "undo-step": "Undo {step}",
+    "redo": "Redo",
+    "redo-step": "Redo {step}",
 }
 
 # A named placeholder in a message, `{type}`.

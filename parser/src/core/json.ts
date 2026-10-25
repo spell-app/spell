@@ -25,10 +25,13 @@ export const jsonMethods = defineCoreModule({
    *   NEVER throws for one.
    * - JSON with ids, a `StateWriter`'s (`state.ts`):  a thing mentioned twice comes back as one.
    *   Without them, JSON keeps no identity:  a card in two places comes back as two cards.
+   * - SIDE EFFECT:  the run's undo history is forgotten:  the program's document changed (`undoing.ts`, Q3).
    * - throws:  `json` is text that isn't JSON (`JSON.parse()`'s `SyntaxError`).
    */
   fromJSON(json: unknown): unknown {
-    return new StateMirror().read(typeof json === "string" ? JSON.parse(json) : json)
+    const state: unknown = typeof json === "string" ? JSON.parse(json) : json
+    core.RUNTIME?.history.clear()
+    return new StateMirror().read(state)
   }
 })
 Object.assign(core, jsonMethods)
