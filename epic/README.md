@@ -81,14 +81,13 @@ flowchart TD
    Then it makes its worktree and installs it:  `../<repo>.worktrees/<name>`, on branch `<name>`.
    It writes a stub epic page, so your prompt survives a lost session,
    and moves itself into its window, `⎇ <name>`, when its turn ends.
-4. It explores, read-only, and puts its open questions on the page.
-   Then it drafts the plan in Claude Code's plan mode:  phases named `P1 · Short Name` with estimates,
-   the last always "Doc Review".
-   The questions come to you in the question modal too.
-5. Once you approve the plan, a background agent fills the page:  phases, items, the overview.
-   The page shows in VS Code's Review tab.
-6. Each phase:  marked active, built, every finding recorded as an item as it goes, committed
-   (`P1:  Name -- summary`, in each repo it touched), then marked done with what was built.
+4. It explores, read-only, and writes the Overview and its open questions on the page, no plan mode.
+   The page shows in VS Code's Review tab, the Overview alone at first.
+   Each answer you give rewrites the Overview, the changed words marked for you to accept.
+5. You press Accept Overview:  a background agent writes the phases, named `P1 · Short Name` with estimates, the last
+   always "Doc Review".  You mark each Looks good or Defer, then press Accept Phases.
+6. Each phase:  Claude's own build plan first, on the phase, for you to accept;  then built, every finding recorded as
+   an item as it goes, committed (`P1:  Name -- summary`, in each repo it touched), and marked done with what was built.
    The agent stops after each phase and asks whether to go on.
 7. At any time you mark the page, and a `/epic review <name>` session takes the marks
    ([README-pages.md](README-pages.md) walks a review round).

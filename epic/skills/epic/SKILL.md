@@ -152,8 +152,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 
 When the session already has work under way ("make this a plan doc"), carry it over -- don't start again:
 - Plan mode, and edits already made on `main`:  the isolate skill's "Start", step 0.
-- Step 3:  start from the plan drafted so far (harness plan file, conversation),
-  reshaped into the epic page's shape.
+- Step 3:  start from the plan drafted so far (a harness plan file, the conversation),
+  reshaped into the Overview and its questions:  still the Overview stage, agreed on the page ("3. Plan").
   - Explore only to fill gaps.
   - Decisions and questions already settled become `decision` items (questions born answered:  `Q7`).
 
@@ -240,6 +240,8 @@ All in the FIRST turn, in this order, then the turn ends.
        - "No saga" too:  then no `--saga`
      - Later:  `epic saga set <name> <saga>`.
 
+   - It starts in the OVERVIEW STAGE (epic `epic-engine` P33):  the page shows the Overview, Questions and Caveats
+     until Owen's Accept Overview ("3. Plan").
    - The prompt is quoted at the top of the Overview, and in the "Plan hung?" notice above it.
      That notice has a copy button and restart steps;  it goes once P1 starts.
    - Then delete the prompt file.
@@ -268,55 +270,45 @@ Staying in this window (step 0):  skip steps 4 and 6.
 - Then go straight on to "3. Plan", in this turn.
   No plan yet:  the last line asks for it, here.
 
-## 3. Plan
+## 3. Plan:  the Overview, on the page
 
-1. Explore (read-only), BEFORE plan mode.
-   - NEVER `EnterPlanMode` before "2. Session" is done:  plan mode can't make the worktree or the doc.
-2. Minimal epic page, BEFORE presenting the plan:  only the Overview and the open questions.
-   - So the user can read them in the doc while the plan is up.
-   - Nothing else yet:  no phases, decisions, caveats ...
-   - Hand-write the Overview's sub-sections (shape:  "4. Fill the doc").
-   - Per open question, explained with examples ("5. Each phase", item 6):
-     `epic add <name>#Q "title" --details "..."`.
+NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
+- The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
+  only the Overview, Questions and Caveats until Owen presses Accept Overview.
+- Three stages, each ended by Owen's button in the page header (`epic stage <name>` prints and sets it):
+  1. `overview`:  Claude writes the Overview and its questions;  each answer rewrites it.  Accept Overview ->
+  2. `phases`:  Claude writes the phases;  Owen marks each Looks good or Defer.  Accept Phases ->
+  3. `building`:  every phase as "5. Each phase", each with Claude's own build plan, accepted first.
+
+1. Explore (read-only):  the code, the docs, the kickoff prompt.
    - Agents:  up to 5, don't ask.
      Unless the user said "watch token budget":  then one question is "How many agents can I use for this?".
-   - `epic lint <name>`, then `epic open <name> --review`.
-   - Why here:  plan mode allows editing ONLY the harness plan file.
-3. `EnterPlanMode`.
-   Draft the plan in the harness plan file, in the epic page's shape:
-   1. Summary:  2 sentences
-   2. Phases:  `P1 · Short Name`, 2-4 words each, so "start P2" is unambiguous.
-      - Each with goal, files, verify, and estimate.
-      - The estimate:  wall-clock for Claude, agents included, review not (`30m`, `2h`, `1-2h`).
-      - The LAST phase is always `Doc Review`.
-      - Its goal names the text pass ("6. Doc Review"):
-        - the repo's text-rewriting skill, if it has one (spell-app's `/fussbudget`):  the branch's text and the epic
-          page, rewritten
-        - the epic's guide, written from the cleaned epic page in the readme voice
-        - the READMEs the epic made untrue, in every repo it touched, brought up to date in the same voice
-        - `epic pages fuss --branch` and the repo's README checker last:  their misses fixed, or listed for Owen
-   3. Overview:  the total estimate, then numbered sections (structure, code, flows):
-      what will become guides
-   4. Caveats (work still to do, and limits), issues, decisions (what + why), open questions (the doc's ids:  `Q1` ...)
-4. Ask the open questions with AskUserQuestion (labels matching the doc's) before ExitPlanMode.
+2. Write the OVERVIEW, by hand, in the skeleton's `#overview` (shape:  "4. Fill the doc"):
+   - the summary, `<epic-summary>`:  two sentences
+   - numbered sub-sections (structure, code, flows):  what will become guides
+   - no phases yet, no estimate
+3. Each open question:  `epic add <name>#Q "title" --details "..."`, explained with examples ("5. Each phase", item 7).
+   - ONE question, ONE choice set (`<epic-choices>`):  two choices are two questions.
+     `epic lint` says `ASKS:` for an item asking two open sets at once (I88):  Owen could pick in only one.
+   - Loose ends:  `#C` (work still to do), `#C ... --limit` (a limit to know about).
+4. `epic lint <name>`, `epic open <name> --review`, then LISTEN:  `epic inbox listen <name>`, then
+   `epic inbox wait <name>` in the background ("7. Review", 7.3:  every Send wakes this session).
+5. Each answer REWRITES the Overview (Q13, B;  `plan-doc.md`, "Change marks"):
+   - `decide <name>#Q<n> "..."`, then rewrite the Overview's words it changes, wrapping the changed words in
+     `<epic-change item="q<n>">...</epic-change>`, in the part file
+   - then `epic change <name>`:  it stamps each mark;  Owen accepts or reopens each on the page
+   - a new question the answer raises:  `add <name>#Q`, as step 3
+6. Owen presses Accept Overview:  `inbox apply` moves the page to `phases`.  Then "4. Fill the doc".
+   - Owen says "go" in chat instead:  `epic stage <name> phases` yourself.
 
-## 4. Fill the doc (right after ExitPlanMode is approved)
+## 4. Fill the doc:  the phases (after Accept Overview)
 
-The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed `/bg "plan-doc" ...`
+The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/bg "plan-doc" ...`
 ([the bg skill](../bg/SKILL.md);  Owen, 2026-10-07).
-- That's everything below, except naming the plan file.
-- Its prompt has these steps, the approved plan's path, and the answers.
-- The session stays free meanwhile, and relays its report.
+- Its prompt has these steps, the Overview's sub-sections to read, and the decided questions.
+- The session stays free meanwhile, listening, and relays its report.
 - So does every later epic-page edit bigger than one command:
   a phase's Done list and items at its end, a reorder, Doc Review's pruning.
-
-- Name the harness plan file after the epic, so it traces back (Owen, 2026-10-04).
-  In `~/.claude/plans/` (the harness still reads the old name, hence the link):
-
-  ```sh
-  mv <file>.md epic-<name>--<file>.md
-  ln -s epic-<name>--<file>.md <file>.md
-  ```
 
 - Per phase, in order, `add-phase`
   (Owen, 2026-10-06:  "Symptom, Changes, then the details"):
@@ -326,17 +318,24 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
     --files "..." --verify "..." --estimate "1-2h"
   ```
 
+  - Names:  `P1 · Short Name`, 2-4 words each, so "start P2" is unambiguous.
   - The symptom:  ONE line, what's wrong today.
   - The changes:  two or three, what changes.
-  - The goal:  the details, one bullet per outcome, in Owen's terms.
-  - The estimate becomes the title's badge, and the Overview's total (`<epic-overview estimate>`) follows by itself.
+  - The goal:  the details, one bullet per outcome, in Owen's terms;  each decided question it carries linked.
+  - The estimate:  wall-clock for Claude, agents included, review not (`30m`, `2h`, `1-2h`).
+    It becomes the title's badge, and the Overview's total (`<epic-overview estimate>`) follows by itself.
+  - The LAST phase is always `Doc Review` ("6. Doc Review").
+    Its goal names the text pass:  the repo's text-rewriting skill, the epic's guide, the READMEs the epic made untrue,
+    `epic pages fuss --branch` and the README checker last.
+    - Added last, it STAYS last:  `add-phase` puts a later phase before it by itself (P33).
+- A decided question a phase carries out:  write it into that phase's text with a change mark,
+  `<epic-change item="q<n>">...</epic-change>`, then `epic change <name>`.
+  The question is then HANDLED in that phase (P31):  grey, out of the lists.
+  Prefer this to leaving one more decided item.
 - Per item:  `epic add <name>#D|#C|#I|#T|#Q "title" [--details "<p>...</p>"]`.
   - `#C`:  a caveat, work still to do;  `#C ... --limit`:  a limit to know about, not work (epic `epic-engine` P32).
-  - `#T`:  a test ("6. Each phase", below;  `V` before P32, still read).
-- Questions answered in "3. Plan", the agents one included:  `decide <name>#Q<n> "..."`.
-- Hand-write the summary, `<epic-summary>`:  two sentences.
-- Bring the Overview (written in "3. Plan") in line with the approved plan,
-  nested in `<epic-overview id="overview">`:
+  - `#T`:  a test ("5. Each phase", below;  `V` before P32, still read).
+- Bring the Overview in line with the phases, nested in `<epic-overview id="overview">`:
   - Each sub-section:  `<epic-section id="o1" kind="overview-part" title="...">`, then `#o2` ...
   - A title with markup:  a `<span slot="title">` first inside, instead of `title`.
   - Sub-sub-items:  `<h4 id>`.
@@ -346,16 +345,28 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - code:  in a folded `<epic-code title="file.ts · N lines" language="ts"><pre>...</pre></epic-code>`
   - digressions:  in a folded `<epic-aside title="...">`
   - the Net effect:  in `<epic-net-effect [option="A" recommended]>`
-  - options, on any item:  in `<epic-choices>`
+  - options, on any item:  in `<epic-choices>`, one set per question
   - labelled blocks:  in `<epic-field label="Where">`
   - links to items and phases:  `<a href="#d2">D2</a>`
   - NEVER change an existing `id`.
 - `epic lint <name>`, then `epic open <name> --review` (new stage:  reload).
+- Owen reviews the phases on the page:  Looks good, or Defer (after the others, still to do;  `inbox apply` moves it).
+  Accept Phases moves the page to `building`.  Then "5. Each phase", the first phase.
 
 ## 5. Each phase
 
-1. `epic phase <name>#P<N> active`.
+1. `epic phase <name>#P<N> active`, then CLAUDE'S BUILD PLAN, accepted before any code (epic `epic-engine` P33, M1).
    - Check the session's name (the isolate skill's "Session name").
+   - Write it into the phase (or each phase of a group built together):
+     `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
+     left out;  short, in Owen's terms.
+     - The phase shows "Claude's plan:" with an orange rule, and its buttons are Accept plan and Revisit
+       (`<epic-phase plan="waiting">`).
+   - Then listen (`epic inbox wait <name>`) and END THE TURN with the phase's link pair:  "Claude's plan is up".
+   - Owen's Accept plan:  `inbox apply` says "plan accepted:  build it" (the field marked accepted):  step 2.
+     - Revisit:  his note says what to change;  write the plan again (a new `--plan` waits again).
+     - He says "go" in chat:  that's the Accept;  build.
+   - Skip it only when Owen said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
    - Found a problem:  `add <name>#I`.
@@ -520,7 +531,14 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - add a LIVE example when the doc's widgets can show it
    - Then ask, with option labels that match the doc's.
 
-## 6. Doc Review (last phase)
+## 6. Doc Review (the floating last phase)
+
+- It FLOATS (epic `epic-engine` P33, M4):  docs never trail the code.
+  - `add-phase` (no `--before`) puts a new phase before a last Doc Review, and a Doc Review already done is to do
+    again:  new phases on a finished epic bring the doc pass back by themselves.
+  - A STANDING epic has no Doc Review:  its short doc pass follows each phase, or each group built together
+    ("5. Each phase", step 5).
+  - What it writes (the guide, the READMEs) stays as below until Q18 of epic `epic-engine` is taken up.
 
 - Prune:  close stale items;  make the summary and Overview true to what was BUILT.
 - "To test":  every hand check the work needs before merging is there, each a step and what should happen.
@@ -1061,13 +1079,11 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
        - symptom (one line), changes (two or three)
        - goal:  a bullet per outcome, Owen's input in it, each antecedent linked (`<a href="#j1">J1</a>`)
        - files, verify, estimate
-    3. where:
-       - before Doc Review, while Doc Review is still to do (`--before <its number>`:  it moves down one)
-       - else last
-       - it prints the new number:
+    3. where:  last, before a last Doc Review (`add-phase` puts it there itself, and reopens a done Doc Review:
+       "6. Doc Review");  `--before <N>` only to put it earlier.  It prints the new number:
 
        ```sh
-       epic add-phase <name> "<Name>" --symptom ... --changes ... --goal ... --files ... --verify ... --estimate ... [--before <N>]
+       epic add-phase <name> "<Name>" --symptom ... --changes ... --goal ... --files ... --verify ... --estimate ...
        ```
 
     4. each antecedent:  `epic queue <name>#<id> "P<n> · <Name>"`.
@@ -1199,12 +1215,16 @@ Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by 
 ## Cheat sheet (`epic ...`, from anywhere in the repo)
 
 ```
-create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future]
-                                                    create from the template, update the docs' home page;  --future:  a
-                                                    future epic (9.);  create on a future epic's doc plans it (promoted)
+create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future] [--stage <stage>]
+                                                    create from the template, in the Overview stage (3.), update the
+                                                    docs' home page;  --future:  a future epic (9.);  create on a
+                                                    future epic's doc plans it (promoted)
+stage <name> [overview|phases|building]             the page's stage:  what it shows;  Owen's Accept buttons move it
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
-          [--before N]                              --before:  inserted as PN;  the to-do phases from N move down
+          [--before N]                              last, before a last Doc Review (a done one reopens);  --before:
+                                                    inserted as PN;  the to-do phases from N move down
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
+update <name>#P<N> --plan "<ol>..</ol>"             Claude's build plan:  waits for Owen's Accept plan (5., step 1)
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."]   phase N's plan changed:  <epic-update>, after Goal
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went

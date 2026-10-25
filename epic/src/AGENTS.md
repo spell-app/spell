@@ -1369,6 +1369,12 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
     - `epic inbox apply` makes Accept `accepted` (the orange goes, the chip stays) and reopens the question for
       Reopen:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
+  - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`):
+    - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
+      moved after the others)
+    - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
+      `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
+    - else Revisit, Make Caveat, Do Now:  notes on the plan, no Approve
   - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.

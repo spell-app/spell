@@ -115,6 +115,14 @@ The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning
   sends what's unsent with an accept mark; `epic inbox apply` moves the page on a stage, and the session then
   writes the phases, or starts building. Its tooltip counts the open questions: a reminder, never a lock
 - while `phases`, an open phase's pills are Looks good and Defer (later: after the other phases, still to do)
+- no plan mode (P33): the Overview and its questions are written on the page, and each answer rewrites the Overview,
+  its changed words in `<epic-change item="qN">`; the phases come after Accept Overview
+- BUILDING, each phase starts with CLAUDE'S PLAN (P33): `epic update <name>#P3 --plan "<ol>...</ol>"` writes a
+  `plan` field, "Claude's plan:" with an orange rule, and the phase's pills become Accept plan and Revisit
+  (`<epic-phase plan="waiting">`); Owen's Accept plan marks it accepted (`plan="accepted"`, the field's `accepted`
+  time), and Claude builds. A new `--plan` waits again; `--plan ""` removes it
+- the doc pass FLOATS (P33): `add-phase` puts a new phase before a last Doc Review, and reopens a done one
+- one question, one choice set: `epic lint` says `ASKS:` for an item asking two open `<epic-choices>` at once (I88)
 
 While planning (no phase yet), the page shows a folded "Plan hung?" notice (P3 of `windows-and-review`), drawn, never
 written:

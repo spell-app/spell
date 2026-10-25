@@ -316,7 +316,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (!next && this.standing)
       return { color: "blue", icon: "arrows rotate", words: this.translationForKey("standing") }
     if (!next) return { color: "green", icon: "check", words: this.translationForKey("done") }
-    return this.phaseLabel(next, "grey", "circle right", this.translationForKey("next"))
+    // the row's to-do circle (`EpicPhase`'s `todo` icon):  the same icon as the phase it names
+    return this.phaseLabel(next, "grey", "circle outline", this.translationForKey("next"))
   })
 
   /** Does the doc still hold its old crumbs before the page (`OLD_CRUMBS`)?  Then it draws none of its own. */
@@ -452,10 +453,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const label = this.phaseStep()
     const state = this.state()
     if (!label || !state) return label
+    // the phase's OWN icon, as its row draws it (Owen, 2026-10-24:  "phase icon + top 'P26' are inconsistent");  the
+    // epic's state colours it and says itself in the tooltip
     return {
       ...label,
       color: state.color as StepLabel["color"],
-      icon: state.icon,
       tip: `${label.tip ?? label.words}\n${state.tip}`
     }
   })

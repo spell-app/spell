@@ -150,6 +150,7 @@ As `plan-doc.md`, "Ids":
     ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>Owen's words</p></blockquote> ...</epic-field
   ></epic-field>
   <epic-field name="goal"><ul><li>a bullet per outcome</li></ul></epic-field>
+  <epic-field name="plan" accepted="2026-10-24 21:40"><ol><li>Claude's build steps</li></ol></epic-field>
   <epic-update at="2026-10-06 14:30" phase="3" summary="Split in two"><p>what changed in the plan, and why</p></epic-update>
   <epic-field name="done"><ul><li>what was built</li></ul></epic-field>
   <epic-commit sha="2c71ac57...">one or two sentences</epic-commit>
@@ -161,14 +162,24 @@ As `plan-doc.md`, "Ids":
 
 - `id`:  stable, from the name it was added under ("Ids");  `P2`, its place, is drawn.
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
-- `status`:  `todo`, `active` (one at a time), `done`.
+- `status`:  `todo`, `active`, `done`.
+- `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
+  title row knows with its body not loaded.
+  - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
+    (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
+  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept plan and Revisit
+    (`<epic-review buttons="plan">`).
+  - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
+    `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
 - Children in that order, always (the vocabulary's `childOrder: "listed"`):
   the tool puts each where it belongs.
   - Owen's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
 - `add-phase`'s fields:
   - with `--symptom` / `--changes`:  Symptom, Changes, then Goal (optional), Files, Verify
   - without:  Goal, Files, Verify
-  - A field not given reads `TBD`.
+  - A field not given reads `TBD`;  but the plan, which comes only once written (`--plan`).
+- `add-phase` with no `--before`, the last phase a `Doc Review` (by its name):  the new phase goes before it, and a Doc
+  Review already done is to do again, logged (P33:  the doc pass floats).
 - `add-phase ... --before N`:  inserted as PN (`N` any way the tool takes a phase:  `--before epic-migrate`).
   - Every phase from N on moves down a NUMBER;  ids stay, so links, comments, marks and part files stay on them.
     What says the number follows:
@@ -196,7 +207,8 @@ As `plan-doc.md`, "Ids":
   which sections the page shows (`PageStages`, `spell-epic/phases`).
   - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases too;  `building`:  everything.
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
-  - `create` writes `overview` (Q15:  new and future epics);  `stage <name> <stage>` sets it by hand, logged.
+  - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
+    `stage <name> <stage>` sets it by hand, logged.
   - The header's stage button (Accept Overview, Accept Phases) leaves the inbox mark `stage`,
     `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).

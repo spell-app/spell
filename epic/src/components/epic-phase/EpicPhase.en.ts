@@ -211,6 +211,13 @@ export const epicPhaseVocabulary = {
     },
     {
       tag: "epic-field",
+      where: { attribute: "name", values: ["plan"] },
+      max: 1,
+      description:
+        "Claude's plan:  how Claude will build it, for Owen to accept first (epic `epic-engine` P33;  `--plan`)."
+    },
+    {
+      tag: "epic-field",
       where: { attribute: "name", values: ["done"] },
       max: 1,
       description: "Done:  what was built, once done."

@@ -277,12 +277,12 @@ describe("<epic-page>", () => {
       mark(busy)?.title.split("\n").at(-1)
     ]).toEqual(["progress", "blue", `in progress:  1/2 phases done, updated ${today}`])
     busy.remove()
-    // a phase active, but nobody on it for days:  paused
+    // a phase active, but nobody on it for days:  paused, in grey;  the icon the PHASE's own (P33:  as its row draws it)
     const idle = await render(page(`updated="2026-01-01"`, ["done", "active"], items))
     expect([mark(idle)?.dataset.state, mark(idle)?.getAttribute("color"), mark(idle)?.getAttribute("icon")]).toEqual([
       "paused",
       "grey",
-      "circle pause"
+      "circle half stroke"
     ])
     idle.remove()
     // every phase done, a question open:  errors;  answered, it's done, and the DONE label says so alone
