@@ -32,6 +32,13 @@
 
 <encanto-aplicación "marcador">
 	<propiedad "mejor" uno-de="bajo, alto" />
+	<propiedad "puntos">una nueva lista de números</>
+	<dibujar>
+		<encabezado>Puntos</>
+		<para cada punto en sus puntos>
+			<texto>{el punto}</texto>
+		</>
+	</dibujar>
 	<probar "empezar de nuevo">
 		eco "otra vez"
 	</>

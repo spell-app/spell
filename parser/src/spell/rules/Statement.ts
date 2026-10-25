@@ -44,6 +44,14 @@ export class SpellStatement<
   declare flatBody: boolean
   @proto static flatBody = false
   /**
+   * `true`:  a LOOP (`for each card in its cards`, `repeat 3 times`):  its body runs inside whatever method holds it,
+   * as a callback (`core.map(list, (card) => ...)`).
+   * - So a markup line in a loop inside a drawing draws, one for each time round (`drawn_markup`, epic
+   *   `elemental-spell` C28):  see `DrawIt.drawingIn()`.
+   */
+  declare loops: boolean
+  @proto static loops = false
+  /**
    * In the expression twin `operandInExpressions` makes:  the statement rule it's the twin of,
    * the one `scope.addRule()` recorded.  See `SpellStatement.statementRuleOf()`.
    */

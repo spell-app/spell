@@ -170,6 +170,109 @@ describe("a markup line in a drawing IS the drawing (Q14)", () => {
     expect(compiled).toContain('return h("div", { class: "spot" }, () => core.drawThing(item))')
   })
 
+  test("several drawn lines, a loop and an `if` draw all of them, in order, as one list (C28)", () => {
+    const compiled = compile([
+      'a "card" is a view',
+      'a "board" is a view where:',
+      '\t- its "cards" is a list of cards',
+      '\t- its "title" is "Klondike"',
+      "\t- to draw it:",
+      "\t\t<ui-text>top</ui-text>",
+      "\t\t<ui-text>bottom</ui-text>",
+      "\t\tfor each card in its cards",
+      "\t\t\t<ui-segment>{draw the card}</ui-segment>",
+      '\t\tif its title is "Klondike"',
+      "\t\t\t<ui-text>K</ui-text>",
+      "\t\totherwise",
+      "\t\t\t<ui-text>?</ui-text>"
+    ])
+    expect(compiled).toContain(
+      [
+        "    return [",
+        '      h("ui-text", "top"),',
+        '      h("ui-text", "bottom"),',
+        '      core.map(this.cards, (card) => h("ui-segment", () => core.drawThing(card))),',
+        '      this.title === "Klondike" ? h("ui-text", "K") : h("ui-text", "?")',
+        "    ]"
+      ].join("\n")
+    )
+  })
+
+  test("a loop alone is the drawing, one per time round;  in an `if`, each branch returns its own (C28)", () => {
+    const compiled = compile([
+      'a "card" is a view',
+      'a "pile" is a view where:',
+      '\t- its "cards" is a list of cards',
+      "\t- to draw it:",
+      "\t\tfor each card in its cards",
+      "\t\t\t<ui-text>{the card}</ui-text>",
+      'a "stack" is a view where:',
+      '\t- its "cards" is a list of cards',
+      "\t- to draw it:",
+      "\t\tif its cards is empty",
+      "\t\t\t<ui-text>none</ui-text>",
+      "\t\totherwise",
+      "\t\t\t<ui-text>cards:</ui-text>",
+      "\t\t\tfor each card in its cards",
+      "\t\t\t\t<ui-text>{the card}</ui-text>"
+    ])
+    expect(compiled).toContain('return core.map(this.cards, (card) => h("ui-text", () => card))')
+    expect(compiled).toMatch(
+      /else \{\s+return \[\s+h\("ui-text", "cards:"\),\s+core\.map\(this\.cards, \(card\) => h\("ui-text", \(\) => card\)\)\s+\]/
+    )
+  })
+
+  test("a line that draws nothing, after a drawn one, runs before the drawing;  an `if` that does more can't draw", () => {
+    const compiled = compile([
+      'a "board" is a view where:',
+      '\t- its "moves" is 0',
+      "\t- to draw it:",
+      "\t\t<ui-text>top</ui-text>",
+      "\t\tset its moves to 1",
+      "\t\t<ui-text>bottom</ui-text>",
+      "\t\tif its moves is 1",
+      "\t\t\tset its moves to 2",
+      "\t\t\t<ui-text>two</ui-text>"
+    ])
+    expect(compiled).toMatch(/this\.moves = 1\n\s+return \[/)
+    expect(compiled).toContain("PARSE ERROR: an `if` among other drawn lines can only draw")
+  })
+
+  test("a drawing of several things draws all of them when it runs (C28)", () => {
+    const run = runSpell([
+      'a "board" is a view where:',
+      '\t- its "names" is a list of texts',
+      "\t- to draw it:",
+      "\t\t<ui-text>top</ui-text>",
+      "\t\tfor each name in its names",
+      "\t\t\t<ui-text>{the name}</ui-text>",
+      "the board is a new board",
+      'add "a" to the names of the board',
+      'add "b" to the names of the board'
+    ])
+    const { board } = run("board") as { board: { draw(): unknown } }
+    const drawing = board.draw() as unknown[]
+    expect(drawing).toHaveLength(2)
+    expect(drawing[1]).toHaveLength(2)
+  })
+
+  test("in Spanish:  `para cada carta en sus cartas` (C28)", () => {
+    const compiled = compile(
+      [
+        'una "carta" es una vista',
+        'un "tablero" es una vista donde:',
+        '\t- sus "cartas" son una lista de cartas',
+        "\t- para dibujarlo:",
+        "\t\t<ui-text>arriba</ui-text>",
+        "\t\tpara cada carta en sus cartas",
+        "\t\t\t<ui-text>{la carta}</ui-text>"
+      ],
+      "/test.es.spell"
+    )
+    expect(compiled).toContain('core.map(this.cartas, (carta) => h("ui-text", () => carta))')
+    expect(compiled).toMatch(/return \[\s+h\("ui-text", "arriba"\),/)
+  })
+
   test("outside a drawing, a markup line isn't understood", () => {
     const { files } = parseSpellProject([
       { path: "/test.spell", contents: ["to show it:", "\t<div>hi</div>"].join("\n") }

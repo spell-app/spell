@@ -27,5 +27,10 @@ una "ficha giratoria" es una vista donde:
 
 marcador es una aplicación donde:
 	- su "mejor" es uno de bajo, alto
+	- su "puntos" es una nueva lista de números
+	- para dibujar eso:
+		<es-encabezado>Puntos</es-encabezado>
+		para cada punto en sus puntos
+			<es-texto>{el punto}</es-texto>
 	- para probar empezar de nuevo:
 		eco "otra vez"

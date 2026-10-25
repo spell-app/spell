@@ -22,6 +22,8 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  * TODO: return values e.g. array.map() ???
  */
 export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
+  /** A loop:  a markup line in its body draws, in a drawing -- see `SpellStatement.loops`. */
+  @proto static loops = true
   @proto static alias = ["statement", "expression"]
 
   /**

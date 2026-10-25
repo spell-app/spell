@@ -14,6 +14,8 @@ import { type MethodBody } from "./lists.shared"
  *   `await core.forEachSequential(...)` if body contains an `await` (`method.isAsync`).
  */
 export class RepeatNTimes extends SpellStatement<"number|body?"> {
+  /** A loop:  a markup line in its body draws, in a drawing -- see `SpellStatement.loops`. */
+  @proto static loops = true
   @proto static alias = ["statement", "expression"]
   /**
    * Name of the variable holding the current iteration number, in the language's words:  `number`, `número`.

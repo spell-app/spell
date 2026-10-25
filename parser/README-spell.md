@@ -343,6 +343,8 @@ export class Tableau extends Pile {
     `- to draw it:` unquoted takes a method's body, which returns it.
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
     `if it is face up`, then markup, `otherwise`, then other markup.
+  - Several such lines draw all of them, in order;  so does a loop, one each time round:
+    `<ui-text>Scores</ui-text>`, then `for each score in its scores` with `<ui-text>{the score}</ui-text>` under it.
 - A view can have PARTS, named drawings it places:
   - `- it has parts "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
   - `draw its front` places it, on a line of its own or inside markup:  `<div>{draw its front}</div>`

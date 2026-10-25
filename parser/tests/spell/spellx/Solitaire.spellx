@@ -20,7 +20,11 @@
 	</>
 
 	<draw>
+		<toolbar />
 		<text>{its moves} moves</text>
+		<for each column in its columns>
+			<segment>{draw the column}</segment>
+		</>
 	</draw>
 </spell-app>
 
@@ -33,5 +37,8 @@
 	The ten best games, fastest first.
 	<draw>
 		<header>High scores</>
+		<for each score in its scores>
+			<text>{the score}</text>
+		</>
 	</draw>
 </spell-page>

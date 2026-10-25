@@ -2,6 +2,8 @@ import { kebabCase, proto } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { Wording } from "spell-parser/spell/rules/expressions"
+// Through the folder:  read only when called, once the folder has loaded
+import { DrawnLines } from "spell-parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell-parser/spell/rules/Statement"
 import { SubjectRule } from "spell-parser/spell/rules/types"
@@ -542,6 +544,9 @@ export class MethodDefinition<
         (line) => !ActionDetail.isDetailLine(line.match as P.Match)
       )
     }
+
+    // a drawing (English's `to draw it:`):  several drawn lines, or a loop of them, draw all of them (C28)
+    if (DrawnLines.draws(method.body.statements)) method.body.statements = DrawnLines.gather(method.body.statements!)
 
     // Add props assignment to START of method body
     if (props) {

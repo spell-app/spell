@@ -17,9 +17,11 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * 	otherwise
  * 		<ui-image source="card-back.svg" />
  * ```
- * - The spell lines around it decide which:  `if`, `otherwise`, loops.  The first markup line reached is the drawing.
+ * - The spell lines around it decide which:  `if`, `otherwise`, loops.
  * - So does a part placed on a line of its own, `draw its front` (`draw_part`).
- * - Only in a drawing (`DrawIt.drawingIn()`):  `to draw it`, `to draw each item`, a part's own `to draw its front`.
+ * - Several draw all of them, in order, and a loop draws one each time round:  `DrawnLines.gather()` (C28).
+ * - Only in a drawing (`DrawIt.drawingIn()`):  `to draw it`, `to draw each item`, a part's own `to draw its front`,
+ *   and a loop in one.
  * - In a part's drawing, its element carries the part's name as a CSS part (J6):  see `DrawIt.withPart()`.
  * - `return <...>` still works, as before.
  */

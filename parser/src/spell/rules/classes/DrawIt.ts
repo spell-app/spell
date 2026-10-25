@@ -7,6 +7,7 @@ import { SubjectRule } from "spell-parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
+import { DrawnLines } from "./DrawnLines"
 
 /**
  * `draw_it` rule:  how a type draws, in its outline body (epic `spanish` P20).
@@ -140,10 +141,12 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
    * What drawing `scope` is in:  `{ drawing, part }` for a `draw_it`'s body (`part` for a part's),
    * `{ drawing: "draw" }` for a method named `draw` (English's `to draw it:`) -- `undefined` anywhere else.
    * - Its nearest method's, so a line inside an `if` in a drawing is in the drawing.
+   * - A loop's body is a method of its own (`core.map(list, (card) => ...)`), but it runs inside the drawing:
+   *   so a line in `for each card in its cards` is in the drawing too (`SpellStatement.loops`, C28).
    */
   static drawingIn(scope: P.Scope): { drawing: Drawing; part?: string } | undefined {
     let current: P.Scope | undefined = scope
-    while (current && !(current instanceof P.MethodScope)) current = current.parentScope
+    while (current && !(current instanceof P.MethodScope && !DrawIt.isLoop(current))) current = current.parentScope
     const declaredBy = (current as P.MethodScope | undefined)?.declaredBy
     if (!declaredBy) return undefined
     if (declaredBy.is(DrawIt)) {
@@ -154,6 +157,11 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
       declaredBy.rule as { getSignature?: (match: P.Match) => { methodName?: string } | undefined }
     ).getSignature?.(declaredBy)?.methodName
     return method === "draw" ? { drawing: "draw" } : undefined
+  }
+
+  /** Is `scope` a loop's body, `for each ...`'s or `repeat ...`'s -- see `SpellStatement.loops`? */
+  private static isLoop(scope: P.MethodScope): boolean {
+    return (scope.declaredBy?.rule as { loops?: boolean } | undefined)?.loops === true
   }
 
   /**
@@ -229,13 +237,16 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
     const { part } = match.data
     let body = P.matchAST<MethodBody>(this.getBody(match))
     if (part && body instanceof P.ASTExpression) body = DrawIt.withPart(body, part) as MethodBody
+    const method = new P.ASTMethodDefinition(match, {
+      args: isEachItem ? [new P.ASTVariableExpression(match, { name: ITEM, datatype: match.data.itemType })] : [],
+      body
+    })
+    // several drawn lines, or a loop of them:  all of them, in order (C28)
+    if (method.body.statements) method.body.statements = DrawnLines.gather(method.body.statements)
     return new P.ASTPropertyDefinition(match, {
       type: P.SubjectScope.of(match.scope)!.subject,
       property: part ? DrawIt.partMethodName(part) : drawing,
-      method: new P.ASTMethodDefinition(match, {
-        args: isEachItem ? [new P.ASTVariableExpression(match, { name: ITEM, datatype: match.data.itemType })] : [],
-        body
-      })
+      method
     })
   }
 }

@@ -15,6 +15,8 @@ import { type MethodBody } from "./lists.shared"
  * TODO: `down` is not accounted for in the output
  */
 export class ListRangeIteration extends SpellStatement<"item|start|end|body?"> {
+  /** A loop:  a markup line in its body draws, in a drawing -- see `SpellStatement.loops`. */
+  @proto static loops = true
   @proto static alias = "statement"
 
   /**

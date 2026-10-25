@@ -185,8 +185,6 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - Plain Spell is untouched:  its drawings name tags as before.
 
 **Not yet:**
-- `<for each>` in a drawing, and a drawing of several elements with Spell between them:  plain Spell can't say them
-  yet either.
 - A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
 - `<menu>`:  read into the tree, but an error when compiled, until menus come.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.

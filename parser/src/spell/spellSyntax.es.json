@@ -5033,7 +5033,7 @@
           "ruleNames": ["draw_it"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 51,
+          "line": 52,
           "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
@@ -5073,7 +5073,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -6240,7 +6240,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []

@@ -19,7 +19,10 @@ solitaire is an app where:
 		// A press a card passed on.
 		print "pressed"
 	- to draw it:
+		<ui-toolbar />
 		<ui-text>{its moves} moves</ui-text>
+		for each column in its columns
+			<ui-segment>{draw the column}</ui-segment>
 
 a "score page" is a page where:
 	// A page that lists games, best first.
@@ -29,3 +32,5 @@ leaderboard is a score page where:
 	// The ten best games, fastest first.
 	- to draw it:
 		<ui-header>High scores</ui-header>
+		for each score in its scores
+			<ui-text>{the score}</ui-text>

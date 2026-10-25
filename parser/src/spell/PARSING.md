@@ -1087,6 +1087,15 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
   - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
     `{markup:draw_part}` => `return ...`, at `Priority.specific`.
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
+    A loop's body counts as the drawing around it (`SpellStatement.loops`:  `for each`, `repeat`).
+  - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts), from `draw_it`'s and
+    `to_do_something`'s `getAST()`, makes them ONE `return [ ... ]`, in order:
+    - markup lines one after another are one fragment already (the tokenizer's), spread into the list
+    - a loop with drawn lines is its `core.map(list, (item) => ...)`, its body gathered the same way
+    - an `if` chain among them is `cond ? a : b` (`null` when no branch is picked);  alone, it stays an `if`, each
+      branch returning its own
+    - a line that draws nothing after a drawn one runs before the drawing;  an `if` branch that does more than draw
+      draws nothing, with a parse error comment
 - A BUILT-IN TEMPLATE written in spell:  `a card is a two sided view` (J8;  compiled once since Q71).
   - Its source is spell, in the core:  [TwoSidedView.spell](../core/templates/TwoSidedView.spell), and each other
     language's twin, [TwoSidedView.es.spell](../core/templates/TwoSidedView.es.spell).
