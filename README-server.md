@@ -1007,7 +1007,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [test/](src/server/test/) | the test helpers |
 | [scripts/favicon.ts](scripts/favicon.ts) | `yarn favicon` |
 | [runs/](src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](src/server/runs/runs.types.ts)) |
-| [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleRecord`, `BUNDLES`) |
+| [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkIconPacks()`, `sizeReport()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
   `spell/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.

@@ -187,6 +187,20 @@ export type BundleBuilt = {
   seconds: number
 }
 
+/** What `Bundle.sizeReport()` reports on:  a build script's output, as it ends. */
+export type BundleSizeParams = {
+  /** what the report calls it, e.g. `site`, `brand` */
+  name: string
+  /** the output folder, absolute */
+  folder: string
+  /** how long the build took, s */
+  seconds: number
+  /** the files a page loads first, relative to `folder`, e.g. `["site.css", "site.js"]` */
+  entries: readonly string[]
+  /** count only the files this matches, e.g. `/\.(js|css)$/` */
+  only?: RegExp
+}
+
 /** What a build records in its `output` folder (`BUNDLE_RECORD`), for `Bundle.check()` to compare. */
 export type BundleRecord = {
   /** the hash of the sources it was built from */
