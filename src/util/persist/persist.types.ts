@@ -2,7 +2,9 @@
  * Types for `spell/util/persist`:  what an app keeps for people --
  * their preferences across visits (`PrefStore`), and the history they undo and redo (`UndoStack`).
  * - Generic, like every file of this folder:  nothing spell-specific, so Spell UI uses it too.
- * - Types only, apart from the place names:  the folder's other files import it, never the reverse.
+ * - Types only, apart from the place names and the colour scheme's constants:
+ *   the folder's other files import it, never the reverse.
+ *   - Spell UI's runtime reads `DARK_QUERY` from it by file:  small, no pref store.
  * - The page server's side of `ServerPlace`'s protocol (spell-app's spaces) imports its types too.
  */
 
@@ -45,6 +47,50 @@ export type ValueInfo = {
   /** Its value while nothing's kept:  wins over the first choice and the type's default. */
   default?: unknown
 }
+
+////////////////
+// ## Colour scheme
+////////////////
+
+/** The colour schemes a page shows:  `ColorScheme`'s. */
+export const ColorSchemeNames = ["light", "dark"] as const
+/** One of `ColorSchemeNames`. */
+export type ColorSchemeName = (typeof ColorSchemeNames)[number]
+
+/**
+ * The key of the chosen colour scheme, in the browser's storage:  `light`, `dark`, or absent for the OS's.
+ * - ONE key for every Spell site, so a switch on one holds on the others:
+ *   the site header on the docs, epic pages and saga pages, Spell UI's docs site, the editor app
+ * - Plain text, so a page's inline `<head>` script reads it before first paint (Spell UI's `ThemePreference`).
+ */
+export const COLOR_SCHEME_KEY = "spell-site:scheme"
+
+/**
+ * Keys the scheme lived under before `COLOR_SCHEME_KEY` (2026-10-04):
+ * read once while it's absent, the first valid one copied to it, then every one removed (`ColorScheme.chosen()`).
+ * - `spell-site:theme`:  the site header's
+ * - `spell-ui-site:scheme`:  Spell UI's docs site (and the Astro site before it)
+ */
+export const OLD_COLOR_SCHEME_KEYS = ["spell-site:theme", "spell-ui-site:scheme"] as const
+
+/** Media query of the OS's dark scheme:  what a page follows while no scheme is chosen. */
+export const DARK_QUERY = "(prefers-color-scheme: dark)"
+
+/**
+ * Classes on `<html>` that force a scheme:  Spell UI's tokens and `--ui-scheme` follow them.
+ * - `ColorScheme.apply()` sets them;  so does a page with its own light / dark switch (the editor app's)
+ */
+export const COLOR_SCHEME_CLASSES = { light: "ui-light", dark: "ui-dark" } as const satisfies Record<
+  ColorSchemeName,
+  string
+>
+
+/**
+ * What `ColorScheme.watch()` heard:
+ * - `os`:  the OS switched scheme, so a page following it shows the other one
+ * - `chosen`:  another tab chose a scheme (already applied here)
+ */
+export type ColorSchemeChange = "os" | "chosen"
 
 ////////////////
 // ## The server's protocol
