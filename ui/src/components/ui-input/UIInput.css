@@ -6,7 +6,7 @@
  *   (the `ui.components.input` layers come later, so they win).
  * - The shadow markup it expects (class grammar on semantic elements), in this order inside the root:
  *
- *     <div class="ui [size color state] [transparent fluid loading disabled inverted] [left icon]
+ *     <div class="ui [size color state] [transparent fluid loading disabled read-only inverted] [left icon]
  *                 [labeled | right labeled | corner labeled | left corner labeled] [action | left action]
  *                 input [icon] [file]" part="input">
  *       <span class="ui label" part="label"><slot name="label">text</slot></span>      (labeled, before)
@@ -579,6 +579,11 @@
   }
   .ui.disabled.input > :is(input, textarea):disabled {
     opacity: 1;
+  }
+
+  /* Read-only:  shown, not typed in;  the arrow, as every control's `read-only`. */
+  .ui.read-only.input > :is(input, textarea) {
+    cursor: default;
   }
 
   @media (prefers-reduced-motion: reduce) {

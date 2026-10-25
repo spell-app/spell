@@ -4,6 +4,7 @@
  * - `FormComponent` (form value, validity, reset) on a `DOMFormControl` (the form-control API)
  * - `Validator` (Fomantic's rules)
  * - `MenuOptions` (search, additions, keyboard navigation of an option list)
+ * - `HighlightedOption` (the highlighted option of a list a control opens:  dropdown, search, icon picker)
  * - `ControlLabels` (the DOM element's `<label>`s as the inner control's name)
  * - `PopoverPanel` (the panel a control opens under itself:  dropdown, calendar, search, icon picker)
  * - Imported by the families with a value:
@@ -20,6 +21,7 @@
 
 export * from "spell-ui/elements/Validator"
 export * from "spell-ui/elements/MenuOptions"
+export * from "spell-ui/elements/HighlightedOption"
 export * from "spell-ui/elements/DOMFormControl"
 export * from "spell-ui/elements/FormComponent"
 export * from "spell-ui/elements/ControlLabels"

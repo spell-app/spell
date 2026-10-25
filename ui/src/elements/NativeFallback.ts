@@ -252,6 +252,26 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
     return target
   }
 
+  /**
+   * Send the vocabulary's event `name` from the DOM element, with `detail`:  as the component's own `send()` does.
+   * - It bubbles, and crosses shadow roots.
+   * - It's cancelable when the vocabulary says so;  then it returns false if a listener cancelled it.
+   * - On a translated tag, it goes out under that tag's name for it:
+   *   `<es-selector>`'s `ui-changed` is `es-cambiado`.
+   * - A host that isn't one of our DOM elements (a test's stub) sends the English name.
+   */
+  protected send(name: E.EventName<V>, detail: object): boolean {
+    const spec = this.vocabulary.events.find((event) => event.name === name)
+    const definition = (this.domElement.constructor as Partial<E.DOMElementClass>).tagSetup?.elementDefinition
+    const event = new CustomEvent(definition?.event(name) ?? name, {
+      bubbles: true,
+      composed: true,
+      cancelable: !!spec?.cancelable,
+      detail
+    })
+    return this.domElement.dispatchEvent(event)
+  }
+
   /** `addEventListener`, undone by `dispose()`. */
   protected listen<T extends Event = Event>(target: EventTarget, type: string, handler: (event: T) => void) {
     target.addEventListener(type, handler as EventListener)

@@ -73,9 +73,7 @@ export class RatingFallback extends E.NativeFallback<typeof ratingVocabulary> {
     ;(this.domElement as RatingDOMElement).value = point
     this.sync()
     const detail = { value: point, originalEvent }
-    this.domElement.dispatchEvent(
-      new CustomEvent(this.vocabulary.events[0].name, { bubbles: true, composed: true, detail })
-    )
+    this.send(this.vocabulary.events[0].name, detail)
   }
 
   /** Copy the chosen radio and the group's validity onto the DOM element. */

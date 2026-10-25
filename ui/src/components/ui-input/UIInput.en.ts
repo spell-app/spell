@@ -92,10 +92,7 @@ export const inputVocabulary = {
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
-      name: "readonly",
-      group: "form",
-      kind: "boolean",
-      property: "readOnly",
+      ...UIT.FormControlAttributes.readonly,
       description: "Shows its value but can't be edited;  submitted with the form (unlike `disabled`)."
     },
     {
@@ -152,14 +149,9 @@ export const inputVocabulary = {
       description:
         "Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input."
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name." },
-    { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
-    {
-      name: "required",
-      group: "form",
-      kind: "boolean",
-      description: "Constraint:  must not be empty (`valueMissing`)."
-    },
+    UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.placeholder,
+    { ...UIT.FormControlAttributes.required, description: "Constraint:  must not be empty (`valueMissing`)." },
     {
       name: "pattern",
       group: "form",
@@ -237,7 +229,7 @@ export const inputVocabulary = {
     { name: "icon", description: "The icon box (the spinner while `loading`)." }
   ],
   states: [
-    { name: "invalid", description: "Fails validation, once someone has interacted (`:user-invalid` semantics)." },
+    UIT.FormControlStates.invalid,
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
     { name: "fluid", description: "The host is block-level (`fluid`, or inside a `<ui-field>`)." }

@@ -24,8 +24,8 @@ export class ComponentPacks {
   /** Every registered pack's tag prefix. */
   private static readonly prefixes = new Set<string>()
 
-  /** Resolved script URL => its load, started once per page. */
-  private static readonly loads = new Map<string, Promise<ComponentPack>>()
+  /** Resolved script URL => its load, started once per page;  a failure is the answer for good. */
+  private static readonly loads = new E.LoadOnce<string, ComponentPack>()
 
   /** Loads whose script hasn't registered its pack yet. */
   private static readonly pending = new Set<PendingPack>()
@@ -104,13 +104,10 @@ export class ComponentPacks {
     } catch (error) {
       return Promise.reject(error instanceof Error ? error : new Error(String(error)))
     }
-    let load = ComponentPacks.loads.get(url)
-    if (!load) {
+    return ComponentPacks.loads.get(url, () => {
       const known = ComponentPacks.packs.get(ComponentPacks.nameFor(url))
-      load = known ? Promise.resolve(known) : ComponentPacks.inject(url)
-      ComponentPacks.loads.set(url, load)
-    }
-    return load
+      return known ? Promise.resolve(known) : ComponentPacks.inject(url)
+    })
   }
 
   /**

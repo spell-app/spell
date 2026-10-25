@@ -62,13 +62,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
       this.sync(input)
     })
     this.listen(input, "change", (event) => {
-      domElement.dispatchEvent(
-        new CustomEvent(CHANGE_EVENT, {
-          bubbles: true,
-          composed: true,
-          detail: { value: input.value, originalEvent: event }
-        })
-      )
+      this.send(CHANGE_EVENT, { value: input.value, originalEvent: event })
     })
     this.input = input
     return [root]

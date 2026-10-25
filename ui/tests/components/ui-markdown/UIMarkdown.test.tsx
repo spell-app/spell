@@ -377,9 +377,10 @@ describe("<ui-markdown editable>", () => {
     await press("Home")
     expect(tabs(host)[0].getAttribute("aria-selected")).toBe("true")
 
-    /** Press `key` on the tab list. */
+    /** Press `key` on the shown tab, as a person does. */
     async function press(key: string) {
-      tabs(host)[0].parentElement!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))
+      const shown = tabs(host).find((tab) => tab.getAttribute("aria-selected") === "true")!
+      shown.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
       await ElementFixture.settle(host)
     }
   })

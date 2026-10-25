@@ -21,7 +21,8 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  * - Two shared entries:  `core` (every family) and `forms` (families with a form VALUE:  dropdown, input, checkbox, form).
  * - `groups` (`bucket()`):
  *   - `solid-js`, `@solidjs/*` => `library`
- *   - `forms.ts`, `FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`, `ControlLabels` (+ `LabelWatch`) =>
+ *   - `forms.ts`, `FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`, `HighlightedOption`, `ControlLabels`
+ *     (+ `LabelWatch`, `PopoverPanel`) =>
  *     `shared:forms`
  *   - a family folder => its own classes / sheet / vocabulary / fallback
  *     (`SkeletonText`, which no page loads, is the kit's since epic `repo-split` P10)
@@ -82,7 +83,7 @@ function bucket(id: string): Bucket {
   const src = /\/src\/(.+)$/.exec(file)?.[1]
   if (!src) return "other"
   if (
-    /^(forms\.ts|elements\/(FormComponent|DOMFormControl|Validator|MenuOptions|ControlLabels|LabelWatch|PopoverPanel)\.ts)$/.test(
+    /^(forms\.ts|elements\/(FormComponent|DOMFormControl|Validator|MenuOptions|HighlightedOption|ControlLabels|LabelWatch|PopoverPanel)\.ts)$/.test(
       src
     )
   )

@@ -22,7 +22,7 @@ export class CodeHighlighter {
   static engineLoader: () => Promise<{ CodeEngine: { instance: CodeEngine } }> = () => import("./CodeEngine")
 
   /** `load()`ed `UI.code` languages, by `name/variant`:  page-wide, so each loads once. */
-  private static readonly loaded = new Map<string, Promise<Omit<E.CodeLanguage, "load">>>()
+  private static readonly loaded = new E.LoadOnce<string, Omit<E.CodeLanguage, "load">>({ failures: "forgotten" })
 
   /** highlight.js, loaded on first use;  the import starts once per page. */
   @E.once static load(): Promise<CodeEngine> {
@@ -79,10 +79,8 @@ export class CodeHighlighter {
     language: E.CodeLanguage,
     variant: string | undefined
   ): Promise<Omit<E.CodeLanguage, "load">> {
-    let pending = CodeHighlighter.loaded.get(name)
-    if (!pending) {
-      pending = language.load!(variant).catch((error: unknown) => {
-        CodeHighlighter.loaded.delete(name)
+    return CodeHighlighter.loaded.get(name, () =>
+      language.load!(variant).catch((error: unknown) => {
         if (error instanceof E.SourceError) throw error
         const said = error instanceof Error ? error.message : String(error)
         throw new E.SourceError(
@@ -92,8 +90,6 @@ export class CodeHighlighter {
           }
         )
       })
-      CodeHighlighter.loaded.set(name, pending)
-    }
-    return pending
+    )
   }
 }

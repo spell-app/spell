@@ -186,28 +186,20 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     this.send("ui-saved", { css: "" })
   }
 
-  /** Copy CSS just copied:  the button says so for a moment. */
-  @E.state accessor isCopied = false
-
-  /** Pending end of `isCopied`. */
-  private copiedTimer?: E.CancelablePromise<unknown>
+  /** Copy CSS's copy:  the button says so for a moment after. */
+  readonly clipboard = new E.ClipboardCopy({ seconds: COPIED_SECONDS })
 
   /**
    * Put the stylesheet on the clipboard, and say so.  Sends `ui-copied`.
-   * - NEVER throws:  a clipboard that refuses (no permission) warns.
+   * - NEVER throws:  a clipboard that refuses, even its fallback, warns.
    */
   @E.untracked
   async copy(): Promise<void> {
     const { css } = this.sheet
-    try {
-      await navigator.clipboard.writeText(css)
-    } catch (error) {
-      E.Warnings.warn("<ui-theme-editor>", "the clipboard refused the stylesheet", error)
+    if (!(await this.clipboard.copy(css))) {
+      E.Warnings.warn("<ui-theme-editor>", "the clipboard refused the stylesheet")
       return
     }
-    this.isCopied = true
-    this.copiedTimer?.cancel()
-    this.copiedTimer = E.after(COPIED_SECONDS, () => (this.isCopied = false))
     this.send("ui-copied", { css })
   }
 
@@ -354,17 +346,19 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     )
   }
 
-  /** Arrow keys in a swatch row:  move AND choose, wrapping, as in any radio group. */
+  /**
+   * Arrow keys in a swatch row:  move AND choose, wrapping, as in any radio group;  Home / End to the ends.
+   * - The chosen swatch is the tab stop, drawn by `swatch()` (`tabindex: "left alone"`).
+   */
   private onSwatchKey(event: KeyboardEvent, key: HueKey): void {
-    const step = SWATCH_KEYS[event.key]
-    if (step === undefined) return
-    event.preventDefault()
     const hues = [undefined, ...UIT.ThemeHues]
-    const at = hues.indexOf(this.theme[key])
-    const next = hues[(at + step + hues.length) % hues.length]
-    this.choose({ [key]: next })
-    const row = (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>("button")
-    row[hues.indexOf(next)]?.focus()
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: "button",
+      orientation: "both",
+      tabindex: "left alone",
+      onChange: (_swatch, index) => this.choose({ [key]: hues[index] })
+    })
   }
 
   /** A font choice:  a select, each font shown in itself, the base's own first. */
@@ -569,11 +563,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         <ui-button
           slot="actions"
           size="mini"
-          icon={this.isCopied ? CHECK_ICON : COPY_ICON}
+          icon={this.clipboard.isCopied ? CHECK_ICON : COPY_ICON}
           onClick={() => void this.copy()}
           appearance="basic"
         >
-          {this.isCopied ? t("copied") : t("copy")}
+          {this.clipboard.isCopied ? t("copied") : t("copy")}
         </ui-button>
         <ui-code language="css" wrap="">
           {this.sheet.css}
@@ -629,14 +623,6 @@ const COPIED_SECONDS = 1.5
 const CHECK_ICON = "check"
 const COPY_ICON = "copy outline"
 const UNDO_ICON = "undo"
-
-/** Keys that move (and choose) in a swatch row, by how far. */
-const SWATCH_KEYS: Readonly<Record<string, number>> = {
-  [UIT.Key.arrowRight]: 1,
-  [UIT.Key.arrowDown]: 1,
-  [UIT.Key.arrowLeft]: -1,
-  [UIT.Key.arrowUp]: -1
-}
 
 /**
  * The events of the elements it's built of, stopped at its shadow root:  `ui-changed` from its select isn't its own.

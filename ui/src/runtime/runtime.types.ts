@@ -210,7 +210,17 @@ export type RovingOptions = {
   activeIndex?: number
   /** called when arrows / Home / End / focus move the active item */
   onChange?: (item: HTMLElement, index: number) => void
+  /** whose the items' `tabindex`es are;  default `"roving"`, the group's (`RovingTabindexMode`) */
+  tabindex?: RovingTabindexMode
 }
+
+/**
+ * Whose a roving group's `tabindex`es are:
+ * - `"roving"`:  the group's, ONE tab stop that follows the arrows (menus, tabs)
+ * - `"left alone"`:  the caller's;  the arrows only move focus (an accordion's titles, each a tab stop;
+ *   a component that draws its own tab stop)
+ */
+export type RovingTabindexMode = "roving" | "left alone"
 
 /** Items for a `RovingTabindex`:  a selector under the container, or a function for slotted / computed items. */
 export type RovingItems = string | (() => HTMLElement[])
@@ -391,11 +401,11 @@ export type ToastOptions = {
   class?: string
   /** ms before auto-dismiss (default `3000`);  `0` keeps it until dismissed;  `"auto"` ~== reading time */
   displayTime?: number | "auto"
-  /** e.g. `"top right"` (default), `"bottom center"`, `"centered"` */
+  /** e.g. `"bottom right"` (default), `"top right"`, `"bottom center"`, `"centered"` */
   position?: string
   /** explicit id, e.g. to replace an existing toast */
   id?: string
-  /** icon:  `true` for the type's own, or an icon name */
+  /** icon:  `true` (default) for the type's own, an icon name, or `false` for none */
   showIcon?: boolean | string
   /** a progress bar counting the display time down, at the `"top"` or `"bottom"` */
   showProgress?: "top" | "bottom" | false
@@ -474,6 +484,55 @@ export type ModalProvider = {
   alert(options: ModalOptions): Promise<void>
   /** resolves with the entered text, or `undefined` on deny / dismiss */
   prompt(options: ModalOptions): Promise<string | undefined>
+}
+
+////////////////
+// ## Fetching
+////////////////
+
+/**
+ * `fetch()` that answers only with an OK response:  any failure throws what `failed()` makes of it,
+ * so each caller throws its OWN typed error (`SourceError`, `ApiError` ...).
+ * - Spell UI can't use the kit's `$fetch()`:  it would bring lodash and query-string into every page.
+ * - `failed()` is told the URL, and either the answer that wasn't OK (`response`) or the network's `error`.
+ * - An abort (`init.signal`) rethrows as it is:  it's no failure of the server's.
+ */
+export async function fetchOk(url: string, failed: (failure: FetchFailure) => Error, init?: RequestInit) {
+  let response: Response
+  try {
+    response = await fetch(url, init)
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error
+    if (init?.signal?.aborted) throw error
+    throw failed({ url, error })
+  }
+  if (!response.ok) throw failed({ url, response })
+  return response
+}
+
+/** `fetchOk()`, then the answer's text:  resolves with both. */
+export async function fetchText(
+  url: string,
+  failed: (failure: FetchFailure) => Error,
+  init?: RequestInit
+): Promise<{ text: string; response: Response }> {
+  const response = await fetchOk(url, failed, init)
+  return { text: await response.text(), response }
+}
+
+/** What `fetchOk()` tells `failed()`:  the URL, and the answer that wasn't OK, or the network's error. */
+export type FetchFailure = {
+  /** the URL asked for */
+  url: string
+  /** the answer, when there was one:  not OK (`status` 404 ...) */
+  response?: Response
+  /** what `fetch()` threw, when nothing answered */
+  error?: unknown
+}
+
+/** `404 Not Found`:  a response's status and text, for a message. */
+export function answerOf(response: Response): string {
+  return `${response.status} ${response.statusText}`.trim()
 }
 
 ////////////////

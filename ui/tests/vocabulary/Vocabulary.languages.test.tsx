@@ -104,3 +104,19 @@ describe("UI.i18n.registerDictionary()", () => {
     expect(i18n.t("close")).toBe("Close")
   })
 })
+
+describe("NativeFallback.send()", () => {
+  it("a Spanish select's FALLBACK sends its change under the Spanish name, as the component would", async () => {
+    await import("spell-ui/components/ui-select")
+    const host = await ElementFixture.render<DOMElement>(
+      `<es-selector aria-label="Fruta"><ui-item value="a">A</ui-item><ui-item value="b">B</ui-item></es-selector>`
+    )
+    await ElementFixture.breakRender(host)
+    const sent: string[] = []
+    for (const name of ["es-cambiado", "ui-changed"]) host.addEventListener(name, (event) => sent.push(event.type))
+    const native = host.shadowRoot!.querySelector("select")!
+    native.value = "b"
+    native.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(sent).toEqual(["es-cambiado"])
+  })
+})

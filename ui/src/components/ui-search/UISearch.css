@@ -5,7 +5,7 @@
  * - The shadow markup it expects (class grammar on semantic elements), in this order inside the root:
  *
  *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
- *                 [loading disabled] search" style="anchor-name: --ui-search-4">
+ *                 [loading disabled read-only] search" style="anchor-name: --ui-search-4">
  *       <div class="ui icon [loading fluid disabled] input" part="input">
  *         <input class="prompt" part="prompt" role="combobox">
  *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
@@ -512,5 +512,10 @@
   }
   .ui.disabled.search > .disabled.input {
     opacity: 1;
+  }
+
+  /* Read-only:  shown, not typed in;  the arrow, as every control's `read-only`. */
+  .ui.read-only.search > .input > input {
+    cursor: default;
   }
 }

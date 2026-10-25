@@ -80,7 +80,7 @@ export class SliderFallback extends E.NativeFallback<typeof sliderVocabulary> {
     const detail = second
       ? { value: domElement.value, end: domElement.end, originalEvent }
       : { value: domElement.value, originalEvent }
-    domElement.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail }))
+    this.send(name, detail)
   }
 
   /** Set the DOM element's form value to the value(s). */

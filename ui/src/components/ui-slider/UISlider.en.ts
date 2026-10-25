@@ -8,6 +8,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-slider>`
@@ -45,11 +46,7 @@ export const sliderVocabulary = {
       description: "Can't be used:  dimmed, not focusable, left out of the form."
     },
     {
-      name: "readonly",
-      group: "form",
-      kind: "keyOnly",
-      property: "readOnly",
-      key: "read-only",
+      ...UIT.FormControlAttributes.readonly,
       description: "Shows its value but can't be changed;  still focusable and submitted."
     },
     {
@@ -148,11 +145,9 @@ export const sliderVocabulary = {
       kind: "json",
       description: 'Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.'
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name." },
+    UIT.FormControlAttributes.name,
     {
-      name: "required",
-      group: "form",
-      kind: "boolean",
+      ...UIT.FormControlAttributes.required,
       description:
         "Form validation:  a value must be chosen, by the page (`value`, a range's `end`) or by moving a thumb.  " +
         "Unset, the thumb rests at `min` but counts as no value (`valueMissing`)."
@@ -182,7 +177,7 @@ export const sliderVocabulary = {
   states: [
     { name: "disabled", description: "Can't be used." },
     { name: "dragging", description: "A thumb is being dragged." },
-    { name: "invalid", description: "Fails validation (`required`), once a person has interacted." }
+    { ...UIT.FormControlStates.invalid, description: "Fails validation (`required`), once a person has interacted." }
   ],
   texts: [
     { key: "sliderMinimum", text: "Minimum", description: "Name of a range's first thumb." },

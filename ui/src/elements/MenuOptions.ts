@@ -104,25 +104,40 @@ export class MenuOptions {
    * - Without `wrap`, stops at the ends:  returns the last enabled option in that direction, or `from` if
    *   there is none.
    * - `-1` when no option is enabled.
+   * - The same steps over any list:  `MenuOptions.nextEnabledIndexIn()`.
    */
   nextEnabledIndex(from: number, delta: number, options: E.MenuNavigateOptions = {}): number {
-    const { options: list } = this
+    return MenuOptions.nextEnabledIndexIn(this.options, from, delta, options)
+  }
+
+  /**
+   * `nextEnabledIndex()`'s steps over `list`, any list of objects, each maybe `disabled`:
+   * a search's results, an icon picker's cells (`HighlightedOption.move()`).
+   * - STATIC:  pure, needs no option model.
+   */
+  static nextEnabledIndexIn(
+    list: readonly object[],
+    from: number,
+    delta: number,
+    options: E.MenuNavigateOptions = {}
+  ): number {
     const { length } = list
     const wrap = options.wrap ?? false
-    if (!list.some((option) => !option.disabled)) return -1
+    const isDisabled = (index: number) => "disabled" in list[index] && !!list[index].disabled
+    if (list.every((_option, index) => isDisabled(index))) return -1
     if (!delta) return from
     const step = delta > 0 ? 1 : -1
     const origin = from < 0 || from >= length ? (step > 0 ? -1 : length) : from
     const target = wrap ? MenuOptions.wrap(origin + delta, length) : E.clamp(origin + delta, 0, length - 1)
     for (let index = target, tries = 0; tries < length; tries++) {
-      if (!list[index].disabled) return index
+      if (!isDisabled(index)) return index
       index += step
       if (wrap) index = MenuOptions.wrap(index, length)
       else if (index < 0 || index >= length) break
     }
     // Ran off an end without wrapping:  take the furthest enabled option between `from` and that end.
     for (let index = target - step; index !== origin && index >= 0 && index < length; index -= step) {
-      if (!list[index].disabled) return index
+      if (!isDisabled(index)) return index
     }
     return from
   }

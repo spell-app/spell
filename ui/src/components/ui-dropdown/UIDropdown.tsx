@@ -160,7 +160,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       const next = [...values, option.value]
       this.commit(next, originalEvent, () => this.send("ui-added", { value: option.value, originalEvent }))
       this.query = ""
-      this.highlightedIndex = 0
+      this.highlighted.index = 0
     } else {
       this.commit([option.value], originalEvent, () => {
         if (isAddition) this.send("ui-added", { value: option.value, originalEvent })
@@ -240,8 +240,8 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     this.typeAheadTimer = E.after(this.typeAheadDelay / 1000, () => (this.typedSoFar = ""))
     if (!this.isOpen) this.requestOpen(true, event)
     const options = this.visibleOptions
-    const index = options.selectionForKey(this.typedSoFar, this.highlightedIndex)
-    if (index >= 0) this.highlightedIndex = index
+    const index = options.selectionForKey(this.typedSoFar, this.highlighted.index)
+    if (index >= 0) this.highlighted.index = index
   }
 
   ////////////////
@@ -272,28 +272,14 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   }
 
   /**
-   * Highlighted index into `visibleOptions.options`;  `-1` for none.
+   * The highlighted row of `visibleOptions.options`.
    * - Fomantic's `selected` class marks it;  its `active` is the CHOSEN option.
    */
-  @E.state accessor highlightedIndex = -1
+  readonly highlighted = new F.HighlightedOption(() => this.visibleOptions.options)
 
   /** Highlighted option. */
   get highlightedOption(): E.MenuOption | undefined {
-    return this.visibleOptions.options[this.highlightedIndex] as E.MenuOption | undefined
-  }
-
-  /** Highlight `option` if it's visible. */
-  @E.untracked
-  private highlight(option: E.MenuOption) {
-    const index = this.visibleOptions.options.indexOf(option)
-    if (index >= 0 && index !== this.highlightedIndex) this.highlightedIndex = index
-  }
-
-  /** Move the highlight by `delta` enabled options. */
-  @E.untracked
-  private move(delta: number) {
-    const options = this.visibleOptions
-    this.highlightedIndex = options.nextEnabledIndex(this.highlightedIndex, delta)
+    return this.highlighted.option as E.MenuOption | undefined
   }
 
   /** Open:  keep the highlighted row in view. */
@@ -350,7 +336,8 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     }
     const options = this.visibleOptions
     const chosen = options.options.findIndex((option) => this.chosenValueSet.has(option.value))
-    this.highlightedIndex = chosen >= 0 ? chosen : options.nextEnabledIndex(-1, 1)
+    if (chosen >= 0) this.highlighted.index = chosen
+    else this.highlighted.moveTo("first")
   }
 
   /**
@@ -623,7 +610,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
         part={this.partForName("item")}
         aria-selected={this.chosenValueSet.has(option.value) ? "true" : "false"}
         aria-disabled={option.disabled ? "true" : undefined}
-        onPointerMove={() => this.highlight(option)}
+        onPointerMove={() => this.highlighted.highlight(option)}
         onClick={(event) => this.select(option, event)}
       >
         <Show when={slot} fallback={this.optionContent(option)}>
@@ -679,7 +666,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
         role="option"
         part={this.partForName("item")}
         aria-selected="false"
-        onPointerMove={() => this.highlight(option)}
+        onPointerMove={() => this.highlighted.highlight(option)}
         onClick={(event) => this.select(option, event)}
       >
         {before}
@@ -750,7 +737,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     const query = (event.currentTarget as HTMLInputElement).value
     this.query = query
     this.requestOpen(true, event)
-    this.highlightedIndex = 0
+    this.highlighted.index = 0
     this.send("ui-searched", { query, originalEvent: event })
   }
 
@@ -780,19 +767,19 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       case UIT.Key.arrowUp:
         event.preventDefault()
         if (!isOpen) this.requestOpen(true, event)
-        else this.move(key === UIT.Key.arrowDown ? 1 : -1)
+        else this.highlighted.move(key === UIT.Key.arrowDown ? 1 : -1)
         return
       case UIT.Key.home:
       case UIT.Key.end:
         if (!isOpen) return
         event.preventDefault()
-        this.highlightedIndex = this.visibleOptions.nextEnabledIndex(-1, key === UIT.Key.home ? 1 : -1)
+        this.highlighted.moveTo(key === UIT.Key.home ? "first" : "last")
         return
       case UIT.Key.pageDown:
       case UIT.Key.pageUp:
         if (!isOpen) return
         event.preventDefault()
-        this.move(key === UIT.Key.pageDown ? this.pageSize : -this.pageSize)
+        this.highlighted.move(key === UIT.Key.pageDown ? this.pageSize : -this.pageSize)
         return
       case UIT.Key.enter: {
         if (!isOpen) {

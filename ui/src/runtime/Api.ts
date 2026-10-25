@@ -1,6 +1,14 @@
 import { after } from "spell-ui/util"
 
-import { ApiError, type ApiRequest, type ApiResponseType, type ApiUrlData } from "./runtime.types"
+import {
+  answerOf,
+  ApiError,
+  fetchOk,
+  type ApiRequest,
+  type ApiResponseType,
+  type FetchFailure,
+  type ApiUrlData
+} from "./runtime.types"
 
 /****************
  * ### `Api`
@@ -73,11 +81,7 @@ export class Api {
       const init: RequestInit = { method, headers: new Headers(headers), signal }
       if (method === "GET" || method === "HEAD") url = this.withQuery(url, data)
       else this.setBody(init, data)
-      const response = await fetch(url, init)
-      if (!response.ok) {
-        const answer = `${response.status} ${response.statusText}`.trim()
-        throw new ApiError(`Api.request():  ${method} ${url} answered ${answer}`, { cause: { response } })
-      }
+      const response = await fetchOk(url, (failure) => Api.failed(method, failure), init)
       return (await this.read(response, method, responseType)) as T
     } finally {
       if (this.latest.get(key) === controller) this.latest.delete(key)
@@ -145,6 +149,17 @@ export class Api {
     if (value === null || typeof value !== "object") return false
     const prototype = Object.getPrototypeOf(value)
     return prototype === Object.prototype || prototype === null
+  }
+
+  /**
+   * What `request()` throws for `failure`:  an `ApiError` for an answer that wasn't OK;
+   * the network's own error when nothing answered, as `fetch()` threw it.
+   * - STATIC:  pure, needs no instance.
+   */
+  private static failed(method: string, { url, response, error }: FetchFailure): Error {
+    if (response)
+      return new ApiError(`Api.request():  ${method} ${url} answered ${answerOf(response)}`, { cause: { response } })
+    return error instanceof Error ? error : new Error(String(error))
   }
 }
 

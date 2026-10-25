@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 import type { codeVocabulary } from "spell-ui/components/ui-code/UICode.en"
 import { MarkdownRenderer } from "./MarkdownRenderer"
 import type { MarkdownHeading, MarkdownOptions, MarkdownRendering } from "./UIMarkdown.types"
@@ -217,11 +217,14 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
 
   /** `editable`'s tab list:  arrows move between the tabs (wrapping), Home / End to the ends;  focus follows. */
   private readonly onTabKeyDown = (event: KeyboardEvent) => {
-    const to = UIMarkdown.tabAfter(this.shownTab, event.key)
-    if (!to) return
-    event.preventDefault()
-    this.shownTab = to
-    this.tabButtons.get(to)?.focus()
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: () => MarkdownTabs.map((tab) => this.tabButtons.get(tab)!),
+      orientation: "horizontal",
+      // the shown tab is the tab stop, drawn by `tabs()`
+      tabindex: "left alone",
+      onChange: (_button, index) => (this.shownTab = MarkdownTabs[index]!)
+    })
   }
 
   ////////////////
@@ -428,17 +431,6 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   /** Id of `tab`'s panel, inside the shadow root. */
   private static panelId(tab: MarkdownTab): string {
     return `ui-markdown-${tab}-panel`
-  }
-
-  /** The tab `key` moves to from `tab`;  `undefined` for any other key. */
-  private static tabAfter(tab: MarkdownTab, key: string): MarkdownTab | undefined {
-    const index = MarkdownTabs.indexOf(tab)
-    const count = MarkdownTabs.length
-    if (key === UIT.Key.arrowLeft) return MarkdownTabs[(index + count - 1) % count]
-    if (key === UIT.Key.arrowRight) return MarkdownTabs[(index + 1) % count]
-    if (key === UIT.Key.home) return MarkdownTabs[0]
-    if (key === UIT.Key.end) return MarkdownTabs[count - 1]
-    return undefined
   }
 }
 

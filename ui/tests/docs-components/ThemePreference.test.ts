@@ -1,12 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
 import { UI } from "spell-ui/runtime"
-import { LEGACY_SCHEME_KEYS, SCHEME_KEY } from "spell/server/site/site.types"
 
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import {
   DOCS_DEFAULT_THEME,
-  DOCS_LEGACY_SCHEME_KEYS,
   DOCS_LOOK_KEYS,
   DOCS_SCHEME_SWITCHING
 } from "spell-ui/docs-components/docs-components.types"
@@ -25,9 +24,8 @@ afterEach(async () => {
 })
 
 describe("DOCS_LOOK_KEYS.scheme", () => {
-  test("ONE scheme key for every doc site:  the site header's (`spell/server/site`)", () => {
-    expect(DOCS_LOOK_KEYS.scheme).toBe(SCHEME_KEY)
-    expect([...DOCS_LEGACY_SCHEME_KEYS]).toEqual([...LEGACY_SCHEME_KEYS])
+  test("ONE scheme key for every Spell site:  the kit's `ColorScheme`'s", () => {
+    expect(DOCS_LOOK_KEYS.scheme).toBe(COLOR_SCHEME_KEY)
   })
 })
 
@@ -40,7 +38,7 @@ describe("ThemePreference.reset()", () => {
     ThemePreference.reset()
     expect(ThemePreference.look.scheme).toBe(scheme)
     expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe(scheme)
-    for (const old of DOCS_LEGACY_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
+    for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
   })
 
   test("an old key never overrides the one key", () => {
@@ -118,7 +116,7 @@ describe("ThemePreference.HEAD_SCRIPT", () => {
 
 /** Back to no stored look (so the default theme, in memory), nothing applied, the system scheme. */
 async function clean() {
-  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...DOCS_LEGACY_SCHEME_KEYS]) {
+  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
     localStorage.removeItem(key)
   }
   ThemePreference.reset()

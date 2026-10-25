@@ -15,6 +15,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-select>`
@@ -65,10 +66,7 @@ export const selectVocabulary = {
       description: "Can't be used;  dimmed, and left out of the form."
     },
     {
-      name: "readonly",
-      group: "form",
-      kind: "boolean",
-      property: "readOnly",
+      ...UIT.FormControlAttributes.readonly,
       description: "Shows its value but can't be changed (a change is undone);  still focusable and submitted."
     },
     {
@@ -78,9 +76,7 @@ export const selectVocabulary = {
       description: "Chooses several values:  a native list box (never the customizable picker)."
     },
     {
-      name: "placeholder",
-      group: "form",
-      kind: "string",
+      ...UIT.FormControlAttributes.placeholder,
       description: "Text of the empty first option shown while nothing is chosen."
     },
     {
@@ -90,13 +86,8 @@ export const selectVocabulary = {
       description:
         "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
     },
-    {
-      name: "name",
-      group: "name",
-      kind: "string",
-      description: "Form field name;  `multiple` submits one entry per value."
-    },
-    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    { ...UIT.FormControlAttributes.name, description: "Form field name;  `multiple` submits one entry per value." },
+    UIT.FormControlAttributes.required,
     {
       name: "options",
       group: "form",
@@ -127,8 +118,8 @@ export const selectVocabulary = {
   ],
   states: [
     { name: "disabled", description: "Can't be used." },
-    { name: "readonly", description: "`readonly`:  can't be changed." },
-    { name: "invalid", description: "Fails validation (`required`)." },
+    UIT.FormControlStates.readonly,
+    { ...UIT.FormControlStates.invalid, description: "Fails validation (`required`)." },
     { name: "fluid", description: "The host is block-level (`fluid`)." },
     { name: "customizable", description: "The browser draws the customizable select (`appearance: base-select`)." }
   ],

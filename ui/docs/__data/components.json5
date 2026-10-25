@@ -3160,7 +3160,7 @@
         },
         {
           "name": "readonly",
-          "kind": "boolean",
+          "kind": "keyOnly",
           "property": "readOnly",
           "description": "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
         },
@@ -13516,7 +13516,7 @@
         },
         {
           "name": "readonly",
-          "kind": "boolean",
+          "kind": "keyOnly",
           "property": "readOnly",
           "description": "Shows its value but can't be edited;  submitted with the form (unlike `disabled`)."
         },
@@ -13804,7 +13804,7 @@
       "states": [
         {
           "name": "invalid",
-          "description": "Fails validation, once someone has interacted (`:user-invalid` semantics)."
+          "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
         },
         {
           "name": "disabled",
@@ -24563,7 +24563,7 @@
         },
         {
           "name": "readonly",
-          "kind": "boolean",
+          "kind": "keyOnly",
           "property": "readOnly",
           "description": "Shows its value but can't be typed in, and the results never open;  still focusable and submitted."
         },
@@ -26465,7 +26465,7 @@
         },
         {
           "name": "readonly",
-          "kind": "boolean",
+          "kind": "keyOnly",
           "property": "readOnly",
           "description": "Shows its value but can't be changed (a change is undone);  still focusable and submitted."
         },
@@ -30864,7 +30864,7 @@
         },
         {
           "name": "readonly",
-          "kind": "boolean",
+          "kind": "keyOnly",
           "property": "readOnly",
           "description": "Shows its value but can't be edited;  still submitted."
         },
@@ -31044,7 +31044,7 @@
       "states": [
         {
           "name": "invalid",
-          "description": "Fails validation, once someone has interacted (`:user-invalid` semantics)."
+          "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
         },
         {
           "name": "disabled",

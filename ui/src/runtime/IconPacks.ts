@@ -1,7 +1,7 @@
-import { Warnings } from "spell-ui/util"
+import { LoadOnce, Warnings } from "spell-ui/util"
 import { BuiltInPacks, DEFAULT_ICON_PACK, IconName } from "spell-ui/icons"
 
-import type { IconPackOptions, ResolvedIcon } from "./runtime.types"
+import { answerOf, fetchText, type IconPackOptions, type ResolvedIcon } from "./runtime.types"
 import { IconPack } from "./IconPack"
 
 /****************
@@ -27,8 +27,10 @@ export class IconPacks {
   private sources: IconPackSource[] = []
   /** `start()` has run */
   private started = false
-  /** SVG templates by URL;  an entry with no `svg` once settled is a known miss.  Shared with child sets. */
-  private readonly templates: Map<string, IconTemplate>
+  /** SVG templates by URL, once loaded;  shared with child sets. */
+  private readonly templates: Map<string, SVGSVGElement>
+  /** SVG loads by URL, each once per page:  shared with child sets (`load()`). */
+  private readonly templateLoads: LoadOnce<string, SVGSVGElement | undefined>
   /** `register()`ed icons, by normalized name;  consulted before any pack.  Shared with child sets. */
   private readonly registered: Map<string, SVGSVGElement>
   /** a child set's parent set, asked at each lookup (see `IconPacksProps.parent`);  none for the page's */
@@ -39,6 +41,9 @@ export class IconPacks {
     this.parent = parent
     const top = parent?.()
     this.templates = top?.templates ?? new Map()
+    // a failure that happened offline is forgotten, so a later `get()` retries:
+    // `fetch` can't tell a 404 from a dropped connection any other way
+    this.templateLoads = top?.templateLoads ?? new LoadOnce({ failures: "forgotten offline" })
     this.registered = top?.registered ?? new Map()
     // a child has no default pack:  its parent's answer what its own don't
     this.started = !!parent
@@ -123,7 +128,7 @@ export class IconPacks {
     const { prefix, name: wanted } = IconName.split(name)
     if (prefix === undefined && this.registered.has(wanted)) return this.registered.get(wanted)
     const url = this.resolve(name)?.url
-    return url === undefined ? undefined : this.templates.get(url)?.svg
+    return url === undefined ? undefined : this.templates.get(url)
   }
 
   /**
@@ -211,24 +216,25 @@ export class IconPacks {
   ////////////////
 
   /**
-   * The template at `url`:  fetched and parsed once per page;  a failed load is remembered as a miss.
-   * - Offline (`navigator.onLine === false`) a failure is forgotten instead, so a later `get()` retries:  `fetch`
-   *   can't tell a 404 from a dropped connection any other way.
+   * The template at `url`:  fetched and parsed once per page;  a failed load is remembered as a miss (`undefined`).
+   * - NEVER rejects.
    */
   private load(url: string): Promise<SVGSVGElement | undefined> {
-    const cached = this.templates.get(url)
-    if (cached) return cached.promise
-    const entry: IconTemplate = {
-      promise: fetch(url)
-        .then((response) => (response.ok ? response.text() : undefined))
-        .then((text) => (entry.svg = text === undefined ? undefined : IconPacks.parse(text)))
-        .catch(() => {
-          if (typeof navigator !== "undefined" && navigator.onLine === false) this.templates.delete(url)
-          return undefined
-        })
-    }
-    this.templates.set(url, entry)
-    return entry.promise
+    return this.templateLoads.get(url, () => this.fetchTemplate(url)).catch(() => undefined)
+  }
+
+  /**
+   * Fetch and parse the template at `url`, kept in `templates` once it's there;  `undefined` when it isn't an SVG.
+   * - Rejects when it can't be fetched:  `load()` makes that a miss.
+   */
+  private async fetchTemplate(url: string): Promise<SVGSVGElement | undefined> {
+    const { text } = await fetchText(url, ({ response, error }) => {
+      if (response) return new Error(`UI.icons:  ${url} answered ${answerOf(response)}`)
+      return error instanceof Error ? error : new Error(String(error))
+    })
+    const svg = IconPacks.parse(text)
+    if (svg) this.templates.set(url, svg)
+    return svg
   }
 
   /**
@@ -277,14 +283,6 @@ type IconPackSource = {
   promise: Promise<IconPack | undefined>
   /** once loaded */
   pack?: IconPack
-}
-
-/** One cached SVG. */
-type IconTemplate = {
-  /** its load, shared by every caller;  never rejects */
-  promise: Promise<SVGSVGElement | undefined>
-  /** once loaded;  `undefined` after settling ~== miss */
-  svg?: SVGSVGElement
 }
 
 /** `Warnings` source of this class's warnings. */
