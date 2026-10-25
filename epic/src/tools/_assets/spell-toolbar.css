@@ -451,6 +451,12 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   padding: var(--site-tabs-band, 8px) var(--site-tabs-band, 8px) 0;
   /* the panel is drawn behind it (`::before`) and by the toolbar, so this box only places the track */
   --_panel-up: calc(var(--site-tabs-track, 34px) + var(--site-tabs-band, 8px));
+  /*
+   * the top band's height, so twice its round ends' radius:  the lower band keeps half of it in from each side, so its
+   * concave curves meet the top band where its lower edge is straight again, past its round ends (Owen, 2026-10-25:
+   * "the bottom set of tabs is not "curling" properly into the top -- there is a "ledge" to the left and right")
+   */
+  --_panel-ends: calc(var(--_panel-up) + var(--site-tabs-band, 8px));
   --_panel-glass: var(--ui-bar-panel-background, var(--ui-bar-background, var(--spell-rail-fill)));
 }
 /*
@@ -478,8 +484,8 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
   --ui-menu-segmented-background: transparent;
   position: relative;
   box-sizing: border-box;
-  /* room for its two concave curves inside the top band, however long its row:  it scrolls instead */
-  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+  /* in past the top band's round ends, however long its row:  it scrolls instead (`--_panel-ends`, above) */
+  max-width: calc(100% - var(--_panel-ends));
   padding: 0 var(--site-tabs-band, 8px) var(--site-tabs-band, 8px);
   /* round the track's ends:  half its height (24px) and the band */
   border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
@@ -567,11 +573,11 @@ ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
   margin-inline: auto;
 }
 /*
- * ... but the segmented one keeps the lower band's room for its two concave curves inside the top band,
- * however long its row (it scrolls):  the rule above's `100%` would let the band jut past the top one
+ * ... but the segmented one stays in past the top band's round ends, however long its row (it scrolls):
+ * the rule above's `100%` would let the band jut out under them, a ledge
  */
 ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled.spell-toolbar-segmented {
-  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+  max-width: calc(100% - var(--_panel-ends));
 }
 /* its `‹` / `›` keys:  a light fill shows nothing on this near-white track, so a faint shade in light */
 ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-segmented {
