@@ -5,8 +5,10 @@
  *   bundles what it imports from here.
  * - REACTIVE (`./reactive`):  the reactive engine every reactive class shares -- spell cells, the records, the schema,
  *   `@prop` / `@state` / `@derived`.  Generic too:  no lodash, no Solid.
+ * - PERSIST (`./persist`):  values kept for people across visits -- `PrefStore` and the places it keeps them.
+ *   Generic too:  Spell UI imports its files one by one.
  * - SPELL'S (`./spell`, flattened in LAST):  lodash, `chalk`, `pluralize`, fetch,
- *   tasks, prefs.  NEVER import them from `ui`:  `ui`'s `src/util/index.ts` imports the generic files one by one
+ *   tasks.  NEVER import them from `ui`:  `ui`'s `src/util/index.ts` imports the generic files one by one
  *   (`spell/util/class` ...) and never this barrel, so none of it lands in `ui`'s bundles or published declarations.
  * - NOTE: no namespace here (unlike `UI` / `E`):  utilities are imported by name,
  *   e.g. `import { proto, kebabCase } from "spell/util"`.
@@ -21,5 +23,6 @@ export * from "./string"
 export * from "./dom"
 
 export * from "./reactive"
+export * from "./persist"
 
 export * from "./spell"

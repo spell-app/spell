@@ -125,18 +125,18 @@ This spoke is house style on top.
 - **Literal getters say `as const`:**  a getter returning a fixed literal (a type name, an icon) narrows its type, so
   subclasses' literals stay distinct.
 - **Pref keys are `static SCREAMING_CASE`, with a paired getter / setter:**
-  - Over `getPref()` / `setPref()` (`spell/util` `prefs.ts`;  `setPrefKey()` once per app, e.g. `editor.ts`'s
-    `setPrefKey("spellEditor:")`).
+  - Over the app's ONE `PrefStore` (`spell/util`;  the editor's is `editorPrefs`, `new PrefStore("spellEditor")`),
+    the pref declared with its choices or type, so it reads its default until set.
 
     ```ts
     class EditorStore {
       /** Pref key for the last file shown, per project. */
       static LAST_FILE_PREF = "lastFile"
       get lastFile() {
-        return getPref(EditorStore.LAST_FILE_PREF)
+        return editorPrefs.get<string>(EditorStore.LAST_FILE_PREF)
       }
       set lastFile(path: string | undefined) {
-        setPref(EditorStore.LAST_FILE_PREF, path)
+        editorPrefs.set(EditorStore.LAST_FILE_PREF, path)
       }
     }
     ```
@@ -251,7 +251,7 @@ This spoke is house style on top.
     hand-written classes, `getProp()` / `setProp()` accessor pairs in compiled spell -- the same runtime shape.
   - State:  internal, never persisted, e.g. a `Task`'s `status`:  a getter over `getState("status")`, written with
     `setState()`, cleared with `resetState()`.
-    - TODO:  `getPref()` to keep state across page loads.
+    - TODO:  a `PrefStore` to keep state across page loads.
     - TODO:  a `@state` decorator for `Observable`s?  (`ui` has one, on its own record:  §12 › "Reactive members".)
   - A plain field (`foo = 1`) is NOT spell state (`solid-2.md` "Spell's decisions" › "Decorators for HAND-WRITTEN
     classes").  Use one only for what no reader needs, and say so (`EditorStore`:  "a plain field
@@ -273,7 +273,7 @@ This spoke is house style on top.
     `Loadable.onContentsUpdated()`.  Add hooks as a class needs them, not up front.
   - The docstring says when it's called, what's already done by then, and whether `super` goes first or last.
   - Defaults come from the schema (`@prop({ default })`);  a persisted preference is the initializer:
-    `getProp(name, () => getPref(KEY, fallback))`.
+    `getProp(name, () => prefs.get(KEY, fallback))`.
   - A hook that persists opens with a lifecycle guard (`if (this.wasRemoved) return`), and persists `toJSON()`
     (§16).
   - Normalize or validate a change in the prop's setter, before `setProp()` (a hand-written getter / setter pair).

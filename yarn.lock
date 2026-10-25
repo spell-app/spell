@@ -5480,13 +5480,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-storage-shim@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "node-storage-shim@npm:2.0.1"
-  checksum: 10c0/201e1036abf1c26787595b609058f0481ff90fc432df683f4db67dcfd0a4d59d4248ccb31015f061361d8be71eaac53e55eb60812100230862632a000291a9be
-  languageName: node
-  linkType: hard
-
 "nopt@npm:^8.0.0":
   version: 8.1.0
   resolution: "nopt@npm:8.1.0"
@@ -6830,7 +6823,6 @@ __metadata:
     lightningcss: "npm:^1.33.0"
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
-    node-storage-shim: "npm:^2.0.1"
     parse5: "npm:^7.3.0"
     playwright: "npm:1.63.0"
     query-string: "npm:^6.12.1"

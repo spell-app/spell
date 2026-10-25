@@ -200,6 +200,44 @@ so a `<ui-header>` slotted into a `<ui-card>`, or drawn inside it, finds its car
   `suggest("primay", ["primary", "secondary"])` is `"primary"`;
   a word more than two edits from every candidate gets no guess at all, which beats a wild one.
 
+### `PrefStore`:  preferences people and plain scripts can read
+
+One store per app keeps what each person set:  a theme, a panel's width, the last file open.
+
+```ts
+import { PrefStore } from "spell/util"
+
+const prefs = new PrefStore("spell-site").declare("scheme", { oneOf: ["light", "dark", "auto"] })
+prefs.get("scheme")          // "light":  nothing kept yet, so the first choice
+prefs.set("scheme", "dark")  // localStorage now holds  spell-site:scheme = dark
+prefs.set("width", 250)      //                          spell-site:width  = 250
+```
+
+- Every key starts with the store's name and a colon, so two apps on one site never share a value,
+  and `forgetAll()` forgets only its own.
+- A value is kept as text you can read:  a string as itself (`dark`), anything else as JSON (`250`, `{"open":true}`).
+  - So a page's inline script, which can't import anything, reads the same key raw, before the page draws.
+  - A string that would read back as something else is quoted:  the text `"1"` is kept as `"1"`, the number as `1`.
+- A declared pref's default is its `default`, else its first choice, else its type's:  `0`, `""` or `false`.
+- Where it keeps them is its place's business:  `local` (the default), `session` (per tab), `memory`
+  (servers, tests), or a place you hand it:
+  - `DatabasePlace.shared`:  the browser's database (IndexedDB), for big values and values that aren't text.
+    A `Blob`, a `Date` or a file handle comes back as it went in;
+    `update()` reads, changes and saves in one transaction, so two tabs never read the same value.
+  - `ServerPlace.shared`:  the page server, which keeps each store in the person's space
+    ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)), so it follows them to every browser.
+  - a `StoragePlace` over a storage you hand it (a test's).
+- The edges:
+  - It never throws when storage fails.
+    Blocked storage (a private window) keeps values in memory for the visit, and says so once;
+    a full one logs, and `get()` answers the default.
+  - It throws `TypeError` for a caller's mistake:  no key, a store name with a colon,
+    a value its declaration doesn't allow.
+  - `load()`, `save()` and `update()` are the waited-on forms, for a place that must be waited on;
+    a quick `get()` there throws, naming `load()`.
+- It's generic, but not in Spell UI's core bundle:  there it cost every page 1.9 kB,
+  so Spell UI's few stores import it by file, `spell/util/persist/PrefStore`.
+
 ## Spell cells:  a read after a write is always fresh
 
 If you know Solid's signals or MobX, cells will feel familiar:
@@ -397,7 +435,6 @@ so the editor and the command line load a project the same way, from a server or
 | `Loadable`, `LoadableFile` | a resource that loads and saves itself:  subclass, write `getLoader()` and `getSaver()`.  `TextFile`, `JSONFile`, `JSON5File`, `ImageFile` are ready-made, and every file fetches through `LoadableFile.fetch`, which spell-app swaps for one that reads the disk under node |
 | `Task`, `TaskList` | an async function in an object you can inspect, `cancel()` and `restart()`;  a list runs them in order, each given the last one's result, stopping at a failure unless the task is `optional` or the list says `continueOnError` |
 | `Logger` | named, levelled logging:  `new Logger({ prefix: "Foo", level: Logger.INFO })`, from `OFF` through `ERROR`, `WARN` (the default), `INFO` to `DEBUG`, the prefix in colour |
-| `getPref()`, `setPref()`, `AppPrefStore` | preferences in `localStorage`, as JSON, under one app's prefix.  Call `setPrefKey()` first:  forget, and every key starts `call_setPrefKey_to_set_up_prefs!!!`, which is rather the point |
 | `CustomError`, `UIError` | errors that carry their context in `props` (`activity`, `context`, `params`, the original `error`), as `die()`'s above |
 | `assert.string()`, `.number()`, `.boolean()` | narrow a value, or throw a `TypeError` |
 | `elementTagFor()` | a view's tag:  `elementTagFor("Solitaire", "Card")` is `"solitaire-card"`, the same in the runtime, the editor and the TypeScript writer |
@@ -460,6 +497,7 @@ Where a new helper goes, in order:
    - Add it to [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts) and the element framework's,
      which import these files one by one.
 4. Part of the engine:  `reactive/`, still with no lodash, no Solid and nothing Spell-specific.
+   Values kept across visits (`PrefStore`, the places it keeps them):  `persist/`, generic too.
 5. Spell-specific, or it needs lodash, `chalk`, `pluralize` ...:  `spell/`.
 6. It needs node:  `node/`, imported by its own path.
 
@@ -481,14 +519,15 @@ And when you're in there:
 
 | File | What |
 | --- | --- |
-| [index.ts](src/util/index.ts) | the barrel:  the generic files, then the reactive engine, then Spell's own |
+| [index.ts](src/util/index.ts) | the barrel:  the generic files, then the reactive engine and `persist/`, then Spell's own |
 | [decorators.ts](src/util/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
 | [class.ts](src/util/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
 | [string.ts](src/util/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()` (Fomantic's column words:  `4` is `"four"`), `levenshtein()`, `suggest()` |
 | [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `prefs`, `AppPrefStore`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
+| [persist/](src/util/persist/) | values kept across visits:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
+| [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
 

@@ -16,8 +16,6 @@
 export * from "./constants"
 
 export * from "./Logger"
-export * from "./prefs"
-export * from "./AppPrefStore"
 
 export * from "./assert"
 export * from "./Derivative"
