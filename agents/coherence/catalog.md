@@ -79,6 +79,7 @@ What `/coherence sweep` reads, an agent each.
   - `spell-app/scripts/examples-readme.ts`
   - `spell-app/src/spaces/test/fixtures.ts`
   - `spell-epic/src/demo/check-test-run.mjs`
+  - `spell-app/src/spaces/server/node/projects/file-utils.ts`:  its `loadJSONFile()`
   - NOTE: `contentFolderOf()` and the toolchain load before `spell/util` can (plain `node`):  check whether they can
     import it before moving them.
 
@@ -200,7 +201,7 @@ What `/coherence sweep` reads, an agent each.
 - **Flag:**  `response\.ok|\.ok\)` after a `fetch(`
 - **Copies:**
   - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
-  - the app's runner:  four, asking for `cache: "no-cache"`, which `$fetch()` has no option for yet
+  - `--` in the app since epic `coherence` P14:  its runner and `editor.ts` ask `$fetch()` for `cache: "no-cache"`
   - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
     instead ("In Spell UI", below)
 
@@ -419,9 +420,14 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### A growing text box
 
-- **It is:**  `<epic-text-box>` (spell-epic):  grows with its text, to a third of the window
+- **It is:**  `<epic-text-box>` (spell-epic):  grows with its text, to a third of the window or its `max-height`;
+  `type="note"` for a box another element reads itself (`value`)
 - **Flag:**  `field-sizing|growField`
-- **Copies:**  six (sweep 1, epic-pages #7)
+- **Copies:**  since epic `coherence` P14 `<epic-agents>`' redirect note and `<epic-new-item>`'s note are text boxes;
+  left:
+  - `<epic-review>`'s note, `<epic-run-row>`'s and `<epic-choice-row>`'s one-line answers:  their own keys, focus and
+    looks, which the text box doesn't take yet
+  - the docs helpers' `growField()`, the syntax page's boxes (`syntax-choices.css`)
 
 ### A draft that saves itself
 

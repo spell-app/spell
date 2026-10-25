@@ -46,7 +46,10 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
 - **Not:**  reader, person.
 - **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
-  - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10.
+  - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10;
+    P14 made them "viewer" (Spell UI's docs components).
+- **Not the same word:**  WWOD §6's "reader", the person reading any text we write (a docstring, a README, a page):
+  it's about writing, not the code's name for who looks at a page, so it stays.
 
 ### Booleans on an element
 
