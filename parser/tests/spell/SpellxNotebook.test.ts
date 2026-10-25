@@ -40,6 +40,8 @@ describe("a spellx notebook", () => {
       ].join("\n")
     )
     expect(code).toMatch(/if \(!core\.isCarryingOver\) counterNotebook\.start\(\)$/)
+    // a JSX text's spaces on its own line stay:  `Clicked {its count} times`, not `Clicked0times`
+    expect(code).toContain('"Clicked ",\n      () => this.count,\n      " times"')
     expect(code.indexOf("class Counter ")).toBeLessThan(code.indexOf("class CounterNotebook "))
   })
 
@@ -176,7 +178,7 @@ describe("a spellx notebook", () => {
       expect(chunk.className).toBe("Counter")
       expect(chunk.errors).toEqual([])
       expect(chunk.code).toMatch(/^class Counter extends View \{\n/)
-      expect(chunk.code).toContain('"Pressed",')
+      expect(chunk.code).toContain('"Pressed ",')
       expect(chunk.code).toMatch(/\n}$/)
     })
 
