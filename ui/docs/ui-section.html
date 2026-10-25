@@ -155,6 +155,22 @@
                   </ui-sections>
                 </ui-docs-example>
               </ui-section>
+
+              <ui-section id="examples-groups-flat-markup" label="Flat markup" sticky collapsible dividing>
+                <ui-docs-example>
+                  <p slot="description">
+                    A section can be written outside the one it belongs in:  <code>parent</code> names that
+                    section's id (or a <code>&lt;ui-sections&gt;</code> group's), and it nests there, in page order.
+                  </p>
+                  <ui-section id="demo-setup" label="Setup" level="4" dividing>
+                    <p>The outer section's own content.</p>
+                  </ui-section>
+                  <ui-section parent="demo-setup" label="Install" collapsible><p>Nested under Setup.</p></ui-section>
+                  <ui-section parent="demo-setup" label="Configure" collapsible collapsed>
+                    <p>Nested too, and folded.</p>
+                  </ui-section>
+                </ui-docs-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>

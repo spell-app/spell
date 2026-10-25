@@ -18309,6 +18309,16 @@ export interface UIPanelAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -21260,6 +21270,16 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
@@ -21866,6 +21886,16 @@ export interface UIPropertyGroupAttributes {
    * @deprecated write `level` -- `prop:` stays only for compiled spell
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
+  /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
@@ -25301,6 +25331,16 @@ export interface UISectionAttributes {
    * @deprecated write `level` -- `prop:` stays only for compiled spell
    */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
+  /**
+   * Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent="setup"`):  it joins it, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
@@ -28864,6 +28904,16 @@ export interface UIStepAttributes {
    */
   "prop:description"?: string
   /**
+   * Id of the `<ui-steps>` this step belongs to, when it's written outside them (`parent="checkout"`):  it joins them, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
+  /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
@@ -29827,6 +29877,16 @@ export interface UITabAttributes {
    * @deprecated write `attached` -- `prop:` stays only for compiled spell
    */
   "prop:attached"?: boolean | "" | "top" | "bottom"
+  /**
+   * Id of the `<ui-tabs>` this pane belongs to, when it's written outside them (`parent="types"`):  it joins them, in page order, as if nested there.
+   * - takes:  text
+   */
+  parent?: string
+  /**
+   * `parent`, as the DOM element's property.
+   * @deprecated write `parent` -- `prop:` stays only for compiled spell
+   */
+  "prop:parent"?: string
   /**
    * No segment box;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)

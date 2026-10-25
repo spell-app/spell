@@ -20271,6 +20271,13 @@
           ]
         },
         {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "icon",
           "description": {
             "kind": "markdown",
@@ -23404,6 +23411,13 @@
           ]
         },
         {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "icon",
           "description": {
             "kind": "markdown",
@@ -23923,6 +23937,13 @@
               "name": "6"
             }
           ]
+        },
+        {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.\n\nTakes:  text"
+          }
         },
         {
           "name": "icon",
@@ -27701,6 +27722,13 @@
               "name": "6"
             }
           ]
+        },
+        {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.\n\nTakes:  text"
+          }
         },
         {
           "name": "icon",
@@ -31703,6 +31731,13 @@
           }
         },
         {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-steps>` this step belongs to, when it's written outside them (`parent=\"checkout\"`):  it joins them, in page order, as if nested there.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "loading",
           "description": {
             "kind": "markdown",
@@ -32829,6 +32864,13 @@
               "name": "bottom"
             }
           ]
+        },
+        {
+          "name": "parent",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the `<ui-tabs>` this pane belongs to, when it's written outside them (`parent=\"types\"`):  it joins them, in page order, as if nested there.\n\nTakes:  text"
+          }
         },
         {
           "name": "basic",

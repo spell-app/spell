@@ -60,6 +60,14 @@ export const sectionVocabulary = {
         "(under the page's `h1`)."
     },
     {
+      name: "parent",
+      group: "layout",
+      kind: "string",
+      description:
+        "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it " +
+        '(`parent="setup"`):  it joins it, in page order, as if nested there.'
+    },
+    {
       name: "icon",
       group: "content",
       kind: "icon",

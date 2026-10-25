@@ -76,6 +76,14 @@ export const stepVocabulary = {
       group: "content",
       kind: "string",
       description: "Shorthand for the description under the title."
+    },
+    {
+      name: "parent",
+      group: "layout",
+      kind: "string",
+      description:
+        'Id of the `<ui-steps>` this step belongs to, when it\'s written outside them (`parent="checkout"`):  ' +
+        "it joins them, in page order, as if nested there."
     }
   ],
   events: [],
