@@ -52,6 +52,13 @@ export const epicTextBoxVocabulary = {
       name: "label",
       kind: "string",
       description: "Its name for a screen reader;  none:  its placeholder."
+    },
+    {
+      name: "max-height",
+      kind: "string",
+      description:
+        "How tall it grows before it scrolls, a CSS length:  `40vh`, `50vh`;  none:  a third of the window.  " +
+        "For a box another element draws, with room of its own (`<epic-agents>`' redirect box, `<epic-new-item>`)."
     }
   ],
   events: [],
@@ -60,7 +67,8 @@ export const epicTextBoxVocabulary = {
     { name: "base", description: "The box around the text field." },
     {
       name: "field",
-      description: "The `<textarea>`:  one line to start, growing with its text to a third of the window."
+      description:
+        "The `<textarea>`:  one line to start, growing with its text to a third of the window (`max-height`)."
     },
     {
       name: "kept",

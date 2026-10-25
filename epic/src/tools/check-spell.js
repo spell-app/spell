@@ -48,7 +48,7 @@ import { join } from "node:path"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 
 import { PACK_TAG, openPage, settle } from "./browserPage.js"
-import { browserUrlFor, pageFile } from "./pages.js"
+import { browserUrlFor, componentSetAddress, pageFile } from "./pages.js"
 
 /** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
 const NAV = ".spell-toolbar"
@@ -95,7 +95,7 @@ if (desktop.topLevel && !stuck.active) problem("no toolbar entry marked current 
 
 const fold = await checkFold(desk)
 // a component set's page with no section at all (a set's home, an element with one example) has nothing to fold
-if (fold.problem && (fold.target || !setAddress(docPath))) problem(`fold:  ${fold.problem}`)
+if (fold.problem && (fold.target || !componentSetAddress(docPath))) problem(`fold:  ${fold.problem}`)
 const itemLine = { desktop: await checkItemLine(desk) }
 
 const phone = await open({ width: 390, height: 844 })

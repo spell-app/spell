@@ -3,7 +3,7 @@
  * - The look of the epic page's note boxes (`<epic-agents>`' redirect box):  the page's ground, a quiet rule,
  *   6px corners;  the focus ring the page's.
  * - Its margin sets it apart on a page;  a `note` has none:  the frame its element draws round it is its margin.
- * - Grows with its text (`field-sizing`), up to a third of the window, then scrolls.
+ * - Grows with its text (`field-sizing`), up to a third of the window (or its `max-height`), then scrolls.
  * - A notes box's KEPT text (P18), above its field:  the page changed under Owen, a warning, so an ORANGE edge and
  *   title;  the texts are his own words, so his IVORY (`templates/epics/plan-doc.md`, "Colours").
  * - Public tokens (`--epic-text-box-*`) are never declared here:  read through private aliases.

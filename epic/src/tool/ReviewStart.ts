@@ -464,7 +464,7 @@ export class ReviewStart {
       sessions: [],
       did,
       at: woken.at,
-      message: `Already ${did} at ${clockOf(woken.at)}:  press Enter there.`
+      message: `Already ${did} at ${clockTime(new Date(woken.at))}:  press Enter there.`
     }
   }
 }
@@ -477,9 +477,4 @@ function isWoken(state: WakeResult["state"]): state is WokenState {
 /** `words` with a capital first:  `typed ...` -> `Typed ...`. */
 function sentence(words: string): string {
   return `${words[0]!.toUpperCase()}${words.slice(1)}`
-}
-
-/** ISO time `iso` as this machine's clock time, 24-hour:  `17:32`. */
-function clockOf(iso: string): string {
-  return clockTime(new Date(iso))
 }

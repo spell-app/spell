@@ -215,24 +215,10 @@
     align-items: flex-end;
     gap: 6px;
   }
+  /* an `<epic-text-box>`:  its own look, capped at 40vh */
   .agent-note {
     flex: 1 1 auto;
     min-width: 0;
-    min-height: 2.2em;
-    max-height: 40vh;
-    field-sizing: content;
-    box-sizing: border-box;
-    padding: 4px 6px;
-    border: 1px solid var(--epic-rule, var(--ui-border-color));
-    border-radius: 6px;
-    background: var(--epic-bg, var(--ui-background));
-    color: var(--epic-ink, var(--ui-text-color));
-    font: inherit;
-    resize: vertical;
-  }
-  .agent-note:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
-    outline-offset: 0;
   }
   .agent-send {
     flex: none;

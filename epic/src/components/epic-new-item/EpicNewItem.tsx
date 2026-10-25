@@ -6,6 +6,7 @@ import { E } from "spell/element"
 import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls': its file, not `epic-review`'s barrel
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
+import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
 
 import { epicNewItemVocabulary } from "./EpicNewItem.en"
 import {
@@ -107,7 +108,7 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
 
   /** The form's fields, as drawn. */
   private titleInput: HTMLInputElement | undefined
-  private noteInput: HTMLTextAreaElement | undefined
+  private noteInput: DOMTextBoxElement | undefined
   private nearInput: HTMLInputElement | undefined
 
   /**
@@ -166,16 +167,16 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
           placeholder={this.translationForKey("newTitle")}
           aria-label={this.translationForKey("newTitle")}
         />
-        <textarea
-          ref={(element) => {
-            this.noteInput = element
-            element.value = item?.note ?? ""
+        <epic-text-box
+          ref={(element: HTMLElement) => {
+            this.noteInput = element as DOMTextBoxElement
+            this.noteInput.value = item?.note ?? ""
           }}
-          class={NEW_INPUT}
           data-field="note"
-          rows="2"
+          type="note"
+          max-height="50vh"
           placeholder={this.translationForKey("newNote")}
-          aria-label={this.translationForKey("newNote")}
+          label={this.translationForKey("newNote")}
         />
         <span class={NEW_ACTIONS}>
           <input

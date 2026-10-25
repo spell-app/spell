@@ -130,13 +130,6 @@
     font: inherit;
     line-height: 1.4;
   }
-  /* grows with its text (Owen, 2026-10-06:  every "tell me more" box), from two lines to half the window */
-  textarea.new-input {
-    min-height: 3.2em;
-    max-height: 50vh;
-    field-sizing: content;
-    resize: vertical;
-  }
   .new-input:focus-visible {
     outline: 2px solid var(--_epic-act-focus);
     outline-offset: 0;
