@@ -248,7 +248,7 @@ export const COUNT_ATTRIBUTES = ["status", "state"]
 
 /**
  * Where an item stands, in the filter's order:  its state, its chip's colour, its texts' keys (the tooltip's words).
- * - the same six as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
+ * - the same seven as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
  *   `replied` (Owen's turn to pick, 2026-10-09) beside `attention`:  both wait on Owen
  */
 export const FILTER_STATES = [
@@ -257,6 +257,8 @@ export const FILTER_STATES = [
   { state: "replied", color: "orange", words: "stateReplied" },
   { state: "open", color: "yellow", words: "stateOpen" },
   { state: "recent", color: "green", words: "stateRecent" },
+  // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart
+  { state: "handled", color: "grey", words: "stateHandled" },
   { state: "old", color: "grey", words: "stateOld" }
 ] as const
 
@@ -288,6 +290,11 @@ export const FILTER_TEXTS = [
   },
   { key: "stateOpen", text: "open, still undecided", description: "A state chip's words:  `open` (yellow)." },
   { key: "stateRecent", text: "decided or done", description: "A state chip's words:  `recent` (green)." },
+  {
+    key: "stateHandled",
+    text: "handled in a phase",
+    description: "A state chip's words:  `handled` (grey:  its answer is in a phase's text now)."
+  },
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." }
 ] as const
 

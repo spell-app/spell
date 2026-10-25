@@ -499,6 +499,9 @@ the block:  `<epic-change item="q16">the new words</epic-change>`, the question'
   Reopen on hover.  `epic inbox apply` makes his Accept `accepted` (the orange goes, the chip stays for good) and
   reopens the question for his Reopen (the words stay orange:  answer it, then rewrite them with a new mark).
 - The page header counts the changes waiting, and so does Accept Overview's tooltip.
+- In a PHASE's text, the mark also marks its item HANDLED in that phase (epic `epic-engine` P31):  grey, quiet in the
+  lists, its line linking the phase.  So rewrite the phase from the item, marking the words, and the item tidies
+  itself away;  Reopen on the mark brings it back.
 - Not instead of the rest:  a phase's PLAN change is still `updated`'s `<epic-update>`;  the Update blocks written
   before stay as they are.  The rules:  `PLAN-DOC.md`, "Change marks".
 

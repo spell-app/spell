@@ -425,6 +425,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        `epic lint` fails one not stamped, or naming no item.
      - Owen accepts each on the page (the orange goes, the `Q16` chip stays) or reopens its question;
        `inbox apply` writes both.  Rules:  `plan-doc.md`, "Change marks".
+     - In a PHASE's text, the mark marks its item handled in that phase (P31):  grey, out of the lists.
+       So settle a question by rewriting the phase it belongs to, marked, rather than leaving it one more decided item.
    - Changed a prose block any other way:  put an `<epic-update>` right AFTER it.
 
      ```html

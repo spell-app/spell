@@ -697,6 +697,49 @@ test("apply:  a change's sent Accept makes it accepted (no longer to accept), it
   expect(printed.join("\n")).toContain("CH1  reopened Q1, was decided;  the change waits")
 })
 
+////////////////
+// ## Handled in a phase (epic `epic-engine` P31)
+////////////////
+
+test("a change mark in a PHASE's text marks its item handled there:  grey, logged;  one in the Overview doesn't", () => {
+  const plan = docWithChange()
+  const q = plan.addItem("question", "How many retries?")
+  plan.decide(q, "Three")
+  plan.addPhase("Retry Logic", {
+    goal: `<ul><li><epic-change item="${q}">three retries, then give up</epic-change></li></ul>`
+  })
+  plan.updateStates()
+  const item = plan.findItem(q)!
+  expect([item.getAttribute("handled"), item.getAttribute("state")]).toEqual(["p-retry-logic", "handled"])
+  expect(plan.toString()).toMatch(new RegExp(`${q.toUpperCase()} handled in P1`))
+  // the Overview's mark (Q1's) is a change to accept, not a phase taking the answer
+  expect(plan.findItem("q1")!.hasAttribute("handled")).toBe(false)
+  expect(plan.findItem("q1")!.getAttribute("state")).toBe("recent")
+})
+
+test("apply:  Reopen on a phase's change mark takes `handled` off:  its question is back, red;  the next edit leaves it so", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const q = plan.addItem("question", "How many retries?")
+  plan.decide(q, "Three")
+  plan.addPhase("Retry Logic", { goal: `<ul><li><epic-change item="${q}">three retries</epic-change></li></ul>` })
+  plan.updateStates()
+  const change = plan.document.querySelector("epic-change")!.id
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark(change, { action: "reopen" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  after.updateStates()
+  const item = after.findItem(q)!
+  expect([item.hasAttribute("handled"), item.getAttribute("status"), item.getAttribute("state")]).toEqual([
+    false,
+    "open",
+    "attention"
+  ])
+})
+
 test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere else;  the stage's Accept still needs its stage", () => {
   const inbox = ReviewInbox.read(inboxFile)
   expect(inbox.setMark("ch2", { action: "accept" }, T1)).toMatchObject({ action: "accept" })

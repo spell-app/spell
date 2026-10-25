@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  c2ad7625ce253e8c
+// sources:  b6be866e193107c1
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -22,7 +22,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","label"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-more": {"folder":"epic-answer","attributes":[]},

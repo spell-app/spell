@@ -720,6 +720,20 @@ text itself, where an `<epic-update>` only said a block changed.
     button's tooltip (Accept Overview, Accept Phases)
 - The `<epic-update>` blocks written before stay as they are.  No migration step:  a new element, nothing old changes.
 
+### Handled in a phase
+
+An item whose answer a PHASE's text took is HANDLED there (epic `epic-engine` P31;  Q17, A):  out of the way, since its
+answer lives in the phase now.
+
+- No step of its own:  a change mark inside a phase (its Goal, Changes ...) naming the item does it, when first stamped
+  (`PlanDoc.markHandled()`):  `<epic-item handled="p-retry-logic">`, the item stamped, the log saying
+  `Q13 handled in P4`.
+  - a mark in the Overview, an item or the log:  not handled;  only a phase takes an answer into its work
+- Its state is `handled` (`itemState()`, before `recent`):  grey, as quiet as canceled, a chip of its own in the
+  section's filter, never in "what needs you";  its line says `in P4`, linking the phase.
+- Reopen on the mark takes `handled` off (`applyChange()`):  the item is back in the lists, red;  rewritten after its next
+  answer, the new mark marks it handled again.
+
 ## Migrations
 
 Named, dated, idempotent steps that bring an older page's markup up to today's, by page KIND

@@ -221,8 +221,12 @@
     color: var(--ui-violet, #6550ca);
     opacity: 0.75;
   }
-  /* failed in a test run (`failed`, epic `epic-engine` P4):  red, needs Owen;  never wraps */
-  .failed {
+  /*
+   * failed in a test run (`failed`, epic `epic-engine` P4):  red, needs Owen;  never wraps
+   * handled in a phase (`handled`, P31):  grey, quiet
+   */
+  .failed,
+  .handled {
     flex: none;
     white-space: nowrap;
   }
@@ -384,7 +388,7 @@
    * - blue:  Claude is working on it
    * - yellow (dark text):  open and still undecided
    * - green:  decided or done (however long ago:  Owen, 2026-10-08)
-   * - grey:  no longer relevant (canceled), a quiet tint
+   * - grey:  no longer relevant (canceled), or handled in a phase (`handled`, epic `epic-engine` P31), a quiet tint
    */
   .item.attention {
     --_epic-state: var(--epic-state-attention, light-dark(var(--ui-red), var(--ui-red-on-light)));
@@ -406,7 +410,7 @@
     --_epic-state-on: var(--epic-state-recent-on, var(--ui-green-on));
     --_epic-state-text: var(--ui-green-text, var(--_epic-state));
   }
-  .item.old {
+  .item:is(.old, .handled) {
     --_epic-state: var(--epic-state-old, var(--ui-grey-background));
     --_epic-state-on: var(--epic-state-old-on, var(--ui-grey-text));
     --_epic-state-text: var(--ui-grey-text, var(--_epic-state));
@@ -449,7 +453,7 @@
   .item:is(.attention, .replied, .progress, .open) .title {
     font-weight: 600;
   }
-  .item.old .title {
+  .item:is(.old, .handled) .title {
     color: var(--_epic-item-muted);
   }
   /* the ONE struck-through status:  `canceled`, made moot;  `done` stays unstruck */

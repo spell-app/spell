@@ -209,6 +209,8 @@ export type ItemFacts = {
   awaitsPick: boolean
   /** how Claude handled Owen's last review mark (`<epic-item review-as>`, `REVIEW_AS`), or `undefined` */
   reviewAs: string | undefined
+  /** the phase whose text took its answer (`<epic-item handled>`, epic `epic-engine` P31), or `undefined` */
+  handled: string | undefined
 }
 
 /** One item (or an Overview sub-section), as `PlanReader.describeItem()` says it for `epic inbox`. */
@@ -316,6 +318,7 @@ export type OptionCard = {
  *   a revisit or Do Now Claude answered, the item still open)
  * - `recent` (green):  decided or done, however long ago (Owen, 2026-10-08:  "green across the board is good"):
  *   closed, or open and settled by a review (`SETTLED_AS`)
+ * - `handled` (grey):  handled in a phase, its answer that phase's text now (`handled`, epic `epic-engine` P31)
  * - `old` (grey):  no longer relevant:  canceled (made moot, struck through)
  */
 export const STATE_COLORS = {
@@ -324,6 +327,7 @@ export const STATE_COLORS = {
   progress: "blue",
   open: "yellow",
   recent: "green",
+  handled: "grey",
   old: "grey"
 } as const
 

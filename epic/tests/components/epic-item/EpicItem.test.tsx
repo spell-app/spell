@@ -280,6 +280,27 @@ describe("<epic-item>", () => {
     expect(day.host.shadowRoot!.querySelector("[part~='overnight']")).toBeNull()
   })
 
+  test("handled in a phase (`handled`, epic `epic-engine` P31):  grey, `in P2` on its line linking the phase, named in its tooltip", async () => {
+    const phases = document.createElement("div")
+    phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-retry" title="Retry Logic"></epic-phase>`
+    document.body.append(phases)
+    try {
+      const { host, chip } = await item(
+        `<epic-item id="q4" title="How many retries?" status="decided" state="handled" handled="p-retry"></epic-item>`
+      )
+      const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
+      expect([mark.textContent, mark.getAttribute("href"), mark.title]).toEqual([
+        "in P2",
+        "#p-retry",
+        "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again."
+      ])
+      expect(chip.title).toMatch(/^Handled in a phase/)
+      await expectAccessible(host)
+    } finally {
+      phases.remove()
+    }
+  })
+
   test("`calm`:  the chip follows the script's `state` (open:  yellow), and stays a link without a review", async () => {
     const { chip } = await item(`<epic-item id="j10" title="Follows WWOD" status="open" state="open" calm></epic-item>`)
     expect([chip.localName, chip.title]).toEqual(["a", "Open, still undecided · not reviewed yet"])

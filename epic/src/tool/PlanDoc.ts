@@ -587,7 +587,8 @@ export class PlanDoc extends PlanReader {
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
       awaitsPick: PlanItem.awaitsPick(item),
-      reviewAs: data.reviewAs
+      reviewAs: data.reviewAs,
+      handled: data.handled
     }
   }
 
@@ -1600,6 +1601,8 @@ export class PlanDoc extends PlanReader {
       Markup.set(page, { recentSince: this.recentSince ?? undefined })
       if (before !== page.getAttribute("recent-since")) changed++
     }
+    // first:  a new mark in a phase's text marks its item handled, which its state reads
+    changed += this.updateChanges()
     for (const item of this.allItems) {
       const state = this.itemState(item)
       if (item.getAttribute("state") === state) continue
@@ -1608,7 +1611,6 @@ export class PlanDoc extends PlanReader {
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
     if (this.updateChangeCounts()) changed++
-    changed += this.updateChanges()
     return changed
   }
 
@@ -2056,6 +2058,7 @@ export class PlanDoc extends PlanReader {
    * - `accept`:  the change stands.  It's `accepted` now:  the orange goes, the words and the Q&A chip stay for good.
    * - `reopen`:  the question it names opens again (red, Owen's to talk over), and the mark stays orange until
    *   it's answered again and the words rewritten
+   *   - no longer handled in a phase (`handled`, P31):  it's back in the lists, to be talked over
    * - the mark gone from the doc (rewritten meanwhile):  dropped (`gone`);  accepted already:  nothing more to do
    * - logs it (`CH3 accepted:  Q13's change stands`)
    */
@@ -2075,6 +2078,10 @@ export class PlanDoc extends PlanReader {
       const question = this.findItem(item)
       if (!question) return { applied: false, left: `${label}:  its question ${item} isn't on the page` }
       const was = question.getAttribute("status") ?? "open"
+      if (question.hasAttribute("handled")) {
+        Markup.set<"epic-item">(question, { handled: undefined })
+        this.stamp(question)
+      }
       if (was !== "open") {
         // open, red, Owen's to answer again:  `setItem()` would keep an answered question decided.
         // Its answer stays, readable, until he answers again
@@ -2114,6 +2121,9 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
+   *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
+   *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
    * - each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting
    *   for Accept, in `to-accept` (`ch3 ch5`;  none:  no attribute)
    *   - the SKELETON's, as `part-ids` is:  the page counts and finds them, and the review routes take their marks
@@ -2126,7 +2136,10 @@ export class PlanDoc extends PlanReader {
     const now = PlanTime.clockTime(this.now)
     for (const change of changes) {
       const data: Partial<EpicData<"epic-change">> = {}
-      if (!CHANGE_ID.test(change.id)) data.id = `ch${next++}`
+      if (!CHANGE_ID.test(change.id)) {
+        data.id = `ch${next++}`
+        if (this.markHandled(change)) changed++
+      }
       if (!change.hasAttribute("at")) data.at = now
       const answer = change.hasAttribute("answer") ? undefined : this.answerOf(change.getAttribute("item") ?? "")
       if (answer) data.answer = answer
@@ -2147,6 +2160,21 @@ export class PlanDoc extends PlanReader {
       changed++
     }
     return changed
+  }
+
+  /**
+   * Change mark `change`, just stamped:  inside a phase's text, its item is HANDLED IN that phase (`handled`, epic
+   * `epic-engine` P31), logged (`Q13 handled in P4`);  changed?
+   * - an item already handled there, or a mark outside a phase, or naming no item:  nothing
+   */
+  private markHandled(change: Element): boolean {
+    const phase = change.closest("epic-section[kind='phases'] > epic-phase")
+    const item = phase ? this.findItem(change.getAttribute("item") ?? "") : null
+    if (!phase || !item || item.localName !== "epic-item" || item.getAttribute("handled") === phase.id) return false
+    Markup.set<"epic-item">(item, { handled: phase.id })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} handled in P${PhaseIds.numberOf(phase)}`)
+    return true
   }
 
   /** Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none. */

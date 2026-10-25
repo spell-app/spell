@@ -4,6 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { PlanDates } from "spell-epic/dates"
+import { PhaseIds } from "spell-epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 import {
@@ -42,6 +43,7 @@ import {
   NOTE_OPEN,
   OVERNIGHT,
   FAILED,
+  HANDLED,
   REVIEW,
   STATE_TIP_KEYS,
   STATUS_SLOT,
@@ -75,6 +77,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
  *     a click on one never folds it
  *   - the bed icon (`overnight`:  made overnight), the git icon (with commits)
+ *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
  * - Its COMMITS (`<epic-commit>` children, or `commits` while its part isn't in):
@@ -360,6 +363,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.slots.hasContent(this.slotForName("actions")) ||
       !!this.overnight ||
       this.failed !== undefined ||
+      !!this.handled ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing() ||
@@ -570,6 +574,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             </span>
           </Show>
           <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
+          <Show when={this.handled}>{this.handledMark()}</Show>
           <Show when={this.hasCommits()}>{this.gitButton()}</Show>
           <Show when={!this.reviewState.reviewing() && this.review()}>
             {(review) => (
@@ -608,6 +613,33 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
+      </ui-label>
+    )
+  }
+
+  /**
+   * Handled in a phase (`handled="p-retry-logic"`, epic `epic-engine` P31):  a quiet grey `in P4` on its line,
+   * linking the phase;  its tooltip names it (`P4 · Retry Logic`).
+   * - the phase read from the page when drawn:  a phase moved since shows its old number until the next redraw
+   */
+  private handledMark(): JSX.Element {
+    const phase = () => {
+      const element = isServer ? null : document.getElementById(this.handled ?? "")
+      if (element?.localName !== "epic-phase") return { short: "P?", full: this.handled ?? "" }
+      const short = `P${PhaseIds.numberOf(element)}`
+      const title = element.getAttribute("title")
+      return { short, full: title ? `${short} · ${title}` : short }
+    }
+    return (
+      <ui-label
+        class={HANDLED}
+        part={this.partForName("handled")}
+        size="mini"
+        basic=""
+        href={`#${this.handled}`}
+        title={this.translationForKey("handledTip", { phase: phase().full })}
+      >
+        {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>
     )
   }

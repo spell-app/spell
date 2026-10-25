@@ -15,7 +15,7 @@ export type EpicItemVocabulary = typeof epicItemVocabulary
 ////////////////
 
 /** An item's id-chip colours, by where it stands (the script's `state`):  see `EpicItem.css`. */
-export const ITEM_STATES = ["attention", "replied", "progress", "open", "recent", "old"] as const
+export const ITEM_STATES = ["attention", "replied", "progress", "open", "recent", "handled", "old"] as const
 
 /** One of `ITEM_STATES`. */
 export type ItemState = (typeof ITEM_STATES)[number]
@@ -53,6 +53,7 @@ export const STATE_TIP_KEYS = {
   progress: "stateProgress",
   open: "stateOpen",
   recent: "stateRecent",
+  handled: "stateHandled",
   old: "stateOld"
 } as const satisfies Record<ItemState, string>
 
@@ -84,6 +85,7 @@ export const GIT = "git"
 export const OVERNIGHT = "overnight"
 /** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
 export const FAILED = "failed"
+export const HANDLED = "handled"
 export const REVIEW = "review"
 export const DETAILS = "details"
 export const LABEL = "label"
