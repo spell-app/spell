@@ -2061,8 +2061,8 @@
           "ruleNames": ["input_state"],
           "internal": false,
           "file": "src/spell/rules/events/InputState.ts",
-          "line": 17,
-          "purpose": "The mouse and the keys, readable anywhere (epic `elemental-spell` P9, Q31, Q32; HyperCard's `the shiftKey`) -- core's `input`, `input.ts`.",
+          "line": 18,
+          "purpose": "The mouse and the keys, readable anywhere -- core's `input`, `input.ts`.",
           "syntaxes": [
             {
               "syntax": "the meta key {operator:is_or_is_not} down"
