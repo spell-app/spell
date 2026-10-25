@@ -89,7 +89,11 @@
       --ui-select-icon-distance,
       calc(2 * var(--_ui-select-padding-inline) + 2 * var(--_ui-select-caret-size))
     );
-    --_ui-select-placeholder-color: var(--ui-select-placeholder-color, var(--ui-text-light));
+    /* as an input's:  well lighter than a chosen value */
+    --_ui-select-placeholder-color: var(
+      --ui-select-placeholder-color,
+      color-mix(in oklab, var(--ui-text-light) 55%, transparent)
+    );
     --_ui-select-placeholder-style: var(--ui-select-placeholder-style, normal);
     --_ui-select-picker-background: var(--ui-select-picker-background, var(--ui-surface));
     --_ui-select-picker-color: var(--ui-select-picker-color, var(--ui-text-color));

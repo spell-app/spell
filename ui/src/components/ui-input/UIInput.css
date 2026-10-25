@@ -107,8 +107,15 @@
     --_ui-input-color-focus: var(--ui-input-color-focus, var(--ui-text-hovered));
     --_ui-input-radius: var(--ui-input-radius, var(--ui-radius));
     --_ui-input-duration: var(--ui-input-duration, var(--ui-duration-fast));
-    --_ui-input-placeholder-color: var(--ui-input-placeholder-color, var(--ui-text-light));
-    --_ui-input-placeholder-focus-color: var(--ui-input-placeholder-focus-color, var(--ui-text-muted));
+    /* a placeholder well lighter than typed text, so it never reads as typed (Owen) */
+    --_ui-input-placeholder-color: var(
+      --ui-input-placeholder-color,
+      color-mix(in oklab, var(--ui-text-light) 55%, transparent)
+    );
+    --_ui-input-placeholder-focus-color: var(
+      --ui-input-placeholder-focus-color,
+      color-mix(in oklab, var(--ui-text-light) 70%, transparent)
+    );
     --_ui-input-disabled-opacity: var(--ui-input-disabled-opacity, var(--ui-disabled-opacity));
     --_ui-input-icon-width: var(--ui-input-icon-width, 2.67142em);
     --_ui-input-icon-size: var(--ui-input-icon-size, 1em);
