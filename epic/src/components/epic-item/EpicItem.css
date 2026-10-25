@@ -121,12 +121,11 @@
   }
   .item.unfolded > .details > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
-    border: none;
-    border-top: 1px solid var(--_epic-item-rule);
+    /* its frame all round, light (the answer-look page's Q2:  "lose heavy border on top") */
     /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
     border-radius: 10px 10px max(0px, calc(var(--_epic-item-bottom-radius) - 1px))
       max(0px, calc(var(--_epic-item-bottom-radius) - 1px));
-    box-shadow: 0 -1px 2px light-dark(rgb(40 30 90 / 0.04), rgb(0 0 0 / 0.3));
+    /* one line of shadow, its own (EpicReview.css) */
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
   .item.under-title > .line {

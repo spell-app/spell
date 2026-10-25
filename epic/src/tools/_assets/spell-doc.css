@@ -1556,3 +1556,9 @@ ui-section:has(> epic-ask)::part(heading) {
     visibility: visible;
   }
 }
+
+/* room between the stuck page header (its toolbar) and what starts the page (Owen, 2026-10-25:  "needs more padding on
+   top") */
+main > ui-sticky.spell-h1 + * {
+  margin-top: 18px;
+}
