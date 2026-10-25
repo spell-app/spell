@@ -642,6 +642,10 @@
   /*
    * the tabs' track is the panel itself:  an unselected tab shows the panel's own fill, only the selected one its thumb
    * (Owen, 2026-10-25:  "non-selected tab to show bg color";  a theme's segmented track, fruity's grey, before)
+   * - no fill of its own behind an unselected tab, and no gap between them:  the segments stay joined
+   *   (Owen, 2026-10-25, on separate pills:  "Gap should be settable, turned off by default")
+   *   - the gap is the segmented menu's own token, `--ui-menu-segmented-gap` (`0` unless a theme sets one;
+   *     spell-brand's is 2px), for both rows:  the section toolbar is a menu too
    */
   .site-tabs::part(menu) {
     /* the panel's own glass, as its ring is:  an unselected tab shows the panel (r25:  transparent showed the page,
@@ -723,6 +727,11 @@
   /* phones:  the tabs need the width */
   @media (--ui-mobile) {
     .site-main {
+      /*
+       * a thinner band round the tabs (Owen, 2026-10-25, the tabs' picture page:  "Phone, at the top ... Thinner border
+       * around the tabs");  wider screens keep 10px, which he didn't ask to change
+       */
+      --site-tabs-band: 6px;
       /* the band's width:  its glass then starts at the gutter, never closer to the screen's edge (the designer, T5) */
       --site-tabs-inset: var(--site-tabs-band);
     }
@@ -858,6 +867,24 @@
     margin-inline: var(--site-tabs-inset);
     /* the top row a little larger than the section toolbar's row under it */
     font-size: calc(var(--ui-font-size) * 1.0667);
+  }
+  /*
+   * phones:  the tabs and their section toolbar scroll away with the page, never stick (Owen, 2026-10-25:  "Phone,
+   * scrolled (tabs stuck):  don't stick this on phone!");  `SiteSections` reads the tabs' `position`, so the titles
+   * then stick right under the page header
+   * - the toolbar's box stays positioned:  it draws the panel behind the tabs (spell-toolbar.css)
+   */
+  @media (--ui-mobile) {
+    /* `top` back to `auto`:  a sticky's line would move a relative box down by as much */
+    .site-tabs::part(menu) {
+      position: relative;
+      top: auto;
+      translate: none;
+    }
+    .site-tabs ui-sticky.spell-site-toolbar::part(sticky) {
+      position: relative;
+      top: auto;
+    }
   }
   /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
   .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {

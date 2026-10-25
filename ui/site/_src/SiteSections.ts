@@ -98,6 +98,12 @@ export class SiteSections {
       main.classList.toggle(HEAD_STUCK, scrollY > 0)
       const bar = SiteSections.barOf(main)
       if (!bar) return
+      // tabs that scroll away with the page (phones):  never stuck, never leaving
+      if (!SiteSections.sticks(bar)) {
+        if (main.style.getPropertyValue(TABS_LEAVE)) main.style.removeProperty(TABS_LEAVE)
+        main.classList.remove(TABS_STUCK)
+        return
+      }
       // how far the joined toolbar has moved up from where it sticks:  0 until its pane ends
       const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
       const part = pageBar?.matches(JOINED_BAR)
@@ -157,7 +163,8 @@ export class SiteSections {
    * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bars:
    * - `--site-top`
    * - plus the masthead's title line (its height on `main` as `--site-head-height`)
-   * - plus, when the page has tabs, the tabs' bar and its band above and below
+   * - plus, when the page has tabs that stick, the tabs' bar and its band above and below
+   *   - on a phone they scroll away with the page (`site.css`), so the titles stick right under the page header
    */
   private measure(): void {
     const main = this.main
@@ -179,13 +186,15 @@ export class SiteSections {
     // the joined panel is drawn by the toolbar's box reaching up behind the track (`--site-tabs-track`)
     const track = `${Math.round(trackHeight)}px`
     if (main.style.getPropertyValue(TABS_TRACK) !== track) main.style.setProperty(TABS_TRACK, track)
-    let top = bar ? trackBottom + band + gap : siteTop
+    const tabsStick = !!bar && SiteSections.sticks(bar)
+    let top = tabsStick ? trackBottom + band + gap : siteTop
     // a page's own sticky bar:
     // the section toolbar under the tabs is the panel's lower half, stuck right under the track;
     // another (the kitchen sink's theme picker) sticks below the panel;  the titles below either
+    // - NOT the section toolbar under tabs that don't stick:  it scrolls away with them
     const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
-    if (pageBar) {
-      const isJoined = !!bar && pageBar.matches(JOINED_BAR)
+    const isJoined = !!bar && !!pageBar?.matches(JOINED_BAR)
+    if (pageBar && (tabsStick || !isJoined)) {
       const at = isJoined ? trackBottom : top
       SiteSections.setOffset(pageBar, String(Math.round(at)))
       top = at + SiteSections.heightOf(pageBar) + (isJoined ? gap : 0)
@@ -452,6 +461,11 @@ export class SiteSections {
   /** Height of `section`'s title bar, px (0 before it draws). */
   private static titleHeight(section: Element): number {
     return section.shadowRoot?.querySelector('[part~="title"]')?.getBoundingClientRect().height ?? 0
+  }
+
+  /** Whether the tabs' bar sticks:  not on a phone, where it scrolls away with the page (`site.css`). */
+  private static sticks(bar: HTMLElement): boolean {
+    return getComputedStyle(bar).position === "sticky"
   }
 
   /** The page's tabs (`#site-tabs`), if any. */
