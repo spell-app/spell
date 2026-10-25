@@ -112,14 +112,13 @@ export type AttributeSpec = {
    */
   aliases?: readonly string[]
   /**
-   * The OLD names this attribute replaces, still read until every page is rewritten (epic `ui-gaps`, request r1).
+   * The OLD names this attribute replaced (epic `ui-gaps`, request r1):  a record, for `spell ui rename`,
+   * which rewrites markup still in them.
    * - Each one is:
    *   - a plain old name, the same value under a new name:  `"href"` on `link`
    *   - an old switch and the value it stands for:  `{ from: "primary", value: "primary" }` on `color`
-   * - The element reads an old name as this attribute, and notes it once per page in the console.
-   * - Written with the new name too, the new one wins.
-   * - Unlike `aliases`, the family needs no code of its own.
-   * - Its translated name, if the dictionary still has one (`primario`), is read too.
+   * - The elements don't read them:  since epic `ui-gaps` P13 an old name does nothing on a page.
+   * - The docs' API tables list them, so a reader still in the old words finds the new one.
    */
   replaces?: readonly AttributeReplacement[]
   /**

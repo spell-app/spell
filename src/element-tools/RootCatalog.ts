@@ -29,11 +29,7 @@ export class RootCatalog {
     const entries: Record<string, RootCatalogEntry> = {}
     for (const root of roots) {
       for (const { folder, vocabulary } of await VocabularyFiles.read(root)) {
-        const attributes = vocabulary.attributes.flatMap(({ name, aliases = [], replaces = [] }) => [
-          name,
-          ...aliases,
-          ...replaces.map((old) => (typeof old === "string" ? old : old.from))
-        ])
+        const attributes = vocabulary.attributes.flatMap(({ name, aliases = [] }) => [name, ...aliases])
         entries[vocabulary.tag] = {
           folder,
           ...(vocabulary.skeleton === undefined ? {} : { skeleton: SkeletonText.parse(vocabulary.skeleton) }),

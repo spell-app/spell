@@ -503,21 +503,6 @@ export type ResolvedAttribute = {
   reflect: boolean
 }
 
-/**
- * An OLD name authors may still write for an attribute (`AttributeSpec.replaces`), as `ElementDefinition` resolves it.
- * - `<ui-button primary>` sets `color` to `primary`;  `<ui-card href>` sets `link`.
- */
-export type OldAttribute = {
-  /** the old name as authors write it:  `primary`, or a translated one (`primario`) */
-  name: string
-  /** the attribute it now stands for */
-  attribute: ResolvedAttribute
-  /** what the old name stands for written bare (`primary`);  `undefined` for a plain old name */
-  value?: string
-  /** old text => new value (`{ very: "very-basic" }`), where the values change too */
-  values?: Readonly<Record<string, string>>
-}
-
 ////////////////
 // ## Errors
 ////////////////

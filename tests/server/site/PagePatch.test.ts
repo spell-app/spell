@@ -51,7 +51,7 @@ describe("PagePatch.plan():  the DOM", () => {
   it("sets a changed attribute, and never a kept one (the reader's folds)", () => {
     expect(
       steps(
-        `<ui-section id="s" label="A" collapsed><p>x</p></ui-section>`,
+        `<ui-section id="s" label="A" open="false"><p>x</p></ui-section>`,
         `<ui-section id="s" label="B"><p>x</p></ui-section>`
       )
     ).toEqual([{ op: "attribute", target: "#s", name: "label", value: "B" }])

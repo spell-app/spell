@@ -180,32 +180,9 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     const attribute = definition?.attributeNamed(name)
     // a vocabulary's own `hidden` (none ships one) keeps its meaning
     if (visibleAttribute && name === "hidden" && !attribute) return this.onHiddenAttributeChanged(text)
-    const old = definition?.oldAttributeNamed(name)
-    if (old && !attribute) return this.onOldAttributeChanged(old, text)
-    // an old switch named like a new attribute (`link`:  a look once, now where a click goes):
-    // written bare, it's the old switch;  with text, the new attribute;  removed, both let go
-    if (old && (text === "" || text === null)) {
-      this.onOldAttributeChanged(old, text)
-      if (text === "") return
-    }
     if (!attribute || connectedState.upgradeValues?.has(attribute.property)) return
     if (attribute === visibleAttribute) return this.onVisibleAttributeChanged(text)
     this.setValue(attribute, definition.convert(attribute, text), "attribute")
-  }
-
-  /**
-   * An OLD name changed (`primary`, `href`:  `AttributeSpec.replaces`):  set the attribute it stands for now.
-   * - The new name wins:  ignored while the element has the new attribute too, or a page set its property early.
-   * - Stored as an attribute value, never written back:  the page's markup stays as it was written.
-   * - SIDE EFFECT:  a console note, once per page per old name (`ElementDefinition.noteOldName()`).
-   */
-  private onOldAttributeChanged(old: E.OldAttribute, text: string | null) {
-    const { attribute } = old
-    if (this.hasAttribute(attribute.attribute) || this.connectedState.upgradeValues?.has(attribute.property)) return
-    const definition = this.tagSetup.elementDefinition
-    if (text !== null) definition.noteOldName(old)
-    const next = definition.valueFromOld(old, text, this.attributeValues[attribute.key])
-    if (next) this.setValue(attribute, next.value, "attribute")
   }
 
   /**
@@ -543,10 +520,10 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
 
   /**
    * The attributes a tag of `definition` observes:
-   * each of its attributes, the old names they replace (`AttributeSpec.replaces`), and the platform's `hidden` where it's `visible` turned round ("Shown or hidden").
+   * each of its attributes, and the platform's `hidden` where it's `visible` turned round ("Shown or hidden").
    */
   static observedAttributesFor(definition: E.ElementDefinition): string[] {
-    const names = [...definition.attributes.map(({ attribute }) => attribute), ...definition.oldAttributeNames]
+    const names = definition.attributes.map(({ attribute }) => attribute)
     return definition.takesShared(VISIBLE) && !names.includes("hidden") ? [...names, "hidden"] : names
   }
 
