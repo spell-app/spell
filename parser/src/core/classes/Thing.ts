@@ -23,8 +23,8 @@ import { hasChosenId, ID_PROP } from "./ids"
  *    it = a new task with name = "Test Drawing"
  *    draw it
  *  ```
- * - `Eventful(Observable)` gives every `Thing` `on`/`off`/`once`/`trigger` for spell's event
- *   syntax, on top of `Observable`'s reactive `props`/`state` -- see `SpellEvent.ts`.
+ * - `Eventful(Observable)` gives every `Thing` `on`/`off`/`once`/`trigger`, for spell's event syntax,
+ *   on top of `Observable`'s reactive `props`/`state` -- see `SpellEvent.ts`.
  * - Every thing has an `id`, built in:  made the first time it's read, or set -- see `id`.
  */
 export class Thing extends Eventful(Observable) {
@@ -114,8 +114,8 @@ export class Thing extends Eventful(Observable) {
   }
 
   /**
-   * The key our remembered prop `property` is kept under, in the app's preferences:  `<id>.<property>`, e.g.
-   * `main.theme` -- see `remembered.ts`.
+   * The key our remembered prop `property` is kept under, in the app's preferences:
+   * `<id>.<property>`, e.g. `main.theme` -- see `remembered.ts`.
    * - Only with an id the program chose, or loaded (`hasChosenId()`):
    *   a made-up one is new each run, so nothing kept under it would be found again.
    * - `undefined` without one:  then it isn't remembered, said once on the console.

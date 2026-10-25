@@ -194,6 +194,25 @@ a card that only said `a card is a thing` would be `class Card extends Thing`.
 `declareProp()`, `getProp()` and `setProp()` are `Thing`'s, and they make `suit` reactive
 ([below](#reactivity--a-write-reads-back-at-once)).
 
+A card made with no suit still has one:
+
+```spell
+the card is a new card
+print the suit of the card
+print the color of the card
+```
+
+```text
+clubs
+black
+```
+
+An unset property reads its declared default, else its first choice, else its type's own:
+0 for a number, empty text, `false` for a choice.
+
+The default is never stored, so the card's JSON leaves it out, and a drawn card's element has no `suit` attribute.
+Python's `spell_core` reads the same defaults, and prints the same two lines.
+
 `core.defineElement()` gives every card an element of its own, `<solitaire-card>`, to draw itself in.
 An app is a view too, its element named for its project:  `<solitaire-app>`, which `<spell-viewer>` holds.
 And `color` is a plain getter, worked out each time it's read:  nothing caches it, so nothing can go stale.
@@ -218,7 +237,9 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | list helpers | positions, ranges, filtering, adding and removing, shuffling | [collection-core.ts](src/core/collection-core.ts), [collection-other.ts](src/core/collection-other.ts), [positions.ts](src/core/positions.ts) |
 | text | text helpers, and dotted paths | [string.ts](src/core/string.ts), [paths.ts](src/core/paths.ts) |
 | drawing | Solid's `h()`, `@drawn`, mounting an app;  each view in its own element (`<solitaire-card>`), inside its own error boundary, so a throw while drawing it shows a stand-in for that thing alone | [drawing.ts](src/core/drawing.ts), [elements.ts](src/core/elements.ts) |
-| notices and prompts | `notify`, `alert`, `warn` ... | [ui.ts](src/core/ui.ts) |
+| notices and prompts | `notify`, `alert`, `warn` ...;  and ⌘Z / ⇧⌘Z, through Spell UI's keyboard registry | [ui.ts](src/core/ui.ts) |
+| undo and redo | each run's undo history:  an action declared undoable is one step | [undoing.ts](src/core/undoing.ts) |
+| remembered props | a prop declared `remembered` keeps its value from run to run, in the person's preferences | [remembered.ts](src/core/remembered.ts) |
 | events | `trigger()`, `on()`, `off()`, `once()`;  pauses and processes | [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts) |
 | JSON | every object's JSON names its class first, as `"$type"`:  `{ "$type": "Card", "rank": "ace" }`;  `core.fromJSON()` reads it back as that class | [json.ts](src/core/json.ts) |
 | carrying over | keeps the game in progress when the program is recompiled | [carry.ts](src/core/carry.ts) |
@@ -391,15 +412,99 @@ Park and Miller's "minimal standard" generator, multiply by 16,807 and keep the 
 That's simple enough to copy into a second language step for step, which is the point.
 A shuffle is lodash's, step for step, in both.
 
-**Not yet:**  36 of the core's names have no Python twin, mostly a browser's own:
-a view's element, a page's shadow root, carrying things over a recompile
+**Not yet:**  44 of the core's names have no Python twin, mostly a browser's own:
+a view's element, a page's shadow root, carrying things over a recompile, remembering props from run to run
 ([the list, by why](README-targets.md#the-python-half)).
 
 Running the Python half (uv, Python 3.12 or later, the standard library only):  [README-targets](README-targets.md).
 
+## A run keeps an undo history, and what the person chose last time
+
+The core keeps two things for the person using a program:  an undo history, and the props declared `remembered`.
+Both are plain declarations on a class, beside `declareProp()`.
+
+**Not yet:**  the compiler writes neither, so for now a program's own TypeScript declares them, as the core's tests do.
+And Python's `spell_core` has neither:  a program compiled to Python keeps no undo history, and remembers nothing.
+
+### One undo step per action, however long it waits
+
+```ts
+class Card extends Thing {
+  turnOver(): void {
+    this.faceUp = !this.faceUp
+  }
+
+  static {
+    this.declareAction("turnOver", { undoneAs: "Turn Card" })
+  }
+}
+
+ace.turnOver()
+game.undoTitle // "Undo Turn Card"
+game.undo() // the ace faces as it did;  ⌘Z does the same
+game.redoTitle // "Redo Turn Card"
+```
+
+_From [the core's undo test](tests/core/undoing.test.ts), the card's props left out;  `game` is the program's app._
+
+An editor's undo usually runs a command backwards.
+This one runs nothing:  a step keeps each prop's value before its first change and after its last,
+and each list's items before and after, and undo sets them back through the setters.
+
+So a deal that waits between cards is one step, the turns it calls included, and its redo is instant.
+
+- Each run has ONE history, `core.RUNTIME.history`, of at most 100 steps;  loading saved state clears it.
+- Only an action declared undoable is recorded:  a plain write is no step.
+- An action declared `cantBeUndone` is left out of the history:
+  - `"keeps history"` (a hint) leaves the steps before it
+  - `"clears history"` (a new game) forgets them all, once it's done
+- A prop declared `undoable: false`, a selection say, is left out of every step.
+- The app shows it to people, its titles in the program's language (the core's messages):
+  - `undo()`, `redo()`
+  - `canUndo`, `canRedo`:  live
+  - `undoTitle`, `redoTitle`:  live, `Undo Turn Card`, or `Undo` with nothing to undo
+- ⌘Z and ⇧⌘Z go through Spell UI's keyboard registry while the app has the focus, or nothing does.
+  A text field and a modal keep their own.
+
+The catch:  nothing undoes while an undoable action still runs, so ⌘Z mid-deal waits for the deal to finish.
+The generic part, one step for everything an action does, is the kit's `UndoStack`
+([README-util](https://github.com/spell-app/spell/blob/main/README-util.md#undostack--one-step-for-everything-an-action-does)).
+
+### Props that outlive a run
+
+```ts
+class Solitaire extends App {
+  static {
+    this.declareProp("theme", { oneOf: ["light", "dark"], remembered: true })
+  }
+}
+
+core.resetRuntime()
+await core.remember("@local/solitaire")
+new Solitaire().theme // "light", its first choice
+new Solitaire().theme = "dark" // kept under @local/solitaire:theme
+
+// the next run:  resetRuntime(), then remember() again
+new Solitaire().theme // "dark"
+```
+
+_From [the core's remembered-props test](tests/core/remembered.test.ts), its run helper written out._
+
+Whoever runs the program calls `core.remember()` with the project's id, before the program starts.
+The editor and `<spell-viewer>` do;  `spell run` and the tests don't, and there a remembered prop is a plain one.
+
+- Kept in the person's preferences, a `PrefStore` named for the project's id
+  ([README-util](https://github.com/spell-app/spell/blob/main/README-util.md#prefstore--preferences-people-and-plain-scripts-can-read)):
+  the browser's storage, unless the runner names another place.
+- Read whole as the run starts, so a place that must be waited on, the page server's, answers at once after that.
+- An app's prop is kept by its name;  any other thing's under the id the program chose, `main.theme`.
+  A thing with a made-up id gets a new one each run, so its prop isn't kept, and the console says so once.
+- Only text, numbers and choices.
+  A kept value the prop no longer allows (a choice the program dropped) starts afresh, said once.
+
 ## Who may import it:  one copy per running app
 
-A program's things, its console and its event listeners all live in its core.
+A program's things, its console, its event listeners and its undo history all live in its core.
 So every running app gets a core of its own, and that one rule decides who may import this folder.
 
 ```mermaid

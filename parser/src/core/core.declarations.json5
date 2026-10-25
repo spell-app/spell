@@ -1873,7 +1873,7 @@
         }
       ],
       "section": "Runtime State",
-      "description": "Remember the running program's `remembered` props from run to run, under `name`, its project's id (epic `prefs-and-undo` P8)."
+      "description": "Remember the running program's `remembered` props from run to run (epic `prefs-and-undo` P8), under `name`, its project's id."
     },
     {
       "kind": "method",
