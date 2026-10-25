@@ -162,10 +162,10 @@ export class EpicProgram {
     this.page(
       epic.command("create"),
       "make an epic page from the template;  --future:  an idea for later, not planned yet;  --saga:  the saga it " +
-        "serves;  --stage overview:  it starts in the Overview stage (epic stage)",
+        "serves;  it starts in the Overview stage (--stage <stage>:  another;  epic stage)",
       'epic create seo --title "SEO" --prompt "Make the docs findable"'
     ).usage(
-      '<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>] [--stage overview]'
+      '<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>] [--stage <stage>]'
     )
     this.page(
       epic.command("stage"),

@@ -48,7 +48,8 @@ export function isPhaseStatus(status: string): status is PhaseStatus {
  * The phase fields a command sets, by flag (`--symptom`, `--goal` ...):  each an `<epic-field name>`.
  * - `Done` has its own command (`phase <N> done --done`);  `To review` is the script's (`PlanDoc.updateToReview()`)
  */
-export const PHASE_FIELDS = ["symptom", "changes", "goal", "files", "verify"] as const
+/** A phase's body fields, `setPhaseFields()`'s;  `plan`:  Claude's build plan, for Owen to accept (epic `epic-engine` P33). */
+export const PHASE_FIELDS = ["symptom", "changes", "goal", "plan", "files", "verify"] as const
 
 /** One of `PHASE_FIELDS`. */
 export type PhaseField = (typeof PHASE_FIELDS)[number]

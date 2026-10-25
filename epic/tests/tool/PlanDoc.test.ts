@@ -1136,10 +1136,10 @@ describe("PlanDoc commits", () => {
 
   test("a phase by its name, not its number alone:  a renumbered phase and another epic's P<n> are left out (r17)", () => {
     const plan = freshPlan()
-    for (const name of ["Spike", "Doc Review", "Pile Drawing"]) plan.addPhase(name)
+    for (const name of ["Spike", "Docs Pass", "Pile Drawing"]) plan.addPhase(name)
     const log = [
       { sha: "d".repeat(40), subject: "other-epic P3:  Pile Drawing -- another epic's" },
-      { sha: "c".repeat(40), subject: "demo P3:  Doc Review -- the old P3, before Pile Drawing went in" },
+      { sha: "c".repeat(40), subject: "demo P3:  Docs Pass -- the old P3, before Pile Drawing went in" },
       { sha: "b".repeat(40), subject: "demo P3:  Pile Drawing -- today's P3" },
       { sha: "a".repeat(40), subject: "P1 follow-up:  more" }
     ]

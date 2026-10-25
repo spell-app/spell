@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  7699d6c3293cf499
+// sources:  2e8a2f7a44d5bb12
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -20,7 +20,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-comment-pane": {"folder":"epic-comment-pane","attributes":["headline","about","saved","failed","deletable","near"]},
   "epic-commit": {"folder":"epic-commit","attributes":["sha","repo"]},
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
-  "epic-field": {"folder":"epic-phase","attributes":["name","label"]},
+  "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
   "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
@@ -34,7 +34,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","title","status","estimate","source","part-ids","commits","to-accept","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","title","status","estimate","source","part-ids","commits","to-accept","plan","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},

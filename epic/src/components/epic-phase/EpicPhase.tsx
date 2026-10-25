@@ -51,6 +51,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Revisit and Edit unfold it (`epic-show-note`)
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
+ *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -92,6 +93,14 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   get isProposed(): boolean {
     void this.layout
     return this.shownStatus !== "done" && PageStages.of(this.page) === "phases"
+  }
+
+  /**
+   * Claude's build plan for it waits for Owen (`plan="waiting"`, epic `epic-engine` P33), and it isn't done:  its
+   * review pills are Accept plan and Revisit.
+   */
+  get isPlanWaiting(): boolean {
+    return this.plan === "waiting" && this.shownStatus !== "done"
   }
 
   /**
@@ -208,7 +217,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         of={this.id}
         label={`P${this.number}`}
         shows={shows}
-        buttons={this.isProposed ? "proposal" : "part"}
+        buttons={this.isProposed ? "proposal" : this.isPlanWaiting ? "plan" : "part"}
         part={this.partForName(part)}
       />
     )

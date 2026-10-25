@@ -462,7 +462,7 @@ const KIND_WORDS = [...Object.values(KIND_LETTERS), "caveat"]
 const KIND_HELP = "J judgement, Q question, I issue, C caveat (--limit:  a limit, not work), T test, D decision"
 
 /** A phase's body fields, `phase-body`'s flags. */
-const PHASE_BODY = ["symptom", "changes", "goal", "files", "verify"]
+const PHASE_BODY = ["symptom", "changes", "goal", "plan", "files", "verify"]
 
 /** A status card's states, the word after the target that makes `update` write one:  `epic update seo#J3 done`. */
 const CARD_STATES = ["underway", "done", "noted"]

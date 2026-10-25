@@ -1644,12 +1644,18 @@
             "changes",
             "requests",
             "goal",
+            "plan",
             "done",
             "files",
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's)."
+        },
+        {
+          "name": "accepted",
+          "kind": "string",
+          "description": "A `plan` field:  when Owen accepted it (`YYYY-MM-DD HH:MM`), the build's go-ahead;  none:  waiting for him."
         },
         {
           "name": "label",
@@ -1695,6 +1701,16 @@
         {
           "key": "goal",
           "text": "Goal:"
+        },
+        {
+          "key": "plan",
+          "text": "Claude's plan:",
+          "description": "A phase's build plan, waiting for Owen's Accept."
+        },
+        {
+          "key": "planAccepted",
+          "text": "Claude's plan, accepted:",
+          "description": "A phase's build plan Owen accepted."
         },
         {
           "key": "done",
@@ -2314,6 +2330,16 @@
           "key": "looksGood",
           "text": "Looks good",
           "description": "A phase's review button while the phases are agreed."
+        },
+        {
+          "key": "acceptPlan",
+          "text": "Accept plan",
+          "description": "A phase's review button while Claude's build plan waits."
+        },
+        {
+          "key": "acceptPlanTip",
+          "text": "Claude's plan for this phase is good:  build it",
+          "description": "What Accept plan does."
         },
         {
           "key": "defer",
@@ -4010,6 +4036,15 @@
           "name": "to-accept",
           "kind": "string",
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+        },
+        {
+          "name": "plan",
+          "kind": "enum",
+          "values": [
+            "waiting",
+            "accepted"
+          ],
+          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review buttons Accept plan and Revisit), or `accepted`;  written by the epic tool, so the title row knows with its body not loaded."
         },
         {
           "name": "changes",

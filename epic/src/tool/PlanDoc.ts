@@ -240,22 +240,40 @@ export class PlanDoc extends PlanReader {
    *   inserted as phase N, the to-do phases from N on moving down one (`makeRoomForPhase()`)
    * - a future epic with a phase is planned:  no longer future;  the "Plan hung?" notice (drawn while there's no
    *   phase) goes by itself
+   * - the DOC PASS FLOATS (epic `epic-engine` P33, M4):  with no `before`, a new phase goes before the last phase when
+   *   that's Doc Review (`DOC_REVIEW`), and a Doc Review already done is to do again (logged):  docs never trail the
+   *   code
    */
-  addPhase(name: string, { estimate, before, ...values }: AddPhaseOptions = {}): number {
+  addPhase(name: string, { estimate, before: asked, ...values }: AddPhaseOptions = {}): number {
+    const docReview = DOC_REVIEW.test(name) ? undefined : this.lastDocReview()
+    const before = asked ?? (docReview ? this.phases.length : undefined)
+    if (docReview?.status === "done" && asked === undefined) {
+      Markup.set<"epic-phase">(this.phaseElements.at(-1)!, { status: "todo" })
+      this.log(`P${docReview.n} ${docReview.name}:  back to do, after the new phase`)
+    }
     // the room first:  a refused --before changes nothing
     const n = before === undefined ? this.phases.length + 1 : this.makeRoomForPhase(before)
     const section = this.section("phases")
     if (this.future) Markup.set(this.page, { future: false })
     const framed = values.symptom !== undefined || values.changes !== undefined
-    const fields = PHASE_FIELDS.filter((name) =>
-      framed ? name !== "goal" || values.goal !== undefined : name !== "symptom" && name !== "changes"
-    ).map((name) => this.make("epic-field", { name }, this.incoming(values[name] ?? "TBD")))
+    // Claude's build plan only once written (`--plan`, P33):  no TBD for it
+    const fields = PHASE_FIELDS.filter((name) => name !== "plan" || values.plan !== undefined)
+      .filter((name) =>
+        framed ? name !== "goal" || values.goal !== undefined : name !== "symptom" && name !== "changes"
+      )
+      .map((name) => this.make("epic-field", { name }, this.incoming(values[name] ?? "TBD")))
     const id = PhaseIds.make(name, PhaseIds.idsIn(this.document))
     const phase = this.make("epic-phase", { id, title: name, status: "todo", estimate }, fields)
     if (before === undefined) section.append(phase)
     else this.phase(n).before(phase)
     this.updateEstimate()
     return n
+  }
+
+  /** The last phase, when it's the doc pass (`DOC_REVIEW`, its name);  else `undefined`. */
+  private lastDocReview(): Phase | undefined {
+    const last = this.phases.at(-1)
+    return last && DOC_REVIEW.test(last.name) ? last : undefined
   }
 
   /**
@@ -443,7 +461,22 @@ export class PlanDoc extends PlanReader {
       this.setField(phase, name, html)
       set.push(`${name[0]!.toUpperCase()}${name.slice(1)}`)
     }
+    // Claude's build plan (epic `epic-engine` P33):  a new one waits for Owen's Accept;  removed, nothing waits
+    if (values.plan !== undefined) {
+      Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
+      this.log(values.plan ? `P${n} plan written:  waiting for Owen's Accept` : `P${n} plan removed`)
+    }
     return set
+  }
+
+  /**
+   * Owen accepted phase `phase`'s build plan (Accept plan, epic `epic-engine` P33):  the plan field `accepted` (now),
+   * the phase `plan="accepted"`;  Claude builds it next.
+   */
+  acceptPlan(phase: Element): void {
+    const field = phase.querySelector(':scope > epic-field[name="plan"]')
+    if (field) Markup.set<"epic-field">(field, { accepted: PlanTime.clockTime(this.now) })
+    Markup.set<"epic-phase">(phase, { plan: "accepted" })
   }
 
   /**
@@ -2017,6 +2050,11 @@ export class PlanDoc extends PlanReader {
   private applyToPart(part: ReviewPart, { action, pick, when, note, at }: PlanMark): MarkResult {
     switch (action) {
       case "approve":
+        // a phase whose build plan waits:  Accept plan (P33)
+        if (part.kind === "phase" && part.element.getAttribute("plan") === "waiting") {
+          this.acceptPlan(part.element)
+          return { applied: true, did: "plan accepted:  build it" }
+        }
         return { applied: true, did: "approved" }
       case "skip":
         if (note) this.keepNote(part.id, { note, action: "skip", at })
@@ -2187,6 +2225,23 @@ export class PlanDoc extends PlanReader {
     const answer = PlanMarkup.squeeze(item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
     if (!answer) return undefined
     return answer.length > ANSWER_MAX ? `${answer.slice(0, ANSWER_MAX - 1).trimEnd()}…` : answer
+  }
+
+  /**
+   * An item asking TWO choice sets at once (epic `epic-engine` I88, P33:  Owen could pick in only one):  its open
+   * sets (`<epic-choices>` not `chosen`), outside its Original Discussion, more than one.  One question, one set.
+   * - `epic lint` prints them, failing nothing:  a reply may offer new options while the old wait, and edits go on
+   */
+  choiceSetProblems(): string[] {
+    const problems: string[] = []
+    for (const item of this.allItems) {
+      const open = Array.from(item.querySelectorAll("epic-choices:not([chosen])")).filter(
+        (set) => !set.closest("epic-original")
+      )
+      if (open.length > 1)
+        problems.push(`${item.id.toUpperCase()} asks ${open.length} choice sets at once:  one question, one set`)
+    }
+    return problems
   }
 
   /**
@@ -2383,6 +2438,9 @@ function promptHTML(prompt: string | null | undefined): string {
     .map((paragraph) => `<p>${PlanMarkup.text(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
     .join("")
 }
+
+/** The doc pass's phase, by its name:  `Doc Review` (epic `epic-engine` P33:  it floats to the end). */
+const DOC_REVIEW = /^doc review$/i
 
 /** A change mark's tag (epic `epic-engine` P30). */
 const CHANGE_TAG = "epic-change"

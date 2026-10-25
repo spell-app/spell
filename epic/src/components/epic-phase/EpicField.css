@@ -169,4 +169,14 @@
     color: var(--epic-muted, var(--ui-text-muted));
     font: 0.85em var(--epic-mono, var(--ui-font-family-mono));
   }
+
+  /*
+   * Claude's build plan, waiting for Owen's Accept (epic `epic-engine` P33):  an orange rule down its side, "pay
+   * attention to this" (Owen, 2026-10-24, of the orange border);  accepted, a plain field like the rest
+   */
+  :host([name="plan"]:not([accepted])) .field {
+    padding-inline-start: 8px;
+    border-inline-start: 3px solid var(--ui-orange, #f2711c);
+    border-radius: 2px;
+  }
 }

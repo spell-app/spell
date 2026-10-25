@@ -73,7 +73,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
           <b class={LABEL} part={this.partForName("label")}>
             {this.isLabelled
               ? this.translationForKey("labelled", { label: this.label ?? "" })
-              : this.translationForKey(this.look.label)}
+              : this.translationForKey(this.name === PLAN && this.accepted ? "planAccepted" : this.look.label)}
           </b>{" "}
           <slot />
         </div>
@@ -95,12 +95,16 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicField extends E.AttributeValues<typeof epicFieldVocabulary> {}
 
+/** A build plan's field name (epic `epic-engine` P33):  labelled as accepted once Owen accepted it. */
+const PLAN = "plan"
+
 /** A field's `name` => its icon and its label's text key, as today's phase bodies drew them. */
 const FIELD_LOOKS = {
   symptom: { icon: "circle exclamation", label: "symptom" },
   changes: { icon: "wand magic sparkles", label: "changes" },
   requests: { icon: "comment dots", label: "requests" },
   goal: { icon: "bullseye", label: "goal" },
+  plan: { icon: "route", label: "plan" },
   done: { icon: "circle check", label: "done" },
   files: { icon: "folder", label: "files" },
   verify: { icon: "flask", label: "verify" },

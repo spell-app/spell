@@ -749,3 +749,49 @@ test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere e
   expect(() => inbox.setMark("stage", { action: "accept" }, T1)).toThrow("accept which stage?")
   expect(inbox.setMark("stage", { action: "accept", stage: "overview" }, T1)).toMatchObject({ stage: "overview" })
 })
+
+////////////////
+// ## The new flow (epic `epic-engine` P33)
+////////////////
+
+test("a phase's build plan waits for Owen:  Accept plan (approve) marks it accepted, logged;  removed, nothing waits", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Retry Logic", { goal: "<ul><li>retries</li></ul>" })
+  plan.setPhaseFields(1, { plan: "<ol><li>Write the loop</li><li>Test it</li></ol>" })
+  const phase = plan.phaseElements[0]!
+  expect(phase.getAttribute("plan")).toBe("waiting")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark(phase.id, { action: "approve" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  const accepted = after.phaseElements[0]!
+  expect(accepted.getAttribute("plan")).toBe("accepted")
+  expect(accepted.querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(true)
+  expect(printed.join("\n")).toContain("plan accepted:  build it")
+  after.setPhaseFields(1, { plan: "" })
+  expect(after.phaseElements[0]!.hasAttribute("plan")).toBe(false)
+})
+
+test("the doc pass floats:  a new phase goes before a last Doc Review, and a done one is to do again", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["Build", "Doc Review"]) plan.addPhase(name)
+  plan.setPhase(1, "done")
+  plan.setPhase(2, "done")
+  plan.addPhase("More")
+  expect(plan.phases.map((phase) => `${phase.name} ${phase.status}`)).toEqual([
+    "Build done",
+    "More todo",
+    "Doc Review todo"
+  ])
+})
+
+test("one question, one choice set:  two open sets are said by choiceSetProblems(), never by check()", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const set = `<epic-choices><epic-option letter="A" title="A"></epic-option><epic-option letter="B" title="B"></epic-option></epic-choices>`
+  const q = plan.addItem("question", "Which?", { details: `<p>pick</p>${set}${set}` })
+  expect(plan.choiceSetProblems()).toEqual([`${q.toUpperCase()} asks 2 choice sets at once:  one question, one set`])
+  expect(plan.check().some((problem) => problem.includes("choice sets"))).toBe(false)
+})

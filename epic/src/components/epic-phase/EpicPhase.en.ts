@@ -88,6 +88,15 @@ export const epicPhaseVocabulary = {
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
+      name: "plan",
+      kind: "enum",
+      values: ["waiting", "accepted"],
+      description:
+        "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review " +
+        "buttons Accept plan and Revisit), or `accepted`;  written by the epic tool, so the title row knows with its " +
+        "body not loaded."
+    },
+    {
       name: "changes",
       kind: "number",
       description:

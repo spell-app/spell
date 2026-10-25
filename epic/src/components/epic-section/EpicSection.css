@@ -9,6 +9,10 @@
 @layer ui.components.epic-section.content;
 
 @layer ui.components.epic-section.content {
+  /* a top-level section's title, stuck:  the bars' one subtle line under it (Owen, 2026-10-24) */
+  :host(:not([kind="overview-part"])) ui-section {
+    --ui-section-stuck-shadow: var(--epic-bar-shadow, none);
+  }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);

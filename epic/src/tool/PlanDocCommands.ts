@@ -380,10 +380,10 @@ export class PlanDocCommands {
    * - refuses to overwrite:  the skill asks the user whether to reuse an existing doc
    * - a future epic, now planned (`/epic <name>`):  promoted where it is, its prompt and answers kept
    * - `--saga <id>`:  the saga it serves, from the start (epic `epic-workflow` P15)
-   * - `--stage overview`:  in the OVERVIEW STAGE (`<epic-page stage="overview">`, epic `epic-engine` P29, Q15):
-   *   the page shows only the Overview, Questions and Todos until its Accept Overview
-   *   - opt-in until the epic skill plans that way (P33, J118):  a skill planning the old way would write phases
-   *     the page then hides;  P33 makes it the default
+   * - every new epic starts in the OVERVIEW STAGE (`<epic-page stage="overview">`, epic `epic-engine` P29, Q15;  the
+   *   default since P33, when the epic skill began planning that way):  the page shows only the Overview, Questions
+   *   and Caveats until its Accept Overview
+   *   - `--stage <stage>`:  another to start in (`building`:  as before stages, everything shown)
    *   - a future epic promoted keeps the stage it has;  one made before stages has none, and reads as building
    *   - refused, writing nothing, for a saga not in the list
    */
@@ -435,12 +435,11 @@ export class PlanDocCommands {
     // the prompt that started the plan, in the Overview's `prompt` slot;  none:  no quote
     plan.setPrompt(promptFile ? readFileSync(promptFile, "utf8") : (prompt ?? ""))
     if (future) plan.makeFuture()
-    // the Overview stage (Q15 of epic `epic-engine`):  opt-in until P33 rewrites the skill (J118)
-    if (stage !== undefined) {
-      if (!PageStages.isStage(stage))
-        throw new PlanDocError(`create --stage:  ${PageStages.ALL.join(", ")}, not "${stage}"`)
-      Markup.set(plan.page, { stage })
-    }
+    // the Overview stage (Q15 of epic `epic-engine`):  where every epic starts since P33
+    const start = stage ?? "overview"
+    if (!PageStages.isStage(start))
+      throw new PlanDocError(`create --stage:  ${PageStages.ALL.join(", ")}, not "${start}"`)
+    Markup.set(plan.page, { stage: start })
     nameSaga(plan)
     mkdirSync(dirname(file), { recursive: true })
     // split from the start (J... of `claude-design`):
@@ -790,6 +789,8 @@ export class PlanDocCommands {
         })
       : []
     for (const orphan of orphans) this.print(`NOTE:  ${PARTS_DIR}/${orphan}:  nothing loads it`)
+    // one question, one choice set (I88, epic `epic-engine` P33):  said, failing nothing
+    for (const asks of plan.choiceSetProblems()) this.print(`ASKS:  ${asks}`)
     for (const problem of problems) this.warn(`PROBLEM:  ${problem}`)
     if (!problems.length)
       this.print(
@@ -1006,7 +1007,7 @@ type CreateFlags = {
   promptFile?: string
   future?: boolean
   saga?: string | true
-  /** the page's stage from the start (`overview`);  none:  building, as before (opt-in until P33) */
+  /** the page's stage from the start;  none:  `overview` (epic `epic-engine` P33) */
   stage?: string
 }
 
@@ -1014,12 +1015,12 @@ type CreateFlags = {
 export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics/<name>/<name>.plan.html)
   The epic tool in its own order, the epic's name first:  \`epic --help\` lists the verbs (\`epic close seo#J3\` ...).
   A phase <N> is its number (3, P3) or its name ("Epic Migrate", epic-migrate, p-epic-migrate:  its stable id).
-  create <name> [--title "Title"] [--prompt "text" | --prompt-file path] [--future] [--saga <id>] [--stage overview]
+  create <name> [--title "Title"] [--prompt "text" | --prompt-file path] [--future] [--saga <id>] [--stage <stage>]
                                                    copy the template, fill it in, update the home page;
                                                    --future:  an epic not planned yet (/epic future);  create on
                                                    a future epic's doc plans it:  promoted where it is;
                                                    --saga:  the saga it serves (epic saga list);
-                                                   --stage overview:  it starts in the Overview stage (epic stage)
+                                                   it starts in the Overview stage (--stage:  another)
   add-phase <name> "Short Name" --symptom html --changes html [--goal html] [--files html] [--verify html]
             [--estimate 2h] [--before N]           a phase:  Symptom (one line), Changes (two or three), then
                                                    the details (goal, files, verify);  --before N:  inserted as

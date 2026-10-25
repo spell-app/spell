@@ -45,8 +45,11 @@
      * 2026-10-24:  white / page / white / page / white bands "distracting and ugly";  a lighter ivory before, 2026-10-13)
      */
     --epic-head-fill: var(--epic-toolbar-fill);
-    /* under each bar at the top (the site's, the header, the toolbar):  slight, drawn over what's below */
-    --epic-bar-shadow: 0 1px 3px light-dark(rgb(40 30 90 / 0.12), rgb(0 0 0 / 0.55));
+    /*
+     * under each bar at the top (the site's, the header, the toolbar) and a stuck section title:  one subtle line,
+     * drawn over what's below (Owen, 2026-10-24:  "more subtle, single line")
+     */
+    --epic-bar-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));
 
     /* ## Type */
@@ -55,7 +58,8 @@
     --epic-mono: var(--spell-mono, var(--ui-font-family-mono));
 
     /* ## Layout:  everything inside a block sits `--epic-inset` in from the bands, which reach edge to edge */
-    --epic-inset: 16px;
+    /* halved (Owen, 2026-10-24:  "reduce horizontal padding by 1/2 around phases / question header / contents") */
+    --epic-inset: 8px;
     /*
      * title bands:  top-level sections on the page itself (no band of their own:  Owen, 2026-10-24, "distracting");
      * nested ones (phases, Overview parts) and item rows on violet-25, cards standing on the page

@@ -36,10 +36,12 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
  * - `proposal`:  an open phase while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
  *   P29):  Looks good and Defer (`PROPOSAL_BUTTONS`);  its note box a part's
+ * - `plan`:  a phase whose build plan waits for Owen (`<epic-phase plan="waiting">`, P33):  Accept plan and Revisit
+ *   (`PLAN_BUTTONS`);  its note box a part's
  * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Accept and Reopen (`CHANGE_BUTTONS`);
  *   no note box
  */
-export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal", "change"] as const
+export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal", "change", "plan"] as const
 
 /** One of `REVIEW_KINDS`. */
 export type ReviewKind = (typeof REVIEW_KINDS)[number]
@@ -92,6 +94,7 @@ export type ReviewButtonSpec = {
     | "defer"
     | "acceptChange"
     | "reopenChange"
+    | "acceptPlan"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -105,6 +108,7 @@ export type ReviewButtonSpec = {
     | "deferTip"
     | "acceptChangeTip"
     | "reopenChangeTip"
+    | "acceptPlanTip"
 }
 
 /**
@@ -155,6 +159,16 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * A phase's buttons while Claude's build plan for it waits (`<epic-phase plan="waiting">`, epic `epic-engine` P33):
+ * - Accept plan (`approve`, green):  the build may start;  `inbox apply` marks the plan accepted, and Claude builds
+ * - Revisit (`revisit`, blue):  notes on the plan, for Claude to rewrite it
+ */
+export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "approve", color: "green", icon: "circle check", label: "acceptPlan", tip: "acceptPlanTip" },
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
+]
+
+/**
  * A change mark's buttons (`<epic-change>`, epic `epic-engine` P30;  Q13, B), drawn over its chip on hover or focus:
  * - Accept (`accept`, green:  decided):  the change stands;  `inbox apply` clears its orange, its chip stays
  * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it, the words stay
@@ -173,7 +187,8 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   thread: [],
   closed: [],
   proposal: PROPOSAL_BUTTONS,
-  change: CHANGE_BUTTONS
+  change: CHANGE_BUTTONS,
+  plan: PLAN_BUTTONS
 }
 
 /**
@@ -286,7 +301,8 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   thread: [],
   closed: [],
   proposal: NOTE_BUTTONS,
-  change: []
+  change: [],
+  plan: NOTE_BUTTONS
 }
 
 ////////////////
@@ -405,6 +421,12 @@ export const REVIEW_NAME_TEXTS = [
   },
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
+  { key: "acceptPlan", text: "Accept plan", description: "A phase's review button while Claude's build plan waits." },
+  {
+    key: "acceptPlanTip",
+    text: "Claude's plan for this phase is good:  build it",
+    description: "What Accept plan does."
+  },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "acceptChange", text: "Accept", description: "A change mark's button:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
