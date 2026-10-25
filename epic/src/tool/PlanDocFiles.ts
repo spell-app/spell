@@ -408,8 +408,11 @@ export class PlanDocFiles {
    * - a part file the doc was read from and no longer writes goes (a phase's, once its id became stable)
    * - one file:  as is, plus the parts folder of a doc that was split gone (`join`)
    * - links are made against the whole doc, at the page's folder:  a part's URLs are rebased to `parts/` after
+   * - a link handed over as a part holds it (`../../../x`, one `../` too many for the page) is the page's first
+   *   (`fixPartRelativeLinks()`)
    */
   async writeDoc(file: string, plan: PlanDoc, split: boolean): Promise<void> {
+    if (split) this.fixPartRelativeLinks(plan, file)
     const linked = this.linker.link(plan.toString(), dirname(file)).text
     if (!split) {
       PlanParts.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
@@ -432,6 +435,29 @@ export class PlanDocFiles {
     // a part the doc was read from but no longer writes:  nothing loads it any more
     // (its host's id changed, `stable-phase-ids`;  or its body emptied)
     for (const id of plan.parts?.hosts ?? []) if (!parts.has(id)) rmSync(PlanParts.partFile(file, id), { force: true })
+  }
+
+  /**
+   * Make `plan`'s links that were written as from a PART FILE (`../../../spell-ui/x.ts`) the page's own
+   * (`../../spell-ui/x.ts`), so the split writes them back as they were (epic `epic-engine` I134).
+   * - why:  HTML a command is handed (`update --plan`, `details --file`) is read as the PAGE's,
+   *   one `../` less than a part's (`writeDoc()` adds it back with `PlanParts.toPart()`);
+   *   an agent copying from a part file hands over the part's, and every one landed one folder too high
+   *   - debut wrote 50 so, and `epic lint` called each missing
+   *   - NOT a worktree's doing:  main and a worktree wrote the same `../../../../`
+   * - only a link that's MISSING as the page's and THERE with one `../` less;  any other link stays as it is
+   * - so it's idempotent, and an older page's links broken this way are mended at its next write
+   * - SIDE EFFECT:  changes `plan`'s document
+   */
+  private fixPartRelativeLinks(plan: PlanDoc, file: string): void {
+    const pageDir = dirname(file)
+    const isThere = (url: string) => existsSync(this.linker.fileFor(decodedPath(url), pageDir))
+    const root = plan.document.documentElement as unknown as Element
+    PlanParts.rebase(root, (url) => {
+      if (!url.startsWith("../") || isThere(url)) return url
+      const page = PlanParts.toPage(url)
+      return isThere(page) ? page : url
+    })
   }
 
   /**
@@ -702,6 +728,16 @@ const DOCS_TOOLS = fileURLToPath(new URL("../tools", import.meta.url))
 
 /** The tool's own template, in `<epic-*>` markup:  `templates/plan.html` beside this file. */
 const TEMPLATE = fileURLToPath(new URL("templates/plan.html", import.meta.url))
+
+/** `url`'s path, its `?query` dropped and decoded (`%20` => space);  as it is when it won't decode. */
+function decodedPath(url: string): string {
+  const path = url.split("?")[0]!
+  try {
+    return decodeURI(path)
+  } catch {
+    return path
+  }
+}
 
 /** Is epic-page text `html` in the `<epic-*>` markup:  does it have an `<epic-page>`? */
 function isEpicMarkup(html: string): boolean {

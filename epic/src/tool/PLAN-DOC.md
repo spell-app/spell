@@ -905,6 +905,9 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
 - A host's body is every child but its slotted ones:  the title stays in the skeleton.
 - In the skeleton, a host carries `source="parts/<id>.html"`, `part-ids` and `commits`.
 - No placeholder line:  the element loads its own body.
+- HTML a command is handed (`update --plan`, `details --file`) has the PAGE's links, one `../` less than a part's.
+  - A link copied out of a part file (`../../../spell-ui/x.ts`) is taken as the part's when only that one is there:
+    so it lands as the part held it, from any checkout (`PlanDocFiles.fixPartRelativeLinks()`, epic `epic-engine` I134).
 - `.html`, not `.htm` (Q12).
   - A part is told from a page by its folder, and every page walker skips `parts/`.
   - The tool reads and writes `.html` only.

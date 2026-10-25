@@ -2,12 +2,13 @@
  * Tests of `PlanDocFiles`:  reading a doc whole (either markup), editing it under its lock, writing it as a skeleton
  * and parts (`EpicParts`) or one file, and refusing what an edit mustn't touch.
  */
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { spawnSync } from "node:child_process"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { afterEach, describe, expect, test } from "vite-plus/test"
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { Markup } from "spell-epic/markup"
 
@@ -161,3 +162,79 @@ describe("PlanDocFiles", () => {
     expect(FILES.read(file).items("todo").at(-1)!.title).toBe("A &lt; B & C")
   })
 })
+
+// epic `epic-engine` I134:  links handed over as a part file holds them (`../../../spell-ui/...`) landed one folder too
+// high (`../../../../`);  from a worktree as from the main checkout
+describe("PlanDocFiles links written as from a part", () => {
+  // its real path:  git names the checkouts by theirs (macOS's temp folder is behind a link)
+  const scratch = realpathSync(mkdtempSync(join(tmpdir(), "plan-doc-part-links-")))
+  const main = join(scratch, "kit")
+  const worktree = join(scratch, "worktrees", "x")
+  const content = join(main, "spell.epics")
+  const file = join(content, "epics", "x", "x.plan.html")
+  const part = join(content, "epics", "x", "parts", "p-one.html")
+
+  /** The links a phase's plan is written with, as the agents wrote them:  a part's, the page's, and a missing one. */
+  const PLAN =
+    '<p><a href="../../../spell-ui/src/x.ts">as the part</a>, <a href="../../spell-ui/src/x.ts">as the page</a>, ' +
+    '<a href="../../../spell-ui/src/gone.ts">missing</a>, <a href="../../../spell-ui/src/x.ts#L3">a line</a></p>'
+
+  beforeAll(async () => {
+    // the kit, with its content folder inside it (git-ignored) and a child repo's file;  an epic's worktree beside it
+    write(main, ".epic/config.json5", JSON.stringify({ contentFolder: "spell.epics" }))
+    git(main, "init", "-q", "-b", "main")
+    commit(main, "kit", { ".gitignore": "spell.epics\n", "yarn.lock": "", "spell-ui/src/x.ts": "x" })
+    git(main, "worktree", "add", "-q", "-b", "x", worktree)
+    mkdirSync(join(content, "epics", "x"), { recursive: true })
+    const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW)
+    plan.addPhase("One", { goal: "<ul><li>a goal</li></ul>" })
+    await new PlanDocFiles({ root: main }).writeDoc(file, plan, true)
+  })
+
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }))
+
+  /** The hrefs in phase One's part after `update x#P1 --plan PLAN`, run from checkout `root`. */
+  async function hrefsFrom(root: string): Promise<string[]> {
+    const files = new PlanDocFiles({ root })
+    const plan = files.read(file)
+    plan.setPhaseFields(1, { plan: PLAN })
+    await files.writeDoc(file, plan, true)
+    return Array.from(readFileSync(part, "utf8").matchAll(/href="([^"]+)"/g), (m) => m[1]!)
+  }
+
+  test("each lands as the part file holds it, from the main checkout and from a worktree alike", async () => {
+    const expected = [
+      "../../../spell-ui/src/x.ts",
+      "../../../spell-ui/src/x.ts",
+      // missing either way:  left as it was handed over, so `epic lint` names it
+      "../../../../spell-ui/src/gone.ts",
+      "../../../spell-ui/src/x.ts#L3"
+    ]
+    expect(await hrefsFrom(main)).toEqual(expected)
+    expect(await hrefsFrom(worktree)).toEqual(expected)
+    // a second write changes nothing
+    const before = readFileSync(part, "utf8")
+    const files = new PlanDocFiles({ root: worktree })
+    await files.writeDoc(file, files.read(file), true)
+    expect(readFileSync(part, "utf8")).toBe(before)
+  })
+})
+
+/** `text` at `path` under `root`, its folders made. */
+function write(root: string, path: string, text: string): void {
+  mkdirSync(dirname(join(root, path)), { recursive: true })
+  writeFileSync(join(root, path), text)
+}
+
+/** `git <args>` in `cwd`, as a test author;  throws when git fails. */
+function git(cwd: string, ...args: string[]): void {
+  const run = spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...args], { cwd, encoding: "utf8" })
+  if (run.status !== 0) throw new Error(`git ${args.join(" ")}:  ${run.stderr}`)
+}
+
+/** `files` written in `cwd` and committed as `message`. */
+function commit(cwd: string, message: string, files: Record<string, string>): void {
+  for (const [path, text] of Object.entries(files)) write(cwd, path, text)
+  git(cwd, "add", ...Object.keys(files))
+  git(cwd, "commit", "-q", "-m", message)
+}
