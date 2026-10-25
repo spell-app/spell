@@ -213,7 +213,7 @@ try {
     if (Math.abs(after.y - before.y) > 2) lost.push(`scroll moved:  ${before.y} -> ${after.y} (address #${before.hash})`)
     const folded = before.open.filter((id) => !after.open.includes(id))
     if (folded.length) lost.push(`folded again:  ${folded.join(", ")}`)
-    if (note !== NOTE) lost.push(`the note's text lost:  ${JSON.stringify(note)}`)
+    if (!note?.includes(NOTE)) lost.push(`the note's text lost:  ${JSON.stringify(note)}`)
     for (const problem of lost) problems.push(`${label}:  ${problem}`)
   }
 
@@ -343,8 +343,11 @@ function blurNote(id) {
 
 /** In the page:  what item `id`'s note box holds, `null` without one. */
 function noteOf(id) {
-  const box = document.getElementById(id)?.shadowRoot?.querySelector("[part~='note-box']")
-  return box?.shadowRoot?.querySelector("textarea")?.value ?? null
+  const root = document.getElementById(id)?.shadowRoot
+  const typed = root?.querySelector("[part~='note-box']")?.shadowRoot?.querySelector("textarea")?.value
+  // saved as the item's mark (epic `epic-engine` P20):  its marked note, over the box
+  const said = root?.querySelector("[part~='said']")?.shadowRoot?.textContent ?? ""
+  return typed || said.replace(/\s+/g, " ").trim() || (typed ?? null)
 }
 
 /** In the page:  where things stand. */
@@ -378,8 +381,15 @@ function stateNow(id) {
 /**
  * The faked review routes' answer to `request`:  `INBOX`, with a session listening.
  * - a draft (`POST .../draft`, `{ id, action, note }`) is kept in it, or dropped when empty, as the real route does
+ * - and a mark (`POST .../mark`, `{ id, mark }`):  what's typed in a revisit box is saved as its mark since epic
+ *   `epic-engine` P20, not as a draft
  */
 function inboxFor(request) {
+  if (request.method() === "POST" && request.url().endsWith("/mark")) {
+    const { id, mark } = request.postDataJSON()
+    if (mark) INBOX.marks[id] = { ...mark, at: new Date().toISOString() }
+    else delete INBOX.marks[id]
+  }
   if (request.method() === "POST" && request.url().endsWith("/draft")) {
     const { id, action, note } = request.postDataJSON()
     if (note?.trim()) INBOX.drafts[id] = { action, note, at: new Date().toISOString() }
