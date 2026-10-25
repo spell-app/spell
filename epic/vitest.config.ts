@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url"
 import { defineConfig, type TestProjectConfiguration, type UserConfig } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
+import { standardDecorators } from "spell/toolchain/decorators"
+
 /**
  * Spell UI's own config, from the `spell-ui` workspace (spell-ui, a child repo of the top `spell` install, epic
  * `epic-engine` P10), by its package entry (`./vite.config.ts`).
@@ -38,6 +40,9 @@ export function epicsProjects({
   return [
     {
       ...(root && { root }),
+      // the kit's files lowered too:  the docs runtime imports `spell/util/persist`, whose `UndoStack` has decorators
+      // (epic `prefs-and-undo`);  Vite's own transform leaves them, and node can't run them
+      plugins: [standardDecorators()],
       test: {
         name: `${prefix}node`,
         dir: TESTS,

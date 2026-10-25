@@ -228,8 +228,12 @@ const ICONS = {
   "../fa7-brands/brands/git-alt": ["git", "git alt"] // the brands pack, beside `ICON_PACK`
 }
 
-/** spell-epic's own names (`spell-epic/links`), which the docs runtime imports:  found as their source files. */
-const SPELL_EPIC = /^spell-epic(?:\/.*)?$/
+/**
+ * spell-epic's own names (`spell-epic/links`), which the docs runtime imports, and the kit's (`spell/util/persist`,
+ * which the epic pages' stores import since epic `prefs-and-undo`, and its files import each other by):  found as
+ * their source files.  esbuild adds no extension to a package's `exports`, so `spell/util/class` failed.
+ */
+const SPELL_EPIC = /^spell(?:-epic)?(?:\/.*)?$/
 
 /** Bare specifiers that MUST resolve from UI's root:  Solid, all subpaths. */
 const SOLID = /^(solid-js|@solidjs\/[\w-]+)(\/.*)?$/
