@@ -2333,8 +2333,8 @@
         },
         {
           "key": "acceptPlan",
-          "text": "Accept plan",
-          "description": "A phase's review button while Claude's build plan waits."
+          "text": "Accept Phase",
+          "description": "A phase's review button while Claude's build plan waits (Owen, 2026-10-25:  \"In the phase, the button should be Accept Phase\";  the header's says Accept plan)."
         },
         {
           "key": "acceptPlanTip",

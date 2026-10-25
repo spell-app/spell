@@ -367,11 +367,11 @@ than just being able to move on").
 - Each one:  `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
   left out;  short, in Owen's terms.
   - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
-  - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept plan and Revisit
+  - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept Phase and Revisit
     (`<epic-phase plan="waiting">`).
 - Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "Build plans are up for
   P3-P9".
-- Owen accepts them on the page (Accept plan on each, one Send), or says "go" in chat:  every waiting plan accepted.
+- Owen accepts them on the page (the header's Accept plan, or Accept Phase on each;  one Send), or says "go" in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
 - Then "5. Each phase", from the first, straight through.
 - A phase ADDED later ("10. Add a phase", a request):  its plan written as it's added, accepted the same way.

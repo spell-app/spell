@@ -167,7 +167,7 @@ As `plan-doc.md`, "Ids":
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
     (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
-  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept plan and Revisit
+  - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit (the header's button:  Accept plan)
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".

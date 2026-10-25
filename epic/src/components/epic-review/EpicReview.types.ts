@@ -419,7 +419,12 @@ export const REVIEW_NAME_TEXTS = [
   },
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
-  { key: "acceptPlan", text: "Accept plan", description: "A phase's review button while Claude's build plan waits." },
+  {
+    key: "acceptPlan",
+    text: "Accept Phase",
+    description:
+      "A phase's review button while Claude's build plan waits (Owen, 2026-10-25:  \"In the phase, the button should be Accept Phase\";  the header's says Accept plan)."
+  },
   {
     key: "acceptPlanTip",
     text: "Claude's plan for this phase is good:  build it",

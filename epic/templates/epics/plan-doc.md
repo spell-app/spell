@@ -119,7 +119,7 @@ The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning
   its changed words in `<epic-change item="qN">`; the phases come after Accept Overview
 - BUILDING starts with CLAUDE'S PLANS for every phase still to do, written UP FRONT (P33; all at once since I117):
   `epic update <name>#P3 --plan "<ol>...</ol>"` writes a `plan` field, "Claude's plan:" with an orange rule, and the
-  phase's pills become Accept plan and Revisit (`<epic-phase plan="waiting">`); Owen's Accept plan marks it accepted
+  phase's pills become Accept Phase and Revisit (`<epic-phase plan="waiting">`); Owen's Accept plan marks it accepted
   (`plan="accepted"`, the field's `accepted` time). Then the phases are built straight through, no stop between them:
   - each phase's plan is checked as it starts; a small adjustment is an Update block (`epic updated`, the plan stays
     accepted), a big one a new `--plan`, which waits again
