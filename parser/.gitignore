@@ -13,3 +13,6 @@ __pycache__/
 
 # the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
 dist-types/
+
+# `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/
