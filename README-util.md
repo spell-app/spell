@@ -356,6 +356,18 @@ set suit(value) { this.setProp("suit", value) }
 @prop({ oneOf: ["clubs", "diamonds", "hearts", "spades"] }) accessor suit!: string
 ```
 
+An unset prop reads as its default, which is never stored, so it's never in the JSON:
+its declared `default`, else its first choice, else its type's.
+A new card's `suit` above reads `clubs`;  a `number` reads `0`, a `text` `""`, a `choice` `false`;
+a prop typed as a class has none, so it reads as nothing.
+Python's runtime reads the same.
+
+- A drawn thing's element shows no attribute for an implied default, only for what was set:
+  `<solitaire-card>` doesn't grow `suit="clubs"` (`readsAsImpliedDefault()`).
+- A pref store declares its prefs with the same rule, through the same helper (`defaultFor()`).
+- A prop declared `remembered: true` keeps its value from run to run, in the person's preferences:
+  Spell's runtime reads and saves it, under the project's id (`core.remember()`);  the schema only carries the flag.
+
 A schema warns;  it never refuses.
 On an `Observable` (every compiled `Thing` and `List` is one), `card.suit = "stars"` printed
 `Card.suit:  expected one of clubs, diamonds, hearts, spades, got stars`, and stored `"stars"` anyway.

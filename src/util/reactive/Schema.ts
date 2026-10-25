@@ -172,7 +172,11 @@ export type PropInfo = {
    * list on a class defined after ours.
    */
   oneOf?: readonly unknown[] | (() => readonly unknown[])
-  /** Its value while unset -- NOT stored, so it isn't one of `keys()`.  Primitives only:  objects use `init`. */
+  /**
+   * Its value while unset -- NOT stored, so it isn't one of `keys()`.  Primitives only:  objects use `init`.
+   * - None declared:  its first choice (`oneOf`), else its type's:  `number` 0, `text` "", `choice` false;
+   *   a thing's type has none (`defaultFor()`, epic `prefs-and-undo` P7).
+   */
   default?: unknown
   /**
    * Makes its value on first read, once per instance, e.g. `() => new List()` -- stored, so it's one of `keys()`.
@@ -199,6 +203,12 @@ export type PropInfo = {
    * - A setter WARNS when a value breaks one (epic `property-editor` P9).
    */
   rules?: readonly PropRule[]
+  /**
+   * `true`:  the running app keeps its value for the next run, in the person's preferences (epic `prefs-and-undo` P8).
+   * - Spell's runtime reads and saves it (`spell-parser/core/remembered`):  nothing here does.
+   * - Compiled spell, once its syntax is settled:  `this.declareProp("theme", { oneOf: THEMES, remembered: true })`.
+   */
+  remembered?: boolean
 }
 
 ////////////////
