@@ -81,15 +81,15 @@ describe("<epic-comment-pane>", () => {
     saved.remove()
   })
 
-  test("× and the trash say so:  `epic-comment-close`, `epic-comment-delete`", async () => {
+  test("× and the trash say so:  `epic-comment-closing`, `epic-comment-removing`", async () => {
     const host = await pane(undefined, "deletable")
     const heard: string[] = []
-    for (const name of ["epic-comment-close", "epic-comment-delete"])
+    for (const name of ["epic-comment-closing", "epic-comment-removing"])
       host.addEventListener(name, () => heard.push(name))
     const [trash, close] = host.shadowRoot!.querySelectorAll<HTMLElement>("ui-button")
     trash.click()
     close.click()
-    expect(heard).toEqual(["epic-comment-delete", "epic-comment-close"])
+    expect(heard).toEqual(["epic-comment-removing", "epic-comment-closing"])
     host.remove()
   })
 

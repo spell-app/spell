@@ -133,7 +133,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         "2 agents running", a button whose popover holds their rows;  beside the session's line ("Responding",
         `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
-        the token, its one refresh on a 403, the poll and `spell-server:file`.
+        the token, its one refresh on a 403, the poll and `spell-server:changed`.
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
     as their elements keep them.
     - No Solid, no Spell UI:  node-safe at import.
@@ -151,7 +151,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
       - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
         second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
-      - kept fresh by the run's files changing (`spell-server:file`) and every 30s, for the waiting state
+      - kept fresh by the run's files changing (`spell-server:changed`) and every 30s, for the waiting state
       - see "Run pages"
     - `ChoicesForm`, one per choice page:
       - the rows (`<epic-choice-row>`) register
@@ -725,7 +725,7 @@ The shared folders:
       - Then the card posts it to [epicRoutes.ts](tool/epicRoutes.ts) (`POST /api/epics/favorite`).
         - That writes the ONE shared file, `favorites.json5` in `epics/`:  a JSON list of names.
         - through `SRV.FileOperations.save()`, as every route module's save
-        - its answer, every starred epic, stars every card (`epic-favorite`):  another window may have starred one
+        - its answer, every starred epic, stars every card (`epic-starred`):  another window may have starred one
         - refused:  back as it was, and a toast says why
       - The page server marks every card by it as it serves the page.
       - From `file://` the stars show, disabled, saying why.
@@ -1010,7 +1010,7 @@ In `tools/`:
     - The runtime remembers the reader's folds per page, and a link to an id unfolds what hides it.
   - its icon:  a `<ui-icon slot="icon" name="...">`, first inside it
   - a title with markup:  a `<span slot="label">`, instead of `label`
-  - the old words (`header`, `subhead`, `info`, `ui-open` / `ui-close`, `ui-load`) went in epic `repo-split` P14 (Q45):
+  - the old words (`header`, `subhead`, `info`, `ui-opening` / `ui-closing`, `ui-loaded`) went in epic `repo-split` P14 (Q45):
     `label`, `hint`, `description`, `ui-opening` / `ui-closing`, `ui-loaded`
   - A sticky page header above them, on EVERY page (the templates have it), so the title stays on screen:
     `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1.
@@ -1171,7 +1171,7 @@ In `tools/`:
     - `<ui-section source>` and `<ui-accordion source>`
     - an epic page's `<epic-*>` blocks and items:  a split epic page's parts (`wireSourceBodies()`)
     - The patch leaves what a host loaded alone.
-    - A changed body file (the live client's `spell-server:file`) re-fetches its open host in place.
+    - A changed body file (the live client's `spell-server:changed`) re-fetches its open host in place.
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
@@ -1452,7 +1452,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - the answers P / F / S / N
       - a COMMENT box on every card:  the mark's `note`, with any answer
         - before one, the inbox's draft;  `apply` keeps it on the test as Owen's reply
-      - its place in the address (`#t3`), kept there against the runtime's scroll-follow (`spell-doc:place`)
+      - its place in the address (`#t3`), kept there against the runtime's scroll-follow (`spell-doc:scrolled-to`)
       - `epic test <name>` opens it;  `epic test --all` the first epic with open tests
       - the run's last card leads to the next (`GET /api/epics/tests`, [epicRoutes.ts](tool/epicRoutes.ts),
         `EpicTests.waiting()`)
@@ -1789,7 +1789,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     box under its block (the runtime's `thread()`, `boxFor()`):
     - ONE element per comment for the visit, given what the server holds at each redraw, moved only when its place
       changes:  Owen's box in it, what's typed and the cursor stay
-    - it draws what it's given and says what Owen did (`epic-thread-fold`, `-edit`, `-delete`, `-answer`);
+    - it draws what it's given and says what Owen did (`epic-thread-opened` / `-closed`, `-editing`, `-removing`, `-answered`);
       the comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
     - what it shows is worked out by `ThreadFacts` (`spell-epic/comments`), the comments' code's too
     - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
@@ -1835,7 +1835,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
       ("same semantics/look as pills in item header").
       - The real `<epic-review>`, `buttons="thread"` (`closed`:  Reopen), drawn by the thread in its shadow root:
-        the item line's group, look and colours, but no inbox behind it (a press sends `epic-thread-answer`).
+        the item line's group, look and colours, but no inbox behind it (a press sends `epic-thread-answered`).
         - Before epic `epic-engine` P3 the docs runtime drew a copy of its markup:  a guide didn't load the pack.
       - ONE grouped pill of 24px square icon buttons, grey outlined, on the page's ground;
         each button its colour under the pointer.

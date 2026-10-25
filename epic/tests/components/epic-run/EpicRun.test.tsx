@@ -318,7 +318,7 @@ describe("<epic-run>, <epic-run-row>", () => {
     const run = await drawRun()
     const more = { ...RUN, progress: [...RUN.progress, { at: "2026-10-23T19:13:00.000Z", text: "still waiting" }] }
     routes.mockImplementation(async () => Response.json({ page: more, answers: { rows: {} }, waiting: true }))
-    dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/pages/runs/demo/run.json5" } }))
+    dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/pages/runs/demo/run.json5" } }))
     await vi.waitFor(() => expect(RunForm.forPage(RUN.id).page?.progress).toHaveLength(3))
     await ElementFixture.settle()
     expect(part(run, "progress")!.querySelector(".latest")!.textContent).toContain("still waiting")
@@ -330,7 +330,7 @@ describe("<epic-run>, <epic-run-row>", () => {
     const run = await drawRun()
     expect(part(run, "status")).toBeNull()
     routes.mockImplementation(async () => Response.json({ page: STEERED, answers: { rows: {} }, waiting: true }))
-    dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/pages/runs/demo/run.json5" } }))
+    dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/pages/runs/demo/run.json5" } }))
     await vi.waitFor(() => expect(RunForm.forPage(RUN.id).passes).toHaveLength(2))
     await ElementFixture.settle()
     expect(part(run, "passes")!.querySelectorAll('[part~="pass"]')).toHaveLength(2)

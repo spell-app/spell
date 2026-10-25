@@ -23,16 +23,16 @@ export const FOLD_OPEN_ATTRIBUTE = {
     "(or into it) and find-in-page set it;  set it from code to open it."
 } as const
 
-/** Events of every folding element:  `ui-open` / `ui-close` (cancelable), and its `source` body's (`LoadableBody`'s). */
+/** Events of every folding element:  `ui-opening` / `ui-closing` (cancelable), and its `source` body's (`LoadableBody`'s). */
 export const FOLD_EVENTS = [
   {
-    name: "ui-open",
+    name: "ui-opening",
     detail: "{ open: true, element: Element, originalEvent?: Event }",
     cancelable: true,
     description: "About to unfold:  its title was clicked.  Cancel to stay folded.  After the fact for a link."
   },
   {
-    name: "ui-close",
+    name: "ui-closing",
     detail: "{ open: false, element: Element, originalEvent?: Event }",
     cancelable: true,
     description: "About to fold:  its title was clicked.  Cancel to stay open."
@@ -121,7 +121,7 @@ export type SectionStack = {
   readonly innerStackTop: number
 }
 
-/** `detail` of a folding element's `ui-open` / `ui-close`. */
+/** `detail` of a folding element's `ui-opening` / `ui-closing`. */
 export type FoldToggleDetail = {
   /** state it's ABOUT to enter:  `true` unfolding */
   open: boolean

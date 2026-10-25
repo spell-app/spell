@@ -116,7 +116,7 @@
             <ul>
               <li>It runs only while countdown mode is on and something waits (<code>state="unsent"</code>).</li>
               <li>Every key, click, wheel, scroll or input on the page starts it again, in a same-origin frame too.</li>
-              <li>At 2 minutes it asks once (<code>epic-send-asked</code>, <code>auto</code> true), and stops until something waits again.</li>
+              <li>At 2 minutes it asks once (<code>epic-send-saving</code>, <code>auto</code> true), and stops until something waits again.</li>
               <li>
                 It's the PAGE's, one <code>SendCountdown</code>: a Send drawn again (a docs page's, at every redraw of its
                 comments) finds it where it was, its ring too.
@@ -183,7 +183,7 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-send-asked</code></td><td><code>{ auto }</code></td><td>The plane pressed (<code>auto</code> false), or the countdown ran out (<code>auto</code> true).</td></tr>
+                  <tr><td><code>epic-send-saving</code></td><td><code>{ auto }</code></td><td>The plane pressed (<code>auto</code> false), or the countdown ran out (<code>auto</code> true).</td></tr>
                 </tbody>
               </table>
             </ui-table>

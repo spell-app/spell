@@ -42,7 +42,7 @@ export const epicThreadVocabulary = {
       kind: "boolean",
       description:
         "Unfolded:  the messages and the reply box show.  A click on its header flips it, and says so " +
-        "(`epic-thread-fold`)."
+        "(`epic-thread-opened` / `epic-thread-closed`)."
     },
     {
       name: "unseen",
@@ -78,22 +78,27 @@ export const epicThreadVocabulary = {
   ],
   events: [
     {
-      name: "epic-thread-fold",
-      detail: "{ open: boolean }",
-      description: "Owen clicked its header (not one of its buttons):  it unfolded or folded, as `open` now says."
+      name: "epic-thread-opened",
+      detail: "{ open: true }",
+      description: "Owen clicked its header (not one of its buttons):  it unfolded."
     },
     {
-      name: "epic-thread-edit",
+      name: "epic-thread-closed",
+      detail: "{ open: false }",
+      description: "Owen clicked its header (not one of its buttons):  it folded."
+    },
+    {
+      name: "epic-thread-editing",
       detail: "{}",
       description: "The pen:  Owen will change his first words, while Claude hasn't had them."
     },
     {
-      name: "epic-thread-delete",
+      name: "epic-thread-removing",
       detail: "{}",
       description: "The trash:  Owen deletes the comment, at once (Undo in the toast that follows)."
     },
     {
-      name: "epic-thread-answer",
+      name: "epic-thread-answered",
       detail: '{ act: "good" | "reply" | "skip" | "reopen" }',
       description:
         "Owen's answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's " +

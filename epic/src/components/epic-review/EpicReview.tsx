@@ -62,7 +62,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - Each one has its own view of the page's review inbox (`ReviewState`, keyed by `of`),
  *   following it while connected.
  * - Revisit and Edit take the reader to the note box (`takeToNote()`):
- *   - `epic-show-note`, so the family unfolds
+ *   - `epic-note-showing`, so the family unfolds
  *   - then the box beside it (the `<epic-review shows="note">` of the same shadow root) takes the focus
  *   - a judgement call's or todo's EMPTY box gets "do it", selected, Revisit turning on with it (Owen, 2026-10-19,
  *     2026-10-22)
@@ -72,7 +72,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - SIDE EFFECT:  the note box listens for `pagehide` while connected, to save a draft as the page goes.
  * - A comment THREAD's answer (`buttons="thread"` / `"closed"`, drawn by `<epic-thread>`;  epic `epic-engine` P3):
  *   the same group, look and colours, That's good / Reply / Skip it, or Reopen (`threadControls()`).
- *   - No inbox behind them:  a press only says which (`epic-thread-answer`), and the comments' code acts on it.
+ *   - No inbox behind them:  a press only says which (`epic-thread-answered`), and the comments' code acts on it.
  ****************/
 export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.proto static vocabulary = epicReviewVocabulary
@@ -209,7 +209,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * colour under the pointer (`EpicReview.css`, "A thread's answer").
    * - tooltips (`title`;  Owen, 2026-10-10:  "No tooltip on those same buttons"):  the name, and for the two that
    *   close it, that they do;  a screen reader hears what each does
-   * - a press says which (`epic-thread-answer`, `{ act }`):  the thread's own line doesn't fold for it
+   * - a press says which (`epic-thread-answered`, `{ act }`):  the thread's own line doesn't fold for it
    */
   private threadControls(specs: () => readonly ThreadButtonSpec[]): JSX.Element {
     return (
@@ -594,7 +594,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /**
    * Take the reader to the note box (Revisit;  Edit, with the marked `note`).
    * 1. the box opens (`ReviewClient.openBox()`)
-   * 2. `epic-show-note` asks the family to show it:  it unfolds, or opens a box by itself under its line
+   * 2. `epic-note-showing` asks the family to show it:  it unfolds, or opens a box by itself under its line
    * 3. the note takes the focus, trying each frame until it can, for `FOCUS_HOLD_MS` at most
    *    (details just opened may not be drawn yet, a part may still be loading)
    * - Edit (`note`):  the marked note goes back in the box, unless something is typed there already

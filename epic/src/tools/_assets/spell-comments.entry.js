@@ -28,7 +28,7 @@
  *   typed goes to the site's search, which Cmd / Ctrl + K opened before (`searchSite()`;  `/` still opens it
  *   straight away).  Only on a page that takes comments:  elsewhere the key stays the search's.
  * - WHEN:  once the site has put the page in its layout (`html.site-mounted`) and `<ui-root>` is defined;  then again
- *   for each page the site's router swaps in (its `spell-site:page` event):  the last page's taken down first
+ *   for each page the site's router swaps in (its `spell-site:navigated` event):  the last page's taken down first
  *   (`wire()`'s `signal`), what's typed there and not saved yet sent.
  * - The comments only on a page the page server serves (`window.SPELL_SERVER`), that takes comments:
  *   `wireComments()` asks.
@@ -43,7 +43,7 @@ import { fitTitles, keepFitted, markCurrent, titledItems, toolbarMenu, wireJumpK
 const PAGE_MAIN = "main#main"
 
 /** What the site's router dispatches on `document` once it swapped another page in (`SiteRouter`'s `PAGE_EVENT`). */
-const PAGE_EVENT = "spell-site:page"
+const PAGE_EVENT = "spell-site:navigated"
 
 /** The class the site puts on `<html>` once its layout is in (`SiteShell`'s `MOUNTED_CLASS`). */
 const MOUNTED_CLASS = "site-mounted"
@@ -100,7 +100,7 @@ async function wire() {
  * the toolbar's menu (`toolbarMenu()`, titled), a button per top-level `<ui-section>` (`titledItems()`:  its number and
  * its title, `1` `Example`);  none without sections.
  * - a page in TABS (a components page's Examples, Usage, API, Theming:  Brand's element pages):  the SHOWN pane's
- *   sections, its bar first in that pane;  drawn again for the next pane as the tabs switch (`ui-show`), the
+ *   sections, its bar first in that pane;  drawn again for the next pane as the tabs switch (`ui-opened`), the
  *   comments' bullhorn kept (`toolbarMenu()` keeps what was added to the row);  a pane without sections, none
  *   - before:  one bar in the first pane, a button for every pane's sections, the hidden ones' too
  * - the section being read marked (`markCurrent()`):  the last whose top has reached the line the site sticks titles
@@ -108,7 +108,7 @@ async function wire() {
  * - a click lands as the site lands any `#id` link (`SiteSections`:  unfolded, below the stuck titles)
  * - the site measured again once it's drawn (a `resize`):  its titles stick below the bar, its links land below it
  * - SIDE EFFECT:  the bar in `main` (`data-spell-added`:  the comments step around it);  a scroll, a resize and a
- *   `ui-show` listener, until `signal`
+ *   `ui-opened` listener, until `signal`
  */
 function wireToolbar(main, { signal }) {
   const sections = topSections(main)
@@ -126,7 +126,7 @@ function wireToolbar(main, { signal }) {
       { signal: pane.signal }
     )
   }
-  tabs.addEventListener("ui-show", (event) => event.target.parentElement === tabs && requestAnimationFrame(drawPane), {
+  tabs.addEventListener("ui-opened", (event) => event.target.parentElement === tabs && requestAnimationFrame(drawPane), {
     signal
   })
   drawPane()

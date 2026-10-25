@@ -77,14 +77,14 @@ export const epicReviewVocabulary = {
   ],
   events: [
     {
-      name: "epic-show-note",
+      name: "epic-note-showing",
       detail: "{ of: string }",
       description:
         "Revisit or Edit pressed:  the reader is taken to the note box, which then takes the focus.  The family that " +
         "draws it unfolds to show the box."
     },
     {
-      name: "epic-thread-answer",
+      name: "epic-thread-answered",
       detail: '{ act: "good" | "reply" | "skip" | "reopen" }',
       description:
         "A comment thread's answer button pressed (`buttons=thread` or `closed`):  which.  The comments' code acts " +

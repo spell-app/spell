@@ -174,7 +174,7 @@ export const epicItemVocabulary = {
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ open: boolean, item: Element, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -182,7 +182,7 @@ export const epicItemVocabulary = {
         "Cancel to stay folded."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ open: boolean, item: Element, originalEvent?: Event }",
       cancelable: true,
       description: "About to fold:  its line was clicked.  Cancel to stay open."

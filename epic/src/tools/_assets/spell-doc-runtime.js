@@ -72,7 +72,7 @@
  *   `scrollIntoView()` from code doesn't --
  *   call `jump`'s path (a click on a `#id` link, or set `location.hash`) instead
  * NOTE: panels open and close through the accordion's `open` PROPERTY (panel indexes as text):
- * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the person).
+ * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-opening` / `ui-closing` mean the person).
  */
 
 import { PrefStore } from "spell/util/persist/PrefStore"
@@ -141,11 +141,11 @@ const SETTLE_MS = 450
 /**
  * The events a fold sends as the reader opens or closes it, and a source host as its body arrives:
  * - a `<ui-section>`'s (`ui-opening`, `ui-closing`;  its old names went in epic `repo-split` P14)
- * - an `<epic-*>` block's and a `<ui-accordion>`'s (`ui-open`, `ui-close`)
+ * - an `<epic-*>` block's and a `<ui-accordion>`'s (`ui-opening`, `ui-closing`)
  * - every source host's body:  `ui-loaded` (Spell UI's `LoadableBody`, the `<epic-*>` blocks' too)
  */
-const OPENING = ["ui-opening", "ui-open"]
-const CLOSING = ["ui-closing", "ui-close"]
+const OPENING = ["ui-opening", "ui-opening"]
+const CLOSING = ["ui-closing", "ui-closing"]
 const LOADED = "ui-loaded"
 
 /** How long a closing fold's header is held in place (`holdWhileFolding()`):  its transition (300ms) and a margin. */
@@ -963,7 +963,7 @@ const squashed = new WeakMap()
 /**
  * An edit to this page's file updates it IN PLACE, instead of reloading it (epic page `review-review`, D10).
  * - `liveClient()` (`spell/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
- *   and fires a cancelable `spell-server:change` on `window`, `detail` `{ path, html, etag, reload() }`:
+ *   and fires a cancelable `spell-server:reloading` on `window`, `detail` `{ path, html, etag, reload() }`:
  *   taking it (`preventDefault()`) stops its reload
  * - the patch compares the page's source as it LOADED (fetched once, `SPELL_SERVER.readPage()`, trusted only when
  *   its `ETag` is the one served) with the new source, and changes only what differs in the live page
@@ -1000,7 +1000,7 @@ function wireLiveUpdate(main) {
     ({ html, etag }) => (etag && etag === server.etag ? html : null),
     () => null
   )
-  addEventListener("spell-server:change", (event) => {
+  addEventListener("spell-server:reloading", (event) => {
     const { html, reload } = event.detail ?? {}
     if (typeof html !== "string" || typeof reload !== "function") return
     event.preventDefault()
@@ -1068,7 +1068,7 @@ function isInert(script) {
  * - a body loads (the first open or a re-fetch):  the page is re-wired around it (`live.refresh()`):
  *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
- * - a body's FILE changed (the page server's `spell-server:file`, `liveClient.ts`):  a host that has loaded it
+ * - a body's FILE changed (the page server's `spell-server:changed`, `liveClient.ts`):  a host that has loaded it
  *   re-fetches it in place (`reload()`), the reading position kept (`readingAnchor()`);  one that hasn't drops the
  *   cached copy, so its first open fetches the new one
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
@@ -1078,7 +1078,7 @@ function wireSourceBodies(main, live, enqueue) {
     const host = event.target
     if (host instanceof Element && host.hasAttribute("source") && main.contains(host)) live.refresh([host])
   })
-  addEventListener("spell-server:file", (event) => {
+  addEventListener("spell-server:changed", (event) => {
     const path = event.detail?.path
     if (typeof path !== "string") return
     const changed = decodeURIComponent(path)
@@ -1984,13 +1984,13 @@ function markItemStates(main) {
  *   the ONE chip element, an epic page's too
  *   - a chip per state the section has items in, in its colour, with how many (Owen, 2026-10-10:  no filter icon)
  *   - SOLID while its items show, OUTLINED while hidden
- * - a click (`epic-state-pick`), by the one rule (`StateFilter.nextShown()`, in the element):
+ * - a click (`epic-state-changed`), by the one rule (`StateFilter.nextShown()`, in the element):
  *   - everything showing:  only that state
  *   - else a hidden state shows too, and a shown one hides
  *   - the only one showing:  everything again
  * - in the title's `actions` slot (`.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
  * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):
- *   a click there (`epic-show-all`) shows all
+ *   a click there (`epic-all-showing`) shows all
  * - the choice:  `data-show="<states shown>"` on the section (none for all),
  *   `data-spell-hidden` on the items it hides (CSS hides them)
  *   - remembered per page (`localStorage`, `{ [section id]: [states] }`);  all by default
@@ -2018,10 +2018,10 @@ function wireItemFilters(main) {
       counts: [...counts].map(([state, count]) => `${state}:${count}`).join(" "),
       "data-spell-added": true
     })
-    chips.addEventListener("epic-state-pick", (event) => choose(event.detail.shown))
+    chips.addEventListener("epic-state-changed", (event) => choose(event.detail.shown))
     const notes = lists.map((list) => {
       const note = el("epic-hidden-note", { class: "spell-hidden-note", hidden: true, "data-spell-added": true })
-      note.addEventListener("epic-show-all", () => choose(states))
+      note.addEventListener("epic-all-showing", () => choose(states))
       list.after(note)
       return note
     })
@@ -2197,7 +2197,7 @@ function buildToolbar(page, outline, counts) {
  * Every section folds, and the reader's folds are remembered per page (`localStorage`, `{ [id]: folded }`).
  * - SECTIONS:  `<ui-section collapsible>` folds itself;
  *   this restores the saved folds (else the markup's `collapsed` stands)
- *   and saves the reader's toggles (`ui-opening` / `ui-closing`;  an `<epic-*>` block's `ui-open` / `ui-close`)
+ *   and saves the reader's toggles (`ui-opening` / `ui-closing`;  an `<epic-*>` block's `ui-opening` / `ui-closing`)
  *   - an EPIC PAGE (`body.plan-doc`):  every section and sub-section not in the saved folds starts FOLDED,
  *     whatever its markup says:  Owen opens what he wants to read (2026-10-03)
  *     - a link to an id inside still lands (`reveal()` unfolds around it)
@@ -2297,7 +2297,7 @@ function wireFolds(main, outline, kept) {
    *   and the browser pulls it back:  the header jumps down.  So the page keeps its height (`min-height`) until the
    *   reader scrolls back far enough for the shorter page to hold him
    * - stops after `FOLD_HOLD_MS`, or at once when the reader scrolls
-   * - ONLY a fold's closing (a section, an epic block, an accordion):  a `<ui-popup>` sends a cancelable `ui-close`
+   * - ONLY a fold's closing (a section, an epic block, an accordion):  a `<ui-popup>` sends a cancelable `ui-closing`
    *   as it hides, and a hidden popup's top is 0, so holding it scrolled the page to the top (epic `epic-engine` r5)
    */
   function holdWhileFolding(event) {
@@ -2350,7 +2350,7 @@ function wireFolds(main, outline, kept) {
   }
 
   /**
-   * The reader folded or unfolded a section (accordions' `ui-open` / `ui-close` bubble here too:  not ours).
+   * The reader folded or unfolded a section (accordions' `ui-opening` / `ui-closing` bubble here too:  not ours).
    * - an opening that can't be cancelled is the BROWSER's reveal (find-in-page, a `#hash` load):
    *   not saved, as a link's unfold isn't
    */
@@ -2687,7 +2687,7 @@ function h2HeightAbove(sticky) {
  * - `hashchange` / `popstate` (back, forward, a typed hash) jump the same way
  * - in a frame (VS Code's view), the parent's `{ spell: "go", hash }` too:  the view showing the page it already
  *   shows, at an id (`packages/vscode/src/DocView.ts`);  a history entry, as a click's
- * - a jump that moves the address says so (`spell-doc:place`):  `pushState()` fires no `hashchange`
+ * - a jump that moves the address says so (`spell-doc:scrolled-to`):  `pushState()` fires no `hashchange`
  * - returns `{ jump, go, canGo }`:
  *   - `jump(id, { unfoldTarget })`:  `unfoldTarget: false` unfolds only what's AROUND a folded target section
  *     (`land()`:  a reload lands on the section being read as it was, folded or not)
@@ -2714,7 +2714,7 @@ function wireAnchors(main, outline, sticky, follow, folds) {
   function go(id) {
     if (hashId() !== id) {
       history.pushState(null, "", `#${id}`)
-      dispatchEvent(new Event("spell-doc:place"))
+      dispatchEvent(new Event("spell-doc:scrolled-to"))
     }
     return jump(id)
   }
@@ -3001,7 +3001,7 @@ function decodeHash(hash) {
  *   not while a followed link is pinned (its click set the hash), and no hash above the first entry;
  *   never while an epic page shows its TEST RUN (`isTestRun()`):  its `#v3` is the test it's on (epic `epic-engine` J44)
  *   - so a reload, or VS Code restarting the view, lands on the section being read
- *   - `replaceState()` fires no `hashchange`:  `spell-doc:place` on `window` tells the live client, which tells
+ *   - `replaceState()` fires no `hashchange`:  `spell-doc:scrolled-to` on `window` tells the live client, which tells
  *     VS Code's view (`liveClient.ts` `reportPlace()`)
  * - returns `{ update, pin, followAddress, rescan }`:
  *   - `pin(entry)` makes it current until the page scrolls again (a link was followed)
@@ -3063,13 +3063,13 @@ function followScroll(main, outline, rail) {
   }
 
   /**
-   * Put `#id` in the address ("":  no hash) without a history entry or a jump, and say so (`spell-doc:place`).
+   * Put `#id` in the address ("":  no hash) without a history entry or a jump, and say so (`spell-doc:scrolled-to`).
    * - only once `followAddress()` was called, and only when it changes
    */
   function writeAddress(id) {
     if (!addressing || hashId() === id || isTestRun()) return
     history.replaceState(history.state, "", `${location.pathname}${location.search}${id ? `#${id}` : ""}`)
-    dispatchEvent(new Event("spell-doc:place"))
+    dispatchEvent(new Event("spell-doc:scrolled-to"))
   }
 
   /** Mark the toolbar's entry of `heading`'s top-level section. */
@@ -3128,7 +3128,7 @@ function titlesOf(accordion) {
  * `ui-input[data-spell-filter]` shows only the cards holding every typed word, and `ui-select[data-spell-filter-badge]`
  * only those with a `ui-label` badge of the chosen text ("" = any);  sections without a visible card hide too, and
  * so do their toolbar buttons.
- * - reads values from the events' `detail`:  during `ui-input` / `ui-change` the element's `value` is still the old one
+ * - reads values from the events' `detail`:  during `ui-typed` / `ui-changed` the element's `value` is still the old one
  * - SIDE EFFECT:  remembers the typed filter (not the badge) in `localStorage` (when the browser allows it), per
  *   page:  under the input's `data-spell-filter` value, or `FILTER_KEY_PREFIX` + the page's path
  */
@@ -3150,9 +3150,9 @@ function wireFilter(main) {
   let chosen = String(badge?.value ?? "")
   /** Folded sections the filter unfolded, to fold back when it's cleared. */
   const filterOpened = new Set()
-  input?.addEventListener("ui-input", onType)
-  input?.addEventListener("ui-change", onType)
-  badge?.addEventListener("ui-change", (event) => {
+  input?.addEventListener("ui-typed", onType)
+  input?.addEventListener("ui-changed", onType)
+  badge?.addEventListener("ui-changed", (event) => {
     chosen = String(event.detail?.value ?? badge.value ?? "")
     apply()
   })
@@ -3244,7 +3244,8 @@ function drawNoteCards(main) {
       preview: noteText(note).split("\n")[0],
       open: note.hasAttribute("open")
     })
-    head.addEventListener("epic-page-note-fold", (event) => note.toggleAttribute("open", !!event.detail?.open))
+    for (const type of ["epic-note-opened", "epic-note-closed"])
+      head.addEventListener(type, (event) => note.toggleAttribute("open", !!event.detail?.open))
     note.prepend(head)
   }
 }

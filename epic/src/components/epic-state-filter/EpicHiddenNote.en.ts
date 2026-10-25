@@ -19,12 +19,12 @@ export const epicHiddenNoteVocabulary = {
   ui: false,
   description:
     "Under a list the state filter (`<epic-state-filter>`) hides items of:  a quiet line, `3 hidden · show all`;  a " +
-    "click asks its owner to show everything again (`epic-show-all`).  Drawn by `<epic-section>` under its items, and " +
+    "click asks its owner to show everything again (`epic-all-showing`).  Drawn by `<epic-section>` under its items, and " +
     "by the docs runtime under the Epics page's lists.  Nothing hidden:  its owner leaves it out.",
   attributes: [{ name: "count", kind: "number", description: "How many items the filter hides." }],
   events: [
     {
-      name: "epic-show-all",
+      name: "epic-all-showing",
       detail: "{}",
       description: "Its line was clicked:  the owner clears the filter, and every item shows."
     }

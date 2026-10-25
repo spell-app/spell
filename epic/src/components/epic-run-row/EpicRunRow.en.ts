@@ -21,7 +21,7 @@ export const epicRunRowVocabulary = {
     "columns, then the answer.  The answer is the command's proposal, pre-filled in a box Owen types over;  a pick " +
     "of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, " +
     "with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says " +
-    "so (`epic-run-answer`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at " +
+    "so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at " +
     "once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  " +
     "A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the " +
     "tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
@@ -58,7 +58,7 @@ export const epicRunRowVocabulary = {
   ],
   events: [
     {
-      name: "epic-run-answer",
+      name: "epic-run-answered",
       detail: "{ rowId: string, outcome: RunOutcome, value: string, ticked?: boolean, now: boolean }",
       description:
         "Owen answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or " +

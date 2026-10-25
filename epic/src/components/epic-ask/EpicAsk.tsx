@@ -39,7 +39,7 @@ const OPTION_ATTRIBUTES = [SELECTED, DONE, "letter"]
  * - It draws its line first:  its id chip in the epic page's state colours, `Pick one` / `Pick several`, and its
  *   tools (Select all, Open | All);  then its children;  then the Other box (`<epic-text-box type="other">`).
  * - It holds what's picked (`picks`) and what wants more details (`moreWanted`):  its options draw from them, and
- *   send a `ui-change` when Owen ticks one, which it takes (`onPick()`).
+ *   send a `ui-selected` / `ui-deselected` when Owen ticks one, which it takes (`onPick()`).
  *   - Before Owen picks:  the options marked `selected` (ticked to start with:  the review's item picker)
  * - Pick one:  its options' round tick boxes are ONE radio group to the keyboard (I5), though each is a native radio
  *   in its option's own shadow root, which the browser never groups:
@@ -293,12 +293,13 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   ////////////////
 
   /**
-   * One of its options was ticked, unticked, or had its (?) pressed (`<epic-option>`'s `ui-change`):
+   * One of its options was ticked, unticked, or had its (?) pressed (`<epic-option>`'s `ui-selected` / `ui-deselected`):
    * - pick one:  a tick picks it alone
    * - "Provide more details" pressed:  the option is ticked too
    * - options further down (quoted in an option's text) are none of its business
    */
-  @E.on("ui-change")
+  @E.on("ui-selected")
+  @E.on("ui-deselected")
   protected onPick(event: Event) {
     const option = event.target as Element
     if (!this.options.includes(option)) return

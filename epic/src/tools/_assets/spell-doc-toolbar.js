@@ -376,7 +376,7 @@ const ID_LIKE = /^#?[a-z]{1,2}\d+$/i
  * - never while typing in a field (a note box, the new item form), nor with a dialog already open
  * - the dialog is a `<ui-modal>` built as `UI.modals.prompt()` builds its own (`ModalDialogs`):
  *   no `<ui-prompt>` element exists, and `prompt()` closes on any answer, so it couldn't stay open on a miss;
- *   here its cancelable `ui-approve` is cancelled instead
+ *   here its cancelable `ui-approving` is cancelled instead
  * - K is free:  the live client takes only Cmd / Ctrl + A C X V Z in VS Code's view (`liveClient.ts` `editKey()`)
  * - options, for Epic UI's pages (`spell-comments.entry.js`), whose site has its own Cmd / Ctrl + K, its search:
  *   - `search(words)`:  what's typed that isn't an id (`ID_LIKE`) goes to it, the site's search (epic `epic-engine`
@@ -446,7 +446,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
     approve.click()
   })
   input.addEventListener("input", () => (miss.hidden = true))
-  modal.addEventListener("ui-approve", (event) => {
+  modal.addEventListener("ui-approving", (event) => {
     const typed = input.value.trim()
     const id = typed.replace(/^#/, "").toLowerCase()
     const comment = commentsOnPage()?.find(id)
@@ -469,7 +469,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
     input.select()
   })
   modal.addEventListener(
-    "ui-hide",
+    "ui-closed",
     () => {
       modal.remove()
       if (thread) void commentsOnPage()?.landOn(thread)

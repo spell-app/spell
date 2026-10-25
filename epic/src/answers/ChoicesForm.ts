@@ -389,7 +389,7 @@ export class ChoicesForm {
   /**
    * Unfold every section holding rows in `document`, or, once they all are, fold them again.
    * - Returns true when they're now all open.
-   * - Remembered as the reader's own folds are:  a property set fires no `ui-open`,
+   * - Remembered as the reader's own folds are:  a property set fires no `ui-opening`,
    *   so this writes the docs runtime's store itself (`FOLD_KEY_PREFIX` + path, through `PrefStore`).
    */
   static expandAll(document: Document): boolean {

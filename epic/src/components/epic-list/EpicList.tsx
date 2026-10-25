@@ -41,7 +41,7 @@ import listCSS from "./EpicList.css?inline"
  * - it NEVER moves or changes its cards (but their star, below):  one grid in its shadow root holds the headings and
  *   the slotted cards, each card placed by a `::slotted()` rule (CSS `order`), the hidden ones hidden by one
  *   - so a live update of the page, or the page server's added cards, are placed as they come
- * - a card's star answered (`epic-favorite`):  every card starred as the page server says
+ * - a card's star answered (`epic-starred`):  every card starred as the page server says
  * - SIDE EFFECT:  watches its cards' attributes and text (`@watches`);
  *   listens for `epic-sort` on the document while connected
  ****************/
@@ -246,7 +246,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
   }
 
   /** A card's star, answered by the page server:  every card starred as it says (another window may have starred). */
-  @E.on("epic-favorite")
+  @E.on("epic-starred")
   protected onFavorite(event: Event) {
     const { favorites } = (event as CustomEvent<FavoriteDetail>).detail ?? {}
     if (!Array.isArray(favorites)) return

@@ -9,9 +9,9 @@ import type { RunOutcome } from "spell/server/runs/runs.types"
 import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 /** A row answered:  the event its owner hears and saves on (`@E.on(RUN_ANSWER)`). */
-export const RUN_ANSWER = "epic-run-answer"
+export const RUN_ANSWER = "epic-run-answered"
 
-/** `epic-run-answer`'s detail:  the row, its answer, and whether to save it at once. */
+/** `epic-run-answered`'s detail:  the row, its answer, and whether to save it at once. */
 export type RunAnswerDetail = {
   /** the row's id */
   rowId: string

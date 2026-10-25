@@ -172,8 +172,8 @@ describe("AgentsClient.watch()", () => {
     const window = fakeWindow()
     const stop = client.watch(window)
     server.agents = []
-    window.dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/epics/sample/other.json" } }))
-    window.dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/epics/sample/agents.json" } }))
+    window.dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/epics/sample/other.json" } }))
+    window.dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/epics/sample/agents.json" } }))
     await vi.waitFor(() => expect(client.agents).toEqual([]))
     stop()
   })

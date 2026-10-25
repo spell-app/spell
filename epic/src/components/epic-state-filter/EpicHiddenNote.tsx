@@ -12,7 +12,7 @@ import noteCSS from "./EpicHiddenNote.css?inline"
  * ### `<epic-hidden-note>`
  * Under a list the state filter hides items of (epic `airplane` P8;  ONE element since epic `epic-engine` P3):
  * `3 hidden · show all`, a quiet line drawn as a link.
- * - a click asks the owner to show everything again (`epic-show-all`):  it clears the filter
+ * - a click asks the owner to show everything again (`epic-all-showing`):  it clears the filter
  * - drawn by `<epic-section>` under its items, and by the docs runtime under the Epics page's lists
  *   (`wireItemFilters()`);  with nothing hidden, the owner leaves it out
  ****************/

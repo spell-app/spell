@@ -6,12 +6,12 @@
 import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 /** A chip's click:  the event its owners hear (`@E.on(STATE_PICK)`). */
-export const STATE_PICK = "epic-state-pick"
+export const STATE_PICK = "epic-state-changed"
 
 /** `<epic-hidden-note>`'s click:  the event its owners hear (`@E.on(SHOW_ALL)`), no detail. */
-export const SHOW_ALL = "epic-show-all"
+export const SHOW_ALL = "epic-all-showing"
 
-/** `epic-state-pick`'s detail:  the state whose chip was clicked, and what should show next (`StateFilter.nextShown()`). */
+/** `epic-state-changed`'s detail:  the state whose chip was clicked, and what should show next (`StateFilter.nextShown()`). */
 export type StatePickDetail = {
   /** the clicked chip's state:  `attention` ... */
   state: string

@@ -15,7 +15,7 @@ import headCSS from "./EpicPageNoteHead.css?inline"
  * P3), drawn by the docs runtime first in each note (`wireNotes()`;  a hand-built button row until epic `epic-engine`
  * P3).
  * - "Owen · 10/10 14:02", the note's first line while it's folded (`preview`), its status, how many replies.
- * - The whole line is ONE button:  a click flips `open`, and says so (`epic-page-note-fold`);  the runtime opens or
+ * - The whole line is ONE button:  a click flips `open`, and says so (`epic-note-opened` / `epic-note-closed`);  the runtime opens or
  *   folds the note (its `open`, which a live patch keeps).
  * - Its look is the note card's head line, as it was (`spell-doc.css` before).
  ****************/
@@ -65,7 +65,7 @@ export class EpicPageNoteHead extends E.UIComponent<typeof epicPageNoteHeadVocab
   private readonly onFold = () => {
     const open = !this.open
     this.open = open
-    this.send("epic-page-note-fold", { open })
+    this.send(open ? "epic-note-opened" : "epic-note-closed", { open })
   }
 }
 

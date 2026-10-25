@@ -21,7 +21,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - Its header:  the bullhorn, the first words it's on (`headline`;  its tooltip `about`), the floppy once saved
  *   (`saved`, red when `failed`), the trash once saved (`deletable`), ×.
  * - Its field is slotted:  the comments' code saves what's typed, closes it (×, Escape, ⌘ Enter, the focus leaving),
- *   and deletes it;  this only says which button was pressed (`epic-comment-close`, `epic-comment-delete`).
+ *   and deletes it;  this only says which button was pressed (`epic-comment-closing`, `epic-comment-removing`).
  ****************/
 export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabulary> {
   @E.proto static vocabulary = epicCommentPaneVocabulary
@@ -78,7 +78,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
               icon="trash can"
               title={this.translationForKey("deleteTitle")}
               aria-label={this.translationForKey("deleteLabel")}
-              onClick={() => this.send("epic-comment-delete", {})}
+              onClick={() => this.send("epic-comment-removing", {})}
             />
           </Show>
           <ui-button
@@ -89,7 +89,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
             icon="xmark"
             title={this.translationForKey("closeTitle")}
             aria-label={this.translationForKey("closeLabel")}
-            onClick={() => this.send("epic-comment-close", {})}
+            onClick={() => this.send("epic-comment-closing", {})}
           />
         </div>
         <slot />

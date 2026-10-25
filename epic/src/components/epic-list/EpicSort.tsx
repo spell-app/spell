@@ -63,7 +63,7 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
   private pick(sort: EpicSortName) {
     this.sort = sort
     save(SORT_KEY, sort)
-    this.send("epic-sort", { sort } satisfies SortDetail)
+    this.send("epic-sorting", { sort } satisfies SortDetail)
   }
 }
 

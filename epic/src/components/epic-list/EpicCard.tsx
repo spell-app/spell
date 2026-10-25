@@ -24,7 +24,7 @@ import cardCSS from "./EpicCard.css?inline"
  * - the STAR at its top right (Owen, 2026-10-10:  "make it yellow"):  a click stars or unstars it at once
  *   (`favorite`, which its list groups by), then on the page server (`POST /api/epics/favorite`);
  *   refused:  back as it was, and a toast says why
- *   - its answer, every starred epic, goes to its list (`epic-favorite`):  another window may have starred one
+ *   - its answer, every starred epic, goes to its list (`epic-starred`):  another window may have starred one
  *   - only served with a write token:  from `file://`, the star shows, disabled, saying why
  * - the day it was last worked on at its bottom right, no year (`10/9`), the full date and time its tooltip
  * - SIDE EFFECT:  a star click sets its own `favorite` attribute;  posts to the page server
@@ -188,7 +188,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         favorites?: unknown
       }
       const favorites = Array.isArray(answer.favorites) ? answer.favorites.map(String) : []
-      this.send("epic-favorite", { epic, favorite, favorites } satisfies FavoriteDetail)
+      this.send("epic-starred", { epic, favorite, favorites } satisfies FavoriteDetail)
     } catch (error) {
       this.domElement.toggleAttribute("favorite", !favorite)
       this.toast(favorite ? "starFailed" : "unstarFailed", epic, (error as Error).message)

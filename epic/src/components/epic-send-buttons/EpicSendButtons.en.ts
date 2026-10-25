@@ -72,7 +72,7 @@ export const epicSendButtonsVocabulary = {
   ],
   events: [
     {
-      name: "epic-send-asked",
+      name: "epic-send-saving",
       detail: "{ auto }",
       description:
         "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The " +

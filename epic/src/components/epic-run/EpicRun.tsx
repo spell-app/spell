@@ -36,7 +36,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     each given its row, the columns and Owen's answer so far
  *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send (no countdown:  `manual`;  a command carries on with exactly what was sent)
  *     (`<epic-send-buttons>`, blue by the fill rule), and why a read, save or Send failed
- * - A row's answer (`epic-run-answer`) goes to the form, which saves it:  a keystroke half a second later, a pick or a
+ * - A row's answer (`epic-run-answered`) goes to the form, which saves it:  a keystroke half a second later, a pick or a
  *   tick at once.
  * - SIDE EFFECT:  as it connects, the form reads the run, and keeps it fresh while the page is open
  *   (`RunForm.watch()`:  the run's files changing, every 30s for the waiting state);  what's unsaved goes as the
