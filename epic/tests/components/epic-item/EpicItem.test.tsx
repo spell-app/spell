@@ -122,6 +122,19 @@ describe("<epic-item>", () => {
     ])
   })
 
+  // Owen, 2026-10-25:  "when we check a Q we should be able to grey it immediately"
+  test("a decided item approved on or after its last change is grey;  changed on a later day, green again", async () => {
+    const now = new Date().toISOString()
+    const states = await Promise.all(
+      [
+        `<epic-item id="q1" title="A" status="decided" changed="${now}"></epic-item>`,
+        `<epic-item id="q2" title="B" status="decided" changed="${now}" reviewed="${now.slice(0, 10)}"></epic-item>`,
+        `<epic-item id="q3" title="C" status="decided" changed="${now}" reviewed="2020-01-01"></epic-item>`
+      ].map(async (html) => (await item(html)).host.shadowRoot!.querySelector("[part~='base']")!.className)
+    )
+    expect(states).toEqual(["recent item", "old item", "recent item"])
+  })
+
   test("`replied` (Owen, 2026-10-09):  an orange chip with dark text, Owen's turn to pick, in its tooltip", async () => {
     const { host, chip } = await item(
       `<epic-item id="j17" title="A call" status="open" state="replied" reviewed="2026-10-09"></epic-item>`
@@ -142,7 +155,7 @@ describe("<epic-item>", () => {
     expect(labels).toEqual([
       ["to do", "review todo", "Skip it"],
       ["deferred", "review deferred", "deferred 10/5/26"],
-      ["reviewed 10/6/26", "review recent", ""],
+      ["reviewed 10/6/26", "review old", ""],
       null
     ])
   })

@@ -231,7 +231,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     if (urgency && this.canCalm()) return urgency.calm ? "open" : "attention"
     const state = this.state
     const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
-    return ItemAge.shown(written ?? STATUS_STATES[this.status ?? ""] ?? "open", this.changed)
+    const shown = ItemAge.shown(written ?? STATUS_STATES[this.status ?? ""] ?? "open", this.changed, this.reviewed)
+    // his check pressed, not applied yet:  grey at once too
+    return shown === "recent" && this.reviewState.mark()?.action === "approve" ? "old" : shown
   })
 
   /**
