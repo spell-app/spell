@@ -108,7 +108,7 @@ describe("<epic-overview>", () => {
 // epic `epic-workflow` P25:  the page's own buttons in the title row, where the docs runtime puts the bullhorn too
 describe("<epic-overview> actions slot", () => {
   // P25:  the page's own buttons at the title's end, before its fold
-  test('`slot="actions"`:  at the title\'s end, before the chevron;  a click never folds it', async () => {
+  test('`slot="actions"`:  at the title\'s end, the chevron at its start;  a click never folds it', async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-overview id="overview"><button slot="actions" aria-label="Copy">C</button></epic-overview>`
     )
@@ -117,7 +117,8 @@ describe("<epic-overview> actions slot", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     expect(button.assignedSlot?.getAttribute("name")).toBe("actions")
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
-    expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(chevron.getBoundingClientRect().left + 0.5)
+    // the chevron at the row's start (Owen, 2026-10-25:  "put it on the left"), the page's buttons at its end
+    expect(chevron.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().left + 0.5)
     // its title in full, folded or open:  no tooltip (Owen, 2026-10-19;  J183's tooltip before)
     expect(host.shadowRoot!.querySelector(".header")!.hasAttribute("title")).toBe(false)
     button.click()
@@ -128,7 +129,7 @@ describe("<epic-overview> actions slot", () => {
 
 // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
 describe("<epic-overview> toggle-all", () => {
-  test("folded:  the toggle after the page's own buttons, before the chevron;  a click opens it, its parts and items", async () => {
+  test("folded:  the toggle after the page's own buttons, the chevron at the row's start;  a click opens it, its parts and items", async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-overview id="overview"><button slot="actions" aria-label="Copy">C</button>` +
         `<epic-summary>Summary</epic-summary>` +
@@ -142,7 +143,7 @@ describe("<epic-overview> toggle-all", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
     const [b, e, c] = [button, expand, chevron].map((each) => each.getBoundingClientRect())
-    expect([b.right <= e.left + 0.5, e.right <= c.left + 0.5]).toEqual([true, true])
+    expect([b.right <= e.left + 0.5, c.right <= b.left + 0.5]).toEqual([true, true])
     expand.click()
     const part = host.querySelector("epic-section")!
     const item = host.querySelector("epic-item")!
