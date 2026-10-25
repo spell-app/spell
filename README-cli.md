@@ -214,6 +214,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
 | `spell publish [--dry-run]` | builds, packs and checks every repo's npm package, installs them in a scratch project, then publishes them, lowest first;  `--dry-run` stops before publishing |
+| `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -284,6 +285,62 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     `npm login` first.
 
 </details>
+
+### Asking the map
+
+Before writing something new, ask what already does it.
+`spell map` keeps two maps of the kit and every repo in it, and answers from them in about a second:
+
+```sh
+spell map uses Tokenizer
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+Affected nodes for Tokenizer
+- RulexTokenizer [inherits] spell-parser/src/parser/rulex/RulexTokenizer.ts:L14
+- MarkdownTokenizer [inherits] spell-parser/src/markdown/MarkdownTokenizer.ts:L15
+- Parser.ts [uses] spell-parser/src/parser/Parser.ts:L8
+- SpellLanguageService.ts [uses] spell-app/src/lsp/SpellLanguageService.ts:L35
+...
+```
+
+</details>
+
+Two subclasses already read a syntax of their own with the parser's tokenizer.
+A new syntax is a third subclass, not a new parser.
+
+| Verb | What it does |
+| --- | --- |
+| `spell map uses <name>` | every file and class that uses it, across repos:  `spell map uses "readJSON5File()"` |
+| `spell map explain <name>` | it, and everything linked to it:  what it contains, calls, extends, and what uses it |
+| `spell map query <words...>` | a question in words, matched against the names in the map;  `--budget <tokens>` caps the answer |
+| `--docs`, on any of the three | asks the docs map:  `spell map explain PrefStore --docs` lists every page and section that names it |
+| `spell map build [code \| docs]` | builds the maps, both by default |
+| `spell map status [--json]` | whether graphify is installed, and how old each map is |
+| `spell map install` | installs graphify with `uv` |
+
+- **The code map** is graphify's, an open-source engine that reads each file's structure, with no model:
+  its classes, functions, calls and imports.
+  - graphify maps each repo on its own:  it skips what git ignores, and the kit ignores its child repos.
+  - Then `spell map` merges them, and links what graphify can't follow:  imports by package name
+    (`spell/util/node/json5`), the names each file takes from them, and classes that extend an imported one
+    (`extends P.Tokenizer`).
+  - About 40 seconds for every repo;  44,000 things and 126,000 links.
+- **The docs map** is read by structure, in TypeScript, in under a second:
+  every epic page (with its part files), guide, saga page, README, `AGENTS.md`, skill and `docs/` page;
+  each one's headings, the pages it links to, and every code name it mentions.
+  It knows what a page names, not what it's about.
+- **A stale map** (older than the newest commit of what it maps) is rebuilt before it's asked.
+  Uncommitted edits don't count:  `spell map build` takes them in.
+- **graphify is optional.**  Without it, the docs map still builds, and every other verb says
+  `graphify isn't installed:  spell map install`.  It needs [uv](https://docs.astral.sh/uv/).
+- **A name two things share** (`Rule`):  the one in a file named for it wins;  else `spell map` lists them, each with its
+  id, and takes an id in the name's place.
+- The maps are in the kit's `graphify-out/`, `code.json` and `docs.json`, and each repo's own `graphify-out/`:
+  git-ignored, everywhere.
 
 ## spell-parser
 
