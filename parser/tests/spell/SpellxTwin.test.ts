@@ -30,7 +30,7 @@ describe("spellx:  a third style of spell", () => {
   beforeAll(registerTestComponentPack)
 
   test.each(["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"])(
-    "%s.spellx compiles as its twin, %s.spell, does",
+    "%s.spellx compiles as its .spell twin does",
     (name) => {
       const spellx = compiled(`${name}.spellx`)
       const spell = compiled(`${name}.spell`)
