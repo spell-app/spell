@@ -32,7 +32,7 @@ describe("<ui-steps> static render", () => {
   })
 
   it("wraps a link step in an <li>", () => {
-    const html = StaticRender.fragment(`<ui-steps><ui-step href="#c" disabled heading="Confirm"></ui-step></ui-steps>`)
+    const html = StaticRender.fragment(`<ui-steps><ui-step link="#c" disabled heading="Confirm"></ui-step></ui-steps>`)
     expect(html).toMatch(/<li data-ui-li=""><a [^>]*class="disabled step"/)
     expect(html).toContain(`aria-disabled="true"`)
     expect(html).not.toContain(`href=`)

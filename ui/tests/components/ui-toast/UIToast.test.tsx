@@ -492,23 +492,23 @@ describe("<ui-toast> closing", () => {
 
   it("approves:  a cancelable ui-approving, then closes (reason approve)", async () => {
     const { host } = await toast(
-      `<ui-toast message="Sure?"><ui-button slot="actions" positive>Yes</ui-button><ui-button slot="actions" class="deny">No</ui-button></ui-toast>`
+      `<ui-toast message="Sure?"><ui-button slot="actions" color="positive">Yes</ui-button><ui-button slot="actions" class="deny">No</ui-button></ui-toast>`
     )
     const approves = record<ToastActionDetail>(host, "ui-approving")
     const closes = record(host, "ui-closing")
-    await userEvent.click(host.querySelector("[positive]")!)
+    await userEvent.click(host.querySelector('[color="positive"]')!)
     expect(approves).toHaveLength(1)
-    expect(approves[0]!.action).toBe(host.querySelector("[positive]"))
+    expect(approves[0]!.action).toBe(host.querySelector('[color="positive"]'))
     expect(closes.map(({ reason }) => reason)).toEqual(["approve"])
   })
 
   it("stays when ui-denying is cancelled", async () => {
     const { host } = await toast(
-      `<ui-toast message="Sure?"><ui-button slot="actions" negative>No</ui-button></ui-toast>`
+      `<ui-toast message="Sure?"><ui-button slot="actions" color="negative">No</ui-button></ui-toast>`
     )
     host.addEventListener("ui-denying", (event) => event.preventDefault())
     const closes = record(host, "ui-closing")
-    await userEvent.click(host.querySelector("[negative]")!)
+    await userEvent.click(host.querySelector('[color="negative"]')!)
     expect(closes).toEqual([])
   })
 

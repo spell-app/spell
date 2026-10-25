@@ -22,7 +22,7 @@ describe("<ui-label> static render", () => {
   })
 
   it("renders a linked label as an <a>, its detail part marked in-label", () => {
-    const html = StaticRender.fragment(`<ui-label href="#mail">Mail<ui-detail>23</ui-detail></ui-label>`)
+    const html = StaticRender.fragment(`<ui-label link="#mail">Mail<ui-detail>23</ui-detail></ui-label>`)
     expect(sorted(html)).toBe(
       sorted(
         `<a data-ui="label" class="ui label" part="label" href="#mail">Mail<span data-ui-slotted="" ` +

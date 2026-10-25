@@ -21,7 +21,7 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-menu/examples/elem
 
 /** Three link items, the second selected. */
 const LINKS =
-  `<ui-item href="#a">A</ui-item>` + `<ui-item href="#b" selected>B</ui-item>` + `<ui-item href="#c">C</ui-item>`
+  `<ui-item link="#a">A</ui-item>` + `<ui-item link="#b" selected>B</ui-item>` + `<ui-item link="#c">C</ui-item>`
 
 /** Render one `<ui-menu>`;  returns it, its root and its item DOM elements. */
 async function menu(attributes = "", items = LINKS) {
@@ -45,9 +45,9 @@ const WIDTH = 800
 
 /** Three link items of very different widths, the second selected. */
 const UNEVEN =
-  `<ui-item href="#a">A</ui-item>` +
-  `<ui-item href="#b" selected>A much longer item</ui-item>` +
-  `<ui-item href="#c">C</ui-item>`
+  `<ui-item link="#a">A</ui-item>` +
+  `<ui-item link="#b" selected>A much longer item</ui-item>` +
+  `<ui-item link="#c">C</ui-item>`
 
 /** Render one `<ui-menu>` in a `WIDTH`-wide box;  returns it, its root and its item DOM elements. */
 async function bar(attributes = "", items = LINKS) {
@@ -84,20 +84,20 @@ describe("<ui-menu> classes", () => {
     ['size="large"', "ui large menu"],
     ['size="medium"', "ui menu"],
     ['color="red"', "ui red menu"],
-    ["secondary pointing", "ui secondary pointing menu"],
-    ['secondary="no" pointing="yes"', "ui pointing menu"],
-    ["tabular", "ui tabular menu"],
-    ["text vertical", "ui vertical text menu"],
+    ['appearance="secondary pointing"', "ui secondary pointing menu"],
+    ['appearance="pointing"', "ui pointing menu"],
+    ['appearance="tabular"', "ui tabular menu"],
+    ['appearance="text" direction="vertical"', "ui vertical text menu"],
     ["pagination", "ui pagination menu"],
     ["icon", "ui icon menu"],
     ["labeled", "ui labeled icon menu"],
-    ["fluid stackable borderless", "ui fluid stackable borderless menu"],
-    ["compact centered wrapping wrapped", "ui compact centered wrapped wrapping menu"],
+    ['fluid stackable appearance="borderless"', "ui fluid stackable borderless menu"],
+    ['padding="compact" centered wrapping wrap', "ui compact centered wrapped wrapping menu"],
     ["inverted", "ui inverted menu"],
-    ["link", "ui link menu"],
-    ['fitted="horizontally"', "ui horizontally fitted menu"],
-    ["attached", "ui attached menu"],
-    ['attached="top"', "ui top attached menu"],
+    ['appearance="link"', "ui link menu"],
+    ['padding="none-x"', "ui horizontally fitted menu"],
+    ['attach="both"', "ui attached menu"],
+    ['attach="top"', "ui top attached menu"],
     ['fixed="bottom"', "ui bottom fixed menu"],
     ['items="3"', "ui three item menu"],
     ['items="equal"', "ui equal width menu"],
@@ -144,7 +144,7 @@ describe("<ui-menu> semantics", () => {
   })
 
   it("accepts `active` as an alias of `selected`", async () => {
-    const { items } = await menu("", `<ui-item href="#x" active>X</ui-item><ui-item href="#y" active="no">Y</ui-item>`)
+    const { items } = await menu("", `<ui-item link="#x" active>X</ui-item><ui-item link="#y" active="no">Y</ui-item>`)
     expect(boxOf(items[0]!).className).toBe("active item")
     expect(boxOf(items[0]!).getAttribute("aria-current")).toBe("page")
     expect(boxOf(items[1]!).className).toBe("item")
@@ -153,7 +153,7 @@ describe("<ui-menu> semantics", () => {
   it("renders a plain item as a <div>, a `link` item as a <button>, a header item as a bold <div>", async () => {
     const { items } = await menu(
       "",
-      `<ui-item>Plain</ui-item><ui-item link selected>Action</ui-item><ui-item type="header">Head</ui-item>`
+      `<ui-item>Plain</ui-item><ui-item appearance="link" selected>Action</ui-item><ui-item kind="header">Head</ui-item>`
     )
     const [plain, action, header] = items.map(boxOf)
     expect(plain!.localName).toBe("div")
@@ -169,15 +169,18 @@ describe("<ui-menu> semantics", () => {
   })
 
   it("makes every item a <button> in a `link` or `pagination` menu", async () => {
-    for (const attributes of ["link", "pagination"]) {
-      const { items } = await menu(attributes, `<ui-item>1</ui-item><ui-item href="#2">2</ui-item>`)
+    for (const attributes of ['appearance="link"', "pagination"]) {
+      const { items } = await menu(attributes, `<ui-item>1</ui-item><ui-item link="#2">2</ui-item>`)
       expect(boxOf(items[0]!).localName).toBe("button")
       expect(boxOf(items[1]!).localName).toBe("a")
     }
   })
 
   it("renders a disabled link without href, aria-disabled", async () => {
-    const { items } = await menu("", `<ui-item href="#x" disabled>X</ui-item><ui-item link disabled>Y</ui-item>`)
+    const { items } = await menu(
+      "",
+      `<ui-item link="#x" disabled>X</ui-item><ui-item appearance="link" disabled>Y</ui-item>`
+    )
     const [link, button] = items.map(boxOf)
     expect(link).toMatchObject({ localName: "a", className: "disabled item", ariaDisabled: "true" })
     expect(link!.hasAttribute("href")).toBe(false)
@@ -185,7 +188,7 @@ describe("<ui-menu> semantics", () => {
   })
 
   it("names an icon-only item with the DOM element's aria-label", async () => {
-    const { items } = await menu("icon", `<ui-item href="#g" icon="gamepad" aria-label="Games"></ui-item>`)
+    const { items } = await menu("icon", `<ui-item link="#g" icon="gamepad" aria-label="Games"></ui-item>`)
     const box = boxOf(items[0]!)
     expect(box.getAttribute("aria-label")).toBe("Games")
     expect(box.querySelector("[part~=icon]")).not.toBeNull()
@@ -193,11 +196,11 @@ describe("<ui-menu> semantics", () => {
 
   it.each([
     ["", "Inbox"],
-    ["vertical text", ""]
+    ['direction="vertical" appearance="text"', ""]
   ])(
     "<ui-menu %s> draws an item's `icon` shorthand 1em high (the glyph is the icon slot's fallback)",
     async (attributes, text) => {
-      const { items } = await menu(attributes, `<ui-item href="#i" icon="inbox" aria-label="Inbox">${text}</ui-item>`)
+      const { items } = await menu(attributes, `<ui-item link="#i" icon="inbox" aria-label="Inbox">${text}</ui-item>`)
       const icon = boxOf(items[0]!).querySelector("[part~=icon]")!
       await expect.poll(() => icon.querySelector("svg path")).not.toBeNull()
       const glyph = icon.querySelector("svg")!.getBoundingClientRect()
@@ -231,7 +234,7 @@ describe("<ui-menu> semantics", () => {
   it("renders a nested <ui-menu> as a sub-menu:  no `ui`, its position, its items owned", async () => {
     const { host } = await menu(
       "",
-      `<ui-item href="#a">A</ui-item><ui-menu position="right"><ui-item href="#b">B</ui-item></ui-menu>`
+      `<ui-item link="#a">A</ui-item><ui-menu position="right"><ui-item link="#b">B</ui-item></ui-menu>`
     )
     const sub = host.querySelector<DOMElement>("ui-menu")!
     const root = sub.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
@@ -248,7 +251,7 @@ describe("<ui-menu> semantics", () => {
   })
 
   it("owns a <ui-header> inside an item (a vertical menu's sub header)", async () => {
-    const { host } = await menu("vertical", `<ui-item><ui-header>Products</ui-header></ui-item>`)
+    const { host } = await menu('direction="vertical"', `<ui-item><ui-header>Products</ui-header></ui-item>`)
     const header = host.querySelector<DOMElement>("ui-header")!
     await expect.poll(() => header.matches(":state(in-menu)")).toBe(true)
     const box = header.shadowRoot!.querySelector<HTMLElement>("[part~=header]")!
@@ -259,7 +262,7 @@ describe("<ui-menu> semantics", () => {
   it("leaves a dropdown's items to the dropdown (a barrier)", async () => {
     const { host } = await menu(
       "",
-      `<ui-item><ui-dropdown text="Lang" aria-label="Lang"><ui-item value="en">English</ui-item></ui-dropdown></ui-item>`
+      `<ui-item><ui-dropdown label="Lang" aria-label="Lang"><ui-item value="en">English</ui-item></ui-dropdown></ui-item>`
     )
     const option = host.querySelector("ui-dropdown ui-item") as DOMElement
     expect(option.matches(":state(in-menu)")).toBe(false)
@@ -280,27 +283,27 @@ describe("<ui-menu> owner tokens reach the items", () => {
   })
 
   it("stacks items in a vertical menu, with a top divider", async () => {
-    const { items } = await menu("vertical")
+    const { items } = await menu('direction="vertical"')
     expect(styleOf(items[0]!).display).toBe("block")
     expect(getComputedStyle(boxOf(items[1]!), "::before").height).toBe("1px")
     expect(getComputedStyle(boxOf(items[0]!), "::before").display).toBe("none")
   })
 
   it("underlines the active item of a secondary pointing menu", async () => {
-    const { items } = await menu("secondary pointing")
+    const { items } = await menu('appearance="secondary pointing"')
     expect(styleOf(items[1]!).borderBottomWidth).toBe("2px")
     expect(styleOf(items[1]!).fontWeight).toBe("700")
     expect(getComputedStyle(boxOf(items[1]!), "::after").display).toBe("none")
   })
 
   it("points at the content from the active item of a pointing menu", async () => {
-    const { items } = await menu("pointing")
+    const { items } = await menu('appearance="pointing"')
     expect(getComputedStyle(boxOf(items[1]!), "::after").display).toBe("block")
     expect(getComputedStyle(boxOf(items[0]!), "::after").display).toBe("none")
   })
 
   it("draws tabs in a tabular menu", async () => {
-    const { items } = await menu("tabular")
+    const { items } = await menu('appearance="tabular"')
     const active = styleOf(items[1]!)
     expect(active.borderTopWidth).toBe("1px")
     expect(active.marginBottom).toBe("-1px")
@@ -312,7 +315,7 @@ describe("<ui-menu> owner tokens reach the items", () => {
     const red = styleOf(items[1]!).color
     const { items: plain } = await menu()
     expect(red).not.toBe(styleOf(plain[1]!).color)
-    const { items: own } = await menu("", `<ui-item href="#x" color="red" selected>X</ui-item>`)
+    const { items: own } = await menu("", `<ui-item link="#x" color="red" selected>X</ui-item>`)
     expect(boxOf(own[0]!).className).toBe("red active ui-red item")
     expect(styleOf(own[0]!).color).toBe(red)
   })
@@ -325,7 +328,7 @@ describe("<ui-menu> owner tokens reach the items", () => {
 
   it("follows a dark page;  resets to light only inside something inverted", async () => {
     const page = await ElementFixture.render<HTMLElement>(
-      `<div class="ui-dark"><ui-menu aria-label="A" secondary>${LINKS}</ui-menu>` +
+      `<div class="ui-dark"><ui-menu aria-label="A" appearance="secondary">${LINKS}</ui-menu>` +
         `<ui-segment inverted><ui-menu aria-label="B">${LINKS}</ui-menu></ui-segment></div>`
     )
     const [plain, nested] = [...page.querySelectorAll<DOMElement>("ui-menu")].map((host) =>
@@ -345,9 +348,9 @@ describe("<ui-menu> owner tokens reach the items", () => {
   it("follows an owner attribute change:  `link` turns plain items into buttons and back", async () => {
     const { host, items } = await menu("", `<ui-item>X</ui-item>`)
     expect(boxOf(items[0]!).localName).toBe("div")
-    host.setAttribute("link", "")
+    host.setAttribute("appearance", "link")
     await expect.poll(() => boxOf(items[0]!).localName).toBe("button")
-    host.removeAttribute("link")
+    host.removeAttribute("appearance")
     await expect.poll(() => boxOf(items[0]!).localName).toBe("div")
   })
 })
@@ -392,7 +395,7 @@ describe("<ui-menu> tokens from outside", () => {
   })
 
   it("variations:  `secondary` swaps the padding, winning over the base token;  corners derive from the radius", async () => {
-    const secondary = await menu(`secondary style="--ui-menu-item-padding: 20px"`)
+    const secondary = await menu('appearance="secondary" style="--ui-menu-item-padding: 20px"')
     expect(padding(secondary.items[1]!)).not.toBe("20px")
     const { root, items } = await menu(`style="--ui-menu-radius: 10px"`)
     expect(getComputedStyle(root).borderTopLeftRadius).toBe("10px")
@@ -423,7 +426,7 @@ describe("<ui-menu> tokens from outside", () => {
     const { items } = await menu(
       `vertical style="--ui-menu-header-padding: 0px 12px 6px; --ui-menu-header-font-family: monospace; ` +
         `--ui-menu-header-weight: 500; --ui-menu-header-letter-spacing: 1px"`,
-      `<ui-item type="header">Group</ui-item>${LINKS}`
+      `<ui-item kind="header">Group</ui-item>${LINKS}`
     )
     const header = styleOf(items[0]!)
     expect(header).toMatchObject({
@@ -434,7 +437,7 @@ describe("<ui-menu> tokens from outside", () => {
       fontWeight: "500",
       letterSpacing: "1px"
     })
-    const plain = await menu("vertical", `<ui-item type="header">Group</ui-item>${LINKS}`)
+    const plain = await menu('direction="vertical"', `<ui-item kind="header">Group</ui-item>${LINKS}`)
     expect(styleOf(plain.items[0]!).paddingTop).toBe(styleOf(plain.items[1]!).paddingTop)
     expect(Number(styleOf(plain.items[0]!).fontWeight)).toBeGreaterThanOrEqual(600)
   })
@@ -448,9 +451,9 @@ describe("<ui-menu> tokens from outside", () => {
 describe("<ui-menu> variation tokens", () => {
   /** Three link items with icons, the second selected. */
   const ICONS =
-    `<ui-item href="#a" icon="home">A</ui-item>` +
-    `<ui-item href="#b" icon="home" selected>B</ui-item>` +
-    `<ui-item href="#c" icon="home">C</ui-item>`
+    `<ui-item link="#a" icon="home">A</ui-item>` +
+    `<ui-item link="#b" icon="home" selected>B</ui-item>` +
+    `<ui-item link="#c" icon="home">C</ui-item>`
 
   /** Three button items (no `href`, in a `link` menu), the second selected. */
   const BUTTONS = `<ui-item value="a">A</ui-item><ui-item value="b" selected>B</ui-item><ui-item value="c">C</ui-item>`
@@ -462,25 +465,25 @@ describe("<ui-menu> variation tokens", () => {
 
   it("vertical:  its own tokens put the icon first and reach the item display and active corners", async () => {
     const { items } = await menu(
-      `vertical style="--ui-menu-vertical-item-display: flex; --ui-menu-vertical-icon-float: none; ` +
+      `direction="vertical" style="--ui-menu-vertical-item-display: flex; --ui-menu-vertical-icon-float: none; ` +
         `--ui-menu-vertical-icon-margin: 0 12px 0 0; --ui-menu-vertical-active-radius: 9px"`,
       ICONS
     )
     expect(styleOf(items[1]!).display).toBe("flex")
     expect([iconOf(items[1]!).float, iconOf(items[1]!).marginRight]).toEqual(["none", "12px"])
     expect(styleOf(items[1]!).borderTopRightRadius).toBe("9px")
-    const plain = await menu("vertical", ICONS)
+    const plain = await menu('direction="vertical"', ICONS)
     expect([iconOf(plain.items[1]!).float, styleOf(plain.items[1]!).display]).toEqual(["right", "block"])
   })
 
   it("vertical:  a generic token (a theme's `:root` base look) never reaches what it swaps", async () => {
-    const { items } = await menu(`vertical style="--ui-menu-icon-float: none"`, ICONS)
+    const { items } = await menu('direction="vertical" style="--ui-menu-icon-float: none"', ICONS)
     expect(iconOf(items[1]!).float).toBe("right")
   })
 
   it("secondary:  its own tokens reach padding, margin, corners, colour and fills", async () => {
     const { items } = await menu(
-      `secondary vertical style="--ui-menu-secondary-item-padding: 0px 12px; ` +
+      `appearance="secondary" direction="vertical" style="--ui-menu-secondary-item-padding: 0px 12px; ` +
         `--ui-menu-secondary-vertical-item-margin: 0px 0px 4px; --ui-menu-secondary-item-radius: 12px; ` +
         `--ui-menu-secondary-item-color: rgb(1, 2, 3); --ui-menu-secondary-active-background: rgb(4, 5, 6); ` +
         `--ui-menu-secondary-active-color: rgb(7, 8, 9)"`
@@ -493,21 +496,23 @@ describe("<ui-menu> variation tokens", () => {
     expect([active!.backgroundColor, active!.color]).toEqual(["rgb(4, 5, 6)", "rgb(7, 8, 9)"])
     // a lone selected item takes the same corners (it was the menu's `last` corners)
     const lone = await menu(
-      `secondary style="--ui-menu-secondary-item-radius: 12px"`,
-      `<ui-item href="#a" selected>A</ui-item>`
+      'appearance="secondary" style="--ui-menu-secondary-item-radius: 12px"',
+      `<ui-item link="#a" selected>A</ui-item>`
     )
     expect(styleOf(lone.items[0]!).borderTopRightRadius).toBe("12px")
   })
 
   it("secondary:  a theme's generic item padding doesn't leak in;  unset, the active text is the secondary hue's", async () => {
-    const { items } = await menu(`secondary style="--ui-menu-item-padding: 20px; --ui-menu-active-color: rgb(7, 8, 9)"`)
+    const { items } = await menu(
+      'appearance="secondary" style="--ui-menu-item-padding: 20px; --ui-menu-active-color: rgb(7, 8, 9)"'
+    )
     expect(styleOf(items[1]!).paddingTop).not.toBe("20px")
     expect(styleOf(items[1]!).color).toBe(colorOf("var(--ui-secondary-text)"))
   })
 
   it("text:  its own tokens reach padding, colour and margin;  `--ui-menu-gap` spaces the items, none trailing", async () => {
     const { root, items } = await bar(
-      `text style="--ui-menu-text-item-padding: 0px; --ui-menu-text-item-color: rgb(1, 2, 3); ` +
+      `appearance="text" style="--ui-menu-text-item-padding: 0px; --ui-menu-text-item-color: rgb(1, 2, 3); ` +
         `--ui-menu-text-margin: 0px; --ui-menu-gap: 26px"`
     )
     const style = getComputedStyle(root)
@@ -520,26 +525,28 @@ describe("<ui-menu> variation tokens", () => {
   })
 
   it("secondary:  hangs out by its items' side margin, unless `--ui-menu-secondary-inline-margin` (design-system I45)", async () => {
-    const hung = await bar("vertical secondary")
+    const hung = await bar('direction="vertical" appearance="secondary"')
     expect(parseFloat(getComputedStyle(hung.root).marginLeft)).toBeLessThan(0)
-    const flush = await bar(`vertical secondary style="--ui-menu-secondary-inline-margin: 0px"`)
+    const flush = await bar(
+      'direction="vertical" appearance="secondary" style="--ui-menu-secondary-inline-margin: 0px"'
+    )
     const style = getComputedStyle(flush.root)
     expect([style.marginLeft, style.marginRight]).toEqual(["0px", "0px"])
   })
 
   it("text:  the current item is normal weight, unless `--ui-menu-text-active-weight` (design-system I44)", async () => {
-    const plain = await menu(`text style="--ui-menu-item-weight: 500"`)
+    const plain = await menu('appearance="text" style="--ui-menu-item-weight: 500"')
     expect(styleOf(plain.items[1]!).fontWeight).toBe("400")
-    const set = await menu(`text style="--ui-menu-item-weight: 500; --ui-menu-text-active-weight: 500"`)
+    const set = await menu('appearance="text" style="--ui-menu-item-weight: 500; --ui-menu-text-active-weight: 500"')
     expect(styleOf(set.items[1]!).fontWeight).toBe("500")
   })
 
   it("a `link` item (a `<button>`) fills a vertical menu's width (design-system I33)", async () => {
-    const { root, items } = await bar("vertical fluid link", BUTTONS)
+    const { root, items } = await bar('direction="vertical" fluid appearance="link"', BUTTONS)
     const box = boxOf(items[0]!)
     expect(box.localName).toBe("button")
     expect(box.getBoundingClientRect().width).toBeCloseTo(root.clientWidth, 0)
-    const secondary = await bar("vertical secondary fluid link", BUTTONS)
+    const secondary = await bar('direction="vertical" appearance="secondary link" fluid', BUTTONS)
     expect(boxOf(secondary.items[2]!).getBoundingClientRect().width).toBeCloseTo(secondary.root.clientWidth, 0)
   })
 })
@@ -551,9 +558,9 @@ describe("<ui-menu> variation tokens", () => {
 describe("<ui-menu interactive> (menubar)", () => {
   /** A menubar of four buttons, `Edit` selected, `Help` disabled. */
   const BAR =
-    `<ui-item link value="file">File</ui-item><ui-item link value="edit" selected>Edit</ui-item>` +
-    `<ui-item link value="view">View</ui-item><ui-item type="header">Group</ui-item>` +
-    `<ui-item link value="help" disabled>Help</ui-item>`
+    `<ui-item appearance="link" value="file">File</ui-item><ui-item appearance="link" value="edit" selected>Edit</ui-item>` +
+    `<ui-item appearance="link" value="view">View</ui-item><ui-item kind="header">Group</ui-item>` +
+    `<ui-item appearance="link" value="help" disabled>Help</ui-item>`
 
   it("renders role=menubar with menuitems;  item DOM elements are role=none", async () => {
     const { root, items } = await menu("interactive", BAR)
@@ -562,7 +569,7 @@ describe("<ui-menu interactive> (menubar)", () => {
     expect(items[0]!.internals.role).toBe("none")
     expect(boxOf(items[3]!).hasAttribute("role")).toBe(false)
     expect(boxOf(items[4]!).getAttribute("aria-disabled")).toBe("true")
-    const { root: vertical } = await menu("interactive vertical", BAR)
+    const { root: vertical } = await menu('interactive direction="vertical"', BAR)
     expect(vertical.getAttribute("aria-orientation")).toBe("vertical")
   })
 
@@ -601,7 +608,7 @@ describe("<ui-menu interactive> (menubar)", () => {
   })
 
   it("moves with ArrowDown / ArrowUp when vertical", async () => {
-    const { items } = await menu("interactive vertical", BAR)
+    const { items } = await menu('interactive direction="vertical"', BAR)
     await expect.poll(() => boxOf(items[1]!).getAttribute("tabindex")).toBe("0")
     boxOf(items[1]!).focus()
     await userEvent.keyboard("{ArrowDown}")
@@ -638,7 +645,7 @@ describe("<ui-menu> ui-select", () => {
   it("fires on a link or button item, with its value (else its text) and the item", async () => {
     const { host, items } = await menu(
       "",
-      `<ui-item href="#a">Alpha</ui-item><ui-item link value="b">Beta</ui-item><ui-item>Plain</ui-item>`
+      `<ui-item link="#a">Alpha</ui-item><ui-item appearance="link" value="b">Beta</ui-item><ui-item>Plain</ui-item>`
     )
     const details = selections(host)
     boxOf(items[0]!).addEventListener("click", (event) => event.preventDefault())
@@ -655,8 +662,8 @@ describe("<ui-menu> ui-select", () => {
   it("fires on Enter / Space on a menubar item, once from a sub-menu, never from a disabled item", async () => {
     const { host, items } = await menu(
       "interactive",
-      `<ui-item link value="a">A</ui-item><ui-item link value="x" disabled>X</ui-item>` +
-        `<ui-menu position="right"><ui-item link value="s">S</ui-item></ui-menu>`
+      `<ui-item appearance="link" value="a">A</ui-item><ui-item appearance="link" value="x" disabled>X</ui-item>` +
+        `<ui-menu position="right"><ui-item appearance="link" value="s">S</ui-item></ui-menu>`
     )
     const details = selections(host)
     await expect.poll(() => boxOf(items[0]!).getAttribute("tabindex")).toBe("0")
@@ -754,7 +761,10 @@ describe("<ui-menu> appearance, alignment, equal", () => {
     await userEvent.click(boxOf(items[0]!))
     await ElementFixture.settle()
     expect(chosen()).toEqual([false, false, true])
-    const plain = await menu("link", `<ui-item value="a">A</ui-item><ui-item value="b" selected>B</ui-item>`)
+    const plain = await menu(
+      'appearance="link"',
+      `<ui-item value="a">A</ui-item><ui-item value="b" selected>B</ui-item>`
+    )
     await userEvent.click(boxOf(plain.items[0]!))
     await ElementFixture.settle()
     expect(plain.items.map((item) => item.matches(":state(selected)"))).toEqual([false, true])
@@ -790,7 +800,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
   })
 
   it("no thumb on a menu that isn't segmented", async () => {
-    const { root } = await bar("secondary")
+    const { root } = await bar('appearance="secondary"')
     await ElementFixture.settle()
     expect(root.classList.contains("thumbed")).toBe(false)
     expect(getComputedStyle(root, "::before").content).not.toBe('""')
@@ -802,7 +812,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
       ["center", "center"],
       ["right", "right"]
     ] as const) {
-      const { root, items } = await bar(`alignment="${alignment}"`)
+      const { root, items } = await bar(`align="${alignment}"`)
       const bounds = root.getBoundingClientRect()
       expect(bounds.width).toBe(WIDTH)
       const first = boxOf(items[0]!).getBoundingClientRect()
@@ -816,9 +826,9 @@ describe("<ui-menu> appearance, alignment, equal", () => {
   })
 
   it('alignment="fluid" fills the bar;  a segmented group moves as a whole', async () => {
-    const fluid = await bar('alignment="fluid"')
+    const fluid = await bar('align="fluid"')
     expect(span(fluid.items)).toBeCloseTo(fluid.root.clientWidth, -0.5)
-    const centered = await bar('appearance="segmented" alignment="center"')
+    const centered = await bar('appearance="segmented" align="center"')
     const bounds = centered.root.getBoundingClientRect()
     const parent = centered.root.getRootNode() as ShadowRoot
     const outer = parent.host.parentElement!.getBoundingClientRect()
@@ -836,7 +846,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
   })
 
   it('equal + alignment="fluid":  an equal share of the bar each', async () => {
-    const { root, items } = await bar('equal alignment="fluid"', UNEVEN)
+    const { root, items } = await bar('equal align="fluid"', UNEVEN)
     const share = root.clientWidth / items.length
     for (const item of items) expect(boxOf(item).getBoundingClientRect().width).toBeCloseTo(share, -0.5)
   })

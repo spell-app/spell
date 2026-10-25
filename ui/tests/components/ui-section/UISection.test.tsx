@@ -453,7 +453,7 @@ describe("<ui-section> look", () => {
   })
 
   it("`text-align` aligns the title", async () => {
-    const { title } = await section(`<ui-section label="H" text-align="center">Body</ui-section>`)
+    const { title } = await section(`<ui-section label="H" align="center">Body</ui-section>`)
     const header = title.querySelector<HTMLElement>("[part~=header]")!
     const [bar, text] = [title.getBoundingClientRect(), header.getBoundingClientRect()]
     expect(Math.abs(bar.left + bar.width / 2 - (text.left + text.width / 2))).toBeLessThan(2)
@@ -691,9 +691,9 @@ describe("<ui-sections>", () => {
   it("overlaps stacked boxes' edges:  no doubled border, and the first box stays inside the group", async () => {
     const { host, byId } = await group(
       `<ui-sections collapsing>` +
-        `<ui-section id="a" label="A" styled open="false">x</ui-section>` +
-        `<ui-section id="b" label="B" styled open="false">x</ui-section>` +
-        `<ui-section id="c" label="C" styled>open</ui-section>` +
+        `<ui-section id="a" label="A" appearance="styled" open="false">x</ui-section>` +
+        `<ui-section id="b" label="B" appearance="styled" open="false">x</ui-section>` +
+        `<ui-section id="c" label="C" appearance="styled">open</ui-section>` +
         `</ui-sections>`
     )
     await expect.poll(() => folded(parts(byId("a")).content)).toBe(true)
@@ -819,7 +819,7 @@ describe("<ui-section source>", () => {
   })
 
   it("`select` takes only the first match", async () => {
-    const { host } = await sourced(`<ui-section source="${DIR}/body.html" select="#item"></ui-section>`)
+    const { host } = await sourced(`<ui-section source="${DIR}/body.html" selector="#item"></ui-section>`)
     await host.load()
     expect([...host.children].map((child) => child.id)).toEqual(["item"])
   })
@@ -1115,7 +1115,7 @@ describe("<ui-section parent>", () => {
     // folding works as for a nested one
     parts(nested).toggle.click()
     await ElementFixture.tick()
-    expect(nested.collapsed).toBe(true)
+    expect(nested.open).toBe(false)
   })
 
   it("joins a <ui-sections> group;  warns ONCE for an id no element has", async () => {

@@ -35,8 +35,8 @@ describe("<ui-dropdown> static render", () => {
 
   it("renders headers and dividers in place", () => {
     const html = StaticRender.fragment(
-      `<ui-dropdown text="File"><ui-item type="header">Recent</ui-item><ui-item>New</ui-item>` +
-        `<ui-item type="divider"></ui-item><ui-item>Quit</ui-item></ui-dropdown>`
+      `<ui-dropdown label="File"><ui-item kind="header">Recent</ui-item><ui-item>New</ui-item>` +
+        `<ui-item kind="divider"></ui-item><ui-item>Quit</ui-item></ui-dropdown>`
     )
     expect(html).toMatch(
       /<div class="header" role="presentation">Recent<\/div><div [^>]*role="option"[^>]*>.*New.*<\/div><hr class="divider"/
@@ -60,7 +60,7 @@ describe("<ui-dropdown> static render", () => {
   })
 
   it("renders an open dropdown's menu as a plain (non-popover) menu under its active root", () => {
-    const html = StaticRender.fragment(`<ui-dropdown open text="Menu"><ui-item>One</ui-item></ui-dropdown>`)
+    const html = StaticRender.fragment(`<ui-dropdown open label="Menu"><ui-item>One</ui-item></ui-dropdown>`)
     expect(html).toMatch(/^<div [^>]*class="ui active dropdown"/)
     expect(html.match(/<div [^>]*role="listbox"[^>]*>/)?.[0]).not.toContain("popover")
   })
@@ -68,7 +68,7 @@ describe("<ui-dropdown> static render", () => {
   it("projects a rich item's markup into its row, text beside its elements too", () => {
     // the unowned item renders a `<span>` on a server, the stand-in DOM element the row's slot receives (seo plan, I20)
     const html = StaticRender.fragment(
-      `<ui-dropdown text="Pick"><ui-item value="a"><b>Bold</b> one</ui-item></ui-dropdown>`
+      `<ui-dropdown label="Pick"><ui-item value="a"><b>Bold</b> one</ui-item></ui-dropdown>`
     )
     expect(html).toMatch(
       /<div [^>]*role="option"[^>]*><span [^>]*data-ui="item"[^>]*><b [^>]*>Bold<\/b> one<\/span><\/div>/

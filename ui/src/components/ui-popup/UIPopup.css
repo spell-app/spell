@@ -208,7 +208,7 @@
 
   /* Coupling:  a grid right inside a popup sits flush with its padding. */
   .ui.popup > .ui.grid:not(.padded),
-  .ui.popup > ::slotted(ui-grid:not([padded])) {
+  .ui.popup > ::slotted(ui-grid:not([padding])) {
     width: calc(100% + 2em);
     margin: -0.7em -1em;
   }

@@ -21,7 +21,7 @@ const AVATAR = `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22
 
 /** An event's content:  a summary with an author and an inline date. */
 const CONTENT =
-  `<ui-content><ui-summary><ui-author href="#elliot">Elliot</ui-author> added you ` +
+  `<ui-content><ui-summary><ui-author link="#elliot">Elliot</ui-author> added you ` +
   `<ui-date>1 hour ago</ui-date></ui-summary><ui-meta><a href="#likes">4 Likes</a></ui-meta></ui-content>`
 
 /** Three plain events. */
@@ -80,7 +80,7 @@ describe("<ui-feed> classes and markup", () => {
   it.each([
     ["", "event"],
     ['color="red"', "red ui-red event"],
-    ["basic disabled", "disabled basic event"],
+    ['appearance="basic" disabled', "disabled basic event"],
     ['appearance="basic" disabled', "disabled basic event"]
   ])("<ui-event %s>", async (attributes, classes) => {
     const { events } = await feed("", `<ui-event ${attributes}>${CONTENT}</ui-event>`)
@@ -268,7 +268,7 @@ describe("<ui-feed> variations", () => {
     await ElementFixture.tick()
     const blue = style(labelOf(events[0]!)!, "::before").backgroundColor
     expect(blue).not.toBe(grey)
-    host.setAttribute("basic", "")
+    host.setAttribute("appearance", "basic")
     await ElementFixture.tick()
     expect(style(labelOf(events[0]!)!, "::before").backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(style(labelOf(events[0]!)!, "::before").color).toBe(blue)

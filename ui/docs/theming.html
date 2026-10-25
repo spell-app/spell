@@ -995,7 +995,7 @@
                     (`--_ui-button-radius: var(--ui-button-radius, var(--ui-radius))`), so nothing inside blocks them.
                   - A variation that SWAPS a value (`circular`) wins over the token; one derived from it (`compact` padding)
                     follows it. Restyle a swapping variation with plain properties:
-                    `ui-button[circular]::part(button) { border-radius: 0.5em }`.
+                    `ui-button[appearance~="circular"]::part(button) { border-radius: 0.5em }`.
                   - Never set the `--_ui-*` names: they are the components' private plumbing.
                 </script>
               </ui-markdown>

@@ -29,7 +29,7 @@ function form(html: string) {
 describe("ButtonFallback", () => {
   it("renders the markup contract", async () => {
     const host = Fixture.render<StubHost>(
-      `<x-fb-button size="small" primary basic aria-label="Save it">Save</x-fb-button>`
+      `<x-fb-button size="small" color="primary" appearance="basic" aria-label="Save it">Save</x-fb-button>`
     )
     const button = FallbackStub.shadow(host).querySelector("button")!
     expect(button.className).toBe("ui small primary basic button")
@@ -41,8 +41,8 @@ describe("ButtonFallback", () => {
     await expectAccessible(host)
   })
 
-  it("uses `content` only as the slot's fallback", () => {
-    const host = Fixture.render<StubHost>(`<x-fb-button content="Shorthand"></x-fb-button>`)
+  it("uses `label` only as the slot's fallback", () => {
+    const host = Fixture.render<StubHost>(`<x-fb-button label="Shorthand"></x-fb-button>`)
     expect(FallbackStub.shadow(host).querySelector("slot")!.textContent).toBe("Shorthand")
   })
 
@@ -55,8 +55,8 @@ describe("ButtonFallback", () => {
     expect(button.className).toContain("disabled")
   })
 
-  it("renders a link with `href`", async () => {
-    const host = Fixture.render<StubHost>(`<x-fb-button href="/x" target="_blank">Go</x-fb-button>`)
+  it("renders a link with `link`", async () => {
+    const host = Fixture.render<StubHost>(`<x-fb-button link="/x" target="_blank">Go</x-fb-button>`)
     const link = FallbackStub.shadow(host).querySelector("a")!
     expect(link.getAttribute("href")).toBe("/x")
     expect(link.rel).toBe("noopener")

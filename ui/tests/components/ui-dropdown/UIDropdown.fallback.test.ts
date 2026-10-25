@@ -49,9 +49,9 @@ describe("DropdownFallback", () => {
 
   it("builds options from <ui-item>s, with groups and dividers", () => {
     const { select } = dropdown(`<x-fb-dropdown placeholder="Pick" aria-label="x">
-      <ui-item type="header" text="Fruit"></ui-item>
-      <ui-item value="a" text="Apple"></ui-item>
-      <ui-item type="divider"></ui-item>
+      <ui-item kind="header" label="Fruit"></ui-item>
+      <ui-item value="a" label="Apple"></ui-item>
+      <ui-item kind="divider"></ui-item>
       <ui-item value="b" disabled>Banana</ui-item>
       <ui-item>Plain</ui-item>
     </x-fb-dropdown>`)

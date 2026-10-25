@@ -18,7 +18,7 @@ describe("<ui-popup> static render", () => {
 
   it("renders a tooltip as a hidden popover that describes its target", () => {
     const html = StaticRender.fragment(
-      `<p>Press <ui-button>Add</ui-button><ui-popup heading="Add" content="Adds a row"></ui-popup> now.</p>`
+      `<p>Press <ui-button>Add</ui-button><ui-popup heading="Add" label="Adds a row"></ui-popup> now.</p>`
     )
     const paragraph = fragment(html).firstElementChild!
     // phrasing content:  the paragraph stays one paragraph when a browser parses the page

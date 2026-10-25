@@ -883,7 +883,7 @@ function landedState(id: string): LandedState | undefined {
   return {
     top: Math.round(box.getBoundingClientRect().top),
     line: Math.round(line),
-    isFolded: [target, ...around].some((section) => section.hasAttribute("collapsed")),
+    isFolded: [target, ...around].some((section) => section.getAttribute("open") === "false"),
     isShown,
     isAtBottom: scrollY >= document.documentElement.scrollHeight - innerHeight - 2
   }

@@ -138,7 +138,7 @@ describe("<ui-calendar> markup", () => {
 
   it("emits the class grammar for its variations", async () => {
     const { root } = await calendar(
-      `<ui-calendar size="small" color="red" inverted compact fluid disabled type="date" locale="en-US"></ui-calendar>`
+      `<ui-calendar size="small" color="red" inverted padding="compact" fluid disabled type="date" locale="en-US"></ui-calendar>`
     )
     expect(root.className).toBe("ui small red compact disabled fluid inverted calendar")
   })
@@ -707,7 +707,7 @@ describe("<ui-calendar> tokens from outside", () => {
     await ElementFixture.tick()
     expect(cellPadding(host)).toBe("20px")
     const { host: compact, trigger: compactTrigger } = await calendar(
-      DATE.replace("<ui-calendar", "<ui-calendar compact")
+      DATE.replace("<ui-calendar", '<ui-calendar padding="compact"')
     )
     compactTrigger.click()
     await ElementFixture.tick()

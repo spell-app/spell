@@ -20,7 +20,7 @@ describe("<ui-comment> static render", () => {
 
   it("renders comments, a thread of replies and a reply box", () => {
     const html = StaticRender.fragment(
-      `<ui-comments threaded><ui-comment><ui-content><ui-author href="#matt">Matt</ui-author>` +
+      `<ui-comments threaded><ui-comment><ui-content><ui-author link="#matt">Matt</ui-author>` +
         `<ui-description>Nice</ui-description></ui-content>` +
         `<ui-comments><ui-comment collapsed><ui-content><ui-author>Jenny</ui-author></ui-content></ui-comment>` +
         `</ui-comments><form slot="reply"><textarea></textarea></form></ui-comment></ui-comments>`

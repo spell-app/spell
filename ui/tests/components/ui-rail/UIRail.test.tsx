@@ -39,7 +39,7 @@ describe("<ui-rail> classes", () => {
     ["", "ui rail"],
     ['position="left"', "ui left rail"],
     ['position="right" internal', "ui right internal rail"],
-    ['position="left" dividing attached', "ui left attached dividing rail"],
+    ['position="left" dividing attach="both"', "ui left attached dividing rail"],
     ['position="right" close', "ui right close rail"],
     ['position="left" close="very"', "ui left very close rail"],
     ['position="right" size="large"', "ui large right rail"],
@@ -79,7 +79,7 @@ describe("<ui-rail> placement", () => {
     const veryClose = await railIn(`position="left" close="very"`)
     expect(veryClose.segment.left + BORDER - veryClose.rail.right).toBeCloseTo(8, 0)
     expect(veryClose.rail.width).toBeCloseTo(308, 0)
-    const attached = await railIn(`position="right" attached`)
+    const attached = await railIn('position="right" attach="both"')
     expect(attached.rail.left).toBeCloseTo(attached.segment.right - BORDER, 0)
   })
 

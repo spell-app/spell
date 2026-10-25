@@ -42,8 +42,8 @@ function focused(): Element | undefined {
 const MENU = `
   <div>
     <ui-menu>
-      <ui-item href="#a">A</ui-item>
-      <ui-item href="#b">B</ui-item>
+      <ui-item link="#a">A</ui-item>
+      <ui-item link="#b">B</ui-item>
     </ui-menu>
     <button>After</button>
   </div>`
@@ -54,7 +54,7 @@ const MENU = `
 
 describe("disabled, the base class's way (`elementSetup.disabled` = unusable)", () => {
   test("every element takes it:  :state(disabled), aria-disabled, its content inert, clicks swallowed", async () => {
-    const menu = await render(`<ui-menu disabled><ui-item href="#a">A</ui-item></ui-menu>`)
+    const menu = await render(`<ui-menu disabled><ui-item link="#a">A</ui-item></ui-menu>`)
     expect(menu.disabled).toBe(true)
     expect(menu.matches(":state(disabled)")).toBe(true)
     expect(menu.matches(":state(dimmed)")).toBe(true)
@@ -68,7 +68,7 @@ describe("disabled, the base class's way (`elementSetup.disabled` = unusable)", 
   })
 
   test("the content is dimmed, and comes back when re-enabled", async () => {
-    const menu = await render(`<ui-menu disabled><ui-item href="#a">A</ui-item></ui-menu>`)
+    const menu = await render(`<ui-menu disabled><ui-item link="#a">A</ui-item></ui-menu>`)
     expect(getComputedStyle(boxesOf(menu)[0]!).opacity).toBe("0.45")
     menu.disabled = false
     await ElementFixture.settle(menu)
@@ -80,7 +80,7 @@ describe("disabled, the base class's way (`elementSetup.disabled` = unusable)", 
   })
 
   test("everything inside is inert:  a slotted link can't take focus", async () => {
-    const menu = await render(`<ui-menu disabled><ui-item href="#a">A</ui-item></ui-menu>`)
+    const menu = await render(`<ui-menu disabled><ui-item link="#a">A</ui-item></ui-menu>`)
     const item = menu.querySelector("ui-item")!
     item.shadowRoot!.querySelector<HTMLElement>("a")!.focus()
     expect(focused()).toBeUndefined()

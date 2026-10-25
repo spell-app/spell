@@ -336,7 +336,7 @@ export class UIPropertyEditor extends UIForm {
         <slot />
         <Show when={this.apply === ON_SAVE}>
           <div class={FOOTER} part={this.partForName(OWN.footer)}>
-            <Dynamic component={BUTTON_TAG} primary="" onClick={() => this.save()}>
+            <Dynamic component={BUTTON_TAG} color="primary" onClick={() => this.save()}>
               {this.translationForKey(OWN.save)}
             </Dynamic>
             <Dynamic component={BUTTON_TAG} onClick={() => this.cancel()}>

@@ -108,18 +108,22 @@ afterEach(() => {
 describe("<ui-tabs> classes", () => {
   it.each([
     ["", "ui tabs", "ui menu"],
-    ["tabular attached", "ui top attached tabular tabs", "ui top attached tabular menu"],
-    ['tabular attached="bottom"', "ui bottom attached tabular tabs", "ui bottom attached tabular menu"],
-    ["pointing secondary", "ui pointing secondary tabs", "ui pointing secondary menu"],
-    ['size="small" color="red" text', "ui small red text tabs", "ui small red text menu"],
-    ["vertical tabular fluid", "ui vertical fluid tabular tabs", "ui vertical fluid tabular menu"],
-    ["vertical tabular attached", "ui vertical tabular tabs", "ui vertical tabular menu"],
-    ["inverted basic", "ui inverted basic tabs", "ui inverted menu"],
-    ["compact basic", "ui compact basic tabs", "ui compact menu"],
-    ['appearance="segmented basic"', "ui segmented basic tabs", "ui segmented menu"],
-    ['appearance="tabular" attached', "ui top attached tabular tabs", "ui top attached tabular menu"],
+    ['appearance="tabular" attach="top"', "ui top attached tabular tabs", "ui top attached tabular menu"],
+    ['appearance="tabular" attach="bottom"', "ui bottom attached tabular tabs", "ui bottom attached tabular menu"],
+    ['appearance="pointing secondary"', "ui pointing secondary tabs", "ui pointing secondary menu"],
+    ['size="small" color="red" appearance="text"', "ui small red text tabs", "ui small red text menu"],
     [
-      'appearance="segmented" alignment="fluid" equal',
+      'direction="vertical" appearance="tabular" fluid',
+      "ui vertical fluid tabular tabs",
+      "ui vertical fluid tabular menu"
+    ],
+    ['direction="vertical" appearance="tabular" attach="top"', "ui vertical tabular tabs", "ui vertical tabular menu"],
+    ['inverted appearance="basic"', "ui inverted basic tabs", "ui inverted menu"],
+    ['padding="compact" appearance="basic"', "ui compact basic tabs", "ui compact menu"],
+    ['appearance="segmented basic"', "ui segmented basic tabs", "ui segmented menu"],
+    ['appearance="tabular" attach="top"', "ui top attached tabular tabs", "ui top attached tabular menu"],
+    [
+      'appearance="segmented" align="fluid" equal',
       "ui equal fluid aligned segmented tabs",
       "ui equal fluid aligned segmented menu"
     ],
@@ -129,7 +133,7 @@ describe("<ui-tabs> classes", () => {
       "ui equal fluid aligned segmented basic tabs",
       "ui equal fluid aligned segmented menu"
     ],
-    ['vertical alignment="center"', "ui vertical tabs", "ui vertical menu"]
+    ['direction="vertical" align="center"', "ui vertical tabs", "ui vertical menu"]
   ])("<ui-tabs %s>", async (attributes, rootClass, menuClasses) => {
     const { root, menu } = await tabs(attributes)
     expect(root.className).toBe(rootClass)
@@ -138,9 +142,9 @@ describe("<ui-tabs> classes", () => {
 
   it.each([
     ["", "ui active tab segment"],
-    ["tabular attached", "ui bottom attached active tab segment"],
-    ['attached="bottom"', "ui top attached active tab segment"],
-    ["basic inverted", "ui inverted active basic tab segment"]
+    ['appearance="tabular" attach="top"', "ui bottom attached active tab segment"],
+    ['attach="bottom"', "ui top attached active tab segment"],
+    ['appearance="basic" inverted', "ui inverted active basic tab segment"]
   ])("panes of <ui-tabs %s>", async (attributes, classes) => {
     const { panes } = await tabs(attributes)
     expect(boxOf(panes[0]!).className).toBe(classes)
@@ -168,7 +172,7 @@ describe("<ui-tabs> semantics", () => {
   })
 
   it("marks vertical tabs aria-orientation=vertical", async () => {
-    const { menu, host } = await tabs("vertical tabular")
+    const { menu, host } = await tabs('direction="vertical" appearance="tabular"')
     expect(menu.getAttribute("aria-orientation")).toBe("vertical")
     expect(host.matches(":state(vertical)")).toBe(true)
   })
@@ -298,7 +302,7 @@ describe("<ui-tabs> keyboard", () => {
   })
 
   it("moves with ArrowDown / ArrowUp when vertical", async () => {
-    const { host, buttons, panes } = await tabs("vertical tabular")
+    const { host, buttons, panes } = await tabs('direction="vertical" appearance="tabular"')
     await expect.poll(() => buttons[0]!.getAttribute("tabindex")).toBe("0")
     buttons[0]!.focus()
     await userEvent.keyboard("{ArrowDown}")
@@ -470,28 +474,28 @@ describe("<ui-tabs> look", () => {
   })
 
   it("joins a tabular menu and its panes, and lays vertical tabs out beside the pane", async () => {
-    const { menu, panes } = await tabs("tabular attached")
+    const { menu, panes } = await tabs('appearance="tabular" attach="top"')
     expect(getComputedStyle(boxOf(panes[0]!)).marginTop).toBe("0px")
     expect(Math.round(boxOf(panes[0]!).getBoundingClientRect().top)).toBe(
       Math.round(menu.getBoundingClientRect().bottom)
     )
-    const vertical = await tabs("vertical tabular")
+    const vertical = await tabs('direction="vertical" appearance="tabular"')
     const pane = boxOf(vertical.panes[0]!).getBoundingClientRect()
     expect(pane.left).toBeGreaterThanOrEqual(vertical.menu.getBoundingClientRect().right - 1)
     expect(Math.round(pane.top)).toBe(Math.round(vertical.menu.getBoundingClientRect().top))
   })
 
   it("spaces an unattached pane below the menu, and puts a bottom-attached menu below the panes", async () => {
-    const { menu, panes } = await tabs("pointing secondary")
+    const { menu, panes } = await tabs('appearance="pointing secondary"')
     expect(getComputedStyle(boxOf(panes[0]!)).marginTop).toBe("16px")
-    const bottom = await tabs('tabular attached="bottom"')
+    const bottom = await tabs('appearance="tabular" attach="bottom"')
     expect(bottom.menu.getBoundingClientRect().top).toBeGreaterThanOrEqual(
       boxOf(bottom.panes[0]!).getBoundingClientRect().bottom - 1
     )
     expect(menu.getBoundingClientRect().height).toBeGreaterThan(0)
   })
 
-  it.each(["secondary", 'pointing secondary color="red"'])(
+  it.each(['appearance="secondary"', 'appearance="pointing secondary" color="red"'])(
     "<ui-tabs %s>:  the panes keep a plain top edge (the set's hue is the tabs')",
     async (attributes) => {
       const { panes } = await tabs(attributes)
@@ -501,7 +505,7 @@ describe("<ui-tabs> look", () => {
   )
 
   it("draws the tabs as menu items:  the tabular active tab joins its pane", async () => {
-    const { menu, buttons } = await tabs("tabular attached")
+    const { menu, buttons } = await tabs('appearance="tabular" attach="top"')
     expect(getComputedStyle(buttons[0]!)).toMatchObject({
       borderTopWidth: "1px",
       marginBottom: "-1px",
@@ -511,7 +515,7 @@ describe("<ui-tabs> look", () => {
   })
 
   it("vertical tabular:  every tab fills the column, and the active one covers the menu's rule to reach its pane", async () => {
-    const { menu, buttons, panes } = await tabs("vertical tabular")
+    const { menu, buttons, panes } = await tabs('direction="vertical" appearance="tabular"')
     const edge = menu.getBoundingClientRect().right
     const [active, other] = buttons.map((button) => button.getBoundingClientRect())
     expect(Math.round(active!.right)).toBe(Math.round(edge))
@@ -530,7 +534,7 @@ describe("<ui-tabs> appearance, alignment, equal", () => {
   })
 
   it("segmented + alignment=center:  the tab list moves to the middle", async () => {
-    const { root, menu } = await wide('appearance="segmented" alignment="center"')
+    const { root, menu } = await wide('appearance="segmented" align="center"')
     const outer = root.getBoundingClientRect()
     const bar = menu.getBoundingClientRect()
     expect(Math.abs(bar.left - outer.left - (outer.right - bar.right))).toBeLessThan(2)
@@ -545,7 +549,7 @@ describe("<ui-tabs> appearance, alignment, equal", () => {
   })
 
   it('equal + alignment="fluid":  an equal share of the row each, and the tab list keeps its tablist semantics', async () => {
-    const { host, menu, buttons } = await wide('appearance="segmented" alignment="fluid" equal', UNEVEN)
+    const { host, menu, buttons } = await wide('appearance="segmented" align="fluid" equal', UNEVEN)
     const share = menu.clientWidth / buttons.length
     for (const button of buttons) expect(button.getBoundingClientRect().width).toBeCloseTo(share, -0.5)
     expect(menu.getAttribute("role")).toBe("tablist")
@@ -602,7 +606,7 @@ describe("<ui-tabs> tokens from outside", () => {
   })
 
   it("variations:  `attached` swaps the margin, winning over the base token", async () => {
-    const { host } = await tabs(`tabular attached style="--ui-tabs-pane-margin: 2em 0 0"`)
+    const { host } = await tabs('appearance="tabular" attach="top" style="--ui-tabs-pane-margin: 2em 0 0"')
     expect(margin(host)).toBe("0px")
   })
 

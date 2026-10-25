@@ -110,35 +110,35 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     ['padding="xs"', "ui very compact table"],
     ['attach="top"', "ui top attached table"],
     ['align="center"', "ui center aligned table"],
-    ['attached="top"', "ui top attached table"],
+    ['attach="top"', "ui top attached table"],
     ['stackable="tablet"', "ui tablet stackable table"],
     ["unstackable", "ui unstackable table"],
     ['scrolling="very short"', "ui very short scrolling table"],
     ['overflowing="long"', "ui long overflowing table"],
     ['stuck="head first"', "ui head stuck first stuck table"],
     ['columns="4"', "ui four column table"],
-    ['text-align="center" vertical-align="top"', "ui center aligned top aligned table"],
-    ["inverted definition structured fixed", "ui definition fixed inverted structured table"]
+    ['align="center" vertical-align="top"', "ui center aligned top aligned table"],
+    ['inverted definition appearance="structured" fixed', "ui definition fixed inverted structured table"]
   ])("<ui-table %s>", async (attributes, classes) => {
     const { table: element } = await table(attributes)
     expect(element.className).toBe(classes)
   })
 
   it("keeps the author's own classes and puts its phrase after them", async () => {
-    const { host, table: element } = await table('basic="very"', HEAD + BODY, 'class="mine celled"')
+    const { host, table: element } = await table('appearance="very-basic"', HEAD + BODY, 'class="mine celled"')
     expect(element.className).toBe("mine celled ui very basic table")
     host.setAttribute("celled", "")
     await settle()
     expect(element.className).toBe("mine ui celled very basic table")
     host.removeAttribute("celled")
-    host.removeAttribute("basic")
+    host.removeAttribute("appearance")
     await settle()
     // `celled` was the author's before the element emitted it:  it stays
     expect(element.className).toBe("mine celled ui table")
   })
 
   it("re-applies its words after a framework rewrites className", async () => {
-    const { table: element } = await table("celled striped")
+    const { table: element } = await table('celled appearance="striped"')
     element.className = "x"
     await settle()
     expect(element.className).toBe("x ui celled striped table")
@@ -158,7 +158,7 @@ describe("<ui-table> classes, mirrored onto the table", () => {
   })
 
   it("styles the light-DOM table from the page sheet", async () => {
-    const { table: element } = await table("celled striped")
+    const { table: element } = await table('celled appearance="striped"')
     const [first, second] = element.tBodies[0]!.rows[1]!.cells
     expect(getComputedStyle(second!).borderLeftStyle).toBe("solid")
     expect(getComputedStyle(first!).borderLeftStyle).toBe("none")
@@ -181,7 +181,7 @@ describe("<ui-table> shadow markup", () => {
 
   it("scrolls as a focusable region named by the caption, else the DOM element's aria-label, else `Table`", async () => {
     const { host, table: element } = await table(
-      'scrolling="short" resizable attached="top"',
+      'scrolling="short" resizable attach="top"',
       `<caption>People</caption>${HEAD}${BODY}`
     )
     const box = scroller(host)
@@ -352,7 +352,7 @@ describe("<ui-table> outer margin", () => {
   })
 
   it("mirrors attached tables:  no margin on a joined edge", async () => {
-    const { hosts } = await tables(['attached="top"', "attached", 'attached="bottom"'])
+    const { hosts } = await tables(['attach="top"', 'attach="both"', 'attach="bottom"'])
     const margins = hosts.map((host) => [getComputedStyle(host).marginTop, getComputedStyle(host).marginBottom])
     expect(margins).toEqual([
       ["16px", "0px"],

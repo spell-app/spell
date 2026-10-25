@@ -30,31 +30,31 @@ async function button(html: string) {
 describe("<ui-button> classes", () => {
   it.each([
     ["", "ui button"],
-    ["primary", "ui primary button"],
-    ['primary="yes"', "ui primary button"],
-    ['primary="no"', "ui button"],
-    ['primary="false"', "ui button"],
+    ['color="primary"', "ui primary button"],
+    ['color="primary"', "ui primary button"],
+    ["", "ui button"],
+    ["", "ui button"],
     ['size="small"', "ui small button"],
     ['size="medium"', "ui button"],
     ['color="red"', "ui red button"],
     ['color="rde"', "ui button"],
-    ["secondary basic", "ui secondary basic button"],
-    ["positive", "ui positive button"],
-    ["negative tertiary", "ui negative tertiary button"],
+    ['color="secondary" appearance="basic"', "ui secondary basic button"],
+    ['color="positive"', "ui positive button"],
+    ['color="negative" appearance="tertiary"', "ui negative tertiary button"],
     ["inverted", "ui inverted button"],
-    ["fluid circular compact", "ui compact fluid circular button"],
-    ["unpadded", "ui unpadded button"],
-    ["wrapped", "ui wrapped button"],
+    ['fluid appearance="circular" padding="compact"', "ui compact fluid circular button"],
+    ['padding="none"', "ui unpadded button"],
+    ["wrap", "ui wrapped button"],
     ["ellipsis fluid", "ui ellipsis fluid button"],
-    ["active", "ui active button"],
+    ["selected", "ui active button"],
     ["disabled", "ui disabled button"],
     ["loading", "ui loading button"],
     ["toggle", "ui toggle button"],
     ["labeled", "ui labeled button"],
     ['labeled="right"', "ui right labeled button"],
-    ["animated", "ui animated button"],
-    ['animated="fade"', "ui fade animated button"],
-    ['attached="top"', "ui top attached button"],
+    ['reveal="slide"', "ui animated button"],
+    ['reveal="fade"', "ui fade animated button"],
+    ['attach="top"', "ui top attached button"],
     // `floated` is gone (epic ui-gaps P8):  a `<ui-stack>` places buttons
     ["floated", "ui button"]
   ])("<ui-button %s>", async (attributes, classes) => {
@@ -103,7 +103,7 @@ describe("<ui-button> classes", () => {
   })
 
   it("sets host states for layout", async () => {
-    const { host } = await button(`<ui-button attached="top">Go</ui-button>`)
+    const { host } = await button(`<ui-button attach="top">Go</ui-button>`)
     expect(host.matches(":state(fluid)")).toBe(true)
   })
 
@@ -134,7 +134,7 @@ describe("<ui-button> padding and text", () => {
   }
 
   it("`unpadded`:  no padding at all, where `compact` keeps some", async () => {
-    const { control: unpadded } = await button(`<ui-button unpadded>Go</ui-button>`)
+    const { control: unpadded } = await button(`<ui-button padding="none">Go</ui-button>`)
     const style = getComputedStyle(unpadded)
     expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
       "0px",
@@ -142,7 +142,7 @@ describe("<ui-button> padding and text", () => {
       "0px",
       "0px"
     ])
-    const { control: compact } = await button(`<ui-button compact>Go</ui-button>`)
+    const { control: compact } = await button(`<ui-button padding="compact">Go</ui-button>`)
     expect(parseFloat(getComputedStyle(compact).paddingTop)).toBeGreaterThan(0)
   })
 
@@ -151,7 +151,7 @@ describe("<ui-button> padding and text", () => {
     const { control: short } = await button(`<ui-button>Go</ui-button>`)
     expect(getComputedStyle(oneLine).whiteSpace).toBe("nowrap")
     expect(oneLine.getBoundingClientRect().height).toBeCloseTo(short.getBoundingClientRect().height, 0)
-    const { control: wrapped } = await narrow("wrapped")
+    const { control: wrapped } = await narrow("wrap")
     expect(wrapped.getBoundingClientRect().height).toBeGreaterThan(oneLine.getBoundingClientRect().height * 1.5)
   })
 
@@ -168,7 +168,7 @@ describe("<ui-button> padding and text", () => {
   })
 
   it("`ellipsis` beats `wrapped`:  still one line", async () => {
-    const { control } = await narrow("ellipsis wrapped")
+    const { control } = await narrow("ellipsis wrap")
     expect(getComputedStyle(control).whiteSpace).toBe("nowrap")
   })
 
@@ -218,7 +218,7 @@ describe("<ui-button> tooltip", () => {
     expect(withText.hasAttribute("title")).toBe(false)
     const { control: titled } = await button(`<ui-button icon="cloud" aria-label="Cloud" title="Send"></ui-button>`)
     expect(titled.hasAttribute("title")).toBe(false)
-    const { control: link } = await button(`<ui-button href="#x" icon="cloud" aria-label="Cloud"></ui-button>`)
+    const { control: link } = await button(`<ui-button link="#x" icon="cloud" aria-label="Cloud"></ui-button>`)
     expect(link.getAttribute("title")).toBe("Cloud")
   })
 })
@@ -243,7 +243,7 @@ describe("<ui-button> behaviour", () => {
   })
 
   it("lets a controlling host veto the toggle from its handler", async () => {
-    const { host, control } = await button(`<ui-button toggle active>Vote</ui-button>`)
+    const { host, control } = await button(`<ui-button toggle selected>Vote</ui-button>`)
     host.addEventListener("ui-deselected", () => ((host as unknown as { selected: boolean }).selected = true))
     control.click()
     await ElementFixture.tick()
@@ -327,16 +327,16 @@ describe("<ui-button> behaviour", () => {
   })
 
   it("renders <a> for href", async () => {
-    const { control } = await button(`<ui-button href="#x">Link</ui-button>`)
+    const { control } = await button(`<ui-button link="#x">Link</ui-button>`)
     expect(control.localName).toBe("a")
     expect(control.getAttribute("href")).toBe("#x")
     expect(control.hasAttribute("download")).toBe(false)
   })
 
   it("forwards `download` to the link, bare or naming the file", async () => {
-    const { control: bare } = await button(`<ui-button href="logo.svg" download>SVG</ui-button>`)
+    const { control: bare } = await button(`<ui-button link="logo.svg" download>SVG</ui-button>`)
     expect(bare.getAttribute("download")).toBe("")
-    const { host, control: named } = await button(`<ui-button href="logo.svg" download="spell.svg">SVG</ui-button>`)
+    const { host, control: named } = await button(`<ui-button link="logo.svg" download="spell.svg">SVG</ui-button>`)
     expect(named.getAttribute("download")).toBe("spell.svg")
     host.removeAttribute("download")
     await ElementFixture.tick()
@@ -436,7 +436,7 @@ describe("<ui-button> behaviour", () => {
 describe("<ui-buttons> / <ui-or>", () => {
   it("renders a group and an or", async () => {
     const group = await ElementFixture.render<DOMElement>(
-      `<ui-buttons basic width="3"><ui-button>A</ui-button><ui-or></ui-or><ui-button>B</ui-button></ui-buttons>`
+      `<ui-buttons appearance="basic" width="3"><ui-button>A</ui-button><ui-or></ui-or><ui-button>B</ui-button></ui-buttons>`
     )
     const root = group.shadowRoot!.firstElementChild!
     expect(root.className).toBe("ui basic three buttons")
@@ -533,7 +533,7 @@ describe("<ui-buttons> track", () => {
 
   it("`trackless` follows its buttons:  `basic` ones too, and back to a track when none draws its own", async () => {
     const host = await ElementFixture.render<DOMElement>(
-      `<ui-buttons><ui-button appearance="basic" color="red">One</ui-button><ui-button basic>Two</ui-button></ui-buttons>`
+      `<ui-buttons><ui-button appearance="basic" color="red">One</ui-button><ui-button appearance="basic">Two</ui-button></ui-buttons>`
     )
     const track = host.shadowRoot!.firstElementChild as HTMLElement
     await expect.poll(() => track.classList.contains("trackless")).toBe(true)
@@ -541,7 +541,7 @@ describe("<ui-buttons> track", () => {
     red!.removeAttribute("color")
     red!.removeAttribute("appearance")
     await expect.poll(() => track.classList.contains("trackless")).toBe(true)
-    old!.removeAttribute("basic")
+    old!.removeAttribute("appearance")
     await expect.poll(() => track.classList.contains("trackless")).toBe(false)
     expect(getComputedStyle(track).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
   })
@@ -642,10 +642,12 @@ describe("<ui-button> tokens from outside", () => {
   })
 
   it("variations:  a swap wins over the base token, a derived value follows it", async () => {
-    const { control: circular } = await button(`<ui-button circular style="--ui-button-radius: 20px">Go</ui-button>`)
+    const { control: circular } = await button(
+      `<ui-button appearance="circular" style="--ui-button-radius: 20px">Go</ui-button>`
+    )
     expect(getComputedStyle(circular).borderTopLeftRadius).not.toBe("20px")
     const { control: compact } = await button(
-      `<ui-button compact style="--ui-button-padding-block: 20px">Go</ui-button>`
+      `<ui-button padding="compact" style="--ui-button-padding-block: 20px">Go</ui-button>`
     )
     expect(getComputedStyle(compact).paddingTop).toBe("15px")
   })

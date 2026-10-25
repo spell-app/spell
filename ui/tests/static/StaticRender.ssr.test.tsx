@@ -38,7 +38,7 @@ describe("StaticRender.fragment()", () => {
   })
 
   it("renders a button to its native <button>, slotted text inside", () => {
-    const html = StaticRender.fragment(`<ui-button primary size="large" id="save">Save</ui-button>`)
+    const html = StaticRender.fragment(`<ui-button color="primary" size="large" id="save">Save</ui-button>`)
     expect(sorted(html)).toBe(
       sorted(
         `<button type="button" class="ui large primary button" part="button" data-ui="button" id="save">Save</button>`
@@ -47,7 +47,7 @@ describe("StaticRender.fragment()", () => {
   })
 
   it("renders a segment around its children", () => {
-    const html = StaticRender.fragment(`<ui-segment raised><p>Body</p></ui-segment>`)
+    const html = StaticRender.fragment(`<ui-segment appearance="raised"><p>Body</p></ui-segment>`)
     expect(sorted(html)).toBe(
       sorted(`<div class="ui raised segment" part="segment" data-ui="segment"><p data-ui-slotted="">Body</p></div>`)
     )
@@ -99,7 +99,7 @@ describe("StaticRender.fragment()", () => {
 
   it("keeps author attributes, drops vocabulary attributes, moves slot assignment", () => {
     const html = StaticRender.fragment(
-      `<ui-segment basic id="intro" class="hero" data-x="1" title="Intro" lang="fr">Salut</ui-segment>`
+      `<ui-segment appearance="basic" id="intro" class="hero" data-x="1" title="Intro" lang="fr">Salut</ui-segment>`
     )
     expect(sorted(html)).toBe(
       sorted(
@@ -110,7 +110,7 @@ describe("StaticRender.fragment()", () => {
   })
 
   it("makes a <div> root inside a <p> a <span>, so parsing doesn't end the paragraph", () => {
-    const html = StaticRender.fragment(`<p>Before <ui-segment basic>inline</ui-segment> after</p>`)
+    const html = StaticRender.fragment(`<p>Before <ui-segment appearance="basic">inline</ui-segment> after</p>`)
     expect(html).toMatch(/^<p>Before <span [^>]*class="ui basic segment"[^>]*>inline<\/span> after<\/p>$/)
   })
 

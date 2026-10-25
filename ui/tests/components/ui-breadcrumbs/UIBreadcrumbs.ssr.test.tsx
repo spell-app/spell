@@ -18,8 +18,8 @@ describe("<ui-breadcrumbs> static render", () => {
 
   it("renders a <nav> landmark around an <ol> of one <li> per section", () => {
     const html = StaticRender.fragment(
-      `<ui-breadcrumbs aria-label="Trail"><ui-breadcrumb href="#home">Home</ui-breadcrumb>` +
-        `<ui-breadcrumb active>Shirt</ui-breadcrumb></ui-breadcrumbs>`
+      `<ui-breadcrumbs aria-label="Trail"><ui-breadcrumb link="#home">Home</ui-breadcrumb>` +
+        `<ui-breadcrumb selected>Shirt</ui-breadcrumb></ui-breadcrumbs>`
     )
     expect(sorted(html)).toBe(
       sorted(

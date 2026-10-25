@@ -16,7 +16,7 @@ describe("<ui-button> static render", () => {
 
   it("renders a submit button as a native submitter:  type, name, value, form attributes", () => {
     const html = StaticRender.fragment(
-      `<ui-button type="submit" name="action" value="save" formaction="/save" formnovalidate primary>Save</ui-button>`
+      `<ui-button type="submit" name="action" value="save" formaction="/save" formnovalidate color="primary">Save</ui-button>`
     )
     const button = html.match(/^<button [^>]*>/)?.[0] ?? ""
     for (const attribute of [

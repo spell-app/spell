@@ -105,8 +105,8 @@ describe("<ui-select> markup", () => {
 
   it("builds groups from header items and an <hr> from a divider", async () => {
     const { native } = await select(`<ui-select placeholder="Food">
-      <ui-item type="header">Fruit</ui-item><ui-item value="apple">Apple</ui-item><ui-item value="pear">Pear</ui-item>
-      <ui-item type="divider"></ui-item><ui-item value="none" disabled>Nothing</ui-item>
+      <ui-item kind="header">Fruit</ui-item><ui-item value="apple">Apple</ui-item><ui-item value="pear">Pear</ui-item>
+      <ui-item kind="divider"></ui-item><ui-item value="none" disabled>Nothing</ui-item>
     </ui-select>`)
     const group = native().querySelector("optgroup")!
     expect(group.label).toBe("Fruit")

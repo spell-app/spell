@@ -9,10 +9,10 @@ import type {} from "spell-ui/jsx"
 export function allowed() {
   return (
     <>
-      <ui-button size="large" basic>
+      <ui-button size="large" appearance="basic">
         Save
       </ui-button>
-      <ui-button basic={false} color="red" class="wide" id="save" onClick={() => {}} aria-label="Save" data-x="1" />
+      <ui-button fluid={false} color="red" class="wide" id="save" onClick={() => {}} aria-label="Save" data-x="1" />
       <ui-button active-text="Following" inactive-text="Follow" toggle="" />
       <ui-dropdown options={[{ value: "a" }]} />
       <ui-dropdown value="a" open={true} />
@@ -43,7 +43,7 @@ export function refused() {
       {/* @ts-expect-error:  a value its set doesn't hold */}
       <ui-button size="enormous" />
       {/* @ts-expect-error:  a flag takes no text */}
-      <ui-button basic="yes" />
+      <ui-button fluid="yes" />
       {/* @ts-expect-error:  a misspelt rich property */}
       <ui-dropdown optoins={[]} />
       {/* @ts-expect-error:  a property takes its attribute's values */}

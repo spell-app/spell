@@ -300,7 +300,7 @@ describe("<ui-property-editor source>", () => {
 
   it("`select`:  only that part of the page", async () => {
     const host = await ElementFixture.render<Editor>(
-      `<ui-property-editor source="${PAGE}" select="ui-property-group[label=Look]"></ui-property-editor>`
+      `<ui-property-editor source="${PAGE}" selector="ui-property-group[label=Look]"></ui-property-editor>`
     )
     host.schema = THEME
     host.value = { size: "lg" }

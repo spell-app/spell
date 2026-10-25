@@ -32,11 +32,11 @@ describe("<ui-icon> classes", () => {
     ['size="large"', "ui large icon"],
     ['size="medium"', "ui icon"],
     ['color="red"', "ui red icon"],
-    ["circular inverted", "ui inverted circular icon"],
-    ['circular="no"', "ui icon"],
-    ['bordered="yes"', "ui bordered icon"],
+    ['appearance="circular" inverted', "ui inverted circular icon"],
+    ["", "ui icon"],
+    ['appearance="bordered"', "ui bordered icon"],
     ["disabled loading", "ui disabled loading icon"],
-    ['fitted appearance="link"', "ui fitted link icon"],
+    ['padding="none" appearance="link"', "ui fitted link icon"],
     ["flipped", "ui flipped icon"],
     ['flipped="vertically"', "ui vertically flipped icon"],
     ["rotated", "ui rotated icon"],
@@ -61,7 +61,7 @@ describe("<ui-icon> classes", () => {
   it("draws `… outline` as the regular icon;  `outline` ~== that name, and `element.style` stays native", async () => {
     const { host: solid } = await icon(`<ui-icon name="heart"></ui-icon>`)
     const { host: named } = await icon(`<ui-icon name="heart outline"></ui-icon>`)
-    const { host: outline } = await icon(`<ui-icon name="heart" outline style="color: red"></ui-icon>`)
+    const { host: outline } = await icon(`<ui-icon name="heart" appearance="outline" style="color: red"></ui-icon>`)
     await expect.poll(() => [solid, named, outline].every((host) => !!path(host))).toBe(true)
     expect(path(solid)).not.toBe(path(named))
     expect(path(outline)).toBe(path(named))
@@ -125,7 +125,7 @@ describe("<ui-icon> tokens from outside", () => {
   })
 
   it("variations:  `circular` swaps the width;  a size follows its ladder token", async () => {
-    const { root } = await icon(`<ui-icon name="house" circular style="--ui-icon-width: 30px"></ui-icon>`)
+    const { root } = await icon(`<ui-icon name="house" appearance="circular" style="--ui-icon-width: 30px"></ui-icon>`)
     expect(width(root)).not.toBe("30px")
     const { root: huge } = await icon(`<ui-icon name="house" size="huge" style="--ui-icon-size-huge: 2"></ui-icon>`)
     expect(getComputedStyle(huge).fontSize).toBe("32px")

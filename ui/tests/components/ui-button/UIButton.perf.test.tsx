@@ -22,7 +22,10 @@ const RUNS = 9
  * - SIDE EFFECT:  writes `results/build-perf.json` (browser-mode `console.log` doesn't reach the terminal).
  */
 it("builds 1,000 <ui-button>s", async () => {
-  const markup = Array.from({ length: COUNT }, (_, index) => `<ui-button primary>Button ${index}</ui-button>`).join("")
+  const markup = Array.from(
+    { length: COUNT },
+    (_, index) => `<ui-button color="primary">Button ${index}</ui-button>`
+  ).join("")
   await build(markup)
   const times: number[] = []
   for (let run = 0; run < RUNS; run++) times.push(await build(markup))

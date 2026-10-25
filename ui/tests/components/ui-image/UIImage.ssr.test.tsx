@@ -14,7 +14,7 @@ describe("<ui-image> static render", () => {
 
   it("renders an image as the <img> itself, and a linked one as Fomantic's <a> wrapper", () => {
     const html = StaticRender.fragment(
-      `<ui-image src="a.png" alt="A" size="small"></ui-image><ui-image href="#x" src="a.png" alt="Link"></ui-image>`
+      `<ui-image src="a.png" alt="A" size="small"></ui-image><ui-image link="#x" src="a.png" alt="Link"></ui-image>`
     )
     expect(sorted(html)).toBe(
       sorted(

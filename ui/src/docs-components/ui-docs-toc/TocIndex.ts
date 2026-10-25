@@ -282,7 +282,7 @@ export class TocIndex {
   /** `element` is hidden inside a folded `<ui-section>` (not counting itself). */
   private static folded(element: Element): boolean {
     for (let section = element.parentElement?.closest(SECTION_TAG); section;) {
-      if (section.hasAttribute("collapsible") && section.hasAttribute("collapsed")) return true
+      if (section.hasAttribute("collapsible") && section.getAttribute("open") === "false") return true
       section = section.parentElement?.closest(SECTION_TAG)
     }
     return false

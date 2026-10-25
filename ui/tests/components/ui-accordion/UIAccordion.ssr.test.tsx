@@ -19,7 +19,7 @@ describe("<ui-accordion> static render", () => {
 
   it("pairs titles and contents into <details>, the open panel open", () => {
     const html = StaticRender.fragment(
-      `<ui-accordion styled open="1"><ui-title>One</ui-title><ui-content><p>First</p></ui-content>` +
+      `<ui-accordion appearance="styled" open="1"><ui-title>One</ui-title><ui-content><p>First</p></ui-content>` +
         `<ui-title>Two</ui-title><ui-content><p>Second</p></ui-content></ui-accordion>`
     )
     const root = fragment(html).firstElementChild!

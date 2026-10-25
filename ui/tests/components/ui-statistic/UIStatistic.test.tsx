@@ -45,8 +45,8 @@ describe("<ui-statistic> classes", () => {
     ['size="large"', "ui large statistic"],
     ['size="medium"', "ui statistic"],
     ['color="red" inverted', "ui red inverted statistic"],
-    ["horizontal", "ui horizontal statistic"],
-    ['horizontal="no"', "ui statistic"],
+    ['direction="horizontal"', "ui horizontal statistic"],
+    ["", "ui statistic"],
     ["fluid", "ui fluid statistic"],
     ['text value="Three" label="x"', "ui statistic"]
   ])("<ui-statistic %s>", async (attributes, classes) => {
@@ -126,7 +126,7 @@ describe("<ui-statistic> owner tokens and layout", () => {
   })
 
   it("lays a horizontal statistic out in a row, on the horizontal ladder", async () => {
-    const { root } = await render(`<ui-statistic horizontal value="2,204" label="Views"></ui-statistic>`)
+    const { root } = await render(`<ui-statistic direction="horizontal" value="2,204" label="Views"></ui-statistic>`)
     expect(token(root, "--_ui-statistic-layout")).toBe("horizontal")
     expect(getComputedStyle(root).flexDirection).toBe("row")
     const value = root.querySelector<HTMLElement>("[part=value]")!
@@ -240,7 +240,7 @@ describe("<ui-statistic> tokens from outside", () => {
     const value = above.querySelector("ui-value")!.shadowRoot!.firstElementChild!
     expect(getComputedStyle(value).fontSize).toBe("30px")
     const { root: horizontal } = await render(
-      `<ui-statistic horizontal value="1" style="--ui-statistic-value-size: 30px"></ui-statistic>`
+      `<ui-statistic direction="horizontal" value="1" style="--ui-statistic-value-size: 30px"></ui-statistic>`
     )
     expect(getComputedStyle(horizontal.querySelector("[part=value]")!).fontSize).not.toBe("30px")
   })
@@ -254,7 +254,7 @@ describe("<ui-statistics>", () => {
   it.each([
     ["", "ui statistics"],
     ['size="small" color="blue"', "ui small blue statistics"],
-    ["horizontal inverted", "ui horizontal inverted statistics"],
+    ['direction="horizontal" inverted', "ui horizontal inverted statistics"],
     ['widths="3"', "ui three statistics"],
     ['widths="four"', "ui four statistics"],
     ["stackable", "ui stackable statistics"]
@@ -287,7 +287,7 @@ describe("<ui-statistics>", () => {
 
   it("lays members out:  group margins, not the standalone ones;  horizontal groups stack rows", async () => {
     const { host } = await render(
-      `<ui-statistics horizontal><ui-statistic value="1" label="a"></ui-statistic>` +
+      `<ui-statistics direction="horizontal"><ui-statistic value="1" label="a"></ui-statistic>` +
         `<ui-statistic value="2" label="b"></ui-statistic></ui-statistics>`
     )
     const [first, second] = [...host.querySelectorAll<DOMElement>("ui-statistic")].map(
@@ -392,7 +392,7 @@ describe("<ui-statistic> outer margins", () => {
     const holder = await ElementFixture.render(
       `<div style="width: 900px"><h4 style="margin: 0 0 10px">Heading</h4>` +
         `<ui-statistics><ui-statistic value="1"></ui-statistic></ui-statistics>` +
-        `<ui-statistics horizontal><ui-statistic value="2"></ui-statistic></ui-statistics></div>`
+        `<ui-statistics direction="horizontal"><ui-statistic value="2"></ui-statistic></ui-statistics></div>`
     )
     const [group, horizontal] = [...holder.querySelectorAll<DOMElement>("ui-statistics")]
     expect(group!.matches(":state(spaced)")).toBe(true)

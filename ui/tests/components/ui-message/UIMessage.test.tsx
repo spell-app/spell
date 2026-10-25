@@ -53,8 +53,8 @@ describe("<ui-message> classes", () => {
     ['size="medium"', "ui message"],
     ['color="teal"', "ui teal message"],
     ['state="negative"', "ui negative message"],
-    ['state="warning" attached="bottom"', "ui warning bottom attached message"],
-    ["attached", "ui attached message"],
+    ['state="warning" attach="bottom"', "ui warning bottom attached message"],
+    ['attach="both"', "ui attached message"],
     // old names (`compact`, `text-align`, `attached`) and the new ones draw the same words (epic `ui-gaps` P4)
     ['floating compact="yes" centered inverted', "ui compact centered floating inverted message"],
     ['floating padding="compact" centered inverted', "ui compact centered floating inverted message"],
@@ -167,7 +167,7 @@ describe("<ui-message> tokens from outside", () => {
   })
 
   it("`attached` squares its bottom corners, keeping the token's top ones", async () => {
-    const { root } = await message(`<ui-message attached style="--ui-message-radius: 20px">Hi</ui-message>`)
+    const { root } = await message(`<ui-message attach="both" style="--ui-message-radius: 20px">Hi</ui-message>`)
     expect(radius(root)).toBe("20px")
     expect(getComputedStyle(root).borderBottomLeftRadius).toBe("0px")
   })

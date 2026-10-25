@@ -19,9 +19,9 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-breadcrumbs/exampl
 
 /** Three sections, the last one current. */
 const TRAIL =
-  `<ui-breadcrumb href="#home">Home</ui-breadcrumb>` +
-  `<ui-breadcrumb href="#store">Store</ui-breadcrumb>` +
-  `<ui-breadcrumb active href="#shirt">T-Shirt</ui-breadcrumb>`
+  `<ui-breadcrumb link="#home">Home</ui-breadcrumb>` +
+  `<ui-breadcrumb link="#store">Store</ui-breadcrumb>` +
+  `<ui-breadcrumb selected link="#shirt">T-Shirt</ui-breadcrumb>`
 
 /** Render a breadcrumb;  returns it, its `<nav>` and its section elements. */
 async function breadcrumb(attributes = "", sections = TRAIL) {
@@ -87,9 +87,9 @@ describe("<ui-breadcrumb>", () => {
   it("renders a link with href, text without, and the active one as the current page", async () => {
     const { sections } = await breadcrumb(
       "",
-      `<ui-breadcrumb href="#a" target="_top">A</ui-breadcrumb>` +
+      `<ui-breadcrumb link="#a" target="_top">A</ui-breadcrumb>` +
         `<ui-breadcrumb>B</ui-breadcrumb>` +
-        `<ui-breadcrumb active href="#c">C</ui-breadcrumb>`
+        `<ui-breadcrumb selected link="#c">C</ui-breadcrumb>`
     )
     const [a, b, c] = sections.map(sectionOf)
     expect(a!.localName).toBe("a")
@@ -107,10 +107,10 @@ describe("<ui-breadcrumb>", () => {
     expect(sections[2]!.matches(":state(selected)")).toBe(true)
   })
 
-  it("moves aria-current with `active`", async () => {
+  it("moves aria-current with `selected`", async () => {
     const { sections } = await breadcrumb()
-    sections[2]!.removeAttribute("active")
-    sections[1]!.setAttribute("active", "")
+    sections[2]!.removeAttribute("selected")
+    sections[1]!.setAttribute("selected", "")
     await ElementFixture.tick()
     expect(sectionOf(sections[1]!).getAttribute("aria-current")).toBe("page")
     expect(sectionOf(sections[2]!).localName).toBe("a")

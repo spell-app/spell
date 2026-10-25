@@ -132,10 +132,10 @@ describe("<ui-{part}> standalone", () => {
   })
 
   it("renders the semantic roots:  <a>, <time>, <span>, <img>", async () => {
-    const title = await ElementFixture.render(`<ui-title href="#t">T</ui-title>`)
+    const title = await ElementFixture.render(`<ui-title link="#t">T</ui-title>`)
     expect(root(title).localName).toBe("a")
     expect(root(title).getAttribute("href")).toBe("#t")
-    const author = await ElementFixture.render(`<ui-author href="#m" target="_blank">Matt</ui-author>`)
+    const author = await ElementFixture.render(`<ui-author link="#m" target="_blank">Matt</ui-author>`)
     expect(root(author).localName).toBe("a")
     expect(root(author).getAttribute("target")).toBe("_blank")
     const plainAuthor = await ElementFixture.render(`<ui-author>Matt</ui-author>`)
@@ -145,7 +145,7 @@ describe("<ui-{part}> standalone", () => {
     expect(root(date).getAttribute("datetime")).toBe("2026-09-29")
     const detail = await ElementFixture.render(`<ui-detail>2</ui-detail>`)
     expect(root(detail).localName).toBe("span")
-    const linkDetail = await ElementFixture.render(`<ui-detail href="#all">214</ui-detail>`)
+    const linkDetail = await ElementFixture.render(`<ui-detail link="#all">214</ui-detail>`)
     expect(root(linkDetail).localName).toBe("a")
     expect(root(linkDetail).getAttribute("href")).toBe("#all")
     const avatar = await ElementFixture.render(
@@ -172,10 +172,10 @@ describe("<ui-header> standalone", () => {
     ['dividing="no"', "ui header"],
     ['sub="yes"', "ui sub header"],
     ["icon block", "ui block icon header"],
-    ['attached="top"', "ui top attached header"],
-    ["attached", "ui attached header"],
-    ['text-align="center"', "ui center aligned header"],
-    ['text-align="justified"', "ui justified header"],
+    ['attach="top"', "ui top attached header"],
+    ['attach="both"', "ui attached header"],
+    ['align="center"', "ui center aligned header"],
+    ['align="justified"', "ui justified header"],
     // the old names (epic ui-gaps P4), and the new
     ["fitted disabled inverted", "ui fitted disabled inverted header"],
     ['padding="none" disabled inverted', "ui fitted disabled inverted header"],
@@ -197,24 +197,24 @@ describe("<ui-header> standalone", () => {
     const plain = await ElementFixture.render(`<ui-header>H</ui-header>`)
     expect(root(plain).localName).toBe("div")
     expect(root(plain).hasAttribute("role")).toBe(false)
-    const link = await ElementFixture.render(`<ui-header level="2" href="#h">H</ui-header>`)
+    const link = await ElementFixture.render(`<ui-header level="2" link="#h">H</ui-header>`)
     expect(root(link)).toMatchObject({ localName: "a", role: "heading", ariaLevel: "2" })
   })
 
-  it("keeps elements slotted into it live when `href` swaps its root tag", async () => {
+  it("keeps elements slotted into it live when `link` swaps its root tag", async () => {
     // loaded first:  the header renders its slot synchronously, BEFORE the label connects
     // (what once tied the label's Solid root to the header's;
     // each element's root has no owner now, epic `spell-element` Q8)
     await UI.load()
     const host = await ElementFixture.render(`<ui-header>Dogs <ui-label>214</ui-label></ui-header>`)
     const label = host.querySelector<DOMElement>("ui-label")!
-    host.setAttribute("href", "#dogs")
+    host.setAttribute("link", "#dogs")
     await ElementFixture.settle(host)
     expect(root(host).localName).toBe("a")
-    label.setAttribute("href", "#count")
+    label.setAttribute("link", "#count")
     await ElementFixture.settle(host)
     expect(root(label).localName).toBe("a")
-    host.removeAttribute("href")
+    host.removeAttribute("link")
     await ElementFixture.settle(host)
     label.setAttribute("color", "red")
     await ElementFixture.settle(host)

@@ -72,12 +72,12 @@ describe("<ui-list> classes and markup", () => {
     ['bulleted="yes"', "ui bulleted list"],
     ['bulleted="no"', "ui list"],
     ["ordered suffixed", "ui ordered suffixed list"],
-    ["relaxed", "ui relaxed list"],
-    ['relaxed="very"', "ui very relaxed list"],
-    ['relaxed="no"', "ui list"],
-    ["divided relaxed selection", "ui relaxed divided selection list"],
-    ["horizontal inverted", "ui horizontal inverted list"],
-    ["link animated fitted celled", "ui animated fitted celled link list"],
+    ['spacing="lg"', "ui relaxed list"],
+    ['spacing="xl"', "ui very relaxed list"],
+    ["", "ui list"],
+    ['divided spacing="lg" selection', "ui relaxed divided selection list"],
+    ['direction="horizontal" inverted', "ui horizontal inverted list"],
+    ['appearance="link" hover="indent" padding="none" celled', "ui animated fitted celled link list"],
     ['vertical-align="middle"', "ui middle aligned list"]
   ])("<ui-list %s>", async (attributes, classes) => {
     const { root } = await list(attributes)
@@ -107,7 +107,7 @@ describe("<ui-list> classes and markup", () => {
   it("renders items as buttons in a selection list;  links with href, buttons with the item's own `link`", async () => {
     const { host, items } = await list(
       "",
-      `<ui-item>Plain</ui-item><ui-item href="#a">Link</ui-item><ui-item link>Button</ui-item>`
+      `<ui-item>Plain</ui-item><ui-item link="#a">Link</ui-item><ui-item appearance="link">Button</ui-item>`
     )
     expect(items.map((item) => boxOf(item).localName)).toEqual(["div", "a", "button"])
     host.setAttribute("selection", "")
@@ -116,7 +116,10 @@ describe("<ui-list> classes and markup", () => {
   })
 
   it("makes link and selection items focusable, plain items not", async () => {
-    const { items } = await list("link", `<ui-item href="#a">A</ui-item><ui-item link>B</ui-item><ui-item>C</ui-item>`)
+    const { items } = await list(
+      'appearance="link"',
+      `<ui-item link="#a">A</ui-item><ui-item appearance="link">B</ui-item><ui-item>C</ui-item>`
+    )
     const [a, b, c] = items.map(boxOf)
     expect(a!.tabIndex).toBe(0)
     expect(b!.tabIndex).toBe(0)
@@ -126,7 +129,10 @@ describe("<ui-list> classes and markup", () => {
   })
 
   it("marks the selected item:  `active` class and aria-current", async () => {
-    const { items } = await list("link", `<ui-item href="#a">A</ui-item><ui-item href="#b" selected>B</ui-item>`)
+    const { items } = await list(
+      'appearance="link"',
+      `<ui-item link="#a">A</ui-item><ui-item link="#b" selected>B</ui-item>`
+    )
     const box = boxOf(items[1]!)
     expect(box.className).toBe("active item")
     expect(box.getAttribute("aria-current")).toBe("page")
@@ -151,10 +157,10 @@ describe("<ui-list> items adopt UIList.css and style by owner", () => {
   it("follows the list's variations:  relaxed, divided, celled, horizontal", async () => {
     const { host, items } = await list()
     const [first, middle, last] = items.map(boxOf)
-    host.setAttribute("relaxed", "")
+    host.setAttribute("spacing", "lg")
     await ElementFixture.tick()
     expect(parseFloat(style(middle!).paddingTop)).toBeCloseTo((6 / 14) * 16, 1)
-    host.setAttribute("relaxed", "very")
+    host.setAttribute("spacing", "xl")
     await ElementFixture.tick()
     expect(parseFloat(style(middle!).paddingTop)).toBeCloseTo((12 / 14) * 16, 1)
     host.setAttribute("divided", "")
@@ -167,7 +173,7 @@ describe("<ui-list> items adopt UIList.css and style by owner", () => {
     expect(style(first!).borderTopWidth).toBe("1px")
     expect(style(last!).borderBottomWidth).toBe("1px")
     host.removeAttribute("celled")
-    host.setAttribute("horizontal", "")
+    host.setAttribute("direction", "horizontal")
     await ElementFixture.tick()
     expect(style(middle!).display).toBe("inline-block")
     expect(first!.getBoundingClientRect().top).toBe(last!.getBoundingClientRect().top)
@@ -401,7 +407,7 @@ describe("<ui-list> tokens from outside", () => {
   })
 
   it("variations:  `relaxed` swaps the padding, winning over the base token;  first-item padding derives", async () => {
-    const { host } = await list(`relaxed style="--ui-list-item-padding-block: 10px"`)
+    const { host } = await list('spacing="lg" style="--ui-list-item-padding-block: 10px"')
     expect(padding(host)).not.toBe("10px")
     const { items } = await list(`style="--ui-list-item-padding-left: 10px"`)
     expect(style(boxOf(items[0]!)).paddingLeft).toBe("10px")
@@ -451,14 +457,14 @@ describe("<ui-list> tokens from outside", () => {
 
   it("`link` and `selection` set their look THROUGH the public tokens:  a page's colour and padding reach them", async () => {
     const red = "rgb(255, 0, 0)"
-    const links = `<ui-item link>One</ui-item><ui-item link>Two</ui-item>`
+    const links = `<ui-item appearance="link">One</ui-item><ui-item appearance="link">Two</ui-item>`
     const link = await list(`link style="--ui-list-link-color: ${red}; --ui-list-item-color: ${red}"`, links)
     expect(style(boxOf(link.items[0]!)).color).toBe(red)
     const selection = await list(`selection style="--ui-list-item-padding-block: 10px; --ui-list-link-color: ${red}"`)
     expect(style(boxOf(selection.items[1]!)).paddingTop).toBe("10px")
     expect(style(boxOf(selection.items[1]!)).color).toBe(red)
     // unset:  the variations' own defaults
-    const plain = await list("link", links)
+    const plain = await list('appearance="link"', links)
     expect(style(boxOf(plain.items[0]!)).color).not.toBe(red)
     expect(style(boxOf((await list("selection")).items[1]!)).paddingTop).toBe("8px")
   })
@@ -487,7 +493,7 @@ describe("<ui-list> marker tokens", () => {
     const [grey, red] = ["rgb(128, 128, 128)", "rgb(255, 0, 0)"]
     const { items } = await list(
       `bulleted style="--ui-list-marker-color: ${grey}; --ui-list-marker-active-color: ${red}"`,
-      `<ui-item>One</ui-item><ui-item selected>Two</ui-item><ui-item link>Three</ui-item><ui-item link selected>Four</ui-item>`
+      `<ui-item>One</ui-item><ui-item selected>Two</ui-item><ui-item appearance="link">Three</ui-item><ui-item appearance="link" selected>Four</ui-item>`
     )
     expect(items.map((item) => marker(item).color)).toEqual([grey, red, grey, red])
     // unset:  the selected item's marker is the marker colour, as before
@@ -539,7 +545,7 @@ describe("<ui-list> ui-select", () => {
   it("fires for link items, not for plain items or links inside content", async () => {
     const { host, items } = await list(
       "",
-      `<ui-item href="#one" value="one">One</ui-item><ui-item>Two <a href="#inner">inner</a></ui-item><ui-item link>Three</ui-item>`
+      `<ui-item link="#one" value="one">One</ui-item><ui-item>Two <a href="#inner">inner</a></ui-item><ui-item appearance="link">Three</ui-item>`
     )
     const events = selections(host)
     await userEvent.click(boxOf(items[0]!))

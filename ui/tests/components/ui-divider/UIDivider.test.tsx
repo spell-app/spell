@@ -31,9 +31,9 @@ describe("<ui-divider> classes and markup", () => {
     ['size="large"', "ui large divider"],
     ['size="medium"', "ui divider"],
     ['color="red"', "ui red divider"],
-    ["horizontal", "ui horizontal divider"],
-    ['horizontal="no"', "ui divider"],
-    ['vertical="yes"', "ui vertical divider"],
+    ['direction="horizontal"', "ui horizontal divider"],
+    ["", "ui divider"],
+    ['direction="vertical"', "ui vertical divider"],
     // the old names (epic ui-gaps P4), and the new
     ["fitted clearing section inverted", "ui fitted clearing inverted section divider"],
     ['padding="none" clearing section inverted', "ui fitted clearing inverted section divider"],
@@ -46,7 +46,7 @@ describe("<ui-divider> classes and markup", () => {
   })
 
   it("is a separator, vertical with aria-orientation, around a slot", async () => {
-    const { root } = await divider(`<ui-divider vertical>and</ui-divider>`)
+    const { root } = await divider(`<ui-divider direction="vertical">and</ui-divider>`)
     expect(root.getAttribute("role")).toBe("separator")
     expect(root.getAttribute("aria-orientation")).toBe("vertical")
     expect(root.querySelector("slot")).not.toBeNull()
@@ -55,7 +55,7 @@ describe("<ui-divider> classes and markup", () => {
   })
 
   it("renders the `icon` shorthand's box before the text", async () => {
-    const { root } = await divider(`<ui-divider horizontal icon="tag">Description</ui-divider>`)
+    const { root } = await divider(`<ui-divider direction="horizontal" icon="tag">Description</ui-divider>`)
     const box = root.firstElementChild!
     expect(box.className).toBe("icon")
     expect(box.getAttribute("part")).toBe("icon")

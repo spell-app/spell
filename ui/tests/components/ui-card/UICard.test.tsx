@@ -64,8 +64,8 @@ describe("<ui-card> classes and markup", () => {
     ['size="small"', "ui small card"],
     ['size="medium"', "ui card"],
     ['color="red"', "ui red card"],
-    ["raised", "ui raised card"],
-    ['raised="no"', "ui card"],
+    ['appearance="raised"', "ui raised card"],
+    ["", "ui card"],
     // the old names (epic ui-gaps P4), and the new
     ["horizontal fluid", "ui horizontal fluid card"],
     ['direction="horizontal" fluid', "ui horizontal fluid card"],
@@ -77,11 +77,11 @@ describe("<ui-card> classes and markup", () => {
     expect(rootOf(host).className).toBe(classes)
   })
 
-  it("renders an <article> around its slot;  a link with href", async () => {
+  it("renders an <article> around its slot;  a link with `link`", async () => {
     const host = await render(`<ui-card><ui-content>Hi</ui-content></ui-card>`)
     expect(rootOf(host).localName).toBe("article")
     expect(rootOf(host).querySelector("slot")).not.toBeNull()
-    host.setAttribute("href", "#profile")
+    host.setAttribute("link", "#profile")
     host.setAttribute("target", "_blank")
     await ElementFixture.tick()
     const link = rootOf(host)
@@ -105,7 +105,7 @@ describe("<ui-card> classes and markup", () => {
   })
 
   it("drops a disabled link card's href;  aria-disabled, :state(disabled)", async () => {
-    const host = await render(`<ui-card href="#x" disabled heading="Off"></ui-card>`)
+    const host = await render(`<ui-card link="#x" disabled heading="Off"></ui-card>`)
     expect(rootOf(host).hasAttribute("href")).toBe(false)
     expect(rootOf(host).getAttribute("aria-disabled")).toBe("true")
     expect(host.internals.ariaDisabled).toBe("true")
@@ -210,12 +210,12 @@ describe("<ui-card> content parts", () => {
     const imaged = await render(`<ui-card image="${PHOTO}"><ui-content>B</ui-content></ui-card>`)
     expect(style(partRoot(imaged.querySelector("ui-content")!)).borderTopWidth).toBe("1px")
     // ... but not in a horizontal card, whose contents have none
-    const horizontal = await render(`<ui-card horizontal heading="A"><ui-content>B</ui-content></ui-card>`)
+    const horizontal = await render(`<ui-card direction="horizontal" heading="A"><ui-content>B</ui-content></ui-card>`)
     expect(style(partRoot(horizontal.querySelector("ui-content")!)).borderTopWidth).toBe("0px")
   })
 
   it("aligns content (`text-align`)", async () => {
-    const host = await render(`<ui-card><ui-content text-align="center">Centred</ui-content></ui-card>`)
+    const host = await render(`<ui-card><ui-content align="center">Centred</ui-content></ui-card>`)
     const [centred] = host.querySelectorAll("ui-content")
     expect(partRoot(centred!).className).toBe("center aligned content")
     expect(style(partRoot(centred!)).textAlign).toBe("center")
@@ -257,7 +257,7 @@ describe("<ui-card> variations", () => {
 
   it("lays out a horizontal card:  image beside the content, `--_ui-card-layout`", async () => {
     const host = await render(
-      `<ui-card horizontal><img src="${PHOTO}" alt="Photo"><ui-content><ui-header>Side</ui-header></ui-content></ui-card>`
+      `<ui-card direction="horizontal"><img src="${PHOTO}" alt="Photo"><ui-content><ui-header>Side</ui-header></ui-content></ui-card>`
     )
     const image = host.querySelector("img")!
     const content = partRoot(host.querySelector("ui-content")!)
@@ -270,7 +270,7 @@ describe("<ui-card> variations", () => {
 
   it("is fluid and centered", async () => {
     const wrapper = await ElementFixture.render(
-      `<div style="width: 600px"><ui-card fluid></ui-card><ui-card centered></ui-card></div>`
+      `<div style="width: 600px"><ui-card fluid></ui-card><ui-card align="center"></ui-card></div>`
     )
     const [fluid, centered] = [...wrapper.querySelectorAll("ui-card")].map(rootOf)
     expect(fluid!.getBoundingClientRect().width).toBe(600)
@@ -315,7 +315,9 @@ describe("<ui-card> variations", () => {
 
   it("`dashed`:  a dashed outline in the border colour instead of the ring, no drop shadow", async () => {
     const red = "rgb(255, 0, 0)"
-    const host = await render(`<ui-card dashed heading="Placeholder" style="--ui-card-border-color: ${red}"></ui-card>`)
+    const host = await render(
+      `<ui-card appearance="dashed" heading="Placeholder" style="--ui-card-border-color: ${red}"></ui-card>`
+    )
     expect(rootOf(host).className).toBe("ui dashed card")
     const root = style(rootOf(host))
     expect([root.outlineStyle, root.outlineColor, root.outlineWidth]).toEqual(["dashed", red, "1px"])
@@ -323,7 +325,7 @@ describe("<ui-card> variations", () => {
     expect(root.boxShadow).not.toContain("3px")
     const plain = await render(`<ui-card heading="Plain"></ui-card>`)
     expect(style(rootOf(plain)).outlineStyle).toBe("none")
-    const raised = await render(`<ui-card dashed raised heading="Raised"></ui-card>`)
+    const raised = await render(`<ui-card appearance="dashed raised" heading="Raised"></ui-card>`)
     expect(style(rootOf(raised)).boxShadow).not.toBe(root.boxShadow)
   })
 
@@ -396,13 +398,13 @@ describe("<ui-cards>", () => {
 
   it("hands its variations to its cards;  a card's own value wins", async () => {
     const group = await render(
-      `<ui-cards raised color="blue" size="small"><ui-card></ui-card><ui-card color="red"></ui-card></ui-cards>`
+      `<ui-cards appearance="raised" color="blue" size="small"><ui-card></ui-card><ui-card color="red"></ui-card></ui-cards>`
     )
     const [first, second] = cardsOf(group).map(rootOf)
     expect(first!.className).toBe("ui small blue raised card")
     expect(second!.className).toBe("ui small red raised card")
     group.setAttribute("inverted", "")
-    group.removeAttribute("raised")
+    group.removeAttribute("appearance")
     await ElementFixture.tick()
     expect(rootOf(cardsOf(group)[0]!).className).toBe("ui small blue inverted card")
     expect(style(rootOf(cardsOf(group)[0]!)).colorScheme).toBe("dark")
@@ -459,14 +461,14 @@ describe("<ui-cards>", () => {
 
   it("centres its rows", async () => {
     const wrapper = await ElementFixture.render(
-      `<div style="width: 1000px"><ui-cards centered><ui-card></ui-card></ui-cards></div>`
+      `<div style="width: 1000px"><ui-cards align="center"><ui-card></ui-card></ui-cards></div>`
     )
     const card = rootOf(cardsOf(wrapper.querySelector("ui-cards")!)[0]!).getBoundingClientRect()
     expect(card.left - wrapper.getBoundingClientRect().left).toBeCloseTo((1000 - 290) / 2, 0)
   })
 
   it("lets a card leave its group:  no role, no group classes", async () => {
-    const group = await render(`<ui-cards raised><ui-card heading="Moving"></ui-card></ui-cards>`)
+    const group = await render(`<ui-cards appearance="raised"><ui-card heading="Moving"></ui-card></ui-cards>`)
     const card = cardsOf(group)[0]!
     group.after(card)
     await ElementFixture.tick()
@@ -484,7 +486,7 @@ describe("<ui-cards>", () => {
 describe("<ui-card> keyboard", () => {
   it("is one Tab stop as a link card, followed with Enter", async () => {
     const wrapper = await ElementFixture.render(
-      `<div><button>Before</button><ui-card href="#kristy" heading="Kristy" description="Art director"></ui-card><ui-card heading="Plain"></ui-card><button>After</button></div>`
+      `<div><button>Before</button><ui-card link="#kristy" heading="Kristy" description="Art director"></ui-card><ui-card heading="Plain"></ui-card><button>After</button></div>`
     )
     const [before, after] = wrapper.querySelectorAll("button")
     const card = wrapper.querySelector("ui-card")!

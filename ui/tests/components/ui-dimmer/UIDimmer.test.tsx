@@ -70,7 +70,7 @@ describe("<ui-dimmer> classes", () => {
     ["", "ui dimmer"],
     ["visible", "ui active dimmer"],
     ['shade="very light" inverted', "ui very light inverted dimmer"],
-    ['blurring simple vertical-align="top"', "ui blurring simple top aligned dimmer"],
+    ['blurring appearance="simple" vertical-align="top"', "ui blurring simple top aligned dimmer"],
     ["page", "ui page dimmer"],
     ["visible disabled", "ui disabled dimmer"]
   ])("<ui-dimmer %s>", async (attributes, classes) => {

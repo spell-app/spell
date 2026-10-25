@@ -98,18 +98,18 @@ describe("<ui-item> unowned", () => {
 describe("<ui-item> owned", () => {
   it.each([
     ["", "div", "item"],
-    ['href="#a"', "a", "item"],
-    ["link", "button", "link item"],
+    ['link="#a"', "a", "item"],
+    ['appearance="link"', "button", "link item"],
     ["selected", "div", "active item"],
     ['selected="no"', "div", "item"],
     ["active", "div", "active item"],
     ['active="no"', "div", "item"],
     ['color="red" selected', "div", "red active ui-red item"],
     ['position="right"', "div", "right item"],
-    ["fitted", "div", "fitted item"],
-    ['fitted="vertically"', "div", "vertically fitted item"],
+    ['padding="none"', "div", "fitted item"],
+    ['padding="none-y"', "div", "vertically fitted item"],
     ["disabled", "div", "disabled item"],
-    ['type="header"', "div", "header item"]
+    ['kind="header"', "div", "header item"]
   ])("<ui-item %s> => <%s class=%s>", async (attributes, tag, classes) => {
     const { items } = await owned(`<ui-item ${attributes}>X</ui-item>`)
     const box = boxOf(items[0]!)
@@ -119,7 +119,7 @@ describe("<ui-item> owned", () => {
   })
 
   it("renders buttons when the owner says items are interactive, with its roles", async () => {
-    const { owner, items } = await owned(`<ui-item>X</ui-item><ui-item href="#y">Y</ui-item>`, "interactive")
+    const { owner, items } = await owned(`<ui-item>X</ui-item><ui-item link="#y">Y</ui-item>`, "interactive")
     expect(boxOf(items[0]!).localName).toBe("button")
     expect(boxOf(items[0]!).getAttribute("type")).toBe("button")
     expect(boxOf(items[1]!).localName).toBe("a")
@@ -132,14 +132,16 @@ describe("<ui-item> owned", () => {
   })
 
   it("says aria-current:  the owner's value on a link, `true` otherwise", async () => {
-    const { items } = await owned(`<ui-item href="#a" selected>A</ui-item><ui-item link selected>B</ui-item>`)
+    const { items } = await owned(
+      `<ui-item link="#a" selected>A</ui-item><ui-item appearance="link" selected>B</ui-item>`
+    )
     expect(boxOf(items[0]!).getAttribute("aria-current")).toBe("page")
     expect(boxOf(items[1]!).getAttribute("aria-current")).toBe("true")
   })
 
   it("forwards the DOM element's aria-expanded to a button box only, and follows it", async () => {
     const { items } = await owned(
-      `<ui-item link aria-expanded="false">A</ui-item><ui-item href="#b" aria-expanded="true">B</ui-item>`
+      `<ui-item appearance="link" aria-expanded="false">A</ui-item><ui-item link="#b" aria-expanded="true">B</ui-item>`
     )
     expect(boxOf(items[0]!).getAttribute("aria-expanded")).toBe("false")
     expect(boxOf(items[1]!).hasAttribute("aria-expanded")).toBe(false)
@@ -148,7 +150,9 @@ describe("<ui-item> owned", () => {
   })
 
   it("disables:  no href, aria-disabled;  a disabled button", async () => {
-    const { items } = await owned(`<ui-item href="#a" disabled>A</ui-item><ui-item link disabled>B</ui-item>`)
+    const { items } = await owned(
+      `<ui-item link="#a" disabled>A</ui-item><ui-item appearance="link" disabled>B</ui-item>`
+    )
     expect(boxOf(items[0]!).hasAttribute("href")).toBe(false)
     expect(boxOf(items[0]!).getAttribute("aria-disabled")).toBe("true")
     expect((boxOf(items[1]!) as HTMLButtonElement).disabled).toBe(true)
@@ -157,7 +161,7 @@ describe("<ui-item> owned", () => {
 
   it("renders a divider, the value as data-value, the image and icon shorthands, the DOM element's aria-label", async () => {
     const { items } = await owned(
-      `<ui-item type="divider"></ui-item>` +
+      `<ui-item kind="divider"></ui-item>` +
         `<ui-item value="7" image="data:," icon="house" aria-label="Home">X</ui-item>`
     )
     const divider = items[0]!.shadowRoot!.firstElementChild!
@@ -190,7 +194,7 @@ describe("<ui-item> owned", () => {
   })
 
   it("exposes its box as focusTarget", async () => {
-    const { items } = await owned(`<ui-item link>X</ui-item>`)
+    const { items } = await owned(`<ui-item appearance="link">X</ui-item>`)
     const component = items[0]!.component as unknown as { focusTarget?: HTMLElement }
     expect(component.focusTarget).toBe(boxOf(items[0]!))
   })
@@ -206,13 +210,13 @@ describe("<ui-item> owned", () => {
     const header = owner.querySelector<DOMElement>("ui-header")!
     owner.setAttribute("interactive", "")
     await expect.poll(() => boxOf(owner.querySelector("ui-item")!).localName).toBe("button")
-    header.setAttribute("href", "#title")
+    header.setAttribute("link", "#title")
     await expect.poll(() => header.shadowRoot!.querySelector("[part~=header]")!.localName).toBe("a")
   })
 
   it("passes axe", async () => {
     const { owner } = await owned(
-      `<ui-item href="#a" selected>A</ui-item><ui-item link>B</ui-item><ui-item>C</ui-item>`,
+      `<ui-item link="#a" selected>A</ui-item><ui-item appearance="link">B</ui-item><ui-item>C</ui-item>`,
       'element-role="listitem"'
     )
     owner.setAttribute("role", "list")

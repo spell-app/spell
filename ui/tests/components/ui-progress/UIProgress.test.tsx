@@ -57,8 +57,8 @@ describe("<ui-progress> classes", () => {
     ['attach="top"', "ui top attached progress"],
     ["indeterminate", "ui indeterminate progress"],
     ['indeterminate="sliding" speed="fast"', "ui fast sliding indeterminate progress"],
-    ["attached", "ui attached progress"],
-    ['attached="top"', "ui top attached progress"],
+    ['attach="both"', "ui attached progress"],
+    ['attach="top"', "ui top attached progress"],
     ['value="100"', "ui success progress"],
     ['value="100" state="error"', "ui error progress"]
   ])("<ui-progress %s>", async (attributes, classes) => {

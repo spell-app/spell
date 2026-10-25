@@ -66,14 +66,14 @@ describe("<ui-steps> classes", () => {
     ["", "ui steps"],
     ['size="small"', "ui small steps"],
     ["ordered", "ui ordered steps"],
-    ["vertical", "ui vertical steps"],
-    ['vertical="right"', "ui right vertical steps"],
-    ['attached="bottom"', "ui bottom attached steps"],
-    ["attached", "ui attached steps"],
+    ['direction="vertical"', "ui vertical steps"],
+    ['direction="vertical-right"', "ui right vertical steps"],
+    ['attach="bottom"', "ui bottom attached steps"],
+    ['attach="both"', "ui attached steps"],
     ['stackable="tablet"', "ui tablet stackable steps"],
     ["unstackable fluid inverted", "ui fluid inverted unstackable steps"],
     ['widths="3"', "ui three steps"],
-    ['circular color="red"', "ui red circular steps"]
+    ['appearance="circular" color="red"', "ui red circular steps"]
   ])("<ui-steps %s>", async (attributes, classes) => {
     const { host, root } = await render(`<ui-steps ${attributes}><ui-step heading="A"></ui-step></ui-steps>`)
     expect(root.className).toBe(classes)
@@ -91,8 +91,8 @@ describe("<ui-step>", () => {
     ["active", "div", "active step"],
     ["completed disabled", "div", "completed disabled step"],
     ['color="red"', "div", "red ui-red step"],
-    ['href="#a"', "a", "step"],
-    ["link", "button", "link step"]
+    ['link="#a"', "a", "step"],
+    ['appearance="link"', "button", "link step"]
   ])("<ui-step %s> => <%s class=%s>", async (attributes, tag, classes) => {
     const holder = await ElementFixture.render(`<ui-steps><ui-step ${attributes} heading="A"></ui-step></ui-steps>`)
     const [root] = stepRoots(holder)
@@ -109,7 +109,7 @@ describe("<ui-step>", () => {
     expect(roots.map((root) => root.getAttribute("aria-current"))).toEqual([null, "step", null])
     expect(steps[1]!.matches(":state(selected)")).toBe(true)
     steps[1]!.removeAttribute("selected")
-    steps[2]!.setAttribute("active", "")
+    steps[2]!.setAttribute("selected", "")
     await ElementFixture.tick()
     expect(roots.map((root) => root.getAttribute("aria-current"))).toEqual([null, null, "step"])
     expect(steps[2]!.matches(":state(selected)")).toBe(true)
@@ -164,7 +164,7 @@ describe("<ui-step>", () => {
 
   it("keeps a disabled link's <a> without href, and disables a <button>", async () => {
     const holder = await ElementFixture.render(
-      `<ui-steps><ui-step href="#a" disabled heading="A"></ui-step><ui-step link disabled heading="B"></ui-step></ui-steps>`
+      `<ui-steps><ui-step link="#a" disabled heading="A"></ui-step><ui-step appearance="link" disabled heading="B"></ui-step></ui-steps>`
     )
     const [link, button] = stepRoots(holder)
     expect(link!.hasAttribute("href")).toBe(false)
@@ -230,7 +230,7 @@ describe("<ui-steps> layouts", () => {
   })
 
   it("lays vertical steps out top to bottom, the arrow only on the current step", async () => {
-    const holder = await ElementFixture.render(three("vertical", 900))
+    const holder = await ElementFixture.render(three('direction="vertical"', 900))
     const roots = stepRoots(holder)
     expect(roots[1]!.getBoundingClientRect().top).toBeGreaterThan(roots[0]!.getBoundingClientRect().top)
     expect(getComputedStyle(roots[0]!, "::after").display).toBe("none")
@@ -270,7 +270,7 @@ describe("<ui-steps> layouts", () => {
   })
 
   it("draws circular steps as a line with rings, the current ring in the accent", async () => {
-    const holder = await ElementFixture.render(three('circular color="red"', 900))
+    const holder = await ElementFixture.render(three('appearance="circular" color="red"', 900))
     const roots = stepRoots(holder)
     expect(parseFloat(getComputedStyle(roots[0]!).height)).toBeLessThan(4)
     const ring = getComputedStyle(roots[1]!, "::before")
@@ -281,8 +281,8 @@ describe("<ui-steps> layouts", () => {
 
   it("draws a step's own `color` on its ring, over the group's or with none", async () => {
     const holder = await ElementFixture.render(
-      `<div style="width: 900px"><ui-steps circular><ui-step color="teal"></ui-step><ui-step></ui-step></ui-steps>` +
-        `<ui-steps circular color="red"><ui-step color="orange"></ui-step></ui-steps></div>`
+      `<div style="width: 900px"><ui-steps appearance="circular"><ui-step color="teal"></ui-step><ui-step></ui-step></ui-steps>` +
+        `<ui-steps appearance="circular" color="red"><ui-step color="orange"></ui-step></ui-steps></div>`
     )
     const [teal, plain, orange] = stepRoots(holder)
     const hue = (name: string) =>
@@ -352,7 +352,7 @@ describe("<ui-steps> outer margin", () => {
   })
 
   it("keeps a circular group's margins on its DOM element, even as the last child", async () => {
-    const { hosts } = await twoGroups("circular")
+    const { hosts } = await twoGroups('appearance="circular"')
     expect(hosts[1]!.matches(":state(block):state(circular)")).toBe(true)
     expect(getComputedStyle(hosts[1]!).marginBottom).toBe("16px")
   })
@@ -439,7 +439,7 @@ describe("<ui-steps> tokens from outside", () => {
     )
     expect(getComputedStyle(content(plain)).paddingTop).toBe("0px")
     const circular = await ElementFixture.render(
-      `<div style="width: 900px"><ui-steps circular style="--ui-step-content-padding: 20px">${STEPS}</ui-steps></div>`
+      `<div style="width: 900px"><ui-steps appearance="circular" style="--ui-step-content-padding: 20px">${STEPS}</ui-steps></div>`
     )
     expect(getComputedStyle(content(circular)).paddingLeft).toBe("8px")
   })
@@ -453,8 +453,8 @@ describe("<ui-step> keyboard", () => {
   it("makes link and button steps Tab stops, plain steps not", async () => {
     const holder = await ElementFixture.render(
       `<div><button>before</button><ui-steps><ui-step heading="Plain"></ui-step>` +
-        `<ui-step href="#a" heading="Link"></ui-step><ui-step link heading="Button"></ui-step>` +
-        `<ui-step href="#b" disabled heading="Off"></ui-step></ui-steps></div>`
+        `<ui-step link="#a" heading="Link"></ui-step><ui-step appearance="link" heading="Button"></ui-step>` +
+        `<ui-step link="#b" disabled heading="Off"></ui-step></ui-steps></div>`
     )
     const [, link, button] = stepRoots(holder)
     holder.querySelector("button")!.focus()
@@ -463,7 +463,7 @@ describe("<ui-step> keyboard", () => {
     await Keys.tab()
     expect(button!.matches(":focus")).toBe(true)
     let clicks = 0
-    holder.querySelector("ui-step[link]")!.addEventListener("click", () => clicks++)
+    holder.querySelector('ui-step[appearance~="link"]')!.addEventListener("click", () => clicks++)
     await userEvent.keyboard("{Enter}")
     await userEvent.keyboard(" ")
     expect(clicks).toBe(2)

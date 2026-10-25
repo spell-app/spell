@@ -51,9 +51,9 @@ describe("<ui-label> classes", () => {
     ["", "ui label"],
     ['size="small"', "ui small label"],
     ['size="medium"', "ui label"],
-    ['color="red" basic', "ui red basic label"],
-    ['basic="no"', "ui label"],
-    ['basic="yes"', "ui basic label"],
+    ['color="red" appearance="basic"', "ui red basic label"],
+    ["", "ui label"],
+    ['appearance="basic"', "ui basic label"],
     ["tag", "ui tag label"],
     ["corner", "ui corner label"],
     ['corner="left"', "ui left corner label"],
@@ -62,11 +62,11 @@ describe("<ui-label> classes", () => {
     ["pointing", "ui pointing label"],
     ['pointing="below"', "ui below pointing label"],
     ['floating="left"', "ui left floating label"],
-    ['attached="top right"', "ui top right attached label"],
-    ["horizontal circular empty", "ui horizontal empty circular label"],
-    ["fluid centered", "ui centered fluid label"],
+    ['attach="top right"', "ui top right attached label"],
+    ['direction="horizontal" appearance="circular" empty', "ui horizontal empty circular label"],
+    ['fluid align="center"', "ui centered fluid label"],
     ["prompt", "ui prompt label"],
-    ["active disabled inverted", "ui disabled inverted active label"],
+    ["selected disabled inverted", "ui disabled inverted active label"],
     // `image` is a string kind:  no grammar slot, so the element adds the class as an extra, before the noun
     ["image", "ui image label"]
   ])("<ui-label %s>", async (attributes, classes) => {
@@ -86,7 +86,7 @@ describe("<ui-label> classes", () => {
   })
 
   it("sets `:state(active)` / `:state(disabled)`", async () => {
-    const { host } = await label(`<ui-label active disabled>x</ui-label>`)
+    const { host } = await label(`<ui-label selected disabled>x</ui-label>`)
     expect(host.matches(":state(active)")).toBe(true)
     expect(host.matches(":state(disabled)")).toBe(true)
   })
@@ -117,7 +117,7 @@ describe("<ui-label> content", () => {
   })
 
   it("renders <a> for href, and the icon box only when there's an icon", async () => {
-    const { root } = await label(`<ui-label href="#tag" target="_blank">Tag</ui-label>`)
+    const { root } = await label(`<ui-label link="#tag" target="_blank">Tag</ui-label>`)
     expect(root).toMatchObject({ localName: "a", target: "_blank" })
     expect(root.getAttribute("href")).toBe("#tag")
     expect(root.querySelector("[part~=icon]")).toBeNull()
@@ -129,7 +129,7 @@ describe("<ui-label> content", () => {
 
   it("forwards the host's aria-label to the root", async () => {
     const { host, root } = await label(
-      `<ui-label corner="left" href="#like" icon="heart" aria-label="Like"></ui-label>`
+      `<ui-label corner="left" link="#like" icon="heart" aria-label="Like"></ui-label>`
     )
     expect(root.getAttribute("aria-label")).toBe("Like")
     host.setAttribute("aria-label", "Love")
@@ -195,7 +195,7 @@ describe("<ui-label> remove", () => {
 describe("<ui-labels>", () => {
   it("renders the group", async () => {
     const group = await ElementFixture.render<DOMElement>(
-      `<ui-labels size="huge" color="blue" basic tag><ui-label>A</ui-label></ui-labels>`
+      `<ui-labels size="huge" color="blue" appearance="basic" tag><ui-label>A</ui-label></ui-labels>`
     )
     const root = group.shadowRoot!.querySelector("[part~=group]")!
     expect(root.className).toBe("ui huge blue tag basic labels")
@@ -203,7 +203,9 @@ describe("<ui-labels>", () => {
   })
 
   it("hands its look to the labels in it", async () => {
-    const group = await ElementFixture.render<DOMElement>(`<ui-labels circular><ui-label>1</ui-label></ui-labels>`)
+    const group = await ElementFixture.render<DOMElement>(
+      `<ui-labels appearance="circular"><ui-label>1</ui-label></ui-labels>`
+    )
     const child = group.querySelector("ui-label")!.shadowRoot!.querySelector<HTMLElement>("[part~=label]")!
     const plain = await ElementFixture.render<DOMElement>(`<ui-label>1</ui-label>`)
     const plainRoot = plain.shadowRoot!.querySelector<HTMLElement>("[part~=label]")!
@@ -251,7 +253,7 @@ describe("<ui-label> colour", () => {
   })
 
   it("`tinted`:  the colour's soft fill (`--ui-color-background`) and text colour (`--ui-color-text`)", async () => {
-    const { root } = await label(`<ui-label tinted color="red">Live</ui-label>`)
+    const { root } = await label(`<ui-label appearance="tinted" color="red">Live</ui-label>`)
     expect(root.className).toBe("ui red tinted label")
     const probe = await ElementFixture.render(
       `<span class="ui-red" style="background: var(--ui-color-background); color: var(--ui-color-text)"></span>`
@@ -260,9 +262,9 @@ describe("<ui-label> colour", () => {
     expect(getComputedStyle(root).color).toBe(getComputedStyle(probe).color)
     const solid = await label(`<ui-label color="red">Live</ui-label>`)
     expect(getComputedStyle(root).backgroundColor).not.toBe(getComputedStyle(solid.root).backgroundColor)
-    const uncoloured = await roots(`<div><ui-label tinted>Plain</ui-label></div>`)
+    const uncoloured = await roots(`<div><ui-label appearance="tinted">Plain</ui-label></div>`)
     expect(getComputedStyle(uncoloured.inner).backgroundColor).toBe(getComputedStyle(uncoloured.plain).backgroundColor)
-    const group = await roots(`<ui-labels tinted color="red"><ui-label>A</ui-label></ui-labels>`)
+    const group = await roots(`<ui-labels appearance="tinted" color="red"><ui-label>A</ui-label></ui-labels>`)
     expect(getComputedStyle(group.inner).backgroundColor).toBe(getComputedStyle(root).backgroundColor)
   })
 })
@@ -307,7 +309,7 @@ describe("<ui-label> tokens from outside", () => {
 
   it("reaches the members of a group, set on the group;  `circular` swaps it", async () => {
     const group = await ElementFixture.render(
-      `<ui-labels style="--ui-label-radius: 12px"><ui-label>A</ui-label><ui-label circular>1</ui-label></ui-labels>`
+      `<ui-labels style="--ui-label-radius: 12px"><ui-label>A</ui-label><ui-label appearance="circular">1</ui-label></ui-labels>`
     )
     const [plain, circular] = [...group.querySelectorAll("ui-label")]
     expect(radius(plain!)).toBe("12px")
@@ -316,7 +318,7 @@ describe("<ui-label> tokens from outside", () => {
 
   it("owner tokens:  a plain owner sets the public `--ui-label-owner-edge`", async () => {
     const owner = await ElementFixture.render(
-      `<div style="position: relative; --ui-label-owner-edge: 5px"><ui-label attached="top">A</ui-label></div>`
+      `<div style="position: relative; --ui-label-owner-edge: 5px"><ui-label attach="top">A</ui-label></div>`
     )
     const box = getComputedStyle(owner.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!)
     expect(box.top).toBe("-5px")
@@ -342,7 +344,7 @@ describe("<ui-label> statistic / standalone swap", () => {
     holder.querySelector("p")!.append(label)
     await ElementFixture.settle(holder)
     expect(label.shadowRoot!.querySelector("[part~=label]")!.className).toBe("ui label")
-    detail.setAttribute("href", "#dogs")
+    detail.setAttribute("link", "#dogs")
     await ElementFixture.settle(holder)
     expect(detail.shadowRoot!.firstElementChild!.localName).toBe("a")
   })

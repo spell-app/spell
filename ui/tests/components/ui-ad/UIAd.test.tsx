@@ -30,7 +30,7 @@ describe("<ui-ad> classes", () => {
   it.each([
     ["", "ui ad"],
     ['unit="medium rectangle"', "ui medium rectangle ad"],
-    ['unit="leaderboard" centered', "ui leaderboard centered ad"],
+    ['unit="leaderboard" align="center"', "ui leaderboard centered ad"],
     ['unit="large mobile banner"', "ui large mobile banner ad"],
     ['unit="small square" test', "ui small square test ad"],
     ['unit="huge rectangle"', "ui ad"]
@@ -109,7 +109,7 @@ describe("<ui-ad> units and test", () => {
 
   it("centres a centered ad", async () => {
     const holder = await ElementFixture.render(
-      `<div style="width: 600px"><p>x</p><ui-ad unit="small rectangle" centered></ui-ad><p>y</p></div>`
+      `<div style="width: 600px"><p>x</p><ui-ad unit="small rectangle" align="center"></ui-ad><p>y</p></div>`
     )
     const root = holder.querySelector<DOMElement>("ui-ad")!.shadowRoot!.firstElementChild!
     const box = root.getBoundingClientRect()

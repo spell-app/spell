@@ -77,10 +77,10 @@ describe("<ui-include> loading", () => {
   })
 
   it("`select` shows only the first match;  no match is an error", async () => {
-    const host = await include(`<ui-include source="${DIR}/page.html" select="#more"></ui-include>`)
+    const host = await include(`<ui-include source="${DIR}/page.html" selector="#more"></ui-include>`)
     expect(box(host).children.length).toBe(1)
     expect(box(host).firstElementChild!.id).toBe("more")
-    const missing = await include(`<ui-include source="${DIR}/page.html" select="#nope"></ui-include>`)
+    const missing = await include(`<ui-include source="${DIR}/page.html" selector="#nope"></ui-include>`)
     expect(missing.matches(":state(error)")).toBe(true)
     expect(missing.shadowRoot!.querySelector("[part~=error]")!.textContent).toMatch(/Couldn't show/)
   })
@@ -174,7 +174,7 @@ describe("<ui-include> content and save()", () => {
   it("with `select`, saves only that element, by its id", async () => {
     const saver = vi.fn<SourceSaver>(async () => ({ etag: '"v2"' }))
     UI.sources.saver = saver
-    const host = await include(`<ui-include source="${DIR}/page.html" select="#intro"></ui-include>`)
+    const host = await include(`<ui-include source="${DIR}/page.html" selector="#intro"></ui-include>`)
     box(host).querySelector("p")!.textContent = "Changed."
     expect(await host.save()).toBe(true)
     expect(saver.mock.calls[0][0]).toMatchObject({
@@ -188,7 +188,7 @@ describe("<ui-include> content and save()", () => {
 
   it("`select` on an element without an id can't be saved", async () => {
     UI.sources.saver = vi.fn<SourceSaver>(async () => ({}))
-    const host = await include(`<ui-include source="${DIR}/page.html" select="h2"></ui-include>`)
+    const host = await include(`<ui-include source="${DIR}/page.html" selector="h2"></ui-include>`)
     const onError = vi.fn()
     host.addEventListener("ui-error", onError)
     expect(await host.save()).toBe(false)

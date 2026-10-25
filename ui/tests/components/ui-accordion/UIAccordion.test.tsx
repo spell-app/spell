@@ -65,10 +65,10 @@ function events(host: Element) {
 describe("<ui-accordion> classes", () => {
   it.each([
     ["", "ui accordion"],
-    ["styled", "ui styled accordion"],
-    ["styled fluid inverted", "ui fluid inverted styled accordion"],
-    ["basic styled", "ui basic styled accordion"],
-    ["compact", "ui compact accordion"],
+    ['appearance="styled"', "ui styled accordion"],
+    ['appearance="styled" fluid inverted', "ui fluid inverted styled accordion"],
+    ['appearance="basic styled"', "ui basic styled accordion"],
+    ['padding="compact"', "ui compact accordion"],
     // old names and new draw the same words (epic `ui-gaps` P4)
     ['compact="very" styled', "ui very compact styled accordion"],
     ['padding="xs" appearance="styled"', "ui very compact styled accordion"],
@@ -161,7 +161,7 @@ describe("<ui-accordion> panels", () => {
   })
 
   it("leaves the slotted parts plain (no owner state):  the summary and content box are the boxes", async () => {
-    const { host, titles } = await accordion("styled")
+    const { host, titles } = await accordion('appearance="styled"')
     const title = host.querySelector<DOMElement>("ui-title")!
     expect(title.matches(":state(in-accordion)")).toBe(false)
     expect(getComputedStyle(titles[0]!).paddingLeft).toBe("16px")
@@ -209,7 +209,7 @@ describe("<ui-accordion> tokens from outside", () => {
   })
 
   it("variations:  `styled` swaps the padding;  the open title's colour follows the title colour", async () => {
-    const { host } = await accordion(`styled style="--ui-accordion-title-padding: 20px 0"`)
+    const { host } = await accordion('appearance="styled" style="--ui-accordion-title-padding: 20px 0"')
     expect(padding(host)).not.toBe("20px")
     const red = "rgb(255, 0, 0)"
     const { titles } = await accordion(`open="0" style="--ui-accordion-title-color: ${red}"`)
@@ -366,7 +366,7 @@ describe("<ui-accordion> nested", () => {
     `</ui-content>`
 
   it("renders a nested accordion without `ui`, taking its parent's styled look", async () => {
-    const { host, titles } = await accordion('styled open="0"', NESTED)
+    const { host, titles } = await accordion('appearance="styled" open="0"', NESTED)
     const inner = host.querySelector<DOMElement>("ui-accordion")!
     await expect.poll(() => inner.matches(":state(in-accordion)")).toBe(true)
     const { root, titles: innerTitles } = parts(inner)
@@ -393,7 +393,7 @@ describe("<ui-accordion> nested", () => {
 
 describe("<ui-accordion> look", () => {
   it("draws the styled box, rules between titles, and turns the open title's arrow", async () => {
-    const { host, root, titles } = await accordion('styled open="1"')
+    const { host, root, titles } = await accordion('appearance="styled" open="1"')
     host.style.width = "800px"
     expect(getComputedStyle(root).width).toBe("600px")
     host.setAttribute("fluid", "")

@@ -88,7 +88,7 @@ describe("<ui-slider> markup", () => {
       'direction="reversed vertical" smooth hover appearance="basic" inverted',
       "ui hover inverted smooth basic reversed vertical slider"
     ],
-    ['labeled aligned="bottom"', "ui labeled bottom aligned slider"],
+    ['labeled align="bottom"', "ui labeled bottom aligned slider"],
     ["readonly disabled", "ui disabled read-only slider"]
   ])("<ui-slider %s>", async (attributes, classes) => {
     const { root } = await slider(`${attributes} aria-label="S"`)
@@ -221,12 +221,14 @@ describe("<ui-slider> keyboard", () => {
   })
 
   it("arrows follow the thumb on reversed and vertical sliders (Fomantic's key movement)", async () => {
-    const { host, thumbs } = await slider(`reversed value="10" aria-label="S"`)
+    const { host, thumbs } = await slider('direction="reversed" value="10" aria-label="S"')
     thumbs[0]!.focus()
     await userEvent.keyboard("{ArrowLeft}")
     await settle()
     expect(host.value).toBe(11)
-    const { host: vertical, thumbs: upright } = await slider(`vertical value="10" style="height: 200px" aria-label="S"`)
+    const { host: vertical, thumbs: upright } = await slider(
+      'direction="vertical" value="10" style="height: 200px" aria-label="S"'
+    )
     upright[0]!.focus()
     await userEvent.keyboard("{ArrowDown}")
     await settle()

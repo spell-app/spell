@@ -38,7 +38,7 @@ describe("<ui-items> static render", () => {
   })
 
   it("wraps a link item's <a> in an <li data-ui-li>", () => {
-    const html = StaticRender.fragment(`<ui-items><ui-item href="#camp">Camp</ui-item></ui-items>`)
+    const html = StaticRender.fragment(`<ui-items><ui-item link="#camp">Camp</ui-item></ui-items>`)
     expect(sorted(html)).toBe(
       sorted(
         `<ul class="ui items" part="items" role="list" data-ui="items" data-state="items"><li data-ui-li="">` +

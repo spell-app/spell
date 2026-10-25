@@ -859,8 +859,8 @@
    * (Owen, 2026-10-23:  "No space between types and content when types is collapsed")
    * - the dividing look's 1.5em margins, its own below and the next one's above, stood between them
    */
-  .site-main ui-section[sticky][collapsed]::part(section),
-  .site-main ui-section[sticky][collapsed] + ui-section[sticky]::part(section) {
+  .site-main ui-section[sticky]:state(collapsed)::part(section),
+  .site-main ui-section[sticky]:state(collapsed) + ui-section[sticky]::part(section) {
     margin-block: 0;
   }
   .site-tabs::part(menu) {

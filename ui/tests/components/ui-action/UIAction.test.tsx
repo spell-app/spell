@@ -15,7 +15,7 @@ type ActionElement = DOMElement & { component: UIAction; action?: ActionToDraw }
 
 /** Render `markup` in a vertical menu;  returns its actions and each one's item box. */
 async function menuOf(markup: string) {
-  const box = await ElementFixture.render(`<ui-menu vertical aria-label="Game">${markup}</ui-menu>`)
+  const box = await ElementFixture.render(`<ui-menu direction="vertical" aria-label="Game">${markup}</ui-menu>`)
   const actions = [...box.querySelectorAll<ActionElement>("ui-action")]
   const boxOf = (action: ActionElement) => action.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!
   return { actions, boxOf }

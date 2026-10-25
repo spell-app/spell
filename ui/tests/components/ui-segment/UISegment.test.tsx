@@ -37,12 +37,12 @@ describe("<ui-segment> classes", () => {
     ['size="small"', "ui small segment"],
     ['size="medium"', "ui segment"],
     ['color="red" inverted', "ui red inverted segment"],
-    ["raised", "ui raised segment"],
-    ['raised="no"', "ui segment"],
-    ["stacked", "ui stacked segment"],
-    ['stacked="tall"', "ui tall stacked segment"],
-    ['piled="yes"', "ui piled segment"],
-    ["vertical placeholder", "ui placeholder vertical segment"],
+    ['appearance="raised"', "ui raised segment"],
+    ["", "ui segment"],
+    ['appearance="stacked"', "ui stacked segment"],
+    ['appearance="tall-stacked"', "ui tall stacked segment"],
+    ['appearance="piled"', "ui piled segment"],
+    ['appearance="vertical" placeholder', "ui placeholder vertical segment"],
     // the old names (epic ui-gaps P4), and the new
     ["circular compact basic clearing", "ui compact clearing circular basic segment"],
     ['appearance="circular basic" padding="compact" clearing', "ui compact clearing circular basic segment"],
@@ -70,7 +70,7 @@ describe("<ui-segment> classes", () => {
 
 describe("<ui-segment> states and owner tokens", () => {
   it("sets :state(piled) and makes the host the stacking context", async () => {
-    const { host } = await render(`<ui-segment piled>x</ui-segment>`)
+    const { host } = await render(`<ui-segment appearance="piled">x</ui-segment>`)
     expect(host.matches(":state(piled)")).toBe(true)
     expect(getComputedStyle(host).zIndex).toBe("0")
     const { host: plain } = await render(`<ui-segment>x</ui-segment>`)
@@ -144,11 +144,11 @@ describe("<ui-segment> states and owner tokens", () => {
 describe("<ui-segments>", () => {
   it.each([
     ["", "ui segments"],
-    ["horizontal equal-width", "ui horizontal equal width segments"],
     ['direction="horizontal" equal-width', "ui horizontal equal width segments"],
-    ["raised", "ui raised segments"],
-    ['stacked="tall"', "ui tall stacked segments"],
-    ["piled", "ui piled segments"],
+    ['direction="horizontal" equal-width', "ui horizontal equal width segments"],
+    ['appearance="raised"', "ui raised segments"],
+    ['appearance="tall-stacked"', "ui tall stacked segments"],
+    ['appearance="piled"', "ui piled segments"],
     ['inverted="no"', "ui segments"]
   ])("<ui-segments %s>", async (attributes, classes) => {
     const { root } = await render(`<ui-segments ${attributes}><ui-segment>a</ui-segment></ui-segments>`)
@@ -157,7 +157,7 @@ describe("<ui-segments>", () => {
   })
 
   it("sets :state(piled)", async () => {
-    const { host } = await render(`<ui-segments piled><ui-segment>a</ui-segment></ui-segments>`)
+    const { host } = await render(`<ui-segments appearance="piled"><ui-segment>a</ui-segment></ui-segments>`)
     expect(host.matches(":state(piled)")).toBe(true)
   })
 
@@ -199,7 +199,7 @@ describe("<ui-segment> tokens from outside", () => {
 
   it("inherits its text alignment unless it sets one (a `right aligned` grid column)", async () => {
     const wrapper = await ElementFixture.render(
-      `<div style="text-align: right"><ui-segment>x</ui-segment><ui-segment text-align="center">y</ui-segment></div>`
+      `<div style="text-align: right"><ui-segment>x</ui-segment><ui-segment align="center">y</ui-segment></div>`
     )
     const [plain, centered] = [...wrapper.querySelectorAll("ui-segment")].map(
       (host) => getComputedStyle(host.shadowRoot!.firstElementChild!).textAlign
@@ -236,7 +236,7 @@ describe("<ui-segment> tokens from outside", () => {
 
   it("owner tokens:  an attached label covers the border width the page set", async () => {
     const { host } = await render(
-      `<ui-segment style="--ui-segment-border-width: 3px"><ui-label attached="top">A</ui-label>x</ui-segment>`
+      `<ui-segment style="--ui-segment-border-width: 3px"><ui-label attach="top">A</ui-label>x</ui-segment>`
     )
     await ElementFixture.settle(host)
     const label = host.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!
@@ -244,9 +244,9 @@ describe("<ui-segment> tokens from outside", () => {
   })
 
   it("variations:  `padded` swaps the padding for its own token", async () => {
-    const { root: padded } = await render(`<ui-segment padded style="--ui-segment-padding: 5px">x</ui-segment>`)
+    const { root: padded } = await render(`<ui-segment padding="md" style="--ui-segment-padding: 5px">x</ui-segment>`)
     expect(getComputedStyle(padded).paddingTop).not.toBe("5px")
-    const { root: themed } = await render(`<ui-segment padded style="--ui-segment-padded: 5px">x</ui-segment>`)
+    const { root: themed } = await render(`<ui-segment padding="md" style="--ui-segment-padded: 5px">x</ui-segment>`)
     expect(getComputedStyle(themed).paddingTop).toBe("5px")
   })
 })

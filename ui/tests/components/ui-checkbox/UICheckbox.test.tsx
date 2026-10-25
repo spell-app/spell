@@ -80,7 +80,7 @@ describe("<ui-checkbox> classes", () => {
     ["readonly", "ui read-only checkbox"],
     ["disabled", "ui disabled checkbox"],
     ["inverted indeterminate", "ui indeterminate inverted checkbox"],
-    ['fitted="no" disabled="yes"', "ui disabled checkbox"]
+    ['disabled="yes"', "ui disabled checkbox"]
   ])("<ui-checkbox %s>", async (attributes, classes) => {
     const { root } = await check(`<ui-checkbox ${attributes}>Label</ui-checkbox>`)
     expect(root.className).toBe(classes)
@@ -88,7 +88,7 @@ describe("<ui-checkbox> classes", () => {
 
   it.each([
     ["", "ui radio checkbox"],
-    ['type="toggle"', "ui toggle checkbox"],
+    ['appearance="toggle"', "ui toggle checkbox"],
     ['size="small" color="teal"', "ui small teal radio checkbox"]
   ])("<ui-radio %s>", async (attributes, classes) => {
     const { root, input } = await check(`<ui-radio ${attributes}>Label</ui-radio>`)
@@ -105,7 +105,7 @@ describe("<ui-checkbox> classes", () => {
   })
 
   it("makes toggles and sliders switches", async () => {
-    const { input } = await check(`<ui-checkbox type="toggle">Wifi</ui-checkbox>`)
+    const { input } = await check(`<ui-checkbox appearance="toggle">Wifi</ui-checkbox>`)
     expect(input.getAttribute("role")).toBe("switch")
     const { input: plain } = await check(`<ui-checkbox>Wifi</ui-checkbox>`)
     expect(plain.hasAttribute("role")).toBe(false)
@@ -261,7 +261,7 @@ describe("<ui-checkbox> forms", () => {
 describe("<ui-checkbox> off-value", () => {
   it("submits `off-value` while unchosen and `value` while chosen;  ui-changed says which", async () => {
     const form = await ElementFixture.render<HTMLFormElement>(
-      `<form><ui-checkbox type="toggle" name="panel" value="open" off-value="closed">Open</ui-checkbox></form>`
+      `<form><ui-checkbox appearance="toggle" name="panel" value="open" off-value="closed">Open</ui-checkbox></form>`
     )
     await ElementFixture.tick()
     const host = form.querySelector<Check>("ui-checkbox")!
@@ -344,7 +344,7 @@ describe("<ui-checkbox> off-value", () => {
 describe("<ui-checkbox> labels", () => {
   it("names a fitted box from <label for> across the shadow boundary;  clicking that label toggles", async () => {
     const container = await ElementFixture.render<HTMLDivElement>(
-      `<div><label for="agree">Agree</label><ui-checkbox id="agree" fitted></ui-checkbox></div>`
+      `<div><label for="agree">Agree</label><ui-checkbox id="agree" padding="none"></ui-checkbox></div>`
     )
     const host = container.querySelector<Check>("ui-checkbox")!
     const { input } = parts(host)

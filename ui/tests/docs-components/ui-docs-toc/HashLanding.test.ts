@@ -16,16 +16,16 @@ const frames: HTMLIFrameElement[] = []
 afterEach(() => frames.splice(0).forEach((frame) => frame.remove()))
 
 /** Tall content around a target, `#far`, unfolded or not. */
-const PAGE = `<div style="height: 2000px"></div><ui-section id="fold" collapsible collapsed><p id="far">far</p></ui-section><div style="height: 2000px"></div>`
+const PAGE = `<div style="height: 2000px"></div><ui-section id="fold" collapsible open="false"><p id="far">far</p></ui-section><div style="height: 2000px"></div>`
 
 describe("HashLanding.reveal()", () => {
   test("unfolds the sections around the target, itself only with `opensTarget`", async () => {
     const page = await pageOf(PAGE)
     const fold = page.getElementById("fold")!
     expect(HashLanding.reveal(fold, { opensTarget: false })).toBe(false)
-    expect(fold.hasAttribute("collapsed")).toBe(true)
+    expect(fold.getAttribute("open")).toBe("false")
     expect(HashLanding.reveal(page.getElementById("far")!, { opensTarget: false })).toBe(true)
-    expect(fold.hasAttribute("collapsed")).toBe(false)
+    expect(fold.hasAttribute("open")).toBe(false)
   })
 })
 

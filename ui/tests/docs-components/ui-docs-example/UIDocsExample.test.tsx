@@ -76,7 +76,7 @@ describe("<ui-docs-example> classes and chrome", () => {
   })
 
   it("shows its children live, in the default slot", async () => {
-    const { host } = await render(`<ui-docs-example><ui-button primary>Save</ui-button></ui-docs-example>`)
+    const { host } = await render(`<ui-docs-example><ui-button color="primary">Save</ui-button></ui-docs-example>`)
     const slot = host.shadowRoot!.querySelector<HTMLSlotElement>("[part~=demo] slot:not([name])")!
     expect(slot.assignedElements().map((element) => element.localName)).toEqual(["ui-button"])
   })
@@ -86,14 +86,14 @@ describe("<ui-docs-example> code pane", () => {
   it("opens at start with `code`:  the children's markup, in html", async () => {
     const { host } = await render(
       `<ui-docs-example header="Emphasis" code>
-        <ui-button primary>Save</ui-button>
+        <ui-button color="primary">Save</ui-button>
         <ui-button>Discard</ui-button>
       </ui-docs-example>`
     )
     expect(host.matches(":state(open)")).toBe(true)
     const code = codeOf(host)!
     expect(code.getAttribute("language")).toBe("html")
-    expect(code.content).toBe("<ui-button primary>Save</ui-button>\n<ui-button>Discard</ui-button>")
+    expect(code.content).toBe('<ui-button color="primary">Save</ui-button>\n<ui-button>Discard</ui-button>')
     expect(toggleOf(host).getAttribute("aria-expanded")).toBe("true")
   })
 
@@ -171,7 +171,7 @@ describe("<ui-docs-example> source capture", () => {
 
   it("reads children upgraded BEFORE it as authored, minus runtime attributes", async () => {
     const holder = await ElementFixture.render<HTMLElement>(
-      `<div><ui-button primary data-ui-animation="fade in">Save</ui-button></div>`
+      `<div><ui-button color="primary" data-ui-animation="fade in">Save</ui-button></div>`
     )
     const button = holder.querySelector("ui-button")!
     expect(button.shadowRoot).not.toBeNull()
@@ -180,7 +180,7 @@ describe("<ui-docs-example> source capture", () => {
     host.append(button)
     holder.append(host)
     await ElementFixture.settle(holder)
-    expect(codeOf(host)!.content).toBe("<ui-button primary>Save</ui-button>")
+    expect(codeOf(host)!.content).toBe('<ui-button color="primary">Save</ui-button>')
   })
 
   it("prefers the snapshot taken before the family loaded", async () => {

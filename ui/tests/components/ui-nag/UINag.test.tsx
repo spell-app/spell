@@ -283,7 +283,7 @@ describe("<ui-nag> remembering", () => {
 
   it("shows a dismissed nag that persists", async () => {
     localStorage.setItem(KEY, "dismiss")
-    const { host } = await nag(`<ui-nag key="${KEY}" storage="local" persist>Hello</ui-nag>`)
+    const { host } = await nag(`<ui-nag key="${KEY}" storage="local" persistent>Hello</ui-nag>`)
     expect(host.hidden).toBe(false)
     expect(host.matches(":state(dismissed)")).toBe(false)
   })

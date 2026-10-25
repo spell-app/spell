@@ -51,7 +51,7 @@ describe("<ui-select> static render", () => {
   it("groups options under header items, and takes options from the JSON attribute", () => {
     const html = StaticRender.fragment(
       `<ui-select options='[{"value":"x","text":"Extra"}]'>` +
-        `<ui-item type="header">Fruit</ui-item><ui-item value="pear">Pear</ui-item></ui-select>`
+        `<ui-item kind="header">Fruit</ui-item><ui-item value="pear">Pear</ui-item></ui-select>`
     )
     expect(html).toMatch(/<optgroup label="Fruit" part="group"><option [^>]*value="pear"/)
     expect(html).toMatch(/<\/optgroup><option [^>]*value="x"[^>]*><span class="text">Extra<\/span>/)

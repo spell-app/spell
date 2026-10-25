@@ -76,7 +76,7 @@ describe("<ui-grid> classes", () => {
     ['color="red" columns="4"', "ui red four column row"],
     ['columns="equal" divided centered', "ui centered divided equal width row"],
     ['only="mobile" reversed="computer"', "ui mobile only computer reversed row"],
-    ['text-align="right" vertical-align="bottom"', "ui right aligned bottom aligned row"]
+    ['align="right" vertical-align="bottom"', "ui right aligned bottom aligned row"]
   ])("<ui-row %s>", async (attributes, classes) => {
     const grid = await ElementFixture.render<DOMElement>(`<ui-grid><ui-row ${attributes}></ui-row></ui-grid>`)
     const root = rootOf(grid.querySelector("ui-row")!)
@@ -95,10 +95,10 @@ describe("<ui-grid> classes", () => {
       'width-tablet="8" width-computer="4" width-large="3" width-widescreen="2"',
       "ui eight wide tablet four wide computer three wide large screen two wide widescreen column"
     ],
-    ['color="teal" attached="left"', "ui teal left attached column"],
+    ['color="teal" attach="left"', "ui teal left attached column"],
     ['color="teal" attach="left"', "ui teal left attached column"],
     ['centered stretched="no"', "ui centered column"],
-    ['only="computer" text-align="center"', "ui computer only center aligned column"]
+    ['only="computer" align="center"', "ui computer only center aligned column"]
   ])("<ui-column %s>", async (attributes, classes) => {
     const grid = await ElementFixture.render<DOMElement>(`<ui-grid><ui-column ${attributes}></ui-column></ui-grid>`)
     const root = rootOf(grid.querySelector("ui-column")!)
@@ -416,7 +416,7 @@ describe("<ui-grid> tokens from outside", () => {
 
   it("variations:  `relaxed` swaps in its own token, whatever the base", async () => {
     const host = await ElementFixture.render(
-      `<ui-grid relaxed style="--ui-grid-gutter: 40px"><ui-column>A</ui-column></ui-grid>`
+      `<ui-grid spacing="lg" style="--ui-grid-gutter: 40px"><ui-column>A</ui-column></ui-grid>`
     )
     expect(measure(host)).toBe("-24px")
     host.style.setProperty("--ui-grid-relaxed-gutter", "60px")

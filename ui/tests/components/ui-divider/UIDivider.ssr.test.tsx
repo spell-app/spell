@@ -12,7 +12,7 @@ describe("<ui-divider> static render", () => {
   })
 
   it("renders a separator, with or without text", () => {
-    const html = StaticRender.fragment(`<ui-divider horizontal>Or</ui-divider><ui-divider></ui-divider>`)
+    const html = StaticRender.fragment(`<ui-divider direction="horizontal">Or</ui-divider><ui-divider></ui-divider>`)
     expect(sorted(html)).toBe(
       sorted(
         `<div data-ui="divider" class="ui horizontal divider" role="separator" part="divider">Or</div>` +

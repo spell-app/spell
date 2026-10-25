@@ -46,7 +46,7 @@ describe("<ui-checkbox> static render", () => {
 
   it("renders toggles as switches, and disabled / read-only states", () => {
     const html = StaticRender.fragment(
-      `<ui-checkbox type="toggle" disabled selected>T</ui-checkbox><ui-checkbox readonly>R</ui-checkbox>`
+      `<ui-checkbox appearance="toggle" disabled selected>T</ui-checkbox><ui-checkbox readonly>R</ui-checkbox>`
     )
     expect(html).toMatch(/class="ui toggle disabled checkbox"[^>]*><input [^>]*role="switch"[^>]*disabled/)
     expect(html).toMatch(/class="ui read-only checkbox"[^>]*><input [^>]*aria-readonly="true"/)

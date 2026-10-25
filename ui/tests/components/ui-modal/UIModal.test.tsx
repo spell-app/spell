@@ -95,7 +95,7 @@ describe("<ui-modal> classes", () => {
     ["", "ui modal"],
     ['size="tiny"', "ui tiny modal"],
     ['size="medium"', "ui modal"],
-    ["basic", "ui basic modal"],
+    ['appearance="basic"', "ui basic modal"],
     ["overlay fullscreen", "ui fullscreen overlay modal"],
     ["inverted scrolling", "ui inverted scrolling modal"],
     ['vertical-align="top"', "ui top aligned modal"],
@@ -141,7 +141,7 @@ describe("<ui-modal> content", () => {
 
   it("owns slotted parts:  :state(in-modal), and the owner tokens they read", async () => {
     const { host, dialog } = await modal(
-      `<ui-modal basic size="large"><ui-header>H</ui-header><ui-content><ui-description>D</ui-description>` +
+      `<ui-modal appearance="basic" size="large"><ui-header>H</ui-header><ui-content><ui-description>D</ui-description>` +
         `</ui-content><ui-actions>A</ui-actions></ui-modal>`
     )
     for (const tag of ["ui-header", "ui-content", "ui-actions"]) {
@@ -215,7 +215,7 @@ describe("<ui-modal> tokens from outside", () => {
     )
     expect(getComputedStyle(header(above)).color).toBe(red)
     const { wrapper: basic } = await modal(
-      `<ui-modal basic style="--ui-modal-header-color: ${red}"><ui-header>H</ui-header></ui-modal>`
+      `<ui-modal appearance="basic" style="--ui-modal-header-color: ${red}"><ui-header>H</ui-header></ui-modal>`
     )
     expect(getComputedStyle(header(basic)).color).not.toBe(red)
   })
@@ -477,17 +477,17 @@ describe("<ui-modal> actions", () => {
   /** A modal with deny / approve buttons in its actions. */
   const ACTIONS =
     `<ui-modal heading="Sure?"><ui-actions><ui-button class="deny">No</ui-button>` +
-    `<ui-button positive>Yes</ui-button></ui-actions></ui-modal>`
+    `<ui-button color="positive">Yes</ui-button></ui-actions></ui-modal>`
 
   it("approve:  a cancelable ui-approving naming the button, then closes (reason `approve`)", async () => {
     const { host, dialog } = await modal(ACTIONS)
     const approves = record<{ action: Element }>(host, "ui-approving")
     const closes = record(host, "ui-closing")
     await open(host)
-    await userEvent.click(host.querySelector("[positive]")!)
+    await userEvent.click(host.querySelector('[color="positive"]')!)
     await settle()
     expect(approves).toHaveLength(1)
-    expect(approves[0]!.action).toBe(host.querySelector("[positive]"))
+    expect(approves[0]!.action).toBe(host.querySelector('[color="positive"]'))
     expect(closes.map((detail) => detail.reason)).toEqual(["approve"])
     expect(dialog.open).toBe(false)
   })

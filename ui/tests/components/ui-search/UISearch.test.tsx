@@ -137,7 +137,7 @@ describe("<ui-search> markup", () => {
 
   it("emits Fomantic's class words", async () => {
     const { root, input } = await search(
-      `<ui-search size="large" category fluid aligned="right" loading aria-label="x"></ui-search>`
+      `<ui-search size="large" category fluid align="right" loading aria-label="x"></ui-search>`
     )
     expect(root.className).toBe("ui large category fluid loading right aligned search")
     expect(input.parentElement!.className).toBe("ui icon input loading fluid")

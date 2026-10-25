@@ -93,7 +93,7 @@ describe("<ui-field> layout", () => {
     const before = { row: row.getBoundingClientRect().height, control: input.getBoundingClientRect().top }
     host.insertAdjacentHTML(
       "afterbegin",
-      `<ui-button slot="actions" size="mini" circular basic icon="rotate left">Reset</ui-button>`
+      `<ui-button slot="actions" size="mini" appearance="circular basic" icon="rotate left">Reset</ui-button>`
     )
     await ElementFixture.settle()
     const pill = host.querySelector("ui-button")!.getBoundingClientRect().height

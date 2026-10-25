@@ -16,7 +16,7 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-toolbar/examples/e
 })
 
 /** Ten link items:  more than a narrow toolbar holds. */
-const MANY = Array.from({ length: 10 }, (_, index) => `<ui-item href="#i${index}">Item number ${index}</ui-item>`).join(
+const MANY = Array.from({ length: 10 }, (_, index) => `<ui-item link="#i${index}">Item number ${index}</ui-item>`).join(
   ""
 )
 
@@ -72,7 +72,7 @@ describe("<ui-toolbar>", () => {
   })
 
   it("everything fits:  no buttons at all, not overflowing", async () => {
-    const { host, back, on } = await toolbar(800, `<ui-item href="#a">A</ui-item><ui-item href="#b">B</ui-item>`)
+    const { host, back, on } = await toolbar(800, `<ui-item link="#a">A</ui-item><ui-item link="#b">B</ui-item>`)
     await ElementFixture.settle()
     expect(host.matches(":state(overflowing)")).toBe(false)
     expect(getComputedStyle(back).display).toBe("none")
@@ -90,7 +90,7 @@ describe("<ui-toolbar>", () => {
     const { menu } = await toolbar(
       300,
       `<ui-item selected>One</ui-item><ui-item>Two</ui-item><ui-item>Three</ui-item>`,
-      'appearance="segmented" link'
+      'appearance="segmented link"'
     )
     await expect.poll(() => menu.classList.contains("thumbed")).toBe(true)
   })
@@ -107,7 +107,7 @@ describe("<ui-toolbar> bar slots", () => {
   /** A 600px bar:  icon, title, center and right around three items. */
   const BAR =
     '<button slot="icon">=</button><b slot="title">Title</b><span slot="center">links</span>' +
-    '<ui-item href="#a">A</ui-item><ui-item href="#b">B</ui-item><button slot="right">?</button>'
+    '<ui-item link="#a">A</ui-item><ui-item link="#b">B</ui-item><button slot="right">?</button>'
 
   it("draws a box per filled slot, in order:  icon, title, center, the items, right at the end", async () => {
     const { host, menu } = await toolbar(600, BAR)

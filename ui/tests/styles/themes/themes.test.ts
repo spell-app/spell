@@ -34,7 +34,7 @@ describe("github.css", () => {
       fontWeight: "700",
       textShadow: expect.not.stringMatching(/^none$/)
     })
-    const primary = await ThemeHarness.inner(`<ui-button primary>Save</ui-button>`, ".ui.button")
+    const primary = await ThemeHarness.inner(`<ui-button color="primary">Save</ui-button>`, ".ui.button")
     expect(primary.style.backgroundColor).toContain("0.542")
   })
 
@@ -48,7 +48,7 @@ describe("github.css", () => {
   it("menu:  gradient bar, roomy items (1em 1.25em)", async () => {
     await ThemeHarness.use("github")
     const { host, style } = await ThemeHarness.inner(
-      `<ui-menu aria-label="Probe"><ui-item href="#">One</ui-item></ui-menu>`,
+      `<ui-menu aria-label="Probe"><ui-item link="#">One</ui-item></ui-menu>`,
       ".ui.menu"
     )
     expect(style.backgroundImage).toContain("linear-gradient")
@@ -80,7 +80,7 @@ describe("material.css", () => {
   it("menu:  a floating card with no dividers", async () => {
     await ThemeHarness.use("material")
     const { style } = await ThemeHarness.inner(
-      `<ui-menu aria-label="Probe"><ui-item href="#">One</ui-item></ui-menu>`,
+      `<ui-menu aria-label="Probe"><ui-item link="#">One</ui-item></ui-menu>`,
       ".ui.menu"
     )
     expect(style.boxShadow).toContain("6px")
@@ -427,10 +427,10 @@ describe("chubby.css", () => {
       backgroundColor: "oklch(0.935 0.006 239.8)"
     })
     expect(parseFloat(style.paddingInlineStart)).toBeCloseTo(14 * 0.92 * 2.5, 1)
-    const basic = await ThemeHarness.inner(`<ui-button basic>Basic</ui-button>`, ".ui.button")
+    const basic = await ThemeHarness.inner(`<ui-button appearance="basic">Basic</ui-button>`, ".ui.button")
     expect(basic.style.textTransform).toBe("uppercase")
     expect(basic.style.fontWeight).toBe("700")
-    const group = await ElementFixture.render(`<ui-buttons basic><ui-button>One</ui-button></ui-buttons>`)
+    const group = await ElementFixture.render(`<ui-buttons appearance="basic"><ui-button>One</ui-button></ui-buttons>`)
     expect(T2.style(group, "ui-button", ".ui.button").textTransform).toBe("uppercase")
   })
 
@@ -444,7 +444,7 @@ describe("chubby.css", () => {
   it("menu:  bold, roomy items;  the active one in the primary colour;  no shadow", async () => {
     await T2.use("chubby")
     const { host, style } = await ThemeHarness.inner(
-      `<ui-menu aria-label="Probe"><ui-item href="#">One</ui-item><ui-item href="#" active>Two</ui-item></ui-menu>`,
+      `<ui-menu aria-label="Probe"><ui-item link="#">One</ui-item><ui-item link="#" active>Two</ui-item></ui-menu>`,
       ".ui.menu"
     )
     expect(style.boxShadow).toBe("none")
@@ -459,7 +459,7 @@ describe("chubby.css", () => {
   it("styled accordion:  1.25em titles, the open one in the primary text colour", async () => {
     await T2.use("chubby")
     const { box } = await ThemeHarness.inner(
-      `<ui-accordion styled open="0"><ui-title>One</ui-title><ui-content>Body</ui-content></ui-accordion>`,
+      `<ui-accordion appearance="styled" open="0"><ui-title>One</ui-title><ui-content>Body</ui-content></ui-accordion>`,
       ".title"
     )
     const title = getComputedStyle(box)
@@ -496,7 +496,7 @@ describe("basic.css", () => {
     const { style } = await ThemeHarness.inner(`<ui-button>Plain</ui-button>`, ".ui.button")
     expect(style.backgroundColor).toBe("oklch(0.949 0 0)")
     expect(style.fontSize).toBe(`${14 * 0.92}px`)
-    const primary = await ThemeHarness.inner(`<ui-button primary>Go</ui-button>`, ".ui.button")
+    const primary = await ThemeHarness.inner(`<ui-button color="primary">Go</ui-button>`, ".ui.button")
     expect(primary.style.backgroundColor).toBe("oklch(0.321 0 0)")
   })
 
@@ -534,7 +534,7 @@ describe("bootstrap3.css", () => {
     expect(style.fontFamily).toMatch(/^"Helvetica Neue"/)
     expect(style.boxShadow).toContain("inset")
     expect(parseFloat(style.lineHeight)).toBeCloseTo(14 * 1.42857, 1)
-    const primary = await ThemeHarness.inner(`<ui-button primary>Go</ui-button>`, ".ui.button")
+    const primary = await ThemeHarness.inner(`<ui-button color="primary">Go</ui-button>`, ".ui.button")
     expect(primary.style.backgroundColor).toBe("oklch(0.564 0.118 247.7)")
   })
 
@@ -564,7 +564,7 @@ describe("amazon.css", () => {
       boxShadow: expect.stringContaining("inset"),
       fontSize: "13px"
     })
-    const primary = await ThemeHarness.inner(`<ui-button primary>Buy</ui-button>`, ".ui.button")
+    const primary = await ThemeHarness.inner(`<ui-button color="primary">Buy</ui-button>`, ".ui.button")
     expect(primary.style).toMatchObject({
       backgroundColor: "oklch(0.86 0.128 87.9)",
       color: "oklch(0.178 0 0)",
@@ -583,7 +583,7 @@ describe("raised.css", () => {
     expect(style.boxShadow).toMatch(/-4\.2px/)
     expect(style.backgroundImage).toContain("linear-gradient")
     expect(parseFloat(style.borderTopLeftRadius)).toBeCloseTo(14 * 0.4, 2)
-    const basic = await ThemeHarness.inner(`<ui-button basic>Flat</ui-button>`, ".ui.button")
+    const basic = await ThemeHarness.inner(`<ui-button appearance="basic">Flat</ui-button>`, ".ui.button")
     expect(basic.style.boxShadow).not.toMatch(/-4\.2px/)
     expect(basic.style.backgroundImage).toBe("none")
   })
@@ -614,7 +614,7 @@ describe("twitter.css", () => {
       fontWeight: "700",
       fontFamily: expect.stringMatching(/^"Helvetica Neue"/)
     })
-    const primary = await ThemeHarness.inner(`<ui-button primary>Tweet</ui-button>`, ".ui.button")
+    const primary = await ThemeHarness.inner(`<ui-button color="primary">Tweet</ui-button>`, ".ui.button")
     expect(primary.style.backgroundColor).toBe("oklch(0.719 0.128 243.9)")
     expect(primary.style.boxShadow).toContain("0.605")
   })
@@ -632,7 +632,7 @@ describe("spell.css", () => {
 
   it("Spell Purple primary (lilac on the aubergine dark), pill buttons that press in", async () => {
     await T3.use("spell")
-    const { box, style } = await ThemeHarness.inner(`<ui-button primary>Build</ui-button>`, ".ui.button")
+    const { box, style } = await ThemeHarness.inner(`<ui-button color="primary">Build</ui-button>`, ".ui.button")
     expect(style).toMatchObject({
       backgroundColor: "rgb(101, 80, 202)", // violet-600
       borderTopLeftRadius: "9999px",
@@ -671,7 +671,7 @@ describe("spell-brand.css", () => {
 
   it("spell's look, plus the brand roles:  ivory warm surface, aubergine inverse, lilac in dark", async () => {
     await T3.use("spell-brand")
-    const { style } = await ThemeHarness.inner(`<ui-button primary>Build</ui-button>`, ".ui.button")
+    const { style } = await ThemeHarness.inner(`<ui-button color="primary">Build</ui-button>`, ".ui.button")
     expect(style.backgroundColor).toBe("rgb(101, 80, 202)") // violet-600, as spell
     expect(T3.color("--spell-surface-warm")).toBe("rgb(250, 245, 234)") // accent-75
     expect(T3.color("--spell-surface-inverse")).toBe("rgb(42, 29, 96)") // violet-900:  aubergine
@@ -716,7 +716,7 @@ describe("fruity.css", () => {
 
   it("the violet accent (a deeper violet in dark, white on it), 8px buttons, the system font", async () => {
     await T3.use("fruity")
-    const { box, style } = await ThemeHarness.inner(`<ui-button primary>Run</ui-button>`, ".ui.button")
+    const { box, style } = await ThemeHarness.inner(`<ui-button color="primary">Run</ui-button>`, ".ui.button")
     expect(style).toMatchObject({ backgroundColor: "rgb(106, 63, 214)", borderTopLeftRadius: "8px" })
     expect(style.fontFamily).toMatch(/^-apple-system/)
     const button = box as HTMLElement
@@ -738,7 +738,7 @@ describe("fruity.css", () => {
   it("the page wears the wallpaper;  a shadow root doesn't", async () => {
     await T3.use("fruity")
     expect(getComputedStyle(document.documentElement).backgroundImage).toMatch(/^radial-gradient/)
-    const { style } = await ThemeHarness.inner(`<ui-segment basic>Plain</ui-segment>`, ".ui.segment")
+    const { style } = await ThemeHarness.inner(`<ui-segment appearance="basic">Plain</ui-segment>`, ".ui.segment")
     expect(style.backgroundImage).toBe("none")
     expect(style.backdropFilter).toBe("none")
   })

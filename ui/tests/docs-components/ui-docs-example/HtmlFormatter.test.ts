@@ -4,8 +4,11 @@ import { HtmlFormatter } from "spell-ui/docs-components/ui-docs-example/HtmlForm
 
 describe("HtmlFormatter.format()", () => {
   test.each([
-    ['<ui-button\n    primary\n    size="small">A</ui-button>', '<ui-button primary size="small">A</ui-button>'],
-    ['<ui-button basic="">A</ui-button>', "<ui-button basic>A</ui-button>"],
+    [
+      '<ui-button\n    color="primary"\n    size="small">A</ui-button>',
+      '<ui-button color="primary" size="small">A</ui-button>'
+    ],
+    ['<ui-button fluid="">A</ui-button>', "<ui-button fluid>A</ui-button>"],
     [
       "<div><ui-button>A</ui-button><ui-button>B</ui-button></div>",
       "<div>\n  <ui-button>A</ui-button>\n  <ui-button>B</ui-button>\n</div>"

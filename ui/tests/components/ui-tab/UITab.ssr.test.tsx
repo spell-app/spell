@@ -19,7 +19,7 @@ describe("<ui-tabs> static render", () => {
 
   it("builds the tab list from the panes, the selected one active", () => {
     const html = StaticRender.fragment(
-      `<ui-tabs tabular attached aria-label="Demo"><ui-tab label="First">One</ui-tab>` +
+      `<ui-tabs appearance="tabular" attach="top" aria-label="Demo"><ui-tab label="First">One</ui-tab>` +
         `<ui-tab label="Second" selected>Two</ui-tab><ui-tab label="Third" disabled>Three</ui-tab></ui-tabs>`
     )
     const root = fragment(html).firstElementChild!

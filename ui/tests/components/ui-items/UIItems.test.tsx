@@ -28,7 +28,7 @@ const PHOTO =
 
 /** An item with an image and a content block. */
 const ITEM =
-  `<ui-item><img src="${PHOTO}" alt=""><ui-content><ui-header href="#a">Cute Dog</ui-header>` +
+  `<ui-item><img src="${PHOTO}" alt=""><ui-content><ui-header link="#a">Cute Dog</ui-header>` +
   `<ui-meta><span>Meta</span></ui-meta><ui-description>Text</ui-description><ui-extra>Extra</ui-extra>` +
   `</ui-content></ui-item>`
 
@@ -76,8 +76,8 @@ describe("<ui-items> classes and markup", () => {
     ["", "ui items"],
     ['size="small"', "ui small items"],
     ["divided", "ui divided items"],
-    ['relaxed="very" divided link', "ui very relaxed divided link items"],
-    ["relaxed unstackable inverted", "ui relaxed inverted unstackable items"],
+    ['spacing="xl" divided appearance="link"', "ui very relaxed divided link items"],
+    ['spacing="lg" unstackable inverted', "ui relaxed inverted unstackable items"],
     ['divided="no" disabled', "ui disabled items"]
   ])("<ui-items %s>", async (attributes, classes) => {
     const { root } = await view(attributes)
@@ -85,7 +85,7 @@ describe("<ui-items> classes and markup", () => {
   })
 
   it("renders a list of the generic <ui-item>s, each a listitem box", async () => {
-    const { host, root, items } = await view("", `${ITEM}<ui-item href="#b"><ui-content>Link</ui-content></ui-item>`)
+    const { host, root, items } = await view("", `${ITEM}<ui-item link="#b"><ui-content>Link</ui-content></ui-item>`)
     expect(root.localName).toBe("div")
     expect(root.getAttribute("role")).toBe("list")
     expect(host.matches(":state(items)")).toBe(true)
@@ -230,13 +230,13 @@ describe("<ui-items> variations", () => {
   })
 
   it("relaxes and divides", async () => {
-    const { host, items } = await view("relaxed", ITEM + ITEM + ITEM)
+    const { host, items } = await view('spacing="lg"', ITEM + ITEM + ITEM)
     const [first, middle] = items.map(boxOf)
     expect(style(middle!).marginTop).toBe("24px")
-    host.setAttribute("relaxed", "very")
+    host.setAttribute("spacing", "xl")
     await ElementFixture.tick()
     expect(style(middle!).marginTop).toBe("32px")
-    host.removeAttribute("relaxed")
+    host.removeAttribute("spacing")
     host.setAttribute("divided", "")
     await ElementFixture.tick()
     expect(style(first!).borderTopWidth).toBe("0px")
@@ -245,7 +245,7 @@ describe("<ui-items> variations", () => {
 
   it("links:  a pointer and the header in the link colour while an item is hovered", async () => {
     const plain = `<ui-item><ui-content><ui-header>Hover</ui-header></ui-content></ui-item>`
-    const { items } = await view("link", plain + plain)
+    const { items } = await view('appearance="link"', plain + plain)
     const header = partRoot(items[0]!.querySelector("ui-header")!)
     const before = style(header).color
     expect(style(boxOf(items[0]!)).cursor).toBe("auto")
@@ -384,7 +384,7 @@ describe("<ui-items> tokens from outside", () => {
   })
 
   it("variations:  `relaxed` swaps the spacing, winning over the base token", async () => {
-    const { host } = await view(`relaxed style="--ui-items-item-spacing: 2em"`, ITEM + ITEM + ITEM)
+    const { host } = await view('spacing="lg" style="--ui-items-item-spacing: 2em"', ITEM + ITEM + ITEM)
     expect(spacing(host)).toBe("24px")
   })
 
@@ -403,7 +403,7 @@ describe("<ui-items> tokens from outside", () => {
 describe("<ui-items> keyboard", () => {
   it("makes an item with `href` one Tab stop;  plain items are none", async () => {
     const wrapper = await ElementFixture.render(
-      `<div><button>Before</button><ui-items><ui-item href="#camp"><ui-content><ui-header>Camp</ui-header>` +
+      `<div><button>Before</button><ui-items><ui-item link="#camp"><ui-content><ui-header>Camp</ui-header>` +
         `</ui-content></ui-item><ui-item><ui-content>Plain</ui-content></ui-item></ui-items><button>After</button></div>`
     )
     await ElementFixture.settle(wrapper)

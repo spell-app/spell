@@ -153,7 +153,8 @@ export class HashLanding {
    * Open what hides `target`:  select the pane of each `<ui-tabs>` around it, unfold each `<ui-section>` around it
    * (and itself, with `opensTarget`);  true when anything opened.
    * - A target in a shadow root:  what's around its host.
-   * - The unfold is the `collapsed` attribute, which announces nothing:  never saved as the viewer's own fold.
+   * - The unfold is the `open` attribute (`open="false"` taken off), which announces nothing:
+   *   never saved as the viewer's own fold.
    */
   static reveal(target: Element, { opensTarget }: { opensTarget: boolean }): boolean {
     const light = TocIndex.lightElementOf(target)
@@ -166,8 +167,8 @@ export class HashLanding {
     }
     const first = opensTarget ? light.closest(SECTION_TAG) : light.parentElement?.closest(SECTION_TAG)
     for (let section = first; section; section = section.parentElement?.closest(SECTION_TAG)) {
-      if (!section.hasAttribute(COLLAPSED)) continue
-      section.removeAttribute(COLLAPSED)
+      if (section.getAttribute(OPEN) !== "false") continue
+      section.removeAttribute(OPEN)
       hasOpened = true
     }
     return hasOpened
@@ -245,8 +246,8 @@ const SHOW_FRAMES = 30
 /** Land once more after this long, s:  late layout (images, a fold's last frame) moves the target a little. */
 const SETTLE_SECONDS = 0.4
 
-/** A section's folded attribute (controlled:  writing it announces nothing). */
-const COLLAPSED = "collapsed"
+/** A section's open attribute, `"false"` when folded (controlled:  writing it announces nothing). */
+const OPEN = "open"
 
 /** The viewer asks for less motion:  a glide jumps. */
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"

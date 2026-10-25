@@ -24,7 +24,7 @@ describe("<ui-modal> static render", () => {
   it("renders a closed <dialog> holding its parts, named by the slotted header", () => {
     const html = StaticRender.fragment(
       `<ui-modal id="profile" size="small" closable><ui-header>Profile</ui-header><ui-content><p>Body</p></ui-content>` +
-        `<ui-actions><ui-button positive>Yes</ui-button></ui-actions></ui-modal>`
+        `<ui-actions><ui-button color="positive">Yes</ui-button></ui-actions></ui-modal>`
     )
     const dialog = fragment(html).firstElementChild!
     expect(dialog.localName).toBe("dialog")

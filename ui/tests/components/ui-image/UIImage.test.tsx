@@ -35,14 +35,17 @@ describe("<ui-image> classes", () => {
     ['size="small"', "ui small image"],
     ['size="medium"', "ui image"],
     ["avatar", "ui avatar image"],
-    ['bordered rounded circular="no"', "ui bordered rounded image"],
-    ["centered fluid", "ui centered fluid image"],
+    ['appearance="bordered rounded"', "ui bordered rounded image"],
+    ['align="center" fluid', "ui centered fluid image"],
     ["inline disabled", "ui disabled inline image"],
     ['floated="right"', "ui right floated image"],
-    ["spaced", "ui spaced image"],
-    ['spaced="left"', "ui left spaced image"],
+    ['spacing="md"', "ui spaced image"],
+    ['spacing="left"', "ui left spaced image"],
     ['vertical-align="middle"', "ui middle aligned image"],
-    ['size="tiny" circular floated="left" vertical-align="top"', "ui tiny left floated circular top aligned image"]
+    [
+      'size="tiny" appearance="circular" floated="left" vertical-align="top"',
+      "ui tiny left floated circular top aligned image"
+    ]
   ])("<ui-image %s>", async (attributes, classes) => {
     const { root } = await image(`<ui-image src="${SRC}" alt="x" ${attributes}></ui-image>`)
     expect(root.localName).toBe("img")
@@ -83,7 +86,7 @@ describe("<ui-image> image", () => {
   })
 
   it("wraps the <img> in a link with href:  classes on the link, the image named by alt", async () => {
-    const { root } = await image(`<ui-image href="#photo" size="small" src="${SRC}" alt="Profile"></ui-image>`)
+    const { root } = await image(`<ui-image link="#photo" size="small" src="${SRC}" alt="Profile"></ui-image>`)
     expect(root).toMatchObject({ localName: "a", className: "ui small image" })
     expect(root.getAttribute("href")).toBe("#photo")
     const img = root.querySelector("img")!
@@ -93,7 +96,7 @@ describe("<ui-image> image", () => {
   })
 
   it("drops a disabled link's href, with aria-disabled and :state(disabled)", async () => {
-    const { host, root } = await image(`<ui-image href="#x" disabled src="${SRC}" alt="X"></ui-image>`)
+    const { host, root } = await image(`<ui-image link="#x" disabled src="${SRC}" alt="X"></ui-image>`)
     expect(root.hasAttribute("href")).toBe(false)
     expect(root.getAttribute("aria-disabled")).toBe("true")
     expect(host.matches(":state(disabled)")).toBe(true)
@@ -119,7 +122,7 @@ describe("<ui-images>", () => {
   it.each([
     ["", "ui images"],
     ['size="tiny"', "ui tiny images"],
-    ["avatar circular", "ui avatar circular images"],
+    ['avatar appearance="circular"', "ui avatar circular images"],
     ['vertical-align="bottom"', "ui bottom aligned images"]
   ])("<ui-images %s>", async (attributes, classes) => {
     const group = await ElementFixture.render<DOMElement>(`<ui-images ${attributes}></ui-images>`)
@@ -156,11 +159,11 @@ describe("<ui-image> tokens from outside", () => {
   }
 
   /** A rounded image. */
-  const ROUNDED = `<ui-image rounded src="${SRC}" alt=""></ui-image>`
+  const ROUNDED = `<ui-image appearance="rounded" src="${SRC}" alt=""></ui-image>`
 
   it("takes a token set on the element", async () => {
     const { host } = await image(
-      `<ui-image rounded src="${SRC}" alt="" style="--ui-image-rounded-radius: 20px"></ui-image>`
+      `<ui-image appearance="rounded" src="${SRC}" alt="" style="--ui-image-rounded-radius: 20px"></ui-image>`
     )
     expect(radius(host)).toBe("20px")
   })
@@ -203,7 +206,7 @@ describe("<ui-image> tokens from outside", () => {
 
   it("reaches the members of a group, set on the group", async () => {
     const group = await ElementFixture.render<DOMElement>(
-      `<ui-images rounded style="--ui-image-rounded-radius: 20px"><ui-image src="${SRC}" alt="a"></ui-image><ui-image src="${SRC}" alt="b"></ui-image></ui-images>`
+      `<ui-images appearance="rounded" style="--ui-image-rounded-radius: 20px"><ui-image src="${SRC}" alt="a"></ui-image><ui-image src="${SRC}" alt="b"></ui-image></ui-images>`
     )
     for (const member of group.querySelectorAll("ui-image")) expect(radius(member)).toBe("20px")
   })

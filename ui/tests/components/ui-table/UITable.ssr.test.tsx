@@ -16,7 +16,7 @@ describe("<ui-table> static render", () => {
 
   it("mirrors the class grammar onto the author's table, author classes first;  aria-sort on the sorted header", () => {
     const html = StaticRender.fragment(
-      `<ui-table celled striped sortable sort-column="1" sort-direction="descending"><table class="mine">` +
+      `<ui-table celled appearance="striped" sortable sort-column="1" sort-direction="descending"><table class="mine">` +
         `<thead><tr><th>Name</th><th>Status</th></tr></thead><tbody><tr><td>John</td><td>Approved</td></tr></tbody>` +
         `</table></ui-table>`
     )

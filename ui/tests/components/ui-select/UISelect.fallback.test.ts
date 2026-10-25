@@ -44,9 +44,9 @@ describe("SelectFallback", () => {
 
   it("builds options from <ui-item>s:  groups, dividers, flags and descriptions as text", () => {
     const { native } = select(`<x-fb-select placeholder="Pick">
-      <ui-item type="header">Fruit</ui-item>
+      <ui-item kind="header">Fruit</ui-item>
       <ui-item value="a" description="red">Apple</ui-item>
-      <ui-item type="divider"></ui-item>
+      <ui-item kind="divider"></ui-item>
       <ui-item value="fr" flag="fr">France</ui-item>
       <ui-item value="b" disabled>Banana</ui-item>
     </x-fb-select>`)

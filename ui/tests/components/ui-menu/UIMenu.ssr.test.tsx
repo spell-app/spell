@@ -17,9 +17,9 @@ describe("<ui-menu> static render", () => {
 
   it("renders a navigation menu:  links, the selected one aria-current, a sub-menu", () => {
     const html = StaticRender.fragment(
-      `<ui-menu aria-label="Site" pointing><ui-item href="#home" selected>Home</ui-item>` +
-        `<ui-item href="#news">News</ui-item>` +
-        `<ui-menu position="right"><ui-item href="#out">Logout</ui-item></ui-menu></ui-menu>`
+      `<ui-menu aria-label="Site" appearance="pointing"><ui-item link="#home" selected>Home</ui-item>` +
+        `<ui-item link="#news">News</ui-item>` +
+        `<ui-menu position="right"><ui-item link="#out">Logout</ui-item></ui-menu></ui-menu>`
     )
     expect(sorted(html)).toBe(
       sorted(
@@ -37,7 +37,7 @@ describe("<ui-menu> static render", () => {
 
   it("renders an interactive menu as a menubar of menuitem buttons;  items aren't list items", () => {
     const html = StaticRender.fragment(
-      `<ui-menu interactive vertical aria-label="Actions"><ui-item>Cut</ui-item>` +
+      `<ui-menu interactive direction="vertical" aria-label="Actions"><ui-item>Cut</ui-item>` +
         `<ui-item disabled>Copy</ui-item></ui-menu>`
     )
     expect(sorted(html)).toBe(

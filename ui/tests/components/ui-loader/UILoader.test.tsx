@@ -34,7 +34,7 @@ describe("<ui-loader> classes", () => {
     ['speed="fast" visible', "ui fast active loader"],
     ['visible="yes" inline="no"', "ui active loader"],
     ["visible text", "ui text active loader"],
-    ["visible inline centered", "ui centered inline active loader"],
+    ['visible inline align="center"', "ui centered inline active loader"],
     ["visible indeterminate", "ui indeterminate active loader"],
     ["visible double elastic inverted", "ui double elastic inverted active loader"],
     ["visible disabled", "ui disabled active loader"]

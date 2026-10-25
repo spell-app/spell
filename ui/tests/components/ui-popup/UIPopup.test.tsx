@@ -89,7 +89,7 @@ describe("<ui-popup> classes", () => {
     ['size="small"', "ui small top left popup"],
     ['size="medium"', "ui top left popup"],
     ['color="red"', "ui red top left popup"],
-    ["basic", "ui basic top left popup"],
+    ['appearance="basic"', "ui basic top left popup"],
     ["wide", "ui wide top left popup"],
     ['wide="very"', "ui very wide top left popup"],
     ["inverted flowing fixed", "ui fixed flowing inverted top left popup"],
@@ -117,7 +117,7 @@ describe("<ui-popup> classes", () => {
 
 describe("<ui-popup> content", () => {
   it("renders the header and content shorthands, then the slot", async () => {
-    const { root } = await popup(`<button>t</button><ui-popup heading="Title" content="Body">Extra</ui-popup>`)
+    const { root } = await popup(`<button>t</button><ui-popup heading="Title" label="Body">Extra</ui-popup>`)
     expect([...root.children].map((child) => `${child.className}.${child.getAttribute("part")}`)).toEqual([
       "header.header",
       "content.content",
@@ -603,7 +603,7 @@ describe("<ui-popup> positioning", () => {
 
 describe("<ui-popup> accessibility", () => {
   it("a tooltip is role=tooltip;  a <ui-button> target's inner button is described by it", async () => {
-    const { host, wrapper } = await popup(`<ui-button>Go</ui-button><ui-popup content="Goes">x</ui-popup>`)
+    const { host, wrapper } = await popup(`<ui-button>Go</ui-button><ui-popup label="Goes">x</ui-popup>`)
     expect(host.internals.role).toBe("tooltip")
     const inner = wrapper.querySelector("ui-button")!.shadowRoot!.querySelector("button")!
     expect((inner as unknown as { ariaDescribedByElements: Element[] }).ariaDescribedByElements).toEqual([host])
@@ -614,7 +614,7 @@ describe("<ui-popup> accessibility", () => {
 
   it("keyboard walkthrough:  Tab through two tooltip targets, each announces its own popup", async () => {
     const { wrapper } = await popup(
-      `<button>One</button><ui-popup content="First"></ui-popup><button>Two</button><ui-popup content="Second"></ui-popup>`
+      `<button>One</button><ui-popup label="First"></ui-popup><button>Two</button><ui-popup label="Second"></ui-popup>`
     )
     const [first, second] = wrapper.querySelectorAll("ui-popup")
     wrapper.querySelector("button")!.focus()

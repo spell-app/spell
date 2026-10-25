@@ -8,7 +8,7 @@ import "spell-ui"
 /** `ElementFixture.breakRender()` must break ANY element, including one with no `keyOnly` attribute. */
 describe("ElementFixture.breakRender()", () => {
   it.each([
-    ["a vocabulary with a keyOnly attribute", `<ui-button primary>Save</ui-button>`],
+    ["a vocabulary with a keyOnly attribute", `<ui-button color="primary">Save</ui-button>`],
     ["a vocabulary with no keyOnly attribute", `<ui-flag country="fr"></ui-flag>`]
   ])("breaks %s, leaving its attributes as they were", async (_name, html) => {
     const host = await ElementFixture.render<DOMElement>(html)

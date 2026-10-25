@@ -25,7 +25,7 @@ const AVATAR = `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22
 
 /** One comment's parts. */
 const PARTS =
-  `<ui-avatar src="${AVATAR}"></ui-avatar><ui-content><ui-author href="#matt">Matt</ui-author>` +
+  `<ui-avatar src="${AVATAR}"></ui-avatar><ui-content><ui-author link="#matt">Matt</ui-author>` +
   `<ui-meta><span>Today</span></ui-meta><ui-description>How artistic!</ui-description>` +
   `<ui-actions><button type="button">Reply</button></ui-actions></ui-content>`
 
@@ -213,7 +213,7 @@ describe("<ui-comments> threads", () => {
 
 describe("<ui-comments> variations", () => {
   it("hides a minimal list's actions until the comment is hovered -- or holds keyboard focus", async () => {
-    const { comments } = await list("minimal", `<ui-comment>${PARTS}</ui-comment>`)
+    const { comments } = await list('appearance="minimal"', `<ui-comment>${PARTS}</ui-comment>`)
     const actions = partRoot(comments[0]!.querySelector("ui-actions")!)
     expect(style(actions).opacity).toBe("0")
     expect(style(actions).position).toBe("absolute")
@@ -305,7 +305,7 @@ describe("<ui-comments> reply form", () => {
 
 describe("<ui-comments> keyboard", () => {
   it("reaches the author link and each action in reading order", async () => {
-    const { comments } = await list("minimal", `<ui-comment>${PARTS}</ui-comment>`)
+    const { comments } = await list('appearance="minimal"', `<ui-comment>${PARTS}</ui-comment>`)
     const author = partRoot(comments[0]!.querySelector("ui-author")!)
     const button = comments[0]!.querySelector("button")!
     author.focus()
