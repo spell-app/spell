@@ -5,6 +5,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
 
 import { ComponentPacks, registerPack } from "spell-ui/components/ui-components"
+import { PackHotSwap } from "spell-ui/hot"
 import type { RootFailure, UIRoot } from "spell-ui/components/ui-root"
 
 import "spell-ui/components/ui-root"
@@ -18,6 +19,9 @@ const X_PACK = "/src/test-helpers/fixtures/component-packs/x.pack.js"
 
 /** A pack whose `define()` loads its families first:  `<later-card>`, defined a while after the script ran. */
 const LATER_PACK = "/src/test-helpers/fixtures/component-packs/later.pack.js"
+
+/** A pack REBUILT between runs:  `<swap-a>` and `<swap-b>`, what each run holds set on `globalThis.__swapPack`. */
+const SWAP_PACK = "/src/test-helpers/fixtures/component-packs/swap.pack.js"
 
 /** A pack script that runs but registers nothing. */
 const SILENT_PACK = "/src/test-helpers/fixtures/component-packs/silent.pack.js"
@@ -202,5 +206,49 @@ describe("<ui-root> with <ui-components source>", () => {
     } finally {
       consoleError.mockRestore()
     }
+  })
+})
+
+// epic `epic-engine` I116:  a merge rebuilt a pack;  the page swaps it in instead of reloading
+describe("ComponentPacks.reload()", () => {
+  /** Set what the swap pack's next run holds. */
+  const build = (version: string, families: Record<string, string>) =>
+    Object.assign(globalThis, { __swapPack: { version, families } })
+
+  /** `element`'s drawn text. */
+  const textOf = (element: Element) => element.shadowRoot?.querySelector("[part=text]")?.textContent
+
+  it("swaps in ONLY the families whose hash changed:  their elements re-render in place, the rest stay as they were", async () => {
+    PackHotSwap.install()
+    build("one", { "swap-a": "a1", "swap-b": "b1" })
+    await ComponentPacks.load(SWAP_PACK)
+    const holder = Fixture.render(`<div><swap-a></swap-a><swap-b></swap-b></div>`)
+    const [a, b] = [holder.querySelector("swap-a") as DOMElement, holder.querySelector("swap-b") as DOMElement]
+    await Promise.all([a.ready, b.ready])
+    expect([textOf(a), textOf(b)]).toEqual(["a one", "b one"])
+    const kept = b.component
+
+    build("two", { "swap-a": "a2", "swap-b": "b1" })
+    expect(await ComponentPacks.reload(SWAP_PACK, PackHotSwap.swap)).toBe("swapped")
+    await vi.waitFor(() => expect(textOf(a)).toBe("a two"))
+    expect(textOf(b)).toBe("b one")
+    expect(b.component).toBe(kept)
+    expect(a.isConnected).toBe(true)
+  })
+
+  it("a pack that isn't on the page:  nothing to swap", async () => {
+    expect(await ComponentPacks.reload("/nowhere/none.pack.js", PackHotSwap.swap)).toBe("none")
+  })
+
+  it("the live client's offer (`spell-server:scripts`):  taken when every changed script is a pack on the page", () => {
+    PackHotSwap.install()
+    build("three", { "swap-a": "a2", "swap-b": "b1" })
+    const offer = (paths: string[]) => {
+      const event = new CustomEvent("spell-server:scripts", { cancelable: true, detail: { paths } })
+      return !dispatchEvent(event)
+    }
+    expect(offer(["/_epic/pack/swap.pack.js"])).toBe(true)
+    expect(offer(["/_epic/pack/swap.pack.js", "/_epic/assets/spell-ui.js"])).toBe(false)
+    expect(offer(["/_epic/pack/unknown.pack.js"])).toBe(false)
   })
 })

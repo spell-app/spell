@@ -29,23 +29,36 @@ export const tabVocabulary = {
   attributes: [
     {
       name: "value",
+      group: "form",
       kind: "string",
       description: "What the tabs' `value` (and the URL hash, with `history`) calls this pane;  default its index."
     },
-    { name: "label", kind: "string", description: "Text of its tab;  default its `value`.  Also names the pane." },
-    { name: "icon", kind: "icon", description: "Icon on its tab (a Font Awesome name)." },
+    {
+      name: "label",
+      group: "name",
+      kind: "string",
+      description: "Text of its tab;  default its `value`.  Also names the pane."
+    },
+    { name: "icon", group: "content", kind: "icon", description: "Icon on its tab (a Font Awesome name)." },
     {
       name: "selected",
+      group: "states",
       kind: "keyOnly",
       key: "active",
       aliases: ["active"],
       description:
         "The pane shown first, when the tabs have no `value`;  alone (no `<ui-tabs>`), shows it.  Alias:  `active`."
     },
-    { name: "disabled", kind: "boolean", description: "Its tab can't be selected (skipped by the arrow keys)." },
-    { name: "loading", kind: "keyOnly", description: "Busy:  a spinner in place of the content." },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "boolean",
+      description: "Its tab can't be selected (skipped by the arrow keys)."
+    },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Busy:  a spinner in place of the content." },
     {
       name: "lazy",
+      group: "advanced",
       kind: "boolean",
       description:
         "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with " +
@@ -53,12 +66,23 @@ export const tabVocabulary = {
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide."
     },
-    { name: "basic", kind: "keyOnly", description: "No segment box;  inside `<ui-tabs>`, the tabs decide." },
-    { name: "inverted", kind: "keyOnly", description: "A dark pane;  inside `<ui-tabs>`, the tabs decide." }
+    {
+      name: "basic",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "No segment box;  inside `<ui-tabs>`, the tabs decide."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A dark pane;  inside `<ui-tabs>`, the tabs decide."
+    }
   ],
   events: [
     {

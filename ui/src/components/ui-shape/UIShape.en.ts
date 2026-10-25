@@ -22,10 +22,16 @@ export const shapeVocabulary = {
   noun: "shape",
   description: "A shape is a three dimensional object displayed on a two dimensional plane.",
   attributes: [
-    { name: "cube", kind: "keyOnly", description: "Square grey faces, as the sides of a cube." },
-    { name: "text", kind: "keyOnly", description: "Sides of text, inline:  a word that flips to another." },
+    { name: "cube", group: "appearance", kind: "keyOnly", description: "Square grey faces, as the sides of a cube." },
+    {
+      name: "text",
+      group: "name",
+      kind: "keyOnly",
+      description: "Sides of text, inline:  a word that flips to another."
+    },
     {
       name: "active-index",
+      group: "appearance",
       kind: "number",
       default: 0,
       description:
@@ -33,6 +39,7 @@ export const shapeVocabulary = {
     },
     {
       name: "direction",
+      group: "layout",
       kind: "enum",
       values: ["up", "down", "left", "right", "over", "back"],
       default: "left",
@@ -42,6 +49,7 @@ export const shapeVocabulary = {
     },
     {
       name: "duration",
+      group: "behaviour",
       kind: "string",
       description: "Length of a flip:  ms (`600`) or a CSS time (`0.6s`);  default Fomantic's 0.6s."
     }

@@ -30,18 +30,21 @@ export const checkboxVocabulary = {
     ...LEADING_ATTRIBUTES,
     {
       name: "type",
+      group: "appearance",
       kind: "valueOnly",
       values: ["slider", "toggle"],
       description: "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`."
     },
     {
       name: "indeterminate",
+      group: "states",
       kind: "keyOnly",
       description: "Neither on nor off (a dash);  a click clears it, as natively."
     },
     ...SHARED_ATTRIBUTES,
     {
       name: "off-value",
+      group: "appearance",
       kind: "string",
       description:
         'Value submitted while unchosen:  `value="open" off-value="closed"`;  default its class\'s `defaultUnchosenValue`, else nothing, as a native checkbox.  Needs JavaScript:  a static server render submits nothing while unchosen.'

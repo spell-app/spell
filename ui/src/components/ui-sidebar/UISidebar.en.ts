@@ -33,6 +33,7 @@ export const sidebarVocabulary = {
   attributes: [
     {
       name: "position",
+      group: "layout",
       kind: "valueOnly",
       values: ["left", "right", "top", "bottom"],
       default: "left",
@@ -40,6 +41,7 @@ export const sidebarVocabulary = {
     },
     {
       name: "width",
+      group: "layout",
       kind: "width",
       description:
         "Width of a `left` / `right` sidebar:  Fomantic's words -- `very thin` (60px), `thin` (150px), 260px by " +
@@ -48,16 +50,23 @@ export const sidebarVocabulary = {
     },
     {
       name: "transition",
+      group: "states",
       kind: "valueOnly",
       values: ["overlay", "push", "scale down", "uncover", "slide along", "slide out"],
       description:
         "How it appears (Fomantic's animations):  over the page, pushing it, shrinking it, from under it ...  " +
         "Default:  `uncover` on the left / right, `overlay` at the top / bottom."
     },
-    { name: "inverted", kind: "keyOnly", description: "A dark panel (put an `inverted` menu in it)." },
-    { name: "blurring", kind: "keyOnly", description: "Blurs the dimmed page beside it." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A dark panel (put an `inverted` menu in it)."
+    },
+    { name: "blurring", group: "appearance", kind: "keyOnly", description: "Blurs the dimmed page beside it." },
     {
       name: "persistent",
+      group: "advanced",
       kind: "boolean",
       description:
         "Part of the page, not a modal:  an `<aside>` landmark;  the page beside it is neither dimmed nor inert, " +
@@ -65,6 +74,7 @@ export const sidebarVocabulary = {
     },
     {
       name: "closedby",
+      group: "behaviour",
       kind: "enum",
       values: ["any", "closerequest", "none"],
       default: "any",

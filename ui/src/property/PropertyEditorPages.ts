@@ -295,6 +295,7 @@ const KIND_TYPES: Record<string, readonly V.ValueType[]> = {
   checkbox: ["boolean"],
   toggle: ["boolean"],
   date: ["date"],
+  icon: ["icon", "text"],
   editor: ["thing"]
 }
 

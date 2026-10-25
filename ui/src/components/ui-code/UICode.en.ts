@@ -26,6 +26,7 @@ export const codeVocabulary = {
     ...UIT.SourceAttributes,
     {
       name: "language",
+      group: "appearance",
       kind: "string",
       description:
         "Language to colour it as:  a highlight.js name or alias (`ts`, `html`, `css`, `json`, `bash` ...), one the " +
@@ -34,19 +35,27 @@ export const codeVocabulary = {
     },
     {
       name: "line-numbers",
+      group: "appearance",
       kind: "keyOnly",
       key: "numbered",
       property: "lineNumbers",
       description: "Number the lines, in a gutter that wrapped lines don't run under."
     },
-    { name: "start", kind: "number", default: 1, description: "Number of the first line, with `line-numbers`." },
+    {
+      name: "start",
+      group: "appearance",
+      kind: "number",
+      default: 1,
+      description: "Number of the first line, with `line-numbers`."
+    },
     {
       name: "wrap",
+      group: "layout",
       kind: "keyOnly",
       key: "wrapping",
       description: "Wrap long lines;  default:  they scroll sideways."
     },
-    { name: "copy", kind: "boolean", description: "A button that copies the code." }
+    { name: "copy", group: "appearance", kind: "boolean", description: "A button that copies the code." }
   ],
   events: [
     ...UIT.SourceEvents,

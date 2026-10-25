@@ -28,16 +28,23 @@ export const flyoutVocabulary = {
   attributes: [
     {
       name: "position",
+      group: "layout",
       kind: "valueOnly",
       values: ["left", "right", "top", "bottom"],
       default: "left",
       description: "Edge it slides in from:  `left` (default), `right`, `top`, `bottom`."
     },
-    { name: "fullscreen", kind: "keyOnly", description: "The whole viewport wide." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme." },
-    { name: "blurring", kind: "keyOnly", description: "Blurs and greys the page behind its dimmer." },
+    { name: "fullscreen", group: "appearance", kind: "keyOnly", description: "The whole viewport wide." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme." },
+    {
+      name: "blurring",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Blurs and greys the page behind its dimmer."
+    },
     {
       name: "modeless",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  " +
@@ -45,6 +52,7 @@ export const flyoutVocabulary = {
     },
     {
       name: "width",
+      group: "layout",
       kind: "width",
       description:
         "Width of a `left` / `right` flyout:  Fomantic's words (`very thin`, `thin`, `wide`, `very wide`) or " +
@@ -52,6 +60,7 @@ export const flyoutVocabulary = {
     },
     {
       name: "closable",
+      group: "behaviour",
       kind: "boolean",
       description:
         "Shows a close icon (Fomantic's `closeIcon` setting).  `closable=\"false\"` is also Fomantic's `closable: " +
@@ -59,6 +68,7 @@ export const flyoutVocabulary = {
     },
     {
       name: "closedby",
+      group: "behaviour",
       kind: "enum",
       values: ["any", "closerequest", "none"],
       default: "any",
@@ -69,11 +79,13 @@ export const flyoutVocabulary = {
     },
     {
       name: "header",
+      group: "name",
       kind: "string",
       description: "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog)."
     },
     {
       name: "content",
+      group: "content",
       kind: "string",
       description: "Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version."
     }

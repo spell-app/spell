@@ -21,18 +21,30 @@ export const railVocabulary = {
   noun: "rail",
   description: "A rail is used to show accompanying content outside the boundaries of the main view of a site.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of the rail's text, `mini` ... `massive`." },
+    { name: "size", group: "appearance", kind: "size", description: "Size of the rail's text, `mini` ... `massive`." },
     {
       name: "position",
+      group: "layout",
       kind: "valueOnly",
       values: ["left", "right"],
       description: "Side:  `left` or `right` of its container."
     },
-    { name: "internal", kind: "keyOnly", description: "Inside its container's edge instead of outside it." },
-    { name: "dividing", kind: "keyOnly", description: "A vertical rule between the rail and its container." },
-    { name: "attached", kind: "keyOnly", description: "Flush against its container:  no gap." },
+    {
+      name: "internal",
+      group: "advanced",
+      kind: "keyOnly",
+      description: "Inside its container's edge instead of outside it."
+    },
+    {
+      name: "dividing",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A vertical rule between the rail and its container."
+    },
+    { name: "attached", group: "layout", kind: "keyOnly", description: "Flush against its container:  no gap." },
     {
       name: "close",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'Closer to its container:  `close` (1em away), `close="very"` (0.5em away).'

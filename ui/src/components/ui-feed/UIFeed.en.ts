@@ -25,22 +25,39 @@ export const feedVocabulary = {
   noun: "feed",
   description: "A feed presents people's activity chronologically.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of the events' number circles (`ordered`) and connecting line (`connected`)."
     },
-    { name: "connected", kind: "keyOnly", description: "A line joins each event's label to the next." },
+    {
+      name: "connected",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A line joins each event's label to the next."
+    },
     {
       name: "ordered",
+      group: "appearance",
       kind: "keyOnly",
       description: "Numbers the events, in a circle where the label goes.  Renders `<ol>`."
     },
-    { name: "divided", kind: "keyOnly", description: "A rule between events." },
-    { name: "basic", kind: "keyOnly", description: "Ordered:  outlined number circles instead of filled ones." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert." }
+    { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between events." },
+    {
+      name: "basic",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Ordered:  outlined number circles instead of filled ones."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-event>`s." }],

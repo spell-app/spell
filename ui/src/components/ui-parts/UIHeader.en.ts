@@ -28,43 +28,69 @@ export const headerVocabulary = {
   attributes: [
     {
       name: "level",
+      group: "appearance",
       kind: "enum",
       values: ["1", "2", "3", "4", "5", "6"],
       description: "Page header:  renders `<h1>` ... `<h6>`, sized by level unless `size` is set."
     },
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description:
         "Content header size relative to the surrounding text, `mini` ... `massive`;  `medium` is the default."
     },
-    { name: "color", kind: "color", description: "Hue of the text (and of a `dividing` rule)." },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the text (and of a `dividing` rule)." },
     {
       name: "sub",
+      group: "appearance",
       kind: "keyOnly",
       description: "A sub heading:  small, uppercase.  Inside a header, its sub header."
     },
-    { name: "icon", kind: "keyOnly", description: "Icon header:  a large slotted icon centred above the text." },
-    { name: "dividing", kind: "keyOnly", description: "A rule below it." },
-    { name: "block", kind: "keyOnly", description: "In a tinted box." },
+    {
+      name: "icon",
+      group: "content",
+      kind: "keyOnly",
+      description: "Icon header:  a large slotted icon centred above the text."
+    },
+    { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule below it." },
+    { name: "block", group: "layout", kind: "keyOnly", description: "In a tinted box." },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two."
     },
-    { name: "seamless", kind: "keyOnly", description: "With `attached`:  no line where it meets the segment." },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right`." },
+    {
+      name: "seamless",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "With `attached`:  no line where it meets the segment."
+    },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Floats `left` or `right`."
+    },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: "alignments",
       description: "Aligns its text `left`, `center`, `right` or `justified`."
     },
-    { name: "fitted", kind: "keyOnly", description: "No padding." },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme, for it and its parts." },
-    { name: "href", kind: "string", description: "Renders a link (`<a>`) styled as a header." }
+    { name: "fitted", group: "layout", kind: "keyOnly", description: "No padding." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  the dark scheme, for it and its parts."
+    },
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a header." }
   ],
   events: [],
   slots: [

@@ -19,16 +19,27 @@ export const commentsVocabulary = {
   noun: "comments",
   description: "A list of comments, or the thread of replies to one.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "threaded", kind: "keyOnly", description: "A line down the left of each thread of replies." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    {
+      name: "threaded",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A line down the left of each thread of replies."
+    },
     {
       name: "minimal",
+      group: "appearance",
       kind: "keyOnly",
       description: "Each comment's actions hidden until the comment is hovered (and shown to keyboard focus)."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "collapsed", kind: "keyOnly", description: "Hidden:  a thread of replies folded away." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert." }
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    { name: "collapsed", group: "states", kind: "keyOnly", description: "Hidden:  a thread of replies folded away." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],
   events: [],
   slots: [

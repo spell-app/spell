@@ -35,6 +35,11 @@ import * as uiCore from "spell-ui/core"
 import * as uiForms from "spell-ui/forms"
 import type { ComponentPack } from "spell-ui/components/ui-components/UIComponents.types"
 import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
+import { PackHotSwap } from "spell-ui/hot"
+
+// a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
+// installed now, before any pack defines its tags
+PackHotSwap.install()
 
 /**
  * What a pack imports, by its `packModules` key => the page's copy of that module.

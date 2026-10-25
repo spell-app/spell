@@ -24,6 +24,7 @@ export const sectionsVocabulary = {
   attributes: [
     {
       name: "collapsing",
+      group: "layout",
       kind: "keyOnly",
       description:
         "Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded " +

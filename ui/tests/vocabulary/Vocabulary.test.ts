@@ -242,13 +242,18 @@ describe("Vocabulary.define():  another package's events", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
     expect([...vocabulary.define().get("spell-viewer")!.events.keys()]).toEqual(["spell-open", "ui-change"])
-    expect([...vocabulary.define("ie", SPANISH).get("spell-viewer")!.events.keys()]).toEqual(["spell-open", "ie-cambio"])
+    expect([...vocabulary.define("ie", SPANISH).get("spell-viewer")!.events.keys()]).toEqual([
+      "spell-open",
+      "ie-cambio"
+    ])
   })
 
   it("are translated when the dictionary names them", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
-    const events = vocabulary.define("ie", { lang: "es", events: { "spell-open": "abrir" } }).get("spell-viewer")!.events
+    const events = vocabulary
+      .define("ie", { lang: "es", events: { "spell-open": "abrir" } })
+      .get("spell-viewer")!.events
     expect([...events.keys()]).toEqual(["ie-abrir", "ie-change"])
   })
 })

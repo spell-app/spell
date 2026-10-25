@@ -20,7 +20,7 @@ export const placeholderHeaderVocabulary = {
   noun: "header",
   ui: false,
   description: "The skeleton of a header:  a block of taller, shorter lines, optionally beside an image.",
-  attributes: [{ name: "image", kind: "keyOnly", description: "A square image beside the lines." }],
+  attributes: [{ name: "image", group: "content", kind: "keyOnly", description: "A square image beside the lines." }],
   events: [],
   slots: [{ name: "", description: "`<ui-placeholder-line>`s, usually two." }],
   parts: [{ name: "header", description: "The header block;  with `image`, its `::before` is the square." }],

@@ -30,26 +30,35 @@ export const modalVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Width, `mini` ... `massive` (Fomantic's ratios of the default width);  `medium` is the default."
     },
-    { name: "basic", kind: "keyOnly", description: "No box:  light text straight on the dimmer." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme." },
-    { name: "fullscreen", kind: "keyOnly", description: "Nearly the whole viewport wide." },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box:  light text straight on the dimmer." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme." },
+    { name: "fullscreen", group: "appearance", kind: "keyOnly", description: "Nearly the whole viewport wide." },
     {
       name: "overlay",
+      group: "appearance",
       kind: "keyOnly",
       description: "With `fullscreen`:  covers the whole viewport, edge to edge (`overlay fullscreen`)."
     },
-    { name: "scrolling", kind: "keyOnly", description: "Scrolls inside itself when taller than the viewport." },
+    {
+      name: "scrolling",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Scrolls inside itself when taller than the viewport."
+    },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: ["top", "bottom"],
       description: "Pinned near the `top` or `bottom` of the viewport instead of centred (`top aligned`)."
     },
     {
       name: "closable",
+      group: "behaviour",
       kind: "boolean",
       description:
         "Shows a close icon (Fomantic's `closeIcon` setting).  `closable=\"false\"` is also Fomantic's `closable: " +
@@ -58,6 +67,7 @@ export const modalVocabulary = {
     },
     {
       name: "closedby",
+      group: "behaviour",
       kind: "enum",
       values: ["any", "closerequest", "none"],
       default: "any",
@@ -69,11 +79,13 @@ export const modalVocabulary = {
     },
     {
       name: "header",
+      group: "name",
       kind: "string",
       description: "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog)."
     },
     {
       name: "content",
+      group: "content",
       kind: "string",
       description: "Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version."
     }

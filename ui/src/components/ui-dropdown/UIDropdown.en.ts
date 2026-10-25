@@ -23,60 +23,121 @@ export const dropdownVocabulary = {
   noun: "dropdown",
   description: "A dropdown lets people choose a value from a series of options.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue:  fills a `button` dropdown;  accents a selection's focus border and labels."
     },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
       description: "Form state, tinting the box, text and menu."
     },
-    { name: "selection", kind: "keyOnly", description: "Looks like a form `<select>`." },
-    { name: "search", kind: "keyOnly", description: "Filters the options by typing;  the trigger is an `<input>`." },
-    { name: "multiple", kind: "keyOnly", description: "Chooses several values, shown as labels." },
-    { name: "inline", kind: "keyOnly", description: "Sits inside running text." },
-    { name: "floating", kind: "keyOnly", description: "The menu floats further away, with a stronger shadow." },
-    { name: "button", kind: "keyOnly", description: "Looks like a button (`UIButton.css`)." },
+    { name: "selection", group: "appearance", kind: "keyOnly", description: "Looks like a form `<select>`." },
+    {
+      name: "search",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Filters the options by typing;  the trigger is an `<input>`."
+    },
+    { name: "multiple", group: "form", kind: "keyOnly", description: "Chooses several values, shown as labels." },
+    { name: "inline", group: "layout", kind: "keyOnly", description: "Sits inside running text." },
+    {
+      name: "floating",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The menu floats further away, with a stronger shadow."
+    },
+    { name: "button", group: "appearance", kind: "keyOnly", description: "Looks like a button (`UIButton.css`)." },
     {
       name: "labeled",
+      group: "appearance",
       kind: "keyOnly",
       key: "labeled icon",
       description: "A labeled icon button:  the `icon` in its own block, no caret.  Use with `button`."
     },
-    { name: "compact", kind: "keyOnly", description: "No minimum width;  the menu sizes to its items." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "scrolling", kind: "keyOnly", description: "The menu scrolls after a fixed height." },
-    { name: "upward", kind: "keyOnly", description: "Opens above (the menu still flips when there's no room)." },
-    { name: "simple", kind: "keyOnly", description: "Opens on hover / focus, with no script and no popover." },
-    { name: "clearable", kind: "keyOnly", description: "Shows a clear button while there's a value." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
-    { name: "loading", kind: "keyOnly", description: "Busy, e.g. fetching options;  the caret spins." },
+    {
+      name: "compact",
+      group: "layout",
+      kind: "keyOnly",
+      description: "No minimum width;  the menu sizes to its items."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    { name: "scrolling", group: "layout", kind: "keyOnly", description: "The menu scrolls after a fixed height." },
+    {
+      name: "upward",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Opens above (the menu still flips when there's no room)."
+    },
+    {
+      name: "simple",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Opens on hover / focus, with no script and no popover."
+    },
+    { name: "clearable", group: "form", kind: "keyOnly", description: "Shows a clear button while there's a value." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
+    {
+      name: "loading",
+      group: "states",
+      kind: "keyOnly",
+      description: "Busy, e.g. fetching options;  the caret spins."
+    },
     {
       name: "readonly",
+      group: "form",
       kind: "keyOnly",
       property: "readOnly",
       key: "read-only",
       description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme's colours." },
-    { name: "unlimited", kind: "keyOnly", description: "A selection menu that never scrolls." },
-    { name: "resizable", kind: "keyOnly", description: "A `scrolling` menu people can resize vertically." },
-    { name: "short", kind: "keyOnly", description: "A shorter selection menu (3/4 height)." },
-    { name: "very-short", kind: "keyOnly", description: "A much shorter selection menu (1/2 height)." },
-    { name: "long", kind: "keyOnly", description: "A longer selection menu (2x height)." },
-    { name: "very-long", kind: "keyOnly", description: "A much longer selection menu (3x height)." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  the dark scheme's colours."
+    },
+    { name: "unlimited", group: "appearance", kind: "keyOnly", description: "A selection menu that never scrolls." },
+    {
+      name: "resizable",
+      group: "behaviour",
+      kind: "keyOnly",
+      description: "A `scrolling` menu people can resize vertically."
+    },
+    { name: "short", group: "appearance", kind: "keyOnly", description: "A shorter selection menu (3/4 height)." },
+    {
+      name: "very-short",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A much shorter selection menu (1/2 height)."
+    },
+    { name: "long", group: "appearance", kind: "keyOnly", description: "A longer selection menu (2x height)." },
+    {
+      name: "very-long",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A much longer selection menu (3x height)."
+    },
     {
       name: "open",
+      group: "states",
       kind: "keyOnly",
       key: "active",
       description: "The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
     },
     {
       name: "pointing",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "top left", "top right", "left", "right", "bottom", "bottom left", "bottom right"],
       description:
@@ -85,6 +146,7 @@ export const dropdownVocabulary = {
     },
     {
       name: "columnar",
+      group: "appearance",
       kind: "width",
       widthClass: "column",
       values: ["2", "3", "4", "5"],
@@ -92,47 +154,69 @@ export const dropdownVocabulary = {
     },
     {
       name: "direction",
+      group: "layout",
       kind: "enum",
       values: ["left", "right"],
       default: "right",
       description: "Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`)."
     },
-    { name: "icon", kind: "icon", description: "Icon name for a `labeled` dropdown's icon block." },
-    { name: "placeholder", kind: "string", description: "Text shown while nothing is chosen." },
+    { name: "icon", group: "content", kind: "icon", description: "Icon name for a `labeled` dropdown's icon block." },
+    { name: "placeholder", group: "form", kind: "string", description: "Text shown while nothing is chosen." },
     {
       name: "value",
+      group: "form",
       kind: "string",
       description:
         "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
     },
     {
       name: "text",
+      group: "name",
       kind: "string",
       reflect: false,
       description: "Text shown for the current value, e.g. before `options` arrive.  Property only by default."
     },
-    { name: "name", kind: "string", description: "Form field name;  `multiple` submits one entry per value." },
-    { name: "required", kind: "boolean", description: "Form validation:  a value must be chosen." },
-    { name: "allow-additions", kind: "boolean", description: "`search`:  offers the query as a new option." },
+    {
+      name: "name",
+      group: "name",
+      kind: "string",
+      description: "Form field name;  `multiple` submits one entry per value."
+    },
+    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    {
+      name: "allow-additions",
+      group: "form",
+      kind: "boolean",
+      description: "`search`:  offers the query as a new option."
+    },
     {
       name: "min-characters",
+      group: "form",
       kind: "number",
       default: 0,
       description: "`search`:  characters to type before the menu filters."
     },
-    { name: "max-selections", kind: "number", description: "`multiple`:  the most values that can be chosen." },
+    {
+      name: "max-selections",
+      group: "form",
+      kind: "number",
+      description: "`multiple`:  the most values that can be chosen."
+    },
     {
       name: "no-results-text",
+      group: "content",
       kind: "string",
       description: "Message when nothing matches;  default the translated `noResults` text."
     },
     {
       name: "addition-text",
+      group: "content",
       kind: "string",
       description: "Label of the add item, with `{value}`;  default the translated `addItem` text."
     },
     {
       name: "options",
+      group: "form",
       kind: "json",
       reflect: false,
       description: "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."

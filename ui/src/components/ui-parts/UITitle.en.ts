@@ -22,7 +22,7 @@ export const titleVocabulary = {
   noun: "title",
   ui: false,
   description: "A title:  a step's, an accordion panel's, a search result's.",
-  attributes: [{ name: "href", kind: "string", description: "Renders a link (`<a>`)." }],
+  attributes: [{ name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`)." }],
   events: [],
   slots: [{ name: "", description: "Text." }],
   parts: [{ name: "title", description: "The title box." }],

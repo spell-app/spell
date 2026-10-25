@@ -36,4 +36,24 @@ export type ComponentPack = {
    *   the pack counts as loaded once that settles, so a `<ui-root>` waits for its tags.
    */
   define(): void | Promise<unknown>
+  /**
+   * Each family folder => a hash of the sources its script holds (`spell pack build`, epic `epic-engine` I116):
+   * when the pack is rebuilt, `ComponentPacks.reload()` swaps in only the families whose hash changed.
+   * - None (a pack built before):  every family is swapped.
+   */
+  readonly families?: Readonly<Record<string, string>>
 }
+
+/**
+ * How `ComponentPacks.reload()` swaps a rebuilt pack into the live elements:  the page's hot replacement
+ * (Spell UI's `PackHotSwap`, over the kit's `HotDefinitions`).
+ */
+export type PackSwap = {
+  /** While its `define()` runs again:  whether a tag KEEPS its live class (`true`:  its family didn't change);  `undefined` after. */
+  keep(keeps: ((tag: string) => boolean) | undefined): void
+  /** Re-render the swapped elements;  `false` when a change needs a page reload (the platform can't take it in place). */
+  finish(): boolean
+}
+
+/** What `ComponentPacks.reload()` did:  swapped in place, needs a page reload, or no such pack on the page. */
+export type PackSwapResult = "swapped" | "reload" | "none"

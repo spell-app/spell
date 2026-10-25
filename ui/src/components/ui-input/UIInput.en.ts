@@ -49,31 +49,55 @@ export const inputVocabulary = {
   noun: "input",
   description: "An input is a field used to elicit a response from a person.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of a `file` input's choose-file button (Fomantic colours only file inputs)."
     },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: UIT.FormStates,
       description: "Form state, tinting the box, text and placeholder."
     },
-    { name: "transparent", kind: "keyOnly", description: "No box:  text only, e.g. inside a menu or header." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "loading", kind: "keyOnly", description: "Busy:  the icon becomes a spinner (with or without `icon`)." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, left out of the form." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
+    {
+      name: "transparent",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "No box:  text only, e.g. inside a menu or header."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    {
+      name: "loading",
+      group: "states",
+      kind: "keyOnly",
+      description: "Busy:  the icon becomes a spinner (with or without `icon`)."
+    },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used;  dimmed, left out of the form."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       property: "readOnly",
       description: "Shows its value but can't be edited;  submitted with the form (unlike `disabled`)."
     },
     {
       name: "icon-position",
+      group: "content",
       kind: "valueAndKey",
       key: "icon",
       values: ["left"],
@@ -81,6 +105,7 @@ export const inputVocabulary = {
     },
     {
       name: "labeled",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["right", "corner", "left corner"],
       description:
@@ -89,20 +114,28 @@ export const inputVocabulary = {
     },
     {
       name: "action",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["left"],
       description:
         "Joined buttons (slot `action`):  bare => after the field, `left` => before it.  Implied by the slot."
     },
-    { name: "icon", kind: "icon", description: "Icon name, drawn inside the field;  the root gets `icon`." },
+    {
+      name: "icon",
+      group: "content",
+      kind: "icon",
+      description: "Icon name, drawn inside the field;  the root gets `icon`."
+    },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description:
         'Label text, joined to the field;  an ICON name with `labeled="corner"` / `"left corner"`;  the `label` slot is the rich version.'
     },
     {
       name: "type",
+      group: "appearance",
       kind: "enum",
       values: INPUT_TYPES,
       default: "text",
@@ -110,30 +143,54 @@ export const inputVocabulary = {
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       reflect: false,
       description:
         "Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input."
     },
-    { name: "name", kind: "string", description: "Form field name." },
-    { name: "placeholder", kind: "string", description: "Hint shown while empty." },
-    { name: "required", kind: "boolean", description: "Constraint:  must not be empty (`valueMissing`)." },
-    { name: "pattern", kind: "string", description: "Constraint:  a regular expression the whole value must match." },
-    { name: "min", kind: "string", description: "Constraint:  lowest number / date." },
-    { name: "max", kind: "string", description: "Constraint:  highest number / date." },
-    { name: "step", kind: "string", description: "Constraint:  granularity of a number / date." },
+    { name: "name", group: "name", kind: "string", description: "Form field name." },
+    { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
+    {
+      name: "required",
+      group: "form",
+      kind: "boolean",
+      description: "Constraint:  must not be empty (`valueMissing`)."
+    },
+    {
+      name: "pattern",
+      group: "form",
+      kind: "string",
+      description: "Constraint:  a regular expression the whole value must match."
+    },
+    { name: "min", group: "form", kind: "string", description: "Constraint:  lowest number / date." },
+    { name: "max", group: "form", kind: "string", description: "Constraint:  highest number / date." },
+    { name: "step", group: "form", kind: "string", description: "Constraint:  granularity of a number / date." },
     {
       name: "minlength",
+      group: "form",
       kind: "number",
       property: "minLength",
       description: "Constraint:  fewest characters (checked once someone has edited it)."
     },
-    { name: "maxlength", kind: "number", property: "maxLength", description: "Constraint:  most characters." },
-    { name: "multiple", kind: "boolean", description: "`email` / `file`:  accepts several values." },
-    { name: "accept", kind: "string", description: "`file`:  accepted file types." },
-    { name: "autocomplete", kind: "string", description: "Autofill hint, forwarded to the native input." },
+    {
+      name: "maxlength",
+      group: "form",
+      kind: "number",
+      property: "maxLength",
+      description: "Constraint:  most characters."
+    },
+    { name: "multiple", group: "form", kind: "boolean", description: "`email` / `file`:  accepts several values." },
+    { name: "accept", group: "form", kind: "string", description: "`file`:  accepted file types." },
+    {
+      name: "autocomplete",
+      group: "form",
+      kind: "string",
+      description: "Autofill hint, forwarded to the native input."
+    },
     {
       name: "inputmode",
+      group: "appearance",
       kind: "enum",
       // Shadows `HTMLElement.inputMode` on purpose:  same attribute, same meaning, forwarded to the native input
       // (a vocabulary attribute meaning something else would take another name, as `<ui-divider spacer>` did)
@@ -145,6 +202,7 @@ export const inputVocabulary = {
     },
     {
       name: "rules",
+      group: "form",
       kind: "json",
       reflect: false,
       description:

@@ -25,21 +25,29 @@ export const fieldsVocabulary = {
   attributes: [
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: UIT.FormStates,
       description: "State of every field inside."
     },
-    { name: "inline", kind: "keyOnly", description: "Fields and their labels on one line." },
-    { name: "grouped", kind: "keyOnly", description: "Fields stacked under one label (radio / checkbox groups)." },
-    { name: "unstackable", kind: "keyOnly", description: "Never stacks on a narrow form." },
+    { name: "inline", group: "layout", kind: "keyOnly", description: "Fields and their labels on one line." },
+    {
+      name: "grouped",
+      group: "content",
+      kind: "keyOnly",
+      description: "Fields stacked under one label (radio / checkbox groups)."
+    },
+    { name: "unstackable", group: "layout", kind: "keyOnly", description: "Never stacks on a narrow form." },
     {
       name: "required",
+      group: "form",
       kind: "keyOnly",
       description: "Marks every field label (or the group label) with an asterisk."
     },
-    { name: "disabled", kind: "keyOnly", description: "Every field dimmed and not usable." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Every field dimmed and not usable." },
     {
       name: "equal",
+      group: "layout",
       kind: "keyOnly",
       key: "equal width",
       description:
@@ -48,6 +56,7 @@ export const fieldsVocabulary = {
     },
     {
       name: "widths",
+      group: "appearance",
       kind: "width",
       widthClass: "",
       canEqual: true,

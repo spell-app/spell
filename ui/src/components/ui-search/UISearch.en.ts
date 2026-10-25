@@ -27,69 +27,123 @@ export const searchVocabulary = {
   noun: "search",
   description: "A search module lets people query for results from a selection of data.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "category", kind: "keyOnly", description: "Results in named groups (`category` of each result)." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
+    {
+      name: "category",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Results in named groups (`category` of each result)."
+    },
     {
       name: "horizontal",
+      group: "layout",
       kind: "keyOnly",
       description: "`category`:  each group's name above its results, not beside them."
     },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container;  so do the results." },
-    { name: "scrolling", kind: "keyOnly", description: "The results scroll after a fixed height." },
-    { name: "resizable", kind: "keyOnly", description: "`scrolling`:  people can resize the results vertically." },
-    { name: "short", kind: "keyOnly", description: "The results scroll after a shorter height." },
-    { name: "very-short", kind: "keyOnly", description: "The results scroll after a much shorter height." },
-    { name: "long", kind: "keyOnly", description: "The results scroll after a longer height." },
-    { name: "very-long", kind: "keyOnly", description: "The results scroll after a much longer height." },
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Takes the full width of its container;  so do the results."
+    },
+    { name: "scrolling", group: "layout", kind: "keyOnly", description: "The results scroll after a fixed height." },
+    {
+      name: "resizable",
+      group: "behaviour",
+      kind: "keyOnly",
+      description: "`scrolling`:  people can resize the results vertically."
+    },
+    { name: "short", group: "appearance", kind: "keyOnly", description: "The results scroll after a shorter height." },
+    {
+      name: "very-short",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The results scroll after a much shorter height."
+    },
+    { name: "long", group: "appearance", kind: "keyOnly", description: "The results scroll after a longer height." },
+    {
+      name: "very-long",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The results scroll after a much longer height."
+    },
     {
       name: "aligned",
+      group: "layout",
       kind: "valueAndKey",
       values: ["left", "right"],
       description: "Which edge the results line up with:  `right` => `right aligned` (they extend to the left)."
     },
-    { name: "loading", kind: "keyOnly", description: "Busy:  the icon spins.  Also shown while a remote query runs." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, and left out of the form." },
+    {
+      name: "loading",
+      group: "states",
+      kind: "keyOnly",
+      description: "Busy:  the icon spins.  Also shown while a remote query runs."
+    },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used;  dimmed, and left out of the form."
+    },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       property: "readOnly",
       description: "Shows its value but can't be typed in, and the results never open;  still focusable and submitted."
     },
     {
       name: "open",
+      group: "states",
       kind: "boolean",
       description:
         "The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show."
     },
-    { name: "placeholder", kind: "string", description: "Placeholder text of the input." },
-    { name: "value", kind: "string", description: "The input's text:  the query, or a chosen result's title." },
-    { name: "name", kind: "string", description: "Form field name:  submits the input's text." },
-    { name: "required", kind: "boolean", description: "Form validation:  the input can't be empty." },
+    { name: "placeholder", group: "form", kind: "string", description: "Placeholder text of the input." },
+    {
+      name: "value",
+      group: "form",
+      kind: "string",
+      description: "The input's text:  the query, or a chosen result's title."
+    },
+    { name: "name", group: "name", kind: "string", description: "Form field name:  submits the input's text." },
+    { name: "required", group: "form", kind: "boolean", description: "Form validation:  the input can't be empty." },
     {
       name: "url",
+      group: "link",
       kind: "string",
       description: "Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`."
     },
     {
       name: "min-characters",
+      group: "form",
       kind: "number",
       default: 1,
       description: "Characters to type before a search runs."
     },
     {
       name: "max-results",
+      group: "appearance",
       kind: "number",
       default: 7,
       description: "The most results shown (before categories);  `0` for no limit."
     },
     {
       name: "search-delay",
+      group: "behaviour",
       kind: "number",
       default: 200,
       description: "Remote:  ms to wait after typing stops before querying (a newer query aborts an older one)."
     },
     {
       name: "full-text-search",
+      group: "appearance",
       kind: "enum",
       values: UIT.SearchMatches,
       default: UIT.SearchMatch.exact,
@@ -99,25 +153,34 @@ export const searchVocabulary = {
     },
     {
       name: "search-fields",
+      group: "behaviour",
       kind: "string",
       default: "title description",
       description: "Local:  the result fields searched, a comma / space list."
     },
-    { name: "ignore-diacritics", kind: "boolean", description: "Local:  `a` matches `á`." },
+    { name: "ignore-diacritics", group: "advanced", kind: "boolean", description: "Local:  `a` matches `á`." },
     {
       name: "highlight-matches",
+      group: "advanced",
       kind: "boolean",
       description: "Marks the query in titles and descriptions (`<mark>`)."
     },
-    { name: "select-first-result", kind: "boolean", description: "Highlights the first result as results arrive." },
+    {
+      name: "select-first-result",
+      group: "advanced",
+      kind: "boolean",
+      description: "Highlights the first result as results arrive."
+    },
     {
       name: "show-no-results",
+      group: "advanced",
       kind: "boolean",
       default: true,
       description: "Shows the no-results message;  `false` shows nothing instead."
     },
     {
       name: "source",
+      group: "content",
       kind: "json",
       reflect: false,
       description:

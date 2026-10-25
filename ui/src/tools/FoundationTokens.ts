@@ -252,9 +252,10 @@ const GROUPS: GroupDefinition[] = [
   {
     id: "motion",
     title: "Motion",
-    description: "Durations and easing curves.",
+    description: "Durations, easing curves, and how long a hover waits.",
     rules: [
       [/^--ui-duration-(\w+)$/, (match) => `Duration \`${match[1]}\`.`],
+      [/^--ui-hover-delay$/, () => "How long a hover popup waits before it shows."],
       [/^--ui-ease$/, () => "Default easing."],
       [/^--ui-ease-([\w-]+)$/, (match) => `Easing \`${match[1]}\`.`]
     ]

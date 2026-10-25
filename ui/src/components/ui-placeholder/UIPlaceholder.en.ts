@@ -27,8 +27,13 @@ export const placeholderVocabulary = {
   noun: "placeholder",
   description: "A placeholder is used to reserve space for content that soon will appear in a layout.",
   attributes: [
-    { name: "fluid", kind: "keyOnly", description: "As wide as its container, instead of a capped width." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." }
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "keyOnly",
+      description: "As wide as its container, instead of a capped width."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." }
   ],
   events: [],
   slots: [

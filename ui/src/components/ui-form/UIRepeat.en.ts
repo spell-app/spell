@@ -22,6 +22,7 @@ export const repeatVocabulary = {
   attributes: [
     {
       name: "items",
+      group: "content",
       kind: "json",
       reflect: false,
       description:
@@ -30,6 +31,7 @@ export const repeatVocabulary = {
     },
     {
       name: "name",
+      group: "name",
       kind: "string",
       description:
         "The list to repeat over, by name:  this property of the scope -- the `<ui-form>`'s `value`, or the item of " +

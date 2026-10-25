@@ -20,6 +20,7 @@ export const orVocabulary = {
   attributes: [
     {
       name: "text",
+      group: "name",
       kind: "string",
       description: "Badge text;  default the translated `or` text.  Keep it to a short word."
     }

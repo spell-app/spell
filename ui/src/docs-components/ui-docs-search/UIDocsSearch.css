@@ -191,7 +191,10 @@
     overscroll-behavior: contain;
     border: 1px solid var(--_ui-docs-search-results-border-color);
     border-radius: var(--_ui-docs-search-results-radius);
-    background: var(--_ui-docs-search-results-background);
+    /* over the page's own solid ground:  a theme's glass surface (fruity's) let the side column show through */
+    background:
+      linear-gradient(var(--_ui-docs-search-results-background), var(--_ui-docs-search-results-background)),
+      var(--ui-background);
     box-shadow: var(--_ui-docs-search-results-shadow);
     color: var(--_ui-docs-search-color);
     font: inherit;
@@ -317,7 +320,10 @@
     gap: 0.5em 1em;
     padding: 0.5em 1em;
     border-block-start: 1px solid var(--_ui-docs-search-border-color);
-    background: var(--_ui-docs-search-results-background);
+    /* solid, as the card's:  the results scroll under it */
+    background:
+      linear-gradient(var(--_ui-docs-search-results-background), var(--_ui-docs-search-results-background)),
+      var(--ui-background);
     color: var(--_ui-docs-search-muted-color);
     font-size: 0.75em;
   }

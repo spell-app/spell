@@ -26,23 +26,46 @@ export const dimmerVocabulary = {
   attributes: [
     {
       name: "shade",
+      group: "appearance",
       kind: "valueOnly",
       values: ["medium", "light", "very light"],
       description: "Lighter than the default (Fomantic's shades):  `medium`, `light`, `very light`."
     },
-    { name: "page", kind: "keyOnly", description: "Dims the whole page:  a modal dialog over the viewport." },
-    { name: "inverted", kind: "keyOnly", description: "A light dimmer (dark text), where the default is dark." },
-    { name: "blurring", kind: "keyOnly", description: "Blurs and greys what's behind it (`backdrop-filter`)." },
-    { name: "simple", kind: "keyOnly", description: "Fomantic's CSS-only dimmer;  the element's look is the same." },
-    { name: "disabled", kind: "keyOnly", description: "Never shows." },
+    {
+      name: "page",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Dims the whole page:  a modal dialog over the viewport."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A light dimmer (dark text), where the default is dark."
+    },
+    {
+      name: "blurring",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Blurs and greys what's behind it (`backdrop-filter`)."
+    },
+    {
+      name: "simple",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Fomantic's CSS-only dimmer;  the element's look is the same."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Never shows." },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: ["top", "bottom"],
       description: "Its content at the `top` or `bottom` instead of the middle (`top aligned`)."
     },
     {
       name: "show-on",
+      group: "appearance",
       kind: "enum",
       values: ["hover", "click"],
       description:
@@ -51,6 +74,7 @@ export const dimmerVocabulary = {
     },
     {
       name: "closedby",
+      group: "behaviour",
       kind: "enum",
       values: ["any", "closerequest", "none"],
       default: "any",

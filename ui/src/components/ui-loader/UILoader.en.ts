@@ -29,28 +29,46 @@ export const loaderVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Spinner and text size, `mini` ... `massive`;  `medium` is the default."
     },
-    { name: "color", kind: "color", description: "Hue of the turning arc." },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the turning arc." },
     {
       name: "speed",
+      group: "appearance",
       kind: "valueOnly",
       values: ["slow", "fast"],
       description: "Spin `slow` or `fast`;  absent is normal."
     },
-    { name: "disabled", kind: "keyOnly", description: "Hidden, even when `visible`." },
-    { name: "text", kind: "keyOnly", description: "Shows the slotted text below the spinner." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Hidden, even when `visible`." },
+    { name: "text", group: "name", kind: "keyOnly", description: "Shows the slotted text below the spinner." },
     {
       name: "inline",
+      group: "layout",
       kind: "keyOnly",
       description: "Sits in the text flow instead of centred over its positioned container."
     },
-    { name: "centered", kind: "keyOnly", description: "With `inline`:  a block of its own, centred." },
-    { name: "indeterminate", kind: "keyOnly", description: "Unsure how long it'll take:  turns backwards, slower." },
-    { name: "double", kind: "keyOnly", description: "Two opposite arcs." },
-    { name: "elastic", kind: "keyOnly", description: "Two arcs that stretch and chase each other." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  a white arc on a faint track." }
+    { name: "centered", group: "layout", kind: "keyOnly", description: "With `inline`:  a block of its own, centred." },
+    {
+      name: "indeterminate",
+      group: "states",
+      kind: "keyOnly",
+      description: "Unsure how long it'll take:  turns backwards, slower."
+    },
+    { name: "double", group: "appearance", kind: "keyOnly", description: "Two opposite arcs." },
+    {
+      name: "elastic",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Two arcs that stretch and chase each other."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  a white arc on a faint track."
+    }
   ],
   events: [],
   slots: [{ name: "", description: "Text shown below the spinner, with `text`;  also the accessible name." }],

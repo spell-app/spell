@@ -30,38 +30,64 @@ export const imageVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Width, `mini` (35px) ... `massive` (960px) at 16px;  `medium` is the natural size."
     },
-    { name: "avatar", kind: "keyOnly", description: "A small circle sitting in a line of text." },
-    { name: "bordered", kind: "keyOnly", description: "A hairline border, for images with white edges." },
-    { name: "centered", kind: "keyOnly", description: "A block centred in its container." },
-    { name: "circular", kind: "keyOnly", description: "Cropped to a circle (a pill when not square)." },
-    { name: "disabled", kind: "keyOnly", description: "Faded:  shown as unavailable." },
-    { name: "fluid", kind: "keyOnly", description: "Fills its container's width." },
-    { name: "inline", kind: "keyOnly", description: "Sits inline in running text instead of as a block." },
-    { name: "rounded", kind: "keyOnly", description: "Softly rounded corners." },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right` of the text." },
+    { name: "avatar", group: "content", kind: "keyOnly", description: "A small circle sitting in a line of text." },
+    {
+      name: "bordered",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A hairline border, for images with white edges."
+    },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "A block centred in its container." },
+    {
+      name: "circular",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Cropped to a circle (a pill when not square)."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded:  shown as unavailable." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Fills its container's width." },
+    {
+      name: "inline",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Sits inline in running text instead of as a block."
+    },
+    { name: "rounded", group: "appearance", kind: "keyOnly", description: "Softly rounded corners." },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Floats `left` or `right` of the text."
+    },
     {
       name: "spaced",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
       description: 'Room from the text around it:  both sides, or `spaced="left"` / `"right"` only.'
     },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: "verticalAlignments",
       description: "Aligns `top`, `middle` or `bottom` against the text (or, in a group, the row)."
     },
-    { name: "src", kind: "string", description: "Image URL, as the native `<img src>`." },
+    { name: "src", group: "link", kind: "string", description: "Image URL, as the native `<img src>`." },
     {
       name: "alt",
+      group: "content",
       kind: "string",
       description: 'Text alternative, as the native `<img alt>`;  `alt=""` marks the image decorative.'
     },
     {
       name: "width",
+      group: "layout",
       kind: "number",
       description:
         "Intrinsic width in px, as the native `<img width>`:  reserves space before load.  NOT the column " +
@@ -69,16 +95,18 @@ export const imageVocabulary = {
     },
     {
       name: "height",
+      group: "layout",
       kind: "number",
       description: "Intrinsic height in px, as the native `<img height>`:  reserves space before load."
     },
     {
       name: "loading",
+      group: "states",
       kind: "enum",
       values: ["eager", "lazy"],
       description: "When to load, as the native `<img loading>`."
     },
-    { name: "href", kind: "string", description: "Renders a link (`<a>`) around the image." }
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) around the image." }
   ],
   events: [],
   slots: [],
