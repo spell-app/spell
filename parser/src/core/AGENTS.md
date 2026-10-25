@@ -258,6 +258,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Nothing called `core.remember()` (tests, `spell run`):  a remembered prop is a plain one.
 - The compiler writes no `remembered` yet:  its spell waits for epic `elemental-spell`.
 
+## Undo and redo
+
+- A running program's undo history ([undoing.ts](undoing.ts), epic `prefs-and-undo` P6):  `core.RUNTIME.history`, an
+  `UndoHistory` on the kit's `UndoStack`.
+  - One per run;  loading saved state clears it (`core.fromJSON()`, `Loader.load()`).
+- Only an action declared undoable is recorded:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`
+  on a `Thing` or a `List`, after the method.
+  - It's ONE step, however long it waits:  what it calls, and work begun while it waits, join it.
+  - `{ cantBeUndone: "keeps history" | "clears history" }`:  left out, and the second forgets every step once done.
+  - A prop declared `undoable: false` (a selection) is left out of every step.
+- What a step keeps:  each prop's value before its first change and after its last;  each list's items before and after
+  (the same things, not copies).  Undo and redo set them back through the setters:  nothing runs again.
+- Every property write comes through `noteSetting()` (`core.ts`), every list change through `noteItems()`
+  (`List.writeItems()`):  the ONE place each is noted, for the history, a `while`'s put-back and `core.remote`.
+- `App`:  `undo()`, `redo()`, and live `canUndo`, `canRedo`, `undoTitle`, `redoTitle` (the core's messages `undo`,
+  `undo-step` ..., in the program's language).
+- ⌘Z and ⇧⌘Z ([ui.ts](ui.ts)'s `listenForUndoKeys()`, from `core.mountApp()`):  through the page's Spell UI keyboard
+  registry, while the app has the focus or nothing does;  a text field and a modal keep their own.
+- The compiler writes no `declareAction()` yet:  its spell waits for epic `elemental-spell`, whose P10 (Actions and
+  Menus) may take it over by calling `UndoHistory.run()` (decision Q21).
+
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).

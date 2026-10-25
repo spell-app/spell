@@ -7,6 +7,7 @@ import type { Drawing } from "spell-parser/core/drawing"
 import { Eventful } from "spell-parser/core/SpellEvent"
 import type { PropCheck } from "spell-parser/core/core.types"
 import { rememberedStartFor, rememberSetting } from "spell-parser/core/remembered"
+import { declareAction, type ActionInfo } from "spell-parser/core/undoing"
 
 import { hasChosenId, ID_PROP } from "./ids"
 
@@ -42,6 +43,16 @@ export class Thing extends Eventful(Observable) {
    * - Kept so a program compiled before then still loads.
    */
   static savedInline = false
+
+  /**
+   * Make our method `name` an action:  ONE undo step, or one that can't be undone (epic `prefs-and-undo` P6).
+   * - In a static block after the method:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`.
+   * - Or `{ cantBeUndone: "clears history" }`, e.g. a new game -- see `ActionInfo`, `undoing.ts`.
+   * - throws `TypeError` if `name` isn't one of our methods, or `info` says neither kind, or both
+   */
+  static declareAction(name: string, info: ActionInfo): void {
+    declareAction(this, name, info)
+  }
 
   static {
     this.declareProp("id", ID_PROP)

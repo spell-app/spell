@@ -129,6 +129,70 @@ export const uiMethods = defineCoreModule({
 })
 Object.assign(core, uiMethods)
 
+////////////////
+// ## Undo keys
+////////////////
+
+/** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
+const UNDO_KEYS = [
+  { chord: "Mod+Z", action: "undo" },
+  { chord: "Mod+Shift+Z", action: "redo" }
+] as const
+
+/** `<input type>`s nobody types into, so the app's keys stay live:  Spell UI's list, copied. */
+const NON_TEXT_INPUTS = new Set(["button", "checkbox", "radio", "range", "reset", "submit", "color", "file", "image"])
+
+/**
+ * ⌘Z and ⇧⌘Z undo and redo the running program's history while `element`, its app's, has the focus, or nothing
+ * does (epic `prefs-and-undo` P6).  Returns how to stop.
+ * - Through the page's Spell UI keyboard registry (`UI.keyboard`), in its page scope:
+ *   a modal open over the app keeps its own keys (Q19).
+ * - A text field keeps its own ⌘Z:  the key passes on to it.  So does a key with nothing to undo.
+ * - No Spell UI on the page (node, a bare page):  nothing listens.
+ * - `core.mountApp()` calls it, and its `unmount()` stops it.
+ * - NEVER throws:  a registry that fails to load is logged.
+ */
+export function listenForUndoKeys(element: HTMLElement): () => void {
+  const ui = pageUI()
+  if (!ui) return () => {}
+  let stops: Array<() => void> = []
+  let isStopped = false
+  ui.load()
+    .then((runtime) => {
+      if (isStopped) return
+      stops = UNDO_KEYS.map(({ chord, action }) =>
+        runtime.keyboard.register({ chord, handler: (event) => undoKeyPressed(event, element, action) })
+      )
+    })
+    .catch((error) => console.error(error))
+  return () => {
+    isStopped = true
+    stops.forEach((stop) => stop())
+  }
+}
+
+/** Undo or redo for a key pressed:  true if it did, false to pass the key on (see `listenForUndoKeys()`). */
+function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "undo" | "redo"): boolean {
+  const path = event.composedPath()
+  const [focused] = path
+  if (isTypedIn(focused)) return false
+  if (!path.includes(element) && focused !== element.ownerDocument.body) return false
+  const { history } = core.RUNTIME
+  return action === "undo" ? history.undo() : history.redo()
+}
+
+/**
+ * Is `target` somewhere people type, with an undo of its own?  A text field, a text area, a select, editable text.
+ * - The same test as Spell UI's keyboard registry:  a copy, as core never imports `ui`.
+ */
+function isTypedIn(target: EventTarget | undefined): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  if (target.isContentEditable || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
+    return true
+  }
+  return target instanceof HTMLInputElement && !NON_TEXT_INPUTS.has(target.type)
+}
+
 /**
  * What core uses of the page's Spell UI runtime (`UI`, `spell-ui`):  typed here, as core never imports `ui`.
  * - Its `modals` work once the `ui-modal` family is defined:  a runner's page defines every family.
@@ -143,6 +207,10 @@ type PageUI = {
     alert(options: { message: string; okText?: string }): Promise<void>
     confirm(options: { message: string; okText?: string; cancelText?: string }): Promise<boolean>
     prompt(options: { message: string; value?: string }): Promise<string | undefined>
+  }
+  /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
+  keyboard: {
+    register(registration: { chord: string; handler: (event: KeyboardEvent) => boolean }): () => void
   }
 }
 

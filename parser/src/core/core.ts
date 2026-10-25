@@ -78,17 +78,30 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
 
 /**
  * SIDE EFFECT:  `target`'s prop `property` is about to be set to `value`:  `Thing` and `List` call it from `setProp()`.
+ * - The ONE place every property write is noted;  each of these hears of it:
+ *   - a `while` handler running:  its value now is noted, to put back -- only its first, what it had before the handler
+ *   - an undoable action running:  the run's undo history records it (`UndoHistory.noteSetting()`, `undoing.ts`)
+ *   - a program running elsewhere (`core.remote`, e.g. Python):
+ *     it's set there too, e.g. a task's title typed into a page's form
  * - Nothing if it has that value already.
- * - A `while` handler running:  its value now is noted, to put back -- only its first, what it had before the handler.
- * - A program running elsewhere (`core.remote`, e.g. Python):
- *   it's set there too, e.g. a task's title typed into a page's form.
  */
 export function noteSetting(target: object, property: string, value: unknown): void {
   const was = peekProp(target, property)
   if (was === value) return
   const isNoted = recording?.some((change) => change.target === target && change.property === property)
   if (recording && !isNoted) recording.push({ target, property, was })
+  core.RUNTIME?.history.noteSetting(target, property, was, value)
   ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+}
+
+/**
+ * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`:  `List.writeItems()` calls it, for every
+ * change to a list.
+ * - An undoable action running:  the run's undo history records it (`UndoHistory.noteItems()`, `undoing.ts`).
+ * - A `while` handler's put-back leaves lists as they are:  see `recordingSettings()`.
+ */
+export function noteItems(list: object, before: readonly unknown[], after: readonly unknown[]): void {
+  core.RUNTIME?.history.noteItems(list, before, after)
 }
 
 /**

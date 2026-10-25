@@ -281,8 +281,10 @@ export class Loader {
   /**
    * The thing saved under `ref`, made from its entry the first time, then the same thing every time.
    * - Nothing saved under `ref`:  `undefined`, with a warning on the program's console.
+   * - SIDE EFFECT:  the run's undo history is forgotten:  the program's document changed (`undoing.ts`, Q3).
    */
   load(ref: string): SpellObject | undefined {
+    core.RUNTIME?.history.clear()
     const known = this.loaded.get(ref)
     if (known) return known
     const entry = this.inside.has(ref) ? undefined : this.entryFor(ref)

@@ -4,6 +4,7 @@ import { core } from "./core"
 import { Eventful, type EventCallback, type SpellEvent } from "./SpellEvent"
 import { defineCoreModule } from "./core.types"
 import { RememberedValues } from "./remembered"
+import { UndoHistory } from "./undoing"
 
 /**
  * Class backing `core.RUNTIME` -- a live per-project state bag (see `SpellRuntimeState`) that's
@@ -14,6 +15,8 @@ import { RememberedValues } from "./remembered"
 export class SpellRuntime extends Eventful() {
   /** What this run remembers for the next (`remembered.ts`):  `undefined` until `core.remember()`. */
   remembered?: RememberedValues
+  /** This run's undo history (`undoing.ts`):  what its undoable actions changed, to undo and redo. */
+  readonly history = new UndoHistory()
 }
 
 /**

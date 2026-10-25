@@ -29,6 +29,7 @@ import { Errored, For, createMemo, runWithOwner } from "solid-js"
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 import { ViewableList } from "./classes/ViewableList"
+import { listenForUndoKeys } from "./ui"
 
 /**
  * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
@@ -136,16 +137,19 @@ export const drawingMethods = defineCoreModule({
    * - What `App.start()` does, into `core.appElement()`.
    * - SIDE EFFECT:  `element.spellRoot` is the mounted app, so a runner can `unmount()` it before running a program
    *   again (`runCompiled()`).
+   * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
     // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect), whose owner would
     // otherwise own the app's drawing -- and hold or re-run it with the host's
     const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))
+    const stopUndoKeys = listenForUndoKeys(element)
     const mounted: MountedApp = {
       app,
       unmount() {
         dispose()
+        stopUndoKeys()
         if ((element as AppElement).spellRoot === mounted) delete (element as AppElement).spellRoot
       }
     }
