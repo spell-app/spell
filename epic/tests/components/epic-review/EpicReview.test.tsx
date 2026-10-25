@@ -770,10 +770,10 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
       `<epic-overview id="overview"><epic-summary>Two sentences.</epic-summary>` +
         `<epic-section id="o1" kind="overview-part" title="Structure"><p>Hello</p></epic-section></epic-overview>`
     )
-    // in the title row (`tools`), before expand-all and the fold;  folded or open
+    // in the title row (`tools`), before the toggle-all and the fold;  folded or open
     expect(actions(host)).toEqual(["revisit", "todo", "details"])
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
-    const [review, expand] = ['[part~="review-buttons"]', '[part~="expand-all"]'].map((selector) =>
+    const [review, expand] = ['[part~="review-buttons"]', '[part~="toggle-all"]'].map((selector) =>
       tools.querySelector(selector)!
     )
     expect(review.compareDocumentPosition(expand) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()

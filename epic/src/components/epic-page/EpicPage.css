@@ -293,7 +293,8 @@
     align-items: center;
     gap: 4px;
     margin-inline-start: auto;
-    padding: 4px var(--epic-inset) 4px 8px;
+    /* its toggle in the sections' toggle column:  in by the cards' inset and the fold chevron's column (EpicFold.css) */
+    padding: 4px calc(var(--epic-inset) + var(--epic-controls-in, 26px) + 22px) 4px 8px;
   }
   .toolbar-tools:empty {
     display: none;
@@ -624,6 +625,10 @@
 
   /* ## Narrow (VS Code's side bar, a phone):  a smaller h1, so the stuck header leaves room to read */
   @container epic-page (max-width: 480px) {
+    /* the sections' narrow columns (EpicFold.css):  controls in by 16px, the chevron's column 20px */
+    .toolbar-tools {
+      padding-inline-end: calc(var(--epic-inset) + 16px + 20px);
+    }
     /* the h1 shares its row with the labels while they fit (no row of their own:  the stuck header stays short) */
     .heading {
       flex-basis: 100%;

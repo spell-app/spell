@@ -64,14 +64,11 @@ export const FOLD_PARTS = [
   },
   { name: "body", description: "Around its children:  sets `--epic-stack` for them." },
   {
-    name: "expand-all",
+    name: "toggle-all",
     description:
-      "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside " +
-      "it (sections, phases, items, cards and panels), parts loading as they open."
-  },
-  {
-    name: "collapse-all",
-    description: "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
+      "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside " +
+      "it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds " +
+      "everything inside again."
   },
   { name: "note", description: "The `Loads from parts/x.html ...` line, when its part can't load." }
 ] as const

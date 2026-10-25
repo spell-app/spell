@@ -127,8 +127,8 @@ describe("<epic-overview> actions slot", () => {
 })
 
 // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-describe("<epic-overview> expand-all", () => {
-  test("folded:  expand-all after the page's own buttons, before the chevron;  a click opens it, its parts and items", async () => {
+describe("<epic-overview> toggle-all", () => {
+  test("folded:  the toggle after the page's own buttons, before the chevron;  a click opens it, its parts and items", async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-overview id="overview"><button slot="actions" aria-label="Copy">C</button>` +
         `<epic-summary>Summary</epic-summary>` +
@@ -137,7 +137,7 @@ describe("<epic-overview> expand-all", () => {
     )
     await inner(host).ready
     await ElementFixture.settle(host)
-    const expand = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="expand-all"]')!
+    const expand = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="toggle-all"]')!
     expect(expand.title).toBe("Open everything in 1. Overview")
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
@@ -148,10 +148,10 @@ describe("<epic-overview> expand-all", () => {
     const item = host.querySelector("epic-item")!
     await vi.waitFor(() => expect(item.matches(":state(open)")).toBe(true))
     expect([host.matches(":state(open)"), part.matches(":state(open)")]).toEqual([true, true])
-    // open:  collapse-all after it, then the chevron
+    // open:  the same button, now folding everything (Owen, 2026-10-25:  one button that toggles)
     await ElementFixture.tick()
-    const all = host.shadowRoot!.querySelector('[part~="collapse-all"]')!
-    expect(all.previousElementSibling).toBe(expand)
+    expect([expand.title, expand.getAttribute("aria-pressed")]).toEqual(["Fold everything in 1. Overview", "true"])
+    expect(host.shadowRoot!.querySelectorAll('[part~="toggle-all"]').length).toBe(1)
     await expectAccessible(host)
   })
 })

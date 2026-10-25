@@ -142,6 +142,30 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     return this.isOpen ? false : this.toggle()
   }
 
+  /** Its toggle-all's last use, holding while it stays open:  everything inside opened. */
+  private readonly allOpenCell = new E.Cell(false)
+
+  /** Everything inside opened by its toggle-all (`allOpenCell`). */
+  get allOpen(): boolean {
+    return this.allOpenCell.get()
+  }
+
+  set allOpen(value: boolean) {
+    this.allOpenCell.set(value)
+  }
+
+  /** Its toggle-all clicked:  everything inside opened, or folded again. */
+  @E.untracked
+  toggleAll() {
+    if (this.isOpen && this.allOpen) {
+      this.allOpen = false
+      this.collapseAll()
+    } else {
+      this.allOpen = true
+      void this.expandAll()
+    }
+  }
+
   /**
    * Collapse-all, the double chevron on its title:  fold everything inside it, itself staying open.
    * - what folds:  nested blocks, items, cards, asides, code (`foldAllUnder()`),
@@ -365,19 +389,14 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
             {/* the page's own buttons first, then its tools */}
             <slot name={this.slotForName("actions" as never)} />
             {pieces.tools?.()}
-            {/* last, so they sit beside the fold chevron:  expand-all, then collapse-all (only while open) */}
-            {Fold.expandAllButton({
-              label: this.translationForKey("expandAll" as never, { name: this.contentsEntry().label }),
-              part: this.partForName("expand-all" as never),
-              onCollapse: () => void this.expandAll()
+            {/* last, beside the fold chevron:  ONE toggle, open everything / fold everything (Owen, 2026-10-25) */}
+            {Fold.toggleAllButton({
+              expandLabel: this.translationForKey("expandAll" as never, { name: this.contentsEntry().label }),
+              collapseLabel: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
+              part: this.partForName("toggle-all" as never),
+              expanded: () => this.isOpen && this.allOpen,
+              onToggle: () => this.toggleAll()
             })}
-            <Show when={this.isOpen}>
-              {Fold.collapseAllButton({
-                label: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
-                part: this.partForName("collapse-all" as never),
-                onCollapse: () => this.collapseAll()
-              })}
-            </Show>
           </span>
           <div class={BODY} part={this.partForName("body" as never)} style={{ [STACK_PROPERTY]: `${this.stack}px` }}>
             <Show when={this.failureText}>

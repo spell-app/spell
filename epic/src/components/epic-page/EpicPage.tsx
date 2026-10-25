@@ -898,15 +898,17 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           {/* what Claude is doing, and the agents running (P35);  a saga has no session or agents of its own */}
           {this.isSaga ? undefined : <epic-agents draws="doing" part={this.partForName("agents")} />}
           {this.pageFilter()}
-          {Fold.expandAllButton({
-            label: this.translationForKey("expandAll"),
-            part: this.partForName("expand-all"),
-            onCollapse: () => this.expandAll()
-          })}
-          {Fold.collapseAllButton({
-            label: this.translationForKey("collapseAll"),
-            part: this.partForName("collapse-all"),
-            onCollapse: () => this.collapseAll()
+          {/* ONE toggle (Owen, 2026-10-25):  open everything, then fold everything */}
+          {Fold.toggleAllButton({
+            expandLabel: this.translationForKey("expandAll"),
+            collapseLabel: this.translationForKey("collapseAll"),
+            part: this.partForName("toggle-all"),
+            expanded: () => this.allOpen,
+            onToggle: () => {
+              this.allOpen = !this.allOpen
+              if (this.allOpen) this.expandAll()
+              else this.collapseAll()
+            }
           })}
         </span>
       </div>
@@ -1339,6 +1341,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     foldAllUnder(this.domElement)
     window.scrollTo({ top: 0, behavior: "instant" })
   }
+
+  /** The toolbar's toggle-all, its last use:  everything opened. */
+  @E.state accessor allOpen = false
 
   /** The toolbar's expand-all:  every section, phase and item on the page opened (`expandAllUnder()`). */
   @E.untracked

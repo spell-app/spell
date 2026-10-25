@@ -644,7 +644,7 @@ describe("<epic-page> Send and its countdown", () => {
     const todos = host.querySelector<E.DOMElement>("#caveats")!
     await vi.waitFor(() => expect(todos.shadowRoot!.querySelector('[part~="new-button"]')).not.toBeNull())
     expect(host.shadowRoot!.querySelector('[part~="new-button"]')).toBeNull()
-    expect(host.shadowRoot!.querySelector('[part~="expand-all"]')).not.toBeNull()
+    expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).not.toBeNull()
     const button = todos.shadowRoot!.querySelector<HTMLButtonElement>('[part~="new-button"]')!
     expect(button.title).toBe("New Caveat")
     expect(button.closest('[part~="tools"]')).not.toBeNull()
@@ -790,8 +790,11 @@ describe("<epic-page> toolbar", () => {
     expect([aside.component!.fold.isOpen(), item.hasAttribute("open")]).toEqual([false, true])
     // the section's:  its items fold, it stays open
     aside.component!.fold.toggle()
-    const sectionButton = questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="collapse-all"]')!
-    expect(sectionButton.title).toBe("Fold everything in 3. Questions")
+    // the section's ONE toggle:  first it opens everything inside, then the same button folds it
+    const sectionButton = questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
+    expect(sectionButton.title).toBe("Open everything in 3. Questions")
+    sectionButton.click()
+    await vi.waitFor(() => expect(sectionButton.title).toBe("Fold everything in 3. Questions"))
     sectionButton.click()
     await ElementFixture.tick()
     expect([
@@ -803,10 +806,16 @@ describe("<epic-page> toolbar", () => {
     // the page's:  everything, each block through its cancelable `ui-close`, as a click (the runtime saves those)
     const closed: string[] = []
     host.addEventListener("ui-close", (event) => closed.push((event.target as Element).id))
-    host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toolbar"] [part~="collapse-all"]')!.click()
+    // the toolbar's ONE toggle:  first it opens everything, then it folds everything
+    const pageButton = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toolbar"] [part~="toggle-all"]')!
+    pageButton.click()
+    await ElementFixture.tick()
+    closed.length = 0
+    pageButton.click()
     await ElementFixture.tick()
     expect(Array.from(host.querySelectorAll("epic-section, epic-phase"), isOpen)).toEqual([false, false, false])
-    expect(closed).toEqual(["phases", "p1", "decisions"])
+    // everything its first click opened (the Overview, the item) folds with the rest
+    expect(closed).toEqual(["overview", "phases", "p1", "decisions", "q1"])
   })
 })
 
