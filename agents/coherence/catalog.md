@@ -43,9 +43,28 @@ What `/coherence sweep` reads, an agent each.
 - **Copies:**
   - `spell-parser/src/markdown/inlines/InlineParser.ts`:  markdown's inlines, by regex, beside `MarkdownTokenizer`
   - `spell-parser/src/spell/rules/JSX/MarkdownBlock.ts`:  its own fence and code-span scanner
-  - `spell-parser/src/spell/node/spellSyntax.ts` (`commentsBlanked()`):  a comment stripper, by character
 - **History:**  elemental-spell's `.spellx` reader was 1,270 lines by hand (its P3) until its P6 moved it onto a
   tokenizer subclass and rules.
+
+### Walking a rule's syntax
+
+- **It is:**  `rule.childRules` (every rule inside it) and `P.leadingRules(rule, { parser, followGroups })` (what it
+  can start with):  `spell-parser/parser`
+- **Use it when:**  any question about a rule's shape:  its first words, its keywords, every rule inside it.
+- **Flag:**  `instanceof P\.(Sequence|Choice|Repeat)` in a new walk
+- **Copies:**  `--`  (P13 moved the translator, the parser's statement words and the language server onto it)
+
+### A text position and its offset
+
+- **It is:**  `P.getLineStarts()`, `P.positionForOffset()`, `P.offsetForPosition()`:  `spell-parser/parser`
+- **Flag:**  `lineStarts\.push|indexOf\("\\n"`
+- **Copies:**  `--`
+
+### Comments in code
+
+- **It is:**  oxc's parser for JavaScript and TypeScript (as `spell-parser/src/spell/node/spellSyntax.ts` uses it), spell's
+  own tokenizer for spell;  only Python keeps a small scanner
+- **Flag:**  a new character-by-character comment or string scanner
 
 ### A JSON5 file
 
