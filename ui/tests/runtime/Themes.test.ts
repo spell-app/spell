@@ -20,6 +20,25 @@ describe("UI.themes.sheets / names", () => {
   })
 })
 
+describe("UI.themes.scopedTokens()", () => {
+  test("one part of the page wears another theme's tokens, the rest keeps the page's", async () => {
+    await UI.load()
+    const css = await UI.themes.scopedTokens("spell-brand", ".scoped")
+    expect(css).toContain(":root .scoped {")
+    const style = document.head.appendChild(document.createElement("style"))
+    style.textContent = css
+    const inside = document.body.appendChild(Object.assign(document.createElement("div"), { className: "scoped" }))
+    onTestFinished(() => {
+      style.remove()
+      inside.remove()
+    })
+    const token = (element: Element) => getComputedStyle(element).getPropertyValue("--ui-font-family-heading")
+    // the brand's headings are its serif;  the page's (no theme) aren't
+    expect(token(inside)).toContain("Spell Serif")
+    expect(token(document.body)).not.toContain("Spell Serif")
+  })
+})
+
 describe("UI.themes.load()", () => {
   test("every sheet is wholly inside @layer ui.theme (bar LAYER_EXCEPTIONS)", async () => {
     await UI.load()

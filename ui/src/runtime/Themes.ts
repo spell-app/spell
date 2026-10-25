@@ -102,7 +102,63 @@ export class Themes {
     this.styles.register(this.slots.base, base, options)
     this.styles.register(this.slots.theme, theme, options)
   }
+
+  /**
+   * Theme `name`'s TOKENS, re-declared on `scope` (a selector, e.g. `.Inspector`):  CSS text for a page sheet.
+   * - So one part of a page wears another theme:  its colours, fonts, sizes, radii and shadows,
+   *   inherited into every element inside it, shadow roots too.
+   * - What it re-declares, in this order, so later ones win as on `:root`:
+   *   - the page's own `:root` tokens (the foundation sheets), but not the page's theme
+   *   - `classic`, then `name`
+   *   - Every `:root` rule, its selector on `scope` (`:root.ui-dark` => `:root.ui-dark .Inspector`),
+   *     inside the same `@media` / `@supports` it sits in.
+   *   - Why the foundation too:  its tokens are worked out from the theme's (`--ui-primary-hover` ...),
+   *     and a custom property's `var()` resolves where it's declared:  on `:root`, they'd keep the page's.
+   * - NOT the theme's class-grammar rules (`.ui.button { ... }`):  those go on the whole page or nowhere.
+   * - Throws a `TypeError` on an unknown name, as `load()`.
+   */
+  async scopedTokens(name: string, scope: string): Promise<string> {
+    const [base, theme] = await Promise.all([this.load(BASE), this.load(name)])
+    const pageTheme = [this.styles.sheet(this.slots.base), this.styles.sheet(this.slots.theme)]
+    const foundation =
+      typeof document === "undefined" ? [] : document.adoptedStyleSheets.filter((sheet) => !pageTheme.includes(sheet))
+    const parsed = [base, theme].map((text) => {
+      const sheet = new CSSStyleSheet()
+      sheet.replaceSync(text)
+      return sheet
+    })
+    return [...foundation, ...parsed].map((sheet) => rootRulesOn(sheet.cssRules, scope)).join("\n")
+  }
 }
+
+/**
+ * `rules`' `:root` rules, re-declared on `scope`, as CSS text:  see `Themes.scopedTokens()`.
+ * - Into `@media` / `@supports` blocks, kept round what they hold;  through `@layer` blocks, dropped
+ *   (on `scope` itself, a declaration beats an inherited one whatever its layer).
+ * - A selector whose `:root` is followed by more of the selector (`:root :where(h1)`) isn't a token rule:  left out.
+ */
+function rootRulesOn(rules: CSSRuleList, scope: string): string {
+  const out: string[] = []
+  for (const rule of rules) {
+    if (rule instanceof CSSStyleRule) {
+      const selectors = rule.selectorText
+        .split(",")
+        .map((selector) => selector.trim())
+        .filter((selector) => ROOT_ONLY.test(selector))
+      if (selectors.length)
+        out.push(`${selectors.map((selector) => `${selector} ${scope}`).join(", ")} { ${rule.style.cssText} }`)
+    } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
+      const inner = rootRulesOn(rule.cssRules, scope)
+      if (inner) out.push(`@${rule instanceof CSSMediaRule ? "media" : "supports"} ${rule.conditionText} { ${inner} }`)
+    } else if (rule instanceof CSSLayerBlockRule) {
+      out.push(rootRulesOn(rule.cssRules, scope))
+    }
+  }
+  return out.filter(Boolean).join("\n")
+}
+
+/** A selector that is `:root` alone, perhaps with classes or states on it (`:root.ui-dark`). */
+const ROOT_ONLY = /^:root(?:[.:\[][^\s>+~]*)?$/
 
 /** What `new Themes()` takes. */
 export type ThemesProps = {
