@@ -51,13 +51,8 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ])
     })
 
-    it("only when served:  the component sets and the app;  the app in its own browser tab", () => {
-      expect(TABS.filter((tab) => tab.serverOnly).map((tab) => tab.name)).toEqual([
-        "Epic/UI",
-        "Spell/UI",
-        "App",
-        "App/UI"
-      ])
+    // epic `epic-engine` P46:  every page is served, so no tab is "only when served" (`serverOnly`, gone)
+    it("the app in its own browser tab", () => {
       expect(TABS.filter((tab) => tab.ownTab).map((tab) => tab.name)).toEqual(["App"])
     })
 

@@ -2,20 +2,18 @@
  * Types of the site header and section editor, and how the header lights its tabs.
  * - Browser code:  no node imports.
  * - GENERIC (epic `repo-split` I4):  it names no site's parts.
- *   The tabs are data (`SiteTab`):  the page server's settings, or `defineSite()`'s caller.
+ *   The tabs are data (`SiteTab`):  the page server's settings.
  */
 
 /**
  * One TAB of the site header:  a part of the site with its own home page.
  * - DATA, never code in this package:  the header knows no site's parts
- *   - served:  the page server's settings, `"siteTabs"` (`PageServerSettings.siteTabs`),
+ *   - the page server's settings, `"siteTabs"` (`PageServerSettings.siteTabs`),
  *     handed to every page it serves as `SPELL_SERVER.siteTabs`
- *   - else (a `file://` page, a server whose settings name none):
- *     what `defineSite()`'s caller passes (`SiteHeader.fallbackTabs`)
+ *   - none (a server whose settings name none):  no tabs;  nothing opens a page from disk (epic `epic-engine` P46)
  *   - plain JSON, so a setting and a served page can carry it
  * - `name`:  its label, e.g. `Epic/UI`
  * - `path`:  its home page, relative to the site's root (`guides/index.html`), or server-absolute (`/components/ui/`)
- * - `serverOnly`:  its home exists only when served:  greyed out on a `file://` page
  * - `ownTab`:  always opens in its own browser tab (`target`), never in place
  *   - e.g. an app:  a whole program, too big for VS Code's side bar
  *   - a frame that left the page server can't step back (`liveClient.ts`)
@@ -27,7 +25,6 @@
 export type SiteTab = {
   name: string
   path: string
-  serverOnly?: boolean
   ownTab?: boolean
   sets?: string[]
   paths?: string[]

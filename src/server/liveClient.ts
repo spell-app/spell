@@ -1,7 +1,8 @@
 /**
  * The browser side of a `WebServer` with live reload:  runs in every page it serves, from `/api/server/live.js`.
  * - MUST stay self-contained:  it's served as `(${liveClient})()`, so it can't use imports or module helpers
- *   - the helpers it calls (`forVsCode()`, `liveAction()`, `servedPath()`, `reloadGate()`) are served beside it
+ *   - the helpers it calls (`forVsCode()`, `liveAction()`, `servedPath()`, `worktreeHref()`, `reloadGate()`) are
+ *     served beside it
  *     (`liveClientScript()`), so tests can call them too
  */
 // types only:  erased, so the served function stays self-contained
@@ -53,7 +54,7 @@ export type ServerConfig = {
   edit?: string
   /**
    * the site header's tabs, in order:  the page server's settings' `"siteTabs"` (`SiteHeader.tabs`);
-   * none:  the header shows what `defineSite()` was given
+   * none:  the header shows none
    */
   siteTabs?: SiteTab[]
   /**
@@ -166,6 +167,8 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  * - in a same-origin frame of a live page (the brand index's thumbnails, the Compare view's panes):
  *   opens no connection, and takes changes from the parent (`__spellLiveChange`),
  *   which hands each one down before acting on it
+ * - on a worktree's page (`/worktrees/<w>/...`):  lays each root link under its address as it's followed
+ *   (`layUnderWorktree()`, `worktreeHref()`;  epic `epic-engine` P46)
  * - runs once per page
  */
 export function liveClient(): void {
@@ -220,6 +223,9 @@ export function liveClient(): void {
 
   restoreScroll()
   watchFetches()
+  // a worktree's page:  its root links open the worktree's files (`worktreeHref()`), however they're followed
+  // (a click, a middle click, the keyboard);  before `followInFrame()` reads the link
+  for (const type of ["pointerdown", "click", "auxclick"]) addEventListener(type, layUnderWorktree, true)
   addEventListener("focusout", () => gate.settle(), true)
   document.addEventListener("visibilitychange", () => {
     if (stale && document.visibilityState === "hidden") reload()
@@ -550,6 +556,21 @@ export function liveClient(): void {
       canGoForward: nav ? nav.canGoForward : false
     }
     window.parent.postMessage(place, "*")
+  }
+
+  /**
+   * A link about to be followed, on a worktree's page:  its root path laid under the worktree (`worktreeHref()`).
+   * - in place, on the link, as it is pressed:  so a click, a middle click, "open in new tab" and the keyboard all
+   *   follow the new address;  a hover still shows main's until then
+   */
+  function layUnderWorktree(event: Event) {
+    const link = event.composedPath().find((node) => node instanceof HTMLAnchorElement && node.hasAttribute("href")) as
+      | HTMLAnchorElement
+      | undefined
+    if (!link) return
+    const href = link.getAttribute("href")!
+    const under = worktreeHref(href, location.pathname)
+    if (under !== href) link.setAttribute("href", under)
   }
 
   /**
@@ -1057,6 +1078,23 @@ export function servedPath(url: string, base: string, worktreesPath = "/.claude/
 }
 
 /**
+ * Root path `href` (`/spell-ui/x.ts`), on a page at `pagePath` (`location.pathname`), as that page means it:
+ * the checkout serving the page (epic `epic-engine` P46, Owen's Q6:  "a branch's review should show the branch").
+ * - a page under a worktree's address (`/worktrees/<w>/...`):  `href` under it, `/worktrees/<w>/spell-ui/x.ts`,
+ *   so the branch's code opens, and a file only the branch has
+ * - left as it is:  any other page;  anything but a root path (`x.html`, `https:`, `#t3`, `//host`);  the server's
+ *   own routes, the same on every checkout (`/api/...`, `/_epic/...`, `/_brand/...`);  one under a worktree already
+ * - the ONE rule:  the site header's tabs follow it too (`SiteHeader.href()`)
+ * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
+ */
+export function worktreeHref(href: string, pagePath: string): string {
+  const worktree = /^\/worktrees\/[^/]+(?=\/)/.exec(pagePath)?.[0]
+  if (!worktree || !href.startsWith("/") || href.startsWith("//")) return href
+  if (/^\/(?:api\/|_|worktrees\/)/.test(href)) return href
+  return `${worktree}${href}`
+}
+
+/**
  * One hot reload for many changes:  `request()` reloads `wait` ms after the LAST request.
  * - `typing()` by then:  the reload waits (`waiting(true)`) until `settle()` (focus left a field),
  *   then `wait` ms more for quiet, and asks again
@@ -1120,7 +1158,7 @@ type LiveWindow = Window & {
 
 /**
  * `liveClient` as a classic script, for `/api/server/live.js`:  the helpers it calls first
- * (`forVsCode()`, `liveAction()`, `servedPath()`, `reloadGate()`).
+ * (`forVsCode()`, `liveAction()`, `servedPath()`, `worktreeHref()`, `reloadGate()`).
  * - HACK: `__name` is a no-op shim:  tsx / esbuild's `keepNames` wraps nested functions in `__name(fn, "fn")`,
  *   a helper that lives in the MODULE, not in the stringified function
  */
@@ -1131,6 +1169,7 @@ export function liveClientScript(): string {
     forVsCode.toString(),
     liveAction.toString(),
     servedPath.toString(),
+    worktreeHref.toString(),
     reloadGate.toString(),
     `(${liveClient.toString()})()`,
     ""

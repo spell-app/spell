@@ -2,19 +2,20 @@ import { ColorScheme, PrefStore, type ColorSchemeName } from "spell/util/persist
 import { escapeHTML } from "spell/util/string"
 import type { ServerConfig, ServerInfo } from "spell/server"
 import { EDIT_PREF, FAVICON_SVG, litTab, LOGO_MARK, SITE_HOME, SITE_PREFS, type SiteTab } from "spell/server/site"
+// a leaf, not the node barrel:  the rule the live client lays a worktree page's root links under too
+import { worktreeHref } from "spell/server/liveClient"
 
 /****************
  * ### `<spell-site-header>`
  * The fixed bar on top of every page of the site, with a tab to switch to each of its parts:
  * e.g. docs, epic pages, sagas, component sets, an app.
  * - The tabs are DATA (`SiteTab`):  this element names no site's parts (epic `repo-split` I4).
- *   - served:  the page server's settings' (`"siteTabs"`), on the page as `SPELL_SERVER.siteTabs`
- *   - else (`file://`, a server whose settings name none):  `fallbackTabs`, what `defineSite()`'s caller passed
+ *   - the page server's settings' (`"siteTabs"`), on the page as `SPELL_SERVER.siteTabs`;  none:  no tabs
  *   - the lit one:  `litTab()`
- * - In each page and template, right after `<body>`, with `root` = the path from the page to the repo root:
- *   `<spell-site-header root="../.."></spell-site-header>`.
- *   - from `file://`:  its links stay relative
- *   - served by the page server:  they're absolute, and server-only tabs (`serverOnly`) turn on
+ * - In each page and template, right after `<body>`:  `<spell-site-header></spell-site-header>`.
+ *   - pages are SERVED, never opened from disk (epic `epic-engine` P46, Q5):  its links are root paths
+ *     (`/guides/index.html`), laid under a worktree's address on a worktree's page (`worktreeHref()`)
+ *   - its `root` (the path to the repo root, for a page opened from disk) and the bundles' fallback tabs went in P46
  * - Brand:  the hat mark (`LOGO_MARK`), a link to the home page (`SITE_HOME`), which lights no tab.
  * - Also shows:
  *   - no breadcrumb (Owen, 2026-10-10:  "We don't need the breadcrumb in the spell doc toolbar"):
@@ -72,12 +73,6 @@ export class SiteHeader extends HTMLElement {
   /** event a router dispatches on `document` after swapping the page in place:  re-draw */
   static readonly PAGE_EVENT = "spell-site:navigated"
 
-  /**
-   * The tabs a page shows when its server names none (`tabs`):  a `file://` page, a server without `"siteTabs"`.
-   * - set by `defineSite({ tabs })`;  none by default:  just the logo and the tools
-   */
-  static fallbackTabs: readonly SiteTab[] = []
-
   /** server info, once known:  injected `SPELL_SERVER`, else `/api/server` */
   private info?: Partial<ServerInfo & ServerConfig>
 
@@ -123,38 +118,21 @@ export class SiteHeader extends HTMLElement {
     return this.hasAttribute("docked")
   }
 
-  /** path from this page to the repo root, from the `root` attribute (default `.`) */
-  get root(): string {
-    return (this.getAttribute("root") ?? ".").replace(/\/$/, "")
-  }
-
-  /** whether the page came over http (the page server, or a proxy through it) */
-  get served(): boolean {
-    return location.protocol.startsWith("http")
-  }
-
-  /**
-   * The tabs this page shows, in order:  its server's (`SPELL_SERVER.siteTabs`), else `fallbackTabs`.
-   */
+  /** The tabs this page shows, in order:  its server's (`SPELL_SERVER.siteTabs`);  none off the server. */
   get tabs(): readonly SiteTab[] {
-    return serverConfig()?.siteTabs ?? SiteHeader.fallbackTabs
+    return serverConfig()?.siteTabs ?? []
   }
 
   /**
-   * The URL of `tab`'s home (or the site's, `SITE_HOME`);
-   * `undefined` where it can't be reached (server-only, from `file://`).
-   * - A worktree's page on the main checkout's server (`/worktrees/<w>/...`) keeps that prefix on repo paths,
-   *   so a tab stays in the worktree:  a tab only the branch has (Brand, before it merges) is a 404 on `main`.
-   * - A server route (`/components/ui/`, `/editor/`) is the server's own:  never prefixed.
+   * The URL of `tab`'s home (or the site's, `SITE_HOME`):  a root path.
+   * - A worktree's page on the main checkout's server (`/worktrees/<w>/...`) keeps that prefix on repo paths
+   *   (`worktreeHref()`, the rule every root link on the page follows):  a tab stays in the worktree, so a tab only
+   *   the branch has (Brand, before it merges) is no 404 there.
+   * - A tab given as a root path (`/components/ui/`, `/editor/`) is a server route:  never prefixed.
    */
-  href(tab: Pick<SiteTab, "path" | "serverOnly">): string | undefined {
-    if (this.served) {
-      if (tab.path.startsWith("/")) return tab.path
-      const worktree = /^\/worktrees\/[^/]+\//.exec(location.pathname)?.[0] ?? "/"
-      return `${worktree}${tab.path}`
-    }
-    if (tab.serverOnly) return undefined
-    return `${this.root}/${tab.path}`
+  href(tab: Pick<SiteTab, "path">): string {
+    if (tab.path.startsWith("/")) return tab.path
+    return worktreeHref(`/${tab.path}`, location.pathname)
   }
 
   /**
@@ -184,9 +162,7 @@ export class SiteHeader extends HTMLElement {
         const current = tab === active ? ` aria-current="page"` : ""
         // its own tab:  `target` in a browser;  `data-spell-open` tells the side bar's frame (`liveClient.ts`)
         const own = tab.ownTab ? ` target="spell-${escapeHTML(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
-        return href
-          ? `<a class="tab" href="${escapeHTML(href)}"${current}${own}>${escapeHTML(tab.name)}</a>`
-          : `<span class="tab off" title="only when served:  spell server start">${escapeHTML(tab.name)}</span>`
+        return `<a class="tab" href="${escapeHTML(href)}"${current}${own}>${escapeHTML(tab.name)}</a>`
       })
       .join("")
     const checkout = this.info?.worktree ?? this.info?.branch
@@ -213,7 +189,7 @@ export class SiteHeader extends HTMLElement {
     const themeLabel = this.themeLabel()
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
-  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
+  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
   <nav part="nav" aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
@@ -363,8 +339,6 @@ nav { display: flex; gap: 2px; }
 .tab { padding: 7px 10px; border-radius: 999px; color: light-dark(#55555f, #a9a9b6); white-space: nowrap; }
 .tab:hover { background: light-dark(#f0eef8, #2c2a38); color: inherit; }
 .tab[aria-current="page"] { background: light-dark(#e9e4ff, #33295e); color: light-dark(#3d2a9e, #d9d0ff); }
-.tab.off { opacity: 0.45; cursor: default; }
-.tab.off:hover { background: none; color: light-dark(#55555f, #a9a9b6); }
 .spacer { flex: 1; }
 .badge { flex: none; padding: 4px 9px; border-radius: 999px; font-size: 12px; background: light-dark(#eef0f3, #2a2d33); }
 .badge.worktree { background: light-dark(#fff1d6, #4a3610); color: light-dark(#7a4c00, #ffd48a); }

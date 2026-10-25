@@ -120,11 +120,38 @@ export type LinkResult = {
   unresolved: string[]
 }
 
+/**
+ * One URL `Linker.rootLinks()` rewrote (or dropped) in a page's text.
+ * - `from` / `to`:  as written, and as written now (`to` is `""` for a dropped `<spell-site-header root>`)
+ * - `kind`:
+ *   - `rooted`:  the root path of the file it reached
+ *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `spell-parser/` ...)
+ *   - `broken`:  it reaches nothing, then or now:  written as the browser reads it, for a person to fix
+ *   - `dropped`:  a `<spell-site-header root>`, which only served pages opened from disk
+ *   - `outside`:  it climbs above the root:  left as written
+ */
+export type RootLinkChange = {
+  from: string
+  to: string
+  kind: "rooted" | "mended" | "broken" | "dropped" | "outside"
+}
+
+/** What `Linker.rootLinks()` did to a page's text. */
+export type RootLinksResult = {
+  /** the page's text, its relative URLs root paths, every other byte as it was */
+  text: string
+  /** each URL it rewrote, dropped or couldn't place, in page order */
+  changes: RootLinkChange[]
+}
+
 /** What `Linker.check()` found in a page's links, outside `<pre>`. */
 export type LinkCheck = {
   /** how many distinct destinations the targeted links have */
   destinations: number
-  /** one line per problem, e.g. `missing:  nope.html`;  empty when the page passes */
+  /**
+   * one line per problem, e.g. `missing:  nope.html`, `relative:  ../x.ts -- write /spell-ui/x.ts`;
+   * empty when the page passes
+   */
   problems: string[]
 }
 

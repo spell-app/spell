@@ -10,8 +10,8 @@ import { componentSet, docsArea, litTab, type SiteTab } from "spell/server/site/
 const TABS: SiteTab[] = [
   { name: "Notes", path: "notes/index.html", areas: ["notes"] },
   { name: "Logs", path: "logs/index.html", areas: ["logs", "old-logs"] },
-  { name: "Kit", path: "/components/kit/", serverOnly: true, sets: ["kit"], paths: ["/kit/docs/"] },
-  { name: "Tool", path: "/tool/", serverOnly: true, ownTab: true, paths: ["^/tool(/|$)"] },
+  { name: "Kit", path: "/components/kit/", sets: ["kit"], paths: ["/kit/docs/"] },
+  { name: "Tool", path: "/tool/", ownTab: true, paths: ["^/tool(/|$)"] },
   { name: "Shop", path: "shop/index.html", areas: ["shop"], sets: ["shop"] }
 ]
 

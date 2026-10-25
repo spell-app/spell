@@ -1,5 +1,5 @@
 import { existsSync, lstatSync, readdirSync, statSync } from "node:fs"
-import { dirname, join, relative, resolve as resolvePath } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath, sep } from "node:path"
 
 import { parseHTML } from "linkedom"
 
@@ -139,10 +139,15 @@ export class Linker {
 
   /**
    * `text` (a page in `pageDir`) with its code spans linked and every link given a target.
+   * - every relative URL a root path first (`rootLinks()`, mending what a move broke):  code spans' links are root paths
+   *   too, but to a file in the page's own folder (`hrefFor()`)
    * - idempotent:  a second run changes nothing
    */
-  link(text: string, _pageDir: string): SRV.LinkResult {
+  link(_text: string, _pageDir: string): SRV.LinkResult {
     const pageDir = this.servedDir(_pageDir)
+    // every relative URL a root path first (`rootLinks()`), a broken one at its new home:  a page written through
+    // the tools is mended as it goes
+    const text = this.rootLinks(_text, pageDir, { mend: true }).text
     const spans = PROTECTED.flatMap((pattern) =>
       Array.from(text.matchAll(pattern), (m) => [m.index, m.index + m[0].length])
     )
@@ -161,8 +166,7 @@ export class Linker {
         if (path.includes("/") || PATH_LIKE.test(path.trim())) unresolved.add(path)
         continue
       }
-      // `|| "."`:  the page's own folder;  a served page's links are written from where it's served
-      let href = URL_START.test(dest) ? dest : relative(pageDir, this.virtual(dest)) || "."
+      let href = URL_START.test(dest) ? dest : this.hrefFor(dest, pageDir)
       if (isDir(dest) && !href.endsWith("/")) href += "/"
       out.push(text.slice(last, m.index))
       out.push(`<a href="${escapeHTML(href)}" target="${this.targetFor(dest)}">${m[0]}</a>`)
@@ -199,7 +203,7 @@ export class Linker {
    */
   private addTarget(tag: string, href: string, pageDir: string): string {
     if (href.startsWith("#") || SAGA_ADDRESS.test(href)) return tag
-    const dest = URL_START.test(href) ? href : this.real(resolvePath(pageDir, href.split("#")[0]))
+    const dest = URL_START.test(href) ? href : this.fileFor(decodeEntities(href), pageDir)
     if (tag.includes("target=")) {
       if (URL_START.test(dest) || !PLAN_DOC.test(relative(this.root, this.inCheckout(dest)))) return tag
       return tag.replace(/target="[^"]*"/g, () => `target="${this.targetFor(dest)}"`)
@@ -223,11 +227,226 @@ export class Linker {
   /**
    * The file a LOCAL `href` in a page in `pageDir` points at, absolute, whether or not it exists:  resolved from where
    * the page is served, as the file it is (`../../spell-ui/x.ts` from `<content>/epics/seo` => `<top>/spell-ui/x.ts`).
-   * - its `#hash` dropped;  `href` decoded already (no `&amp;`)
+   * - a ROOT PATH (`/spell-ui/x.ts`, epic `epic-engine` P46) is from the root, as the page server serves it:
+   *   `<root>/spell-ui/x.ts`, a served folder's file (`/components/ui/x.html`, `/guides/x.html`) as the file it is;
+   *   a link of the checkout's into the content folder that leads nowhere here, the content folder's file
+   * - its `?query` and `#hash` dropped;  `href` decoded already (no `&amp;`), its `%20`s decoded here
    * - what `check()` checks a link against
    */
   fileFor(href: string, _pageDir: string): string {
-    return this.real(resolvePath(this.servedDir(_pageDir), href.split("#")[0]))
+    const path = percentDecoded(urlPath(href))
+    if (isRootPath(path)) {
+      // the checkout's file;  a LINK of its own into the content folder that leads nowhere here (a worktree's
+      // `agents/PAPERCUTS.md`, made for a content folder beside it), the content folder's, as the page server falls back
+      const file = this.real(join(this.root, path))
+      const shared = this.content && join(this.content, path)
+      return shared && isDanglingLink(file) && existsSync(shared) ? shared : file
+    }
+    return this.real(resolvePath(this.servedDir(_pageDir), path))
+  }
+
+  ////////////////
+  // ## Root paths
+  ////////////////
+
+  /**
+   * `href`, a RELATIVE URL in a page in `pageDir`, as a ROOT PATH:  the address the page server serves what it reaches
+   * at (epic `epic-engine` P46;  `../../spell-ui/x.ts#L3` from `<content>/epics/seo` => `/spell-ui/x.ts#L3`).
+   * - the page's folder as it's served (`servedDir()`):  a part from its own folder, a component set's page from its
+   *   address
+   * - `?query` and `#hash` kept, and the path's own spelling (`%20` stays `%20`)
+   * - `undefined`:  not a relative URL, or one that climbs above the root
+   * - pure path arithmetic, as a browser reads it:  says nothing of whether the file is there
+   */
+  rootPathFor(href: string, pageDir: string): string | undefined {
+    if (!isRelativeUrl(href)) return undefined
+    const path = urlPath(href)
+    const from = relative(this.root, this.servedDir(pageDir))
+    if (from.startsWith("..") || isAbsolute(from)) return undefined
+    const segments = from ? from.split(sep) : []
+    const steps = path.split("/")
+    // the last step names the file ("" for a folder's `x/`);  `..` and `.` there are folders too
+    let name = steps.pop()!
+    if (name === ".." || name === ".") {
+      steps.push(name)
+      name = ""
+    }
+    for (const step of steps) {
+      if (step === "..") {
+        if (!segments.length) return undefined
+        segments.pop()
+      } else if (step !== "." && step !== "") segments.push(step)
+    }
+    const folder = segments.length ? `/${segments.join("/")}/` : "/"
+    return `${folder}${name}${href.slice(path.length)}`
+  }
+
+  /**
+   * `text` (a page in `pageDir`, HTML or Markdown) with its relative URLs written as ROOT PATHS (`rootPathFor()`), every
+   * other byte as it was (epic `epic-engine` P46;  Owen, 2026-10-25:  "links should NEVER be `../`").
+   * - what's rewritten:
+   *   - a LINK (`<a href>`, `<ui-breadcrumb link>`, a path tooltip `title="../x"`, a Markdown `](x)`):  always, but
+   *     to a file in the page's OWN folder (`x.html`, `x.png`:  Owen's Q1, "other than in same directory")
+   *   - a LOAD (`src`, `source`, `poster`, `<link href>`, a `data-*` path):  when it climbs out of the page's folder;
+   *     one below it stays (a page's `_assets/` bundle, an epic page's `parts/`), so a worktree's page loads the
+   *     worktree's copy
+   *   - `<spell-site-header root>` is dropped:  it only served pages opened from disk
+   * - never inside `<script>` or `<style>`, nor a Markdown code block;  only double-quoted attributes
+   * - `mend`:  a link that reaches nothing goes to its file's ONE new home, when a move left one
+   *   (`mendedPath()`:  `spell-lang/` is `spell-parser/`, an old `packages/<name>/` its repo's folder);  else it's
+   *   written all the same, and reported `broken`
+   * - idempotent:  a second run changes nothing
+   */
+  rootLinks(
+    text: string,
+    pageDir: string,
+    { mend = false, markdown = false }: RootLinksOptions = {}
+  ): SRV.RootLinksResult {
+    const changes: SRV.RootLinkChange[] = []
+    const dir = this.servedDir(pageDir)
+    const rewrite = (url: string, isLoad: boolean): string => {
+      const decoded = decodeEntities(url)
+      if (!isRelativeUrl(decoded) || keepsRelative(decoded, isLoad)) return url
+      let to = this.rootPathFor(decoded, dir)
+      if (to === undefined) {
+        changes.push({ from: url, to: url, kind: "outside" })
+        return url
+      }
+      let kind: SRV.RootLinkChange["kind"] = "rooted"
+      if (mend && !existsSync(this.fileFor(to, dir))) {
+        const mended = this.mendedPath(to)
+        if (mended) {
+          to = mended
+          kind = "mended"
+        } else kind = "broken"
+      }
+      changes.push({ from: url, to, kind })
+      return url.includes("&") ? escapeHTML(to) : to
+    }
+    const out = markdown ? this.rootMarkdownLinks(text, rewrite) : this.rootTagLinks(text, rewrite, changes)
+    return { text: out, changes }
+  }
+
+  /** `text`'s tags' URLs through `rewrite`, outside `<script>` / `<style>`;  site header `root`s dropped. */
+  private rootTagLinks(
+    text: string,
+    rewrite: (url: string, isLoad: boolean) => string,
+    changes: SRV.RootLinkChange[]
+  ): string {
+    return mapOutside(text, SCRIPT_OR_STYLE, (part) =>
+      part.replace(TAG, (tag: string, name: string) => {
+        const lower = name.toLowerCase()
+        if (lower === SITE_HEADER)
+          return tag.replace(SITE_HEADER_ROOT, (attribute: string, root: string) => {
+            changes.push({ from: root, to: "", kind: "dropped" })
+            return ""
+          })
+        return tag.replace(URL_ATTRIBUTE, (attribute: string, start: string, key: string, url: string) => {
+          const kind = urlKind(lower, key.toLowerCase(), url)
+          if (!kind) return attribute
+          return `${start}${rewrite(url, kind === "load")}"`
+        })
+      })
+    )
+  }
+
+  /** `text`'s Markdown links (`[x](url)`, `![x](url)`) through `rewrite`, outside fenced code;  HTML in it too. */
+  private rootMarkdownLinks(text: string, rewrite: (url: string, isLoad: boolean) => string): string {
+    return mapOutside(text, MARKDOWN_FENCE, (part) =>
+      this.rootTagLinks(
+        part
+          .replace(MARKDOWN_LINK, (whole: string, bang: string, start: string, url: string) =>
+            isRelativeUrl(url) ? `${bang}${start}${rewrite(url, bang === "!")}` : whole
+          )
+          .replace(MARKDOWN_REFERENCE, (whole: string, start: string, url: string) =>
+            isRelativeUrl(url) ? `${start}${rewrite(url, false)}` : whole
+          ),
+        rewrite,
+        []
+      )
+    )
+  }
+
+  /**
+   * Root path `path` (no file there) at its file's ONE new home, when a move left one;  else `undefined`.
+   * - `/spell-lang/...`:  the repo was renamed `spell-parser` (`/spell-parser/...`)
+   * - an old monorepo path, `/packages/<name>/...` or `/<repo>/packages/<name>/...`:  that package's folder
+   *   (`inPackage()`)
+   * - a folder moved into its repo's one `src/` (epic `repo-split` P14):  `/<repo>/<folder>/src/x` => `/<repo>/src/<folder>/x`,
+   *   `/<repo>/<folder>/x` => `/<repo>/src/<folder>/x`
+   * - each tried on the others' results too
+   * - none of those there:  the one file the bare-name index has under the same last folder and name (`sameNamed()`)
+   * - more than one distinct home, or none:  `undefined`
+   */
+  mendedPath(path: string): string | undefined {
+    const suffix = path.slice(urlPath(path).length)
+    const start = percentDecoded(urlPath(path)).replace(/^\//, "")
+    const seen = new Set<string>([start])
+    let round = [start]
+    const homes = new Set<string>()
+    for (let depth = 0; depth < 3 && round.length; depth++) {
+      const next: string[] = []
+      for (const candidate of round)
+        for (const moved of this.movedPaths(candidate)) {
+          if (seen.has(moved)) continue
+          seen.add(moved)
+          next.push(moved)
+          if (existsSync(this.real(join(this.root, moved)))) homes.add(moved)
+        }
+      round = next
+    }
+    if (!homes.size) for (const home of this.sameNamed(start)) homes.add(home)
+    if (homes.size !== 1) return undefined
+    const [home] = homes
+    return `/${encodeURI(home!)}${suffix}`
+  }
+
+  /**
+   * The paths from the root of the files named as `path`'s last folder and file are (`notes/plan.md`), by the
+   * bare-name index:  where a page's link landed when a folder moved whole (`packages/ui/notes/` into the content
+   * folder's `guides/ui/notes/`, `guides/ui/src/` into spell-ui's `src/`).
+   * - never a lone name:  `package.json`, `vite.config.ts` are everywhere
+   */
+  private sameNamed(path: string): string[] {
+    const steps = path.replace(/\/$/, "").split("/")
+    if (steps.length < 2) return []
+    const tail = `/${steps.slice(-2).join("/")}`
+    return (this.fileIndex.get(steps.at(-1)!) ?? [])
+      .filter((file) => file.endsWith(tail) && !file.includes("/test/"))
+      .map((file) => this.inCheckout(file))
+      .filter((file) => isUnder(file, this.root))
+      .map((file) => relative(this.root, file).split(sep).join("/"))
+  }
+
+  /** The paths from the root a file at `path` (from the root, decoded) may have moved to, one move each. */
+  private movedPaths(path: string): string[] {
+    const moved: string[] = []
+    const [first, ...rest] = path.split("/")
+    if (first === "spell-lang") moved.push(["spell-parser", ...rest].join("/"))
+    const packages = path.indexOf("packages/")
+    if (packages === 0 || (packages > 0 && path[packages - 1] === "/")) {
+      const inPackage = this.inPackage(path.slice(packages))
+      if (inPackage && isUnder(this.virtual(inPackage), this.root))
+        moved.push(relative(this.root, this.virtual(inPackage)).split(sep).join("/"))
+    }
+    if (first && rest.length > 1 && rest[0] !== "src") {
+      const [folder, ...more] = rest
+      moved.push([first, "src", folder, ...(more[0] === "src" ? more.slice(1) : more)].join("/"))
+    }
+    return moved
+  }
+
+  /**
+   * The href for `dest` (a file, absolute) in a page served from `pageDir`:  a ROOT PATH (`/spell-ui/x.ts`), but a
+   * file in the page's own folder by its name (`x.html`), the folder itself `./`.
+   * - a file outside the root (a repo beside an old checkout):  from the page, as before
+   */
+  private hrefFor(dest: string, pageDir: string): string {
+    const address = this.virtual(dest)
+    if (address === pageDir) return "./"
+    if (dirname(address) === pageDir) return basename(address)
+    if (!isUnder(address, this.root)) return relative(pageDir, address)
+    return `/${relative(this.root, address).split(sep).join("/")}`
   }
 
   /** `path`, resolved from a served place, as the file it is:  `<root>/components/ui/x` => `<root>/packages/ui/docs/x`. */
@@ -285,6 +504,12 @@ export class Linker {
     let path = text.replace(/:\d+$/, "")
     // `/`, `./`, `..`:  operators and punctuation, not paths (`/` resolved to the filesystem root)
     if (!/[A-Za-z0-9]/.test(path)) return undefined
+    // a root path (`/spell-ui/x.ts`, epic `epic-engine` P46):  from the root, as the page server serves it;
+    // else an absolute path on this machine, as before
+    if (isRootPath(path)) {
+      const fromRoot = this.real(join(this.root, path))
+      if (existsSync(fromRoot)) return fromRoot
+    }
     if (!PATH_CHARS.test(path) || (!path.includes("/") && !path.includes("."))) return undefined
     const alias = ALIAS.exec(path)
     if (alias) path = join("packages", alias[1], "src", alias[2])
@@ -372,6 +597,8 @@ export class Linker {
    *   - missing or outside-the-repo files
    *   - links with no target
    *   - a destination with several targets, or a target shared by several destinations
+   *   - a RELATIVE URL `rootLinks()` would make a root path (`relative:  ../x.ts -- write /spell-ui/x.ts`), and a site
+   *     header's `root` (epic `epic-engine` P46):  `epic lint` and `doc-links.js --check` both refuse them
    * - SIDE EFFECT:  runs `git check-ignore` once per missing local file
    */
   check(text: string, _pageDir: string): SRV.LinkCheck {
@@ -381,6 +608,15 @@ export class Linker {
     const body = text.replace(PRE, "")
     const nested = Array.from(body.matchAll(NESTED)).length
     const problems = nested ? [`${nested} nested links`] : []
+    // a relative URL `rootLinks()` would write as a root path (epic `epic-engine` P46):  the tools never write one
+    for (const change of this.rootLinks(body, pageDir, { mend: true }).changes)
+      problems.push(
+        change.kind === "dropped"
+          ? `site header root:  root="${change.from}" -- drop it, pages are served`
+          : change.kind === "outside"
+            ? `relative:  ${change.from} -- climbs above the root`
+            : `relative:  ${change.from} -- write ${change.to}${change.kind === "broken" ? " (reaches nothing)" : ""}`
+      )
     for (const m of body.matchAll(A_TAG)) {
       const attrs = m[1]
       const hrefMatch = /href="([^"]+)"/.exec(attrs)
@@ -523,6 +759,105 @@ const PATH_CHARS = /^[#~.@\w/-]+(\.\w+)?\/?$/
 /** An old-style alias, `#name/rest`:  `[1]` the package, `[2]` the rest. */
 const ALIAS = /^#([\w-]+)\/(.+)$/
 
+/** `Linker.rootLinks()` options:  `mend` broken links (`mendedPath()`);  the text is `markdown`. */
+export type RootLinksOptions = { mend?: boolean; markdown?: boolean }
+
+/** A start tag:  `[1]` its name;  attribute values may hold `>`. */
+const TAG = /<([a-zA-Z][\w-]*)(?:[^>"]|"[^"]*")*>/g
+
+/** A double-quoted attribute in a tag:  `[1]` up to its value's quote, `[2]` its name, `[3]` its value. */
+const URL_ATTRIBUTE = /(\s([a-zA-Z][\w:-]*)=")([^"]*)"/g
+
+/** The site header, whose `root` only served pages opened from disk (epic `epic-engine` P46, Q5). */
+const SITE_HEADER = "spell-site-header"
+
+/** A site header's `root` attribute, with the space before it:  `[1]` its value. */
+const SITE_HEADER_ROOT = /\s+root="([^"]*)"/
+
+/** A `<script>` or `<style>` element's BODY (its tags are rewritten, its text never). */
+const SCRIPT_OR_STYLE = /(?<=<(?:script|style)\b(?:[^>"]|"[^"]*")*>)[\s\S]*?(?=<\/(?:script|style)\s*>)/gi
+
+/** Markdown code:  a fenced block, or an inline span. */
+const MARKDOWN_FENCE = /^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$|`[^`\n]+`/gm
+
+/** A Markdown link or image:  `[1]` `!` for an image, `[2]` up to its URL, `[3]` its URL. */
+const MARKDOWN_LINK = /(!?)(\[[^\]\n]*\]\()([^)\s]+)/g
+
+/** A Markdown link reference definition, `[x]: url`:  `[1]` up to its URL, `[2]` its URL. */
+const MARKDOWN_REFERENCE = /^(\s{0,3}\[[^\]\n]+\]:[ \t]+)(\S+)/gm
+
+/** The attributes that LOAD what they name (`rootLinks()` leaves one below the page's folder as it is). */
+const LOAD_ATTRIBUTES = new Set(["src", "source", "poster"])
+
+/** The attributes that LINK, wherever they are (`<link href>` aside:  a load). */
+const LINK_ATTRIBUTES = new Set(["href", "link", "action"])
+
+////////////////
+// ## URLs
+////////////////
+
+/**
+ * What attribute `key` of a `tag` holding `url` is to `rootLinks()`:  a `"link"`, a `"load"`, or nothing to rewrite.
+ * - `title` and `data-*` only when they hold a climbing path (`../x`):  a path tooltip, a page's data file
+ */
+function urlKind(tag: string, key: string, url: string): "link" | "load" | undefined {
+  if (key === "href") return tag === "link" ? "load" : "link"
+  if (LINK_ATTRIBUTES.has(key)) return "link"
+  if (LOAD_ATTRIBUTES.has(key)) return "load"
+  if (key === "title") return url.startsWith("../") ? "link" : undefined
+  if (key.startsWith("data-")) return url.startsWith("../") ? "load" : undefined
+  return undefined
+}
+
+/**
+ * Is `url` RELATIVE to the page it's in:  not empty, a `#hash`, a `?query`, absolute (`https:`, `mailto:`, `SAGA:/`),
+ * a root path (`/x`), or a template's placeholder (`${x}`, `{{x}}`)?
+ */
+function isRelativeUrl(url: string): boolean {
+  return url !== "" && !/^[#?/]/.test(url) && !/^[a-z][a-z0-9+.-]*:/i.test(url) && !/[{}$<>\s]/.test(url)
+}
+
+/** Does `rootLinks()` leave relative `url` as it is:  a link to the page's own folder, a load that doesn't climb? */
+function keepsRelative(url: string, isLoad: boolean): boolean {
+  const steps = urlPath(url)
+    .replace(/^(\.\/)+/, "")
+    .split("/")
+  if (isLoad) return !steps.includes("..")
+  return steps.length === 1 && steps[0] !== ".." && steps[0] !== "."
+}
+
+/** `url`'s path:  before its `?query` or `#hash`. */
+function urlPath(url: string): string {
+  return /^[^?#]*/.exec(url)![0]
+}
+
+/** Is `path` a root path, `/x`:  one slash, not a protocol-relative `//host`? */
+function isRootPath(path: string): boolean {
+  return path.startsWith("/") && !path.startsWith("//")
+}
+
+/** `path` with its `%XX` escapes decoded;  as it is when one won't decode. */
+function percentDecoded(path: string): string {
+  if (!path.includes("%")) return path
+  try {
+    return decodeURIComponent(path)
+  } catch {
+    return path
+  }
+}
+
+/** `text` with `change` applied to every stretch outside `pattern`'s matches (a global regex), which stay as they are. */
+function mapOutside(text: string, pattern: RegExp, change: (part: string) => string): string {
+  const out: string[] = []
+  let last = 0
+  for (const m of text.matchAll(pattern)) {
+    out.push(change(text.slice(last, m.index)), m[0])
+    last = m.index + m[0].length
+  }
+  out.push(change(text.slice(last)))
+  return out.join("")
+}
+
 ////////////////
 // ## Helpers
 ////////////////
@@ -575,6 +910,11 @@ function contentAreasOf(root: string, content: string): string[] {
       const own = lstatSync(join(root, name), { throwIfNoEntry: false })
       return !own || own.isSymbolicLink()
     })
+}
+
+/** Whether `path` is a symlink whose target isn't there. */
+function isDanglingLink(path: string): boolean {
+  return Boolean(lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink()) && !existsSync(path)
 }
 
 /** Whether `path` is a folder (following symlinks);  `false` when it doesn't exist. */

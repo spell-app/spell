@@ -23,28 +23,24 @@ let browser: Browser
 /** the site header's tabs, as the checkout's settings name them (`"siteTabs"`) */
 const SERVED_TABS: SiteTab[] = [
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
-  { name: "Kit", path: "/components/kit/", serverOnly: true, sets: ["kit"] },
-  { name: "Tool", path: "/tool/", serverOnly: true, ownTab: true, paths: ["^/tool(/|$)"] }
+  { name: "Kit", path: "/components/kit/", sets: ["kit"] },
+  { name: "Tool", path: "/tool/", ownTab: true, paths: ["^/tool(/|$)"] }
 ]
 
-/** the tabs a page's bundle gives (`defineSite({ tabs })`), for a page whose server names none:  `file://` */
-const FALLBACK_TABS: SiteTab[] = [
-  { name: "Notes", path: "notes/index.html", areas: ["notes"] },
-  { name: "Kit", path: "/components/kit/", serverOnly: true, sets: ["kit"] }
-]
+/** the worktrees' folder:  `/worktrees/<w>/` serves its `<w>/` (`PageServer.serveWorktrees()`) */
+const worktrees = `${main}.worktrees`
 
 /**
- * A page loading the header, at `file`.
+ * A page loading the header, at `file`, with a root link to the checkout's code (epic `epic-engine` P46).
  * - `site`:  the header's script, as the page loads it
- * - the bundle's tabs as `defineSite({ tabs })` sets them, before the header upgrades:  `FALLBACK_TABS`
  */
 function put(file: string, site = "/site.js"): void {
   mkdirSync(dirname(file), { recursive: true })
-  const fallback = `<script>SiteHeaderTest.SiteHeader.fallbackTabs = ${JSON.stringify(FALLBACK_TABS)}</script>`
   writeFileSync(
     file,
-    `<!doctype html><html><head><title>T</title><script src="${site}"></script>${fallback}</head>` +
-      `<body><spell-site-header root=".."></spell-site-header><p>page</p></body></html>\n`
+    `<!doctype html><html><head><title>T</title><script src="${site}"></script></head>` +
+      `<body><spell-site-header></spell-site-header><p>page <a id="code" href="/docs/own.html">code</a> ` +
+      `<a id="api" href="/api/server">api</a></p></body></html>\n`
   )
 }
 
@@ -68,19 +64,20 @@ beforeAll(async () => {
   })
   put(join(main, "docs", "own.html"))
   put(join(content, "guides", "guide.html"))
-  put(join(main, "notes", "note.html"), "../site.js")
+  put(join(worktrees, "w1", "docs", "own.html"))
   // the Kit tab's component set, served:  a tab naming only sets the server doesn't serve is left out
   const componentSets = { kit: { name: "Kit", dir: "docs", assets: "docs" } }
   writeFileSync(join(main, "package.json"), JSON.stringify({ pageServer: { siteTabs: SERVED_TABS, componentSets } }))
   server = await new PageServer({ root: main }).start({ port: 0, routes: false, pidFile: false })
   server.serveContent(content)
+  server.serveWorktrees(worktrees)
   browser = await chromium.launch()
 }, 120_000)
 
 afterAll(async () => {
   await browser?.close()
   await server?.stop()
-  for (const dir of [main, content]) rmSync(dir, { recursive: true, force: true })
+  for (const dir of [main, content, worktrees]) rmSync(dir, { recursive: true, force: true })
 })
 
 /** `path`, opened in a new page wide enough for every button (VS Code's side bar is narrower:  it hides the badge) */
@@ -170,14 +167,36 @@ describe("<spell-site-header>'s tabs (I4)", () => {
     await page.close()
   })
 
-  it("from disk:  the bundle's (`defineSite({ tabs })`), a server-only one greyed out", async () => {
-    const page = await browser.newPage({ viewport: { width: 1200, height: 600 } })
-    await page.goto(`file://${join(main, "notes", "note.html")}`)
-    await page.waitForFunction(() => !!document.querySelector("spell-site-header")?.shadowRoot?.querySelector("header"))
+  it("a worktree's page (`/worktrees/<w>/`):  its repo paths stay in the worktree, a server route doesn't", async () => {
+    const page = await opened("/worktrees/w1/docs/own.html")
     expect(await tabsOf(page)).toEqual([
-      { name: "Notes", href: "../notes/index.html", lit: true, target: null },
-      { name: "Kit", href: null, lit: false, target: null }
+      { name: "Guides", href: "/worktrees/w1/guides/index.html", lit: false, target: null },
+      { name: "Kit", href: "/components/kit/", lit: false, target: null },
+      { name: "Tool", href: "/tool/", lit: false, target: "spell-tool" }
     ])
     await page.close()
+  })
+})
+
+// epic `epic-engine` P46:  a page's root links mean the checkout serving it (Owen's Q6)
+describe("a worktree page's root links (the live client's `worktreeHref()`)", () => {
+  /** `id`'s href on the page at `path`, after it's pressed */
+  async function pressed(path: string, id: string): Promise<string | null> {
+    const page = await opened(path)
+    await page.waitForFunction(() => (window as { __spellLive?: boolean }).__spellLive)
+    // pressed, not followed:  the link is rewritten on the way down
+    await page.dispatchEvent(`#${id}`, "pointerdown")
+    const href = await page.getAttribute(`#${id}`, "href")
+    await page.close()
+    return href
+  }
+
+  it("lays a root link under the worktree as it's pressed", async () => {
+    expect(await pressed("/worktrees/w1/docs/own.html", "code")).toBe("/worktrees/w1/docs/own.html")
+  })
+
+  it("leaves it alone on main's own pages, and a server route anywhere", async () => {
+    expect(await pressed("/docs/own.html", "code")).toBe("/docs/own.html")
+    expect(await pressed("/worktrees/w1/docs/own.html", "api")).toBe("/api/server")
   })
 })

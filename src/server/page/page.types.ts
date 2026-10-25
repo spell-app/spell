@@ -128,10 +128,9 @@ export type PageServerSettings = {
    */
   engineRoutes?: Record<string, string>
   /**
-   * the SITE HEADER's tabs, in its order (`SiteTab`);  none by default:  pages show the tabs their bundle gives
-   * (`defineSite({ tabs })`)
+   * the SITE HEADER's tabs, in its order (`SiteTab`);  none by default:  no tabs
    * - handed to every page it serves, as `SPELL_SERVER.siteTabs`
-   * - e.g. `{ "name": "Epic/UI", "path": "/components/epics/", "serverOnly": true, "sets": ["epics"] }`:
+   * - e.g. `{ "name": "Epic/UI", "path": "/components/epics/", "sets": ["epics"] }`:
    *   a component set's tab, lit on its pages (`litTab()`)
    * - the server knows nothing of what they are:  the header's parts come from here (epic `repo-split` I4)
    * - the content repo's part (`CONTENT_SETTINGS`):  the tabs describe its areas and the component sets

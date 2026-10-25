@@ -792,7 +792,8 @@ They're the content repo's, since they describe its areas and the sets beside th
 | App/UI | `/components/app/` | the `app` set, and spell-app's `app/docs/` |
 | Templates | `templates/index.html` | pages under `templates/` |
 
-- A tab whose home starts with `/` exists only when served:  it's greyed out on a `file://` page.
+- A tab whose home starts with `/` is a server route, never laid under a worktree's address;  every other tab is,
+  on a worktree's page (`worktreeHref()`).
 - A tab whose home is a component set none of whose sets is served is left out:  without spell-app, no App/UI.
 - A component set or a path pattern lights a tab first;  a page's folder (`guides/` ...) only when none does.
 - The header's code names no tab:  they're data.

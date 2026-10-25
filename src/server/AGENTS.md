@@ -284,11 +284,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - plain DOM, no imports:  any page's bundle takes it;  its class docstring has the rules
     - the site header every page shows
       - its TABS are data (`SiteTab`, epic `repo-split` I4):  it names no site's parts
-        - served:  the settings' `"siteTabs"`, in the header's order, told every page as `SPELL_SERVER.siteTabs`
-        - else (`file://`, settings naming none):  what `defineSite({ tabs })`'s caller gave (`SiteHeader.fallbackTabs`)
-        - each:  its label and home;  `serverOnly`, `ownTab`;  what lights it (`litTab()`):
+        - the settings' `"siteTabs"`, in the header's order, told every page as `SPELL_SERVER.siteTabs`;  none:  no tabs
+          (the bundles' fallback tabs, for a page opened from disk, went in epic `epic-engine` P46, with its `root`)
+        - each:  its label and home;  `ownTab`;  what lights it (`litTab()`):
           component sets by id (`sets`), path patterns (`paths`), docs area folders (`areas`)
-        - the content repo's part (`page-server.json5`);  spell-epic's docs bundle gives the docs' own areas
+        - the content repo's part (`page-server.json5`)
         - a tab whose home is a component set's address, none of whose `sets` is served, is left out:
           no App/UI tab without spell-app
     - Spell's favicon, `favicon.ts`:
@@ -327,7 +327,12 @@ The steps between a page's content and its file on disk, for every tool that wri
 - `Linker` -- a page's links:
   - `<code>path</code>` references become links
   - every link gets a named target (one per destination)
-  - `check()` verifies them
+  - every local link a ROOT PATH, as the page server serves it (`/spell-ui/x.ts`, `/guides/x.html`;  epic `epic-engine`
+    P46, `rootLinks()`):  the same text from any folder, a part or a template;  a link to the page's own folder stays
+    relative, and so does a load below it (`_assets/`, `parts/`);  a link a move broke goes to its one new home
+  - `check()` verifies them, and refuses a relative one (`relative:  ../x.ts -- write /spell-ui/x.ts`)
+  - a worktree's page lays its root links under its address as they're clicked:  the live client's `worktreeHref()`,
+    the rule the site header's tabs follow too
   - It was the docs tools' `doc-links.js`, which is now its command line.
 - [`formatHTML()`](format.ts):  formats a page's text in memory, as `vp fmt` would format its file (oxfmt).
   It was the docs tools' `plan-parts.js`'s.

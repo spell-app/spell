@@ -150,6 +150,29 @@ describe("servedPath()", () => {
   })
 })
 
+// epic `epic-engine` P46:  a root link means the checkout serving the page
+describe("worktreeHref()", () => {
+  test("a worktree's page:  a root path under its address;  the server's own routes and other URLs as they are", () => {
+    const page = "/worktrees/seo/epics/seo/seo.plan.html"
+    expect(SRV.worktreeHref("/spell-ui/src/x.ts#L3", page)).toBe("/worktrees/seo/spell-ui/src/x.ts#L3")
+    expect(SRV.worktreeHref("/guides/server.html", page)).toBe("/worktrees/seo/guides/server.html")
+    for (const href of [
+      "/api/server",
+      "/_epic/assets/x.js",
+      "/worktrees/b/x.html",
+      "x.html",
+      "#t3",
+      "//cdn/x",
+      "https://x.dev"
+    ])
+      expect(SRV.worktreeHref(href, page)).toBe(href)
+  })
+
+  test("main's own page:  every link as it is", () => {
+    expect(SRV.worktreeHref("/spell-ui/src/x.ts", "/epics/seo/seo.plan.html")).toBe("/spell-ui/src/x.ts")
+  })
+})
+
 describe("reloadGate():  one hot reload, not while typing", () => {
   beforeEach(() => void vi.useFakeTimers())
   afterEach(() => void vi.useRealTimers())
