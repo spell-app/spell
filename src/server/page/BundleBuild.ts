@@ -1,10 +1,10 @@
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from "node:child_process"
-import { existsSync } from "node:fs"
+import { existsSync, statSync, watch, type FSWatcher } from "node:fs"
 import { createRequire } from "node:module"
-import { dirname, join } from "node:path"
+import { basename, dirname, join } from "node:path"
 import { createInterface } from "node:readline"
 
-import type { Handler } from "spell/server"
+import { SRV, type Handler } from "spell/server"
 import {
   BUNDLE_WAIT_MS,
   componentSetPath,
@@ -26,6 +26,9 @@ import {
  * - `wait`:  while it runs, a request for a MISSING file in a bundle's folder waits for it to end,
  *   at most `timeout` ms, then is served as usual;  a file that's there is served at once
  * - when it ends, live reload reloads the open pages that load a bundle:  the page server watches both folders
+ * - `watch()`:  and again whenever a bundle's SOURCES change while it runs (a merge into this checkout, an edit), once
+ *   they've been quiet `REBUILD_QUIET_MS`:  so a merge never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25:
+ *   ui-gaps' renames merged after the last build, and every components page drew with the old code)
  * - It runs the kit's CLI as a child process, never imports it:  the CLI imports the server.
  * - spell-app's (its `page-server` folder) from epic `repo-split` P4 until P16, which moved it into the kit's server:
  *   it names no repo, its folders are the settings'.
@@ -51,6 +54,15 @@ export class BundleBuild {
 
   /** resolves when the build ends, however it ends */
   private ended: Promise<void> = Promise.resolve()
+
+  /** the sources' watchers (`watch()`) */
+  private watchers: FSWatcher[] = []
+
+  /** the rebuild waiting for the sources to be quiet */
+  private quiet?: NodeJS.Timeout
+
+  /** a source changed while the build ran:  check again once it ends */
+  private again = false
 
   constructor({ root, timeout = BUNDLE_WAIT_MS, spawn = nodeSpawn }: BundleBuildProps) {
     this.root = root
@@ -108,13 +120,66 @@ export class BundleBuild {
         if (code !== 0) console.error(`bundles:  the build failed (${signal ?? `exit ${code}`});  see above`)
         this.child = undefined
         done()
+        if (this.again) {
+          this.again = false
+          this.start()
+        }
       })
     })
     return this
   }
 
-  /** Stop the build, if it runs:  its whole process group.  NEVER throws. */
+  /**
+   * Build again whenever a bundle's sources change, once quiet for `quiet` ms (`spell bundle --stale`:  a change
+   * that leaves the sources' hash as it was builds nothing).
+   * - SIDE EFFECT:  an `fs.watch` per source folder or file, closed by `stop()`
+   * - NEVER throws:  a source it can't watch is skipped
+   */
+  watch(quiet = REBUILD_QUIET_MS): this {
+    let specs: ReturnType<typeof SRV.Bundle.specs>
+    try {
+      specs = SRV.Bundle.specs(this.root)
+    } catch (error) {
+      console.error("bundles:  can't watch the sources:", error)
+      return this
+    }
+    const changed = () => {
+      clearTimeout(this.quiet)
+      this.quiet = setTimeout(() => this.rebuild(), quiet)
+      this.quiet.unref()
+    }
+    const roots = new Set(specs.flatMap((spec) => new SRV.Bundle(this.root, spec).sourceRoots()))
+    for (const root of roots) {
+      try {
+        const folder = statSync(root).isDirectory()
+        const watcher = folder
+          ? watch(root, { recursive: true }, changed)
+          : watch(dirname(root), (_event, name) => name === basename(root) && changed())
+        watcher.on("error", () => {})
+        watcher.unref()
+        this.watchers.push(watcher)
+      } catch {
+        // gone, or not watchable:  the next start checks it
+      }
+    }
+    return this
+  }
+
+  /** The sources changed:  check the bundles now, or once the running build ends. */
+  private rebuild(): void {
+    if (this.child) {
+      this.again = true
+      return
+    }
+    console.log("bundles:  sources changed")
+    this.start()
+  }
+
+  /** Stop the build, if it runs:  its whole process group;  and stop watching.  NEVER throws. */
   stop(): void {
+    clearTimeout(this.quiet)
+    for (const watcher of this.watchers) watcher.close()
+    this.watchers = []
     const pid = this.child?.pid
     if (pid === undefined) return
     try {
@@ -165,6 +230,9 @@ export class BundleBuild {
     return join(this.root, folder, served.slice(folderUrl(folder).length))
   }
 }
+
+/** How long a bundle's sources must be quiet before it's checked again, in ms (`BundleBuild.watch()`):  a merge writes many files. */
+const REBUILD_QUIET_MS = 3000
 
 /** Starts the build's child process:  `node:child_process`'s `spawn`, or a test's stub. */
 export type SpawnBuild = (command: string, args: string[], options: SpawnOptions) => ChildProcess

@@ -154,6 +154,25 @@ describe("BundleBuild", () => {
     expect(error).toHaveBeenCalledWith("bundles:  the build failed (exit 1);  see above")
   })
 
+  // epic `epic-engine`, 2026-10-25:  a merge after the last build left every components page on the old code
+  test("watch():  a source changed builds again once quiet;  while a build runs, once it ends", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    put(root, "sources/a.ts", "1")
+    vi.spyOn(SRV.Bundle, "specs").mockReturnValue([SRV.BUNDLES[0]!])
+    vi.spyOn(SRV.Bundle.prototype, "sourceRoots").mockReturnValue([join(root, "sources")])
+    const first = new FakeChild()
+    const spawn = spawnOf(first)
+    const bundles = new BundleBuild({ root, spawn }).start().watch(50)
+    await new Promise((done) => setTimeout(done, 100))
+    put(root, "sources/a.ts", "2")
+    await new Promise((done) => setTimeout(done, 300))
+    // the first build still runs:  the check waits for it
+    expect(spawn).toHaveBeenCalledTimes(1)
+    first.exit(0)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2), { timeout: 2000 })
+    bundles.stop()
+  })
+
   test("stop() ends the build's whole process group", async () => {
     await serve()
     vi.spyOn(console, "log").mockImplementation(() => {})

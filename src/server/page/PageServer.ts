@@ -222,7 +222,7 @@ export class PageServer {
     for (const [route, folder] of Object.entries(settings.engineRoutes ?? {}))
       this.web.live!.watch(join(this.root, folder), { servedAt: route.endsWith("/") ? route : `${route}/` })
     if (routes) {
-      this.bundles.start()
+      this.bundles.start().watch()
       for (const path of settings.routes ?? []) await this.loadRoutes(path)
     }
     const { port: actual } = await this.web.listen({ port })
