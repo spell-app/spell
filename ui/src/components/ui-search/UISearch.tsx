@@ -229,12 +229,12 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   // ## Highlight
   ////////////////
 
-  /** Highlighted index into `shownResults`;  `-1` for none. */
-  @E.state accessor highlightedIndex = -1
+  /** The highlighted result of `shownResults`. */
+  readonly highlighted = new F.HighlightedOption(() => this.shownResults)
 
   /** Highlighted result. */
   get highlightedResult(): UIT.SearchResult | undefined {
-    return this.shownResults[this.highlightedIndex]
+    return this.highlighted.option
   }
 
   /** A newly highlighted result scrolls into view, while results show. */
@@ -242,22 +242,6 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   protected onHighlightChanged(resultsAreShowing: boolean, result: UIT.SearchResult | undefined) {
     if (resultsAreShowing && result)
       this.domElement.renderRoot.getElementById(this.idFor(result))?.scrollIntoView({ block: "nearest" })
-  }
-
-  /** Highlight `result` if it's shown. */
-  @E.untracked
-  private highlight(result: UIT.SearchResult) {
-    const index = this.shownResults.indexOf(result)
-    if (index >= 0 && index !== this.highlightedIndex) this.highlightedIndex = index
-  }
-
-  /** Move the highlight by `delta`, stopping at the ends (Fomantic's arrows). */
-  @E.untracked
-  private move(delta: number) {
-    const count = this.shownResults.length
-    if (!count) return
-    const from = this.highlightedIndex
-    this.highlightedIndex = from < 0 ? (delta > 0 ? 0 : count - 1) : E.clamp(from + delta, 0, count - 1)
   }
 
   ////////////////
@@ -283,7 +267,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     restoreFocus: false,
     canChange: (open) => !open || !(this.isDisabled || this.isReadOnly),
     onChange: (open) => {
-      if (open) this.highlightedIndex = this.selectFirstResult ? 0 : -1
+      if (open) this.highlighted.index = this.selectFirstResult ? 0 : -1
     }
   })
 
@@ -356,7 +340,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   onFormReset() {
     this.value = this.initialValue
     this.inputRevision++
-    this.highlightedIndex = -1
+    this.highlighted.clear()
   }
 
   /**
@@ -519,7 +503,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     const url = typeof result.url === "string" && result.url ? result.url : undefined
     const classes = () => [RESULT, { [UIT.ACTIVE]: this.highlightedResult === result }]
     const selected = () => (this.highlightedResult === result ? "true" : "false")
-    const onPointerMove = () => this.highlight(result)
+    const onPointerMove = () => this.highlighted.highlight(result)
     const onClick = (event: MouseEvent) => this.select(result, event)
     if (url) {
       return (
@@ -638,7 +622,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
       return true
     })
     this.inputRevision++
-    this.highlightedIndex = this.selectFirstResult ? 0 : -1
+    this.highlighted.index = this.selectFirstResult ? 0 : -1
     this.runQuery(text, event)
   }
 
@@ -675,13 +659,13 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     switch (event.key) {
       case UIT.Key.arrowDown:
         event.preventDefault()
-        if (isShowing) this.move(1)
+        if (isShowing) this.highlighted.move(1)
         else this.rerunQuery(event)
         return
       case UIT.Key.arrowUp:
         if (!isShowing) return
         event.preventDefault()
-        this.move(-1)
+        this.highlighted.move(-1)
         return
       case UIT.Key.enter: {
         const result = isShowing ? this.highlightedResult : undefined

@@ -345,6 +345,14 @@ describe("<ui-accordion> keyboard", () => {
     await userEvent.keyboard("{End}")
     expect(host.shadowRoot!.activeElement).toBe(titles[2])
   })
+
+  it("the arrows only move focus:  EVERY title stays a tab stop of its own", async () => {
+    const { host, titles } = await accordion()
+    titles[0]!.focus()
+    await userEvent.keyboard("{ArrowDown}")
+    expect(host.shadowRoot!.activeElement).toBe(titles[1])
+    expect(titles.map((title) => title.getAttribute("tabindex"))).toEqual(titles.map(() => null))
+  })
 })
 
 ////////////////

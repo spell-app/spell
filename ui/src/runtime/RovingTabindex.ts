@@ -1,12 +1,16 @@
 import { type Prettify } from "spell-ui/util"
 import * as UIT from "spell-ui/components/components.types"
 
-import type { Disposer, RovingItems, RovingOptions, RovingOrientation } from "./runtime.types"
+import type { Disposer, RovingItems, RovingOptions, RovingOrientation, RovingTabindexMode } from "./runtime.types"
 
 /****************
  * ### `RovingTabindex`
  * Roving tabindex for composite widgets:  menus, tabs, listboxes, toolbars, radio-like groups.
- * - In the runtime's lazy chunk;  components reach it through `UI.focus.roving()`, never by import.
+ * - In the runtime's lazy chunk;  components reach it through `UI.focus`, never by import:
+ *   - `UI.focus.roving()`:  attached to a container, for the element's life (menus, tabs)
+ *   - `UI.focus.arrowKey()`:  one key press, from a JSX `onKeyDown` (the accordion, radios, ratings, swatches)
+ * - `tabindex: "left alone"`:  the arrows only move focus, and the items' `tabindex`es stay the caller's:
+ *   an accordion's titles, each a tab stop;  a component that draws its own tab stop.
  * - The WAI-ARIA APG pattern:  the group is ONE tab stop (active item `tabindex="0"`, the rest `-1`),
  *   arrow keys move between items, Home / End jump to the ends.
  * - Items come from a selector under `container`, or a function (for slotted or computed items).
@@ -26,19 +30,29 @@ export class RovingTabindex {
   private readonly wrap: boolean
   /** told when the active item moves */
   private readonly onChange?: RovingOptions["onChange"]
+  /** `"roving"`:  the items' `tabindex`es are ours;  `"left alone"`:  the caller's */
+  private readonly tabindex: RovingTabindexMode
   /** removes the container's listeners */
   private readonly listeners = new AbortController()
 
-  constructor({ container, items, orientation = "vertical", wrap = true, activeIndex, onChange }: RovingTabindexProps) {
+  /** A group over `props`, not listening yet:  `attach()` and `arrowKey()` make one. */
+  private constructor(props: RovingTabindexProps) {
+    const {
+      container,
+      items,
+      orientation = "vertical",
+      wrap = true,
+      activeIndex,
+      onChange,
+      tabindex = "roving"
+    } = props
     this.container = container
     this.source = items
     this.orientation = orientation
     this.wrap = wrap
     this.onChange = onChange
+    this.tabindex = tabindex
     this._activeIndex = activeIndex ?? this.initialIndex()
-    const { signal } = this.listeners
-    container.addEventListener("keydown", this.onKeyDown, { signal })
-    container.addEventListener("focusin", this.onFocusIn, { signal })
     this.refresh()
   }
 
@@ -68,8 +82,9 @@ export class RovingTabindex {
     item.focus()
   }
 
-  /** Re-apply `tabindex`es, e.g. after items were added or removed. */
+  /** Re-apply `tabindex`es, e.g. after items were added or removed;  none with `tabindex: "left alone"`. */
   refresh() {
+    if (this.tabindex === "left alone") return
     const items = this.items
     if (this._activeIndex >= items.length) this._activeIndex = Math.max(0, items.length - 1)
     items.forEach((item, index) => item.setAttribute("tabindex", index === this._activeIndex ? "0" : "-1"))
@@ -82,16 +97,17 @@ export class RovingTabindex {
   // ## Internals
   ////////////////
 
-  /** Arrow / Home / End handling. */
-  private readonly onKeyDown = (event: KeyboardEvent) => {
-    if (event.ctrlKey || event.metaKey || event.altKey || event.defaultPrevented) return
+  /** Arrow / Home / End handling;  true when it moved focus. */
+  private readonly onKeyDown = (event: KeyboardEvent): boolean => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.defaultPrevented) return false
     const items = this.items
     const from = this.indexOfEvent(event, items)
-    if (from < 0) return
+    if (from < 0) return false
     const next = this.targetIndex(event.key, from, items)
-    if (next === undefined || next === from) return
+    if (next === undefined || next === from) return false
     event.preventDefault()
     this.focus(next)
+    return true
   }
 
   /** Focus landing on an item (click, script) makes it the tab stop. */
@@ -171,10 +187,25 @@ export class RovingTabindex {
 
   /**
    * Create and start a roving tabindex -- see class docs.
-   * - STATIC:  the factory `UI.focus.roving()` calls;  ~== `new RovingTabindex(props)`, which already starts it.
+   * - STATIC:  the factory `UI.focus.roving()` calls;  it listens on `container` until `detach()`.
    */
   static attach(props: RovingTabindexProps): RovingTabindex {
-    return new RovingTabindex(props)
+    const group = new RovingTabindex(props)
+    const { signal } = group.listeners
+    group.container.addEventListener("keydown", group.onKeyDown, { signal })
+    group.container.addEventListener("focusin", group.onFocusIn, { signal })
+    return group
+  }
+
+  /**
+   * One key press on a group nothing is attached to:  a JSX `onKeyDown` hands it on, with the group's items.
+   * - Arrows step from the item the event came from, Home / End jump, as an attached group's do;
+   *   `onChange` hears of the move (a radio group chooses there).
+   * - Returns true when it moved focus (and prevented the key's default), false for any other key.
+   * - STATIC:  the group keeps no state between presses;  the items say where it is.
+   */
+  static arrowKey(event: KeyboardEvent, props: RovingTabindexProps): boolean {
+    return new RovingTabindex(props).onKeyDown(event)
   }
 }
 

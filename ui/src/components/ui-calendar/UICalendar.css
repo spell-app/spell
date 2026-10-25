@@ -4,7 +4,7 @@
  * - Adopted after the foundation, AFTER `UIInput.css` (the field is a real `.ui.input`).
  * - The shadow markup it expects (class grammar on semantic elements):
  *
- *     <div class="ui [size color] [inverted compact fluid] calendar [active] [disabled]" part="calendar">
+ *     <div class="ui [size color] [inverted compact fluid] calendar [active] [disabled read-only]" part="calendar">
  *       <div class="ui left icon input [fluid] [disabled]" part="input" style="anchor-name: --ui-calendar-7">
  *         <input part="control">
  *         <button class="icon" part="trigger" aria-haspopup="dialog"><svg></button>
@@ -452,5 +452,10 @@
   }
   .ui.disabled.calendar > .ui.input.disabled {
     opacity: 1;
+  }
+
+  /* Read-only:  shown, not changed;  the arrow, as every control's `read-only`. */
+  .ui.read-only.calendar > .ui.input > input {
+    cursor: default;
   }
 }

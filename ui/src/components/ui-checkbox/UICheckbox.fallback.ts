@@ -58,9 +58,7 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
       this.sync()
       const value = (input.checked ? undefined : this.unchosenValue()) ?? this.chosenValue()
       const detail = { selected: input.checked, value, originalEvent: event }
-      domElement.dispatchEvent(
-        new CustomEvent(this.vocabulary.events[0].name, { bubbles: true, composed: true, detail })
-      )
+      this.send(this.vocabulary.events[0].name, detail)
     })
     this.input = input
     return [root]

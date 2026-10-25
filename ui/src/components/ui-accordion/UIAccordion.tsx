@@ -184,27 +184,16 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
     this.openText = AccordionPanels.format(now)
   }
 
-  /** ArrowDown / ArrowUp / Home / End on a title:  focus another title of THIS accordion. */
+  /**
+   * ArrowDown / ArrowUp / Home / End on a title:  focus another title of THIS accordion, wrapping.
+   * - Focus only:  every title stays a tab stop of its own (`tabindex: "left alone"`).
+   */
   private readonly onKeyDown = (event: KeyboardEvent) => {
-    if (event.altKey || event.ctrlKey || event.metaKey || event.defaultPrevented) return
-    const root = event.currentTarget as HTMLElement
-    const titles = [...root.querySelectorAll<HTMLElement>(TITLE_SELECTOR)]
-    const from = titles.indexOf(event.composedPath()[0] as HTMLElement)
-    if (from < 0) return
-    const last = titles.length - 1
-    const to =
-      event.key === UIT.Key.arrowDown
-        ? (from + 1) % titles.length
-        : event.key === UIT.Key.arrowUp
-          ? (from + last) % titles.length
-          : event.key === UIT.Key.home
-            ? 0
-            : event.key === UIT.Key.end
-              ? last
-              : undefined
-    if (to === undefined) return
-    event.preventDefault()
-    titles[to]!.focus()
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: TITLE_SELECTOR,
+      tabindex: "left alone"
+    })
   }
 
   ////////////////

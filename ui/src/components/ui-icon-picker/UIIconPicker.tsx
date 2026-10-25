@@ -147,7 +147,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     onChange: (open) => {
       if (!open) return
       this.query = this.queryOnOpen
-      this.highlighted = -1
+      this.highlighted.clear()
       this.scrollTop = 0
     },
     onDismiss: (reason) => {
@@ -303,11 +303,11 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
    */
   @E.untracked
   private onSearchWordsLoaded(words: IconSearchWords) {
-    const highlighted = this.cells[this.highlighted]
+    const highlighted = this.highlighted.option
     this.searchWords = words
     const at = highlighted ? this.cells.indexOf(highlighted) : -1
     if (at < 0) return
-    this.highlighted = at
+    this.highlighted.index = at
     E.afterSolidUpdate(() => this.reveal(at, "center"))
   }
 
@@ -410,8 +410,11 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   // ## The highlight
   ////////////////
 
-  /** The highlighted cell, by its place in the grid ("none" is 0 when offered);  `-1` for none. */
-  @E.state accessor highlighted = -1
+  /**
+   * The highlighted cell, by its place in the grid ("none" is 0 when offered).
+   * - The arrows step through the GRID (a row down, a cell across:  `cellForArrow()`), not the list.
+   */
+  readonly highlighted = new F.HighlightedOption(() => this.cells)
 
   /** Highlight the chosen icon, its row in the middle;  with a search, or none chosen, the first cell. */
   @E.untracked
@@ -419,10 +422,10 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     const name = this.iconName
     const at = name && !this.query ? this.cells.findIndex((choice) => choice.names.includes(name)) : -1
     if (at < 0) {
-      this.highlighted = this.query ? this.firstMatchCell : 0
+      this.highlighted.index = this.query ? this.firstMatchCell : 0
       return
     }
-    this.highlighted = at
+    this.highlighted.index = at
     // once the grid's padding has grown to hold every row:  until then it can't scroll that far
     E.afterSolidUpdate(() => this.reveal(at, "center"))
   }
@@ -454,8 +457,8 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   private highlight(cell: number) {
     const last = this.cells.length - 1
     if (last < 0) return
-    this.highlighted = E.clamp(cell, 0, last)
-    this.reveal(this.highlighted)
+    this.highlighted.index = E.clamp(cell, 0, last)
+    this.reveal(this.highlighted.index)
   }
 
   ////////////////
@@ -553,7 +556,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           aria-expanded={this.popover.ariaExpanded}
           aria-controls={this.ids.grid}
           aria-autocomplete="list"
-          aria-activedescendant={this.highlighted >= 0 ? this.cellId(this.highlighted) : undefined}
+          aria-activedescendant={this.highlighted.index >= 0 ? this.cellId(this.highlighted.index) : undefined}
           autocomplete="off"
           spellcheck={false}
           onInput={this.onSearchInput}
@@ -627,7 +630,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     return (
       <div
         id={this.cellId(cell)}
-        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted === cell }]}
+        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted.index === cell }]}
         part={this.partForName("cell")}
         role="option"
         aria-selected={isChosen() ? "true" : "false"}
@@ -679,7 +682,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   /** Typing filters the grid, from its top, the best match highlighted. */
   private readonly onSearchInput = (event: Event) => {
     this.query = (event.currentTarget as HTMLInputElement).value
-    this.highlighted = this.query ? this.firstMatchCell : 0
+    this.highlighted.index = this.query ? this.firstMatchCell : 0
     if (this.grid) this.grid.scrollTop = 0
     this.scrollTop = 0
   }
@@ -714,7 +717,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
    * `undefined` for another key.
    */
   private cellForArrow(key: string): number | undefined {
-    const cell = this.highlighted
+    const cell = this.highlighted.index
     const across = getComputedStyle(this.domElement).direction === "rtl" ? -1 : 1
     let next: number | undefined
     if (key === UIT.Key.arrowRight) next = cell + across
@@ -727,14 +730,14 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
 
   /** Pick the highlighted cell, if there is one. */
   private pickHighlighted(originalEvent: Event) {
-    const choice = this.cells[this.highlighted]
+    const choice = this.highlighted.option
     if (choice) this.choose(choice === NONE_CELL ? "" : choice.name, originalEvent)
   }
 
   /** The pointer over cell `cell` highlights it. */
   @E.untracked
   private hover(cell: number) {
-    if (this.highlighted !== cell) this.highlighted = cell
+    if (this.highlighted.index !== cell) this.highlighted.index = cell
   }
 
   /** The grid scrolled:  draw the rows now in view, as many as its box holds now it's settled. */

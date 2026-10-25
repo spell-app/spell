@@ -130,6 +130,14 @@ export class Focus {
     return RovingTabindex.attach(props)
   }
 
+  /**
+   * One arrow / Home / End key press on a group of items, from a JSX `onKeyDown`:  true when it moved focus.
+   * - SEE:  `RovingTabindex.arrowKey()`.
+   */
+  arrowKey(event: KeyboardEvent, props: RovingTabindexProps): boolean {
+    return RovingTabindex.arrowKey(event, props)
+  }
+
   ////////////////
   // ## Trap
   ////////////////

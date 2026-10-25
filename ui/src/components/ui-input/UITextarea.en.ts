@@ -59,13 +59,7 @@ export const textareaVocabulary = {
       description: "Can't be used;  dimmed, left out of the form."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
-    {
-      name: "readonly",
-      group: "form",
-      kind: "boolean",
-      property: "readOnly",
-      description: "Shows its value but can't be edited;  still submitted."
-    },
+    { ...UIT.FormControlAttributes.readonly, description: "Shows its value but can't be edited;  still submitted." },
     {
       name: "value",
       group: "form",
@@ -73,14 +67,9 @@ export const textareaVocabulary = {
       reflect: false,
       description: "Value.  Attribute:  the starting (and reset) value;  property:  the live value."
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name." },
-    { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
-    {
-      name: "required",
-      group: "form",
-      kind: "boolean",
-      description: "Constraint:  must not be empty (`valueMissing`)."
-    },
+    UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.placeholder,
+    { ...UIT.FormControlAttributes.required, description: "Constraint:  must not be empty (`valueMissing`)." },
     {
       name: "minlength",
       group: "form",
@@ -133,7 +122,7 @@ export const textareaVocabulary = {
     { name: "control", description: "The native `<textarea>`." }
   ],
   states: [
-    { name: "invalid", description: "Fails validation, once someone has interacted (`:user-invalid` semantics)." },
+    UIT.FormControlStates.invalid,
     { name: "disabled", description: "Can't be used." },
     { name: "fluid", description: "The host is block-level (`fluid`, or inside a `<ui-field>`)." }
   ],

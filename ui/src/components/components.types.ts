@@ -1550,6 +1550,45 @@ export const WHITESPACE = /\s+/
 export const DIGITS = /^\d+(\.\d+)?$/
 
 ////////////////
+// ## Form controls:  the attributes and states every control with a value shares (`FormComponent`)
+////////////////
+
+/**
+ * The form attributes every control with a value declares, ONE shape each:  its vocabulary takes them by name.
+ * - `UIT.FormControlAttributes.name` as it is, or `{ ...UIT.FormControlAttributes.required, description: "..." }`
+ *   where the control says more.
+ * - `readonly` is the same everywhere:  the `readOnly` property, a plain boolean, as the platform's;
+ *   its class word `read-only` is what the controls' sheets style.
+ */
+export const FormControlAttributes = {
+  name: { name: "name", group: "name", kind: "string", description: "Form field name." },
+  required: {
+    name: "required",
+    group: "form",
+    kind: "boolean",
+    description: "Form validation:  a value must be chosen."
+  },
+  readonly: {
+    name: "readonly",
+    group: "form",
+    kind: "keyOnly",
+    property: "readOnly",
+    key: "read-only",
+    description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
+  },
+  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." }
+} as const
+
+/** The states every control with a value has (`FormComponent`):  its vocabulary takes them by name, as above. */
+export const FormControlStates = {
+  readonly: { name: "readonly", description: "`readonly`:  can't be changed." },
+  invalid: {
+    name: "invalid",
+    description: "Fails validation, once a person has interacted (`:user-invalid` semantics)."
+  }
+} as const
+
+////////////////
 // ## Sources:  shared by ui-include, ui-code, ui-markdown (`LoadableComponent`)
 ////////////////
 

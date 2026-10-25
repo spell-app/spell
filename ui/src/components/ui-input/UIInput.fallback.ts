@@ -98,10 +98,9 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
     else formInternals.setValidity(control.validity, control.validationMessage, control)
   }
 
-  /** Send event `name` (`ui-input`, `ui-changed`), composed, with the control's value. */
+  /** Send event `name` (`ui-input`, `ui-changed`) with the control's value. */
   private announce(name: E.EventName<Vocabulary>, originalEvent: Event) {
-    const detail = { value: this.control!.value, originalEvent }
-    this.domElement.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail }))
+    this.send(name, { value: this.control!.value, originalEvent })
   }
 }
 

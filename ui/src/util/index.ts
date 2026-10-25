@@ -23,6 +23,7 @@
  *   - spell-element's timing helpers (`spell/element/timing`), to run a function later:
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`
  *   - `Warnings` -- `ui`'s console warnings, its own
+ *   - `LoadOnce` -- a load per key, once per page, with a choice of what a failure does
  */
 
 export * from "spell/util/class"
@@ -34,3 +35,4 @@ export * from "spell/util/util.types"
 
 export * from "spell/element/timing"
 export * from "./Warnings"
+export * from "./LoadOnce"

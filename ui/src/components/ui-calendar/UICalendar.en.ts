@@ -11,6 +11,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import * as UIT from "spell-ui/components/components.types"
 
 /****************
  * ### `<ui-calendar>`
@@ -101,19 +102,11 @@ export const calendarVocabulary = {
         "Chosen value, ISO by `type`.  The ATTRIBUTE is the starting value (form reset restores it);  the " +
         "property is current."
     },
-    { name: "name", group: "name", kind: "string", description: "Form field name;  submits the ISO value." },
-    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    { ...UIT.FormControlAttributes.name, description: "Form field name;  submits the ISO value." },
+    UIT.FormControlAttributes.required,
+    UIT.FormControlAttributes.readonly,
     {
-      name: "readonly",
-      group: "form",
-      kind: "boolean",
-      property: "readOnly",
-      description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
-    },
-    {
-      name: "placeholder",
-      group: "form",
-      kind: "string",
+      ...UIT.FormControlAttributes.placeholder,
       description: "Text shown in the empty field;  its accessible name too."
     },
     { name: "min", group: "form", kind: "string", description: "Earliest value that can be chosen, ISO by `type`." },
@@ -242,7 +235,7 @@ export const calendarVocabulary = {
   states: [
     { name: "open", description: "The popup is open." },
     { name: "disabled", description: "Can't be used." },
-    { name: "invalid", description: "Fails validation (`required`)." },
+    { ...UIT.FormControlStates.invalid, description: "Fails validation (`required`)." },
     { name: "fluid", description: "The host is block-level (`fluid`)." },
     { name: "inline", description: "The grid sits in the page." }
   ],

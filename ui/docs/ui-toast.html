@@ -644,10 +644,10 @@
                 <script type="text/markdown">
                   Two ways to show a toast:
 
-                  - `UI.toast({...})` builds a `<ui-toast>` in a container per `position` (`top right` by default;
-                    `top left`, `top center`, `bottom right`, `bottom left`, `bottom center`, `centered`), in the top
+                  - `UI.toast({...})` builds a `<ui-toast>` in a container per `position` (`bottom right` by default;
+                    `top right`, `top left`, `top center`, `bottom left`, `bottom center`, `centered`), in the top
                     layer, and removes it once it has closed. Its options are Fomantic's `$.toast()` settings
-                    (`title`, `message`, `class`, `displayTime` (3000 by default), `showIcon`, `showProgress`,
+                    (`title`, `message`, `class`, `displayTime` (3000 by default), `showIcon` (the type's own by default), `showProgress`,
                     `progressUp`, `closeIcon`, `closeOnClick`, `pauseOnHover`, `compact`, `actions`, `classActions`,
                     `newestOnTop`, `horizontal`). Text is always set as text, never parsed as HTML.
                   - A `<ui-toast>` written in the page shows where it is, like any element, and stays until closed

@@ -12606,7 +12606,7 @@
           "cssStates": [
             {
               "name": "invalid",
-              "description": "Fails validation, once someone has interacted (`:user-invalid` semantics)."
+              "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
             },
             {
               "name": "disabled",
@@ -13062,7 +13062,7 @@
           "cssStates": [
             {
               "name": "invalid",
-              "description": "Fails validation, once someone has interacted (`:user-invalid` semantics)."
+              "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
             },
             {
               "name": "disabled",

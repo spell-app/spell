@@ -133,22 +133,19 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   // ## Copying
   ////////////////
 
-  /** The copy button just copied (for `COPIED_MS`):  it says "Copied".  `:state(copied)`. */
-  @E.cssState("copied")
-  @E.state
-  accessor wasJustCopied = false
+  /** The copy button's copy:  "Copied" for a moment after. */
+  readonly clipboard = new E.ClipboardCopy()
 
-  /** Clears `wasJustCopied`. */
-  private copiedTimer?: E.CancelablePromise<unknown>
+  /** The copy button just copied:  it says "Copied".  `:state(copied)`. */
+  @E.cssState("copied")
+  get wasJustCopied(): boolean {
+    return this.clipboard.isCopied
+  }
 
   /** The copy button:  the code to the clipboard, `ui-copied`, "Copied" for a moment. */
   private readonly onCopy = async () => {
     const { content } = this
-    await navigator.clipboard.writeText(content)
-    this.wasJustCopied = true
-    this.send("ui-copied", { content })
-    this.copiedTimer?.cancel()
-    this.copiedTimer = E.after(COPIED_MS / 1000, () => (this.wasJustCopied = false))
+    if (await this.clipboard.copy(content)) this.send("ui-copied", { content })
   }
 
   ////////////////
@@ -194,6 +191,3 @@ const HLJS_CLASS = "hljs"
 
 /** Class of the copy button. */
 const COPY_CLASS = "copy"
-
-/** ms the copy button says "Copied". */
-const COPIED_MS = 2000

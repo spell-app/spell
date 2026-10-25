@@ -117,8 +117,9 @@ describe("<ui-theme-editor> choosing", () => {
 
   it("arrow keys in a swatch row move and choose", async () => {
     const host = await editor()
-    const row = inner(host, 'ui-property[name="secondary"] .swatches')
-    row.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }))
+    // from the chosen swatch, the row's tab stop, as a person presses it
+    const chosen = inner(host, 'ui-property[name="secondary"] .swatches [aria-checked="true"]')
+    chosen.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
     await ElementFixture.settle()
     expect(host.theme?.secondary).toBe("red")
   })
