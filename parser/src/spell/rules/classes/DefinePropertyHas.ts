@@ -365,10 +365,12 @@ export class DefinePropertyHas extends SpellStatement<
       })
     )
     // what its body says besides its rules, e.g. its aliases (epic `elemental-spell` Q13):  compiled after it,
-    // as if written after its line
+    // as if written after its line, each with its `SPELL: DECLARES` comment, so an importer reads them too
     for (const line of (this.getBody(match)?.matched ?? []) as P.Match[]) {
       const statement = (line.data as { statement?: P.Match }).statement
       if (statement?.is(PropertyBodyMust)) continue
+      const declares = statement && SP.SpellDeclarations.commentFor(statement)
+      if (declares) statements.push(declares)
       const ast = line.AST
       if (ast) statements.push(ast as P.ASTStatement)
     }

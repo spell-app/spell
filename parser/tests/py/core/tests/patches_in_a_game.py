@@ -4,7 +4,7 @@
 
 - Run by the core contract (cli's `contract.test.ts`), in a process of its own:
   the game's classes (`Card`, `Pile` ...) are known by name, and would stand in for the test files' own.
-- Each click is a `card-click`, as `onClick` triggers one:
+- Each click is a call of the card's own click handler, `on_click`, as the page sends one (epic `elemental-spell` J69):
   every other one on the top card of the game's `stock`, if it has one, turning a card over;
   the rest on a card of its `deck`, picked by the seeded random.
   - Each kept at the program's top level, or by its app:  `solitaire`'s `stock` (see `kept()`).
@@ -36,7 +36,7 @@ def main() -> None:
         stock = stock and stock["$items"]
         card = stock[-1] if click % 2 == 0 and stock else {"$id": core.random_item_of(cards)}
         try:
-            changed += bool(game.trigger("card-click", card=game.ref(card)))
+            changed += bool(game.call("on_click", {"type": "click"}, on=card))
         except PatchMismatchError:
             print(f"click {click + 1}:  the patched state differs from the whole state", file=sys.stderr)
             sys.exit(1)
