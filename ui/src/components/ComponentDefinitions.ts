@@ -9,7 +9,7 @@ export type ComponentDefinition = {
    * a doc-only tag's is under `src/docs-components/`, e.g. `ui-docs-example`.
    */
   readonly folder: string
-  /** Display name from the tag:  `ui-breadcrumb-section` => `Breadcrumb section`. */
+  /** Display name from the tag:  `ui-breadcrumb` => `Breadcrumb section`. */
   readonly name: string
   /** What it's filed under (the vocabulary's `topics`). */
   readonly topics: readonly ComponentTopic[]
@@ -81,7 +81,7 @@ export class ComponentDefinitions {
     return folders
   }
 
-  /** `ui-breadcrumb-section` => `Breadcrumb section`. */
+  /** `ui-breadcrumb` => `Breadcrumb section`. */
   static nameOf(tag: string): string {
     const words = tag.replace(/^ui-/, "").replace(/-/g, " ")
     return words.charAt(0).toUpperCase() + words.slice(1)

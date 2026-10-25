@@ -417,9 +417,18 @@ describe("<ui-form> values", () => {
       news: false,
       topics: ["a", "b"],
       plan: "pro",
-      tags: ["x", "y"],
-      nameless: "by id"
+      tags: ["x", "y"]
     })
+  })
+
+  it("skips a field with an id but no name, and says so once:  an id finds an element, never data", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    onTestFinished(() => warn.mockRestore())
+    const { host } = await form(`<ui-form><form>
+      <input id="nameless" value="by id" aria-label="Nameless">
+    </form></ui-form>`)
+    expect([host.values, host.values]).toEqual([{}, {}])
+    expect(warn.mock.calls.filter(([text]) => String(text).includes("#nameless has no name"))).toHaveLength(1)
   })
 
   it("reads `off-value`:  a lone unchosen box reports it;  several of one name list what each submits", async () => {

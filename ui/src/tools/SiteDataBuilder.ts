@@ -193,7 +193,7 @@ export class SiteDataBuilder {
     return topic.charAt(0).toUpperCase() + topic.slice(1)
   }
 
-  /** `ui-breadcrumb-section` => `Breadcrumb section`;  `ui-docs-example` => `Docs example`. */
+  /** `ui-breadcrumb` => `Breadcrumb section`;  `ui-docs-example` => `Docs example`. */
   static nameFor(tag: string): string {
     const words = tag.replace(/^ui-/, "").replace(/-/g, " ")
     return words.charAt(0).toUpperCase() + words.slice(1)

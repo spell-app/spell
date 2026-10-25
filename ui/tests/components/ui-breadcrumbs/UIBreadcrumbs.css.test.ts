@@ -5,15 +5,15 @@ import { colorsCSS, foundationCSS } from "spell-ui/styles"
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { breadcrumbSectionVocabulary } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection.en"
-import { breadcrumbVocabulary } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.en"
+import { breadcrumbVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb.en"
+import { breadcrumbsVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.en"
 import { Painted } from "spell-ui/test-helpers/Painted"
 
-import breadcrumbCSS from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.css?inline"
-import breadcrumbRaw from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.css?raw"
+import breadcrumbCSS from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?inline"
+import breadcrumbRaw from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?raw"
 
 /**
- * `UIBreadcrumb.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
+ * `UIBreadcrumbs.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
  * light-DOM examples (Fomantic's markup and the semantic list form), and -- the part static markup can't show --
  * section elements in their own shadow roots, drawing the breadcrumb's divider tokens.
  * - Sheets are adopted into the document per test and removed again.
@@ -21,7 +21,7 @@ import breadcrumbRaw from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.css?ra
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/src/components/ui-breadcrumb",
+  base: "/src/components/ui-breadcrumbs",
   query: "?raw",
   import: "default",
   eager: true
@@ -37,7 +37,7 @@ const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 // ## Source
 ////////////////
 
-describe("UIBreadcrumb.css source", () => {
+describe("UIBreadcrumbs.css source", () => {
   it("never uses rem", () => {
     expect(Sheets.withoutComments(breadcrumbRaw)).not.toMatch(/\d(\.\d+)?rem\b/)
   })
@@ -62,7 +62,7 @@ describe("UIBreadcrumb.css source", () => {
 
   it("covers every class word the vocabularies can emit", () => {
     const css = breadcrumbRaw + colorsCSS
-    for (const vocabulary of [breadcrumbVocabulary, breadcrumbSectionVocabulary]) {
+    for (const vocabulary of [breadcrumbsVocabulary, breadcrumbVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
     }
@@ -73,7 +73,7 @@ describe("UIBreadcrumb.css source", () => {
 // ## Examples
 ////////////////
 
-describe("UIBreadcrumb.css examples", () => {
+describe("UIBreadcrumbs.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every breadcrumb in %s", (path) => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
     const root = Fixture.render(EXAMPLES[path]!)
@@ -158,7 +158,7 @@ describe("UIBreadcrumb.css examples", () => {
 // ## In shadow roots
 ////////////////
 
-describe("UIBreadcrumb.css in shadow roots", () => {
+describe("UIBreadcrumbs.css in shadow roots", () => {
   it("lets section hosts draw the breadcrumb's divider, text or icon, skipping the first", () => {
     Sheets.adopt(foundationCSS)
     const breadcrumb = Sheets.host(
@@ -198,7 +198,7 @@ describe("UIBreadcrumb.css in shadow roots", () => {
   })
 })
 
-/** The foundation plus `UIBreadcrumb.css`, as a breadcrumb or a section adopts them. */
+/** The foundation plus `UIBreadcrumbs.css`, as a breadcrumb or a section adopts them. */
 function sheets(): string[] {
   return [...foundationCSS, breadcrumbCSS]
 }

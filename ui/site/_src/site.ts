@@ -25,7 +25,8 @@
  *   7. THEN `<ui-root>` (`import()`):  defined only once the layout AND the theme's sheet are in, so its
  *      `display="when-ready"` shows the whole page at once, already themed;  every OTHER family, `<ui-docs-*>`
  *      included, is a lazy chunk it imports on first use
- *   8. `SiteRouter`:  links to other pages swap only the `main`, the layout stays
+ *   8. `SiteRouter`:  links to other pages swap only the `main`, the layout stays;
+ *      `SitePatch`:  an edit to the shown page's file shows in place, no reload (epic `epic-engine` P40)
  * - The root's module joins `SpellUI.packModules` here, once imported (`SitePacks`)
  * - Lazy, by `import()`:  families, the runtime, icon packs (`_assets/icon-packs/`), emoji names, `<ui-code>`'s and
  *   `<ui-markdown>`'s engines, the Temporal polyfill.
@@ -44,8 +45,10 @@ import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import { LOGO_MARK, defineSite } from "spell/server/site"
+import { SitePatch } from "./SitePatch"
 import { SiteRouter } from "./SiteRouter"
 import { SiteShell } from "./SiteShell"
+import { PAGE_MAIN } from "./site.types"
 
 /** This bundle's folder, `.../_assets/`:  a string slice, NOT `new URL(".", import.meta.url)` (Vite would inline it). */
 const ASSETS = import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)
@@ -78,7 +81,10 @@ document.addEventListener("click", (event) => {
 void SiteShell.mount(SITE_ROOT).then(async (content) => {
   // the hat before the top bar's brand (`site.css`, "Top bar"):  the site header's own mark, a constant SVG
   for (const hat of document.querySelectorAll(".site-hat")) hat.innerHTML = LOGO_MARK
-  const router = content && new SiteRouter({ siteRoot: SITE_ROOT, content })
+  // the page's own edits, patched in:  listening at once, from the source as loaded
+  const patch = content && new SitePatch({ main: () => content.querySelector<HTMLElement>(PAGE_MAIN) ?? undefined })
+  patch?.start()
+  const router = content && new SiteRouter({ siteRoot: SITE_ROOT, content, patch })
   router?.followPage()
   // the swaps' landing, for the first page:  saved folds before the sections draw;  the hash once the root is ready
   router?.land(new URL(location.href), { isFirst: true })

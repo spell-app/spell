@@ -389,8 +389,8 @@ export type MessageDismissDetail = {
 ////////////////
 
 /**
- * Inherited tokens a `<ui-breadcrumb>` sets INLINE on its root,
- * which every `<ui-breadcrumb-section>` draws as its leading divider.  See "Dividers" in `UIBreadcrumb.css`.
+ * Inherited tokens a `<ui-breadcrumbs>` sets INLINE on its root,
+ * which every `<ui-breadcrumb>` draws as its leading divider.  See "Dividers" in `UIBreadcrumbs.css`.
  * - `text` -- a CSS STRING (`"›"`), from `divider`;  quote and escape it as CSS (`\"`, `\\`, `\A `), not JSON
  * - `icon` -- an `<image>`, `url("data:image/svg+xml,...")` of the `divider-icon` SVG;
  *   painted as a mask in `currentColor`
@@ -1734,9 +1734,11 @@ export const SourceBodyAttributes = [
       "`load()` fetches it now, `reload()` again."
   },
   {
-    name: "select",
+    name: "selector",
     kind: "string",
-    description: "With `source`:  a CSS selector;  only its first match in the file becomes the content."
+    replaces: ["select"],
+    description:
+      "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
   }
 ] as const
 

@@ -26,6 +26,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "collapsible",
       "open",
       "source",
+      "selector",
       "select"
     ]
   },
@@ -64,13 +65,13 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["unit", "align", "centered", "test"]
   },
   "ui-author": { folder: "ui-parts", attributes: ["link", "href", "target"] },
-  "ui-avatar": { folder: "ui-parts", attributes: ["src", "alt"] },
-  "ui-breadcrumb": {
-    folder: "ui-breadcrumb",
+  "ui-avatar": { folder: "ui-parts", attributes: ["src", "tooltip", "alt"] },
+  "ui-breadcrumb": { folder: "ui-breadcrumbs", attributes: ["selected", "active", "link", "href", "target"] },
+  "ui-breadcrumbs": {
+    folder: "ui-breadcrumbs",
     skeleton: { parts: [{ shape: "line", length: "medium" }] },
     attributes: ["size", "inverted", "divider", "divider-icon"]
   },
-  "ui-breadcrumb-section": { folder: "ui-breadcrumb", attributes: ["selected", "active", "link", "href", "target"] },
   "ui-button": {
     folder: "ui-button",
     skeleton: { display: "inline", width: "6em", height: "2.5em" },
@@ -720,7 +721,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-include": {
     folder: "ui-include",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["source", "load", "select", "page-styles"]
+    attributes: ["source", "load", "selector", "select", "page-styles"]
   },
   "ui-input": {
     folder: "ui-input",
@@ -1053,6 +1054,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "loading",
       "disabled",
       "source",
+      "selector",
       "select"
     ]
   },
@@ -1145,6 +1147,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "schema",
       "value",
       "source",
+      "selector",
       "select",
       "readonly",
       "output",
@@ -1197,6 +1200,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-property-editor",
     skeleton: { parts: [{ shape: "header" }, { shape: "paragraph" }] },
     attributes: [
+      "selector",
       "select",
       "readonly",
       "state",
@@ -1403,6 +1407,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "loading",
       "disabled",
       "source",
+      "selector",
       "select"
     ]
   },

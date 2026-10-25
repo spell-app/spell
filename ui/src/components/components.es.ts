@@ -24,8 +24,8 @@
 import { Vocabulary, type Dictionary } from "spell-ui/vocabulary"
 import { accordionEs } from "spell-ui/components/ui-accordion/UIAccordion.es"
 import { adEs } from "spell-ui/components/ui-ad/UIAd.es"
-import { breadcrumbEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.es"
-import { breadcrumbSectionEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection.es"
+import { breadcrumbsEs } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.es"
+import { breadcrumbEs } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb.es"
 import { buttonEs } from "spell-ui/components/ui-button/UIButton.es"
 import { actionEs } from "spell-ui/components/ui-action/UIAction.es"
 import { buttonsEs } from "spell-ui/components/ui-button/UIButtons.es"
@@ -145,6 +145,7 @@ export const sharedEs = {
     open: "abierto",
     source: "fuente",
     select: "seleccionar",
+    selector: "selector",
     centered: "centrado",
     size: "tamano",
     active: "activo",
@@ -636,8 +637,8 @@ export const sharedEs = {
 export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   accordionEs,
   adEs,
+  breadcrumbsEs,
   breadcrumbEs,
-  breadcrumbSectionEs,
   buttonEs,
   buttonsEs,
   orEs,

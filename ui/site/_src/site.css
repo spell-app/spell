@@ -907,7 +907,7 @@
    * - Owen, 2026-10-23:  "Uneven amount of space above and below the breadcrumbs here, bottom looks good"
    * - measured:  18.9px over the capitals, 18px under the baseline
    */
-  ui-docs-example:has(> ui-breadcrumb) {
+  ui-docs-example:has(> ui-breadcrumbs) {
     --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
