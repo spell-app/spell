@@ -86,6 +86,7 @@ export const OVERNIGHT = "overnight"
 /** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
 export const FAILED = "failed"
 export const HANDLED = "handled"
+export const LIMIT = "limit"
 export const REVIEW = "review"
 export const DETAILS = "details"
 export const LABEL = "label"
@@ -160,8 +161,16 @@ export type ChipMark = {
   label?: ReviewButtonSpec["label"] | "boxSkip" | { pick: string }
 }
 
-/** A todo's id:  `t3`. */
-export const TODO_ID = /^t\d+$/i
+/**
+ * A caveat's id:  `c3` (epic `epic-engine` P32).  One without `limit` is work still to do, a TODO:  the todo's
+ * buttons (`isTodo()`).
+ */
+export const CAVEAT_ID = /^c\d+$/i
+
+/** Is item `id` (`limit`:  its `limit`) work still to do:  a caveat that's no limit (epic `epic-engine` P32)? */
+export function isTodo(id: string | undefined, limit: boolean | undefined): boolean {
+  return CAVEAT_ID.test(id ?? "") && !limit
+}
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
 export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot"]

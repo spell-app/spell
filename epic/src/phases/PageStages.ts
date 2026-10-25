@@ -23,8 +23,8 @@ export class PageStages {
    * - the Overview (`<epic-overview>`) always shows, and its sub-sections with it
    */
   static readonly SHOWN: Readonly<Record<PlanningStage, readonly string[]>> = {
-    overview: ["questions", "todos"],
-    phases: ["phases", "questions", "todos"]
+    overview: ["questions", "caveats"],
+    phases: ["phases", "questions", "caveats"]
   }
 
   /** Is `value` one of the stages? */

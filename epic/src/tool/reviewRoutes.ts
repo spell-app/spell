@@ -24,7 +24,7 @@
  *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
  * - `POST /api/epics/review/shot` `{ page, id, png }` -- Owen's screenshot of test `id` failing, pasted or dropped in
  *   the test run (epic `epic-engine` P4):  `png` a PNG data URL, at most 8 MB (`MAX_SHOT`, else 413)
- *   - written beside the page, `tests/v3-20261019-1432.png` (`TestShots.saveShot()`), never over a file
+ *   - written beside the page, `tests/t3-20261019-1432.png` (`TestShots.saveShot()`), never over a file
  *   - answers `{ shot }`, that path:  the failure's mark carries it
  *   - only a test's id (400);  its own body limit, since a screenshot is far bigger than a note
  * - `POST /api/epics/review/new` `{ page, id?, entry }` -- a NEW todo or question asked for from the page

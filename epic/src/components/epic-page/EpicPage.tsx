@@ -1201,7 +1201,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     E.afterSolidUpdate(() => window.scrollTo({ top: 0, behavior: "instant" }))
   }
 
-  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#v3` off the address. */
+  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#t3` off the address. */
   @E.on(TEST_DONE, { target: "renderRoot" })
   protected onTestDone(event: Event) {
     event.stopPropagation()
@@ -1221,7 +1221,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return value === TEST_ALL || query.has(ALL_QUERY) ? TEST_ALL : "1"
   }
 
-  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#v3`), replacing it. */
+  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#t3`), replacing it. */
   private static markTestQuery(value: string | undefined) {
     const url = new URL(location.href)
     if (value) url.searchParams.set(TEST_QUERY, value)

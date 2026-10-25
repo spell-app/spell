@@ -1894,6 +1894,11 @@
           "description": "Work on it is under way."
         },
         {
+          "name": "limit",
+          "kind": "boolean",
+          "description": "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered for the next phase;  a caveat without it is work still to do (a todo, before P32)."
+        },
+        {
           "name": "bedtime",
           "kind": "boolean",
           "description": "Changed during a `/bedtime` run, until reviewed (it no longer colours the chip)."
@@ -2277,8 +2282,8 @@
         },
         {
           "key": "todo",
-          "text": "Make Todo",
-          "description": "Review button:  its name."
+          "text": "Make Caveat",
+          "description": "Review button:  its name (a todo, before epic `epic-engine` P32)."
         },
         {
           "key": "revisit",
@@ -3720,7 +3725,7 @@
         },
         {
           "key": "stageOverviewTip",
-          "text": "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+          "text": "Agreeing the Overview:  only it, the questions and caveats show until Accept Overview",
           "description": "The step label's tooltip, Overview stage."
         },
         {
@@ -4828,7 +4833,6 @@
             "questions",
             "judgements",
             "caveats",
-            "todos",
             "issues",
             "tests",
             "log",
@@ -5055,10 +5059,6 @@
           "text": "Caveats"
         },
         {
-          "key": "todosTitle",
-          "text": "Todos"
-        },
-        {
           "key": "issuesTitle",
           "text": "Issues"
         },
@@ -5117,8 +5117,8 @@
         },
         {
           "key": "newTodo",
-          "text": "Todo",
-          "description": "Kind:  a todo."
+          "text": "Caveat",
+          "description": "Kind:  a caveat, work still to do (a todo, before epic `epic-engine` P32)."
         },
         {
           "key": "newQuestion",

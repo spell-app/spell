@@ -1,6 +1,6 @@
 ---
 name: epic
-description: Run a planning session against a live epic page, `epics/<name>/<name>.plan.html`, in its own worktree. Use for `/epic <name> [what to plan]` (name alone:  the plan comes in the next prompt), or when Owen says "make this a plan doc" / "turn this into a plan doc" about the work in the current session.  `/epic review [<name>]`:  open an epic page in the side bar's Review tab, where Owen marks items on the page, and listen:  act on his marks (approvals, picks, todos), write details and replies in the background, talk revisits over ("review the seo epic", "go through unified-server's caveats").  `/epic resume [<name>]`:  pick an epic back up in a new session, in the right worktree and window, where its epic page says it stopped ("resume the seo epic", "carry on with windows-and-review").  `/epic future <name> [idea]`:  write an idea down as a FUTURE epic, not planned yet:  a stub epic page and a review page of its high-level open questions, answered in the Review tab;  no worktree ("save this as a future epic", "an epic for later").  `/epic phase [ids] [name]`:  add a phase to this session's epic, from its items (`/epic phase J1 J5, t3`) or from scratch;  `/epic start <P1 | ids>`:  work a phase, or a block of its items, now.  `/epic request <epic> [<rN>]`:  take up a request Owen sent from another session (`/send`), into a phase.  `/epic done`:  the same as `/isolate done`.
+description: Run a planning session against a live epic page, `epics/<name>/<name>.plan.html`, in its own worktree. Use for `/epic <name> [what to plan]` (name alone:  the plan comes in the next prompt), or when Owen says "make this a plan doc" / "turn this into a plan doc" about the work in the current session.  `/epic review [<name>]`:  open an epic page in the side bar's Review tab, where Owen marks items on the page, and listen:  act on his marks (approvals, picks, caveats to make), write details and replies in the background, talk revisits over ("review the seo epic", "go through unified-server's caveats").  `/epic resume [<name>]`:  pick an epic back up in a new session, in the right worktree and window, where its epic page says it stopped ("resume the seo epic", "carry on with windows-and-review").  `/epic future <name> [idea]`:  write an idea down as a FUTURE epic, not planned yet:  a stub epic page and a review page of its high-level open questions, answered in the Review tab;  no worktree ("save this as a future epic", "an epic for later").  `/epic phase [ids] [name]`:  add a phase to this session's epic, from its items (`/epic phase J1 J5, c3`) or from scratch;  `/epic start <P1 | ids>`:  work a phase, or a block of its items, now.  `/epic request <epic> [<rN>]`:  take up a request Owen sent from another session (`/send`), into a phase.  `/epic done`:  the same as `/isolate done`.
 argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | color <look>
 ---
 
@@ -293,7 +293,7 @@ Staying in this window (step 0):  skip steps 4 and 6.
         - `epic pages fuss --branch` and the repo's README checker last:  their misses fixed, or listed for Owen
    3. Overview:  the total estimate, then numbered sections (structure, code, flows):
       what will become guides
-   4. Caveats, issues, todos, decisions (what + why), open questions (the doc's ids:  `Q1` ...)
+   4. Caveats (work still to do, and limits), issues, decisions (what + why), open questions (the doc's ids:  `Q1` ...)
 4. Ask the open questions with AskUserQuestion (labels matching the doc's) before ExitPlanMode.
 
 ## 4. Fill the doc (right after ExitPlanMode is approved)
@@ -327,6 +327,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - The goal:  the details, one bullet per outcome, in Owen's terms.
   - The estimate becomes the title's badge, and the Overview's total (`<epic-overview estimate>`) follows by itself.
 - Per item:  `epic add <name>#D|#C|#I|#T|#Q "title" [--details "<p>...</p>"]`.
+  - `#C`:  a caveat, work still to do;  `#C ... --limit`:  a limit to know about, not work (epic `epic-engine` P32).
+  - `#T`:  a test ("6. Each phase", below;  `V` before P32, still read).
 - Questions answered in "3. Plan", the agents one included:  `decide <name>#Q<n> "..."`.
 - Hand-write the summary, `<epic-summary>`:  two sentences.
 - Bring the Overview (written in "3. Plan") in line with the approved plan,
@@ -383,7 +385,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - Written so his TEST RUN can step him through it on the page, one at a time (epic `epic-engine` P4):
 
        ```text
-       add <name>#V "<what it checks>" --step "<exactly what to do>" --should "<what should happen>"
+       add <name>#T "<what it checks>" --step "<exactly what to do>" --should "<what should happen>"
            [--example <screenshot.png> | "a line"] [--if-not "<what to tell Claude>"]
        ```
 
@@ -400,7 +402,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
          - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
          - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
-       - `details <name>#V3 --step ... --should ...` rewrites an older test in these fields
+       - `details <name>#T3 --step ... --should ...` rewrites an older test in these fields
      - He answers it in the run (passed, failed, skip, not now);  `inbox apply` closes it (7.3).
        Told in chat instead:  `close` it once he says it passed.
    - Fixed or done:  `close <name>#<id>`.
@@ -492,7 +494,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/epic done`:  the worktree, the window and the session stay, for the next request.
-     - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
+     - In bedtime mode, nothing merges:  `add <name>#C "merge P<n>"`, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
 6. Reply:  a short bulleted list (done, issues, caveats, next), and the "complete.  Next is" line (see the top).
@@ -500,7 +502,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      Options, most useful first:
      - "Start P<N+1> · <Name> (Recommended)"
      - the top open issue(s):  "Fix I<n>:  <title>"
-     - a caveat or todo worth acting on now
+     - a caveat worth acting on now
      - "Stop here"
    - Questions the user must answer also go in the doc (`add <name>#Q`).
    - Once answered:  `decide <name>#Q3 "what was decided"`.
@@ -578,9 +580,10 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
 ## 7. Review:  `/epic review [<name>]`
 
 Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he marks items.
-- Each item's buttons:  one group, Approve, Revisit, Make Todo;
+- Each item's buttons:  one group, Approve, Revisit, Make Caveat;
   then Do Now apart, the wand, for Add Details or a revisit now.
-- A TODO's instead:  the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
+- A caveat that's WORK (no `limit`;  a todo, before epic `epic-engine` P32) has these instead:
+  the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
 - Every other note box:  Revisit Later;  the x, "skip this" (`skip`:  nothing to do).
   `inbox apply` applies it as reviewed:  the note kept, the status left as it was.
@@ -642,7 +645,7 @@ epic items <name> --json                   where reviews stand;  sections, items
 epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
-epic inbox apply <name> [ids]              approve / pick / todo marks into the doc;  prints what's left
+epic inbox apply <name> [ids]              approve / pick / Make Caveat marks into the doc;  prints what's left
 epic inbox working <name>#<id> on|off      the page's spinner on an item
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
@@ -667,7 +670,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
   - more:  the next 2, then "More" (the next names), until 4 or fewer
   - any other:  typed in Other
 - (The Review tab's own start page, "What would you like to review?", will replace this:
-  todo T1 of `review-review`.)
+  `review-review`'s todo T1, a caveat since epic `epic-engine` P32.)
 
 ### 7.2 Start
 
@@ -687,7 +690,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    Do Now (an item's wand) starts at once (click again to call one off);
-   a todo's plane queues it for the next phase, its x drops it;
+   a caveat's plane queues it for the next phase, its x drops it;
    a note box's x skips it (nothing to do);
    the header's paper plane sends the rest.  I'm listening."
    - Then the doc's link pair.
@@ -701,7 +704,7 @@ Every card you finish says what REALLY happened
 (Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything"):
 - `status ... done` ONLY for work done:  an answer or reply written, details added, code changed, a phase built.
 - `status ... noted "<what was recorded;  what happens next>"`, when all you did was RECORD his choice
-  ("B it is";  a todo made;  "do it next phase").
+  ("B it is";  a caveat made;  "do it next phase").
   - E.g. `"Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build"`.
   - An underway card turns noted.
 - Called off:  `done "Called off on the page:  nothing written."` stays (it says what happened).
@@ -712,8 +715,8 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
 - solid:  done
 - Leave work you queued `queued` until it's built, so his chip stays outlined.
 
-A revisit note that says just `do it` (now or soon) means:  DO it, no question back -- the call as written, the todo
-as asked.  Revisit puts it in a judgement call's or todo's empty note box for him (Owen, 2026-10-19:  "I generally
+A revisit note that says just `do it` (now or soon) means:  DO it, no question back -- the call as written, the caveat
+as asked.  Revisit puts it in a judgement call's or caveat's empty note box for him (Owen, 2026-10-19:  "I generally
 want you to just do it").
 
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
@@ -755,27 +758,27 @@ want you to just do it").
      - Then `epic inbox done <name>#<id>`.
    - Up to 5 agents at once (root rules);  more:  the rest after.
 3. SENT marks:  `epic inbox apply <name>`.
-   - Approvals, picks and todos land in the doc;  it prints each.
+   - Approvals, picks and caveats made or queued land in the doc;  it prints each.
    - TEST RESULTS from Owen's test run (epic `epic-engine` P4):  `wait` prints them under
      "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his COMMENT and his
      screenshot's path.  `apply` applies them all:
      - passed:  the test closed;  skip:  canceled;  not now:  deferred, last in his next run
-     - failed:  a NEW issue, "V3 failed:  <title>", holding his note and screenshot, linked both ways;
+     - failed:  a NEW issue, "T3 failed:  <title>", holding his note and screenshot, linked both ways;
        the test stays open, marked failed
-     - then `apply` lists the failures, `V3 -> I12`:  tell Owen ONE line per failure, with the new issue's link
-       (`epic pages link <doc> --hash i12 --review`), e.g. "V3 failed:  the pill stayed grey -> I12";  the passes,
+     - then `apply` lists the failures, `T3 -> I12`:  tell Owen ONE line per failure, with the new issue's link
+       (`epic pages link <doc> --hash i12 --review`), e.g. "T3 failed:  the pill stayed grey -> I12";  the passes,
        skips and not-nows in one line of counts
      - fix the issues as any issue:  don't reopen the test by hand;  his next run tries it again
      - his COMMENT, with ANY result, lands on the test as his reply (`<epic-reply from="Owen">`;  a skip's in its
        cancel line too).  READ EVERY ONE:  a passed test with a comment may still need work (Owen, 2026-10-19:  "it
        did part of what you asked, I want to explain how").  A comment that says something is missing or wrong:
-       `epic add <name>#I "<what>" --calm --details "<p>From <a href=\"#v3\">V3</a>'s comment:  ...</p>"`, the
+       `epic add <name>#I "<what>" --calm --details "<p>From <a href=\"#t3\">T3</a>'s comment:  ...</p>"`, the
        issue linking the test
    - A pick works on ANY item's cards, a reply's too (I8 of `epic-components`):
      a question is answered with it, any other item approved with it.
-   - `apply` itself gives each pick, todo and queued todo its outlined NOTED card;  an approval gets none (Q19):
+   - `apply` itself gives each pick, caveat made and caveat queued its outlined NOTED card;  an approval gets none (Q19):
      - "Chose B · ...:  recorded ...;  waiting for ..."
-     - "Made todo T23 ..."
+     - "Made caveat C23 ..."
      - "Queued for P10 · ..."
    - Then each "to talk over" (revisit soon), one at a time:
      - `status ... underway "<reading>"` as you take it up.
@@ -866,7 +869,7 @@ When Owen says he's done ("stop reviewing", "that's it"), or the session must st
 - stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
   - a session whose title or worktree names the epic keeps listening anyway, through its monitor (P18):  the next
     Send still reaches it, as a `📬` line
-- `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
+- `epic log <name> "Review:  <n> approved, <n> answered, <n> to caveats, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on him;  the link pair
 - the doc's changes:  nothing to commit, from any checkout.
   It's shared content, committed for you at the turn's end.
@@ -880,7 +883,7 @@ A SAGA PAGE (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15) is reviewed 
   epic items SAGA:/epics --json
   epic inbox watch SAGA:/epics
   epic inbox wait SAGA:/epics
-  epic add SAGA:/epics#T "..."
+  epic add SAGA:/epics#C "..."
   ```
 
   - Owen may say "saga epics" or `/epic review saga epics`:  read it as `SAGA:/epics`.
@@ -1028,6 +1031,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 Owen adds a phase to the epic under way, from items it already has, or from scratch.
 - Epic `skillz` P4, Owen 2026-10-07:
   "`/epic phase J1 J5, t3` => take judgement 1+2 and todo #3 and make a new phase".
+  - A todo is a caveat since epic `epic-engine` P32:  today that's `/epic phase J1 J5, c3`.
 
 ```
 /epic phase                      a new phase with no antecedents:  the text on the lines after says what
@@ -1202,9 +1206,10 @@ file <name>#P<N> <rN>                               a request into phase N's Req
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
-add <name>#Q|#J|#C|#I|#T|#V|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (C3)
-add <name>#V "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a test, for Owen's test run
-test <name>[#V3] [--list [--json]]  /  test --all   Owen's test run in the Review tab (?test=1);  --list:  open tests
+add <name>#Q|#J|#C|#I|#T|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (C3)
+add <name>#C "title" [--limit]                      a caveat:  work still to do;  --limit:  a limit to know about
+add <name>#T "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a test, for Owen's test run
+test <name>[#T3] [--list [--json]]  /  test --all   Owen's test run in the Review tab (?test=1);  --list:  open tests
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option Owen settled in words, any item:  as his pick (latest set)
@@ -1222,7 +1227,7 @@ migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify
                                                     pages up to today's markup, every step of their kind, oldest
                                                     first, safe to run again;  alone:  every kind, every page;
                                                     --notify:  running epics told (TELL lines), idle ones migrated
-summary <name> [--json]                             phases, next phase, open questions/issues/caveats/todos
+summary <name> [--json]                             phases, next phase, open questions/issues/caveats/tests
 lint <name> [--no-browser]                          ids, links, phases, then the browser check
 open <name> --review                                show in the side bar's Review tab
 review <name>#<id> ["outcome"]                      mark reviewed today (outcome to the log)

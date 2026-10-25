@@ -44,7 +44,7 @@ const PLAN = `<!doctype html><title>x</title><body class="plan-doc"><epic-page e
 <epic-section id="judgements" kind="judgements"><epic-item id="j3" title="a" status="open"></epic-item></epic-section>
 <epic-section id="decisions" kind="questions"><epic-item id="q8" title="b" status="open"></epic-item></epic-section>
 <epic-section id="issues" kind="issues"><epic-item id="i2" title="c" status="open"></epic-item></epic-section>
-<epic-section id="tests" kind="tests"><epic-item id="v1" title="d" status="open"></epic-item></epic-section>
+<epic-section id="tests" kind="tests"><epic-item id="t1" title="d" status="open"></epic-item></epic-section>
 </epic-page>`
 
 /** an epic page in `<epic-*>` markup:  the summary, an Overview sub-section, a phase, an item */
@@ -61,7 +61,7 @@ const EPIC_PLAN = `<!doctype html><title>x</title><body class="plan-doc"><epic-p
  */
 const SAGA = `<!doctype html><title>x</title><body class="plan-doc"><epic-page kind="saga" saga="epics" title="Epic Tooling">
 <epic-overview id="overview"><epic-summary>Epics.</epic-summary><epic-section id="o1" kind="overview-part" title="Done so far"></epic-section></epic-overview>
-<epic-section id="todos" kind="todos"><epic-item id="t1" title="a todo" status="open"></epic-item></epic-section>
+<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="a todo" status="open"></epic-item></epic-section>
 </epic-page>`
 
 beforeAll(async () => {
@@ -137,11 +137,11 @@ test("a saga page:  marked and sent in its own inbox beside it;  a page under sa
   const marked = await post("mark", { page, id: "o1", mark: { action: "revisit", when: "soon", note: "more?" } })
   expect(marked.status).toBe(200)
   expect(written(PAGES.saga).marks.o1).toMatchObject({ action: "revisit", note: "more?" })
-  expect((await post("mark", { page, id: "t9", mark: { action: "approve" } })).status).toBe(400)
-  await post("draft", { page, id: "t1", action: "revisit", note: "x" })
+  expect((await post("mark", { page, id: "c9", mark: { action: "approve" } })).status).toBe(400)
+  await post("draft", { page, id: "c1", action: "revisit", note: "x" })
   expect((await post("send", { page })).status).toBe(200)
   expect(written(PAGES.saga).sent).toEqual(expect.any(String))
-  expect((await post("mark", { page: `/${PAGES.notSaga}`, id: "t1", mark: null })).status).toBe(403)
+  expect((await post("mark", { page: `/${PAGES.notSaga}`, id: "c1", mark: null })).status).toBe(403)
 })
 
 test("GET:  an empty inbox before any mark, and no file", async () => {
@@ -279,7 +279,7 @@ test("only epic pages:  403;  missing:  404;  not a path:  400", async () => {
 })
 
 test("unknown items and bad marks:  400, nothing written", async () => {
-  expect((await post("mark", { page: PLAN_URL, id: "t99", mark: { action: "approve" } })).status).toBe(400)
+  expect((await post("mark", { page: PLAN_URL, id: "c99", mark: { action: "approve" } })).status).toBe(400)
   // a section is no item (a phase is, since epic `airplane` P2)
   expect((await post("mark", { page: PLAN_URL, id: "phases", mark: { action: "approve" } })).status).toBe(400)
   expect((await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "nope" } })).status).toBe(400)
@@ -590,29 +590,29 @@ describe("a test run:  answers and screenshots", () => {
   beforeEach(() => rmSync(shots(), { recursive: true, force: true }))
 
   test("shot:  written beside the page in tests/, never over one;  the mark then carries it", async () => {
-    const first = await post("shot", { page: PLAN_URL, id: "V1", png: dataUrl(png()) })
+    const first = await post("shot", { page: PLAN_URL, id: "T1", png: dataUrl(png()) })
     expect(first.status).toBe(200)
-    expect(first.body.shot).toMatch(/^tests\/v1-\d{8}-\d{4}\.png$/)
+    expect(first.body.shot).toMatch(/^tests\/t1-\d{8}-\d{4}\.png$/)
     expect(readFileSync(join(root, "epics", "big", first.body.shot))).toEqual(png())
-    const second = await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png(80)) })
+    const second = await post("shot", { page: PLAN_URL, id: "t1", png: dataUrl(png(80)) })
     expect(second.body.shot).not.toBe(first.body.shot)
     expect(readFileSync(join(root, "epics", "big", first.body.shot))).toEqual(png())
     const mark = { action: "test", result: "failed", note: "grey", shot: first.body.shot }
-    const marked = await post("mark", { page: PLAN_URL, id: "v1", mark })
+    const marked = await post("mark", { page: PLAN_URL, id: "t1", mark })
     expect(marked.status).toBe(200)
-    expect(written(PAGES.plan).marks.v1).toMatchObject(mark)
+    expect(written(PAGES.plan).marks.t1).toMatchObject(mark)
   })
 
   test("shot:  only a PNG, only a test's, at most 8 MB;  the guard as every write", async () => {
-    expect((await post("shot", { page: PLAN_URL, id: "v1", png: "data:image/jpeg;base64,AAAA" })).status).toBe(400)
-    expect((await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(Buffer.from("not a png")) })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "t1", png: "data:image/jpeg;base64,AAAA" })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "t1", png: dataUrl(Buffer.from("not a png")) })).status).toBe(400)
     expect((await post("shot", { page: PLAN_URL, id: "j3", png: dataUrl(png()) })).status).toBe(400)
-    expect((await post("shot", { page: PLAN_URL, id: "v9", png: dataUrl(png()) })).status).toBe(400)
-    expect((await post("shot", { page: `/${PAGES.other}`, id: "v1", png: dataUrl(png()) })).status).toBe(403)
-    const big = await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png(8 * 1024 * 1024 + 1)) })
+    expect((await post("shot", { page: PLAN_URL, id: "t9", png: dataUrl(png()) })).status).toBe(400)
+    expect((await post("shot", { page: `/${PAGES.other}`, id: "t1", png: dataUrl(png()) })).status).toBe(403)
+    const big = await post("shot", { page: PLAN_URL, id: "t1", png: dataUrl(png(8 * 1024 * 1024 + 1)) })
     expect([big.status, big.body.error]).toEqual([413, "a screenshot is 8 MB at most"])
     expect(
-      (await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png()) }, { "x-server-token": "nope" })).status
+      (await post("shot", { page: PLAN_URL, id: "t1", png: dataUrl(png()) }, { "x-server-token": "nope" })).status
     ).toBe(403)
     expect(existsSync(shots())).toBe(false)
   })
@@ -621,8 +621,8 @@ describe("a test run:  answers and screenshots", () => {
     expect((await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "test", result: "passed" } })).status).toBe(
       400
     )
-    expect((await post("mark", { page: PLAN_URL, id: "v1", mark: { action: "test", result: "ok" } })).status).toBe(400)
-    expect((await post("mark", { page: PLAN_URL, id: "v1", mark: { action: "test", result: "notnow" } })).status).toBe(
+    expect((await post("mark", { page: PLAN_URL, id: "t1", mark: { action: "test", result: "ok" } })).status).toBe(400)
+    expect((await post("mark", { page: PLAN_URL, id: "t1", mark: { action: "test", result: "notnow" } })).status).toBe(
       200
     )
   })

@@ -190,7 +190,6 @@ export const SECTION_LOOKS = {
   questions: { icon: "file circle question", title: "questionsTitle" },
   judgements: { icon: "gavel", title: "judgementsTitle" },
   caveats: { icon: "triangle exclamation", title: "caveatsTitle" },
-  todos: { icon: "list check", title: "todosTitle" },
   issues: { icon: "bug", title: "issuesTitle" },
   tests: { icon: "flask", title: "testsTitle" },
   log: { icon: "clock rotate left", title: "logTitle" }
@@ -209,7 +208,7 @@ export const REPORT = "report"
 export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"])`
 
 /** The kinds that hold items:  an empty one says "none yet". */
-export const ITEM_KINDS = ["questions", "judgements", "caveats", "todos", "issues", "tests"] as const
+export const ITEM_KINDS = ["questions", "judgements", "caveats", "issues", "tests"] as const
 
 /** The Phases section's toggles:  which fields each shows, its icon, its texts, the custom property it sets. */
 export const PHASE_TOGGLES = [

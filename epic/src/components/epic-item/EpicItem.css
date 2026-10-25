@@ -449,8 +449,11 @@
     border-style: dashed;
   }
 
-  /* still wants a look:  a bolder title;  no longer relevant:  a quieter one */
-  .item:is(.attention, .replied, .progress, .open) .title {
+  /*
+   * still wants a look:  a bolder title;  no longer relevant:  a quieter one
+   * - a caveat that's only a LIMIT to know about (`limit`, epic `epic-engine` P32):  calmer, never bold
+   */
+  .item:is(.attention, .replied, .progress, .open):not(.limit) .title {
     font-weight: 600;
   }
   .item:is(.old, .handled) .title {

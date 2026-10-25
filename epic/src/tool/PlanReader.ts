@@ -145,10 +145,16 @@ export abstract class PlanReader {
     return this.bedtimeRun !== null
   }
 
-  /** Items of `kind` in its section, in order:  the elements whose id has the kind's letter (`q7`, never `d7`). */
+  /**
+   * Items of `kind` in its section, in order:  the elements whose id has the kind's letter (`q7`, never `d7`).
+   * - a `caveat` (a limit, `<epic-item limit>`) or a `todo` (work):  only those (epic `epic-engine` P32);  both are `c`
+   */
   itemsOf(kind: ItemKind): Element[] {
-    const pattern = new RegExp(`^${KINDS[kind].prefix}\\d+$`)
-    return this.sectionChildren(kind).filter((item) => pattern.test(item.id))
+    const spec: { prefix: string; limit?: boolean } = KINDS[kind]
+    const pattern = new RegExp(`^${spec.prefix}\\d+$`)
+    return this.sectionChildren(kind).filter(
+      (item) => pattern.test(item.id) && (spec.limit === undefined || item.hasAttribute("limit") === spec.limit)
+    )
   }
 
   /** Items of `kind`, in order:  `{ id, title, status }`. */

@@ -44,20 +44,21 @@ import {
   OVERNIGHT,
   FAILED,
   HANDLED,
+  LIMIT,
   REVIEW,
   STATE_TIP_KEYS,
   STATUS_SLOT,
   STATUS_STATES,
   THREAD_ATTRIBUTES,
   TITLE,
-  TODO_ID,
   TOGGLE,
   UNDER_LINE,
   UNFOLDED,
   type ChipMark,
   type EpicItemVocabulary,
   type ItemState,
-  type ReviewLabel
+  type ReviewLabel,
+  isTodo
 } from "./EpicItem.types"
 
 import collapseAllCSS from "./CollapseAll.css?inline"
@@ -200,7 +201,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * a todo's three (the plane, Revisit, the x:  Owen, 2026-10-09), else an item's four.
    * - declared before `chipMark`, which reads it (memos compute as they're made)
    */
-  readonly reviewButtons = createMemo(() => (TODO_ID.test(this.id ?? "") ? TODO_BUTTONS : REVIEW_BUTTONS))
+  readonly reviewButtons = createMemo(() => (isTodo(this.id, this.limit) ? TODO_BUTTONS : REVIEW_BUTTONS))
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
@@ -420,7 +421,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   ////////////////
 
   /**
-   * Words before the noun:  its state (`attention item`), `canceled`, `has-details`, `note-open`, `unfolded`.
+   * Words before the noun:  its state (`attention item`), `canceled`, `limit`, `has-details`, `note-open`, `unfolded`.
    * - NOTE: `unfolded`, not `open`:  `open` is a state (yellow) already.
    * - Of the statuses only `canceled` looks different (struck through), so only it is a word here.
    */
@@ -429,6 +430,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return [
       this.itemState(),
       canceled && CANCELED,
+      this.limit && LIMIT,
       this.hasDetails() && HAS_DETAILS,
       this.boxUnderLine() && NOTE_OPEN,
       this.isOpen() && UNFOLDED
@@ -685,7 +687,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       <epic-review
         of={this.id}
         shows={shows}
-        buttons={TODO_ID.test(this.id ?? "") ? "todo" : "item"}
+        buttons={isTodo(this.id, this.limit) ? "todo" : "item"}
         label={this.label()}
         tip={this.reviewTip()}
         under-line={shows === "note" && !this.hasDetails() ? "" : undefined}

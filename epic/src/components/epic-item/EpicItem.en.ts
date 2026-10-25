@@ -108,6 +108,13 @@ export const epicItemVocabulary = {
     { name: "work", kind: "string", description: "The queued work, in a few words (`Skip short sections`)." },
     { name: "working", kind: "boolean", description: "Work on it is under way." },
     {
+      name: "limit",
+      kind: "boolean",
+      description:
+        "A caveat that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16):  drawn calmer, and never offered " +
+        "for the next phase;  a caveat without it is work still to do (a todo, before P32)."
+    },
+    {
       name: "bedtime",
       kind: "boolean",
       description: "Changed during a `/bedtime` run, until reviewed (it no longer colours the chip)."

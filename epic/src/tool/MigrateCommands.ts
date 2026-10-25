@@ -4,7 +4,7 @@ import { join, relative, resolve } from "node:path"
 
 import { PlanDocError } from "./planDoc.types"
 
-import { Migrations, PAGE_KINDS, type PageKind } from "./migrations"
+import { ContentRelink, Migrations, PAGE_KINDS, type PageKind } from "./migrations"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 import { PlanDocFiles, type MigrateResult } from "./PlanDocFiles"
 
@@ -111,6 +111,8 @@ export class MigrateCommands {
     const only = step ? [step] : undefined
     const counts = new Map<string, number>()
     const tell: { epic: string; sessions: string[]; steps: string[] }[] = []
+    // what `caveats-and-tests` renumbered, by epic:  the links on other pages follow (`ContentRelink`)
+    const renumbered: Record<string, Record<string, string>> = {}
     let changed = 0
     let refused = 0
     const self = process.env.CLAUDE_CODE_SESSION_ID
@@ -128,12 +130,19 @@ export class MigrateCommands {
         refused++
         continue
       }
+      if (result.ran.includes(RENUMBERS) && !running) renumbered[name] = result.renames
       const steps = [...result.ran, ...(result.moves.length && !result.ran.includes(LINKS) ? [LINKS] : [])]
       for (const each of steps) counts.set(each, (counts.get(each) ?? 0) + 1)
       if (steps.length) changed++
       if (running && steps.length) tell.push({ epic: name, sessions, steps })
       this.owner.print(MigrateCommands.pageLine(name, steps, { dryRun, running }))
       for (const note of result.notes) this.owner.print(`  ${note}`)
+    }
+    if (Object.keys(renumbered).length) {
+      const relinked = ContentRelink.run(this.files.content, renumbered, { dryRun })
+      this.owner.print(
+        `links on other pages:  ${relinked.links} in ${relinked.files} file${relinked.files === 1 ? "" : "s"} ${dryRun ? "would follow" : "followed"} the renumbering`
+      )
     }
     const byStep = [...counts].map(([each, n]) => `${each} ${n}`).join(", ")
     const verb = dryRun ? "would change" : "changed"
@@ -236,6 +245,9 @@ export type SessionFinder = (epic: string) => Promise<{ name: string; sessionId:
 
 /** The step whose inbox-only fixes count as a change:  comments moved. */
 const LINKS = "links-agree"
+
+/** The step that renumbers items:  the links on other pages follow it (`ContentRelink`). */
+const RENUMBERS = "caveats-and-tests"
 
 /** An epic page's path:  `epics/<name>/<name>.plan.html` (or an older `<name>.html`);  `[1]` its name. */
 const PLAN_DOC = /(?:^|[\\/])epics[\\/]([^\\/]+)[\\/]\1(?:\.plan)?\.html$/

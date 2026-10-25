@@ -70,8 +70,8 @@ export const TEST_START = "epic-test-start"
 /** Owen left the run (Esc, Done testing):  `<epic-page>` shows its blocks again. */
 export const TEST_DONE = "epic-test-done"
 
-/** A test's id:  `v3`. */
-export const TEST_ID = /^v\d+$/i
+/** A test's id:  `t3` (`v3` before epic `epic-engine` P32). */
+export const TEST_ID = /^t\d+$/i
 
 /** The tests on a page:  its To test section's items. */
 export const TESTS_SELECTOR = 'epic-section[kind="tests"] epic-item'

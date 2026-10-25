@@ -23,7 +23,7 @@ export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test"] as const sat
  * - `section`:  the section it lands in
  */
 export const NEW_KIND_LOOKS = {
-  todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "todos" },
+  todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "caveats" },
   question: {
     icon: "circle question",
     label: "newQuestion",
@@ -63,7 +63,11 @@ export const NEW_CLOSED = "epic-new-closed"
 
 /** The kinds' names:  `<epic-new-item>`'s (its form's kind buttons), and `<epic-section>`'s (its waiting cards). */
 export const NEW_KIND_TEXTS = [
-  { key: "newTodo", text: "Todo", description: "Kind:  a todo." },
+  {
+    key: "newTodo",
+    text: "Caveat",
+    description: "Kind:  a caveat, work still to do (a todo, before epic `epic-engine` P32)."
+  },
   { key: "newQuestion", text: "Question", description: "Kind:  a question." },
   { key: "newIssue", text: "Issue", description: "Kind:  an issue." },
   { key: "newTest", text: "Test", description: "Kind:  a test, for Owen to try by hand." }
@@ -71,8 +75,8 @@ export const NEW_KIND_TEXTS = [
 
 /** The rest of `<epic-new-item>`'s texts. */
 export const NEW_ITEM_TEXTS = [
-  { key: "newButton", text: "New todo, question, issue or test", description: "The button's words without `adds`." },
-  { key: "addTodo", text: "New todo", description: "The Todos section's button, at its end." },
+  { key: "newButton", text: "New caveat, question, issue or test", description: "The button's words without `adds`." },
+  { key: "addTodo", text: "New caveat", description: "The Caveats section's button, at its end." },
   { key: "addQuestion", text: "New question", description: "The Questions section's button, at its end." },
   { key: "addIssue", text: "New issue", description: "The Issues section's button, at its end." },
   { key: "addTest", text: "New test", description: "The Tests section's button, at its end." },
@@ -92,7 +96,7 @@ export const NEW_ITEM_TEXTS = [
   { key: "newAdd", text: "Add", description: "The form's button:  a new one." },
   { key: "newSave", text: "Save", description: "The form's button:  one being changed." },
   { key: "newCancel", text: "Cancel", description: "The form's button:  closes it, nothing saved." },
-  { key: "newTodoTip", text: "Make it a todo", description: "Kind button:  its tooltip." },
+  { key: "newTodoTip", text: "Make it a caveat:  work still to do", description: "Kind button:  its tooltip." },
   { key: "newQuestionTip", text: "Make it a question", description: "Kind button:  its tooltip." },
   { key: "newIssueTip", text: "Make it an issue", description: "Kind button:  its tooltip." },
   { key: "newTestTip", text: "Make it a test", description: "Kind button:  its tooltip." },

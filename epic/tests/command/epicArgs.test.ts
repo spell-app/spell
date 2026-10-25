@@ -85,7 +85,7 @@ describe("planDocArgs()", () => {
     expect(refused("update", ["seo", "J3", "underway", "x"])).toThrow('epic update seo#J3 underway "<reading>"')
     expect(refused("phase", ["seo", "3", "done"])).toThrow("epic phase seo#P3 ...")
     expect(refused("updated", ["seo", "Epic Migrate", "<p>x</p>"])).toThrow('epic updated "seo#Epic Migrate" ...')
-    expect(refused("add", ["seo", "todo", "T"])).toThrow("epic add seo#T ...")
+    expect(refused("add", ["seo", "todo", "T"])).toThrow("epic add seo#C ...")
     expect(refused("commit", ["seo", "abc", "s", "--phase", "3"])).toThrow("epic commit seo#P3 <sha>")
     expect(refused("commit", ["seo", "abc", "s", "--item", "J3"])).toThrow("epic commit seo#J3 <sha>")
     expect(refused("update", ["seo", "P3", "--goal", "g"])).toThrow("epic update seo#P3 --<field> <value> ...")

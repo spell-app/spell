@@ -638,6 +638,7 @@ export class PlanDoc extends PlanReader {
       status: spec.live,
       phase: this.activePhase,
       answered: kind === "decision",
+      ...((spec as { limit?: boolean }).limit && { limit: true }),
       ...(this.bedtime && { overnight: true }),
       ...(calm && { calm: true })
     }
@@ -651,13 +652,16 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its kind, `v4`.
+   * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its LETTER, `t4`.
+   * - a caveat and a todo share theirs (`c`, epic `epic-engine` P32)
    * - throws on a kind not in `KINDS`
    */
   nextId(kind: string): string {
     if (!isItemKind(kind)) throw new PlanDocError(`kind must be ${Object.keys(KINDS).join(" / ")}, not "${kind}"`)
-    const spec = KINDS[kind]
-    return `${spec.prefix}${Math.max(0, ...this.items(kind).map((item) => PlanItem.idNumber(item.id))) + 1}`
+    const { prefix } = KINDS[kind]
+    const pattern = new RegExp(`^${prefix}\\d+$`)
+    const ids = this.sectionChildren(kind).filter((item) => pattern.test(item.id))
+    return `${prefix}${Math.max(0, ...ids.map((item) => PlanItem.idNumber(item.id))) + 1}`
   }
 
   /**
@@ -990,7 +994,7 @@ export class PlanDoc extends PlanReader {
     const item = this.findItem(mark.id)
     if (!item) return { applied: false, gone: true, left: "no such item:  mark dropped" }
     // skipping a todo IS dropping it (its own note box's x is Drop It;  a skip comes from a page drawn before)
-    const todoSkip = mark.action === "skip" && PlanItem.kindOf(item.id) === "todo"
+    const todoSkip = mark.action === "skip" && PlanItem.kindOfItem(item) === "todo"
     const applied = todoSkip ? { ...mark, action: "drop" as const } : mark
     const result = this.applyAction(item, applied)
     if (result.applied) {
@@ -1014,7 +1018,7 @@ export class PlanDoc extends PlanReader {
 
   /** `applyMark()`'s work on `item`, the log line aside. */
   applyAction(item: Element, { action, pick, choices, when, note, at, result, shot }: PlanMark): MarkResult {
-    const kind = PlanItem.kindOf(item.id)
+    const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
       case "approve": {
@@ -1033,7 +1037,7 @@ export class PlanDoc extends PlanReader {
         const todo = this.followUp(from, note)
         this.review(item.id)
         this.noteStatus(item.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
@@ -1067,7 +1071,7 @@ export class PlanDoc extends PlanReader {
   /**
    * A test's answer from Owen's TEST RUN on the page (epic `epic-engine` P4):  `result`, maybe his `note` and `shot`.
    * - `passed`:  closed (done), reviewed;  a `failed` from an earlier run goes
-   * - `failed`:  a NEW issue, "V3 failed:  <test title>", linking the test, with his note and his screenshot
+   * - `failed`:  a NEW issue, "T3 failed:  <test title>", linking the test, with his note and his screenshot
    *   (an `<img>`, its path from the epic page's folder, as the page's own) (`fileFailure()`)
    *   - the test stays open (a closed one reopens), reviewed, `failed="i42"`,
    *     and a Noted card linking the issue:  linked both ways
@@ -1122,7 +1126,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * File test `item`'s failure as a new issue, "V3 failed:  <test title>";  its id (`i42`).
+   * File test `item`'s failure as a new issue, "T3 failed:  <test title>";  its id (`i42`).
    * - its details:  the run and a link back to the test, Owen's note in his words, his screenshot (`shot`, from the
    *   epic page's folder:  the page's own relative path, so it shows in the page and its part alike)
    */
@@ -2020,7 +2024,7 @@ export class PlanDoc extends PlanReader {
       case "todo": {
         const todo = this.followUp(part, note)
         this.noteStatus(part.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
@@ -2226,9 +2230,11 @@ export class PlanDoc extends PlanReader {
     const details = `${promptHTML(note)}${about}`
     const id = this.addItem(kind, title, { details: details || undefined })
     const written = at ? `, written ${PlanTime.clockTime(new Date(at))}` : ""
-    this.noteStatus(id, `Made from the page:  Owen's new ${kind}${written}.`)
-    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${kind} (${String(key).toUpperCase()})`)
-    return { applied: true, did: `made ${kind} ${id.toUpperCase()}:  ${title}` }
+    // a todo is a caveat now, work still to do (epic `epic-engine` P32)
+    const word = kind === "todo" ? "caveat" : kind
+    this.noteStatus(id, `Made from the page:  Owen's new ${word}${written}.`)
+    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${word} (${String(key).toUpperCase()})`)
+    return { applied: true, did: `made ${word} ${id.toUpperCase()}:  ${title}` }
   }
 
   /** A link to `id` (an item, a phase, an Overview sub-section, `summary`) as HTML;  its id alone when it's gone. */
@@ -2290,7 +2296,7 @@ function textNodes(node: Node): Node[] {
 /** `PlanItem.asProse()`'s option for text as a reader sees it:  every element's heading, at any depth. */
 const PLAIN = { plain: true }
 
-/** Who a test answer's log line names (epic `epic-engine` P4):  `V3 passed (Owen's run)`. */
+/** Who a test answer's log line names (epic `epic-engine` P4):  `T3 passed (Owen's run)`. */
 const OWENS_RUN = "Owen's run"
 
 /** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
@@ -2337,9 +2343,9 @@ type ReviewPart = {
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 
-/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
+/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made caveat C23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
-  return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
+  return `Made caveat <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
 }
 
 /**

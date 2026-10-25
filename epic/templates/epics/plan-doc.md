@@ -107,7 +107,7 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
 
 The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got, so which sections show.
 
-- `overview`: only the Overview, Questions and Todos; `phases`: the Phases too; `building`, or none: everything. A
+- `overview`: only the Overview, Questions and Caveats; `phases`: the Phases too; `building`, or none: everything. A
   hidden section is still in the file: it's only a view
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand
@@ -132,11 +132,10 @@ written:
 | 2. Phases          | `#phases`     | progress bar, then one block per phase (`#p1` ...): its estimate as the title's badge; Symptom, Changes, the details (Goal), Done (once done), Commits; Files and Verify hidden until the folder / flask toggle on the Phases title is pressed                                                                                                            |
 | 3. Questions       | `#decisions`  | open questions first (waiting on the user; each also asked with AskUserQuestion), then the answered ones, in id order: settled unless new facts arrive. A decision IS an answered question (D13 of `review-review`, 2026-10-04): `decide` writes the answer INTO the question; `add <name>#D` makes a question born answered                              |
 | 4. Judgement calls | `#judgements` | choices Claude made WITHOUT the user (a `/bedtime` run, an agent mid-phase): title the choice, details "chose X over Y because Z" + the options; open until the user reviews it, `close` = accepted, disagreement becomes a question. Its phase's "To review" line lists it while it's open and not reviewed (never hand-write a "Judgement calls:" line) |
-| 5. Caveats         | `#caveats`    | limits and risks we accept                                                                                                                                                                                                                                                                                                                                |
-| 6. Todos           | `#todos`      | later work that isn't a caveat or an issue                                                                                                                                                                                                                                                                                                                |
-| 7. Issues          | `#issues`     | problems found, open until fixed                                                                                                                                                                                                                                                                                                                          |
-| 8. To test         | `#tests`      | what Owen checks by hand before merging, each a Step (what to do) and what it Should do (`add <name>#V --step ... --should ...`, "A test" below); Owen's test run answers them; `close` one by hand once it passes                                                                                                                                        |
-| 9. Log             | `#log`        | one-liners of plan changes, stamped with local date and time                                                                                                                                                                                                                                                                                              |
+| 5. Caveats         | `#caveats`    | loose ends: work still to do (the todos, before epic `epic-engine` P32), and limits and risks we accept (`limit`)                                                                                                                                                                                                                                         |
+| 6. Issues          | `#issues`     | problems found, open until fixed                                                                                                                                                                                                                                                                                                                          |
+| 7. To test         | `#tests`      | what Owen checks by hand before merging, each a Step (what to do) and what it Should do (`add <name>#T --step ... --should ...`, "A test" below); Owen's test run answers them; `close` one by hand once it passes                                                                                                                                        |
+| 8. Log             | `#log`        | one-liners of plan changes, stamped with local date and time                                                                                                                                                                                                                                                                                              |
 
 - The elements draw each section's title, icon, rule, fold and `open/all` count: write only its contents.
 - Everything starts folded; the reader opens what they want, and the page remembers. A link to any id inside
@@ -157,9 +156,9 @@ A SAGA PAGE is a saga's page, built of the same elements as an epic page (epic `
   - 1. Overview:  the saga's purpose as its summary, then "Done so far" (`#o1`) and "Ideas not done yet" (`#o2`)
   - 2. Epics (`#epics`):  a card per epic naming the saga, grouped as on the Epics page;  drawn from the page
     server (`<epic-cards>`), never written by hand
-  - 3. Questions, 4. Todos, 5. Log:  as an epic page's
+  - 3. Questions, 4. Log:  as an epic page's
 - Made once by `epic saga page <id>` (`--force` remakes it);  then every verb edits it, named by its short address:
-  `epic add SAGA:/epics#T "..."`, `epic close SAGA:/epics#T1`, `epic lint SAGA:/epics`.
+  `epic add SAGA:/epics#Q "..."`, `epic close SAGA:/epics#Q1`, `epic lint SAGA:/epics`.
 - Owen comments on it as on an epic page:  a note box on each Overview part and on the summary, the bullhorn on any
   block, Send in the header.  The marks and comments wait in its own inbox, `<id>.inbox.json5` beside it.
   - The session that takes them runs `/epic review SAGA:/<id>` (the epic skill, "Review").
@@ -167,13 +166,17 @@ A SAGA PAGE is a saga's page, built of the same elements as an epic page (epic `
 - Filling its Overview, the rules above apply:  a plain lead sentence, then bullets;  each epic linked to its epic
   page, with what it built and whether it's done or merged;  written for Owen coming back cold.
   - "Done so far":  a line per epic, from its summary and changelog entry.
-  - "Ideas not done yet":  future epics, open todos, review pages, and the parked goals' topics (`goals/spell/`).
+  - "Ideas not done yet":  future epics, open caveats, review pages, and the parked goals' topics (`goals/spell/`).
 - The parked goal sets (`goals/`) are NOT saga pages:  read only, their story in the goals guide.
 
 ## Ids: short, so they're easy to say in chat
 
 - Items: `q1` questions (answered ones are the decisions), `j1` judgement calls, `c1` caveats, `i1` issues, `t1`
-  todos, `v1` tests ("verify": `t` is taken). Shown as `Q1`, `J1`, `C1` ...
+  tests. Shown as `Q1`, `J1`, `C1` ...
+  - a caveat is work still to do, or (`<epic-item limit>`) a limit to know about:  `add <name>#C`, `--limit`
+  - before epic `epic-engine` P32:  `t1` todos and `v1` tests;  the migration `caveats-and-tests` made each todo a
+    caveat, numbered after the last one, and each `v` test a `t`, the same number.  Each page's log lists them:
+    `Caveats hold the todos now, tests are T:  T1 → C12, V1 → T1`
   - docs from before 2026-10-04 also had `d1` decisions; each lives on as the answer inside its question (old
     `#d7` links still land there, and `close d7` finds the question)
 - Phases: a STABLE id, made once from the name when the phase is added (`p-epic-migrate` for "Epic Migrate"), kept
@@ -238,7 +241,8 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
 - An item's status: `open`; `decided` (an answered question: a decision in force); `done` (closed, never
   removed: fixed, passed, accepted; NOT struck); `canceled` (made moot by another decision: closed like `done`,
   its title struck through; `reopen` undoes it).
-- A TEST (`#tests`, `add <name>#V`) is what Owen checks by hand, written so his TEST RUN can step him through it
+- A TEST (`#tests`, `add <name>#T`;  `#V` still works) is what Owen checks by hand, written so his TEST RUN can
+  step him through it
   (epic `epic-engine` P4):  its fields, in this order, each an `<epic-field label>`:
   - Step:  exactly what to do, short;  `--step`.  A page to open is an ACTION link, shown as a button in the run:
     `<a class="epic-test-action" href="...">Open the Epics page</a>` (an `epic pages link` URL)
@@ -256,9 +260,9 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   - Example, optional:  a screenshot Claude took (`--example shot.png`, copied to `tests/<id>.png` beside the page)
     and / or a line of text
   - If not, optional:  what to tell Claude;  `--if-not`
-  - e.g. `epic add seo#V "The sitemap lists every guide" --step "Open <a class=\"epic-test-action\"
+  - e.g. `epic add seo#T "The sitemap lists every guide" --step "Open <a class=\"epic-test-action\"
     href=\"/sitemap.xml\">the sitemap</a>" --should "Every guide is in it" --example sitemap.png`
-  - an older test has only prose:  the run shows it as the Step.  `details <name>#V3 --step ... --should ...`
+  - an older test has only prose:  the run shows it as the Step.  `details <name>#T3 --step ... --should ...`
     rewrites one in the fields, its prose kept in the Original Discussion
 - An answered question reads in the order it happened (Owen, 2026-10-04, I9 of `review-review`): the question as
   asked, its options (folded "Choices", the chosen one ticked), then the answer. `decide` writes it; answering
@@ -298,13 +302,13 @@ element takes its colour from this table, never a colour that means something el
 | Colour | Means                                       | Examples                                                                                                                                                                                                            |
 | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
-| yellow | open, still undecided                       | an open todo, caveat or test (a todo a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
+| yellow | open, still undecided                       | an open caveat or test (a caveat a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
 | blue   | do it now, or Claude is working on it       | Do Now, Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); an epic in progress; a goals topic "building" |
-| green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done, the Done status card (filled), the Noted status card (outlined: your choice recorded, nothing built yet); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
+| green  | decided or done (however long ago)          | Approve, Make Caveat, a caveat's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done, the Done status card (filled), the Noted status card (outlined: your choice recorded, nothing built yet); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
 | orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen; "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | Claude's voice                              | his reply cards; "recommended" (a thumbs-up, no word)                                                                                                                                                               |
 | ivory  | Owen's voice (the brand's brown tint)       | his note box, a marked note, his reply cards, the answer card; the toolbar                                                                                                                  |
-| grey   | no longer relevant, inactive, not chosen    | a canceled item (made moot); a todo's "drop it" x; the note box's "skip this" x; buttons at rest, and once Claude has handled them; a phase to do; a future epic; a paused epic (phases left, untouched for 3 days); a goals topic "draft"                                                                                 |
+| grey   | no longer relevant, inactive, not chosen    | a canceled item (made moot); a caveat's "drop it" x; the note box's "skip this" x; buttons at rest, and once Claude has handled them; a phase to do; a future epic; a paused epic (phases left, untouched for 3 days); a goals topic "draft"                                                                                 |
 
 - No light blue, no light green: one shade per meaning.
 - Colour-blind readers tell red and green apart least: the chip's id, the icons and the words keep them readable.
@@ -341,7 +345,7 @@ over ... leaning into outlines in the item chips". The chip's FILL says how far 
 - SOLID: done: Claude did it, or noted it and nothing more is due (the item's state colour)
 
 While your own mark is live (dashed, or outlined once sent) the chip keeps its state's colour, and the Colour column
-below is the button's. Once Claude has it in hand, the outline takes the column's colour: a pick taken, a todo
+below is the button's. Once Claude has it in hand, the outline takes the column's colour: a pick taken, a caveat
 queued (green), work underway (blue).
 
 So a dashed or outlined chip is ANSWERED: don't answer it again. A solid red (needs you) or orange (Claude's options,
@@ -352,14 +356,14 @@ your pick) chip waits on you, and only those (the toolbar counts them).
 | Approve                                            | green  | pressed          | sent, until `inbox apply`                                         | green: a call accepted, a test passed; an issue / caveat settled |
 | a pick (Choose pill)                               | green  | picked           | sent; still outlined once applied, until the doc's `chosen` reaches the page | green: a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve or a pick)      | green  | as above         | as above                                                          | green, decided                                                 |
-| Make Todo                                          | green  | pressed          | sent                                                              | green, settled (the new todo is its own item, yellow until queued) |
-| a todo's plane, "do it in the next phase"          | green  | pressed          | sent; then QUEUED: outlined until the todo is done                | green, once done                                               |
+| Make Caveat                                        | green  | pressed          | sent                                                              | green, settled (the new caveat is its own item, yellow until queued) |
+| a caveat's plane, "do it in the next phase"        | green  | pressed          | sent; then QUEUED: outlined until the caveat is done              | green, once done                                               |
 | a review's "do it" (`queue <id> "work"`)           | green  | --               | queued: outlined until done                                       | green, once done                                               |
-| a todo's x, "drop it"                              | grey   | pressed          | sent                                                              | grey, canceled                                                 |
+| a caveat's x, "drop it"                            | grey   | pressed          | sent                                                              | grey, canceled                                                 |
 | Revisit, with a note                               | blue   | pressed          | sent: Claude talking it over                                      | yellow (talked over, still open); orange (Claude answered with options: your pick); green if decided |
 | Do Now (the wand)                                  | blue   | waiting to be taken | Claude's agent on it                                           | the state's colour                                             |
 | work Claude took (an Underway card)                | blue   | --               | outlined until the card is Done or Noted                          | the state's colour                                             |
-| a new todo / question from the page                | its section's new row | not sent | sent                                                     | the new item's own chip (a question red, a todo yellow)        |
+| a new caveat / question from the page              | its section's new row | not sent | sent                                                     | the new item's own chip (a question red, a caveat yellow)      |
 | urgent / not urgent (clicking the chip)            | red / yellow | a dashed ring | --                                                        | solid red / yellow                                             |
 
 The Choose pill says it in words too: `Choose`, `Chosen · not sent` (dashed), `Chosen · sent` (outlined), `Chosen`
@@ -372,19 +376,20 @@ On an item's line, ONE group, in this order:
 
 1. Approve (check), green
 2. Revisit (history), blue
-3. Make Todo (list check), green
+3. Make Caveat (list check), green:  a new caveat, work to follow it up
 
 Then, APART from the group, Do Now (the magic wand:  Owen, 2026-10-09;  it was a paper plane), blue: it replaces Add Details Now on the line, and the note box's "now". An item Claude has answered or done
 keeps the three-button group, so Owen can still approve it.
 
-The NOTE BOX (every one but a todo's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
+The NOTE BOX (every one but a work caveat's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
 buttons:  Revisit Later (history), blue, and Skip This (x), grey (Owen, 2026-10-09:  the x replaced the box's Make
-Todo, which he never used there;  the line keeps its Make Todo). The x means "nothing to do here":  a `skip` mark,
+Todo, Make Caveat today, which he never used there;  the line keeps its Make Caveat). The x means "nothing to do here":  a `skip` mark,
 with the note typed (or none);  no line button wears it, the id chip does, grey. `inbox apply`:  the item reviewed and
 nothing else (an open question stays open, no status card), the note kept as Owen's `<epic-reply re="skip">`;  on a
-phase, the summary or an Overview sub-section, logged and the note kept;  on a todo, as `drop`.
+phase, the summary or an Overview sub-section, logged and the note kept;  on a work caveat, as `drop`.
 
-A TODO's line is different (Owen, 2026-10-09):  ONE group, no Approve, Make Todo or Do Now:
+A WORK caveat's line is different (no `limit`;  a todo before P32;  Owen, 2026-10-09):  ONE group, no Approve, Make
+Caveat or Do Now:
 
 1. Do it in the next phase (paper plane), green:  `inbox apply` queues it into the first phase still to do
    (`queue <name>#<id> "P10 · <name>"`, a Noted card "Queued for P10 · ...";  no phase to do:  "the next phase");
@@ -405,11 +410,11 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | `progress`  | blue   | Claude is working on it: an Underway status card, or the working spinner (closed or not)     |
 | `old`       | grey   | canceled: no longer relevant (made moot, struck through)                                     |
 | `recent`    | green  | decided or done (decided, done), however long ago                                            |
-| `open`      | yellow | work a review queued (a todo mark), not started                                              |
+| `open`      | yellow | work a review queued (a Make Caveat or plane mark), not started                                              |
 | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet: your turn to pick      |
 | `attention` | red    | an open question; an open judgement call or issue not reviewed, unless `calm` (not urgent)   |
-| `recent`    | green  | open, settled by a review: approved as it stands, or made a todo                             |
-| `open`      | yellow | anything else open: still undecided, not urgent (todos, caveats, tests; reviewed issues and judgement calls; a revisit or Do Now Claude answered) |
+| `recent`    | green  | open, settled by a review: approved as it stands, or made a caveat                           |
+| `open`      | yellow | anything else open: still undecided, not urgent (caveats, tests; reviewed issues and judgement calls; a revisit or Do Now Claude answered) |
 
 - Green across the board for what's decided; grey only for what no longer matters (Owen, 2026-10-08). Neither age
   nor a `/bedtime` run colours a chip any more.
@@ -515,8 +520,8 @@ the block:  `<epic-change item="q16">the new words</epic-change>`, the question'
 
 ## Review inbox
 
-Owen marks items ON the page (served by the page server): approve, todo, Add Details, revisit (soon / now, with a
-note), pick an option. Revisit on a judgement call or a todo puts `do it` in its EMPTY note box, selected and saved as
+Owen marks items ON the page (served by the page server): approve, Make Caveat, Add Details, revisit (soon / now, with a
+note), pick an option. Revisit on a judgement call or a work caveat puts `do it` in its EMPTY note box, selected and saved as
 his draft (Owen, 2026-10-19:  "I generally want you to just do it"):  he types over it when he means something else,
 and a revisit note `do it` means do it, no question back. Picks work wherever option cards are (I8 of `epic-components`): a question's, a judgement
 call's text, a reply, More Details; the mark names WHICH card set by position (`{ pick: "B", choices: 1 }`; none:
@@ -527,17 +532,17 @@ but the chosen one (its pill solid), only while Owen revisits it (its Revisit bo
 (or approves) it again with that option. The
 marks wait in `<name>.inbox.json5` beside the doc (git-ignored) until "send to Claude"; Add Details and revisit now
 go at once (the inbox's `now` queue), and Owen may call one off ("nevermind": `canceled`, handed to the waiting
-session to stop that item's agent; `epic details` then refuses its write). A todo may carry Owen's note (from
-before 2026-10-09, when the note box had Make Todo), written into the new todo;  a skip (the note box's x) its note,
+session to stop that item's agent; `epic details` then refuses its write). A Make Caveat may carry Owen's note (from
+before 2026-10-09, when the note box had Make Todo), written into the new caveat;  a skip (the note box's x) its note,
 kept as his reply. Read it with `epic inbox <name>`; shape, routes and helpers:
 spell-epic's `src/AGENTS.md`, "Review inbox". NEVER change its data by hand: go through `ReviewInbox`
 (spell-epic's `src/tool/ReviewInbox.ts`, its lock). A comment in it is fine: it's JSON5, and every save keeps it
 (`DataFile`, epic `epic-workflow` P21), as in every data file the tooling keeps.
 
 The summary and every phase take marks too (epic `airplane` P2), as an Overview sub-section does: Revisit (with a
-note), Make Todo, Do Now, no Approve; the summary is keyed `summary` (it has no id), a phase by its id (`p3`). And
-Owen can ask for a NEW todo or question from the page: the `+` in the page header, or New todo / New question at the
-end of the Todos and Questions sections, opens a small form (todo or question, title, note, what it's about). It
+note), Make Caveat, Do Now, no Approve; the summary is keyed `summary` (it has no id), a phase by its id (`p3`). And
+Owen can ask for a NEW caveat or question from the page: the `+` in the page header, or New caveat / New question at
+the end of the Caveats and Questions sections, opens a small form (caveat or question, title, note, what it's about). It
 waits in the inbox as a mark under its own key, `new1`, `new2` ... (`{ action: "new", kind, title, note?, near? }`,
 `POST new`), drawn at the end of its section until made (Edit, Remove), and goes with the next send like any mark.
 All of it works with no session listening: the marks wait, dashed, until Send (or its countdown) or Do Now wakes the
@@ -548,7 +553,7 @@ Review tab ("Start testing" on the To test section, or `epic test <name>`;  `epi
 his saga order). Each test's answer is a mark on it, `{ action: "test", result, note?, shot? }`, sent with Send like
 any other:
 
-- `passed`;  `failed`, with his note and a screenshot he pasted (saved beside the page, `tests/v3-20261019-1432.png`,
+- `passed`;  `failed`, with his note and a screenshot he pasted (saved beside the page, `tests/t3-20261019-1432.png`,
   `POST shot`);  `skip` (it no longer applies);  `notnow` (he can't do it yet)
 - only on a test;  `epic inbox <name>` and `wait` print each with its result, note and screenshot
 
@@ -597,7 +602,7 @@ server types `/epic review` into it, above):
        - Q3  question, open · Where should the send button sit?
            picks A · In the page header, asks:  "A, but only on epic pages?"
      ...
-   next:  `epic inbox apply review-review` (approve, pick, todo, a todo's next phase or drop, skip, new, test results, urgency)
+   next:  `epic inbox apply review-review` (approve, pick, Make Caveat, a caveat's next phase or drop, skip, new, test results, urgency)
    ```
 
    - `now`: Add Details and revisit now, TAKEN off the queue, each item marked `working` (its spinner); the mark
@@ -617,28 +622,28 @@ server types `/epic review` into it, above):
    | approve             | an open question                                                   | answered with the option marked recommended (`decide`, that option chosen), reviewed; no recommended option: left, "needs talk"                                                    |
    | approve             | an open judgement call                                             | closed (accepted), reviewed                                                                                                                                                        |
    | approve             | an open test                                                       | closed (passed), reviewed                                                                                                                                                          |
-   | test passed         | a test (Owen's test run)                                           | closed (done), reviewed, a `failed` from an earlier run gone;  logged "V3 passed (Owen's run)";  his comment kept as his reply (read it:  it may still need work)                 |
-   | test failed         | a test                                                             | a NEW issue "V3 failed:  <title>", his comment and screenshot (an `<img>`) in it, linking the test (the comment on the test too, as his reply);  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking the issue.  `apply` lists each failure's issue:  tell Owen one line each, with its link |
+   | test passed         | a test (Owen's test run)                                           | closed (done), reviewed, a `failed` from an earlier run gone;  logged "T3 passed (Owen's run)";  his comment kept as his reply (read it:  it may still need work)                 |
+   | test failed         | a test                                                             | a NEW issue "T3 failed:  <title>", his comment and screenshot (an `<img>`) in it, linking the test (the comment on the test too, as his reply);  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking the issue.  `apply` lists each failure's issue:  tell Owen one line each, with its link |
    | test skip           | a test                                                             | canceled, "no longer applies (Owen's run)" (his comment after it), reviewed;  the comment kept as his reply                                                                       |
    | test notnow         | a test                                                             | stays open, deferred today:  the next run puts it last;  his comment kept as his reply                                                                                             |
-   | approve             | anything else (open caveat, issue, todo; closed or answered items) | reviewed                                                                                                                                                                           |
+   | approve             | anything else (open caveat, issue; closed or answered items)       | reviewed                                                                                                                                                                           |
    | pick                | a question                                                         | answered with that option's title, the option chosen (in the card set the mark names), reviewed                                                                                    |
-   | pick                | any other item (judgement call, issue, todo, caveat)               | APPROVED with that option: its card set's `chosen` set, then as approve (an open judgement call closed, accepted; reviewed); the option in the log line                            |
-   | todo                | any item                                                           | a new todo "Follow up: <title>" linking back, the item reviewed                                                                                                                    |
-   | todo                | a phase, the summary, an Overview sub-section                      | a new todo "Follow up: P3 · <title>" (or "the summary", "<title>") linking back (`#p3`, `#overview`, `#o3`); a Noted status card on what was marked                                 |
-   | next                | a todo (its plane)                                                 | queued into the first phase still to do (`queued`, work `P10 · <name>`;  none: "the next phase", and the reply says so), a Noted status card "Queued for P10 · <name>", reviewed;  a note kept as Owen's reply |
-   | drop                | a todo (its x)                                                     | canceled, "dropped by Owen in review" (struck through, grey), reviewed;  a note kept as Owen's reply                                                                               |
-   | skip                | any item but a todo (the note box's x)                             | reviewed, nothing else ("skipped:  nothing to do"):  its status and state as they were, no status card;  a note kept as Owen's reply (`re="skip"`).  On a todo:  as drop               |
+   | pick                | any other item (judgement call, issue, caveat)                     | APPROVED with that option: its card set's `chosen` set, then as approve (an open judgement call closed, accepted; reviewed); the option in the log line                            |
+   | todo                | any item                                                           | Make Caveat:  a new caveat "Follow up: <title>" linking back, the item reviewed                                                                                                    |
+   | todo                | a phase, the summary, an Overview sub-section                      | a new caveat "Follow up: P3 · <title>" (or "the summary", "<title>") linking back (`#p3`, `#overview`, `#o3`); a Noted status card on what was marked                                 |
+   | next                | a work caveat (its plane)                                          | queued into the first phase still to do (`queued`, work `P10 · <name>`;  none: "the next phase", and the reply says so), a Noted status card "Queued for P10 · <name>", reviewed;  a note kept as Owen's reply |
+   | drop                | a work caveat (its x)                                              | canceled, "dropped by Owen in review" (struck through, grey), reviewed;  a note kept as Owen's reply                                                                               |
+   | skip                | any item but a work caveat (the note box's x)                      | reviewed, nothing else ("skipped:  nothing to do"):  its status and state as they were, no status card;  a note kept as Owen's reply (`re="skip"`).  On a work caveat:  as drop             |
    | skip                | a phase, the summary, an Overview sub-section                      | logged ("skipped:  nothing to do");  a note kept as for any of their marks                                                                                                         |
    | approve             | a phase, the summary, an Overview sub-section                      | logged only (the page has no Approve for them)                                                                                                                                     |
-   | new                 | a new todo or question (`new1`)                                    | made as `add` makes it: Owen's note its details (a question's lead), "About P3." linking `near`; a Noted status card "Made from the page: Owen's new todo, written <time>."         |
+   | new                 | a new caveat or question (`new1`)                                  | made as `add` makes it: Owen's note its details (a question's lead), "About P3." linking `near`; a Noted status card "Made from the page: Owen's new todo, written <time>."         |
    | revisit soon        | any item                                                           | left: answered INTO the item as a reply (`details --append`), the chat only linking it (Q3 of `windows-and-review`), then `inbox clear <name>#<id>`                                |
    | revisit with a pick | any item                                                           | left, NOT answered ("to talk over: picks B · ..., asks: ..."): answer the note about that option; once Owen agrees (a pick, or in words), record it:  `choose <name>#<id> B "<outcome>"` on any item, then `clear` |
 
    Each applied mark logs one line (`J9 approved:  closed (accepted)`); a mark Owen changed meanwhile stays. Each
-   pick, todo and queued todo also gets a "Claude • Noted" status card (outlined, NOT the green Done:  it only
+   pick, caveat made and caveat queued also gets a "Claude • Noted" status card (outlined, NOT the green Done:  it only
    records Owen's choice, Owen 2026-10-10) saying what was recorded and what happens next (`Chose B · ...:
-   recorded as the answer;  waiting for the next phase, P9 · ...`, `Made todo T23 ...`: Q19 of `epic-components`),
+   recorded as the answer;  waiting for the next phase, P9 · ...`, `Made caveat C23 ...`: Q19 of `epic-components`),
    each new item one saying where it came from; an approval none.  A pick riding on a revisit that Claude
    `clear`s or `done`s without deciding stays chosen, with a Noted card. A revisit on a
    phase or the summary is talked over as on an item; `clear` / `done` keep its note as Owen's `<epic-reply>` (in
@@ -758,7 +763,7 @@ command prints the usage.
 | `updated <name>#<N> "<html>"` / `--file <path>` `[--summary "..."]`                                                                           | a change to phase N's plan: an `<epic-update>` block at the end of its description, **Update**: <summary> and its date; kept once done; a pen + count on N's title while it isn't done                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `phase <name>#<N> todo\|active\|done [--done <html>] [--no-open]`                                                                             | set a phase's status; `done` removes its UPDATE markers, and `--done` writes its Done field; brings the doc forward in VS Code                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `update <name>#P<N> --estimate "1-2h"`                                                                                                        | change a phase's estimate (its title's badge); the Overview's total follows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `add <name>#Q\|J\|C\|I\|T\|V\|D "<title>" [--details "<html>"] [--calm]`                                                                      | append an item, print its id; a decision (`#D`) is a question born answered (`Q7`); `--calm` (last): a judgement call or issue that wouldn't surprise Owen (the default, "What phases and items say"), yellow (open) rather than red                                                                                                                                                                                                                                                                                                                                              |
+| `add <name>#Q\|J\|C\|I\|T\|D "<title>" [--details "<html>"] [--calm]`                                                                        | append an item, print its id; `#C` a caveat, work still to do (`--limit`:  a limit to know about); `#T` a test (`#V` still read); a decision (`#D`) is a question born answered (`Q7`); `--calm` (last): a judgement call or issue that wouldn't surprise Owen (the default, "What phases and items say"), yellow (open) rather than red                                                                                                                                                                                                                                                                                                                                              |
 | `calm <name>#<id> [<id>...] [--loud]`                                                                                                         | judgement calls / issues already written made not urgent (yellow, open), as a click on the id chip does; logged; `--loud` (last): urgent (red) again                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `change <name> [--for <item id>]`                                                                                                                | stamp the change marks written by hand (`<epic-change item>`:  id, time, answer;  every edit does too) and list the ones waiting for Owen's Accept;  `--for`:  the item of the marks that name none (P30) |
 | `close <name>#<id>` / `reopen <name>#<id>`                                                                                                    | close an item (`done`) / open it again                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -778,7 +783,7 @@ command prints the usage.
 | `items <name> --section <s> --spec <file>`                                                                                                    | `/epic review`'s item picker as a details page spec (`epic ask create --from`): a checkbox per open item, the not-reviewed ones ticked, each labelled by its id                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `list [--json]`                                                                                                                               | every epic: in progress / future / done, its worktree while it has one (`checkout`), not reviewed / all                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `backfill <name> \| --all [--apply]`                                                                                                          | one-off: items not reviewed that Owen named in a past session of the epic (his message, or a modal he answered); a dry run unless `--apply`, which marks them dated that day (`ReviewBackfill`)                                                                                                                                                                                                                                                                                                                                                                                   |
-| `summary <name> [--json]`                                                                                                                     | open questions, judgement calls, issues, caveats, todos, tests, and the next phase                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `summary <name> [--json]`                                                                                                                     | open questions, judgement calls, issues, caveats, tests, and the next phase                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `docs <name> [--json]`                                                                                                                        | the docs the epic wrote besides its epic page:  wrote (guide, its commits), related (name it, its turns swept up), linked;  its changelog entry.  For `/docs-check`                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `decisions <name> [--json]`                                                                                                                   | what the epic page settled:  phases' Done lists and Updated notes, items' status, chosen option and answer (`--json`:  their text).  For `/docs-check`                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `summaries <file.html> ...`                                                                                                                   | `summary --json` of each doc, by PATH (a worktree's too), as one JSON object `{ <file>: summary \| { error } }`; for `/epics`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -787,7 +792,7 @@ command prints the usage.
 | `inbox <name> [--json]`                                                                                                                       | the marks Owen left on the page (`<name>.inbox.json5`), by action, with their items' titles, sent or not; the `now` queue, agents at work, the session listening                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `inbox watch <name> [--session <id>]` / `ignore`                                                                                              | this session (`$CLAUDE_CODE_SESSION_ID`) waits on the inbox / stopped: the page tells Owen whether anyone is listening                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `inbox wait <name> [--timeout <s>] [--json]`                                                                                                  | block (polls every 1s, default 3300s) until there's work, print it, exit 0; timeout: exit 2. Work: requests for now (taken off the queue, their items marked working) and a send not yet handed over (its marks by action)                                                                                                                                                                                                                                                                                                                                                        |
-| `inbox apply <name> [ids...]`                                                                                                                 | apply the sent approve / pick / todo / new marks, and the sent urgency (an id chip clicked: calm or not), to the doc and clear them; prints a line per item and what it left (revisits)                                                                                                                                                                                                                                                                                                                                                                                               |
+| `inbox apply <name> [ids...]`                                                                                                                 | apply the sent approve / pick / Make Caveat / new marks, and the sent urgency (an id chip clicked: calm or not), to the doc and clear them; prints a line per item and what it left (revisits)                                                                                                                                                                                                                                                                                                                                                                                               |
 | `inbox working <name>#<id> on\|off`                                                                                                           | the page's spinner on an item;  a comment (`M3`, keyed `m3` in the inbox, an older inbox's `cm3` read the same;  a checkout before epic-workflow P23 types `cm3`):  its thread's "Claude: thinking…", until `<name>#M3 done`                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `update <name>#<id> underway "<reading>"` / `done ["<summary>"]` / `noted "<what>"`                                                           | Claude's status card on an item, Overview sub-section, phase or the summary (`summary`): blue "Claude • Underway" with its reading of the task (spinner on), then the same card green "Claude • Done" when WORK was done, a summary under it when worth saying (spinner off); `noted`: Claude only recorded Owen's choice, an outlined "Claude • Noted" card saying what was recorded and what happens next (an underway card turns noted; `done --filed`, the older spelling, the same) |
 | `inbox done <name>#<id>` / `clear`                                                                                                            | an agent finished the item: its mark and spinner go / drop marks (a revisit talked over); a mark's note is kept in the item first, as Owen's reply                                                                                                                                                                                                                                                                                                                                                                                                                                |

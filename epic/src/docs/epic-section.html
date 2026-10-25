@@ -53,7 +53,7 @@
           <p class="lede"><code>&lt;epic-section&gt;</code> is one section of an epic page.</p>
           <ul>
             <li>
-              Its <code>kind</code> says what it holds: the phases, one kind of item (questions, todos ...), the log, an
+              Its <code>kind</code> says what it holds: the phases, one kind of item (questions, caveats ...), the log, an
               Overview sub-section's prose, or a run's report.
             </li>
             <li>It draws the numbered title, the kind's icon, the fold, the count, and the state filter.</li>
@@ -157,9 +157,9 @@
                   The count badge (the Phases section's) stays just after the title, where Spell UI's section draws it.
                 </li>
               </ul>
-              <epic-section id="todos-example" kind="todos">
+              <epic-section id="caveats-example" kind="caveats">
                 <epic-item
-                  id="t43"
+                  id="c43"
                   title="Show the slot on every element's page"
                   status="open"
                   state="open"
@@ -179,8 +179,8 @@
                 <ui-content>
                   <ui-code language="html"
                     ><script type="text/plain">
-                      <epic-section id="todos-example" kind="todos">
-                        <epic-item id="t43" title="Show the slot on every element's page" status="open" state="open"></epic-item>
+                      <epic-section id="caveats-example" kind="caveats">
+                        <epic-item id="c43" title="Show the slot on every element's page" status="open" state="open"></epic-item>
                         <ui-button slot="actions" circular basic size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
                       </epic-section>
                     </script></ui-code
@@ -228,7 +228,7 @@
             <ul>
               <li>
                 The page's sections have FIXED ids, one per kind: <code>phases</code>, <code>decisions</code> (Questions
-                kept its old id), <code>judgements</code>, <code>caveats</code>, <code>todos</code>,
+                kept its old id), <code>judgements</code>, <code>caveats</code>,
                 <code>issues</code>, <code>tests</code>, <code>log</code>; a saga page's Epics, <code>epics</code>. An
                 Overview sub-section is <code>o1</code>, <code>o2</code> ...; a report has its own.
               </li>
@@ -312,17 +312,7 @@
                       </td>
                       <td>as <code>kind="caveats"</code></td>
                       <td>one at most</td>
-                      <td>5. Caveats.</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="epic-page.html" target="src-packages-epics-docs-epic-page-html"
-                          ><code>&lt;epic-page&gt;</code></a
-                        >
-                      </td>
-                      <td>as <code>kind="todos"</code></td>
-                      <td>one at most</td>
-                      <td>6. Todos.</td>
+                      <td>5. Caveats: work still to do, and limits to know about (<code>limit</code>).</td>
                     </tr>
                     <tr>
                       <td>
@@ -332,7 +322,7 @@
                       </td>
                       <td>as <code>kind="issues"</code></td>
                       <td>one at most</td>
-                      <td>7. Issues.</td>
+                      <td>6. Issues.</td>
                     </tr>
                     <tr>
                       <td>
@@ -342,7 +332,7 @@
                       </td>
                       <td>as <code>kind="tests"</code></td>
                       <td>one at most</td>
-                      <td>8. To test.</td>
+                      <td>7. To test.</td>
                     </tr>
                     <tr>
                       <td>
@@ -352,7 +342,7 @@
                       </td>
                       <td>as <code>kind="log"</code></td>
                       <td>one at most</td>
-                      <td>9. Log.</td>
+                      <td>8. Log.</td>
                     </tr>
                     <tr>
                       <td>
@@ -438,7 +428,7 @@
                       </td>
                       <td>
                         only when its <code>kind</code> is <code>questions</code> or <code>judgements</code> or
-                        <code>caveats</code> or <code>todos</code> or <code>issues</code> or <code>tests</code>
+                        <code>caveats</code> or <code>issues</code> or <code>tests</code>
                       </td>
                       <td>any number</td>
                       <td>The items, their id's letter the section's (<code>q</code> in Questions).</td>
@@ -499,7 +489,7 @@
                     <td><code>kind</code></td>
                     <td>
                       <code>overview-part</code>, <code>epics</code>, <code>phases</code>, <code>questions</code>,
-                      <code>judgements</code>, <code>caveats</code>, <code>todos</code>, <code>issues</code>,
+                      <code>judgements</code>, <code>caveats</code>, <code>issues</code>,
                       <code>tests</code>, <code>log</code>, <code>report</code>
                     </td>
                     <td>
@@ -761,7 +751,7 @@
                 sub-section by its parent's (<code>1.2 Why</code>); a report not at all, so the sections after it keep
                 their numbers. The kind's icon: <code>phases</code> layers, <code>questions</code> a file with a
                 question mark, <code>judgements</code> a gavel, <code>caveats</code> a warning triangle,
-                <code>todos</code> a checklist, <code>issues</code> a bug, <code>tests</code> a flask,
+                <code>issues</code> a bug, <code>tests</code> a flask,
                 <code>log</code> a clock turning back, a saga page's <code>epics</code> a map.
               </li>
               <li>

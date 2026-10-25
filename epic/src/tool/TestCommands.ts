@@ -10,10 +10,10 @@ import { TEST_SHOTS } from "./TestShots"
 
 /****************
  * ### `TestCommands`
- * `epic test`, and the test flags of `epic add <epic>#V` / `epic details <epic>#V3` (epic `epic-engine` P4):
+ * `epic test`, and the test flags of `epic add <epic>#T` / `epic details <epic>#T3` (epic `epic-engine` P4):
  * Owen's TEST RUN, from the command line.
  * - `test <name>`:  the epic page in the Review tab in test mode (`?test=1`), one test at a time;
- *   `--at <id>`, landing on that test (`seo#V3`)
+ *   `--at <id>`, landing on that test (`seo#T3`)
  * - `test <name> --list [--json]`:  its open tests, in the run's order (`EpicTests.openIn()`)
  * - `test --all [--list] [--json]`:  every epic with open tests, in Owen's saga order (`EpicTests.waiting()`),
  *   and the first one's page opened in test mode, `?test=1&all=1`:  its summary card leads to the next
@@ -98,8 +98,8 @@ export class TestCommands {
   fieldsOf(id: string, { step, should, example, ifNot }: Flags): TestFields {
     const given = [step, should, example, ifNot].some((flag) => flag !== undefined)
     if (!given) return { html: "" }
-    if (!/^v\d+$/i.test(id))
-      throw new PlanDocError(`--step / --should / --example / --if-not are a test's (V), not ${id.toUpperCase()}'s`)
+    if (!/^t\d+$/i.test(id))
+      throw new PlanDocError(`--step / --should / --example / --if-not are a test's (T), not ${id.toUpperCase()}'s`)
     const image = typeof example === "string" && IMAGE_FILE.test(example) ? resolve(example) : undefined
     if (image && !existsSync(image)) throw new PlanDocError(`no example image ${example}`)
     const values: TestFieldValues = {
@@ -135,6 +135,9 @@ export class TestCommands {
    * - its id is worked out first (`PlanDoc.nextId()`), so the Example's image is named for it
    */
   addItem(plan: PlanDoc, kind: string, title: string, flags: Flags): { id: string; example: TestFields["example"] } {
+    // `#C` is work still to do;  `--limit`, a limit to know about (epic `epic-engine` P32)
+    if (flags.limit && kind === "todo") kind = "caveat"
+    else if (flags.limit) throw new PlanDocError(`--limit is a caveat's (C), not a ${kind}'s`)
     const { html, example } = this.fieldsOf(plan.nextId(kind), flags)
     const details = `${html}${typeof flags.details === "string" ? flags.details : ""}`
     const id = plan.addItem(kind, title, { ...flags, details })
@@ -146,7 +149,7 @@ export class TestCommands {
 export type TestFields = {
   /** the fields' `<epic-field label>`s, `""` for none */
   html: string
-  /** the screenshot `--example` named:  `from` its file, `to` its path from the page's folder (`tests/v3.png`) */
+  /** the screenshot `--example` named:  `from` its file, `to` its path from the page's folder (`tests/t3.png`) */
   example?: { from: string; to: string }
 }
 
@@ -164,7 +167,7 @@ function text(flag: string | true | undefined): string | undefined {
   return typeof flag === "string" && flag.trim() ? flag : undefined
 }
 
-/** Test `id`'s example screenshot's path from the page's folder:  `tests/v3.png` (its file's own extension). */
+/** Test `id`'s example screenshot's path from the page's folder:  `tests/t3.png` (its file's own extension). */
 function exampleOf(id: string, image: string): string {
   return `${TEST_SHOTS}/${id.toLowerCase()}${extname(image).toLowerCase()}`
 }

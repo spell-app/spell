@@ -125,8 +125,8 @@ describe("POST /api/epics/favorite", () => {
       const html = `<epic-page epic="${name}" title="${name}" saga="${saga}">${items}</epic-page>`
       writeFileSync(join(root, "epics", name, `${name}.plan.html`), html)
     }
-    page("tested", "epics", '<epic-item id="v1" title="a" status="open"></epic-item>')
-    page("passed", "epics", '<epic-item id="v1" title="a" status="done"></epic-item>')
+    page("tested", "epics", '<epic-item id="t1" title="a" status="open"></epic-item>')
+    page("passed", "epics", '<epic-item id="t1" title="a" status="done"></epic-item>')
     const answer = await ask(port, "GET", "/api/epics/tests")
     expect(answer.status).toBe(200)
     expect(JSON.parse(answer.text)).toEqual([
@@ -147,7 +147,7 @@ describe("POST /api/epics/favorite", () => {
     mkdirSync(join(other, "epics", "copy"), { recursive: true })
     writeFileSync(
       join(other, "epics", "copy", "copy.plan.html"),
-      '<epic-page epic="copy" title="Copy"><epic-item id="v1" title="a" status="open"></epic-item></epic-page>'
+      '<epic-page epic="copy" title="Copy"><epic-item id="t1" title="a" status="open"></epic-item></epic-page>'
     )
     const served = new PageServer({ root })
     await epicRoutes.setup({ ...served.routeContext(), content: other } as Parameters<typeof epicRoutes.setup>[0])
