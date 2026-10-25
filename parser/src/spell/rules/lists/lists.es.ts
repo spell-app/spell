@@ -9,6 +9,7 @@
  *   There the tests say `cartas`, `palabras`, so a `where`'s item is `carta`, `palabra`.
  * - Keywords with a written accent are accepted without it too:  `(posición|posicion)`, `(después|despues)`.
  */
+import { withoutAccents } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SpellParser } from "spell-parser/spell/SpellParser"
 import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
@@ -95,7 +96,7 @@ function genderedForms(stem: string, value: number): Record<string, number> {
   for (const ending of ["o", "a", "os", "as"]) {
     const word = stem + ending
     forms[word] = value
-    forms[word.normalize("NFD").replace(/\p{M}/gu, "")] = value
+    forms[withoutAccents(word)] = value
   }
   return forms
 }

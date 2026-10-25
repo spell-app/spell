@@ -1,3 +1,4 @@
+import { withoutAccents } from "spell/util"
 import { SP } from "spell-parser/spell"
 
 /**
@@ -10,7 +11,7 @@ import { SP } from "spell-parser/spell"
 export function registerTestComponentPack(): void {
   SP.ComponentPacks.register({
     name: "spell-ui",
-    tagFor: (word, language) => TEST_TAGS[language]?.[unaccented(word)]
+    tagFor: (word, language) => TEST_TAGS[language]?.[withoutAccents(word)]
   })
 }
 
@@ -25,9 +26,4 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     segment: "ui-segment"
   },
   es: { texto: "es-texto", imagen: "es-imagen", encabezado: "es-encabezado", boton: "es-boton" }
-}
-
-/** `word` without its accents:  `botón` => `boton`. */
-function unaccented(word: string): string {
-  return word.normalize("NFD").replace(/\p{M}/gu, "")
 }

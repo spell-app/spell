@@ -1,5 +1,4 @@
-import escapeRegExp from "lodash/escapeRegExp"
-
+import { clockTime, escapeRegExp } from "spell/util"
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
 import type { NamesPass } from "spell-parser/spell/translate/NamesPass"
@@ -120,7 +119,9 @@ export class NamesReview {
         ? `names:  ${drafted} drafted in ${seconds(drafting)};  your turn:  accept, type or pick, then Send`
         : `names:  ${rows.length} to type, then Send`
     )
-    run.progress(`each answer is used as you give it;  Send by ${clockTime(Date.now() + this.timeoutMs)} to go on`)
+    run.progress(
+      `each answer is used as you give it;  Send by ${clockTime(new Date(Date.now() + this.timeoutMs))} to go on`
+    )
     const answers = run.answersAsTheyCome({ timeoutMs: this.timeoutMs })
     let next = await answers.next()
     while (!next.done) {
@@ -488,10 +489,4 @@ const GENDER_SUFFIX = /^(.*?)\s*\((f|m|feminine|masculine)\)$/i
 /** `ms` as seconds, `6 s`. */
 function seconds(ms: number): string {
   return `${Math.round(ms / 1000)} s`
-}
-
-/** `at` (ms since 1970) as a local clock time, `19:42`. */
-function clockTime(at: number): string {
-  const time = new Date(at)
-  return `${time.getHours()}:${String(time.getMinutes()).padStart(2, "0")}`
 }

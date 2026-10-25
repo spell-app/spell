@@ -4,6 +4,8 @@
 //  - An empty block holds `pass`.
 //
 
+import { indented as indentedBy } from "spell/util"
+
 /** One level of indent:  4 spaces, PEP 8's. */
 export const INDENT = "    "
 
@@ -15,10 +17,7 @@ export const TOP_LEVEL_GAP = "\n\n\n"
 
 /** `text`, each line indented one level;  blank lines left blank. */
 export function indented(text: string): string {
-  return text
-    .split(NEWLINE)
-    .map((line) => (line ? `${INDENT}${line}` : line))
-    .join(NEWLINE)
+  return indentedBy(text, INDENT)
 }
 
 /**

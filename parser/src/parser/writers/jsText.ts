@@ -7,6 +7,8 @@
  * - Usage:  `P.jsText.InParens({ children })`, `P.jsText.NEWLINE`.
  */
 
+import { escapeRegExp, indented as indentedBy } from "spell/util"
+
 ////////////////
 // ## Identifiers
 ////////////////
@@ -25,8 +27,7 @@ export function isLegalIdentifier(value: string): boolean {
  *   and a Spanish name (`índice`, `está`) would never be found (epic `spanish` P28).
  */
 export function mentions(code: string, name: string): boolean {
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  return new RegExp(`(?<![\\p{L}\\p{M}\\d_$])${escaped}(?![\\p{L}\\p{M}\\d_$])`, "u").test(code)
+  return new RegExp(`(?<![\\p{L}\\p{M}\\d_$])${escapeRegExp(name)}(?![\\p{L}\\p{M}\\d_$])`, "u").test(code)
 }
 
 /** `'name'`:  `name` as a single-quoted JS string, backslashes and quotes escaped. */
@@ -64,10 +65,7 @@ export const INDENTED_NEWLINE = `${NEWLINE}${INDENT}`
 
 /** `text` with every non-blank line indented once. */
 export function indented(text: string): string {
-  return text
-    .split(NEWLINE)
-    .map((line) => (line ? `${INDENT}${line}` : line))
-    .join(NEWLINE)
+  return indentedBy(text, INDENT)
 }
 
 /** A comma, as a list delimiter. */

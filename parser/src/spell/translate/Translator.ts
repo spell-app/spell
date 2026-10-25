@@ -1,3 +1,4 @@
+import { clamp, escapeRegExp, withoutAccents } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { BODY_KEYWORDS } from "spell-parser/spell/spell.types"
@@ -422,7 +423,7 @@ class FileWriting {
     const stem = (word: string) => word.replace(/(os|as|o|a|es|s)$/, "")
     const forms = theirs.filter((each) => stem(each) === stem(theirs[0]!))
     if (forms.length > 1) return { text: forms[0]!, agree: forms }
-    const at = Math.min(Math.max(ours.indexOf(raw), 0), theirs.length - 1)
+    const at = clamp(ours.indexOf(raw), 0, theirs.length - 1)
     return { text: theirs[at]! }
   }
 
@@ -1137,11 +1138,7 @@ function areForms(alternatives: string[], language: SP.Language): boolean {
   if (alternatives.length < 2 || alternatives.some((each) => /\s/.test(each))) return false
   if (alternatives.every((each) => articleKindOf(each, language))) return true
   // accents aside:  `vacío|vacio|vacía` are one word's forms, written with and without
-  const stem = (word: string) =>
-    word
-      .normalize("NFD")
-      .replace(/\p{M}/gu, "")
-      .replace(/(os|as|o|a|s)$/, "")
+  const stem = (word: string) => withoutAccents(word).replace(/(os|as|o|a|s)$/, "")
   return alternatives.every((each) => stem(each) === stem(alternatives[0]!))
 }
 
@@ -1186,8 +1183,7 @@ function alternativesOf(literal: string | string[]): string[] {
 
 /** `words` without each one that's another's twin but for an accent:  `sí, si` => `sí`. */
 function withoutAccentTwins(words: string[]): string[] {
-  const plain = (word: string) => word.normalize("NFD").replace(/\p{M}/gu, "")
-  return words.filter((word, at) => !words.slice(0, at).some((each) => plain(each) === plain(word)))
+  return words.filter((word, at) => !words.slice(0, at).some((each) => withoutAccents(each) === withoutAccents(word)))
 }
 
 /** The word a language says `not` with, before a verb:  Spanish's `no`. */
@@ -1391,9 +1387,7 @@ function saysWords(rule: P.Rule, text: string): boolean {
   }
   visit(rule)
   if (!words.size) return false
-  const escaped = [...words]
-    .sort((a, b) => b.length - a.length)
-    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  const escaped = [...words].sort((a, b) => b.length - a.length).map(escapeRegExp)
   return new RegExp(`^(?:${escaped.join("|")}|\\s)+$`, "u").test(text)
 }
 
