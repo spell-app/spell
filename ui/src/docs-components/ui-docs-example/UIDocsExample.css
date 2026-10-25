@@ -7,7 +7,7 @@
  *   - `<div class="heading">`:  the `<ui-header part="header">` (only when there is a header)
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
  *   - `<div class="frame">`:
- *     - the `<ui-button part="toggle">`, on its top edge at the right, half above it (a bare example's:  over its corner)
+ *     - the `<ui-button part="toggle">`, centred on its top right corner (a bare example's:  over the corner, inside)
  *     - the `<ui-segment part="demo">`, around the default slot
  *     - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
  *   - the header and description sit on the page, outside the frame:
@@ -136,13 +136,15 @@
       var(--ui-shadow-subtle, 0 0 #0000);
   }
   /*
-   * a framed example's button sits ON the frame's top edge, at its right, half above it:  the example takes no room
+   * a framed example's button sits ON the frame's top right corner, half above and half outside it:  the example takes no room
    * for it, so its sides and top keep the same space (Owen, 2026-10-25:  "make the "code" icon float above the
    * top-right of the panel and don't take space for it in the content")
    */
   .ui.example:not(.bare) > .frame > [part~="toggle"] {
     inset-block-start: 0;
-    translate: 0 -50%;
+    inset-inline-end: 0;
+    /* centred on the corner itself (Owen, 2026-10-25:  "over actual top-right corner") */
+    translate: 50% -50%;
   }
   .frame > [part~="toggle"]:hover,
   .frame > [part~="toggle"]:focus-within,

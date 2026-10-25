@@ -37,7 +37,7 @@ describe("UIDocsExample.css layout", () => {
     `<div class="description" part="description">D</div>` +
     `<div class="frame"><button part="toggle">c</button><div part="demo">X</div></div></section>`
 
-  it("puts the header and description above the frame, the code button centred on the frame's top edge", () => {
+  it("puts the header and description above the frame, the code button centred on the frame's top right corner", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, exampleCSS])
     const shadow = host.shadowRoot!
     expect(getComputedStyle(shadow.querySelector(".heading")!).display).toBe("flex")
@@ -52,10 +52,9 @@ describe("UIDocsExample.css layout", () => {
     const box = toggle.getBoundingClientRect()
     const edge = shadow.querySelector<HTMLElement>(".frame")!
     expect(Math.abs((box.top + box.bottom) / 2 - (frame.top + edge.clientTop))).toBeLessThan(1)
-    // in from the frame's right edge by the inset (0.8em)
-    const inset = parseFloat(getComputedStyle(toggle).fontSize) * 0.8
+    // its middle on the frame's right edge (inside its hairline):  centred on the corner
     const borderRight = frame.width - edge.clientLeft - edge.clientWidth
-    expect(Math.abs(frame.right - borderRight - box.right - inset)).toBeLessThan(1)
+    expect(Math.abs((box.left + box.right) / 2 - (frame.right - borderRight))).toBeLessThan(1)
   })
 
   it("takes a public token from outside", () => {
