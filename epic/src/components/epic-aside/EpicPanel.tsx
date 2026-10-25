@@ -59,21 +59,22 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
     return (
       <div class={this.rootClass} part={this.partForName("base" as never)} title="">
         <div class={HEAD} part={this.partForName("head" as never)}>
-          <button
-            type="button"
-            class={TOGGLE}
-            part={this.partForName("toggle" as never)}
-            aria-expanded={this.isOpen ? "true" : "false"}
-            aria-controls={BODY_ID}
-            title={this.translationForKey((this.isOpen ? "foldTip" : "unfoldTip") as never)}
-            onClick={this.fold.toggle}
-          >
-            {Fold.chevron()}
-            {/* in full, wrapped, folded or open (EpicPanel.css) */}
-            <span class={HEADING} part={this.partForName("heading" as never)}>
-              {this.heading()}
-            </span>
-          </button>
+          {this.fold.button({
+            className: TOGGLE,
+            part: this.partForName("toggle" as never),
+            controls: BODY_ID,
+            tips: {
+              fold: this.translationForKey("foldTip" as never),
+              unfold: this.translationForKey("unfoldTip" as never)
+            },
+            // in full, wrapped, folded or open (EpicPanel.css)
+            label: (
+              <span class={HEADING} part={this.partForName("heading" as never)}>
+                {this.heading()}
+              </span>
+            ),
+            clicks: true
+          })}
           {Fold.actions({
             part: this.partForName("actions" as never),
             hidden: () => !this.slots.hasContent(this.slotForName("actions" as never))

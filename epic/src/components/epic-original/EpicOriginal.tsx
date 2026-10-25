@@ -34,18 +34,14 @@ export class EpicOriginal extends E.UIComponent<typeof epicOriginalVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
-        <button
-          type="button"
-          class={TOGGLE}
-          part={this.partForName("toggle")}
-          aria-expanded={this.isOpen ? "true" : "false"}
-          aria-controls={BODY_ID}
-          title={this.translationForKey(this.isOpen ? "foldTip" : "unfoldTip")}
-          onClick={this.fold.toggle}
-        >
-          {Fold.chevron()}
-          {this.translationForKey("original")}
-        </button>
+        {this.fold.button({
+          className: TOGGLE,
+          part: this.partForName("toggle"),
+          controls: BODY_ID,
+          tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
+          label: this.translationForKey("original"),
+          clicks: true
+        })}
         <div
           ref={this.fold.watch}
           id={BODY_ID}

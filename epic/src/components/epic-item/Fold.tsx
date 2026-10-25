@@ -14,6 +14,8 @@ import { ACTIONS_SLOT } from "./Fold.types"
  *   - every card with a heading band:  a reply, the answer, a status card, a note
  *     (Owen, 2026-10-08, "everything in a section box should be collapsible")
  *   - NOT `<epic-item>`:  it folds through its `open` attribute, as links and P9 open it from outside
+ * - Built on the kit's `Disclosure` (`spell/element`;  epic `coherence` P8):  its open state, `aria-expanded`,
+ *   find-in-page opening it;  no events, as nothing outside listens to a card's fold.
  * - Starts as `initial()` says, and follows it until the reader toggles it:
  *   an option panel opens while its option is the chosen one.
  * - Or KEPT outside it (`kept`):  the element's own `open` attribute, page state the live patch keeps
@@ -23,7 +25,7 @@ import { ACTIONS_SLOT } from "./Fold.types"
  * - A card's heading band takes `heading` as its ref, with its fold button (`button()`) first in it:
  *   a click anywhere on the band folds, but on a link or another control in it.
  * - Draws the pieces every fold shares:
- *   - its fold button (`fold.button()`)
+ *   - its fold button (`fold.button()`):  chevron, label, tooltip, for a card's band and every panel's title
  *   - the chevron (`Fold.chevron()`)
  *   - the collapse-all button of an open title (`Fold.collapseAllButton()`, folding all under it:  `foldAllUnder()`)
  *   - the expand-all button of a fold's title and the page toolbar (`Fold.expandAllButton()`, `expandAllUnder()`)
@@ -35,81 +37,68 @@ import { ACTIONS_SLOT } from "./Fold.types"
  * - Its listeners are added by its refs, by hand:  `Fold` is no component, so no `@E.on`.
  ****************/
 export class Fold {
-  /** The reader's choice, once made;  `undefined` until then. */
-  @E.state private accessor toggled: boolean | undefined = undefined
+  constructor(initial: Accessor<boolean>, kept?: KeptFold) {
+    this.disclosure = new E.Disclosure({ initial, kept })
+  }
 
-  constructor(
-    private readonly initial: Accessor<boolean>,
-    private readonly kept?: KeptFold
-  ) {}
+  /** The open state:  the reader's choice (or `kept`'s), else `initial()`. */
+  readonly disclosure: E.Disclosure
 
   ////////////////
   // ## Open or folded
   ////////////////
 
   /** Open?  Tracked. */
-  readonly isOpen = (): boolean => (this.kept ? this.kept.isOpen() : (this.toggled ?? this.initial()))
-
-  /** The reader's choice:  into `kept`, when it's kept outside. */
-  private choose(open: boolean) {
-    if (this.kept) this.kept.setOpen(open)
-    else this.toggled = open
-  }
+  readonly isOpen = (): boolean => this.disclosure.isOpen
 
   /** The content box's `hidden`:  `until-found` while folded;  tracked. */
-  readonly hidden = (): "until-found" | undefined => (this.isOpen() ? undefined : "until-found")
+  readonly hidden = (): "until-found" | undefined => this.disclosure.hidden
 
   /** Open if folded, fold if open:  a click on its header. */
   readonly toggle = () => {
-    this.choose(!this.isOpen())
+    this.disclosure.toggle()
   }
 
   /** Fold it, if open (collapse-all, `foldAllUnder()`);  true when it was open. */
-  readonly close = (): boolean => {
-    if (!this.isOpen()) return false
-    this.choose(false)
-    return true
-  }
+  readonly close = (): boolean => this.disclosure.close()
 
   /** Open it, if folded, as the reader would (expand-all, `expandAllUnder()`);  true when it was folded. */
-  readonly open = (): boolean => {
-    if (this.isOpen()) return false
-    this.choose(true)
-    return true
-  }
+  readonly open = (): boolean => this.disclosure.open()
 
   /** The content box's ref:  find-in-page matched inside the folded box, which the browser has revealed. */
-  readonly watch = (content: HTMLElement) => {
-    content.addEventListener("beforematch", () => this.choose(true))
-  }
+  readonly watch = (content: HTMLElement) => this.disclosure.revealOnMatch(content)
 
   ////////////////
   // ## Drawing
   ////////////////
 
   /**
-   * The fold button FIRST in a card's heading band, so everything boxed in a section folds (Owen, 2026-10-08).
-   * - The cards:
-   *   `<epic-reply>`, `<epic-answer>`, `<epic-status>`, `<epic-note>`, an `<epic-update>` note, `<epic-updated>`
-   * - A `<button>`, named by the heading's words (`labelledBy`:  ids in the same shadow root),
-   *   its `aria-expanded` as the fold stands,
-   *   its tooltip (`tips`) what a click does
-   * - The chevron turns down while open (`Fold.css`, which each card adopts).
-   * - No click handler of its own:  its band's (`heading`) takes a click on it, Enter and Space too,
-   *   and a click on the rest of the band.
+   * THE fold button:  the chevron, then its `label`;  its `aria-expanded` as the fold stands,
+   * its tooltip (`tips`) what a click does.
+   * - Two kinds:
+   *   - FIRST in a card's heading band, so everything boxed in a section folds (Owen, 2026-10-08):
+   *     `<epic-reply>`, `<epic-answer>`, `<epic-status>`, `<epic-note>`, an `<epic-update>` note, `<epic-updated>`
+   *     - named by the heading's words (`labelledBy`:  ids in the same shadow root), no `label`
+   *     - no click handler of its own:  its band's (`heading`) takes a click on it, Enter and Space too,
+   *       and a click on the rest of the band
+   *   - a panel's whole title, `clicks` (it folds on its own click), its words its `label`:
+   *     More Details, Original Discussion, Choices, an option's panel, an aside or code panel
+   * - The chevron turns down while open (`Fold.css`, or the element's own sheet).
    */
-  button({ controls, labelledBy, part, tips }: FoldButtonOptions): JSX.Element {
+  button({ controls, labelledBy, part, tips, label, className = FOLD_BUTTON, clicks }: FoldButtonOptions): JSX.Element {
     return (
       <button
         type="button"
-        class={FOLD_BUTTON}
+        class={className}
         part={part}
-        aria-expanded={this.isOpen() ? "true" : "false"}
+        aria-expanded={this.disclosure.ariaExpanded}
         aria-controls={controls}
         aria-labelledby={labelledBy}
         title={this.isOpen() ? tips.fold : tips.unfold}
+        onClick={clicks ? this.toggle : undefined}
       >
         {Fold.chevron()}
+        {label}
       </button>
     )
   }
@@ -351,10 +340,16 @@ export type ActionsBoxOptions = {
 export type FoldButtonOptions = {
   /** the `id` of the box it folds */
   controls: string
-  /** the `id`s of the heading's words, space-separated:  its name */
-  labelledBy: string
+  /** a card's:  the `id`s of the heading's words, space-separated:  its name */
+  labelledBy?: string
+  /** a panel's title:  its words, after the chevron;  its name */
+  label?: JSX.Element
   /** its `part`:  `toggle` in every card's vocabulary */
   part: string
+  /** its class.  Default:  `FOLD_BUTTON`, a card's (`Fold.css`) */
+  className?: string
+  /** it folds on its own click (a panel's title);  a card's band takes the click instead */
+  clicks?: boolean
   /** its tooltip while open (`fold`) and while folded (`unfold`):  the card's `foldTip` / `unfoldTip` texts */
   tips: FoldTips
 }

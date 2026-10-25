@@ -6,7 +6,7 @@ import { E } from "spell-ui/core"
 import { NOBODY_LISTENING, ReviewClient, picks } from "spell-epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
 import { EpicAsk } from "spell-epic/components/epic-ask/EpicAsk"
-import { Fold } from "spell-epic/components/epic-item/Fold"
+import { Fold, type FoldTips } from "spell-epic/components/epic-item/Fold"
 import type { EpicItem } from "spell-epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
 import "spell-epic/components/epic-text-box"
@@ -309,17 +309,13 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     return (
       <div class={HEADER} part={this.partForName("header")}>
         <Show when={this.canFold}>
-          <button
-            type="button"
-            class={FOLD}
-            part={this.partForName("toggle")}
-            aria-expanded={this.isOpen ? "true" : "false"}
-            aria-controls={BODY_ID}
-            title={this.translationForKey(this.isOpen ? "foldTip" : "unfoldTip", { letter: this.letter ?? "" })}
-            onClick={this.fold.toggle}
-          >
-            {Fold.chevron()}
-          </button>
+          {this.fold.button({
+            className: FOLD,
+            part: this.partForName("toggle"),
+            controls: BODY_ID,
+            tips: this.foldTips,
+            clicks: true
+          })}
         </Show>
         <label class={PICK}>
           <input
@@ -395,6 +391,21 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
         </span>
       </Show>
     )
+  }
+
+  /** Its fold button's tooltips, naming its letter (`foldTipsOf()`). */
+  private readonly foldTips: FoldTips = EpicOption.foldTipsOf(this)
+
+  /** `option`'s fold button's tooltips:  getters, read as the button draws, so they follow its letter. */
+  private static foldTipsOf(option: EpicOption): FoldTips {
+    return {
+      get fold() {
+        return option.translationForKey("foldTip", { letter: option.letter ?? "" })
+      },
+      get unfold() {
+        return option.translationForKey("unfoldTip", { letter: option.letter ?? "" })
+      }
+    }
   }
 
   /** An epic page's option's header:  the fold toggle (its whole title), the Choose pill while reviewed. */

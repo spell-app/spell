@@ -127,28 +127,28 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
         aria-label={this.isRadioGroup ? this.ask?.groupLabel : undefined}
       >
         <Show when={this.questionIsAnswered} fallback={<slot />}>
-          <button
-            type="button"
-            class={TOGGLE}
-            part={this.partForName("toggle")}
-            aria-expanded={this.isOpen ? "true" : "false"}
-            aria-controls={PANELS_ID}
-            title={this.translationForKey(this.isOpen ? "foldTip" : "unfoldTip")}
-            onClick={this.fold.toggle}
-          >
-            {Fold.chevron()}
-            {this.translationForKey("choices")}
-            <Show when={this.chosenName}>
-              {(name) => (
-                <span class={CHOSEN_MARK} part={this.partForName("chosen")}>
-                  <svg class={CHECK} viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M2.5 8.5l3.5 3.5 7.5-8" />
-                  </svg>
-                  {this.translationForKey("chosen", { name: name() })}
-                </span>
-              )}
-            </Show>
-          </button>
+          {this.fold.button({
+            className: TOGGLE,
+            part: this.partForName("toggle"),
+            controls: PANELS_ID,
+            tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
+            label: (
+              <>
+                {this.translationForKey("choices")}
+                <Show when={this.chosenName}>
+                  {(name) => (
+                    <span class={CHOSEN_MARK} part={this.partForName("chosen")}>
+                      <svg class={CHECK} viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M2.5 8.5l3.5 3.5 7.5-8" />
+                      </svg>
+                      {this.translationForKey("chosen", { name: name() })}
+                    </span>
+                  )}
+                </Show>
+              </>
+            ),
+            clicks: true
+          })}
           <div
             ref={this.fold.watch}
             id={PANELS_ID}
