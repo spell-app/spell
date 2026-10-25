@@ -153,7 +153,7 @@ export class ProseRewrite {
     const { state, title, phase } = shape
     const children = PlanMarkup.takeChildren(message)
     if (phase) {
-      message.replaceWith(this.owner.element("epic-update", { phase }, children, message))
+      message.replaceWith(this.owner.element("epic-update", { phase: String(phase) }, children, message))
       return this.owner.count(ProseCounted.update)
     }
     if (message.hasAttribute("data-phase")) {

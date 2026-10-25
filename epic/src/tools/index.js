@@ -57,6 +57,7 @@ import {
   favoritesIn
 } from "spell-epic/list/EpicCards.ts"
 import { URGENT_SELECTOR } from "spell-epic/list/EpicState.ts"
+import { PhaseIds } from "spell-epic/phases/PhaseIds.ts"
 import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "spell/server/page/settings"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { Sagas } from "spell-epic/tool/Sagas.ts"
@@ -414,10 +415,10 @@ export function planOf(document) {
   if (!page) return { phases: [], updated: null, future: false, saga: null, urgent: [] }
   const phases = Array.from(
     document.querySelectorAll('epic-page > epic-section[kind="phases"] > epic-phase'),
-    (phase, index) => ({
+    (phase) => ({
       status: phase.getAttribute("status"),
-      // numbered by its place, not its id (stable since epic `epic-workflow` P15:  `p-epic-migrate`)
-      label: `P${index + 1} · ${(phase.getAttribute("title") ?? phase.querySelector(':scope > [slot="title"]')?.textContent ?? "").replace(/\s+/g, " ").trim()}`
+      // numbered as drawn, not by its id (stable since epic `epic-workflow` P15:  `p-epic-migrate`):  P7, P11.1
+      label: `${PhaseIds.labelOf(phase)} · ${(phase.getAttribute("title") ?? phase.querySelector(':scope > [slot="title"]')?.textContent ?? "").replace(/\s+/g, " ").trim()}`
     })
   )
   return {

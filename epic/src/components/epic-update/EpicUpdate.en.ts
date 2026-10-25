@@ -37,9 +37,10 @@ export const epicUpdateVocabulary = {
     },
     {
       name: "phase",
-      kind: "number",
+      kind: "string",
+      format: "phase number",
       description:
-        "The phase active when it was written (`3`).  `phase 3 done` removes P3's bare labels and the updates " +
+        "The phase active when it was written, by its number (`3`, `11.1`).  `phase 3 done` removes P3's bare labels and the updates " +
         "outside a phase;  a phase's own plan changes stay."
     }
   ],

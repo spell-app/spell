@@ -30,7 +30,7 @@ export class EpicAddress {
   readonly epic: string | undefined
   /** an id on the page, as written (`T1`) */
   readonly item: string | undefined
-  /** a phase, as written:  `7`, `P7`, `epic-migrate` */
+  /** a phase, as written:  `7`, `P7`, `P11.1`, `epic-migrate` */
   readonly phase: string | undefined
 
   /**
@@ -169,40 +169,44 @@ export class EpicAddress {
   // ## Phases
   ////////////////
 
-  /** A phase written as a number (`7`, `P7`, `p7`):  that number;  else `undefined`. */
-  static phaseNumber(phase: string): number | undefined {
-    const match = /^p?(\d+)$/i.exec(phase.trim())
-    return match ? Number(match[1]) : undefined
+  /** A phase written as a number (`7`, `P7`, `p7`, `P11.1`):  that number, `"7"`, `"11.1"`;  else `undefined`. */
+  static phaseNumber(phase: string): string | undefined {
+    return /^p?(\d+(?:\.\d+)?)$/i.exec(phase.trim())?.[1]
   }
 
   /**
    * A phase's id, best guessed from how it's written, for a page nobody has read (`file://`):
-   * - a number:  `p7`, the id phases had before stable ids
+   * - a number:  `p7`, the id phases had before stable ids;  a decimal phase (`11.1`) never had one:  `p11-1`, no id
+   *   a page has, so the link lands on the page
    * - a name:  `p-epic-migrate`, its stable id (P15)
    */
   static phaseIdFor(phase: string): string {
     const number = EpicAddress.phaseNumber(phase)
-    if (number !== undefined) return `p${number}`
+    if (number !== undefined) return `p${number.replace(".", "-")}`
     const slug = EpicAddress.slugOf(phase.replace(/^p-/i, ""))
     return `p-${slug}`
   }
 
   /**
-   * `phase` among a page's `phases` (in page order), with its number (its place, from 1);  `undefined` if none:
-   * - a number (`7`, `P7`):  the 7th
+   * `phase` among a page's `phases` (in page order), with its number (`7`, `11.1`);  `undefined` if none:
+   * - a number (`7`, `P7`, `P11.1`):  the phase numbered so (`PagePhase.number`, else its place)
    * - else by id:  `phase` as an id (`p-epic-migrate`), or `p-` and its slug (`epic-migrate`, `Epic Migrate`)
    * - else by title:  the phase whose title slugifies to the same
    */
-  static findPhase<P extends PagePhase>(phases: readonly P[], phase: string): { phase: P; number: number } | undefined {
+  static findPhase<P extends PagePhase>(phases: readonly P[], phase: string): { phase: P; number: string } | undefined {
+    const numberOf = (each: P, index: number) => each.number ?? String(index + 1)
     const number = EpicAddress.phaseNumber(phase)
-    if (number !== undefined) return phases[number - 1] && { phase: phases[number - 1], number }
+    if (number !== undefined) {
+      const index = phases.findIndex((each, at) => numberOf(each, at) === number)
+      return index >= 0 ? { phase: phases[index]!, number } : undefined
+    }
     const id = phase.trim().toLowerCase()
     const slug = EpicAddress.slugOf(phase.replace(/^p-/i, ""))
     const index = [
       (each: P) => each.id.toLowerCase() === id || each.id === `p-${slug}`,
       (each: P) => EpicAddress.slugOf(each.title) === slug
     ].reduce((found, test) => (found >= 0 ? found : phases.findIndex(test)), -1)
-    return index >= 0 ? { phase: phases[index], number: index + 1 } : undefined
+    return index >= 0 ? { phase: phases[index]!, number: numberOf(phases[index]!, index) } : undefined
   }
 
   /** `title` as a slug:  lower case, a hyphen for every run of other characters (`Epic Migrate` -> `epic-migrate`). */

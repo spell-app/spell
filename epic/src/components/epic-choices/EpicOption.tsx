@@ -481,7 +481,11 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   /** Answering:  its tick box changed:  its question hears it (`ui-selected` / `ui-deselected`);  unticked, its (?) goes off too. */
   private readonly onTick = (event: Event) => {
     const selected = (event.currentTarget as HTMLInputElement).checked
-    this.send(selected ? "ui-selected" : "ui-deselected", { letter: this.letter ?? "", selected, more: selected && this.wantsMore })
+    this.send(selected ? "ui-selected" : "ui-deselected", {
+      letter: this.letter ?? "",
+      selected,
+      more: selected && this.wantsMore
+    })
   }
 
   /** Answering:  its (?) pressed:  on, it's ticked too;  off, its tick stays as it is. */

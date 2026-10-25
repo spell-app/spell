@@ -12,7 +12,7 @@ export class PlanCommits {
   /**
    * What a commit subject says it did:  `{ epic, phases, items, title, sentence }`, or `null` when it names neither.
    * - `epic`:  the epic it names first (`outline-spell P28:`), else `null`
-   * - `phases`:  numbers (`P6a` -> 6);  `items`:  ids, lower case (`i3`), a range spelled out (`J110-J112`)
+   * - `phases`:  numbers, as people say them (`P6a` -> `6`, `P11.1` -> `11.1`, epic `epic-engine` P39);  `items`:  ids, lower case (`i3`), a range spelled out (`J110-J112`)
    * - phases and items mix:  `spanish P22, J110-J135:`
    * - `title`:  the subject after the colon, up to ` -- `:  the phase's name, in a phase commit
    * - `sentence`:  the subject after ` -- ` (`P3:  Name -- what it did`), else after the colon
@@ -26,7 +26,7 @@ export class PlanCommits {
     const dash = tail.indexOf(" -- ")
     return {
       epic: prefix && !/^fix$/i.test(prefix) ? prefix : null,
-      phases: ids.filter((id) => id.startsWith("P")).map((id) => Number(id.match(/\d+/)![0])),
+      phases: ids.filter((id) => id.startsWith("P")).map((id) => id.match(/\d+(?:\.\d+)?/)![0]),
       items: ids.filter((id) => !id.startsWith("P")).flatMap(PlanCommits.itemRange),
       title: (dash >= 0 ? tail.slice(0, dash) : tail).trim(),
       sentence: (dash >= 0 ? tail.slice(dash + 4) : tail).trim()
@@ -85,12 +85,13 @@ export class PlanCommits {
   private static readonly MAX_RANGE = 200
 
   /**
-   * A commit's subject that names phases or items:  `P3:`, `P4 + P5:`, `WIP P3:`, `P6a:` (phase 6), `P1 follow-up:`,
+   * A commit's subject that names phases or items:  `P3:`, `P4 + P5:`, `WIP P3:`, `P6a:` (phase 6), `P11.1:` (a
+   * decimal phase), `P1 follow-up:`,
    * `Fix I3:`, `<epic> I3:`, `<epic> P5, T1, J7:`, `<epic> P22, J110-J135:`.
    * - the epic's name first, when it's there (`<epic> `);  `Fix` is never one
    * - `P052 fonts` isn't one:  a phase number has no leading 0, and the colon follows at once
    * - static:  every subject is read against the same pattern
    */
   private static readonly SUBJECT =
-    /^(?:WIP\s+)?(?:([a-z][a-z0-9-]*)\s+)?(?:[Ff]ix\s+)?((?:P[1-9]\d*[a-z]?|[QCITVJD]\d+(?:-[QCITVJD]?\d+)?)(?:\s*[+,]\s*(?:P[1-9]\d*[a-z]?|[QCITVJD]\d+(?:-[QCITVJD]?\d+)?))*)(?:\s+follow-up)?\s*:\s*(.*)$/
+    /^(?:WIP\s+)?(?:([a-z][a-z0-9-]*)\s+)?(?:[Ff]ix\s+)?((?:P[1-9]\d*(?:\.[1-9]\d*)?[a-z]?|[QCITVJD]\d+(?:-[QCITVJD]?\d+)?)(?:\s*[+,]\s*(?:P[1-9]\d*(?:\.[1-9]\d*)?[a-z]?|[QCITVJD]\d+(?:-[QCITVJD]?\d+)?))*)(?:\s+follow-up)?\s*:\s*(.*)$/
 }

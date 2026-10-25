@@ -56,8 +56,10 @@ export type PhaseField = (typeof PHASE_FIELDS)[number]
 
 /** One phase, as `PlanReader.phases` reads it. */
 export type Phase = {
-  /** its number:  its place in the list, from 1 (P15:  never its id) */
+  /** its place in the list, from 1:  what `PlanDoc`'s methods take (`phase(n)`) */
   n: number
+  /** its number, as people say it:  `7`, or a decimal phase's `11.1` (`PhaseIds.numberOf()`;  never its id) */
+  number: string
   /** its id:  stable, made from its name when it was added (`p-epic-migrate`;  an older page's `p3`) */
   id: string
   /** its short name, without `P3 · ` */
@@ -76,8 +78,10 @@ export type AddPhaseOptions = Prettify<
   PhaseFieldValues & {
     /** wall-clock estimate (`1-2h`):  `<epic-phase estimate>` */
     estimate?: string
-    /** inserted as this phase, the to-do phases from it on moving down a number (`add-phase --before N`);  default last */
+    /** inserted at this place, the to-do phases from it on moving down a number (`add-phase --before N`);  default last */
     before?: number
+    /** a decimal phase after the phase at this place (`add-phase --after 11`:  P11.1, epic `epic-engine` P39) */
+    after?: number
   }
 >
 
@@ -191,8 +195,8 @@ export type ItemFacts = {
   status: string
   /** when a command last changed it (ISO), or `undefined` */
   changed: string | undefined
-  /** the phase active when it was added */
-  phase: number | undefined
+  /** the phase active when it was added, by its number (`3`, `11.1`) */
+  phase: string | undefined
   /** an answered question */
   answered: boolean
   /** reviewed that day, `YYYY-MM-DD` */
@@ -564,7 +568,7 @@ export type KeptNote = {
 
 /** Where a commit is listed:  under phase `phase`, or item `item` (an id). */
 export type CommitTarget = {
-  /** a phase's number */
+  /** a phase's place (`PlanDoc.phasePlace()`) */
   phase?: number
   /** an item's id, any case */
   item?: string
@@ -604,8 +608,8 @@ export type BackfillOptions = CommitOptions & {
 export type ParsedCommit = {
   /** the epic it names first (`outline-spell P28:`), else `null` */
   epic: string | null
-  /** phase numbers (`P6a` -> 6) */
-  phases: number[]
+  /** phase numbers, as people say them (`P6a` -> `6`, `P11.1` -> `11.1`) */
+  phases: string[]
   /** item ids, lower case (`i3`) */
   items: string[]
   /** the subject after the colon, up to ` -- `:  a phase commit's phase name (`P3:  Name -- what it did`) */

@@ -116,10 +116,11 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
-   * Its number:  its place among the phases, from 1 (`PhaseIds.numberOf()`), drawn `P3`.
+   * Its number:  its place among the whole-numbered phases, from 1, or its own decimal (`11.1`, epic `epic-engine`
+   * P39;  `PhaseIds.numberOf()`), drawn `P3`, `P11.1`.
    * - read again on every layout change (the page's `layout`:  a phase inserted, moved or removed)
    */
-  get number(): number {
+  get phaseNumber(): string {
     void this.layout
     return PhaseIds.numberOf(this.domElement)
   }
@@ -145,7 +146,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return this.renderFold({
       title: () => (
         <>
-          <span class="id">P{this.number}</span>
+          <span class="id">P{this.phaseNumber}</span>
           <span class="dot" aria-hidden="true">
             {" · "}
           </span>
@@ -237,7 +238,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return (
       <epic-review
         of={this.id}
-        label={`P${this.number}`}
+        label={`P${this.phaseNumber}`}
         shows={shows}
         buttons={this.isProposed ? "proposal" : this.isPlanWaiting ? "plan" : "part"}
         part={this.partForName(part)}

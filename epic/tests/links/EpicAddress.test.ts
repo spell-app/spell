@@ -67,7 +67,7 @@ describe("EpicAddress from `<epic-link>`'s attributes", () => {
     expect(new EpicAddress({ saga: "epics", item: "T3" }).labelFor()).toBe("epics T3")
     expect(new EpicAddress({ epic: "seo" }).labelFor()).toBe("seo")
     const phase = new EpicAddress({ phase: "epic-migrate" })
-    expect(phase.labelFor({ samePage: true, landing: { id: "p7", title: "Epic Migrate", number: 7 } })).toBe(
+    expect(phase.labelFor({ samePage: true, landing: { id: "p7", title: "Epic Migrate", number: "7" } })).toBe(
       "P7 · Epic Migrate"
     )
     expect(phase.labelFor({ samePage: true })).toBe("epic-migrate")
@@ -83,14 +83,27 @@ describe("phases", () => {
   ]
 
   test("by number, by stable id, by name:  with its place as its number", () => {
-    expect(EpicAddress.findPhase(phases, "2")).toMatchObject({ phase: { id: "p-epic-migrate" }, number: 2 })
-    expect(EpicAddress.findPhase(phases, "P3")?.number).toBe(3)
-    expect(EpicAddress.findPhase(phases, "epic-migrate")?.number).toBe(2)
-    expect(EpicAddress.findPhase(phases, "p-epic-migrate")?.number).toBe(2)
+    expect(EpicAddress.findPhase(phases, "2")).toMatchObject({ phase: { id: "p-epic-migrate" }, number: "2" })
+    expect(EpicAddress.findPhase(phases, "P3")?.number).toBe("3")
+    expect(EpicAddress.findPhase(phases, "epic-migrate")?.number).toBe("2")
+    expect(EpicAddress.findPhase(phases, "p-epic-migrate")?.number).toBe("2")
     expect(EpicAddress.findPhase(phases, "Send Command")?.phase.id).toBe("p3")
     expect(EpicAddress.findPhase(phases, "send-command")?.phase.id).toBe("p3")
     expect(EpicAddress.findPhase(phases, "9")).toBeUndefined()
     expect(EpicAddress.findPhase(phases, "nope")).toBeUndefined()
+  })
+
+  test("a decimal phase (P11.1, epic `epic-engine` P39) by its own number;  the whole ones keep theirs", () => {
+    const numbered = [
+      { id: "p-one", title: "One", number: "1" },
+      { id: "p-notebook", title: "Notebook", number: "1.1" },
+      { id: "p-two", title: "Two", number: "2" }
+    ]
+    expect(EpicAddress.findPhase(numbered, "P1.1")).toMatchObject({ phase: { id: "p-notebook" }, number: "1.1" })
+    expect(EpicAddress.findPhase(numbered, "2")?.phase.id).toBe("p-two")
+    expect(EpicAddress.findPhase(numbered, "notebook")?.number).toBe("1.1")
+    expect(EpicAddress.findPhase(numbered, "P1.2")).toBeUndefined()
+    expect(new EpicAddress({ epic: "x", phase: "P11.1" }).labelFor()).toBe("x P11.1")
   })
 
   test("unread pages:  a number guesses `p7`, a name its stable id", () => {
@@ -133,9 +146,9 @@ describe("PageTargets", () => {
 
   test("an item with its title;  a phase by number or name, with its number;  an id in an unloaded part", () => {
     expect(page.find(new EpicAddress({ item: "T1" }))).toEqual({ id: "t1", title: "Do the thing" })
-    expect(page.find(new EpicAddress({ phase: "2" }))).toEqual({ id: "p-second-one", title: "Second one", number: 2 })
-    expect(page.find(new EpicAddress({ phase: "second-one" }))?.number).toBe(2)
-    expect(page.find(new EpicAddress({ item: "p1" }))).toEqual({ id: "p1", title: "First", number: 1 })
+    expect(page.find(new EpicAddress({ phase: "2" }))).toEqual({ id: "p-second-one", title: "Second one", number: "2" })
+    expect(page.find(new EpicAddress({ phase: "second-one" }))?.number).toBe("2")
+    expect(page.find(new EpicAddress({ item: "p1" }))).toEqual({ id: "p1", title: "First", number: "1" })
     expect(page.find(new EpicAddress({ item: "h5" }))).toEqual({ id: "h5" })
     expect(page.find(new EpicAddress({ item: "t9" }))).toBeUndefined()
     expect(page.saga).toBe("epics")

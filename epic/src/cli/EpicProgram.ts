@@ -237,11 +237,18 @@ export class EpicProgram {
 
     this.page(
       epic.command("add-phase"),
-      "add a phase:  what's wrong (symptom), what changes;  --before N inserts it as PN",
-      'epic add-phase seo "Sitemap" --symptom "<p>No sitemap.</p>" --changes "<p>Write one.</p>" --estimate 2h'
+      "add a phase:  what's wrong (symptom), what changes;  --after 11 makes it P11.1, renumbering nothing;  " +
+        "--before N inserts it as PN, renumbering the rest",
+      'epic add-phase seo "Sitemap" --symptom "<p>No sitemap.</p>" --changes "<p>Write one.</p>" --after 11'
     )
       .usage('<epic> "Short Name" --symptom <html> --changes <html> [--goal ...] [--files ...] [--verify ...]')
-      .addHelpText("after", "\n  Also:  [--estimate 2h] [--before N]")
+      .addHelpText(
+        "after",
+        "\n  Also:  [--estimate 2h] [--after N | --before N]" +
+          "\n  --after 11:  P11.1 right after P11 (P11.2 when P11.1 is there);  no other phase changes its number" +
+          "\n  neither, with a Doc Review last:  a decimal of the phase before it (P14.1 ahead of Doc Review P15);" +
+          "\n    a Doc Review under way or done goes back to do, keeping its name and number"
+      )
     this.page(
       epic.command("update"),
       "set a phase's or an item's fields, or the page's flags;  or Claude's status card on an item:  underway " +
@@ -262,8 +269,8 @@ export class EpicProgram {
     this.page(
       epic.command("move"),
       "move a to-do phase to another place among the to-do phases:  the numbers, links and text naming them follow",
-      "epic move seo#P7 4"
-    ).usage("<epic>#P7 <place>")
+      "epic move seo#P7 P4"
+    ).usage("<epic>#P7 <the phase whose place it takes:  P4, P11.1>")
     this.page(
       epic.command("commit"),
       "list a commit under a phase or an item (replacing its entry there)",

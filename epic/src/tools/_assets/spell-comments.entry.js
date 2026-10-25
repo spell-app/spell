@@ -126,9 +126,13 @@ function wireToolbar(main, { signal }) {
       { signal: pane.signal }
     )
   }
-  tabs.addEventListener("ui-opened", (event) => event.target.parentElement === tabs && requestAnimationFrame(drawPane), {
-    signal
-  })
+  tabs.addEventListener(
+    "ui-opened",
+    (event) => event.target.parentElement === tabs && requestAnimationFrame(drawPane),
+    {
+      signal
+    }
+  )
   drawPane()
 }
 

@@ -112,7 +112,9 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   toggle(originalEvent?: Event): boolean {
     const opening = !this.isOpen
     const detail: FoldToggleDetail = { open: opening, element: this.domElement, originalEvent }
-    return this.requestChange("isOpen", opening, () => this.send((opening ? "ui-opening" : "ui-closing") as never, detail))
+    return this.requestChange("isOpen", opening, () =>
+      this.send((opening ? "ui-opening" : "ui-closing") as never, detail)
+    )
   }
 
   /**

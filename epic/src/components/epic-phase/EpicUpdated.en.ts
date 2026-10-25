@@ -29,10 +29,16 @@ export const epicUpdatedVocabulary = {
       format: "time",
       description: "When the plan changed:  `2026-10-06 14:30`, drawn `10/6/26 14:30`."
     },
-    { name: "phase", kind: "number", description: "The phase active when it changed (`3`)." },
+    {
+      name: "phase",
+      kind: "string",
+      format: "phase number",
+      description: "The phase active when it changed, by its number (`3`, `11.1`)."
+    },
     {
       name: "of",
-      kind: "number",
+      kind: "string",
+      format: "phase number",
       description:
         "An OLDER doc's COPY in the Phases section (T14, until 2026-10-11):  the phase whose plan it changes (`5`).  " +
         "Never drawn;  the epic tool removes the copies on its next write.  Never on the line in its phase."

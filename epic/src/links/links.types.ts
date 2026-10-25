@@ -64,12 +64,17 @@ export type Landing = {
   id: string
   /** its title, as text */
   title?: string
-  /** a phase's number, its place among the page's phases (from 1) */
-  number?: number
+  /** a phase's number, as people say it:  `7`, a decimal phase's `11.1` (`PhaseIds.numberOf()`) */
+  number?: string
 }
 
 /** One phase of a page, in page order:  what `EpicAddress.findPhase()` looks through. */
-export type PagePhase = { id: string; title: string }
+export type PagePhase = {
+  id: string
+  title: string
+  /** its number, as people say it (`7`, `11.1`);  absent:  its place among the phases, from 1 */
+  number?: string
+}
 
 /**
  * What the page server answers about a link (`GET /api/epics/target`, `linkRoutes.ts`):  read by `<epic-link>`.

@@ -77,7 +77,12 @@ export const epicItemVocabulary = {
       format: "time",
       description: "When a command last changed its status or review marks (ISO, with offset)."
     },
-    { name: "phase", kind: "number", description: "The phase active when it was added:  its To review line lists it." },
+    {
+      name: "phase",
+      kind: "string",
+      format: "phase number",
+      description: "The phase active when it was added, by its number (`3`, `11.1`):  its To review line lists it."
+    },
     {
       name: "answered",
       kind: "boolean",

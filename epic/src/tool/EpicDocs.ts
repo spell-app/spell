@@ -215,10 +215,11 @@ export class EpicDocs {
   decisions(): EpicDecisions {
     const { plan } = this
     const phases = plan.phaseElements.map((phase, index) => {
-      const { n, name, status } = plan.phases[index]!
+      const { n, number, name, status } = plan.phases[index]!
       const done = phase.querySelector(':scope > epic-field[name="done"]')
       return {
         n,
+        number,
         name,
         status,
         done: done ? PlanMarkup.squeeze(done.textContent ?? "") : null,
@@ -425,8 +426,10 @@ export type EpicDocList = {
 
 /** One phase, as `EpicDocs.decisions()` gives it. */
 export type SettledPhase = {
-  /** its number */
+  /** its place in the list, from 1 */
   n: number
+  /** its number, as people say it:  `7`, `11.1` */
+  number: string
   /** its short name */
   name: string
   /** `todo`, `active` or `done` */

@@ -1,3 +1,5 @@
+import { PhaseIds } from "spell-epic/phases"
+
 import { EpicAddress } from "./EpicAddress"
 import type { Landing, PagePhase } from "./links.types"
 
@@ -35,11 +37,12 @@ export class PageTargets {
     return host ? { id } : undefined
   }
 
-  /** The page's phases, in page order:  each `<epic-phase>`'s id and title. */
+  /** The page's phases, in page order:  each `<epic-phase>`'s id, title and number (`PhaseIds.numberOf()`). */
   get phases(): PagePhase[] {
     return Array.from(this.root.querySelectorAll(PHASE), (phase) => ({
       id: phase.id,
-      title: PageTargets.titleOf(phase)
+      title: PageTargets.titleOf(phase),
+      number: PhaseIds.numberOf(phase)
     }))
   }
 
@@ -60,11 +63,9 @@ export class PageTargets {
     )
   }
 
-  /** A phase's number (its place among the page's phases), for an element that is one. */
-  private numberOf(element: Element): { number?: number } {
-    if (element.localName !== PHASE) return {}
-    const index = Array.from(this.root.querySelectorAll(PHASE)).indexOf(element)
-    return index >= 0 ? { number: index + 1 } : {}
+  /** A phase's number (`7`, `11.1`;  `PhaseIds.numberOf()`), for an element that is one. */
+  private numberOf(element: Element): { number?: string } {
+    return element.localName === PHASE ? { number: PhaseIds.numberOf(element) } : {}
   }
 
   /**

@@ -3,6 +3,7 @@
  */
 export { CaveatsAndTests } from "./CaveatsAndTests"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
+export { DecimalPhasesAgree } from "./DecimalPhasesAgree"
 export { LinksAgree } from "./LinksAgree"
 export { Migrations } from "./Migrations"
 export { MoreRequestsFirst } from "./MoreRequestsFirst"

@@ -7,10 +7,10 @@ import { EpicCommandError } from "./command.types"
  *   - `seo`:  the page
  *   - `seo#J3`:  an item (or a comment, `seo#M3`, `m3` and the old `cm3` read the same;  or an Overview section)
  *   - `seo#P3`:  a phase, by its number, the one way help and messages write it
- *     - `seo#p3` and `seo#3` read the same
+ *     - `seo#p3` and `seo#3` read the same;  a decimal phase too, `seo#P11.1` (epic `epic-engine` P39)
  *     - `seo#p-epic-migrate`:  by its stable id (epic `epic-workflow` P15)
  *     - a verb that takes only a phase (`phase`, `updated`, `file`) takes its name too:
- *       `seo#epic-migrate`, `"seo#Epic Migrate"` (the tool finds it, `PlanDoc.phaseNumber()`)
+ *       `seo#epic-migrate`, `"seo#Epic Migrate"` (the tool finds it, `PlanDoc.phasePlace()`)
  *   - `seo#J`:  a NEW item of that kind, for `add`
  * - `inbox`:  its own verb FIRST, then the epic (Owen's names, epic `repo-split` P13):
  *   `epic inbox wait seo`, `epic inbox done seo#J3`;  `epic inbox seo` alone prints it (`inboxArgs()`)
@@ -141,7 +141,7 @@ export function parseTarget(text: string): EpicTarget {
 
 /**
  * The phase a ref names, as the tool takes it:
- * a number (`P3`, `p3`, `3` -> `3`), or a stable id as it is (`p-epic-migrate`).
+ * a number (`P3`, `p3`, `3` -> `3`;  `P11.1` -> `11.1`), or a stable id as it is (`p-epic-migrate`).
  * - `undefined` when it names something else (an item, or a phase's name:  `phaseRef()`)
  */
 export function phaseOf(ref: string): string | undefined {
@@ -236,7 +236,7 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     const body = PHASE_BODY.filter((key) => key in flags).flatMap((key) => [`--${key}`, value(key)])
     if (body.length) runs.push(["phase-body", epic, phase, ...body])
     if ("estimate" in flags) runs.push(["estimate", epic, phase, value("estimate")])
-    rename(/^\d+$/.test(phase) ? `P${phase}` : phase)
+    rename(phaseLabel(phase))
   } else {
     if (flags.calm && flags.loud) throw new EpicCommandError("update:  --calm or --loud, not both")
     if (flags.calm) runs.push(["calm", epic, ref])
@@ -281,9 +281,9 @@ function flagsOf(args: string[]): Record<string, string | true> {
   return flags
 }
 
-/** A phase as said:  `P3` for `3`, a stable id as it is. */
+/** A phase as said:  `P3` for `3`, `P11.1` for `11.1`, a stable id as it is. */
 export function phaseLabel(phase: string): string {
-  return /^\d+$/.test(phase) ? `P${phase}` : phase
+  return /^\d+(\.\d+)?$/.test(phase) ? `P${phase}` : phase
 }
 
 /**
@@ -424,8 +424,8 @@ const PHASE_EXAMPLES: Record<string, string> = {
   file: " <request id>"
 }
 
-/** A phase ref by number:  `P3`, `p3`, `3`. */
-const PHASE_REF = /^[Pp]?(\d+)$/
+/** A phase ref by number:  `P3`, `p3`, `3`, a decimal phase's `P11.1`. */
+const PHASE_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
 
 /** An item's id (or a comment's, an Overview section's):  `J3`, `M3` (`cm3`), `o2`. */
 const ITEM_REF = /^[A-Za-z]{1,2}\d+$/

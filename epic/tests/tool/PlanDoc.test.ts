@@ -109,8 +109,8 @@ describe("PlanDoc phases", () => {
     expect(plan.addPhase("Runtime + Index", { goal: "sidebar from headings" })).toBe(2)
     // each id stable, made from its name;  its number its place
     expect(plan.phases).toEqual([
-      { n: 1, id: "p-docs-workspace", name: "Docs Workspace", status: "todo", estimate: undefined },
-      { n: 2, id: "p-runtime-index", name: "Runtime + Index", status: "todo", estimate: undefined }
+      { n: 1, number: "1", id: "p-docs-workspace", name: "Docs Workspace", status: "todo", estimate: undefined },
+      { n: 2, number: "2", id: "p-runtime-index", name: "Runtime + Index", status: "todo", estimate: undefined }
     ])
     expect(Markup.read(el(plan, "p2"))).toEqual({ id: "p-runtime-index", title: "Runtime + Index", status: "todo" })
     expect(kids(el(plan, "p2"))).toEqual(["field:goal", "field:files", "field:verify"])
@@ -154,7 +154,7 @@ describe("PlanDoc phases", () => {
     const plan = freshPlan()
     plan.addPhase("One", { goal: "<ul><li>a goal</li></ul>" })
     plan.setPhase(1, "active")
-    expect(plan.activePhase).toBe(1)
+    expect(plan.activePhase).toBe("1")
     expect(el(plan, "p1").getAttribute("status")).toBe("active")
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
     expect([last.getAttribute("at"), last.textContent]).toEqual([PlanTime.isoMinutes(NOW), "P1 active"])
@@ -229,7 +229,7 @@ describe("PlanDoc phases", () => {
     plan.setPhase(2, "active")
     plan.addPhaseUpdate(4, "<p>four changed</p>")
     const item = plan.addItem("todo", "after four", { details: '<p>see <a href="#p-four">P4 · Four</a></p>' })
-    Markup.set<"epic-item">(el(plan, item), { phase: 4 })
+    Markup.set<"epic-item">(el(plan, item), { phase: "4" })
     plan.updateChangeCounts()
     expect(plan.addPhase("Inserted", { before: 3, estimate: "1h" })).toBe(3)
     expect(plan.phases.map((phase) => `${phase.n} ${phase.name} ${phase.status}`)).toEqual([
@@ -249,6 +249,116 @@ describe("PlanDoc phases", () => {
     const link = el(plan, item).querySelector('a[href^="#p"]')!
     expect([link.getAttribute("href"), link.textContent]).toEqual(["#p-four", "P5 · Four"])
     expect(el(plan, item).getAttribute("phase")).toBe("5")
+    expect(problems(plan)).toEqual([])
+  })
+
+  // epic `epic-engine` P39 (r28):  a phase added on the fly is P11.1, renumbering nothing
+  test("--after 11:  P11.1, then P11.2, right after P11;  every later phase keeps its number, links and items land", () => {
+    const plan = freshPlan()
+    for (let n = 1; n <= 12; n++) plan.addPhase(`Phase ${n}`)
+    plan.setPhase(11, "active")
+    const item = plan.addItem("todo", "after twelve", {
+      details: '<p>see <a href="#p-phase-12">P12 · Phase 12</a></p>'
+    })
+    expect(el(plan, item).getAttribute("phase")).toBe("11")
+    expect(plan.phaseLabel(plan.addPhase("Notebook", { after: plan.phasePlace("P11") }))).toBe("P11.1")
+    expect(plan.phaseLabel(plan.addPhase("Reassess", { after: plan.phasePlace("11") }))).toBe("P11.2")
+    // `--after 11.1`:  still its whole phase's next decimal, at the end of their run
+    expect(plan.phaseLabel(plan.addPhase("Third", { after: plan.phasePlace("P11.1") }))).toBe("P11.3")
+    expect(plan.phases.slice(10).map((phase) => `P${phase.number} ${phase.name}`)).toEqual([
+      "P11 Phase 11",
+      "P11.1 Notebook",
+      "P11.2 Reassess",
+      "P11.3 Third",
+      "P12 Phase 12"
+    ])
+    expect(Markup.read(el(plan, "p-notebook"))).toEqual({
+      id: "p-notebook",
+      number: "11.1",
+      title: "Notebook",
+      status: "todo"
+    })
+    // nothing naming a phase by number changed:  the link's words, the item's phase
+    const link = el(plan, item).querySelector('a[href="#p-phase-12"]')!
+    expect(link.textContent).toBe("P12 · Phase 12")
+    expect(el(plan, item).getAttribute("phase")).toBe("11")
+    // found by number as people say it, everywhere
+    for (const ref of ["11.1", "P11.1", "p11.1", "#P11.1", "p-notebook", "Notebook"])
+      expect(plan.phasePlace(ref)).toBe(12)
+    expect(() => plan.phasePlace("P11.9")).toThrow(/no phase P11\.9 in the doc \(P1-P12/)
+    expect(() => plan.addPhase("X", { after: 1, before: 2 })).toThrow(/--before or --after, not both/)
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("a decimal phase active:  items added then say `11.1`, its To review lists them, `phase done` clears its markers", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two"]) plan.addPhase(name)
+    const n = plan.addPhase("Inserted", { after: 1 })
+    plan.setPhase(n, "active")
+    expect(plan.activePhase).toBe("1.1")
+    const item = plan.addItem("question", "while inserted")
+    expect(el(plan, item).getAttribute("phase")).toBe("1.1")
+    plan.updateStates()
+    expect(el(plan, "p-inserted").querySelector(':scope > epic-field[name="to-review"]')?.textContent).toBe("Q1")
+    const last = () => Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!.textContent
+    plan.setPhase(n, "done")
+    expect(last()).toBe("P1.1 done")
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("a commit titled `P1.1:` files under P1.1", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two"]) plan.addPhase(name)
+    plan.addPhase("Notebook", { after: 1 })
+    const added = plan.backfillCommits([
+      { sha: "a".repeat(40), subject: "demo P1.1:  Notebook -- the page" },
+      { sha: "b".repeat(40), subject: "P2:  Two -- the second" }
+    ])
+    expect(added.map((entry) => [entry.sha[0], entry.phase])).toEqual([
+      ["b", 3],
+      ["a", 2]
+    ])
+    expect(Array.from(el(plan, "p-notebook").querySelectorAll("epic-commit"), (commit) => commit.textContent)).toEqual([
+      "the page"
+    ])
+  })
+
+  test("a started Doc Review:  the new phase goes BEFORE it, a decimal of the phase before;  the Doc Review to do again, its number and name kept", () => {
+    const plan = freshPlan()
+    for (const name of ["Build", "Polish", "Doc Review"]) plan.addPhase(name)
+    plan.setPhase(1, "done")
+    plan.setPhase(2, "done")
+    plan.setPhase(3, "active")
+    plan.addPhase("Notebook Page")
+    plan.addPhase("Reassess")
+    expect(plan.phases.map((phase) => `P${phase.number} ${phase.name} ${phase.status}`)).toEqual([
+      "P1 Build done",
+      "P2 Polish done",
+      "P2.1 Notebook Page todo",
+      "P2.2 Reassess todo",
+      "P3 Doc Review todo"
+    ])
+    const lines = Array.from(plan.document.querySelectorAll("#log > epic-event"), (event) => event.textContent)
+    expect(lines).toContain("P3 Doc Review:  back to do (was active), after the new phase")
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("a phase moved past a decimal one:  the decimal re-bases on the phase before it, what names it follows", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two", "Three"]) plan.addPhase(name)
+    plan.addPhase("Two Point", { after: 2 })
+    const item = plan.addItem("todo", "names it", { details: '<p>see <a href="#p-two-point">P2.1 · Two Point</a></p>' })
+    Markup.set<"epic-item">(el(plan, item), { phase: "2.1" })
+    // Two to the end:  Two Point now follows One
+    plan.movePhase(plan.phasePlace("P2"), plan.phaseElements.length)
+    expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual([
+      "P1 One",
+      "P1.1 Two Point",
+      "P2 Three",
+      "P3 Two"
+    ])
+    expect(el(plan, item).getAttribute("phase")).toBe("1.1")
+    expect(el(plan, item).querySelector("a")!.textContent).toBe("P1.1 · Two Point")
     expect(problems(plan)).toEqual([])
   })
 
@@ -295,8 +405,8 @@ describe("PlanDoc phases", () => {
     ])
     const updates = Array.from(el(plan, "p2").querySelectorAll(":scope > epic-update"), (line) => Markup.read(line))
     expect(updates).toEqual([
-      { at: "2026-10-01 09:05", phase: 1, summary: "Make Todo dropped (Owen)" },
-      { at: "2026-10-01 09:05", phase: 1, summary: "Split P2" }
+      { at: "2026-10-01 09:05", phase: "1", summary: "Make Todo dropped (Owen)" },
+      { at: "2026-10-01 09:05", phase: "1", summary: "Split P2" }
     ])
     plan.setPhase(2, "done")
     expect(el(plan, "p2").querySelectorAll(":scope > epic-update")).toHaveLength(2)
@@ -1040,7 +1150,7 @@ describe("PlanDoc commits", () => {
     const parse = (subject: string) => PlanCommits.parseCommitSubject(subject)!
     expect(parse("P1:  Side Bar And Chrome -- Spell Docs + Review tabs")).toEqual({
       epic: null,
-      phases: [1],
+      phases: ["1"],
       items: [],
       title: "Side Bar And Chrome",
       sentence: "Spell Docs + Review tabs"
@@ -1049,15 +1159,18 @@ describe("PlanDoc commits", () => {
     expect(parse("fix I3:  the label").epic).toBe(null)
     // phases and items together, an item range spelled out (r17:  the commit rule names every id)
     expect(parse("spanish P22, J110-J112:  Card Checks -- x")).toMatchObject({
-      phases: [22],
+      phases: ["22"],
       items: ["j110", "j111", "j112"]
     })
-    expect(parse("epic-engine P5, C1, J7:  x")).toMatchObject({ phases: [5], items: ["c1", "j7"] })
+    expect(parse("epic-engine P5, C1, J7:  x")).toMatchObject({ phases: ["5"], items: ["c1", "j7"] })
     expect(parse("P1 follow-up:  ivory rail").sentence).toBe("ivory rail")
-    expect(parse("P4 + P5:  both -- did both").phases).toEqual([4, 5])
-    expect(parse("WIP P3:  half").phases).toEqual([3])
-    expect(parse("review-review P3:  x").phases).toEqual([3])
-    expect(parse("P6a:  first half").phases).toEqual([6])
+    expect(parse("P4 + P5:  both -- did both").phases).toEqual(["4", "5"])
+    expect(parse("WIP P3:  half").phases).toEqual(["3"])
+    expect(parse("review-review P3:  x").phases).toEqual(["3"])
+    expect(parse("P6a:  first half").phases).toEqual(["6"])
+    // a decimal phase (epic `epic-engine` P39)
+    expect(parse("epic-engine P39.1:  Notebook -- x")).toMatchObject({ epic: "epic-engine", phases: ["39.1"] })
+    expect(parse("P11.1 + P12:  x").phases).toEqual(["11.1", "12"])
     expect(parse("Fix I3:  the label").items).toEqual(["i3"])
     expect(parse("review-review J2:  y").items).toEqual(["j2"])
     expect(parse("P052 fonts:  x")).toBe(null)
@@ -2102,7 +2215,7 @@ describe("PlanDoc summary and check", () => {
     plan.setItem("i1", "done")
     const summary = plan.summary()
     expect(summary.title).toBe("Demo Plan")
-    expect(summary.next).toEqual({ n: 2, id: "p-two", name: "Two", status: "todo", estimate: undefined })
+    expect(summary.next).toEqual({ n: 2, number: "2", id: "p-two", name: "Two", status: "todo", estimate: undefined })
     expect(Object.keys(summary.open)).toEqual(["question", "judgement", "issue", "caveat", "todo", "test"])
     expect(summary.open.question.map((item) => item.id)).toEqual(["q1"])
     expect(summary.open.issue).toEqual([])

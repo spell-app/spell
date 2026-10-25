@@ -45,7 +45,16 @@ export const epicPhaseVocabulary = {
       description:
         "Stable, made from its name when it's added, and kept through renames and inserts:  `p-epic-migrate` (an " +
         "older page's `p2`, until `stable-phase-ids`).  Links and comments use it (`#p-epic-migrate`);  the number " +
-        "shown, `P2 · <title>`, is its place among the phases."
+        "shown, `P2 · <title>`, is its place among the whole-numbered phases, or its own `number`."
+    },
+    {
+      name: "number",
+      kind: "string",
+      format: "decimal phase number",
+      description:
+        "A phase added on the fly (epic `epic-engine` P39):  its own number, a decimal of the phase before it " +
+        "(`11.1`, drawn `P11.1`), so no other phase is renumbered.  Absent:  its number is its place among the " +
+        "phases without one."
     },
     {
       name: "title",

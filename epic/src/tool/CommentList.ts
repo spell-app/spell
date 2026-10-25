@@ -301,7 +301,7 @@ export class CommentList {
       back.offset = Number.isInteger(offset) && Number(offset) >= 0 ? Number(offset) : 0
     }
     if (stamp(edited)) back.edited = stamp(edited)
-    if (taken && typeof taken.epic === "string" && Number.isInteger(taken.phase)) {
+    if (taken && typeof taken.epic === "string" && isPhaseNumber(taken.phase)) {
       back.taken = { epic: taken.epic, phase: taken.phase, at: stamp(taken.at) ?? back.at }
       if (typeof taken.phaseId === "string" && PHASE_ID.test(taken.phaseId)) back.taken.phaseId = taken.phaseId
       if (short(taken.title)) back.taken.title = short(taken.title)
@@ -549,11 +549,16 @@ function checkedText(text: unknown): string {
 
 /**
  * The phase a comment was taken into (`CommentList.take()`).
- * - `phase`:  its number then, `7`
+ * - `phase`:  its number then, `7`;  a decimal phase's as text, `"11.1"` (epic `epic-engine` P39)
  * - `phaseId`, `title`:  its stable id (`p-memory`) and title (`Memory`);  none in a comment taken before epic
  *   `epic-engine` I16
  */
-export type TakenInto = { epic: string; phase: number; phaseId?: string; title?: string }
+export type TakenInto = { epic: string; phase: number | string; phaseId?: string; title?: string }
+
+/** Is `phase` a phase's number, as `taken.phase` holds one:  `7`, or a decimal phase's `"11.1"`? */
+function isPhaseNumber(phase: unknown): phase is number | string {
+  return Number.isInteger(phase) || (typeof phase === "string" && /^\d+(\.\d+)?$/.test(phase))
+}
 
 /** A stable phase id, as `taken.phaseId` holds one:  `p-memory`. */
 const PHASE_ID = /^p-[a-z0-9]+(?:-[a-z0-9]+)*$/

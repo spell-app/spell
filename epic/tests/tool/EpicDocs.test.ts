@@ -171,6 +171,7 @@ describe("EpicDocs on a scratch checkout", () => {
     expect(phases).toEqual([
       {
         n: 1,
+        number: "1",
         name: "One",
         status: "done",
         done: "built one",
