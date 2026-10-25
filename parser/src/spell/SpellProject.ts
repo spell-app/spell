@@ -346,7 +346,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * File for `target`'s source map, beside its output in our build folder, e.g. `Solitaire.spell.js.map` (epic
    * `elemental-spell` P14):  each line of its code back to the `.spell` / `.spellx` line it came from.
-   * - Written for a javascript-family target only (`P.JSWriter` and its subclasses):  see `P.SourceMarks`.
+   * - Written for a javascript-family target that runs (`P.JSWriter` and its subclasses):  see `P.SourceMarks`.
+   *   - Never for a library (`ts/lib`):  its `.lib.ts` sits beside its source, committed, so a map there would
+   *     write a `sourceMappingURL` into hand-checked code.
    */
   sourceMapFileFor(target: SP.Target): SP.SpellJSFile {
     return new SP.SpellJSFile(this.getFileLocation(`${this.outputFileFor(target).location.file}.map`)!.path)
@@ -555,9 +557,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                     })
                   }
                   const header = this.importHeader(target.writer)
-                  // a source map as it's written, for a javascript-family target -- see `P.SourceMarks`
+                  // a source map as it's written, for a javascript-family target that runs -- see `P.SourceMarks`
+                  // - never a library's (`ts/lib`):  its `.lib.ts` is source the repo commits and imports, not output
                   const sourceMarks =
-                    target.writer instanceof P.JSWriter ? new P.SourceMarks(SpellProject.sourcePlaceOf) : undefined
+                    target.writer instanceof P.JSWriter && target.can.run !== false
+                      ? new P.SourceMarks(SpellProject.sourcePlaceOf)
+                      : undefined
                   const combine = () =>
                     SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
                       listsStartAt: this.contents?.listsStartAt
