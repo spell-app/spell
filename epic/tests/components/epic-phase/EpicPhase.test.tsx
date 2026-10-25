@@ -242,9 +242,10 @@ describe("<epic-phase> title, folded and open", () => {
     expect(host.matches(":state(open)")).toBe(true)
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(header.hasAttribute("title")).toBe(false)
-    expect(firstLineTop(words)).toBeCloseTo(folded.top, 0)
+    // open, a drawer (I115):  the whole row moves down by the drawer's room above it, 10px, and nothing else moves
+    expect(firstLineTop(words) - folded.top).toBeCloseTo(10, 0)
     // collapse-all shows only while open (as before P25), so the slot's button keeps its height, not its x
-    expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top, 0)
+    expect(button.getBoundingClientRect().top - folded.button.top).toBeCloseTo(10, 0)
   })
 })
 

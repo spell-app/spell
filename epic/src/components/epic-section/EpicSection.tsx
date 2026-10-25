@@ -278,13 +278,14 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - an OPEN item stands free, with room above and below it (I105;  Owen, 2026-10-25:  "touching items are square,
    *   round when free", "more padding above / below open question drawer"):  a run of its own, so the line before it
    *   rounds its bottom, the one after it its top;  its own line rounds all round, its drawer hanging 4px in from its edges
+   * - an OPEN PHASE the same (I115):  a drawer, free above and below
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
     const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
     const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
-    // an open item stands free, room above and below (I105);  an open phase's body ends its run
-    const alone = this.holdsItems() ? isUnfolded : () => false
+    // an open item, or an open phase (its drawer, I115), stands free:  a run of its own
+    const alone = isUnfolded
     return {
       tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1]) || alone(item)),
       bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item) || alone(shown[index + 1]))

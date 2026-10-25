@@ -37,13 +37,18 @@
   :host([kind="overview-part"]) {
     --_epic-fold-band: var(--epic-band-row, transparent);
     --_epic-fold-gap: 14px;
-    --_epic-fold-bleed: var(--epic-inset, 16px);
+    /* inside its section's inset, a card as phases are (I115):  open, a drawer (`EpicFold.css`) */
+    --_epic-fold-bleed: 0px;
   }
   :host([kind="overview-part"]) ui-section {
     --ui-section-title-padding: 8px var(--epic-inset, 16px);
     --ui-section-content-padding: 8px var(--epic-inset, 16px) 0;
     /* its title is an h3:  the line everything in its title row centres on (`EpicFold.css`) */
     --_epic-fold-line: calc(var(--ui-font-size, 16px) * var(--ui-section-h3) * var(--ui-section-title-line-height));
+  }
+  /* open:  its body is a drawer, padded inside (`EpicFold.css`, I115) */
+  :host([kind="overview-part"]:state(open)) ui-section {
+    --ui-section-content-padding: 0;
   }
   /* the phases' own bands reach edge to edge:  their section's content keeps no inset of its own around them */
   :host([kind="phases"]) ui-section {

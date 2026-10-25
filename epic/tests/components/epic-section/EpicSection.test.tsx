@@ -554,7 +554,8 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
 
 // epic `epic-engine` I96, Owen, 2026-10-24:  "showed the white corners at the bottom above P29"
 describe("<epic-section kind=phases> runs of phase title rows", () => {
-  test("P2 open:  P1 rounded on top, P2's title at the bottom, P3 on top, P4 at the bottom;  no rule under P4", async () => {
+  // open, a phase is a drawer, free above and below (I115):  its title rounded all round, and P1 alone
+  test("P2 open:  P1 rounded all round, P2's title all round, P3 on top, P4 at the bottom;  no rule under P4", async () => {
     const phases = [1, 2, 3, 4]
       .map(
         (n) =>
@@ -571,7 +572,7 @@ describe("<epic-section kind=phases> runs of phase title rows", () => {
       const bottom = parseFloat(title.borderBottomLeftRadius) > 0 && parseFloat(title.borderBottomRightRadius) > 0
       ends[phase.id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
     }
-    expect(ends).toEqual({ p1: "top", p2: "bottom", p3: "top", p4: "bottom" })
+    expect(ends).toEqual({ p1: "top bottom", p2: "top bottom", p3: "top", p4: "bottom" })
     expect(getComputedStyle(host.querySelector("#p4")!).borderBottomStyle).toBe("none")
     expect(getComputedStyle(host.querySelector("#p3")!).borderBottomStyle).not.toBe("none")
   })

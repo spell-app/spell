@@ -181,6 +181,45 @@
   .body {
     display: block;
   }
+
+  /*
+   * ## Open, a DRAWER (epic `epic-engine` I115;  Owen, 2026-10-25:  phases and Overview parts "like the questions"):
+   * a PHASE or an OVERVIEW PART opens as an item does (`EpicItem.css`, I104-I106)
+   * - free:  10px of room above and below it, so its corners round ("touching items are square, round when free")
+   * - its title band rounded all round, the bars' one line of shadow under it;  square while stuck under the titles
+   *   above it
+   * - its body:  the drawer's fill, thin side rules running down from 4px in from the band's edges, rounded at the
+   *   bottom;  the note box, when it's last, IS that bottom
+   * - NOT a top-level section:  those stay as they are
+   */
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) {
+    margin-block: 10px;
+  }
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section::part(title) {
+    box-shadow: var(--epic-bar-shadow, 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45)));
+  }
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:not(:state(stuck))::part(title) {
+    border-radius: var(--epic-drawer-radius, 8px);
+  }
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body {
+    margin: 0 var(--epic-drawer-inset, 4px);
+    /* the body's text where it stood:  the band's inset, less the drawer's and its rule */
+    padding: 10px calc(var(--epic-inset, 16px) - var(--epic-drawer-inset, 4px) - 1px) 10px;
+    border: 1px solid var(--epic-rule, var(--ui-border-color));
+    border-top: none;
+    border-end-start-radius: var(--epic-drawer-radius, 8px);
+    border-end-end-radius: var(--epic-drawer-radius, 8px);
+    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
+  }
+  /* the note box, last:  the drawer's bottom, side to side, its bottom corners the drawer's */
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child {
+    margin-inline: calc(var(--epic-drawer-inset, 4px) + 1px - var(--epic-inset, 16px));
+    margin-block-end: -10px;
+  }
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child::part(base) {
+    margin: 8px 0 0;
+    border-radius: 10px 10px calc(var(--epic-drawer-radius, 8px) - 1px) calc(var(--epic-drawer-radius, 8px) - 1px);
+  }
   /* the part can't load:  as today's placeholder line */
   .note {
     margin: 0 0 8px;

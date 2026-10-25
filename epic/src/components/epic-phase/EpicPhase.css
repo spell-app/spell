@@ -27,6 +27,10 @@
     /* its title is an h3:  the line everything in its title row centres on (`EpicFold.css`) */
     --_epic-fold-line: calc(var(--ui-font-size, 16px) * var(--ui-section-h3) * var(--ui-section-title-line-height));
   }
+  /* open:  its body is a drawer, padded inside (`EpicFold.css`, I115) */
+  :host(:state(open)) ui-section {
+    --ui-section-content-padding: 0;
+  }
 
   /*
    * open:  the title's band rounded at the bottom, a card over its body (Owen, 2026-10-24);  square while stuck
