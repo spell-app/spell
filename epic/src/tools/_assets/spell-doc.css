@@ -101,6 +101,14 @@
 html {
   -webkit-text-size-adjust: 100%;
 }
+/*
+ * an epic page's top, the site's bar included, on the page's own background:  one block with its header and toolbar,
+ * one hairline under it all (Owen, 2026-10-24:  "rather have the top section stay all background rather than white")
+ */
+body.plan-doc {
+  --spell-site-header-fill: var(--spell-bg);
+  --spell-site-header-rule: transparent;
+}
 body {
   margin: 0;
   background: var(--spell-bg);

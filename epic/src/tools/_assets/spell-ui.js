@@ -152,9 +152,9 @@ header {
   display: flex; align-items: center; gap: 12px; padding: 0 16px;
   font: 500 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: light-dark(#1d1d22, #ececf1);
-  background: light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86));
+  background: var(--spell-site-header-fill, light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86)));
   backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px);
-  border-bottom: 1px solid light-dark(#e3e0d8, #34343b);
+  border-bottom: 1px solid var(--spell-site-header-rule, light-dark(#e3e0d8, #34343b));
 }
 a { color: inherit; text-decoration: none; }
 .brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }

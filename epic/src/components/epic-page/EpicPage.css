@@ -36,7 +36,9 @@
     --epic-warm: var(--spell-warm, var(--ui-accent-background));
     --epic-code-bg: var(--spell-code-bg, var(--ui-code-background));
     /* the toolbar's band:  the docs' rail ivory (`spell-doc.css`) */
-    --epic-toolbar-fill: var(--spell-rail-fill, var(--epic-warm));
+    /* the page's own background, as the header row's and the site bar's (Owen, 2026-10-24:  "rather have the top section
+       stay all background rather than white") */
+    --epic-toolbar-fill: var(--epic-bg);
     --epic-toolbar-rule: var(--spell-rail-rule, var(--epic-rule));
     /*
      * the header's row:  the toolbar's fill, so the two read as ONE header block under the site's bar (Owen,
