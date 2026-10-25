@@ -233,8 +233,9 @@
   }
   /* the note box, last:  the drawer's bottom, side to side, its bottom corners the drawer's */
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child {
-    margin-inline: calc(var(--epic-drawer-inset, 4px) + 1px - var(--epic-inset, 16px));
-    margin-block-end: -10px;
+    /* over the drawer's side rules (1px out):  they run down into its rounded top corners, no gap (Owen, 2026-10-25) */
+    margin-inline: calc(var(--epic-drawer-inset, 4px) - var(--epic-inset, 16px));
+    margin-block-end: -11px;
   }
   /* the note box sticks to the window's bottom while its block is open and taller than the window, as an item's does
      (Owen, 2026-10-25:  "The comment at the bottom should be sticky like it is in questions") */
@@ -245,7 +246,7 @@
   }
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
-    border-radius: 10px 10px calc(var(--epic-drawer-radius, 8px) - 1px) calc(var(--epic-drawer-radius, 8px) - 1px);
+    border-radius: 10px 10px var(--epic-drawer-radius, 8px) var(--epic-drawer-radius, 8px);
   }
   /* the part can't load:  as today's placeholder line */
   .note {

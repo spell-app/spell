@@ -126,16 +126,18 @@
    */
   .item.unfolded > .details > [part~="note-box"]:last-child {
     bottom: 0;
-    margin-inline: calc(var(--_epic-drawer-inset) + 1px - var(--_epic-item-indent)) -6px;
+    /* over the drawer's side rules (1px out):  they run down into its rounded top corners, no gap (Owen, 2026-10-25) */
+    margin-inline: calc(var(--_epic-drawer-inset) - var(--_epic-item-indent)) -7px;
     /* over the drawer's bottom padding:  the box IS its bottom */
-    margin-block-end: -10px;
+    margin-block-end: -11px;
   }
   .item.unfolded > .details > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
     /* its frame all round, light (the answer-look page's Q2:  "lose heavy border on top") */
     /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
-    border-radius: 10px 10px max(0px, calc(var(--_epic-item-bottom-radius) - 1px))
-      max(0px, calc(var(--_epic-item-bottom-radius) - 1px));
+    border-radius: 10px 10px var(--_epic-item-bottom-radius) var(--_epic-item-bottom-radius);
+    /* its paper ring only above, 1px in at the sides:  the drawer's side rules show down to its rounded corners */
+    box-shadow: 0 -4px 0 -1px var(--ui-background, Canvas);
     /* one line of shadow, its own (EpicReview.css) */
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
