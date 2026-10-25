@@ -8,7 +8,7 @@ import { FOLDS_KEY } from "./site.types"
 /****************
  * ### `SiteSections`
  * The page side of the site's nested `<ui-section>`s (written into the pages by `yarn site:sections`):
- * where their titles stick, the reader's folds, and LANDING on a `#hash`.
+ * where their titles stick, which sections the reader closed, and LANDING on a `#hash`.
  * - ONE per page (`SiteSections.instance`), following whichever `main` the router shows (`show()`).
  * - Sticky:  the page header's title line sticks under the top bar, and the tabs' bar under it
  *   (`site.css`, "The page header" and "Sections and tabs").
@@ -19,14 +19,14 @@ import { FOLDS_KEY } from "./site.types"
  *   - The same line goes on `main` as `--site-sections-top`,
  *     for the browser's own anchor scrolling (`scroll-margin-top`).
  *   - A page's own sticky bar (`PAGE_BAR`) stacks between.
- * - Folds:  remembered per page, in `localStorage` through `PrefStore`
- *   (`FOLDS_KEY` + the path:  `{ [section id]: folded }`).
+ * - Closed sections:  remembered per page, in `localStorage` through `PrefStore`
+ *   (`FOLDS_KEY` + the path:  `{ [section id]: closed }`).
  *   - The reader's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
  *   - Everything else starts OPEN.
- *   - An unfold made by a landing, or by find-in-page, is never saved.
+ *   - An opening made by a landing, or by find-in-page, is never saved.
  * - Landing (`land()`):
  *   - the target's pane selected (the first word of a section id IS its tab:  `#usage-keyboard`)
- *   - every section around it (and itself) unfolded without animation
+ *   - every section around it (and itself) opened without animation
  *   - then scrolled so its title sits just below the stuck ones
  *   - once more after `SETTLE_MS` (late layout, the toc's own first scroll),
  *     unless the reader scrolled, clicked or typed meanwhile
@@ -123,14 +123,14 @@ export class SiteSections {
   ////////////////
 
   /**
-   * `main` is the page shown (its first load, or a swap):  restore its folds, set the sticky offsets,
+   * `main` is the page shown (its first load, or a swap):  restore its closed sections, set the sticky offsets,
    * and again once its `<ui-root>` is ready (the tabs' bar has drawn).
-   * - `isFirst`:  before the sections are defined, so a restored fold just starts folded.
-   *   After a swap they have drawn, so it folds without its animation.
+   * - `isFirst`:  before the sections are defined, so a restored close just starts closed.
+   *   After a swap they have drawn, so it closes without its animation.
    */
   show(main: HTMLElement, { isFirst = false }: { isFirst?: boolean } = {}): void {
     this.main = main
-    this.restoreFolds(main, { isInstant: !isFirst })
+    this.restoreClosed(main, { isInstant: !isFirst })
     SiteSections.splitSubtitle(main)
     this.measure()
     TocIndex.whenReady(main, () => {
@@ -219,12 +219,12 @@ export class SiteSections {
   }
 
   ////////////////
-  // ## Folds
+  // ## Open and closed
   ////////////////
 
-  /** Fold or unfold `main`'s sections as the reader left them on this page;  `isInstant`:  without the animation. */
-  private restoreFolds(main: HTMLElement, { isInstant }: { isInstant: boolean }): void {
-    const saved = SiteSections.readFolds()
+  /** Open or close `main`'s sections as the reader left them on this page;  `isInstant`:  without the animation. */
+  private restoreClosed(main: HTMLElement, { isInstant }: { isInstant: boolean }): void {
+    const saved = SiteSections.readClosed()
     let hasChanged = false
     for (const section of SiteSections.pageSections(main)) {
       if (!section.hasAttribute("collapsible") || !(section.id in saved)) continue
@@ -237,36 +237,36 @@ export class SiteSections {
   }
 
   /**
-   * The reader folded or unfolded a section:  remember it.
+   * The reader opened or closed a section:  remember it.
    * - Not ours:
    *   - another element's, demo sections inside examples, a vetoed toggle
-   *   - a `ui-opening` that can't be cancelled (find-in-page's reveal:  never saved, as a landing's unfold isn't)
+   *   - a `ui-opening` that can't be cancelled (find-in-page's reveal:  never saved, as a landing's opening isn't)
    */
   private onToggle(event: CustomEvent<{ open: boolean }>): void {
     const section = event.target as HTMLElement
     if (section.localName !== SECTION_TAG || !section.id || !this.main?.contains(section)) return
     if (!event.cancelable || event.defaultPrevented || section.parentElement?.closest(NOT_PAGE)) return
-    const saved = SiteSections.readFolds()
+    const saved = SiteSections.readClosed()
     saved[section.id] = !event.detail.open
-    SiteSections.writeFolds(saved)
+    SiteSections.writeClosed(saved)
   }
 
-  /** Unfold every section around `target` (and `target`, a section), without the animation;  true if any was. */
-  private static unfold(main: HTMLElement, target: Element): boolean {
-    let hasUnfolded = false
+  /** Open every section around `target` (and `target`, a section), without the animation;  true if any was. */
+  private static openAround(main: HTMLElement, target: Element): boolean {
+    let hasOpened = false
     for (
       let section: Element | undefined = target.closest(SECTION_TAG) ?? undefined;
       section && main.contains(section);
     ) {
       if (section.hasAttribute(COLLAPSED)) {
-        if (!hasUnfolded) SiteSections.instantly(main)
+        if (!hasOpened) SiteSections.instantly(main)
         // controlled:  writing it announces nothing, so it isn't saved
         section.removeAttribute(COLLAPSED)
-        hasUnfolded = true
+        hasOpened = true
       }
       section = SiteSections.sectionAround(section)
     }
-    return hasUnfolded
+    return hasOpened
   }
 
   ////////////////
@@ -277,7 +277,7 @@ export class SiteSections {
    * Land on `hash` in `main`, if it names something there.
    * - False when it doesn't (or names a pane:  the tabs show it themselves),
    *   so the caller can scroll to the top instead.
-   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the folds have drawn.
+   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the opened sections have drawn.
    * - `scroll`:  `"jump"` (a page arriving at its address) or `"glide"` (a link on the page)
    *   - glide:  a smooth scroll, the stuck bars staying put;  a jump all the same under reduced motion
    */
@@ -335,10 +335,10 @@ export class SiteSections {
     const pane = tabs && TocIndex.paneOf(tabs, holder)
     if (tabs && pane && TocIndex.shownPane(tabs) !== pane)
       (tabs as HTMLElement & { value?: string }).value = TocIndex.paneValue(tabs, pane)
-    const hasUnfolded = SiteSections.unfold(main, holder)
+    const hasOpened = SiteSections.openAround(main, holder)
     for (let frame = 0; frame < SHOW_FRAMES && !SiteSections.boxOf(target); frame++) await SiteSections.frames(1)
     // after the toc's own first-load scroll (`<ui-docs-toc>` lands a hash a frame after the root is ready)
-    await SiteSections.frames(hasUnfolded ? UNFOLD_FRAMES : 2)
+    await SiteSections.frames(hasOpened ? OPEN_FRAMES : 2)
     if (landing !== this.landings) return
     this.measure()
     this.scrollTo(target, holder, scroll)
@@ -466,10 +466,10 @@ export class SiteSections {
     if (element.getAttribute(OFFSET) !== offset) element.setAttribute(OFFSET, offset)
   }
 
-  /** Folds and unfolds in `main` skip their animation for a few frames:  a landing measures right after. */
+  /** Opening and closing in `main` skip their animation for a few frames:  a landing measures right after. */
   private static instantly(main: HTMLElement): void {
     main.style.setProperty(SECTION_DURATION, "0s")
-    void SiteSections.frames(UNFOLD_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
+    void SiteSections.frames(OPEN_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
   }
 
   /** Resolves after `count` animation frames. */
@@ -477,15 +477,15 @@ export class SiteSections {
     for (let frame = 0; frame < count; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
   }
 
-  /** This page's saved folds, `{}` when none. */
-  private static readFolds(): Record<string, boolean> {
+  /** This page's saved closed sections, `{}` when none. */
+  private static readClosed(): Record<string, boolean> {
     const saved = PrefStore.getAt(FOLDS_KEY + location.pathname)
     return saved && typeof saved === "object" ? (saved as Record<string, boolean>) : {}
   }
 
-  /** Save this page's folds, as JSON;  where storage is blocked, for this page only. */
-  private static writeFolds(folds: Record<string, boolean>): void {
-    PrefStore.setAt(FOLDS_KEY + location.pathname, folds)
+  /** Save this page's closed sections, as JSON;  where storage is blocked, for this page only. */
+  private static writeClosed(closed: Record<string, boolean>): void {
+    PrefStore.setAt(FOLDS_KEY + location.pathname, closed)
   }
 }
 
@@ -495,13 +495,13 @@ export class SiteSections {
  */
 type Found = { target: Element; id: string } | { api: HTMLElement; tag: string }
 
-/** Frames a section takes to draw what an unfold revealed (the write lands on a microtask, the render next frame). */
-const UNFOLD_FRAMES = 3
+/** Frames a section takes to draw what an opening revealed (the write lands on a microtask, the render next frame). */
+const OPEN_FRAMES = 3
 
 /** Frames to wait at most for a target to get a box (its pane swapping in, inside a View Transition). */
 const SHOW_FRAMES = 30
 
-/** Land once more after this long, ms:  late layout (images, a fold's last frame) moves the target a little. */
+/** Land once more after this long, ms:  late layout (images, a close's last frame) moves the target a little. */
 const SETTLE_MS = 400
 
 /** How a landing scrolls:  a page arriving jumps;  a link on the page glides (`land()`). */
@@ -556,7 +556,7 @@ const NOT_PAGE = "ui-docs-example, template"
 /** The section tag. */
 const SECTION_TAG = "ui-section"
 
-/** A section's folded attribute (controlled:  writing it announces nothing). */
+/** A section's closed attribute (controlled:  writing it announces nothing). */
 const COLLAPSED = "collapsed"
 
 /** The sticky offset attribute of a section or `<ui-sticky>`, px. */
@@ -565,7 +565,7 @@ const OFFSET = "offset"
 /** `main`'s custom property:  the line below the stuck bar, for anchor scrolling (`site.css`). */
 const SECTIONS_TOP = "--site-sections-top"
 
-/** `<ui-section>`'s fold duration token:  `0s` while folds go instantly. */
+/** `<ui-section>`'s open / close duration token:  `0s` while they go instantly. */
 const SECTION_DURATION = "--ui-section-duration"
 
 /** A tag name, as `<ui-docs-api>` gives each tag's header its id (`ui-or`). */
