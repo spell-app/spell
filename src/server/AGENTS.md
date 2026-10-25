@@ -252,6 +252,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Settings that name no sets:  no sets served.
     - The bundles it serves are NOT committed:  it builds the stale ones as it starts
       (`BundleBuild`, in [page/](page/BundleBuild.ts):  `spell bundle --stale`, as a child;  spell-app's until P16).
+      - and again whenever their sources change while it runs (`BundleBuild.watch()`), once quiet 3s:  a merge into
+        the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
       - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.

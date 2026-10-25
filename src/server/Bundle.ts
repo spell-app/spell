@@ -160,6 +160,22 @@ export class Bundle {
     return this.sources().map(([name]) => name)
   }
 
+  /**
+   * Where its sources are:  each of `spec.sources` as an absolute folder or file, as `sourceFiles()` finds them;
+   * the ones not there left out.  For watching them (`BundleBuild.watch()`).
+   */
+  sourceRoots(): string[] {
+    const roots: string[] = []
+    for (const source of this.spec.sources) {
+      const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
+      const folder = named && packageFolder(named[1]!, this.root)
+      if (named?.[1]!.startsWith("@") && !folder) continue
+      const path = folder ? join(folder, named![2] ?? "") : join(installRoot(this.root), source)
+      if (statSync(path, { throwIfNoEntry: false })) roots.push(path)
+    }
+    return roots
+  }
+
   /** `sourceFiles()`'s names, each with its file, absolute;  sorted by name. */
   private sources(): Array<[name: string, file: string]> {
     const found: Array<[string, string]> = []
