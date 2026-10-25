@@ -289,6 +289,8 @@ The other three panes:
   `<ui-docs-api family="ui-button">` draws every table from the vocabularies,
   and `yarn site:sections` splits it into one section per kind the family has (Attributes, Events ...),
   each holding `<ui-docs-api family="ui-button" only="attributes">`.
+  - A family of 2+ tags gets a Tags section first:  each tag with its one-line summary,
+    its name a link to its first table below (`<ui-docs-api family="ui-button" only="tags">`).
   - So the API tab gets the same row of section buttons as Examples.
   - Its "On this page" list names every attribute, event, slot ... under its section;
     a click lands on the row (`#api-attributes-size`), which flashes.

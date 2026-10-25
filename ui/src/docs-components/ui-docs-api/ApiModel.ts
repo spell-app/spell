@@ -86,10 +86,25 @@ export class ApiModel {
     return sections.filter((section) => section.rows.length)
   }
 
-  /** The tables any of `tags` has, in `ApiSectionIds` order:  the sections a page's API tab gets. */
+  /**
+   * The tables any of `tags` has, in `ApiSectionIds` order:  the sections a page's API tab gets.
+   * - 2+ tags (a family's):  the `tags` table first.
+   */
   static sectionIdsFor(tags: readonly SiteTag[]): ApiSectionId[] {
     const ids = new Set(tags.flatMap((tag) => ApiModel.sectionsFor(tag).map((section) => section.id)))
+    if (tags.length > 1) ids.add(TAGS)
     return ApiSectionIds.filter((id) => ids.has(id))
+  }
+
+  /**
+   * A family's `tags` table:  each tag, in the family's order, with its one-line summary.
+   * - Each tag's name links to its first table below (`#<tag>`:  the page lands on the tag's first header);
+   *   a tag with no tables is named, not linked.
+   * - `undefined` for fewer than 2 tags:  one tag's page needs no list of its tags.
+   */
+  static tagsSectionFor(tags: readonly SiteTag[]): ApiSection | undefined {
+    if (tags.length < 2) return undefined
+    return { id: TAGS, columns: ["tag", "description"], rows: tags.map((tag) => ApiModel.tagRow(tag)) }
   }
 
   /** A table's id as `only` writes it:  `usedIn` => `used-in`. */
@@ -144,6 +159,19 @@ export class ApiModel {
   ////////////////
   // ## Rows
   ////////////////
+
+  /** `<tag>` as the name (a link to its first table, when it has one), its summary. */
+  private static tagRow(tag: SiteTag): ApiRow {
+    const hasTables = ApiModel.sectionsFor(tag).length > 0
+    return {
+      key: tag.tag,
+      name: `<${tag.tag}>`,
+      cells: [
+        { type: "name", code: `<${tag.tag}>`, ...(hasTables && { href: `#${tag.tag}` }), notes: [] },
+        { type: "text", text: tag.description ?? "" }
+      ]
+    }
+  }
 
   /** Prop name (`required` as a note), its type as code, description. */
   private static propRow(prop: SiteProp): ApiRow {
@@ -256,6 +284,9 @@ export class ApiModel {
     return values.every((value, index) => /^\d+$/.test(value) && Number(value) === Number(values[0]) + index)
   }
 }
+
+/** The family's table of its tags (`tagsSectionFor()`). */
+const TAGS = "tags"
 
 /** The default slot's name in the "On this page" list and its anchor (the table says `(default)`, translated). */
 const DEFAULT_SLOT = "default"

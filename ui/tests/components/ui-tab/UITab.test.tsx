@@ -122,6 +122,12 @@ describe("<ui-tabs> classes", () => {
       "ui equal fluid aligned segmented tabs",
       "ui equal fluid aligned segmented menu"
     ],
+    // the docs site's page tabs, in the new words (epic `ui-gaps` P4)
+    [
+      'appearance="segmented basic" align="fluid" equal',
+      "ui equal fluid aligned segmented basic tabs",
+      "ui equal fluid aligned segmented menu"
+    ],
     ['vertical alignment="center"', "ui vertical tabs", "ui vertical menu"]
   ])("<ui-tabs %s>", async (attributes, rootClass, menuClasses) => {
     const { root, menu } = await tabs(attributes)

@@ -535,6 +535,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - It writes (or fixes) their ids, `<tab>-<section>-<example>`;  idempotent.
   - It splits a components page's API tab into a section per kind of table its tags have
     (`<ui-docs-api family only="attributes">` ...), from the site's data:  rerun it after `yarn site:data`.
+    - A family of 2+ tags gets a Tags section first (`only="tags"`):  its tags, their summaries, links to their tables.
   - `site:index`, `site:kitchen` and `site:new` run it on what they write.
 - `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell design build`):
   the claude.ai design system's files (epic `claude-design`).
