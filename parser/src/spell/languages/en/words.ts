@@ -121,6 +121,8 @@ export const englishWords: SP.LanguageWords = {
   ongoingEventName: /ing$/,
   // the app's own actions, as a menu names them (`define_menu`, epic `elemental-spell` P10)
   appActions: { undo: "undo", redo: "redo" },
+  // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
+  exampleTag: "example",
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
   retiredTypeWords: {
@@ -143,7 +145,9 @@ export const englishWords: SP.LanguageWords = {
       page: "page",
       app: "app",
       "page-template": "page template",
-      "app-template": "app template"
+      "app-template": "app template",
+      // a page of prose, examples and its own templates (epic `elemental-spell` P16)
+      notebook: "notebook"
     },
     declarations: {
       property: "property",
@@ -152,7 +156,9 @@ export const englishWords: SP.LanguageWords = {
       draw: "draw",
       event: "event",
       test: "test",
-      menu: "menu"
+      menu: "menu",
+      // a heading over the members after it (epic `elemental-spell` P16)
+      group: "group"
     },
     notes: { description: "description", comment: "comment" },
     handlers: { on: "on", when: "when", while: "while" },
@@ -176,7 +182,9 @@ export const englishWords: SP.LanguageWords = {
       "selected-when": "selected-when",
       "undone-as": "undone-as",
       icon: "icon",
-      "menu-bar": "menu-bar"
+      "menu-bar": "menu-bar",
+      locked: "locked",
+      group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -189,7 +197,8 @@ export const englishWords: SP.LanguageWords = {
         page: "page",
         app: "app",
         "page template": "page",
-        "app template": "app"
+        "app template": "app",
+        notebook: "notebook"
       },
       property: {
         list: "its {name} is one of {one-of}",
@@ -220,6 +229,10 @@ export const englishWords: SP.LanguageWords = {
       menu: "its {name} is a menu of",
       menuAnd: "and",
       menuBar: "its menu bar is {quoted menu-bar}",
+      group: "group {name}",
+      notebookContent: "to draw its content :",
+      notebookLocked: "its lock is locked",
+      start: "start {words}",
       handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
       controls: {
         if: "if {phrase}",

@@ -31,10 +31,28 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     // with fill-ins:  one `{...}` child, a template string
     if (match.data.fillIns) return new P.ASTJSXExpression(match, { expression: fillInsAST(match, match.data.fillIns) })
     const { raw, value } = match.matched[0] as P.JSXTextToken
-    const text = value.trim()
+    const text = jsxText(value)
     // Blank text has nothing to render -- return `undefined` for "no AST" (`Rule.getAST()`'s return
     // type already permits this; `Match.AST` treats a falsy return as "no AST").
     if (!text) return undefined
     return new P.ASTJSXText(match, { raw, value: text })
   }
+}
+
+/**
+ * `value`, a run of JSX text, as JSX reads it:  each line trimmed where it meets a line break, blank lines dropped,
+ * the lines joined by a space;  text on one line keeps its spaces, `Clicked ` before a hole.
+ */
+function jsxText(value: string): string {
+  if (!value.includes("\n")) return value
+  const lines = value.split(/\r?\n/)
+  return lines
+    .map((line, index) => {
+      let each = line
+      if (index > 0) each = each.trimStart()
+      if (index < lines.length - 1) each = each.trimEnd()
+      return each
+    })
+    .filter((line) => line.trim())
+    .join(" ")
 }

@@ -133,6 +133,29 @@ export const drawingMethods = defineCoreModule({
   ////////////////
 
   /**
+   * Mount `view`'s drawing into `core.appElement()`, as the program's page:  what `App.start()` and `Page.start()` do
+   * (`start the game`, `start the counter notebook`).
+   * - Creates a `core.REACT_APP_ROOT_ID` container `div` if there's none.
+   * - On a page that defines elements, that's the view's element, `<solitaire-app>`, its drawing inside it.
+   * - Starting again replaces what's drawn there.
+   * - SIDE EFFECT: appends a `div` to `document.body` the first time it's called, if the host set no `appRoot`.
+   * - With `core.appLayout` (a `<spell-viewer>` with markup inside it):  draws nothing, saying so on the console.
+   */
+  startDrawing(view: CanDraw): void {
+    if (core.appLayout) {
+      core.console.log(`${view.constructor.name}:  its page's markup draws it, not its \`to draw\``)
+      return
+    }
+    let element = core.appElement()
+    if (!element) {
+      element = document.createElement("div")
+      element.id = core.REACT_APP_ROOT_ID
+      document.body.appendChild(element)
+    }
+    core.mountApp(view, element)
+  },
+
+  /**
    * Mount `app`'s drawing into `element` -- replacing what was there -- and return how to take it down again.
    * - What `App.start()` does, into `core.appElement()`.
    * - SIDE EFFECT:  `element.spellRoot` is the mounted app:

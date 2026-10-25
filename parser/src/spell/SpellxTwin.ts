@@ -140,6 +140,11 @@ export class SpellxTwin {
         return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :"))
       case "control":
         return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"))
+      case "start":
+        return {
+          line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
+          takesNextItem: false
+        }
       default:
         return this.skipped()
     }
@@ -154,7 +159,11 @@ export class SpellxTwin {
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    */
   private template(): SpellxTwinLine {
+    const regrouped = this.block && SpellxTwin.withGroupsOpened(this.block)
+    if (regrouped)
+      return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
+    if (kind === "notebook") return this.notebook()
     const singleton = kind === "page" || kind === "app"
     const shape = singleton
       ? this.words.singleton
@@ -163,6 +172,203 @@ export class SpellxTwin {
         : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
     return this.lineAndBlock(this.expand(shape), [], menuBar)
+  }
+
+  /**
+   * A notebook (epic `elemental-spell` P16):  a page, `counter notebook is a notebook :`, its body a drawing.
+   * - Its members stay its members (`<property>`, `<action>` ...).
+   * - Everything else is its content's drawing, `- to draw its content :`, in order:
+   *   - markup, `<section>`, `<example "one counter">`, as written
+   *   - each run of prose as a `<markdown>` block, a new block at each `##` heading:  a section of the page
+   * - `locked`:  a line, `- its lock is locked`.
+   * - Its own templates aren't in its block:  the tokenizer lifted them out, to after it (`liftNotebooks()`).
+   */
+  private notebook(): SpellxTwinLine {
+    const members: Array<P.LineToken | P.BlockToken> = []
+    const drawing: Array<P.LineToken | P.BlockToken> = []
+    let prose: Array<SP.SpellxProseToken | null> = []
+    let last: typeof members | undefined
+    const endProse = () => {
+      drawing.push(...this.markdownLines(prose))
+      prose = []
+    }
+    for (const item of this.block?.tokens ?? []) {
+      if (item instanceof P.BlockToken) {
+        ;(last ?? drawing).push(item)
+        continue
+      }
+      if (!(item instanceof P.LineToken)) continue
+      const [first] = item.tokens
+      if (first instanceof SP.SpellxProseToken && !first.note && item.tokens.length === 1) {
+        prose.push(first)
+        continue
+      }
+      // a blank line:  inside a run of prose, part of it
+      if (!first) {
+        if (prose.length) prose.push(null)
+        continue
+      }
+      endProse()
+      const isCloser = first instanceof SP.SpellxCloserToken && item.tokens.length === 1
+      const isMember =
+        (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
+        (first instanceof SP.SpellxProseToken && !!first.note)
+      // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
+      if (isCloser) {
+        if (last === members) members.push(item)
+        continue
+      }
+      last = isMember ? members : drawing
+      last.push(item)
+    }
+    endProse()
+    const indent = this.block?.indent ?? (this.line.indent ?? 0) + 1
+    const lineOf = (tokens: P.Token[]) =>
+      new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens })
+    const items: Array<P.LineToken | P.BlockToken> = [...members]
+    if (this.tag.attributes.some((attribute) => attribute.name === "locked"))
+      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookLocked)]))
+    if (drawing.length) {
+      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookContent)]))
+      SpellxTwin.joinMarkup(drawing)
+      const [first] = drawing
+      items.push(
+        new P.BlockToken({ start: first!.start, line: first!.line, ch: first!.ch, indent: indent + 1, tokens: drawing })
+      )
+    }
+    const line = new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.singleton) })
+    if (!items.length) return { line, takesNextItem: !!this.block, swallowsNextItem: !!this.block }
+    const body = new P.BlockToken({
+      start: this.block?.start ?? this.head.start,
+      line: this.block?.line ?? this.head.line,
+      ch: this.block?.ch ?? this.head.ch,
+      indent,
+      tokens: items
+    })
+    return { line, body, takesNextItem: !!this.block }
+  }
+
+  /**
+   * `lines` with each run of lines holding only markup joined into ONE line, an implicit fragment:
+   * the drawing is those elements side by side, as code spell's tokenizer joins the elements on lines one after
+   * another (`P.Tokenizer.matchJSXElements()`).
+   * - A `<markdown>` block or an `<example>` is then a child of the fragment, read as one (`jsxChild`).
+   * - SIDE EFFECT:  changes `lines` in place.
+   */
+  private static joinMarkup(lines: Array<P.LineToken | P.BlockToken>) {
+    const isMarkup = (item: P.Token | undefined): item is P.LineToken =>
+      item instanceof P.LineToken &&
+      item.tokens.length > 0 &&
+      item.tokens.every((token) => token instanceof P.JSXElementToken || token instanceof P.JSXFragmentToken)
+    for (let index = 0; index < lines.length; index++) {
+      let end = index
+      while (isMarkup(lines[end])) end++
+      if (end - index < 2) continue
+      const run = lines.slice(index, end) as P.LineToken[]
+      const children = run.flatMap((line) =>
+        line.tokens.flatMap((token) =>
+          token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
+        )
+      )
+      const [first] = run
+      const fragment = new P.JSXFragmentToken({ start: first!.start, raw: "", children, isImplicit: true })
+      lines.splice(index, run.length, new P.LineToken({ ...first!.record, tokens: [fragment] }))
+    }
+  }
+
+  /**
+   * A run of a notebook's `prose` as `<markdown>` blocks, a line each:  a new one at each `##` heading, so each
+   * section of the page starts with its own (`markdown_block` draws them).
+   * - Each block stands where its first line is, its text the lines as written, less their indent.
+   */
+  private markdownLines(prose: Array<SP.SpellxProseToken | null>): P.LineToken[] {
+    const runs: Array<Array<SP.SpellxProseToken | null>> = []
+    for (const token of prose) {
+      if (!runs.length || (token && /^##\s/.test(`${token.value}`))) runs.push([])
+      runs.at(-1)!.push(token)
+    }
+    return runs.flatMap((run) => {
+      while (run.length && !run.at(-1)) run.pop()
+      const [first] = run
+      if (!first) return []
+      // each line as written, less the indent its run's first line has:  a nested list stays nested
+      const indentOf = (token: SP.SpellxProseToken) => "  ".repeat(Math.max(0, (token.ch ?? 0) - (first.ch ?? 0)))
+      const text = run.map((token) => (token ? indentOf(token) + `${token.value}` : "")).join("\n")
+      const end = run.at(-1)!.end
+      const element = new P.JSXElementToken({
+        tagName: MARKDOWN,
+        start: first.start,
+        raw: text,
+        children: [
+          new P.JSXTextToken({ value: text, raw: text, start: first.start }) as unknown as P.JSXElementToken,
+          new P.JSXEndTagToken({ raw: `</${MARKDOWN}>`, tagName: MARKDOWN, start: end }) as unknown as P.JSXElementToken
+        ]
+      })
+      const indent = this.block?.indent ?? 1
+      return [
+        new P.LineToken({ start: first.start, line: first.line, ch: first.ch, indent: indent + 1, tokens: [element] })
+      ]
+    })
+  }
+
+  /**
+   * Template `block` with a group opened above each member written away from its group, `group="direction"`, and the
+   * group it's among opened again below it (epic `elemental-spell` P16):  code spell's twin has no word for a member's
+   * group, only the headings, `- group "direction"`, each member under the nearest above it.
+   * - `undefined` when no member needs it:  `block` as it is.
+   * - The headings it adds are `<group>` tags of their own, standing at the member, with no text of their own.
+   */
+  private static withGroupsOpened(block: P.BlockToken): P.BlockToken | undefined {
+    const items = block.tokens
+    let current: SP.SpellxTagToken | undefined
+    let changed = false
+    const out: Array<P.LineToken | P.BlockToken> = []
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index]!
+      const head = item instanceof P.LineToken ? item.tokens[0] : undefined
+      if (!SP.isSpellxTag(head)) {
+        out.push(item)
+        continue
+      }
+      if (head.tag.category === "declaration" && head.tag.kind === "group") {
+        current = head
+        out.push(item)
+        continue
+      }
+      const group = head.tag.attributes.find((attribute) => attribute.name === "group")?.value
+      if (!group || group.text === current?.tag.name?.text) {
+        out.push(item)
+        continue
+      }
+      // this member, its block and its closer:  under its own group, then back to the one it's among
+      let count = items[index + 1] instanceof P.BlockToken ? 2 : 1
+      const closer = items[index + count]
+      if (
+        closer instanceof P.LineToken &&
+        closer.tokens.length === 1 &&
+        closer.tokens[0] instanceof SP.SpellxCloserToken
+      )
+        count++
+      out.push(SpellxTwin.groupLine(head, group, item as P.LineToken), ...items.slice(index, index + count))
+      if (current?.tag.name) out.push(SpellxTwin.groupLine(head, current.tag.name, item as P.LineToken))
+      index += count - 1
+      changed = true
+    }
+    return changed ? new P.BlockToken({ ...block.record, tokens: out }) : undefined
+  }
+
+  /** A `<group>` line opening group `name`, standing at member `head`'s line. */
+  private static groupLine(head: SP.SpellxTagToken, name: SP.SpellxText, line: P.LineToken): P.LineToken {
+    const tag: SP.SpellxTag = {
+      category: "declaration",
+      kind: "group",
+      word: "group",
+      name,
+      attributes: [],
+      selfClosing: true
+    }
+    const token = new SP.SpellxTagToken({ start: head.start, raw: "", value: "", tag })
+    return new P.LineToken({ ...line.record, tokens: [token] })
   }
 
   /** A member:  a property, an alias, an action, a drawing, an event or a test. */
@@ -185,6 +391,8 @@ export class SpellxTwin {
         return this.lineAndBlock(this.event())
       case "menu":
         return this.menu()
+      case "group":
+        return this.lineAndBlock(this.expand(words.group))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
@@ -503,5 +711,8 @@ function spaceAfter(tokens: P.Token[]) {
   if (last && !last.whitespace) last.record.whitespace = " "
 }
 
+/** The tag of a run of a notebook's prose, drawn as markdown:  `markdown_block`'s. */
+const MARKDOWN = "markdown"
+
 /** A tag's attributes that are never an event's parameters. */
-const NOT_PARAMS = new Set(["name", "description"])
+const NOT_PARAMS = new Set(["name", "description", "group"])

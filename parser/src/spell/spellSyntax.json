@@ -4983,6 +4983,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DefineGroup",
+          "ruleNames": ["define_group"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineGroup.ts",
+          "line": 20,
+          "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} group {group:text}",
+              "example": "a card is a view where:\n\t- group \"direction\"\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\tset its direction to up",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}"
+                },
+                "ts": {
+                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)"
+                },
+                "py": {
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DefineMenu",
           "ruleNames": ["define_menu"],
           "internal": false,
@@ -5418,6 +5444,12 @@
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
+              "syntax": "{markup:example_block}"
+            },
+            {
+              "syntax": "{markup:markdown_block}"
+            },
+            {
               "syntax": "{markup:jsxElement}"
             },
             {
@@ -5755,11 +5787,36 @@
           "aliases": ["jsxChild", "expression"]
         },
         {
+          "className": "ExampleBlock",
+          "ruleNames": ["example_block"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ExampleBlock.ts",
+          "line": 26,
+          "purpose": "A notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
+          "syntaxes": [
+            {
+              "example": "<example \"one counter\">\n\t<ui-button>Count</ui-button>\n</example>",
+              "outputs": {
+                "js": {
+                  "code": "h(\"spell-example\", { name: \"one counter\" }, h(\"ui-button\", \"Count\"))"
+                },
+                "ts": {
+                  "code": "<spell-example name=\"one counter\">\n  <ui-button>Count</ui-button>\n</spell-example>"
+                },
+                "py": {
+                  "code": "h(\"spell-example\", {\"name\": \"one counter\"}, h(\"ui-button\", \"Count\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
           "className": "SpellJSX",
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 35,
+          "line": 37,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

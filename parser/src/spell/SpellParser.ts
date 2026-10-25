@@ -15,7 +15,10 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
   // never read as spell:  a view type's own styles (`css_block`),
   // and formatted text (`markdown_block`, `markdown_description`)
-  rawTextTags: ["css", "markdown"]
+  rawTextTags: ["css", "markdown"],
+  // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
+  // `elemental-spell` P16);  each language's word
+  quotedNameTags: ["example", "ejemplo"]
 }
 
 // Above the class:  read while this module is still loading (the built-in templates compile then)

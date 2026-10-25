@@ -1,7 +1,8 @@
 import { elementTagFor, proto } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
-import { SPELL_JSX_MEANINGS, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -30,6 +31,7 @@ import { SpellJSXContent } from "./SpellJSXContent"
  * - In a spellx file, a BARE name is a component's (epic `elemental-spell` P7, Q46):  `componentTagFor()`.
  *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
  *   - No native HTML (Q46, C1):  `<div>` is an error unless a pack has it.
+ *   - Except in a `<spell>` chunk, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
  * - NOTE: rule name is `jsxElement`, kept distinct from class name `SpellJSX` (pre-existing convention).
  */
 export class SpellJSX extends P.TokenType<never, JSXMatchData> {
@@ -47,6 +49,23 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!match) return undefined
     if (match.matched.length !== 1) throw new TypeError("Can only handle a single JSXElement at a time!")
     const [element] = match.matched as [P.JSXElementToken | P.JSXFragmentToken]
+    // in a spellx file's `<spell>` chunk, it and everything inside it is code spell (J83)
+    const codeSpell = codeSpellDepth > 0 || SP.isCodeSpell(element)
+    if (codeSpell) codeSpellDepth++
+    try {
+      return this.parseElement(scope, match, element, codeSpell)
+    } finally {
+      if (codeSpell) codeSpellDepth--
+    }
+  }
+
+  /** `parse()`'s work on `element`:  its children, its tag, its attributes;  `codeSpell`:  is it written as code spell? */
+  private parseElement(
+    scope: P.Scope,
+    match: P.MatchFor<this>,
+    element: P.JSXElementToken | P.JSXFragmentToken,
+    codeSpell: boolean
+  ) {
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
@@ -56,10 +75,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!(element instanceof P.JSXElementToken)) return match
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
-    if ((scope.parser as SP.SpellParser | undefined)?.form === "spellx" && match.data.tagName === element.tagName) {
+    const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
+    if (isSpellx && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
       if (tag) match.data.tagName = tag
-      else if (BARE_NAME.test(element.tagName) && !SPELL_JSX_MEANINGS.includes(element.tagName)) {
+      else if (isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
         // a control or handler inside an element (`<segment><if ...>`):  spellx reads those on a drawing's own lines
@@ -100,7 +120,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - `undefined`:  not a bare name (`ui-text`, `solitaire-card`, `slot` are left as written), or nobody has it
    */
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
-    if (!BARE_NAME.test(word) || SPELL_JSX_MEANINGS.includes(word)) return undefined
+    if (!isBareComponentName(word)) return undefined
     const type = scope.getType(SP.typeName(word))
     if (type?.isA("View")) {
       const project = projectScopeOf(scope)
@@ -165,7 +185,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const below: Array<P.Match | P.Token | undefined> = [...match.matched]
-      if (match.is(SpellJSX)) {
+      if (match.is(SpellJSX) || match.is(ExampleBlock)) {
         if (match.data.error) errors.push(match.data.error)
         below.push(...(match.data.attributes ?? []), ...(match.data.children ?? []))
       }
@@ -180,8 +200,12 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 }
 
-/** A tag a spellx drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
-const BARE_NAME = /^\p{Ll}+$/u
+/**
+ * How many elements being parsed are code spell, outermost first:  > 0 inside a spellx file's `<spell>` chunk.
+ * - An element's `{...}` is tokenized as it parses, so its elements aren't noted (`SP.markCodeSpell()`):
+ *   they're read as their outer element is.
+ */
+let codeSpellDepth = 0
 
 /** The project scope `scope` is in, if any:  its `name` names the project's elements. */
 function projectScopeOf(scope: P.Scope): P.ProjectScope | undefined {

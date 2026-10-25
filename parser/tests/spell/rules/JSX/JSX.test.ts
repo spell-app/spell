@@ -126,6 +126,24 @@ describe("a drawing of several elements side by side:  a fragment", () => {
   })
 })
 
+describe("a JSX text keeps its spaces, as JSX reads them", () => {
+  const GAME = ["a game is a thing", "a game has moves", "to draw a game:"]
+
+  test('the space after a hole stays:  `{its moves} moves` draws "3 moves", not "3moves" (issue I6)', () => {
+    expect(drawOf([...GAME, "\treturn <p>{its moves} moves</p>"])).toContain(
+      `return h("p", () => this.moves, " moves")`
+    )
+    expect(drawOf([...GAME, "\treturn <p>Made {its moves} moves</p>"])).toContain(
+      `return h("p", "Made ", () => this.moves, " moves")`
+    )
+  })
+
+  test("only a line break and the indent around it go, the lines joined by a space", () => {
+    const lines = [...GAME, "\treturn <p>", "\t\tMade  {its moves}  moves", "\t\tin   all", "\t</p>"]
+    expect(drawOf(lines)).toContain(`return h("p", "Made  ", () => this.moves, "  moves in   all")`)
+  })
+})
+
 /** `lines` as one file, compiled by `writer` (javascript by default). */
 function compiled(lines: string[], writer: P.ProgramWriter = P.JSWriter.instance): string {
   const [file] = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }]).files

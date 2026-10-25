@@ -1,7 +1,7 @@
 /**
  * Master import file for the classes `core` exposes to compiled spell code.
  * - Re-exported from `spell-parser/core`'s own barrel (`export * from "./classes"`) so `Thing`, `List`, `App`, `View`,
- *   `Page`, `TwoSidedView` and `ViewableList` are available alongside the rest of `core`.
+ *   `Page`, `TwoSidedView`, `Notebook` and `ViewableList` are available alongside the rest of `core`.
  *
  * NOTE: imports reach into `spell-parser/core/core` and `spell-parser/core/Core` directly rather than
  * the `spell-parser/core` barrel -- this file helps BUILD that barrel, so going through it would
@@ -16,6 +16,7 @@ import { List } from "./List"
 import { View } from "./View"
 import { Page } from "./Page"
 import { TwoSidedView } from "./TwoSidedView"
+import { Notebook } from "./Notebook"
 import { ViewableList } from "./ViewableList"
 
 /** Base-type registry, and where an app mounts.  Drawing is `../drawing.ts`. */
@@ -57,5 +58,5 @@ export const classesMethods = defineCoreModule({
 Object.assign(core, classesMethods)
 
 // Compiled spell imports these -- `import { core, Thing, List, App, ... } from "@spell/core"`.  No globals.
-export { Thing, List, App, View, Page, TwoSidedView, ViewableList }
+export { Thing, List, App, View, Page, TwoSidedView, Notebook, ViewableList }
 export type { ListCallback } from "./List"

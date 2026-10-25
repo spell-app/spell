@@ -89,10 +89,39 @@ export class CodeSpellWriter {
       return
     }
     for (const comment of comments) this.lines.push(`${indent}// ${comment.value}`)
-    const markup = this.markupOf(code.slice(0, end))
+    const written = code.slice(0, end)
+    // a notebook's drawing (P16):  each element, or block of prose, on lines of its own
+    const [only] = written
+    if (written.length === 1 && only instanceof P.JSXFragmentToken && only.record.isImplicit && !only.raw) {
+      for (const child of only.children ?? []) this.writeMarkup(child, indent)
+      return
+    }
+    // markup after the twin's words, an inline drawing:  `to draw it : <button ...>`
+    const firstMarkup = written.findIndex((token) => token instanceof P.JSXToken)
+    const words = firstMarkup > 0 ? `${CodeSpellWriter.textOf(written.slice(0, firstMarkup))} ` : ""
+    const markup = this.markupOf(firstMarkup > 0 ? written.slice(firstMarkup) : written, indent)
     this.lines.push(
-      `${indent}${bullet}${markup ?? CodeSpellWriter.colonOf(CodeSpellWriter.textOf(code.slice(0, end)))}`
+      `${indent}${bullet}${markup !== undefined ? CodeSpellWriter.colonOf(words) + markup : CodeSpellWriter.colonOf(CodeSpellWriter.textOf(written))}`
     )
+  }
+
+  /**
+   * One of a notebook drawing's items, `indent` in:  an element as code spell writes it, or a run of its prose as the
+   * `<markdown>` block it reads as, its lines one tab further in.
+   */
+  private writeMarkup(token: P.Token, indent: string) {
+    if (
+      token instanceof P.JSXElementToken &&
+      token.tagName === "markdown" &&
+      token.raw === `${token.children?.[0]?.value}`
+    ) {
+      this.lines.push(`${indent}<markdown>`)
+      for (const line of `${token.raw}`.split("\n")) this.lines.push(line ? `${indent}\t${line}` : "")
+      this.lines.push(`${indent}</markdown>`)
+      return
+    }
+    const markup = this.markupOf([token], indent)
+    if (markup !== undefined) this.lines.push(`${indent}${markup}`)
   }
 
   /**
@@ -100,7 +129,7 @@ export class CodeSpellWriter {
    * closes -- `<text>back</>` => `<ui-text>back</ui-text>`.  `undefined` for a line with none.
    * - From the file's text, edited where a name is:  an element's token holds its children, on any number of lines.
    */
-  private markupOf(tokens: P.Token[]): string | undefined {
+  private markupOf(tokens: P.Token[], indent = ""): string | undefined {
     if (!tokens.some((token) => token instanceof P.JSXToken)) return undefined
     const from = tokens[0]!.start
     const edits: Array<{ start: number; end: number; text: string }> = []
@@ -119,7 +148,14 @@ export class CodeSpellWriter {
     for (const edit of edits.sort((a, b) => b.start - a.start)) {
       line = line.slice(0, edit.start - from) + edit.text + line.slice(edit.end - from)
     }
-    return line.trimEnd()
+    // its lines after the first at `indent`, as the first is:  its own indent, where it was written, swapped for that
+    const lineStart = this.text.lastIndexOf("\n", from - 1) + 1
+    const written = /^[ \t]*/.exec(this.text.slice(lineStart, from))![0]
+    return line
+      .split("\n")
+      .map((each, index) => (index && each.startsWith(written) ? indent + each.slice(written.length) : each))
+      .join("\n")
+      .trimEnd()
   }
 
   /**

@@ -12,10 +12,11 @@ game.start()   # drawn on the page:  `core.page.body_html()` writes it
 ```
 
 - The twins of the JavaScript core's `App`, `View`, `Page` and `ViewableList` (`classes/`).
-- `TwoSidedView` is a built-in template written in spell:  generated, in `two_sided_view.py`.
+- `TwoSidedView` and `Notebook` are built-in templates written in spell:  generated, in `two_sided_view.py` and
+  `notebook.py`.
 """
 
-from spell_core.drawing import Element, h
+from spell_core.drawing import h
 from spell_core.lists import List
 from spell_core.things import Thing, program_core
 
@@ -44,18 +45,8 @@ class App(View):
     """
 
     def start(self) -> None:
-        """SIDE EFFECT:  mount our drawing on the page, into `core.app_element()` (see `core.mount_app()`).
-
-        - Makes the page's `<div id="spell-app-root">` the first time, when the host set no `core.app_root`.
-        - Starting again replaces the app drawn there.
-        - Drawn when the page is written, not now:  the page shows the app as it is then.
-        """
-        core = program_core()
-        element = core.app_element()
-        if element is None:
-            element = Element("div", {"id": core.REACT_APP_ROOT_ID})
-            core.page.body.append(element)
-        core.mount_app(self, element)
+        """SIDE EFFECT:  mount our drawing on the page, into `core.app_element()`:  see `start_drawing()`."""
+        start_drawing(self)
 
 
 class Page(View):
@@ -63,6 +54,22 @@ class Page(View):
 
     - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
     """
+
+    def start(self) -> None:
+        """SIDE EFFECT:  draw this page as the program's page, as an app starts:  see `start_drawing()`.
+
+        - Compiles from `start the counter notebook`, which a `.spellx` notebook says by itself
+          (epic `elemental-spell` P16).
+        """
+        start_drawing(self)
+
+
+def start_drawing(view: View) -> None:
+    """SIDE EFFECT:  mount `view`'s drawing on the page:  `core.start_drawing()`.
+
+    - What `App.start()` and `Page.start()` do.
+    """
+    program_core().start_drawing(view)
 
 
 class ViewableList(List):

@@ -24,6 +24,14 @@ export class Tokenizer {
   rawTextTags: string[] = []
 
   /**
+   * JSX tags whose first attribute may be a bare quoted NAME, as spellx names its tags:  `<example "one counter">`
+   * reads as `<example name="one counter">` (epic `elemental-spell` P16).
+   * - e.g. spell's `["example", "ejemplo"]`.
+   * - None by default:  anywhere else a bare string in a tag is no attribute.
+   */
+  quotedNameTags: string[] = []
+
+  /**
    * Does `</>` close the innermost open JSX element, as in a spellx drawing (`<text>{its rank}</>`;  epic
    * `elemental-spell` P7, Q40)?
    * - Off by default:  in code spell, `</>` only ends a fragment, `<>...</>`.
@@ -532,10 +540,12 @@ export class Tokenizer {
 
     // If we didn't immediately get an end marker, attempt to match attributes
     if (endBit !== ">" && endBit !== "/>") {
+      const named = this.matchJSXQuotedName(tagName, text, nextStart, end)
+      if (named) nextStart = named.next
       const attrs = this.consume(this.matchJSXAttribute, text, nextStart, end)
-      if (attrs && attrs.length) {
-        jsxElement.record.attributes = attrs
-        nextStart = attrs[attrs.length - 1].next
+      if (named || (attrs && attrs.length)) {
+        jsxElement.record.attributes = [...(named ? [named] : []), ...(attrs ?? [])]
+        if (attrs?.length) nextStart = attrs[attrs.length - 1].next
       }
 
       // see if we got an end marker after attributes
@@ -550,6 +560,18 @@ export class Tokenizer {
     }
     jsxElement.record.raw = text.slice(start, nextStart)
     return jsxElement
+  }
+
+  /**
+   * A tag's bare quoted name at `start`, `"one counter"` in `<example "one counter">`, as its `name` attribute --
+   * only for one of `quotedNameTags`.
+   */
+  matchJSXQuotedName(tagName: string, text: string, start: number, end: number): P.JSXAttributeToken | undefined {
+    if (!this.quotedNameTags.includes(tagName)) return undefined
+    const value = this.matchText(text, start, end)
+    if (!value) return undefined
+    const next = this.eatWhitespace(text, value.next, end)
+    return new P.JSXAttributeToken({ name: "name", start, value, raw: text.slice(start, next) })
   }
 
   /**
@@ -1079,6 +1101,8 @@ export type TokenizerProps = {
   quoteSymbols?: string[]
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
+  /** See `Tokenizer.quotedNameTags`. */
+  quotedNameTags?: string[]
   /** See `Tokenizer.emptyEndTagCloses`. */
   emptyEndTagCloses?: boolean
 }

@@ -356,6 +356,19 @@
       path: "type:Date/property:day",
       detail: "number",
       description: "Its day of the month, from 1 to 31."
+    },
+    {
+      path: "type:Notebook", line: [5, 11],
+      super: "type:Page",
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/Notebook.spell"
+    },
+    {
+      path: "type:Notebook/property:lock", line: 8,
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/Notebook.spell"
+    },
+    {
+      path: "type:Notebook/enumeration:Locks", line: 8,
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/Notebook.spell"
     }
   ]
 }

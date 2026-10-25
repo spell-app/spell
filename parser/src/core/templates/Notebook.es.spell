@@ -1,0 +1,11 @@
+## Un cuaderno:  una página de prosa, ejemplos vivos y sus propias plantillas
+// Integrado en spell (épica `elemental-spell` P16):  compilado una vez, en el `Notebook` del núcleo.
+// Un cuaderno hecho de él dice qué hay en su página con `para dibujar su contenido:`;  un cuaderno `.spellx` lo
+// escribe como su cuerpo:  markdown, etiquetas de dibujo y `<ejemplo>`s.
+un "cuaderno" es una página donde:
+	- tiene las partes "contenido"
+	// si quien no puede escribir su archivo puede cambiarlo:  los demás lectores de un cuaderno bloqueado solo prueban
+	- su "candado" es desbloqueado o bloqueado
+	// su contenido:  la aplicación del editor dibuja su propia página alrededor, con las secciones y la barra
+	- para dibujarlo:
+		dibujar su contenido

@@ -97,25 +97,10 @@ export class App extends View {
   }
 
   /**
-   * Mount this app's drawing into `core.appElement()` (`core.mountApp()`),
-   * creating a `core.REACT_APP_ROOT_ID` container `div` if there's none.
-   * - On a page that defines elements, that's our element, `<solitaire-app>`, our drawing inside it.
+   * Mount this app's drawing into `core.appElement()`:  `core.startDrawing()`, which a page's `start()` shares.
    * - Compiles from `start the game` -- see `rules/draw/StartApp.ts` (a method call on the app instance, not a global).
-   * - Starting again replaces the app drawn there.
-   * - SIDE EFFECT: appends a `div` to `document.body` the first time it's called, if the host set no `appRoot`.
-   * - With `core.appLayout` (a `<spell-viewer>` with markup inside it):  draws nothing, saying so on the console.
    */
   start(): void {
-    if (core.appLayout) {
-      core.console.log(`${this.constructor.name}:  its page's markup draws it, not its \`to draw\``)
-      return
-    }
-    let element = core.appElement()
-    if (!element) {
-      element = document.createElement("div")
-      element.id = core.REACT_APP_ROOT_ID
-      document.body.appendChild(element)
-    }
-    core.mountApp(this, element)
+    core.startDrawing(this)
   }
 }

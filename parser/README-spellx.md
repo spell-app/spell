@@ -91,12 +91,14 @@ reversible:`, and reads to the same tree as the English card.
 
 | What it is | English | Spanish |
 | --- | --- | --- |
-| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` |
-| A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` |
+| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` |
+| A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
+| A notebook's example, in a drawing | `<example "...">` | `<ejemplo "...">` |
+| A block of markup drawn as written | `<html>` | `<html>` |
 | A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
@@ -130,6 +132,13 @@ The catch, and it catches everybody once:  a body line ending in `</>` ends its 
 
 A `.spellx` file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
 and the two kinds use what each other declares.
+
+**One file per template.**
+A template lives in ONE file, `Card.spell` or `Card.spellx`, never both:  two copies drift apart.
+The other form is a read-only view, written when you ask for it:
+- on a `.spell` file, Show as Spellx (VS Code's title bar;  the editor app's Spellx tab)
+- on a `.spellx` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
+- Edits happen only in the real file, so the view always matches it.
 
 Its tree, for a tool or an agent walking it:
 
@@ -180,7 +189,9 @@ spell spellx convert @spell/examples/Solitaire --dry-run
 ```
 
 - `Card.spell` becomes `Card.spellx`, beside it;  `Carta.es.spell` becomes `Carta.es.spellx`, in Spanish spellx.
-  The `.spell` file stays:  move one of the two out, or the project declares everything twice.
+  The `.spell` file stays:  keep ONE of the two, and list it in the project's `__project.json5`.
+  Both, and the project declares everything twice.
+- To just look at a file as spellx, Show as Spellx writes it without a second file.
 - `--dry-run` prints each file instead of writing it.  Nothing is written inside the test projects.
 - Each declaration becomes its tag:  a template, and inside it
   `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<on ...>`.
@@ -197,7 +208,8 @@ spell spellx convert @spell/examples/Solitaire --dry-run
 </spell>
 ```
 
-- From code:  `SX.SpellxWriter.write({ text, match, scope })`, given the parsed file.
+- From code:  `SX.SpellxWriter.write({ text, match, scope })`, given the parsed file;
+  `SX.SpellxWriter.textOf(file)` for a parsed `SP.SpellFile`, Show as Spellx's view.
 
 ## The edges
 
@@ -208,8 +220,11 @@ its tree reads as above.
 Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - A name is one of the project's own views first (`<card>`, its `<solitaire-card>`), then the first of the project's
   packs that has it:  its project file's `"packs"`, Spell UI's alone unless it says more.
-- There's no plain HTML:  `<div>` is an error naming the packs it looked in.
-  - So a converted drawing's `<div>` is an error, and its `<button>` becomes Spell UI's.
+- There's no plain HTML in a tag's drawing:  `<div>` is an error naming the packs it looked in.
+- The web's own elements are written in a `<spell>` chunk, which is plain Spell, as written:
+  there `<div>` is the web's, and so is `<button>`, never Spell UI's.
+  - So `spell spellx convert` writes a member whose drawing has one (`<div>`, `<button>`, `<label>`) as a
+    `<spell>` chunk, just that member, and the program stays the same;  every other member is a tag.
 - `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
 - Plain Spell is untouched:  its drawings name tags as before.
 
@@ -217,7 +232,54 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as
 `- its menu bar is "GameMenu"`.
 
+**Groups:**  `<group "direction" description="Face up or face down"/>` is a heading over the members after it, up to
+the next, as text sits under a `##` heading;  a member before any group is in none.
+- A member written away from its group says so, `group="direction"`.
+- It reads as the heading alone, `- group "direction"`, its description the comment above it;  a member written away
+  from its group has its group opened again above it, and the one it's among below it.
+- Groups compile to nothing:  they're how a template's laid out for people.  The notebook draws each one's members
+  together, and `SX.SpellxFile.groupsOf(template)` lists them.
+- A property's aliases with no body are its `alias=`, as many as it has:
+  `<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>`.
+
+**`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
+or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
+
+**Notebooks:**  `<spell-notebook "counter notebook">` is a page made from Spell's built-in `notebook` template:
+its body a drawing of markdown, markup and examples, with templates of its own.
+
+```html
+<spell-notebook "counter notebook">
+	# A counter
+	A button that counts its clicks.
+
+	<spell-view "counter">
+		<property "count">a number</>
+		<action "create it">set its count to 0</>
+		<action "count up">set its count to its count + 1</>
+		<draw><button onClick={count up}>Clicked {its count} times</button></draw>
+	</spell-view>
+
+	## Try it
+	<example "one counter">
+		<counter/>
+	</example>
+</spell-notebook>
+```
+
+- Loose text in it is markdown, `#` headings too;  a drawing's tags (`<section>`, `<text>`) draw where they sit.
+- `<example "one counter">` is a titled frame round what's inside it, drawn live:  `<spell-example>`, in the editor.
+  It reads the same in plain Spell.
+- It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
+  block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
+- `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
+- A notebook is only ever a `.spellx` file.  The editor shows its page, editable in place, at
+  `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
+- `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's
+  element, or a template's class.
+
 **Not yet:**
+- A `<spellx>` block back inside a `<spell>` chunk.
 - A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - Completion in a tag's head offers types, not spellx's own words.
@@ -232,7 +294,7 @@ it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `
 | [spellx.types.ts](src/spellx/spellx.types.ts) | the tree's nodes, spans and diagnostics |
 | [SpellxView.ts](src/spellx/SpellxView.ts) | a file's tree, built from its tokens |
 | [SpellxFile.ts](src/spellx/SpellxFile.ts) | a file's tree:  `walk()`, `toOutline()`, `positionOf()` |
-| [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx, `spell spellx convert` |
+| [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx:  `spell spellx convert`, and the editors' Show as Spellx |
 | [CodeSpellWriter.ts](src/spellx/CodeSpellWriter.ts) | a `.spellx` file written as plain Spell:  the editor's Show as Code Spell |
 | [Language.ts](src/spell/languages/Language.ts) | `SpellxWords`, the shape of a language's spellx words |
 | [en/words.ts](src/spell/languages/en/words.ts), [es/words.ts](src/spell/languages/es/words.ts) | each language's words, its `spellx` table:  the tags, and each tag's twin (`twins`) |

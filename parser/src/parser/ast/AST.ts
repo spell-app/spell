@@ -1801,7 +1801,10 @@ export class ASTTypeDescription extends ASTStatement {
     if (typeof this.type === "string") this.type = new ASTTypeExpression(match, { name: this.type })
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
-    this.assert(["action", "event", "menu"].includes(this.describes), `ASTTypeDescription: unknown kind '${this.describes}'`)
+    this.assert(
+      ["action", "event", "menu"].includes(this.describes),
+      `ASTTypeDescription: unknown kind '${this.describes}'`
+    )
   }
 }
 

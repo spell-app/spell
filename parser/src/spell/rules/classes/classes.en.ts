@@ -24,6 +24,7 @@ import { DrawnMarkup } from "./DrawnMarkup"
 import { DrawPart } from "./DrawPart"
 import { HasParts } from "./HasParts"
 import { DefineMenu } from "./DefineMenu"
+import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -1740,6 +1741,76 @@ classes.addRule(HasParts, {
 })
 
 // a template's menu of its actions (epic `elemental-spell` P10):  `- its "game menu" is a menu of "deal" and "undo"`
+// a group of a template's members, a heading in its outline (epic `elemental-spell` P16):  `- group "direction"`
+classes.addRule(DefineGroup, {
+  syntax: "{type:subject_implied} group {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a heading over the members after it:  compiles to nothing",
+          input: [
+            "a card is a view where:",
+            '\t- group "direction"',
+            "\t- its direction is one of up or down",
+            "\t- to turn it over:",
+            "\t\tset its direction to up"
+          ],
+          js: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"]',
+            '  static { this.declareProp("direction", { oneOf: Card.Directions }) }',
+            '  get direction() { return this.getProp("direction") }',
+            '  set direction(value) { this.setProp("direction", value) }',
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Direction = (typeof Card.Directions)[number]",
+            "",
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"] as const',
+            "  @prop({ oneOf: () => Card.Directions })",
+            "  accessor direction!: Direction",
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-card", "card", [',
+            '    { name: "direction", kind: "string", description: "Its direction." }',
+            "  ])",
+            "",
+            "  turnOver() {",
+            "    return this.currentThing?.turnOver()",
+            "  }",
+            "}",
+            "core.useElement(Card, CardElement)"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
 classes.addRule(DefineMenu, {
   syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
   tests: [
@@ -1865,6 +1936,15 @@ classes.addRule(DrawPart, {
 })
 
 // a line of a drawing that IS the drawing:  markup, or a part placed
+// - a notebook's example, or block of markdown, on a line of its own:  theirs, not an element's (P16)
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:example_block}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:markdown_block}"
+})
+
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:jsxElement}"
 })

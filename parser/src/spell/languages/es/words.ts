@@ -105,6 +105,8 @@ export const spanishWords: SP.LanguageWords = {
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
   appActions: { deshacer: "undo", rehacer: "redo" },
+  // el ejemplo de un cuaderno, en un dibujo (`example_block`, épica `elemental-spell` P16)
+  exampleTag: "ejemplo",
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
   retiredTypeWords: {
@@ -134,7 +136,8 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-página": "page template",
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
-      "plantilla-de-aplicacion": "app template"
+      "plantilla-de-aplicacion": "app template",
+      cuaderno: "notebook"
     },
     declarations: {
       propiedad: "property",
@@ -145,7 +148,8 @@ export const spanishWords: SP.LanguageWords = {
       evento: "event",
       probar: "test",
       menú: "menu",
-      menu: "menu"
+      menu: "menu",
+      grupo: "group"
     },
     notes: { descripción: "description", descripcion: "description", comentario: "comment" },
     handlers: { al: "on", cuando: "when", mientras: "while" },
@@ -174,7 +178,9 @@ export const spanishWords: SP.LanguageWords = {
       "se-deshace-como": "undone-as",
       icono: "icon",
       "barra-de-menú": "menu-bar",
-      "barra-de-menu": "menu-bar"
+      "barra-de-menu": "menu-bar",
+      bloqueado: "locked",
+      grupo: "group"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
@@ -187,7 +193,8 @@ export const spanishWords: SP.LanguageWords = {
         page: "página",
         app: "aplicación",
         "page template": "página",
-        "app template": "aplicación"
+        "app template": "aplicación",
+        notebook: "cuaderno"
       },
       property: {
         list: "su {name} es uno de {one-of}",
@@ -219,6 +226,10 @@ export const spanishWords: SP.LanguageWords = {
       menu: "su {name} es un menú de",
       menuAnd: "y",
       menuBar: "su barra de menú es {quoted menu-bar}",
+      group: "grupo {name}",
+      notebookContent: "para dibujar su contenido :",
+      notebookLocked: "su candado es bloqueado",
+      start: "iniciar {words}",
       handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
       controls: {
         if: "si {phrase}",
@@ -337,6 +348,8 @@ export const spanishTypeWords: P.TypeWords = {
   // a view with a front and a back:  `de` and `a` are grammar words, so not `vista de dos caras`
   "vista reversible": "two sided view",
   "vista-reversible": "two sided view",
+  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
+  cuaderno: "notebook",
   // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
   dibujable: "view",
   "cosa dibujable": "view",

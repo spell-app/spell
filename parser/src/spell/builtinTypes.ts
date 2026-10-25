@@ -608,6 +608,8 @@ export const TYPE_WORDS: P.TypeWords = {
   "two sided view": "two sided view",
   "two-sided view": "two sided view",
   "two-sided-view": "two sided view",
+  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
+  notebook: "notebook",
   // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
   drawable: "view",
   "drawable thing": "view",

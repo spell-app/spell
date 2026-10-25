@@ -1162,6 +1162,18 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     `breakIntoIndentedBlocks()` takes its tag line out and puts its body's lines in its place (`unwrapCode()`),
     so they parse at the level the chunk is at:  a member among a template's, a function at the top.
     Its closer stays, and compiles to nothing.
+    - An `<html>` block (epic `elemental-spell` P16) is unwrapped the same way:  its markup the drawing's own lines,
+      as written.  A view of the file's chunks keeps it whole (`unwrapsHtml`).
+  - A NOTEBOOK, `<spell-notebook>` (P16):  its body is a drawing, so a line there that isn't spellx's is markup or
+    markdown (prose), and a template may sit inside it.
+    - `breakIntoIndentedBlocks()` then lifts its own templates to just before it, and adds a `start` tag after it
+      (`liftNotebooks()`):  code spell declares a type only at a file's top level.
+      A view of the file's chunks keeps them where they're written (`liftsNotebooks`).
+    - Its twin (`SpellxTwin.notebook()`) keeps its members, and makes the rest its content's drawing,
+      `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
+      each run of markup lines joined into one implicit fragment.
+  - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
+    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
   - A line's closer may have a comment after it, `<property "value">1</>   // ace = 1`:
     the twin keeps it after its inline body, so it's the member's docstring, as on the twin line.
 - [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
@@ -1189,7 +1201,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     imports Spell UI.
   - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a control inside an element,
     `spellx-tag-in-markup` (C29).
-  - Code spell's drawings are untouched.
+  - Code spell's drawings are untouched;  so are a `<spell>` chunk's, in a spellx file (J83):  the tokenizer marks
+    its JSX as it unwraps the chunk (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything
+    inside it, `{...}` too, as code spell.
 - The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
   file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
   - A `<spell>` chunk's lines are in it as written:  at the top, and among a template's members;

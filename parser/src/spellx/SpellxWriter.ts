@@ -17,6 +17,7 @@ import { SP } from "spell-parser/spell"
  *   - a body:  its lines as written, at the same depth
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
  *   a `<spell>` chunk, holding its lines as written, one tab in (the tokenizer unwraps it:  `SP.SpellxTokenizer`).
+ *   - So is a member whose drawing has the web's own elements, `<div>`, `<button>` (J83):  `drawsBareTags()`.
  * - Comments and blank lines stay as they are;  so do a body's lines.
  * - NEVER throws:  a line it can't write as a tag goes in a `<spell>` chunk.
  * - Above `spell-parser/spell` in the import graph, as the rest of `SX`.
@@ -36,6 +37,22 @@ export class SpellxWriter {
     writer.writeBlock(root?.tokens ?? [], 0)
     while (writer.out.at(-1) === "") writer.out.pop()
     return `${writer.out.join("\n")}\n`
+  }
+
+  /**
+   * The spellx `file` reads as, for people to look at:  the editors' "Show as Spellx" view of a `.spell` file.
+   * - A `.spell` file:  written as spellx from its last parse, so unsaved edits show.
+   * - A `.spellx` file:  its own text.
+   * - A view only, never saved:  a template lives in ONE file, `.spell` or `.spellx`, never both
+   *   (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
+   * - Throws `TypeError` if a `.spell` file hasn't been parsed yet.
+   */
+  static textOf(file: SP.SpellFile): string {
+    if (file.form === "spellx") return file.contents ?? ""
+    const { match, scope } = file
+    if (!match || !scope)
+      throw new TypeError(`SpellxWriter.textOf():  ${file.file} hasn't been parsed;  parse it first`)
+    return SpellxWriter.write({ text: file.parseText, match, scope })
   }
 
   /** The lines written so far. */
@@ -233,6 +250,8 @@ export class SpellxWriter {
     statement: P.Match,
     indent: string
   ): Written | undefined {
+    // a drawing with the web's own elements (`<div>`):  spellx would read them as components, so it stays code spell
+    if (this.drawsBareTags(line, body)) return undefined
     // its trailing comment, `- its "value" is 1   // ace = 1`:  after the tag's first line, never inside its body
     const last = line.tokens.at(-1)
     const comment = last instanceof P.CommentToken && last !== line.tokens[0] ? last : undefined
@@ -250,6 +269,32 @@ export class SpellxWriter {
     }
   }
 
+  /**
+   * Does `line` or its `body` draw a tag spellx would read as a component's bare name (`<div>`, `<button>`)
+   * (epic `elemental-spell` J83)?
+   * - Code spell writes such a tag as the web's;  spellx looks it up in the packs, so `<div>` is an error there and
+   *   `<button>` is Spell UI's.  So the member is written as code spell, in a `<spell>` chunk, and means the same.
+   * - Spell's own tag words (`<children/>`) and names with `-` or a capital (`<ui-text>`) read the same in both.
+   * - Every element, by its parse:  the ones inside a `{...}` too.
+   */
+  private drawsBareTags(line: P.LineToken, body: P.BlockToken | undefined): boolean {
+    const seen = new Set<P.Match>()
+    const draws = (node: unknown): boolean => {
+      if (Array.isArray(node)) return node.some(draws)
+      if (!(node instanceof P.Match) || seen.has(node)) return false
+      seen.add(node)
+      const [element] = node.matched
+      if (node.rule.name === "jsxElement" && element instanceof P.JSXElementToken) {
+        const { tagName } = node.data as SP.JSXMatchData
+        if (tagName === element.tagName && SP.isBareComponentName(tagName)) return true
+      }
+      return node.matched.some(draws) || Object.values(node.data ?? {}).some(draws)
+    }
+    const lines = (item: P.Token): P.Token[] =>
+      item instanceof P.BlockToken ? item.tokens.flatMap(lines) : item instanceof P.LineToken ? [item] : []
+    return [line, ...(body ? lines(body) : [])].some((item) => draws(this.statements.get(item.start)))
+  }
+
   /** A member's tag, from its line's `text` without its comment:  by its statement's rule. */
   private memberTag(
     text: string,
@@ -261,6 +306,7 @@ export class SpellxWriter {
     if (ALIAS_RULES.has(rule)) return this.alias(text, body, statement, indent)
     if (PROPERTY_RULES.has(rule)) return this.property(text, body, statement, indent)
     if (rule === "declare_event") return this.event(text, body, statement, indent)
+    if (rule === "define_group") return this.group(text, body, statement, indent)
     if (rule === "draw_it" || rule === "to_do_something") return this.action(text, body, statement, indent)
     return this.handler(text, body, indent)
   }
@@ -328,6 +374,19 @@ export class SpellxWriter {
     if (!name || name.includes('"')) return undefined
     const text = this.lineText(line).replace(/^-\s+/, "")
     return text === fill(this.twins.propertyAlias, { "quoted alias": quoted(name) }) ? name : undefined
+  }
+
+  /**
+   * `- group "direction"` => `<group "direction" />` (epic `elemental-spell` P16):  a heading over the members after it.
+   * - A group opened again further down (code spell's way to put a member away from the rest) is a `<group>` again:
+   *   the same group, so it means the same, if not written `group=` on the member.
+   */
+  private group(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
+    if (body) return undefined
+    const name = unquote(groupText(statement, "group"))
+    if (!name || name.includes('"') || text !== fill(this.twins.group, { name: quoted(name) })) return undefined
+    const word = keyFor(this.words.declarations, "group")
+    return this.tag(indent, `<${word} ${quoted(name)}`, [], undefined, undefined, word)
   }
 
   /** `- it sends "flipped" with count as a number` => `<event "flipped" count="number" />`. */

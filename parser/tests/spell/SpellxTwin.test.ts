@@ -343,6 +343,38 @@ describe("spellx:  a third style of spell", () => {
       expect(errors).toEqual([])
       expect(code).toContain("return this.play()")
     })
+
+    // J83:  a drawing in a chunk names the web's own elements, as code spell does
+    test("its drawings are code spell's:  <div> and <button> are the web's, inside a {...} too", () => {
+      const drawing = '<div><button>hi</button>{<label>x</label> if 1 is 1 otherwise ""}</div>'
+      const spellx = compiledText([
+        '<spell-view "box">',
+        "\t<spell>",
+        "\t\t- to draw it:",
+        `\t\t\t${drawing}`,
+        "\t</spell>",
+        "</spell-view>"
+      ])
+      const spell = compiledText(['a "box" is a view where:', "\t- to draw it:", `\t\t${drawing}`], {
+        path: "/test.spell"
+      })
+      expect(spellx.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+      expect(spellx.code).toContain('h("button"')
+      expect(spellx.code).toContain('h("label"')
+    })
+
+    test("outside a chunk, a drawing's <button> is still a pack's", () => {
+      const { code, errors } = compiledText([
+        '<spell-view "box">',
+        "\t<draw>",
+        "\t\t<button>hi</button>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(errors).toEqual([])
+      expect(code).not.toContain('h("button"')
+    })
   })
 
   test("a comment after a line's closer is the member's docstring, as after its twin", () => {

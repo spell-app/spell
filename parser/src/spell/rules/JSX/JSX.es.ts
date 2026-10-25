@@ -16,6 +16,7 @@ import { SpellParser } from "spell-parser/spell/SpellParser"
 import { Wording } from "spell-parser/spell/rules/expressions"
 
 import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
 import { SpellJSXAttribute } from "./SpellJSXAttribute"
@@ -110,6 +111,22 @@ JSXEs.addRule(MarkdownBlock, {
             '  {`Hi ${null /* PARSE ERROR: No entiendo "{foo bar baz}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave */}`}',
             "</ui-markdown>"
           ]
+        ]
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(ExampleBlock, {
+  tests: [
+    {
+      title: "El ejemplo de un cuaderno:  su nombre entre comillas tras su palabra, su resultado dentro",
+      compileAs: "expression",
+      tests: [
+        [
+          ['<ejemplo "un contador">', "\t<ui-button>Contar</ui-button>", "</ejemplo>"],
+          'h("spell-example", { name: "un contador" }, h("ui-button", "Contar"))',
+          ['<spell-example name="un contador">', "  <ui-button>Contar</ui-button>", "</spell-example>"]
         ]
       ]
     }

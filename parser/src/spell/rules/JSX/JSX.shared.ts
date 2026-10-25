@@ -47,6 +47,20 @@ export function webWordFor(scope: P.Scope, ruleName: string, written: string): s
   return rule?.meanings?.find((meaning) => Wording.reads(scope, ruleName, written, meaning)) ?? written
 }
 
+/**
+ * Is `tag`, as written in a drawing, one a spellx file reads as a COMPONENT's bare name (epic `elemental-spell` P7)?
+ * - Lowercase letters alone, accents too (`button`, `div`, `botón`), and not one of the web names spell's own words
+ *   become (`slot`):  `SpellJSX.componentTagFor()` looks it up.
+ * - Code spell writes such a tag as it is:  so a code-spell drawing that has one means something else in spellx
+ *   (`SX.SpellxWriter` keeps it as code spell, J83).
+ */
+export function isBareComponentName(tag: string): boolean {
+  return BARE_NAME.test(tag) && !SPELL_JSX_MEANINGS.includes(tag)
+}
+
+/** A tag a spellx drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
+const BARE_NAME = /^\p{Ll}+$/u
+
 /** A name of letters alone, which might be one of spell's own JSX words. */
 const PLAIN_WORD = /^\p{L}+$/u
 

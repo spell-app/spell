@@ -24,7 +24,8 @@ when working with code in this folder, `src/spellx/` of the `spell-parser` packa
   - [SpellxView.ts](SpellxView.ts):  a file's tree, built from the spellx tokens spell's parser reads it as
   - [SpellxFile.ts](SpellxFile.ts):  a file's tree:  its nodes, diagnostics, `walk()`, `toOutline()`
 - And the way back:  [SpellxWriter.ts](SpellxWriter.ts), a `.spell` file written as spellx (P12, `spell spellx convert`):
-  each declaration as its tag, the rest in `<spell>` chunks, as written.
+  each declaration as its tag, the rest in `<spell>` chunks, as written:
+  a member whose drawing has the web's own elements (`<div>`) too, so it means the same (J83).
 - It stands on `spell-parser/spell`:  the spellx tokenizer and its tokens, the language's spellx words (`SP.SpellxWords`,
   in each language's `words.ts`) and its messages (the `spellx-*` keys of `parserMessages.ts`).
   - NEVER imported by `spell-parser/spell`, nor by anything below it.
