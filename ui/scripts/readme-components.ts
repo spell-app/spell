@@ -23,12 +23,13 @@ import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { parseArgs } from "node:util"
-import { chromium, type Page } from "playwright"
+import type { Page } from "playwright"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { Terminal } from "spell/element-tools/Terminal"
 
 import type { SiteDataFile, SiteFamily } from "spell-ui/docs-components/docs-components.types"
-import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
 import { STATUS_TEXT, spliceGenerated, writeOrCheck } from "spell-ui/tools/generatedFiles"
@@ -168,9 +169,8 @@ class ComponentThumbnails {
   /** Shoot each of `families` (folders, `ui-button`);  prints one line each, and never throws for one family. */
   async shoot(families: readonly SiteFamily[]): Promise<void> {
     mkdirSync(path.join(UI, THUMBNAILS), { recursive: true })
-    const browser = await chromium.launch()
-    try {
-      const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1, colorScheme: "light" })
+    await BrowserPage.with(async (browser) => {
+      const page = await BrowserPage.newPage(browser, { viewport: VIEWPORT, context: { deviceScaleFactor: 1 } })
       for (const family of families) {
         try {
           await this.shootOne(page, family)
@@ -179,9 +179,7 @@ class ComponentThumbnails {
           Terminal.err(`thumbnail:  ${family.folder} failed:  ${String(error).split("\n")[0]}`)
         }
       }
-    } finally {
-      await browser.close()
-    }
+    })
   }
 
   /** Load `family`'s page, wait for its root, and save its first example's picture. */

@@ -10,8 +10,9 @@
 import { mkdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
-import { chromium, type Page } from "playwright"
+import type { Page } from "playwright"
 
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { DevServer } from "spell/element-tools/DevServer"
 import { Terminal } from "spell/element-tools/Terminal"
 
@@ -30,11 +31,10 @@ class DemoScreenshots {
   constructor({ server, page }: { server: DevServer; page: Page }) {
     this.server = server
     this.page = page
-    page.on("pageerror", (error) => this.problems.push(error.message))
-    page.on("console", (message) => {
-      if (message.type() === "error" || message.type() === "warning") {
-        this.problems.push(`${message.type()}: ${message.text()}`)
-      }
+    BrowserPage.watch(page, {
+      consoleTypes: ["error", "warning"],
+      onProblem: (text, kind) =>
+        this.problems.push(kind === "page error" ? text : `${kind.slice(CONSOLE.length)}: ${text}`)
     })
   }
 
@@ -67,7 +67,10 @@ class DemoScreenshots {
     return count
   }
 
-  /** Wait until the page is still:  no requests in flight, every `ui-*` element `ready`, fonts in, two frames. */
+  /**
+   * Wait until the page is still:  no requests in flight, every `ui-*` element `ready`, fonts in, two frames.
+   * - its own, not `BrowserPage.settle()`, which waits for tags to be defined, not for each element's `ready`
+   */
   private async settle() {
     await this.page.waitForLoadState("networkidle")
     await this.page.evaluate(async () => {
@@ -97,17 +100,20 @@ const PORT = 5198
 /** How long to wait for the demo page's first pair, ms:  the first load compiles every family. */
 const PAGE_TIMEOUT = 30_000
 
+/** What `BrowserPage` puts before a console message's type (`console warning`). */
+const CONSOLE = "console "
+
 /** Problems printed at most:  the first ones say what's wrong. */
 const MAX_PROBLEMS = 30
 
 const { positionals } = parseArgs({ allowPositionals: true, options: {} })
 const families = (positionals[0] ?? DEFAULT_FAMILIES).split(",").map((family) => family.trim().replace(/^ui-/, ""))
 const server = await DevServer.start({ root: ROOT, port: PORT, logLevel: "error" })
-const browser = await chromium.launch()
 try {
-  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })
-  await new DemoScreenshots({ server, page }).run(families.filter(Boolean))
+  await BrowserPage.with(async (browser) => {
+    const page = await BrowserPage.newPage(browser, { viewport: { width: 1400, height: 900 } })
+    await new DemoScreenshots({ server, page }).run(families.filter(Boolean))
+  })
 } finally {
-  await browser.close()
   await server.close()
 }
