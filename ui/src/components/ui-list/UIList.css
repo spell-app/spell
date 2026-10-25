@@ -131,7 +131,7 @@
  *     the element's root is ALWAYS a `<ul>` / `<ol>` of `<ui-item>`s, so it says `bulleted` / `ordered` with classes
  *   - `.ui.menu .ui.list` coupling:  `UIMenu.css` owns it
  *   - floated / aligned CONTENT (`right floated content`, `middle aligned content`):
- *     `<ui-content floated>` / `vertical-align` style themselves (`UIParts.css`);
+ *     `<ui-content vertical-align>` styles itself (`UIParts.css`), and a `<ui-stack>` places content left or right;
  *     the static class-grammar rules stay here
  *   - a slotted `<img>` / `<ui-image>` FOLLOWED by a `<ui-content>`:
  *     the content is a table cell (`UIParts.css`, `:not(:first-child)`) beside an inline-block image,

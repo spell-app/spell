@@ -44,7 +44,7 @@
  * - NOTE: left out, on purpose:
  *   - favorite / like icons (`.favorite.icon`, `.like.icon`):  icon looks
  *   - floated components inside an item (`.ui.items > .item [class*="right floated"]`):
- *     a `<ui-button floated>` floats itself;  the static rules stay
+ *     elements have no `floated` (a `<ui-stack>` places them);  the static rules stay
  *   - Fomantic's `!important`s (first / last item spacing, mobile image sizes):
  *     the DOM element's position and layers decide
  */
