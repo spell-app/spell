@@ -186,7 +186,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  * - drawn again:
  *   - after a live patch (`spell-doc:updated`)
  *   - when the page's content changes (an epic page's part loading)
- *   - when the inbox file changes (`spell-server:file`:  another window, Claude)
+ *   - when the inbox file changes (`spell-server:changed`:  another window, Claude)
  *   - when the page comes back into view
  * - what it adds in `main` carries `data-spell-added`:  a patch steps around it, the anchors never count it
  * - NEVER throws:  a page with no server, or a server without the routes, shows no bullhorns
@@ -210,7 +210,7 @@ export async function wireComments(main, { go, fitToolbar, signal } = {}) {
   const listening = { signal }
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
   addEventListener(
-    "spell-server:file",
+    "spell-server:changed",
     (event) => {
       if (comments.inboxPaths.includes(decodeURIComponent(event.detail?.path ?? ""))) reload()
     },
@@ -486,7 +486,7 @@ class PageComments {
    * - beside it, who is listening:  "python-target is listening", or nobody (then Send wakes the epic's session);
    *   a page no epic owns:  the standing epic `feedback`'s (epic `epic-engine` T9), "feedback is listening", or
    *   "nobody is listening:  Send wakes feedback" (`whoLabel()`)
-   * - a press, or the countdown running out (`epic-send-asked`), sends (`POST /api/docs/comments/send`), and a toast
+   * - a press, or the countdown running out (`epic-send-saving`), sends (`POST /api/docs/comments/send`), and a toast
    *   says what went where
    * - drawn again with the comments;  none on an epic page, or from a server without it
    */
@@ -1083,21 +1083,23 @@ class PageComments {
    * - the pen:  his first words into a box to change;  the trash:  deleted at once, Undo in the toast
    */
   wireThread(thread, id) {
-    thread.addEventListener("epic-thread-fold", (event) => {
+    const onFold = (event) => {
       const opening = !!event.detail?.open
       this.folds.set(id, opening)
       if (!opening) return
       requestAnimationFrame(() => this.growFields())
       this.markSeen(id)
-    })
-    thread.addEventListener("epic-thread-answer", (event) => {
+    }
+    thread.addEventListener("epic-thread-opened", onFold)
+    thread.addEventListener("epic-thread-closed", onFold)
+    thread.addEventListener("epic-thread-answered", (event) => {
       const act = event.detail?.act
       if (act === "reply") void this.focusReply(id)
       else if (act === "reopen") void this.reopen(id)
       else if (act === "good" || act === "skip") void this.resolve(id, act)
     })
-    thread.addEventListener("epic-thread-edit", () => this.startEdit(id))
-    thread.addEventListener("epic-thread-delete", () => void this.remove(id))
+    thread.addEventListener("epic-thread-editing", () => this.startEdit(id))
+    thread.addEventListener("epic-thread-removing", () => void this.remove(id))
   }
 
   /**
@@ -1431,7 +1433,7 @@ class PageComments {
    */
   wirePane(pane, field, open) {
     const close = this.wireField(pane, field, open)
-    pane.addEventListener("epic-comment-close", () => void close())
+    pane.addEventListener("epic-comment-closing", () => void close())
     pane.addEventListener("keydown", (event) => {
       const closing = event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))
       if (!closing) return
@@ -1450,7 +1452,7 @@ class PageComments {
         void close()
       })
     })
-    pane.addEventListener("epic-comment-delete", () => void (open.discard ? open.discard() : this.remove(open.id)))
+    pane.addEventListener("epic-comment-removing", () => void (open.discard ? open.discard() : this.remove(open.id)))
   }
 
   /**
@@ -1705,7 +1707,7 @@ const PANE_TAG = "epic-comment-pane"
 const SEND_BUTTONS_TAG = "epic-send-buttons"
 
 /** `<epic-send-buttons>`' ask to send:  a press on its plane, or its countdown running out. */
-const SEND_ASKED = "epic-send-asked"
+const SEND_ASKED = "epic-send-saving"
 
 /** The room a thread's header leaves on its right for a corner bullhorn above it (`makeRoom()`;  `EpicThread.css`). */
 const HEAD_ROOM = "--epic-thread-head-room"

@@ -439,7 +439,7 @@
         window.parent.postMessage({ spell: "open", url: link.href, kind: "external" }, "*")
       }
     })
-    bar.feedback.addEventListener("ui-input", changed)
+    bar.feedback.addEventListener("ui-typed", changed)
     bar.send.addEventListener("click", () => void send())
     addEventListener("pagehide", () => void save({ keepalive: true }))
     document.addEventListener("visibilitychange", () => {

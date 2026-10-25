@@ -67,7 +67,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 export class DOMEpicSectionElement extends DOMEpicFoldElement {
   /**
    * Its state filter:  each state its items are in, how many, and whether they show;  none without items.
-   * Read untracked (`EpicSection.stateFilter()`):  the page follows its `ui-filter` instead.
+   * Read untracked (`EpicSection.stateFilter()`):  the page follows its `epic-filter-changed` instead.
    */
   get stateFilter(): readonly StateFilterEntry[] | undefined {
     return this.section?.stateFilter()
@@ -107,7 +107,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *     the only one showing, everything again
  *   - a filtered list says `3 hidden · show all` under it
  *   - hidden items go by a `::slotted()` rule drawn in the shadow root:  the doc's markup is never touched
- *   - remembered per page, under the old runtime's key (`FILTER_KEY`);  `ui-filter` says it changed
+ *   - remembered per page, under the old runtime's key (`FILTER_KEY`);  `epic-filter-changed` says it changed
  *   - the page's toolbar filters every section at once, through its DOM element (`DOMEpicSectionElement`)
  * - An item section's lines are drawn as rounded cards, one per RUN of lines between unfolded items' details
  *   (Owen, 2026-10-24;  `runEnds`):  each run's first line rounded on top, its last on the bottom.
@@ -126,13 +126,13 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - Revisit, Make Todo, Do Now in `tools` (no Approve:  Q14 asks for notes, not sign-off)
  *   - its note box at the end of its body, a marked note at its top
  *   - Claude's status cards (`slot="status"`, P13) just above the note box
- *   - Revisit and Edit unfold it (`epic-show-note`)
+ *   - Revisit and Edit unfold it (`epic-note-showing`)
  * - NEW ITEMS (epic `airplane` P2), while the page is reviewed:
  *   the Todos and Questions sections end with
  *   - the new items of their kind Owen asked for and Claude hasn't made yet (Edit, Remove:  `newItemList()`)
  *   - then a New todo / New question button, which opens the form there (`<epic-new-item>`)
  * - The To test section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
- *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-start`)
+ *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-opening`)
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
  *   follows the review inbox while connected (an Overview sub-section, Todos, Questions).
  ****************/
@@ -275,20 +275,19 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
    * - the Phases section's phases the same (Owen, 2026-10-24, epic `epic-engine` I96:  "showed the white corners at
    *   the bottom above P29"):  their title rows, the open ones' bodies between them
-   * - an OPEN item stands free, with room above and below it (I105;  Owen, 2026-10-25:  "touching items are square,
-   *   round when free", "more padding above / below open question drawer"):  a run of its own, so the line before it
-   *   rounds its bottom, the one after it its top;  its own line rounds all round, its drawer hanging 4px in from its edges
-   * - an OPEN PHASE the same (I115):  a drawer, free above and below
+   * - an OPEN item or phase ends its run (its drawer under it), the line above touching it, room only below it
+   *   (I105, I115;  Owen, 2026-10-25:  "Don't put space at the top of open sections, just below");  the next line
+   *   starts a run
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
     const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
     const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
-    // an open item, or an open phase (its drawer, I115), stands free:  a run of its own
-    const alone = isUnfolded
+    // an open item or phase ends its run (its drawer under it), and the row after it starts one;  the row above it
+    // touches it, room only below an open one (Owen, 2026-10-25:  "Don't put space at the top of open sections")
     return {
-      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1]) || alone(item)),
-      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item) || alone(shown[index + 1]))
+      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1])),
+      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item))
     }
   })
 
@@ -470,7 +469,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * The To test section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
-   * - A click asks the page for its test run (`epic-test-start`, out of the shadow root).
+   * - A click asks the page for its test run (`epic-test-opening`, out of the shadow root).
    */
   private startTesting(open: number): JSX.Element {
     return (
@@ -509,7 +508,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * The filter's chips:  one per state its items are in, with how many, solid while they show
-   * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3);  a click comes back as `epic-state-pick`.
+   * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3);  a click comes back as `epic-state-changed`.
    */
   private filter(): JSX.Element {
     return (
@@ -751,7 +750,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     EpicSection.save(PHASE_TOGGLES_KEY, shown)
   }
 
-  /** One of its state chips, clicked (`<epic-state-filter>`'s `epic-state-pick`). */
+  /** One of its state chips, clicked (`<epic-state-filter>`'s `epic-state-changed`). */
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
@@ -766,7 +765,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     this.showStates(next.length === present.length ? undefined : next)
   }
 
-  /** "Show all", under a filtered list (`<epic-hidden-note>`'s `epic-show-all`). */
+  /** "Show all", under a filtered list (`<epic-hidden-note>`'s `epic-all-showing`). */
   @E.on(SHOW_ALL, { target: "renderRoot" })
   protected onShowAll(event: Event) {
     event.stopPropagation()
@@ -775,13 +774,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * Show its items in `states` only;  none:  every state, now and as new ones come.
-   * - Remembered for this page;  `ui-filter` tells the page (its toolbar's chips follow).
+   * - Remembered for this page;  `epic-filter-changed` tells the page (its toolbar's chips follow).
    * - Its DOM element's `showStates()`:  the page's toolbar filters every section through it.
    */
   @E.untracked
   showStates(states: readonly string[] | undefined) {
     this.chosen = states ? [...states] : undefined
-    this.send("ui-filter", { states: states ? [...states] : undefined })
+    this.send("epic-filter-changed", { states: states ? [...states] : undefined })
     const id = this.id
     if (!id) return
     const saved: Record<string, readonly string[]> = { ...EpicSection.savedFilters() }

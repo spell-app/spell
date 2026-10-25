@@ -44,15 +44,15 @@ export const SORTS = ["title", "date"] as const
 export type EpicSortName = (typeof SORTS)[number]
 
 /** `<epic-sort>`'s event when the reader picks a sort:  every `<epic-list>` on the page follows it. */
-export const SORT_EVENT = "epic-sort"
+export const SORT_EVENT = "epic-sorting"
 
 /** `<epic-card>`'s event once the page server has starred or unstarred it:  its list sets every card's star. */
-export const FAVORITE_EVENT = "epic-favorite"
+export const FAVORITE_EVENT = "epic-starred"
 
 /** `epic-sort`'s detail. */
 export type SortDetail = { sort: EpicSortName }
 
-/** `epic-favorite`'s detail:  the epic, starred or not, and every starred epic as the page server answered. */
+/** `epic-starred`'s detail:  the epic, starred or not, and every starred epic as the page server answered. */
 export type FavoriteDetail = { epic: string; favorite: boolean; favorites: readonly string[] }
 
 /** A card's tag:  the list's children. */

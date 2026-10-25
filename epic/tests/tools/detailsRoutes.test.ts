@@ -213,3 +213,21 @@ test("who waits for the answer:  `epic ask wait`'s heartbeat, in the GETs and th
   expect(JSON.parse((await answer(path, { q1: { picked: ["B"] } })).text).listening).toBeNull()
   expect((await ask(port, "GET", "/api/docs/details/listening?page=%2Fguides%2Fother.html")).status).toBe(403)
 })
+
+test("a page on its next round (`epic ask round`):  no answer served yet, and a send keeps the rounds before", async () => {
+  const file = join(root, "pages/details/drafted.answer.json5")
+  const rounds = [{ round: 1, asked: "2026-10-24", sent: "Answer to ...", answer: { notes: "round one" } }]
+  writeFileSync(file, JSON.stringify({ rounds }))
+  const got = await ask(port, "GET", "/api/docs/details/answer?page=%2Fpages%2Fdetails%2Fdrafted.html")
+  expect(JSON.parse(got.text).answer).toBeNull()
+  expect((await answer("/pages/details/drafted.html")).status).toBe(200)
+  // round 2's first answer:  no changes counted against round 1's
+  expect(written(PAGES[5]!)).toMatchObject({ changes: 0, notes: "why not", rounds })
+  const served = JSON.parse(
+    (await ask(port, "GET", "/api/docs/details/answer?page=%2Fpages%2Fdetails%2Fdrafted.html")).text
+  )
+  expect(served.answer.notes).toBe("why not")
+  expect(served.answer.rounds).toBeUndefined()
+  await answer("/pages/details/drafted.html")
+  expect(written(PAGES[5]!)).toMatchObject({ changes: 1, rounds })
+})

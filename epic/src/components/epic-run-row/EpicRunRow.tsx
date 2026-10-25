@@ -27,7 +27,7 @@ import runRowCSS from "./EpicRunRow.css?inline"
  *   - its details, folded:  a line each (`row.details`)
  * - Taken by the command (`taken`, epic `epic-engine` P25):  a quiet `taken` mark beside the box, its time the
  *   tooltip;  his answer newer than that, an orange note under the box ("changed after the run took it").
- * - It draws what it's given and says what Owen did (`epic-run-answer`):  `<epic-run>` keeps and saves it.
+ * - It draws what it's given and says what Owen did (`epic-run-answered`):  `<epic-run>` keeps and saves it.
  *   - the outcome comes from the value:  the proposal is `accepted`, an alternative `picked`, anything else `typed`
  ****************/
 export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {

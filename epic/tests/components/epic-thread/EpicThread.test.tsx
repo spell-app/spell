@@ -174,7 +174,7 @@ describe("<epic-thread>", () => {
   test("a click on its header folds it and says so;  the pen, the trash and the pills say theirs, and don't fold", async () => {
     const host = await thread(comment())
     const heard: string[] = []
-    for (const name of ["epic-thread-fold", "epic-thread-edit", "epic-thread-delete"])
+    for (const name of ["epic-thread-opened", "epic-thread-closed", "epic-thread-editing", "epic-thread-removing"])
       host.addEventListener(name, (event) => heard.push(`${name} ${JSON.stringify((event as CustomEvent).detail)}`))
     part(host, "headline").click()
     await ElementFixture.settle(host)
@@ -184,11 +184,11 @@ describe("<epic-thread>", () => {
     await ElementFixture.settle(host)
     expect({ open: host.hasAttribute("open"), heard }).toEqual({
       open: true,
-      heard: ['epic-thread-fold {"open":true}', "epic-thread-edit {}", "epic-thread-delete {}"]
+      heard: ['epic-thread-opened {"open":true}', "epic-thread-editing {}", "epic-thread-removing {}"]
     })
   })
 
-  test("the pills' answer crosses into the page:  `epic-thread-answer`, `{ act }`", async () => {
+  test("the pills' answer crosses into the page:  `epic-thread-answered`, `{ act }`", async () => {
     const host = await thread(
       comment({
         status: "answered",
@@ -198,7 +198,7 @@ describe("<epic-thread>", () => {
       "open"
     )
     const acts: string[] = []
-    host.addEventListener("epic-thread-answer", (event) => acts.push((event as CustomEvent).detail.act))
+    host.addEventListener("epic-thread-answered", (event) => acts.push((event as CustomEvent).detail.act))
     const review = host.shadowRoot!.querySelector("epic-review")!
     await ElementFixture.settle(host)
     review.shadowRoot!.querySelector<HTMLElement>('ui-button[data-act="skip"]')!.click()

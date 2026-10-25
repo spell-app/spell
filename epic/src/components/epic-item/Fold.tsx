@@ -230,7 +230,7 @@ export class Fold {
  * Fold everything under `root`:  collapse-all (Owen, 2026-10-10:  "close everything underneath it").
  * - its button:  the double chevron on a section's, phase's or item's title, and the page toolbar's
  * - every `<epic-*>` element inside it that folds, in page order:
- *   - sections, phases and items through their own `collapse()`:  the cancelable `ui-close`, as a click's,
+ *   - sections, phases and items through their own `collapse()`:  the cancelable `ui-closing`, as a click's,
  *     so the page remembers a section's fold as usual
  *   - every card and panel (an aside, a code block, a reply, Choices ...) through its `fold` (`Fold.close()`)
  * - `root` itself stays as it is;  so do the boxes in its shadow root (its own `collapseAll()` folds those)
@@ -251,7 +251,7 @@ export function foldAllUnder(root: Element): number {
 /**
  * Open everything under `root`:  expand-all.
  * - the page toolbar's (Owen, 2026-10-13:  "Add expand all button next to collapse all"):
- *   - every section, phase and item inside it, through their own `expand()`:  the cancelable `ui-open`, as a click's,
+ *   - every section, phase and item inside it, through their own `expand()`:  the cancelable `ui-opening`, as a click's,
  *     so the page remembers each as a click's
  *   - NOT the cards and panels inside them (asides, code, replies ...):  those stay as the reader left them, so an
  *     opened page reads as a list of items, not every aside at once

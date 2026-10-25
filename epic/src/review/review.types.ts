@@ -249,7 +249,7 @@ export type Running = { action: NowAction; queued: boolean }
 export type ServerInfo = {
   /** the write token (`x-server-token`) */
   token: string
-  /** the page's file, as the server announces changes (`spell-server:file`'s `path`) */
+  /** the page's file, as the server announces changes (`spell-server:changed`'s `path`) */
   file?: string
 }
 

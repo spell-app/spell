@@ -117,12 +117,12 @@ describe("<epic-cards>", () => {
     fetched.mockImplementation(
       async () => new Response(JSON.stringify({ saga: "epics", epics: [epic("one", ["todo"])] }))
     )
-    dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/epics/one/one.plan.html" } }))
+    dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/epics/one/one.plan.html" } }))
     await vi.waitFor(() => expect(host.shadowRoot!.querySelector('epic-card[epic="one"]')).toBeTruthy())
     expect(host.shadowRoot!.querySelector(".note")).toBeNull()
     // a file that isn't an epic page's asks nothing
     const asked = fetched.mock.calls.length
-    dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/guides/x.html" } }))
+    dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path: "/guides/x.html" } }))
     await ElementFixture.tick()
     expect(fetched.mock.calls.length).toBe(asked)
   })

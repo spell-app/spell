@@ -690,7 +690,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
 
   /**
    * The address says where the run is, `#t3` (none on the summary), replaced:  a reload resumes there.
-   * - again each time the docs runtime's scroll-follow writes its own (`spell-doc:place`):
+   * - again each time the docs runtime's scroll-follow writes its own (`spell-doc:scrolled-to`):
    *   its sections are hidden, so it would take the hash off
    *   - then said the same way, so VS Code's view keeps the run's place too
    */
@@ -967,7 +967,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   }
 
   /** The zoom closed (Esc, its ×, the dimmer). */
-  @E.on("ui-hide", { target: "renderRoot" })
+  @E.on("ui-closed", { target: "renderRoot" })
   protected onZoomClosed() {
     this.zoomed = undefined
   }
@@ -1054,7 +1054,7 @@ const STATE_COLORS: Record<string, UILabelAttributes["color"]> = {
 }
 
 /** The docs runtime's word that it wrote the address (its scroll-follow), for the live client and VS Code's view. */
-const PLACE_EVENT = "spell-doc:place"
+const PLACE_EVENT = "spell-doc:scrolled-to"
 
 /** `at` on the summary card. */
 const SUMMARY = "summary"

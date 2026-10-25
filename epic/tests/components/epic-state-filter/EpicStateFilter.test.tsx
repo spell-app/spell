@@ -50,7 +50,7 @@ describe("<epic-state-filter>", () => {
       `<epic-state-filter counts="attention:1 open:2 recent:3"></epic-state-filter>`
     )
     const heard = vi.fn()
-    host.addEventListener("epic-state-pick", (event) => heard((event as CustomEvent).detail))
+    host.addEventListener("epic-state-changed", (event) => heard((event as CustomEvent).detail))
     chip(host, "open").click()
     expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["open"] })
     // controlled:  still all pressed until its owner sets `shown`
@@ -70,7 +70,7 @@ describe("<epic-hidden-note>", () => {
     const button = host.shadowRoot!.querySelector("button")!
     expect([button.textContent, button.title]).toEqual(["3 hidden · show all", "Show everything:  clear the filter"])
     const heard = vi.fn()
-    host.addEventListener("epic-show-all", heard)
+    host.addEventListener("epic-all-showing", heard)
     button.click()
     expect(heard).toHaveBeenCalledOnce()
     await expectAccessible(host)

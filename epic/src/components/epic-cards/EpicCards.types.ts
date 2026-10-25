@@ -34,7 +34,7 @@ export type SagaEpicsAnswer = { saga: string; epics: SagaEpic[] }
 /** Why no cards show:  opened from disk, the page server wouldn't answer, or no epic names the saga. */
 export type CardsProblem = "file" | "server" | "none"
 
-/** An epic page's file, as the page server announces a change (`spell-server:file`):  the cards ask again. */
+/** An epic page's file, as the page server announces a change (`spell-server:changed`):  the cards ask again. */
 export const EPIC_FILE = /\/epics\/[^/]+\/(?:parts\/[^/]+|[^/]+\.plan)\.html$/
 
 /** Loose attributes of an `<epic-*>` tag drawn in JSX:  HTML attributes, plus any attribute. */

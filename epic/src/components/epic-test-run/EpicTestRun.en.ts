@@ -37,7 +37,7 @@ export const epicTestRunVocabulary = {
   ],
   events: [
     {
-      name: "epic-test-done",
+      name: "epic-test-closed",
       detail: "{}",
       description:
         'Owen left the run:  Esc, or "Done testing".  `<epic-page>` shows its blocks again;  the run has sent its ' +

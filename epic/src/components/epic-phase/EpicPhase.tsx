@@ -48,7 +48,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Revisit, Make Todo, Do Now at its title's end (no Approve:  notes on the plan, not sign-off)
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
- *   - Revisit and Edit unfold it (`epic-show-note`)
+ *   - Revisit and Edit unfold it (`epic-note-showing`)
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
@@ -164,8 +164,18 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           {this.glyph.svg}
         </span>
       ),
-      badge: () => this.estimate,
-      tools: () => this.reviewButtons(),
+      // the estimate AFTER the review controls (Owen, 2026-10-25:  "Put time estimate to the right of it"), in the
+      // tools, so the toggle-all after it keeps its column
+      tools: () => (
+        <>
+          {this.reviewButtons()}
+          <Show when={this.estimate}>
+            <span class={ESTIMATE} part={this.partForName("estimate")}>
+              {this.estimate}
+            </span>
+          </Show>
+        </>
+      ),
       before: () => this.saidNote(),
       after: () => (
         <>
@@ -280,3 +290,6 @@ const STATUS_COLORS = {
 
 /** The doc pass's title:  its build plan never waits for an Accept (`isPlanWaiting`). */
 const DOC_REVIEW = /^doc review$/i
+
+/** Class of its estimate pill, after its review controls. */
+const ESTIMATE = "estimate"

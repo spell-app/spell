@@ -565,7 +565,7 @@ async function run() {
     document
       .querySelector("epic-page")
       .shadowRoot.querySelector("epic-send-buttons")
-      .dispatchEvent(new CustomEvent("epic-send-asked", { detail: { auto: true }, bubbles: true, composed: true }))
+      .dispatchEvent(new CustomEvent("epic-send-saving", { detail: { auto: true }, bubbles: true, composed: true }))
   )
   await waitInbox(
     page,

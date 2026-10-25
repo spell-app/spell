@@ -25,7 +25,7 @@ export const epicSortVocabulary = {
   attributes: [],
   events: [
     {
-      name: "epic-sort",
+      name: "epic-sorting",
       detail: '{ sort: "title" | "date" }',
       description: "The reader picked a sort:  every `<epic-list>` on the page sorts by it."
     }

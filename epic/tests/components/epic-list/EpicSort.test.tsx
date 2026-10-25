@@ -30,7 +30,7 @@ describe("<epic-sort>", () => {
       "A–Z, in use"
     ])
     const heard = vi.fn()
-    document.addEventListener("epic-sort", (event) => heard((event as CustomEvent).detail), { once: true })
+    document.addEventListener("epic-sorting", (event) => heard((event as CustomEvent).detail), { once: true })
     ;(date as HTMLElement).click()
     await ElementFixture.settle()
     expect(heard).toHaveBeenCalledWith({ sort: "date" })

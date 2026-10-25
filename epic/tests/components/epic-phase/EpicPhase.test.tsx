@@ -50,7 +50,8 @@ describe("<epic-phase>", () => {
     const section = inner(host)
     const header = section.shadowRoot!.querySelector('[part~="header"]')!
     expect(flatText(header).replace(/\s+/g, " ").trim()).toBe("P5 · Drawing Elements")
-    expect(section.getAttribute("badge")).toBe("4-6h")
+    // the estimate after the review buttons (Owen, 2026-10-25), not the section's badge
+    expect(host.shadowRoot!.querySelector('[part~="estimate"]')?.textContent).toBe("4-6h")
     const status = host.shadowRoot!.querySelector('[part~="status"]')!
     expect({ classes: status.className, label: status.getAttribute("aria-label") }).toEqual({
       classes: "icon active",
@@ -242,10 +243,10 @@ describe("<epic-phase> title, folded and open", () => {
     expect(host.matches(":state(open)")).toBe(true)
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(header.hasAttribute("title")).toBe(false)
-    // open, a drawer (I115):  the whole row moves down by the drawer's room above it, 10px, and nothing else moves
-    expect(firstLineTop(words) - folded.top).toBeCloseTo(10, 0)
+    // open, a drawer (I115):  nothing moves, room only below it (Owen, 2026-10-25)
+    expect(firstLineTop(words) - folded.top).toBeCloseTo(0, 0)
     // collapse-all shows only while open (as before P25), so the slot's button keeps its height, not its x
-    expect(button.getBoundingClientRect().top - folded.button.top).toBeCloseTo(10, 0)
+    expect(button.getBoundingClientRect().top - folded.button.top).toBeCloseTo(0, 0)
   })
 })
 

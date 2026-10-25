@@ -58,6 +58,8 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
      - Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
      - `/worktrees` and `/bedtime` use it.
    - In an epic (an epic page this session keeps):  add `--epic <name>`.
+   - A question asked before (a page for it is there already):  NOT a new page, `epic ask round` ("Asking the same
+     question again", below).
      - The page goes in `epics/<name>/details/`, beside the epic page
        (shared content, committed for you at the turn's end).
      - The decision it leads to links it.
@@ -113,6 +115,22 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 3. In an epic:  format the page once it's written, as the engine's tools do:
    `yarn vp fmt <its ABSOLUTE path>`, from spell-epic's root
    ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
+
+### Asking the same question again:  a new ROUND, never a new page
+
+- Asked again (his answer raised more, a round 2 of the same names):  `epic ask round <slug> [--from <spec.json>]`,
+  or for a choice page `epic choices round <slug> --rows <rows.json5>` (epic `epic-engine` P37).
+  - Owen (2026-10-24):  "you updated the Event Names document several times, leaving multiple copies viable.
+    Better to replace the one file."
+  - It rewrites the ONE page in place:  the new round on top, the round before folded at its bottom
+    ("Round 1 · 10/24 · what you sent"), with what he sent.
+  - Without `--from`, a details page stays as it is, for you to edit into the new round.
+  - The answer file keeps every round's:  `epic ask answer <slug>` prints the newest round's,
+    `--round <n>` an earlier one.
+  - A draft he typed and didn't send stays, and comes back over the new round (below);  a sent one goes.
+- NEVER a new slug for the same question (`event-names-2`, `-round2`):  `create` refuses it, naming the `round`
+  command.
+- Read `epic ask draft <slug>` first, as for any rewrite (below).
 
 ### Rewriting a page Owen may have open
 
@@ -207,10 +225,13 @@ new <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <spec.j
                                            a page from the template (or a spec);  prints its path
 show <page> [--wait] [--timeout 8h]        in this session's side bar (Chrome outside VS Code);  then wait
 wait <page> [--timeout 8h]                 until a NEW answer;  prints it, exit 0;  timeout:  exit 2
-answer <page>                              the answer already sent (exit 1:  none)
+round <page> [--title "..."] [--from <spec.json>]
+                                           the same question again:  the one page rewritten, the round before folded in
+answer <page> [--round <n>]                the answer already sent (exit 1:  none);  --round:  an earlier round's
 draft <page>                               what's typed and not sent (exit 1:  nothing);  read it before a rewrite
 list                                       every details page, answered or waiting
 sweep [--days 14]                          delete old scratch pages and answers;  never an epic's
+fold [--dry-run]                           once:  every epic's near-copies (x-2, x-3) folded into x as its rounds
 ```
 
 `<page>`:  a slug, `<epic>/<slug>`, or a path.  Flags go after it.

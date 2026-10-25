@@ -78,7 +78,7 @@ export const epicCardVocabulary = {
   ],
   events: [
     {
-      name: "epic-favorite",
+      name: "epic-starred",
       detail: "{ epic: string, favorite: boolean, favorites: string[] }",
       description:
         "The page server starred (`favorite`) or unstarred it;  `favorites`:  every starred epic, as it answered.  " +

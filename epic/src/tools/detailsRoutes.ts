@@ -60,7 +60,7 @@ const detailsRoutes: RouteModule = {
     const api = new SRV.Router()
     api.get("/answer", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
-      const answer = DataFile.read<DetailsAnswer>(answerFile(file)) ?? null
+      const answer = sentAnswer(DataFile.read<DetailsAnswer>(answerFile(file)))
       reply.set("Cache-Control", "no-store").json({ answer, listening: listeningOn(file) })
     })
     api.get("/listening", (request, reply) => {
@@ -151,7 +151,9 @@ export async function saveAnswer(
   { kept = [] }: { kept?: KeptText[] } = {}
 ): Promise<DetailsAnswer> {
   let answer!: DetailsAnswer
-  await saveData<Partial<DetailsAnswer>>(answerFile(file), (before) => {
+  await saveData<Partial<DetailsAnswer>>(answerFile(file), (file) => {
+    // a new round's file holds only the rounds before (`rounds`):  this is the round's first answer
+    const before = sentAnswer(file) ?? undefined
     answer = {
       page,
       answered: new Date().toISOString(),
@@ -163,10 +165,26 @@ export async function saveAnswer(
     }
     if (kept.length) answer.kept = kept
     answer.changed = changedSince(before, answer)
-    return answer
+    return withRounds(answer, file)
   })
   DataFile.remove(draftFile(file))
   return answer
+}
+
+/**
+ * The answer sent in an answer file's data, without its earlier rounds;  `null` for none.
+ * - a page on its next round (`epic ask round`, epic `epic-engine` P37) has a file holding only `rounds`:  no answer
+ *   yet
+ */
+export function sentAnswer<T extends { answered?: string; rounds?: unknown }>(data: T | undefined): T | null {
+  if (!data || !Object.keys(data).some((key) => key !== "rounds")) return null
+  const { rounds: _rounds, ...answer } = data
+  return answer as T
+}
+
+/** `answer` with the earlier rounds `file` (an answer file's data) holds, kept as they were;  none:  as it is. */
+export function withRounds<T extends object>(answer: T, file: { rounds?: unknown } | undefined): T {
+  return file?.rounds ? { ...answer, rounds: file.rounds } : answer
 }
 
 /**
@@ -292,6 +310,8 @@ function toAnswers(answers: unknown): DetailsAnswers {
  *   an option's box is `<question id>-<letter>` (`q1-B`)
  * - `notes`:  the page's notes box, trimmed
  * - `kept`:  text typed for questions, options or sections gone from the page since (P18);  absent for none
+ * - `rounds`:  the earlier rounds' answers (`epic ask round`, epic `epic-engine` P37;  `rounds.js`), kept through
+ *   every send;  never served to the page
  */
 export type DetailsAnswer = {
   page: string
@@ -302,6 +322,7 @@ export type DetailsAnswer = {
   comments?: DetailsComments
   notes: string
   kept?: KeptText[]
+  rounds?: unknown[]
 }
 
 /**
@@ -310,7 +331,7 @@ export type DetailsAnswer = {
  * - `labels`:  every id the page's parts held, with its title
  * - `kept`:  as an answer's
  */
-export type DetailsDraft = Omit<DetailsAnswer, "answered" | "changes" | "changed"> & {
+export type DetailsDraft = Omit<DetailsAnswer, "answered" | "changes" | "changed" | "rounds"> & {
   saved: string
   comments: DetailsComments
   labels: Record<string, string>

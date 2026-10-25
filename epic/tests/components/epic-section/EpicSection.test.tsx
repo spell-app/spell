@@ -87,11 +87,11 @@ describe("<epic-section>", () => {
     expect({ rule: style.borderBottomWidth, gap: style.marginBottom }).toEqual({ rule: "1px", gap: "0px" })
   })
 
-  test("a click on its title goes through the host's cancelable `ui-open`;  open, a gap below and no rule", async () => {
+  test("a click on its title goes through the host's cancelable `ui-opening`;  open, a gap below and no rule", async () => {
     const host = await render(`<epic-section id="decisions" kind="questions"><p>An item</p></epic-section>`)
     const opens: boolean[] = []
     let veto = true
-    host.addEventListener("ui-open", (event) => {
+    host.addEventListener("ui-opening", (event) => {
       opens.push(event.cancelable)
       if (veto) event.preventDefault()
     })
@@ -397,7 +397,7 @@ describe("<epic-section> counts and state filter", () => {
       "Open everything in 1. Phases"
     ])
     const opened: string[] = []
-    host.addEventListener("ui-open", (event) => opened.push((event.target as Element).id))
+    host.addEventListener("ui-opening", (event) => opened.push((event.target as Element).id))
     expand.click()
     // the phase's part loads, then the item in it opens, then its aside
     await vi.waitFor(() => expect(host.querySelector("epic-aside")?.matches(":state(open)")).toBe(true))
@@ -505,13 +505,14 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     return `<epic-section id="decisions" kind="questions" open>${items.join("")}</epic-section>`
   }
 
-  // an unfolded item is a run of its own since I104 (Owen, 2026-10-25:  "item header is rounded when it's open")
-  test("Owen's example, Q3 and Q4 unfolded:  Q1 top, Q2 bottom, Q3 and Q4 both, Q5 top, Q7 bottom", async () => {
+  // an unfolded item ENDS its run, the line above touching it (Owen, 2026-10-25:  "Don't put space at the top of open
+  // sections, just below");  the next line starts one
+  test("Q3 and Q4 unfolded:  Q1 top, Q3 bottom, Q4 both, Q5 top, Q7 bottom", async () => {
     const host = await render(seven([3, 4]))
     expect(roundedEnds(host)).toEqual({
       q1: "top",
-      q2: "bottom",
-      q3: "top bottom",
+      q2: "",
+      q3: "bottom",
       q4: "top bottom",
       q5: "top",
       q6: "",
@@ -521,7 +522,7 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     const ruled = Array.from(host.querySelectorAll("epic-item"))
       .filter((item) => getComputedStyle(item).borderTopStyle !== "none")
       .map((item) => item.id)
-    expect(ruled).toEqual(["q2", "q6", "q7"])
+    expect(ruled).toEqual(["q2", "q3", "q6", "q7"])
   })
 
   test("follows folding:  all folded is one run;  a click on a line splits it there", async () => {
@@ -535,8 +536,8 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
       q1: "top",
       q2: "",
       q3: "",
-      q4: "bottom",
-      q5: "top bottom",
+      q4: "",
+      q5: "bottom",
       q6: "top",
       q7: "bottom"
     })
@@ -548,14 +549,14 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     chip(host, "open").click()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "bottom", q3: "top bottom", q4: "top", q5: "bottom" })
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "bottom", q4: "top", q5: "bottom" })
   })
 })
 
 // epic `epic-engine` I96, Owen, 2026-10-24:  "showed the white corners at the bottom above P29"
 describe("<epic-section kind=phases> runs of phase title rows", () => {
-  // open, a phase is a drawer, free above and below (I115):  its title rounded all round, and P1 alone
-  test("P2 open:  P1 rounded all round, P2's title all round, P3 on top, P4 at the bottom;  no rule under P4", async () => {
+  // open, a phase is a drawer under its title (I115), the row above touching it, room only below (2026-10-25)
+  test("P2 open:  P1 on top, P2's title at the bottom, P3 on top, P4 at the bottom;  no rule under P4", async () => {
     const phases = [1, 2, 3, 4]
       .map(
         (n) =>
@@ -572,7 +573,7 @@ describe("<epic-section kind=phases> runs of phase title rows", () => {
       const bottom = parseFloat(title.borderBottomLeftRadius) > 0 && parseFloat(title.borderBottomRightRadius) > 0
       ends[phase.id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
     }
-    expect(ends).toEqual({ p1: "top bottom", p2: "top bottom", p3: "top", p4: "bottom" })
+    expect(ends).toEqual({ p1: "top", p2: "bottom", p3: "top", p4: "bottom" })
     expect(getComputedStyle(host.querySelector("#p4")!).borderBottomStyle).toBe("none")
     expect(getComputedStyle(host.querySelector("#p3")!).borderBottomStyle).not.toBe("none")
   })

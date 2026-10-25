@@ -172,3 +172,15 @@ test("writes need the token, our origin and our host", async () => {
   expect((await post("draft", path, undefined, fromPage({ origin: "http://evil.example" }))).status).toBe(403)
   expect((await post("answer", path, undefined, fromPage({ host: "evil.example" }))).status).toBe(403)
 })
+
+test("a page on its next round (`epic choices round`):  no answer served yet, and Do it keeps the rounds before", async () => {
+  const path = "/pages/details/names.html"
+  const rounds = [{ round: 1, asked: "2026-10-24" }]
+  writeFileSync(join(root, "pages/details/names.answer.json5"), JSON.stringify({ rounds }))
+  expect((await get("answer", path)).body).toEqual({ answer: null })
+  expect((await post("answer", path)).status).toBe(200)
+  expect(written<ChoicesAnswer>(CHOICES[0]!, "answer")).toMatchObject({ changes: 0, rounds })
+  const served = (await get("answer", path)).body.answer
+  expect(served.changes).toBe(0)
+  expect(served.rounds).toBeUndefined()
+})

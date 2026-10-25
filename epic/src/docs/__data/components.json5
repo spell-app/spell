@@ -506,7 +506,7 @@
       ],
       "events": [
         {
-          "name": "epic-favorite",
+          "name": "epic-starred",
           "detail": "{ epic: string, favorite: boolean, favorites: string[] }",
           "description": "The page server starred (`favorite`) or unstarred it;  `favorites`:  every starred epic, as it answered.  Its `<epic-list>` sets every card's star by it."
         }
@@ -1434,12 +1434,12 @@
       ],
       "events": [
         {
-          "name": "epic-comment-close",
+          "name": "epic-comment-closing",
           "detail": "{}",
           "description": "× pressed:  save what's typed, then close it."
         },
         {
-          "name": "epic-comment-delete",
+          "name": "epic-comment-removing",
           "detail": "{}",
           "description": "The trash pressed:  delete the comment at once (Undo in the toast that follows)."
         }
@@ -1751,7 +1751,7 @@
         "show all",
         "N hidden"
       ],
-      "description": "Under a list the state filter (`<epic-state-filter>`) hides items of:  a quiet line, `3 hidden · show all`;  a click asks its owner to show everything again (`epic-show-all`).  Drawn by `<epic-section>` under its items, and by the docs runtime under the Epics page's lists.  Nothing hidden:  its owner leaves it out.",
+      "description": "Under a list the state filter (`<epic-state-filter>`) hides items of:  a quiet line, `3 hidden · show all`;  a click asks its owner to show everything again (`epic-all-showing`).  Drawn by `<epic-section>` under its items, and by the docs runtime under the Epics page's lists.  Nothing hidden:  its owner leaves it out.",
       "noun": "hidden-note",
       "attributes": [
         {
@@ -1763,7 +1763,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-show-all",
+          "name": "epic-all-showing",
           "detail": "{}",
           "description": "Its line was clicked:  the owner clears the filter, and every item shows."
         }
@@ -1980,13 +1980,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: boolean, item: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to unfold:  its line was clicked;  after the fact (not cancelable) for a link or find-in-page.  Cancel to stay folded."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: boolean, item: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to fold:  its line was clicked.  Cancel to stay open."
@@ -2333,8 +2333,8 @@
         },
         {
           "key": "acceptPlan",
-          "text": "Accept Phase",
-          "description": "A phase's review button while Claude's build plan waits (Owen, 2026-10-25:  \"In the phase, the button should be Accept Phase\";  the header's says Accept plan)."
+          "text": "Accept",
+          "description": "A phase's review button while Claude's build plan waits, the left of its Accept | Defer pill (Owen, 2026-10-25:  \"make this single segmented pill, with just Accept Defer\";  the header's says Accept plan)."
         },
         {
           "key": "acceptPlanTip",
@@ -2343,8 +2343,8 @@
         },
         {
           "key": "deferPhase",
-          "text": "Defer Phase",
-          "description": "A phase's worded button while its build plan waits, beside Accept Phase:  build it after the others."
+          "text": "Defer",
+          "description": "The right of a waiting plan's Accept | Defer pill:  build this phase after the others."
         },
         {
           "key": "defer",
@@ -2865,9 +2865,14 @@
       ],
       "events": [
         {
-          "name": "ui-change",
-          "detail": "{ letter: string, selected: boolean, more: boolean }",
-          "description": "In an `<epic-ask>`:  Owen ticked or unticked it (`selected`), or pressed its (?) (`more`).  Its question takes it, and draws the result."
+          "name": "ui-selected",
+          "detail": "{ letter: string, selected: true, more: boolean }",
+          "description": "In an `<epic-ask>`:  Owen ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
+        },
+        {
+          "name": "ui-deselected",
+          "detail": "{ letter: string, selected: false, more: boolean }",
+          "description": "In an `<epic-ask>`:  Owen unticked it.  Its question takes it, and draws the result."
         }
       ],
       "parts": [
@@ -3160,13 +3165,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: true, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to unfold:  its title was clicked.  Cancel to stay folded.  After the fact for a link."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
@@ -3931,15 +3936,20 @@
         {
           "name": "open",
           "kind": "boolean",
-          "description": "The note is open:  its preview hides.  A click flips it, and says so (`epic-page-note-fold`)."
+          "description": "The note is open:  its preview hides.  A click flips it, and says so (`epic-note-opened` / `epic-note-closed`)."
         }
       ],
       "slots": [],
       "events": [
         {
-          "name": "epic-page-note-fold",
-          "detail": "{ open: boolean }",
-          "description": "Owen clicked it:  the note should open or fold, as `open` now says."
+          "name": "epic-note-opened",
+          "detail": "{ open: true }",
+          "description": "Owen clicked it:  the note should open."
+        },
+        {
+          "name": "epic-note-closed",
+          "detail": "{ open: false }",
+          "description": "Owen clicked it:  the note should fold."
         }
       ],
       "parts": [
@@ -4082,13 +4092,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: true, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to unfold:  its title was clicked.  Cancel to stay folded.  After the fact for a link."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
@@ -4141,7 +4151,11 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page is reviewed."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page is reviewed, then its estimate."
+        },
+        {
+          "name": "estimate",
+          "description": "Its `estimate`, a small pill after its review buttons (`2-3h`)."
         },
         {
           "name": "review-buttons",
@@ -4680,7 +4694,7 @@
         "review row",
         "name review"
       ],
-      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box Owen types over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answer`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
+      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box Owen types over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
       "noun": "run row",
       "attributes": [
         {
@@ -4712,7 +4726,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-run-answer",
+          "name": "epic-run-answered",
           "detail": "{ rowId: string, outcome: RunOutcome, value: string, ticked?: boolean, now: boolean }",
           "description": "Owen answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or ticked the box (`now: true`).  `outcome` says which:  `accepted` (the proposal), `picked` (an alternative), `typed` (anything else)."
         }
@@ -4927,13 +4941,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: true, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to unfold:  its title was clicked.  Cancel to stay folded.  After the fact for a link."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, element: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
@@ -4955,12 +4969,12 @@
           "description": "The `source` part couldn't be loaded;  its note says so unless cancelled."
         },
         {
-          "name": "ui-filter",
+          "name": "epic-filter-changed",
           "detail": "{ states: string[] | undefined }",
           "description": "Its state filter changed:  its chips, `show all`, or the page's toolbar (`showStates()`).  `states` the ones showing;  none:  every state."
         },
         {
-          "name": "epic-test-start",
+          "name": "epic-test-opening",
           "detail": "{}",
           "description": "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
         }
@@ -5028,7 +5042,7 @@
         },
         {
           "name": "start-testing",
-          "description": "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-start`).  Only while the page is reviewed and a test is open."
+          "description": "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
         }
       ],
       "states": [
@@ -5335,7 +5349,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-send-asked",
+          "name": "epic-send-saving",
           "detail": "{ auto }",
           "description": "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The owner sends;  a countdown's send asks every revisit now, as Review Now did (decision Q7)."
         }
@@ -5441,7 +5455,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-sort",
+          "name": "epic-sorting",
           "detail": "{ sort: \"title\" | \"date\" }",
           "description": "The reader picked a sort:  every `<epic-list>` on the page sorts by it."
         }
@@ -5503,7 +5517,7 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-pick`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
       "noun": "state-filter",
       "attributes": [
         {
@@ -5520,7 +5534,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-state-pick",
+          "name": "epic-state-changed",
           "detail": "{ state, shown }",
           "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`).  The owner filters, and sets `shown`."
         }
@@ -5863,7 +5877,7 @@
       "slots": [],
       "events": [
         {
-          "name": "epic-test-done",
+          "name": "epic-test-closed",
           "detail": "{}",
           "description": "Owen left the run:  Esc, or \"Done testing\".  `<epic-page>` shows its blocks again;  the run has sent its unsent answers (I52)."
         }
@@ -6371,7 +6385,7 @@
         {
           "name": "open",
           "kind": "boolean",
-          "description": "Unfolded:  the messages and the reply box show.  A click on its header flips it, and says so (`epic-thread-fold`)."
+          "description": "Unfolded:  the messages and the reply box show.  A click on its header flips it, and says so (`epic-thread-opened` / `epic-thread-closed`)."
         },
         {
           "name": "unseen",
@@ -6411,22 +6425,27 @@
       ],
       "events": [
         {
-          "name": "epic-thread-fold",
-          "detail": "{ open: boolean }",
-          "description": "Owen clicked its header (not one of its buttons):  it unfolded or folded, as `open` now says."
+          "name": "epic-thread-opened",
+          "detail": "{ open: true }",
+          "description": "Owen clicked its header (not one of its buttons):  it unfolded."
         },
         {
-          "name": "epic-thread-edit",
+          "name": "epic-thread-closed",
+          "detail": "{ open: false }",
+          "description": "Owen clicked its header (not one of its buttons):  it folded."
+        },
+        {
+          "name": "epic-thread-editing",
           "detail": "{}",
           "description": "The pen:  Owen will change his first words, while Claude hasn't had them."
         },
         {
-          "name": "epic-thread-delete",
+          "name": "epic-thread-removing",
           "detail": "{}",
           "description": "The trash:  Owen deletes the comment, at once (Undo in the toast that follows)."
         },
         {
-          "name": "epic-thread-answer",
+          "name": "epic-thread-answered",
           "detail": "{ act: \"good\" | \"reply\" | \"skip\" | \"reopen\" }",
           "description": "Owen's answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's good, Reply, Skip it;  Reopen once done."
         }

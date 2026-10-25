@@ -21,6 +21,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: 'epic ask create pick-layout --epic seo --title "Pick a layout"'
     },
     {
+      name: "round",
+      usage: '<page> [--title "..."] [--description "..."] [--from <questions.json5>]',
+      description:
+        "ask the same question again:  the ONE page rewritten in place (from --from, else left to edit), the round " +
+        "before folded at its bottom with what Owen sent;  never a second page (create refuses one)",
+      example: "epic ask round seo/pick-layout --from round2.json5"
+    },
+    {
       name: "show",
       usage: "<page> [--wait] [--timeout 8h]",
       description: "show the page in this session's VS Code side bar (the Review tab);  --wait:  then wait",
@@ -36,8 +44,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "answer",
-      usage: "<page>",
-      description: "print the answer Owen already sent (exit 1 if none)",
+      usage: "<page> [--round <n>]",
+      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic ask answer seo/pick-layout"
     },
     {
@@ -59,6 +67,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "[--days 14]",
       description: "delete the scratch pages (and their answers) older than that;  never an epic's",
       example: "epic ask sweep --days 7"
+    },
+    {
+      name: "fold",
+      usage: "[--dry-run]",
+      description:
+        "once:  every epic's near-copies made before round (x-2, x-3 beside x) folded into their first page as its " +
+        "rounds, their files merged and removed;  --dry-run:  only say what it would do",
+      example: "epic ask fold --dry-run"
     }
   ],
   choices: [
@@ -68,6 +84,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description:
         "make a choice page from its rows (a table of names Claude recommends, Owen's call on each), and print its path",
       example: "epic choices create boolean-names --rows rows.json5 --epic seo"
+    },
+    {
+      name: "round",
+      usage: '<page> --rows <rows.json5> [--title "..."] [--description "..."]',
+      description:
+        "ask the same question again:  the ONE page rewritten with the new rows, the round before folded at its " +
+        "bottom with what Owen sent;  never a second page (create refuses one)",
+      example: "epic choices round seo/boolean-names --rows round2.json5"
     },
     {
       name: "show",
@@ -84,8 +108,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "answer",
-      usage: "<page>",
-      description: "print the answer Owen already sent (exit 1 if none)",
+      usage: "<page> [--round <n>]",
+      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic choices answer seo/boolean-names"
     },
     {

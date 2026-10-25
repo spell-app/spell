@@ -23,13 +23,15 @@ export const THREAD_BOXED = ["first", "pending"] as const
 export type ThreadBoxed = (typeof THREAD_BOXED)[number]
 
 /** The event a thread sends when its header is clicked:  `{ open }`, as it now stands. */
-export const THREAD_FOLD = "epic-thread-fold"
+export const THREAD_OPENED = "epic-thread-opened"
+/** A thread folded:  `THREAD_OPENED`'s other half. */
+export const THREAD_CLOSED = "epic-thread-closed"
 
 /** The event a thread's pen sends:  Owen will change his first words. */
-export const THREAD_EDIT = "epic-thread-edit"
+export const THREAD_EDIT = "epic-thread-editing"
 
 /** The event a thread's trash sends:  Owen deletes the comment. */
-export const THREAD_DELETE = "epic-thread-delete"
+export const THREAD_DELETE = "epic-thread-removing"
 
 /** Classes of a thread's shadow markup (`EpicThread.css`). */
 export const BASE = "base"

@@ -13,8 +13,8 @@ import "spell-epic/components/epic-item"
 /** An `<epic-item>` host:  its `open`, and its source API. */
 type ItemHost = E.DOMElement & { open: boolean; load(): Promise<void>; reload(): Promise<void> }
 
-/** The room an open item keeps above and below it (`EpicItem.css`, I105). */
-const OPEN_ROOM = 10
+/** The room an open item keeps ABOVE it:  none since 2026-10-25, its room below only (`EpicItem.css`). */
+const OPEN_ROOM = 0
 
 /** The part file the source tests serve. */
 const PART = "/demo/parts/items-q6.html"
@@ -147,12 +147,12 @@ describe("<epic-item>", () => {
     ])
   })
 
-  test("starts folded (details `hidden=until-found`);  a click on the line unfolds it through `ui-open`, again folds", async () => {
+  test("starts folded (details `hidden=until-found`);  a click on the line unfolds it through `ui-opening`, again folds", async () => {
     const { host, line, details, toggle } = await item(
       `<epic-item id="c1" title="A caveat" status="open"><p>Why</p></epic-item>`
     )
     const opened = vi.fn()
-    host.addEventListener("ui-open", opened)
+    host.addEventListener("ui-opening", opened)
     expect([host.open, details.getAttribute("hidden")]).toEqual([false, "until-found"])
     expect(toggle()!.getAttribute("aria-expanded")).toBe("false")
     line.click()
@@ -185,13 +185,13 @@ describe("<epic-item>", () => {
     await vi.waitFor(() => expect(details.getBoundingClientRect().height).toBe(0), { timeout: 2000 })
   })
 
-  test("a click on a link in its line (the chip) doesn't fold;  a cancelled `ui-open` keeps it folded", async () => {
+  test("a click on a link in its line (the chip) doesn't fold;  a cancelled `ui-opening` keeps it folded", async () => {
     const { host, chip, line } = await item(`<epic-item id="c2" title="A caveat" status="open"><p>Why</p></epic-item>`)
     chip.addEventListener("click", (event) => event.preventDefault())
     chip.click()
     await ElementFixture.tick()
     expect(host.open).toBe(false)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     line.click()
     await ElementFixture.tick()
     expect(host.open).toBe(false)
@@ -218,7 +218,7 @@ describe("<epic-item>", () => {
     expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", "Original reply", null])
   })
 
-  test("a link to it, or to an element inside it, unfolds it (`ui-open` after the fact)", async () => {
+  test("a link to it, or to an element inside it, unfolds it (`ui-opening` after the fact)", async () => {
     const { host } = await item(`<epic-item id="q7" title="A" status="open"><p id="q7-why">Why</p></epic-item>`)
     location.hash = "#q7-why"
     await new Promise((resolve) => setTimeout(resolve, 0))
@@ -447,7 +447,7 @@ describe("<epic-item> title, folded and open", () => {
     expect(host.open).toBe(true)
     expect(title.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(title.hasAttribute("title")).toBe(false)
-    // down by the room an open item keeps above it (I105:  10px), and nothing else
+    // nothing moves as it opens:  its room is below it, none above (Owen, 2026-10-25)
     expect(title.getBoundingClientRect().top).toBeCloseTo(folded.top + OPEN_ROOM, 0)
     expect(button.getBoundingClientRect().left).toBeCloseTo(folded.button.left, 0)
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top + OPEN_ROOM, 0)

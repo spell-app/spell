@@ -567,7 +567,7 @@ describe("<epic-page> Send and its countdown", () => {
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
     // the countdown running out sends as Review Now did (decision Q7):  every revisit asked now
     sendGroup(host).dispatchEvent(
-      new CustomEvent("epic-send-asked", { detail: { auto: true }, bubbles: true, composed: true })
+      new CustomEvent("epic-send-saving", { detail: { auto: true }, bubbles: true, composed: true })
     )
     await vi.waitFor(() =>
       expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html", now: true }])
@@ -809,9 +809,9 @@ describe("<epic-page> toolbar", () => {
       isOpen(questions),
       isOpen(host.querySelector("#phases")!)
     ]).toEqual([false, false, true, true])
-    // the page's:  everything, each block through its cancelable `ui-close`, as a click (the runtime saves those)
+    // the page's:  everything, each block through its cancelable `ui-closing`, as a click (the runtime saves those)
     const closed: string[] = []
-    host.addEventListener("ui-close", (event) => closed.push((event.target as Element).id))
+    host.addEventListener("ui-closing", (event) => closed.push((event.target as Element).id))
     // the toolbar's ONE toggle:  first it opens everything, then it folds everything
     const pageButton = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toolbar"] [part~="toggle-all"]')!
     pageButton.click()

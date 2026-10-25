@@ -24,7 +24,7 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
- * - a click asks the owner to filter:  `epic-state-pick`, with the clicked state and what should show next, by the one
+ * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
  *   one hides;  the only one showing, everything again);  the owner filters, and sets `shown`
  * - each chip's tooltip and name:  how many, which state, what its click does
