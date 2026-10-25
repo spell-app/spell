@@ -103,7 +103,7 @@ describe("a spellx notebook", () => {
       '<spell-notebook "raw notebook">',
       "\t# Raw",
       "\t<html>",
-      '\t\t<ui-button primary="">Go</ui-button>',
+      '\t\t<ui-button color="primary">Go</ui-button>',
       '\t\t<div class="note">hi</div>',
       "\t</html>",
       '\t<example "a button">',
@@ -118,7 +118,7 @@ describe("a spellx notebook", () => {
     expect(code).toContain('h("div", { class: "note" }, "hi"),')
     expect(code).toContain('h("spell-example", { name: "a button" }, h("ui-button", "Go"))')
     const written = SX.CodeSpellWriter.write(text, { path: "/Raw.spellx" })
-    expect(written).toContain('\t\t<ui-button primary="">Go</ui-button>\n\t\t<div class="note">hi</div>\n')
+    expect(written).toContain('\t\t<ui-button color="primary">Go</ui-button>\n\t\t<div class="note">hi</div>\n')
     expect(compiled(written, "/Raw.spell").code).toBe(code)
     // a cell of its own in the chunk tree
     const [notebook] = SX.SpellxView.read(text, { path: "/Raw.spellx" }).templates

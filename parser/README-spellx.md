@@ -242,7 +242,7 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - A property's aliases with no body are its `alias=`, as many as it has:
   `<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>`.
 
-**`<html>` blocks:**  markup drawn exactly as written, `<ui-button primary="">`, `<div>` the web's own, in a drawing
+**`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
 or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
 
 **Notebooks:**  `<spell-notebook "counter notebook">` is a page made from Spell's built-in `notebook` template:
