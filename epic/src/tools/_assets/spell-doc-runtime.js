@@ -209,11 +209,38 @@ const KEPT_FOLDS_KEY_PREFIX = "spell-doc:kept-folds:"
  */
 const ITEM_FILTER_KEY_PREFIX = "spell-item-state:"
 
+/** How long a page coming up stays still (`quietFor()`):  its folds put back and its scroll held (`RESTORE_HOLD_MS`). */
+const QUIET_LOAD_MS = 2500
+
+/** How long a live patch keeps the page still (`quietFor()`):  its re-wiring, a frame or two, and what settles after. */
+const QUIET_PATCH_MS = 900
+
+/** The timer ending the page's quiet (`quietFor()`). */
+let quietTimer = 0
+
 /** The listeners of the last `wireFolds()` call:  aborted by the next, so a rebuilt page doesn't double them. */
 let foldWiring = null
 
+// still, from the first moment:  a page coming up draws its folds and marks as they ARE, never animating into them
+quietFor(QUIET_LOAD_MS)
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true })
 else void start()
+
+/**
+ * QUIET (Owen, 2026-10-25:  "part of the reason the page continually flashes is that you are running animations when
+ * updating / reloading the page ... if page is already loaded, skip the animations"):  no motion for `ms` from now,
+ * longer if asked again meanwhile.
+ * - `<html data-spell-quiet>`:  `spell-doc.css` sets every duration token to 0s under it (Spell UI's
+ *   `--ui-duration-*`, `--ui-section-duration`, the epic elements' `--epic-*-duration`), which reach every shadow root
+ * - the page's load (until it has settled:  folds put back, the scroll held) and every live patch;  a fold the reader
+ *   clicks after that still animates
+ */
+function quietFor(ms) {
+  const root = document.documentElement
+  root.dataset.spellQuiet = ""
+  clearTimeout(quietTimer)
+  quietTimer = setTimeout(() => delete root.dataset.spellQuiet, ms)
+}
 
 ////////////////
 // ## Start
@@ -972,6 +999,8 @@ function wireLiveUpdate(main) {
   /** Patch the page to `html`, then re-wire it;  reload when it can't be patched. */
   async function update(html, reload) {
     const [before, page] = await Promise.all([base, started])
+    // no motion while the page takes the change:  it's the file, not the reader, moving things
+    quietFor(QUIET_PATCH_MS)
     const patched = before === null ? null : patchPage(page.main, parse(before), parse(html))
     if (!patched) return reload()
     base = Promise.resolve(html)
@@ -1538,6 +1567,7 @@ function keepAnchor(anchor) {
  */
 async function rewire(page, changed) {
   const { main } = page
+  quietFor(QUIET_PATCH_MS)
   // an epic page's blocks take the change in a microtask (Solid batches):  each `contentsEntry` reads it after
   if (main.querySelector("epic-page")) await nextFrames(1)
   const outline = outlineOf(main)

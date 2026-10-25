@@ -294,7 +294,7 @@
     background: none;
   }
   .pill.flash {
-    animation: epic-review-line-flash 0.9s ease-out;
+    animation: epic-review-line-flash var(--epic-flash-duration, 0.9s) ease-out;
   }
   .pill:focus-visible {
     outline: 2px solid var(--ui-focus-color, var(--epic-accent));
@@ -384,7 +384,7 @@
     font-weight: 600;
   }
   .review-line.flash {
-    animation: epic-review-line-flash 0.9s ease-out;
+    animation: epic-review-line-flash var(--epic-flash-duration, 0.9s) ease-out;
   }
   @keyframes epic-review-line-flash {
     from {
@@ -553,7 +553,7 @@
     width: 12px;
     height: 12px;
     color: var(--epic-muted);
-    transition: rotate 0.15s;
+    transition: rotate var(--epic-turn-duration, 0.15s);
   }
   .chevron svg {
     display: block;

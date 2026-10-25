@@ -90,7 +90,7 @@
   }
   .chevron {
     font-size: 12px;
-    transition: rotate 0.15s;
+    transition: rotate var(--epic-turn-duration, 0.15s);
   }
   :host([open]) .chevron {
     rotate: 90deg;

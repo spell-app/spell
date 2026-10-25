@@ -46,7 +46,7 @@
     stroke-linejoin: round;
     margin-block: calc((1lh - 12px) / 2);
     color: var(--_epic-choices-muted);
-    transition: rotate 0.12s;
+    transition: rotate var(--epic-turn-duration, 0.12s);
   }
   button:focus-visible {
     outline: 2px solid var(--ui-focus-color, Highlight);

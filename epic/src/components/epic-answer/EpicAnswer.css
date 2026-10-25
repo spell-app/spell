@@ -188,7 +188,7 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: rotate 0.12s;
+    transition: rotate var(--epic-turn-duration, 0.12s);
   }
   .more:has(> .body:not([hidden])) .chevron {
     rotate: 90deg;
