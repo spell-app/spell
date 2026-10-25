@@ -26,8 +26,7 @@
     --_epic-item-indent: var(--epic-item-indent, 26px);
     --_epic-item-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
     /* an open item's drawer (I104):  in from the line's edges, its bottom corners */
-    --_epic-drawer-inset: var(--epic-drawer-inset, 6px);
-    --_epic-drawer-radius: var(--epic-drawer-radius, 8px);
+    --_epic-drawer-inset: var(--epic-drawer-inset, 4px);
     /* opaque:  the open line sticks, and the text scrolls under it */
     --_epic-item-band: var(
       --epic-band-row,
@@ -47,6 +46,10 @@
   }
   :host([hidden]) {
     display: none;
+  }
+  /* open:  free of its neighbours, room above and below its drawer (I105;  Owen, 2026-10-25), its corners round there */
+  :host([open]) {
+    margin-block: 10px;
   }
 
   .item {
@@ -94,16 +97,18 @@
    *   corners;  the note box, when there, IS that bottom (below)
    */
   .item.unfolded > .line {
+    /* its drawer hangs under it:  square there, touching (I105:  "touching items are square, round when free") */
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
     box-shadow: var(--epic-bar-shadow, 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45)));
   }
   .item.unfolded > .details {
-    /* a gap under it:  the next run's rounded top stands clear of the drawer's bottom */
-    margin: 0 var(--_epic-drawer-inset) 10px;
+    margin: 0 var(--_epic-drawer-inset);
     padding-inline-start: calc(var(--_epic-item-indent) - var(--_epic-drawer-inset) - 1px);
     border: 1px solid var(--_epic-item-rule);
     border-top: none;
-    border-end-start-radius: var(--_epic-drawer-radius);
-    border-end-end-radius: var(--_epic-drawer-radius);
+    border-end-start-radius: var(--_epic-item-bottom-radius);
+    border-end-end-radius: var(--_epic-item-bottom-radius);
     background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
   }
   /*
@@ -113,13 +118,16 @@
   .item.unfolded > .details > [part~="note-box"]:last-child {
     bottom: 0;
     margin-inline: calc(var(--_epic-drawer-inset) + 1px - var(--_epic-item-indent)) -6px;
+    /* over the drawer's bottom padding:  the box IS its bottom */
     margin-block-end: -10px;
   }
   .item.unfolded > .details > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
     border: none;
     border-top: 1px solid var(--_epic-item-rule);
-    border-radius: 0 0 calc(var(--_epic-drawer-radius) - 1px) calc(var(--_epic-drawer-radius) - 1px);
+    /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
+    border-radius: 10px 10px max(0px, calc(var(--_epic-item-bottom-radius) - 1px))
+      max(0px, calc(var(--_epic-item-bottom-radius) - 1px));
     box-shadow: 0 -1px 2px light-dark(rgb(40 30 90 / 0.04), rgb(0 0 0 / 0.3));
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */

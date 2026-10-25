@@ -19,9 +19,10 @@
    * where nothing scrolls under
    */
   :host(:state(open):not([kind="overview-part"])) ui-section::part(title) {
-    border-end-start-radius: var(--epic-section-radius, 8px);
-    border-end-end-radius: var(--epic-section-radius, 8px);
-    box-shadow: var(--epic-bar-shadow, none);
+    /* rounder, and a darker line than the bars' (I105;  Owen, 2026-10-25), still 1px */
+    border-end-start-radius: var(--epic-section-radius, 14px);
+    border-end-end-radius: var(--epic-section-radius, 14px);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.18), rgb(0 0 0 / 0.65));
   }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
