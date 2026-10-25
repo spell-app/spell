@@ -223,6 +223,9 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
 - A phase reads Symptom (one line: what's wrong today), Changes (two or three lines: what changes), then the
   details (Owen, 2026-10-06; P3 of `windows-and-review`): `add-phase --symptom ... --changes ...`;
   `update <name>#P<N> --symptom ...` sets them on a phase written before.
+- A "(coherence)" item or change mark: what the coherence review found (epic `coherence`): something in the repos
+  that already does part of the plan, or two words for one idea. In a plan still being made it's worked into the
+  words; in one being built it's a question for the epic's session. The coherence skill says how (`/coherence`).
 - Updates: a change to the phase's plan (after Owen's feedback, or found while building) is an `<epic-update>`
   block at the END of the phase's description, after Goal, one per change:
   `updated <name>#<N> "<p>what changed, and why</p>" [--summary "..."]`. It's titled **Update**: <summary> (the
