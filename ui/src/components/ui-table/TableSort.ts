@@ -88,7 +88,7 @@ export class TableSort {
     return undefined
   }
 
-  /** `header`'s `data-key`, for `ui-sort`'s detail. */
+  /** `header`'s `data-key`, for `ui-sorting`'s detail. */
   static key(header: HTMLTableCellElement): string | undefined {
     return header.getAttribute(UIT.TABLE_SORT_KEY) ?? undefined
   }

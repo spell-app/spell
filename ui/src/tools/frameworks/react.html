@@ -11,7 +11,7 @@
     <p>
       React 19 sets <code>options</code> / <code>value</code> / <code>open</code> as PROPERTIES (<code
         >"options" in el</code
-      >) and listens through <code>onui-change</code>.
+      >) and listens through <code>onui-changed</code>.
     </p>
     <div id="root"></div>
     <pre id="result">checking...</pre>
@@ -36,7 +36,7 @@
             options: OPTIONS,
             value,
             open,
-            "onui-change": (event) => setValue(event.detail.value),
+            "onui-changed": (event) => setValue(event.detail.value),
             "onui-open": () => setOpen(true),
             "onui-close": () => setOpen(false)
           }),

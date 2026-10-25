@@ -188,10 +188,10 @@ describe("<ui-slider> markup", () => {
 ////////////////
 
 describe("<ui-slider> keyboard", () => {
-  it("arrows step, pages take 2, Home / End go to the ends;  each ui-input then ui-change", async () => {
+  it("arrows step, pages take 2, Home / End go to the ends;  each ui-moved then ui-changed", async () => {
     const { host, thumbs } = await slider(`value="10" aria-label="S"`)
-    const inputs = events(host, "ui-input")
-    const changes = events(host, "ui-change")
+    const inputs = events(host, "ui-moved")
+    const changes = events(host, "ui-changed")
     thumbs[0]!.focus()
     await userEvent.keyboard("{ArrowRight}")
     await settle()
@@ -244,10 +244,10 @@ describe("<ui-slider> keyboard", () => {
     expect(host.end).toBe(20)
   })
 
-  it("keeps the host's value when a ui-input handler re-sets it", async () => {
+  it("keeps the host's value when a ui-moved handler re-sets it", async () => {
     const { host, thumbs } = await slider(`value="4" aria-label="S"`)
-    host.addEventListener("ui-input", () => (host.value = 4))
-    const changes = events(host, "ui-change")
+    host.addEventListener("ui-moved", () => (host.value = 4))
+    const changes = events(host, "ui-changed")
     thumbs[0]!.focus()
     await userEvent.keyboard("{ArrowRight}")
     await settle()
@@ -275,10 +275,10 @@ describe("<ui-slider> keyboard", () => {
 ////////////////
 
 describe("<ui-slider> pointer", () => {
-  it("pressing the track jumps the thumb there;  dragging follows;  ui-change once at the end", async () => {
+  it("pressing the track jumps the thumb there;  dragging follows;  ui-changed once at the end", async () => {
     const { host, inner, root } = await slider(`value="0" aria-label="S"`)
-    const inputs = events(host, "ui-input")
-    const changes = events(host, "ui-change")
+    const inputs = events(host, "ui-moved")
+    const changes = events(host, "ui-changed")
     const track = root.querySelector(".track")!
     point("pointerdown", track, inner, 0.5)
     await settle()

@@ -1034,9 +1034,9 @@ describe("<ui-section> its words:  `<ui-field>`'s (epic `property-editor` P10)",
     expect(rich.host.querySelector("[slot=header]")!.assignedSlot).toBeNull()
   })
 
-  it("`ui-closing` / `ui-opening`, then `ui-closed` / `ui-opened` once it has folded;  never `ui-close` / `ui-open`", async () => {
+  it("`ui-closing` / `ui-opening`, then `ui-closed` / `ui-opened` once it has folded", async () => {
     const { host, toggle } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
-    const seen = record(host, ["ui-closing", "ui-close", "ui-closed", "ui-opening", "ui-open", "ui-opened"])
+    const seen = record(host, ["ui-closing", "ui-closed", "ui-opening", "ui-opened"])
     await userEvent.click(toggle)
     await ElementFixture.tick()
     await userEvent.click(toggle)

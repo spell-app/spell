@@ -1,6 +1,6 @@
 /**
  * Spell UI in Spanish:  every component named in Spanish at once (`defineComponents()`), its texts too.
- * - `es-cambio` / `es-alternar` events are logged.
+ * - `es-cambiado` / `es-seleccionado` events are logged.
  */
 
 import { UI } from "spell-ui"
@@ -12,7 +12,7 @@ ui.i18n.registerDictionary(es)
 ui.i18n.locale = "es"
 
 const log = document.getElementById("log")!
-for (const name of ["es-cambio", "es-alternar"]) {
+for (const name of ["es-cambiado", "es-seleccionado"]) {
   document.addEventListener(name, (event) => {
     log.textContent += `${name} ${JSON.stringify((event as CustomEvent).detail, ["value", "active"])}\n`
   })

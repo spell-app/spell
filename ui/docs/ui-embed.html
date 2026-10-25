@@ -203,7 +203,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-activate` -- about to load the frame from `url` (a click, **Enter** / **Space**, `host.activate()`);
+                  - `ui-loading` -- about to load the frame from `url` (a click, **Enter** / **Space**, `host.activate()`);
                     `detail` is `{ url, originalEvent? }`. `preventDefault()` keeps the placeholder: the place to ask for
                     consent.
                   - `ui-reset` -- back to the placeholder (`host.reset()`, Fomantic's `reset`); the frame is gone.
@@ -215,7 +215,7 @@
                 <script type="text/plain">
                   const tour = document.querySelector("ui-embed")
                   tour.parameters = { start: 30 }
-                  tour.addEventListener("ui-activate", (event) => {
+                  tour.addEventListener("ui-loading", (event) => {
                     if (!consent.video) {
                       event.preventDefault() // keep the placeholder
                       askForConsent()
@@ -233,7 +233,7 @@
 
                   - `change(source, id, url)` -- set `source` / `video-id` / `url`
                   - `reset` -- `host.reset()`
-                  - `show` -- `host.activate()` (fires `ui-activate`), or `host.active = true` (no event)
+                  - `show` -- `host.activate()` (fires `ui-loading`), or `host.active = true` (no event)
                   - `get url`, `get id`, `get placeholder` ... -- read the attributes
                   - `has placeholder` -- `host.placeholder`
                 </script>
@@ -258,7 +258,7 @@
                   - Once activated, focus moves into the frame, so keyboard users land on the player they asked for.
                   - The video's own controls and captions are the other site's.
                   - If the element fails to render, the video is gone: no play button, no frame,
-                    and no `ui-activate`, `reset()` or focus move.
+                    and no `ui-loading`, `reset()` or focus move.
                     Only children written inside the element still show, through a bare `<slot>`.
                 </script>
               </ui-markdown>
@@ -267,7 +267,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `parameters` as a property, and listen for `ui-activate` to gate loading.
+                  Set `parameters` as a property, and listen for `ui-loading` to gate loading.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -280,7 +280,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-embed source="youtube" :video-id="id" :label="title" :parameters="{ start: 30 }" @ui-activate="track" />
+                  <ui-embed source="youtube" :video-id="id" :label="title" :parameters="{ start: 30 }" @ui-loading="track" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -292,7 +292,7 @@
                     video-id={id}
                     label={title}
                     parameters={{ start: 30 }}
-                    on-ui-activate={track}
+                    on-ui-loading={track}
                   />
                 </script>
               </ui-code>

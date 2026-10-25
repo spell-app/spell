@@ -126,14 +126,15 @@
                   `value` is an icon's NAME, as `<ui-icon name>` takes it (`star`, `address book`);  `""` is none.
 
                   - The attribute is the starting (and reset) value;  the `value` property is the live one.
-                  - Picking sends `ui-change` (`{ value }`) first:  a handler that sets `el.value` again wins.
+                  - Picking sends the cancelable `ui-changing` (`{ value }`) first:  a handler that sets `el.value` again wins;  then
+                    `ui-changed` once it's in.
                   - In a `<ui-form value>` it binds like any control;  a property editor draws one for every
                     `icon` attribute (a button's, a rating's).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  document.querySelector("ui-icon-picker").addEventListener("ui-change", (event) => {
+                  document.querySelector("ui-icon-picker").addEventListener("ui-changed", (event) => {
                     document.querySelector("ui-button").icon = event.detail.value
                   })
                 </script>

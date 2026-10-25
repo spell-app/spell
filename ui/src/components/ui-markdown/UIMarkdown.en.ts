@@ -2,7 +2,7 @@
  * The English vocabulary of `<ui-markdown>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - The source pieces (`source`, `load`, `ui-load` ... `ui-error`, the loader and error parts, the states and texts)
+ * - The source pieces (`source`, `load`, `ui-loaded` ... `ui-error`, the loader and error parts, the states and texts)
  *   are shared with `<ui-include>` and `<ui-code>`:  `UIT.Source*`, which `LoadableComponent` reads.
  */
 
@@ -60,7 +60,7 @@ export const markdownVocabulary = {
       group: "behaviour",
       kind: "boolean",
       description:
-        "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` " +
+        "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` " +
         "writes it."
     },
     {
@@ -75,7 +75,7 @@ export const markdownVocabulary = {
   events: [
     ...UIT.SourceEvents,
     {
-      name: "ui-render",
+      name: "ui-drawn",
       detail: "{ headings: { level: number, text: string, id: string }[] }",
       description:
         "Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents."

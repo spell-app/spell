@@ -100,9 +100,9 @@ export const nagVocabulary = {
     }
   ],
   events: [
-    { name: "ui-show", detail: "{}", description: "Shown, its entry animation finished (Fomantic's `onVisible`)." },
+    { name: "ui-opening", detail: "{}", description: "Shown, its entry animation finished (Fomantic's `onVisible`)." },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ reason: NagCloseReason, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -110,7 +110,7 @@ export const nagVocabulary = {
         "`preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`)."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ reason: NagCloseReason }",
       description: "Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now."
     }

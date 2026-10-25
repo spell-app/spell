@@ -11,7 +11,7 @@ import { iconPickerVocabulary } from "./UIIconPicker.en"
  * - Still a form control.  Every `input` event:
  *   - sets `domElement.value`, and the DOM element's form value
  *   - copies the text box's validity onto the DOM element (`required`)
- *   - and `change` sends a composed `ui-change`.
+ *   - and `change` sends a composed `ui-changed`.
  * - Its starting value is the DOM element's `value` PROPERTY, else its attribute.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
  ****************/
@@ -47,7 +47,7 @@ export class IconPickerFallback extends E.NativeFallback<typeof iconPickerVocabu
     this.listen(control, "change", (originalEvent) => {
       const detail = { value: control.value, originalEvent }
       this.domElement.dispatchEvent(
-        new CustomEvent(this.vocabulary.events[0].name, { bubbles: true, composed: true, detail })
+        new CustomEvent("ui-changed", { bubbles: true, composed: true, detail })
       )
     })
     this.control = control

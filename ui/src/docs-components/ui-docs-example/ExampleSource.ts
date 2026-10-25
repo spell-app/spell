@@ -42,7 +42,7 @@ export class ExampleSource {
 
   /**
    * Keep the markup of every `<ui-docs-example>` in `root` -- a fragment about to go into the page (a
-   * `<ui-include>`'s `ui-insert`) -- defined or not;  returns how many.
+   * `<ui-include>`'s `ui-drawing`) -- defined or not;  returns how many.
    * - Its elements may be upgraded already (imported into a document whose families are defined),
    *   but not yet connected, so their light DOM is still as authored.
    * - URLs the include rewrote go back to what the page wrote (`data-ui-include-*`):  the code shows the source.

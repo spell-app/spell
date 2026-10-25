@@ -183,7 +183,7 @@
                   - Headings get GitHub's ids, so `#anchor` links work, inside the element too (the page's own fragment
                     navigation can't see into its shadow root). `heading-offset` shifts their levels to sit under the page's
                     heading (property `headingLevelOffset`: `headingOffset` is WebKit's native `headingoffset`).
-                  - `headings` lists the headings (`{ level, text, id }`), e.g. for a table of contents; `ui-render` fires with
+                  - `headings` lists the headings (`{ level, text, id }`), e.g. for a table of contents; `ui-drawn` fires with
                     them after each render.
                   - Scrolling to a heading from outside: `reveal(id)` scrolls to it and puts `#id` in the address. A plain
                     `<a href="#id">` elsewhere on the page works too: the element follows `hashchange`, and a page opened
@@ -192,7 +192,7 @@
                   - `skip-title` drops the text's leading `#` title (the page shows its own headline above a README); the
                     text itself keeps it.
                   - `editable`: Write / Preview tabs. The preview draws as the element does, swapping only the blocks an
-                    edit changed. Each keystroke is a `ui-change` and makes the element dirty; `save()` writes the text back
+                    edit changed. Each keystroke is a `ui-changed` and makes the element dirty; `save()` writes the text back
                     to `source`.
                   - Spell's own markdown engine, which draws with `ui-*` elements (headers, lists, tables, messages for
                     alerts, checkboxes for tasks), is the app's `<spell-markdown>`: a subclass, outside Spell UI.
@@ -203,18 +203,18 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-render` -- rendered: `{ headings }`.
-                  - `ui-load` -- the text arrived, from `source` or the element's own content: `{ source, content }`.
+                  - `ui-drawn` -- rendered: `{ headings }`.
+                  - `ui-loaded` -- the text arrived, from `source` or the element's own content: `{ source, content }`.
                   - `ui-error` (cancelable) -- loading or rendering failed: `{ kind, source, error }`. Cancel it to skip the error
                     message.
-                  - `ui-change`, `ui-save`, `ui-saved` -- editing and saving, shared with `<ui-code>` and `<ui-include>` (see
+                  - `ui-changed`, `ui-saving`, `ui-saved` -- editing and saving, shared with `<ui-code>` and `<ui-include>` (see
                     Include's Usage tab).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const readme = document.querySelector("ui-markdown")
-                  readme.addEventListener("ui-render", (event) => {
+                  readme.addEventListener("ui-drawn", (event) => {
                     for (const { level, text, id } of event.detail.headings) console.log(level, text, `#${id}`)
                   })
                 </script>

@@ -241,7 +241,7 @@ export type SiteNamed = {
 
 /** A `ui-*` event a tag dispatches. */
 export type SiteEvent = {
-  /** e.g. `ui-change` */
+  /** e.g. `ui-changed` */
   readonly name: string
   /** `event.detail`'s shape, as text, e.g. `{ value: string }` */
   readonly detail: string

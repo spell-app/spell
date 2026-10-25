@@ -151,11 +151,11 @@ describe("<ui-nag> content", () => {
 ////////////////
 
 describe("<ui-nag> closing", () => {
-  it("fires ui-show, then on the close icon a cancelable ui-close, hidden, ui-hide", async () => {
+  it("fires ui-opening, then on the close icon a cancelable ui-closing, hidden, ui-closed", async () => {
     const host = Fixture.render<Nag>(`<ui-nag>Hello</ui-nag>`)
-    await next(host, "ui-show")
-    const closes = record(host, "ui-close")
-    const hidden = next(host, "ui-hide")
+    await next(host, "ui-opening")
+    const closes = record(host, "ui-closing")
+    const hidden = next(host, "ui-closed")
     await userEvent.click(host.shadowRoot!.querySelector("button")!)
     expect(closes.map(({ reason }) => reason)).toEqual(["close"])
     expect((await hidden).reason).toBe("close")
@@ -163,9 +163,9 @@ describe("<ui-nag> closing", () => {
     expect(host.matches(":state(dismissed)")).toBe(true)
   })
 
-  it("stays when ui-close is cancelled", async () => {
+  it("stays when ui-closing is cancelled", async () => {
     const { host } = await nag(`<ui-nag key="${KEY}" storage="local">Hello</ui-nag>`)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     await userEvent.click(host.shadowRoot!.querySelector("button")!)
     expect(host.hidden).toBe(false)
     expect(localStorage.getItem(KEY)).toBeNull()
@@ -178,7 +178,7 @@ describe("<ui-nag> closing", () => {
       vi.useRealTimers()
     })
     const { host } = await nag(`<ui-nag display-time="40" key="${KEY}" storage="local">Hello</ui-nag>`)
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     await vi.advanceTimersByTimeAsync(40)
     expect((await hidden).reason).toBe("timeout")
     expect(host.hidden).toBe(true)
@@ -192,11 +192,11 @@ describe("<ui-nag> closing", () => {
         `<ui-nag id="n" hidden key="${KEY}" storage="local">Hello</ui-nag></div>`
     )
     const host = wrapper.querySelector<Nag>("ui-nag")!
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opening")
     wrapper.querySelector<HTMLButtonElement>("#show")!.click()
     await shown
     expect(host.hidden).toBe(false)
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     wrapper.querySelector<HTMLButtonElement>("#toggle")!.click()
     expect((await hidden).reason).toBe("dismiss")
     expect(host.hidden).toBe(true)
@@ -210,7 +210,7 @@ describe("<ui-nag> closing", () => {
     before.focus()
     await Keys.tab()
     expect(host.shadowRoot!.activeElement).toBe(host.shadowRoot!.querySelector("button"))
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     await userEvent.keyboard("{Enter}")
     expect((await hidden).reason).toBe("close")
   })
@@ -233,7 +233,7 @@ describe("<ui-nag> remembering", () => {
     async (storage) => {
       const store = storage === "local" ? localStorage : sessionStorage
       const { host } = await nag(`<ui-nag key="${KEY}" storage="${storage}">Hello</ui-nag>`)
-      const hidden = next(host, "ui-hide")
+      const hidden = next(host, "ui-closed")
       host.close()
       expect((await hidden).reason).toBe("dismiss")
       expect(store.getItem(KEY)).toBe("dismiss")
@@ -294,7 +294,7 @@ describe("<ui-nag> remembering", () => {
     expect(host.hidden).toBe(true)
     expect(host.show()).toBe(false)
     host.clear()
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opening")
     expect(host.show()).toBe(true)
     await shown
     expect(host.hidden).toBe(false)
@@ -314,7 +314,7 @@ describe("<ui-nag> remembering", () => {
       const { host, root } = await nag(`<ui-nag key="${KEY}" storage="local">Hello</ui-nag>`)
       expect(host.hidden).toBe(false)
       expect(root.className).toBe("ui nag")
-      const hidden = next(host, "ui-hide")
+      const hidden = next(host, "ui-closed")
       expect(host.close()).toBe(true)
       await hidden
       expect(host.hidden).toBe(true)

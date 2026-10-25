@@ -96,11 +96,11 @@ describe("<ui-field apply>", () => {
 describe('<ui-form apply="on save">', () => {
   const FIELDS = `<ui-field><ui-input name="title" aria-label="Title"></ui-input></ui-field>`
 
-  it("holds edits (`:state(changed)`) until `save()`:  `ui-saving`, then `ui-saved`, with the changes", async () => {
+  it("holds edits (`:state(changed)`) until `save()`:  `ui-applying`, then `ui-applied`, with the changes", async () => {
     const thing = { title: "Milk" }
     const { host, named } = await bound(FIELDS, thing, `apply="on save"`)
     const events: [string, FormSaveDetail][] = []
-    for (const type of ["ui-saving", "ui-saved"])
+    for (const type of ["ui-applying", "ui-applied"])
       host.addEventListener(type, (event) => events.push([type, (event as CustomEvent<FormSaveDetail>).detail]))
     await userEvent.type(inner(named("title")), "!")
     await settle()
@@ -110,7 +110,7 @@ describe('<ui-form apply="on save">', () => {
     expect(thing.title).toBe("Milk!")
     await settle()
     expect(host.matches(":state(changed)")).toBe(false)
-    expect(events.map(([type]) => type)).toEqual(["ui-saving", "ui-saved"])
+    expect(events.map(([type]) => type)).toEqual(["ui-applying", "ui-applied"])
     expect(events[0]![1].changes).toEqual([{ name: "title", value: "Milk!", target: thing }])
   })
 
@@ -142,10 +142,10 @@ describe('<ui-form apply="on save">', () => {
     expect(thing.title).toBe("Milk!")
   })
 
-  it("a cancelled `ui-saving` keeps the edits held", async () => {
+  it("a cancelled `ui-applying` keeps the edits held", async () => {
     const thing = { title: "Milk" }
     const { host, named } = await bound(FIELDS, thing, `apply="on save"`)
-    host.addEventListener("ui-saving", (event) => event.preventDefault())
+    host.addEventListener("ui-applying", (event) => event.preventDefault())
     await userEvent.type(inner(named("title")), "!")
     await settle()
     expect(host.save()).toBe(false)

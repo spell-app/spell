@@ -13,7 +13,7 @@ import { LABEL_CLASSES, type Vocabulary } from "./UIInput.types"
  * - Still a form control.  Every `input` event:
  *   - sets `domElement.value`, and the DOM element's form value
  *   - copies the native control's validity onto the DOM element (`setValidity(..., control)`)
- *   - sends a composed `ui-input`;  `change` sends `ui-change`.
+ *   - sends a composed `ui-input`;  `change` sends `ui-changed`.
  * - Its starting value is the DOM element's `value` PROPERTY, else its attribute.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
  ****************/
@@ -76,9 +76,9 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
     this.listen(control, "input", (event) => {
       domElement.value = control.value
       this.sync()
-      this.announce("ui-input", event)
+      this.announce("ui-typed", event)
     })
-    this.listen(control, "change", (event) => this.announce("ui-change", event))
+    this.listen(control, "change", (event) => this.announce("ui-changed", event))
     this.control = control
     return [root]
   }
@@ -98,7 +98,7 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
     else formInternals.setValidity(control.validity, control.validationMessage, control)
   }
 
-  /** Send event `name` (`ui-input`, `ui-change`), composed, with the control's value. */
+  /** Send event `name` (`ui-input`, `ui-changed`), composed, with the control's value. */
   private announce(name: E.EventName<Vocabulary>, originalEvent: Event) {
     const detail = { value: this.control!.value, originalEvent }
     this.domElement.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail }))

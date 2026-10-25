@@ -310,7 +310,7 @@
                   </p>
                   <ui-message slot="description" state="info" size="small"
                     >The wiring (children set the master, the master sets the children) is a few lines on
-                    <code>ui-change</code>: see "Grouped checkboxes" on the Usage tab. Here the states are set in
+                    <code>ui-changed</code>: see "Grouped checkboxes" on the Usage tab. Here the states are set in
                     markup.</ui-message
                   >
                   <ui-list celled relaxed>
@@ -341,7 +341,7 @@
                   </p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's <code>uncheckable: false</code> setting (check once, never uncheck) -- veto
-                    the change in a <code>ui-change</code> listener instead (Usage tab, "Vetoing a change").</ui-message
+                    the change in a <code>ui-changed</code> listener instead (Usage tab, "Vetoing a change").</ui-message
                   >
                   <ui-form>
                     <form>
@@ -378,7 +378,7 @@
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Using Callbacks, Checking Conditions and Attaching Events to other Elements, which are
                 jQuery behaviours (check, set checked, beforeChecked, attach events). Instead, set the
-                <code>selected</code> property and listen for <code>ui-change</code>. Wire other controls with a click
+                <code>selected</code> property and listen for <code>ui-changed</code>. Wire other controls with a click
                 listener (Usage tab).</ui-message
               >
             </ui-section>
@@ -449,7 +449,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` fires when the user chooses or unchooses, with `{ selected, value, originalEvent }`. `value` is
+                  `ui-changed` fires when the user chooses or unchooses, with `{ selected, value, originalEvent }`. `value` is
                   what the box stands for after the change: its `value`, or once unchosen its `off-value` when it has one.
                   Setting `selected` from code fires nothing -- Fomantic's `set checked`.
                 </script>
@@ -457,7 +457,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const news = document.querySelector("ui-checkbox[name=news]")
-                  news.addEventListener("ui-change", (event) => console.log(event.detail.selected, event.detail.value))
+                  news.addEventListener("ui-changed", (event) => console.log(event.detail.selected, event.detail.value))
                   document.querySelector("ui-checkbox[name=terms]").checked = true // same as .selected = true;  no event
                 </script>
               </ui-code>
@@ -466,14 +466,14 @@
             <ui-section id="usage-vetoing-a-change" label="Vetoing a change" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` fires BEFORE the state changes; a handler that sets `selected` back vetoes the change. That covers
+                  `ui-changed` fires BEFORE the state changes; a handler that sets `selected` back vetoes the change. That covers
                   Fomantic's `beforeChecked` / `beforeUnchecked` and its `uncheckable: false` (check once, never uncheck).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const terms = document.querySelector("ui-checkbox[name=terms]")
-                  terms.addEventListener("ui-change", (event) => {
+                  terms.addEventListener("ui-changed", (event) => {
                     if (!event.detail.selected && !confirm("Really opt out?")) terms.selected = true
                   })
                 </script>
@@ -483,7 +483,7 @@
             <ui-section id="usage-grouped-checkboxes" label="Grouped checkboxes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Fomantic's master / child example, on `ui-change`: the master sets every child, and each child sets the master
+                  Fomantic's master / child example, on `ui-changed`: the master sets every child, and each child sets the master
                   to chosen, unchosen or `indeterminate`.
                 </script>
               </ui-markdown>
@@ -492,10 +492,10 @@
                   for (const item of document.querySelectorAll("ui-list[celled] > ui-item")) {
                     const master = item.querySelector(":scope > ui-checkbox")
                     const children = [...item.querySelectorAll("ui-list ui-checkbox")]
-                    master.addEventListener("ui-change", (event) => {
+                    master.addEventListener("ui-changed", (event) => {
                       for (const child of children) child.selected = event.detail.selected
                     })
-                    item.addEventListener("ui-change", (event) => {
+                    item.addEventListener("ui-changed", (event) => {
                       if (event.target === master) return
                       queueMicrotask(() => {
                         const chosen = children.filter((child) => child.selected).length
@@ -530,7 +530,7 @@
                     so give it an `aria-label` or a `<label for>` pointing at the host.
                   - A box that fails `required` after the user has interacted gets `aria-invalid="true"`.
                   - If the element fails to render, its native fallback keeps the same markup with a plain native input:
-                    it still submits, validates `required` and fires `ui-change`. It drops vetoing `ui-change`,
+                    it still submits, validates `required` and fires `ui-changed`. It drops vetoing `ui-changed`,
                     the invalid state, reset to the starting state,
                     and naming a `fitted` box through `<label for>` (only `aria-label` works).
                 </script>
@@ -540,20 +540,20 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `selected` as a property to control the box, and listen for `ui-change`.
+                  Bind `selected` as a property to control the box, and listen for `ui-changed`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-checkbox name="news" selected={on} onui-change={(e) => setOn(e.detail.selected)}>Newsletter</ui-checkbox>
+                  <ui-checkbox name="news" selected={on} onui-changed={(e) => setOn(e.detail.selected)}>Newsletter</ui-checkbox>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-checkbox name="news" :selected="on" @ui-change="(e) => (on = e.detail.selected)">Newsletter</ui-checkbox>
+                  <ui-checkbox name="news" :selected="on" @ui-changed="(e) => (on = e.detail.selected)">Newsletter</ui-checkbox>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -563,7 +563,7 @@
                   <ui-checkbox
                     name="news"
                     selected={on()}
-                    on-ui-change={(e) => setOn(e.detail.selected)}
+                    on-ui-changed={(e) => setOn(e.detail.selected)}
                   >
                     Newsletter
                   </ui-checkbox>

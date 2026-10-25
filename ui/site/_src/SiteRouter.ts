@@ -14,7 +14,7 @@ import { PAGE_MAIN } from "./site.types"
  * `history.pushState`s the page's real URL.  Back / forward swap it back.
  * - Each swap:  the new page's text is fetched (`UI.sources`, cached), the families it uses loaded, THEN the include
  *   pointed at it, so it goes in already defined;  inside a View Transition where the browser has them.
- * - On `ui-insert` (any include, the footer too, before its markup goes in):  examples keep their authored markup
+ * - On `ui-drawing` (any include, the footer too, before its markup goes in):  examples keep their authored markup
  *   (`ExampleSource.keep()`), and every relative URL left is made absolute, so it holds after the next swap.
  * - After a swap:  the title, the nav's `current`, live reload's file (`SPELL_SERVER.file`) and the file on disk
  *   (`SPELL_SERVER.source`, the header's "open in VS Code"), inline scripts run again, then the hash (or the top,
@@ -60,8 +60,8 @@ export class SiteRouter {
   start(): void {
     history.scrollRestoration = "manual"
     document.addEventListener("click", (event) => this.onClick(event))
-    document.addEventListener("ui-navigate", (event) => this.onNavigate(event as CustomEvent<{ href: string }>))
-    document.addEventListener("ui-insert", (event) =>
+    document.addEventListener("ui-navigating", (event) => this.onNavigate(event as CustomEvent<{ href: string }>))
+    document.addEventListener("ui-drawing", (event) =>
       this.onInsert(event as CustomEvent<{ fragment: DocumentFragment }>)
     )
     window.addEventListener("popstate", () => this.onPopState())
@@ -356,7 +356,7 @@ export class SiteRouter {
   private static inserted(include: HTMLElement, href: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => done(timedOut()), TIMEOUT_MS)
-      include.addEventListener("ui-insert", onInsert)
+      include.addEventListener("ui-drawing", onInsert)
       include.addEventListener("ui-error", onError)
 
       /** The include's markup is in:  settle once it has gone in. */
@@ -386,7 +386,7 @@ export class SiteRouter {
       /** Settle once, dropping the listeners and the timer. */
       function done(error?: Error) {
         clearTimeout(timer)
-        include.removeEventListener("ui-insert", onInsert)
+        include.removeEventListener("ui-drawing", onInsert)
         include.removeEventListener("ui-error", onError)
         if (error) reject(error)
         else resolve()
@@ -415,7 +415,7 @@ export type LandOptions = {
 const NOT_PAGES = ["_assets/", "__data/", "__parts/", "examples/", "images/", "_examples/", "_images/"]
 
 /** Dispatched on `document` after a swap (`SiteHeader.PAGE_EVENT`, spelled out:  the header's module is the server's). */
-const PAGE_EVENT = "spell-site:page"
+const PAGE_EVENT = "spell-site:navigated"
 
 /** Give up on a swap that hasn't arrived after this long, ms:  full load instead. */
 const TIMEOUT_MS = 10_000

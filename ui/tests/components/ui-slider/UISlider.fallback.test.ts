@@ -33,18 +33,18 @@ describe("SliderFallback", () => {
     await expectAccessible(host, AXE)
   })
 
-  it("is still a form control:  value, host.value, ui-input / ui-change", () => {
+  it("is still a form control:  value, host.value, ui-moved / ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-slider name="volume" value="5" aria-label="Volume"></x-fb-slider></form>`
     )
     const host = form.querySelector<StubHost & { value?: number }>("x-fb-slider")!
     expect(new FormData(form).get("volume")).toBe("5")
     const names: string[] = []
-    for (const name of ["ui-input", "ui-change"]) host.addEventListener(name, () => names.push(name))
+    for (const name of ["ui-moved", "ui-changed"]) host.addEventListener(name, () => names.push(name))
     slide(FallbackStub.shadow(host).querySelector("input")!, "12")
     expect(new FormData(form).get("volume")).toBe("12")
     expect(host.value).toBe(12)
-    expect(names).toEqual(["ui-input", "ui-change"])
+    expect(names).toEqual(["ui-moved", "ui-changed"])
   })
 
   it("a range:  two named inputs, two form entries, kept in order", async () => {

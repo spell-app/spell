@@ -33,17 +33,17 @@ async function markdown(html: string): Promise<DOMMarkdownElement> {
 }
 
 /**
- * Resolves on the next `ui-render` or `ui-error` reaching `target`.
+ * Resolves on the next `ui-drawn` or `ui-error` reaching `target`.
  * - No timeout of its own:  a render that never ends fails the test at Vitest's test timeout.
  */
 function nextRender(target: EventTarget): Promise<void> {
   return new Promise<void>((resolve) => {
-    target.addEventListener("ui-render", done)
+    target.addEventListener("ui-drawn", done)
     target.addEventListener("ui-error", done)
 
     /** Stop listening, and resolve. */
     function done() {
-      target.removeEventListener("ui-render", done)
+      target.removeEventListener("ui-drawn", done)
       target.removeEventListener("ui-error", done)
       resolve()
     }
@@ -88,11 +88,11 @@ describe("<ui-markdown> rendering", () => {
     expect(body(host).querySelector("a")!.getAttribute("href")).toBe("https://example.com")
   })
 
-  it("gives headings GitHub's ids and lists them:  `headings`, `ui-render`", async () => {
+  it("gives headings GitHub's ids and lists them:  `headings`, `ui-drawn`", async () => {
     const onRender = vi.fn()
-    document.addEventListener("ui-render", onRender)
+    document.addEventListener("ui-drawn", onRender)
     const host = await markdown(md("# Getting started!\n\n## Setup\n\n## Setup"))
-    document.removeEventListener("ui-render", onRender)
+    document.removeEventListener("ui-drawn", onRender)
     expect([...body(host).querySelectorAll("h1, h2")].map((heading) => heading.id)).toEqual([
       "getting-started",
       "setup",
@@ -338,13 +338,13 @@ describe("<ui-markdown editable>", () => {
     expect(body(host).querySelector("ui-header, ui-checkbox, ui-table")).toBeNull()
   })
 
-  it("each edit is `ui-change` and dirty;  the preview swaps only the changed blocks", async () => {
+  it("each edit is `ui-changed` and dirty;  the preview swaps only the changed blocks", async () => {
     const host = await editable("# Title\n\nfirst\n\nlast")
     await preview(host)
     const [title, , last] = body(host).children
     tabs(host)[0].click()
     const onChange = vi.fn()
-    host.addEventListener("ui-change", onChange)
+    host.addEventListener("ui-changed", onChange)
     await type(host, "# Title\n\nchanged\n\nlast")
     expect(onChange.mock.calls.at(-1)![0].detail.content).toBe("# Title\n\nchanged\n\nlast")
     expect(host.matches(":state(dirty)")).toBe(true)

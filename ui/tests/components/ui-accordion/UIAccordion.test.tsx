@@ -46,10 +46,10 @@ function openPanels(details: HTMLDetailsElement[]) {
   return details.flatMap((panel, index) => (panel.open ? [index] : []))
 }
 
-/** Collect `ui-open` / `ui-close` details (type, index, open) from `host`. */
+/** Collect `ui-opening` / `ui-closing` details (type, index, open) from `host`. */
 function events(host: Element) {
   const seen: { type: string; index: number; open: boolean; originalEvent?: Event }[] = []
-  for (const type of ["ui-open", "ui-close"]) {
+  for (const type of ["ui-opening", "ui-closing"]) {
     host.addEventListener(type, (event) => {
       const { index, open, originalEvent } = (event as CustomEvent<AccordionToggleDetail>).detail
       seen.push({ type, index, open, originalEvent })
@@ -220,7 +220,7 @@ describe("<ui-accordion> tokens from outside", () => {
 ////////////////
 
 describe("<ui-accordion> behaviour", () => {
-  it("opens a panel on a title click, closing the open one (exclusive), with ui-open / ui-close first", async () => {
+  it("opens a panel on a title click, closing the open one (exclusive), with ui-opening / ui-closing first", async () => {
     const { host, details, titles } = await accordion('open="0"')
     const seen = events(host)
     await userEvent.click(titles[1]!)
@@ -229,8 +229,8 @@ describe("<ui-accordion> behaviour", () => {
     expect(host.open).toBe("1")
     expect(host.getAttribute("open")).toBe("1")
     expect(seen.map(({ type, index, open }) => [type, index, open])).toEqual([
-      ["ui-open", 1, true],
-      ["ui-close", 0, false]
+      ["ui-opening", 1, true],
+      ["ui-closing", 0, false]
     ])
     expect(seen[0]!.originalEvent).toBeInstanceOf(MouseEvent)
   })
@@ -255,13 +255,13 @@ describe("<ui-accordion> behaviour", () => {
     expect(host.open).toBe("0 2")
   })
 
-  it("lets ui-open veto an open, and ui-close veto both halves of an exclusive switch", async () => {
+  it("lets ui-opening veto an open, and ui-closing veto both halves of an exclusive switch", async () => {
     const { host, details, titles } = await accordion('open="0"')
-    host.addEventListener("ui-open", (event) => event.preventDefault(), { once: true })
+    host.addEventListener("ui-opening", (event) => event.preventDefault(), { once: true })
     await userEvent.click(titles[1]!)
     await ElementFixture.tick()
     expect(openPanels(details)).toEqual([0])
-    host.addEventListener("ui-close", (event) => event.preventDefault(), { once: true })
+    host.addEventListener("ui-closing", (event) => event.preventDefault(), { once: true })
     await userEvent.click(titles[2]!)
     await ElementFixture.tick()
     expect(openPanels(details)).toEqual([0])
@@ -270,7 +270,7 @@ describe("<ui-accordion> behaviour", () => {
 
   it("lets a handler that re-sets `open` win", async () => {
     const { host, details, titles } = await accordion('open="0"')
-    host.addEventListener("ui-open", () => (host.open = "0"), { once: true })
+    host.addEventListener("ui-opening", () => (host.open = "0"), { once: true })
     await userEvent.click(titles[1]!)
     await ElementFixture.tick()
     expect(openPanels(details)).toEqual([0])
@@ -282,7 +282,7 @@ describe("<ui-accordion> behaviour", () => {
     // what find-in-page does:  open a closed panel natively
     details[2]!.open = true
     await expect.poll(() => host.open).toBe("2")
-    expect(seen.map(({ type, index }) => [type, index])).toEqual([["ui-open", 2]])
+    expect(seen.map(({ type, index }) => [type, index])).toEqual([["ui-opening", 2]])
     expect(parts(host).titles[2]!.className).toBe("active title")
   })
 

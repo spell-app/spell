@@ -43,12 +43,12 @@ export const stickyVocabulary = {
   ],
   events: [
     {
-      name: "ui-stick",
+      name: "ui-stuck",
       detail: "{ edge: StickyEdge }",
       description: "Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`."
     },
     {
-      name: "ui-unstick",
+      name: "ui-unstuck",
       detail: "{ edge: StickyEdge }",
       description:
         "Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`)."

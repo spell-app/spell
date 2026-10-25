@@ -31,11 +31,11 @@ import tocCSS from "./UIDocsToc.css?inline"
  *     each level opening on the way to the entry in view
  *   - light DOM only.
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
- *   and its section opens;  `ui-change { value }` when that changes.
+ *   and its section opens;  `ui-scrolled-to { value }` when that changes.
  * - Links are plain `#id` links:  the browser scrolls (below the document's `scroll-padding-top`).
  *   - A hash naming an element in a HIDDEN pane of the followed tabs (a link from elsewhere, or a page opened on it)
  *     shows that pane first, then scrolls to it:  `<ui-tabs history>` ignores hashes that aren't pane values.
- * - It scans again when the tabs show another pane (`ui-show`),
+ * - It scans again when the tabs show another pane (`ui-opened`),
  *   and when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`).
  * - It re-follows when that content resizes
  *   (a `ResizeObserver`:  components drawing late move the headings without any scroll).
@@ -246,17 +246,17 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const root = followed?.tabs ? TocIndex.shownPane(followed.tabs) : followed?.root
     const sections = root ? TocIndex.scan(root, UIDocsToc.reservedIdsFor(followed?.tabs)) : []
     this.sections = sections
-    this.send("ui-render", { ids: TocIndex.flatten(sections).map((entry) => entry.id) })
+    this.send("ui-drawn", { ids: TocIndex.flatten(sections).map((entry) => entry.id) })
     this.followScroll(sections)
   }
 
-  /** Mark the entry in view;  `ui-change` when it moved. */
+  /** Mark the entry in view;  `ui-scrolled-to` when it moved. */
   @E.untracked
   private followScroll(sections = this.sections): void {
     const id = TocIndex.current(sections, this.domElement.ownerDocument)
     if (id === this.idInView) return
     this.idInView = id
-    if (id) this.send("ui-change", { value: id })
+    if (id) this.send("ui-scrolled-to", { value: id })
   }
 
   /**
@@ -316,7 +316,7 @@ type Observers = {
 const OBSERVED_ATTRIBUTES = ["header", "level", "id"]
 
 /** `<ui-tabs>`' event as it shows another pane. */
-const UI_SHOW = "ui-show"
+const UI_SHOW = "ui-opened"
 
 /** Class word of a section's link item. */
 const SECTION = "section"

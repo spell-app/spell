@@ -17,7 +17,7 @@ import { type RadioMember } from "./UICheckbox.types"
  *   - choosing one unchooses the rest (without events, as natively)
  *   - only the group's tab stop is tabbable:  the chosen one, else the first enabled one
  *   - Arrow Down / Right choose the next enabled one, Arrow Up / Left the previous, wrapping.
- * - Only the newly chosen radio sends `ui-change`;  the form gets the chosen one's `name=value`.
+ * - Only the newly chosen radio sends `ui-changed`;  the form gets the chosen one's `name=value`.
  * - `required` on any member requires a choice in the group:  every member reports `valueMissing`.
  ****************/
 export class UIRadio extends CheckControl<typeof radioVocabulary> implements RadioMember {

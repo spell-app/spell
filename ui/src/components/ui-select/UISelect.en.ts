@@ -105,7 +105,7 @@ export const selectVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: string | string[], originalEvent?: Event }",
       description: "Someone chose a value (or changed the chosen set, with `multiple`)."
     }

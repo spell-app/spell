@@ -51,7 +51,7 @@ import calendarCSS from "./UICalendar.css?inline"
  * - Typing:  the field's text is read on `change` / Enter (`CalendarText.read()`);
  *   unreadable or out-of-range text goes back to the value's.
  * - `value` and `open` are controlled (`@controlled`):
- *   `ui-change` / `ui-open` / `ui-close` go first, and are cancelable.
+ *   `ui-changing` / `ui-opening` / `ui-closing` go first, and are cancelable.
  *   The `value` ATTRIBUTE is the starting (and form-reset) value.
  * - Ranges (Fomantic's `startCalendar` / `endCalendar`):
  *   `start-calendar="id"` makes this the END (the partner's value is its minimum),
@@ -165,7 +165,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * Set the value to `moment` (`undefined` clears), dispatching the cancelable `ui-change` first;  true when applied.
+   * Set the value to `moment` (`undefined` clears), dispatching the cancelable `ui-changing` first;  true when applied.
    * - SIDE EFFECT:  drops typed text either way (a vetoed value shows the old one again).
    */
   @E.untracked
@@ -175,7 +175,10 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     const value = moment ? dates.format(moment) : ""
     const detail: UIT.CalendarChangeDetail = { value, originalEvent }
     this.typedText = undefined
-    return this.requestChange("value", value, () => this.send("ui-change", detail))
+    const applied = this.requestChange("value", value, () => this.send("ui-changing", detail))
+    // Then the -ed half, once the value is in (epic elemental-spell P9:  a form reads `ui-changed`)
+    if (applied) this.send("ui-changed", detail)
+    return applied
   }
 
   /** Typing:  kept until `change`. */
@@ -230,7 +233,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * Open or close the popup, dispatching the cancelable `ui-open` / `ui-close` first;  true when applied.
+   * Open or close the popup, dispatching the cancelable `ui-opening` / `ui-closing` first;  true when applied.
    * - Opening starts over in the type's first view, on the value (or `initial-date`, or today).
    */
   @E.untracked
@@ -238,7 +241,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     if (this.inline || open === this.popupIsOpen) return false
     if (open && (this.isDisabled || this.readonly)) return false
     const detail: UIT.CalendarOpenDetail = { open, originalEvent }
-    const isApplied = this.requestChange("isOpen", open, () => this.send(open ? "ui-open" : "ui-close", detail))
+    const isApplied = this.requestChange("isOpen", open, () => this.send(open ? "ui-opening" : "ui-closing", detail))
     if (isApplied && open) {
       this.explicitMode = undefined
       this.explicitFocus = undefined

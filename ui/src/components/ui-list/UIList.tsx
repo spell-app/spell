@@ -112,7 +112,7 @@ export class UIList extends E.UIComponent<typeof listVocabulary> implements UIT.
     const item = this.activatedItem(event)
     if (!item) return
     const detail: UIT.ListSelectDetail = { value: UIList.valueFor(item), item, originalEvent: event }
-    this.send("ui-select", detail)
+    this.send("ui-chosen", detail)
   }
 
   /**

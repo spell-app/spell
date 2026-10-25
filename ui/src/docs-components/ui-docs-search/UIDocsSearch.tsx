@@ -78,7 +78,7 @@ export class DOMDocsSearchElement extends E.DOMElement<UIDocsSearch> {
  *   - Escape closes, then clears (the list beside it unfilters), then leaves the field
  *   - leaving the field closes the card;  coming back reopens it.
  * - Results are LINKS (`<a href>`), so a router that takes the page's link clicks takes them too.
- *   Picking one fires a cancelable `ui-navigate`:
+ *   Picking one fires a cancelable `ui-navigating`:
  *   - vetoed:  a router took it
  *   - else a result on the page shown sets the hash,
  *     closing the drawer the field is in (the site's landing scrolls)
@@ -126,7 +126,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     this.query = value
     this.highlightedIndex = 0
     this.cardIsWanted = true
-    this.send("ui-input", { value, originalEvent: event })
+    this.send("ui-typed", { value, originalEvent: event })
   }
 
   /** The clear button:  empty the field, and give it focus back. */
@@ -140,7 +140,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     if (this.input) this.input.value = ""
     this.query = ""
     this.highlightedIndex = 0
-    this.send("ui-input", { value: "", originalEvent: event })
+    this.send("ui-typed", { value: "", originalEvent: event })
   }
 
   ////////////////
@@ -414,7 +414,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
       window.open(href, "_blank", "noopener")
       return
     }
-    const shouldFollow = this.send("ui-navigate", { href, kind: hit.entry.kind, originalEvent: event })
+    const shouldFollow = this.send("ui-navigating", { href, kind: hit.entry.kind, originalEvent: event })
     E.soon(() => this.finishPick())
     if (!shouldFollow) {
       event.preventDefault()

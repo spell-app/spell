@@ -61,23 +61,23 @@ export function refused() {
  */
 export function events() {
   const button = document.querySelector("ui-button")!
-  button.addEventListener("ui-toggle", (event) => event.detail.active satisfies boolean)
-  // @ts-expect-error:  `ui-toggle`'s detail has no `value`
-  button.addEventListener("ui-toggle", (event) => event.detail.value)
+  button.addEventListener("ui-selected", (event) => event.detail.active satisfies boolean)
+  // @ts-expect-error:  `ui-selected`'s detail has no `value`
+  button.addEventListener("ui-selected", (event) => event.detail.value)
   // any element or the document:  the name completes, but any set may send it, so its detail is `unknown`
-  document.addEventListener("ui-change", (event) => event.detail satisfies unknown)
+  document.addEventListener("ui-changed", (event) => event.detail satisfies unknown)
   // @ts-expect-error:  `unknown` until it's narrowed
-  document.body.addEventListener("ui-change", (event) => event.detail.value)
+  document.body.addEventListener("ui-changed", (event) => event.detail.value)
   return (
     <>
-      <ui-input on-ui-change={(event) => event.detail.value satisfies string} />
-      <ui-rating on-ui-change={(event) => event.detail.value satisfies number} />
-      <ui-button on-ui-toggle={(event) => event.detail.active} on-ui-chnage={() => {}} />
-      <ui-button ref={(element) => element.addEventListener("ui-toggle", (event) => event.detail.active)} />
-      {/* @ts-expect-error:  `<ui-button>`'s `ui-toggle` has no `value` */}
-      <ui-button on-ui-toggle={(event) => event.detail.value} />
+      <ui-input on-ui-changed={(event) => event.detail.value satisfies string} />
+      <ui-rating on-ui-changed={(event) => event.detail.value satisfies number} />
+      <ui-button on-ui-selected={(event) => event.detail.active} on-ui-chnage={() => {}} />
+      <ui-button ref={(element) => element.addEventListener("ui-selected", (event) => event.detail.active)} />
+      {/* @ts-expect-error:  `<ui-button>`'s `ui-selected` has no `value` */}
+      <ui-button on-ui-selected={(event) => event.detail.value} />
       {/* @ts-expect-error:  a listener takes the event, not its detail */}
-      <ui-input on-ui-change={(detail: { value: number }) => detail.value} />
+      <ui-input on-ui-changed={(detail: { value: number }) => detail.value} />
     </>
   )
 }

@@ -34,7 +34,7 @@ import progressCSS from "./UIProgress.css?inline"
  *   Unset, a single bar at 100% shows `success` (Fomantic's `autoSuccess`).
  * - `active` is only what the author sets:  Fomantic's JS pulsed every bar between 0 and 100%.
  *
- * - Events:  `ui-change` when the percentage changes, `ui-complete` when it reaches 100.
+ * - Events:  `ui-changed` when the percentage changes, `ui-completed` when it reaches 100.
  *   Both only after the first render, whatever wrote the numbers (there is no user input).
  ****************/
 export class UIProgress extends E.UIComponent<typeof progressVocabulary> {
@@ -66,18 +66,18 @@ export class UIProgress extends E.UIComponent<typeof progressVocabulary> {
     })
   }
 
-  /** Percentage when the last `ui-change` went out, to tell when it reaches 100. */
+  /** Percentage when the last `ui-changed` went out, to tell when it reaches 100. */
   private lastAnnouncedPercent = this.numbers.percent
 
-  /** The numbers changed:  `ui-change`, and `ui-complete` when it just reached 100.  Not for the first draw. */
+  /** The numbers changed:  `ui-changed`, and `ui-completed` when it just reached 100.  Not for the first draw. */
   @E.onChange("numbers", { defer: true })
   protected onNumbersChanged(numbers: ProgressValues) {
     if (numbers.percent === this.lastAnnouncedPercent) return
     const hasReached = numbers.percent >= 100 && this.lastAnnouncedPercent < 100
     this.lastAnnouncedPercent = numbers.percent
     const { percent, shown, value, total } = numbers
-    this.send("ui-change", { percent, percents: [...shown], value, total })
-    if (hasReached) this.send("ui-complete", { value, total })
+    this.send("ui-changed", { percent, percents: [...shown], value, total })
+    if (hasReached) this.send("ui-completed", { value, total })
   }
 
   ////////////////

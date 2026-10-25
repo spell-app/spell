@@ -44,9 +44,9 @@ describe("ElementManifests.jsxTypes()", () => {
   test("types every tag's events:  its own map, `on-<event>`, and the DOM's maps", () => {
     const text = new ElementManifests({ data: DATA, packageFolder: UI }).jsxTypes()
     expect(text).toContain("export interface UIButtonEventMap {")
-    expect(text).toContain('  "on-ui-toggle"?: (event: UIButtonEventMap["ui-toggle"]) => void')
+    expect(text).toContain('  "on-ui-selected"?: (event: UIButtonEventMap["ui-selected"]) => void')
     expect(text).toContain('    "ui-button": UIHTMLElement<UIButtonEventMap>')
-    expect(text).toContain('  "ui-change": CustomEvent<unknown>')
+    expect(text).toContain('  "ui-changed": CustomEvent<unknown>')
     expect(text).toContain("reason: UIT.ModalCloseReason")
   })
 })
@@ -85,7 +85,7 @@ describe("ElementManifests.customElements()", () => {
       .flatMap((module) => module.declarations)
       .find((entry) => entry.tagName === "ui-button")!
     expect(button.attributes).toContainEqual(expect.objectContaining({ name: "primary", type: { text: "boolean" } }))
-    expect(button.events).toContainEqual(expect.objectContaining({ name: "ui-toggle" }))
+    expect(button.events).toContainEqual(expect.objectContaining({ name: "ui-selected" }))
   })
 })
 

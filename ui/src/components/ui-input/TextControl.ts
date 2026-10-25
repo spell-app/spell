@@ -90,17 +90,17 @@ export abstract class TextControl<V extends E.ComponentVocabulary = E.ComponentV
     const control = event.currentTarget as HTMLInputElement | HTMLTextAreaElement
     const next = control.value
     const applied = this.requestChange("value", next, () =>
-      this.send("ui-input" as never, { value: next, originalEvent: event })
+      this.send("ui-typed" as never, { value: next, originalEvent: event })
     )
     if (!applied) E.afterSolidUpdate(() => this.syncControl())
     this.readNativeValidity()
   }
 
-  /** Commit:  `ui-change`;  the person has now interacted. */
+  /** Commit:  `ui-changed`;  the person has now interacted. */
   @E.untracked
   protected readonly onChange = (event: Event) => {
     this.isTouched = true
-    this.send("ui-change" as never, { value: this.value, originalEvent: event })
+    this.send("ui-changed" as never, { value: this.value, originalEvent: event })
   }
 
   /** Focus:  remember the value, to tell an edit on the way out. */

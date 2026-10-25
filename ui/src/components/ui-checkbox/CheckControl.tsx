@@ -55,7 +55,7 @@ export class DOMCheckElement extends F.DOMFormControl<CheckControl> {
  * a native `<input>` (invisible, over the box) and a `<label for>` that draws the box and holds the text.
  * The chosen state, value and validity belong to the DOM element.
  *
- * - `selected` is controlled (`isSelected`):  the input's `change` sends `ui-change` first;
+ * - `selected` is controlled (`isSelected`):  the input's `change` sends `ui-changed` first;
  *   a handler that sets `el.selected` again wins (the input shows that state).
  *   - `checked` is another name for it:  the DOM element's property (`DOMCheckElement`),
  *     and the `checked` ATTRIBUTE, which selects it as markup selects a native checkbox.
@@ -145,7 +145,7 @@ export abstract class CheckControl<V extends CheckVocabulary = CheckVocabulary> 
 
   /**
    * Someone chose or unchose it (a click, a key):
-   * send `ui-change`, then set the DOM element's property, unless a handler set it first.
+   * send `ui-changed`, then set the DOM element's property, unless a handler set it first.
    * - `detail.value`:  what it stands for after the change:
    *   `chosenValue`, or once unchosen, `unchosenValue` when there is one.
    * - Returns true when applied.
@@ -155,7 +155,7 @@ export abstract class CheckControl<V extends CheckVocabulary = CheckVocabulary> 
     const value = (selected ? undefined : this.unchosenValue) ?? this.chosenValue
     // `E.Reactive`'s own:  `requestChange()` names public members only, and `selectedProperty` is private
     const applied = E.Reactive.requestChange(this, "selectedProperty", selected, () =>
-      this.send("ui-change" as never, { selected, value, originalEvent })
+      this.send("ui-changed" as never, { selected, value, originalEvent })
     )
     if (!applied) E.afterSolidUpdate(() => this.control && (this.control.checked = this.isSelected))
     this.onChosen(applied)
@@ -307,7 +307,7 @@ export abstract class CheckControl<V extends CheckVocabulary = CheckVocabulary> 
     if (this.readonly) event.preventDefault()
   }
 
-  /** The input changed:  `ui-change` first, then the state (unless a handler took over). */
+  /** The input changed:  `ui-changed` first, then the state (unless a handler took over). */
   private readonly onChange = (event: Event) => {
     const selected = (event.currentTarget as HTMLInputElement).checked
     this.choose(selected, event)

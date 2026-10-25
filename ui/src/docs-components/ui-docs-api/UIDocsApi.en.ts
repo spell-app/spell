@@ -48,7 +48,7 @@ export const docsApiVocabulary = {
   ],
   events: [
     {
-      name: "ui-render",
+      name: "ui-drawn",
       detail: "{ tags: string[] }",
       description: "The tables are drawn (the data arrived, or `tag` / `family` changed);  `tags` are the tags shown."
     }

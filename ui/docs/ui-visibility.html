@@ -171,7 +171,7 @@
                     By default each event fires only <b>the first time</b> its conditions are met:
                     <code>once="false"</code> fires it each time its condition <b>becomes true</b>, and
                     <code>continuous</code> at every check while it holds. Each segment below counts its
-                    <code>ui-top-visible</code> events: scroll them out of view and back.
+                    <code>ui-top-in-view</code> events: scroll them out of view and back.
                   </p>
                   <ui-visibility class="visibility-counter">
                     <ui-segment>Default (once): <ui-label size="small">0</ui-label></ui-segment>
@@ -204,17 +204,17 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <td><code>ui-visible</code></td>
+                          <td><code>ui-in-view</code></td>
                           <td><code>onOnScreen</code></td>
                           <td>Any part of the element is on screen</td>
                         </tr>
                         <tr>
-                          <td><code>ui-hidden</code></td>
+                          <td><code>ui-out-of-view</code></td>
                           <td><code>onOffScreen</code></td>
                           <td>No part of the element is on screen</td>
                         </tr>
                         <tr>
-                          <td><code>ui-top-visible</code></td>
+                          <td><code>ui-top-in-view</code></td>
                           <td><code>onTopVisible</code></td>
                           <td>The element's top edge has passed the bottom of the screen</td>
                         </tr>
@@ -224,7 +224,7 @@
                           <td>The element's top edge has passed the top of the screen</td>
                         </tr>
                         <tr>
-                          <td><code>ui-bottom-visible</code></td>
+                          <td><code>ui-bottom-in-view</code></td>
                           <td><code>onBottomVisible</code></td>
                           <td>The element's bottom edge has passed the bottom of the screen</td>
                         </tr>
@@ -451,7 +451,7 @@
               <ui-section id="examples-examples-infinite-scroll" label="Infinite Scroll" sticky collapsible dividing>
                 <ui-docs-example>
                   <p slot="description">
-                    As an alternative to pagination, listen for <code>ui-bottom-visible</code> with
+                    As an alternative to pagination, listen for <code>ui-bottom-in-view</code> with
                     <code>once="false"</code> and load more content when the bottom of a container is reached. Here the
                     page's script adds three items each time, up to twelve.
                   </p>
@@ -476,10 +476,10 @@
                  * runtime's global.
                  */
                 const EVENTS = [
-                  "ui-visible",
-                  "ui-hidden",
-                  "ui-top-visible",
-                  "ui-bottom-visible",
+                  "ui-in-view",
+                  "ui-out-of-view",
+                  "ui-top-in-view",
+                  "ui-bottom-in-view",
                   "ui-top-passed",
                   "ui-bottom-passed",
                   "ui-passing"
@@ -497,10 +497,10 @@
                   })
                 }
 
-                // Changing Callback Frequency:  count `ui-top-visible`
+                // Changing Callback Frequency:  count `ui-top-in-view`
                 for (const counter of document.querySelectorAll(".visibility-counter")) {
                   let count = 0
-                  counter.addEventListener("ui-top-visible", () => {
+                  counter.addEventListener("ui-top-in-view", () => {
                     counter.querySelector("ui-label").textContent = String(++count)
                   })
                 }
@@ -539,7 +539,7 @@
                 // Infinite Scroll:  three more items at each bottom, up to twelve
                 const list = document.getElementById("visibility-infinite-list")
                 const loader = document.getElementById("visibility-infinite-loader")
-                document.getElementById("visibility-infinite").addEventListener("ui-bottom-visible", () => {
+                document.getElementById("visibility-infinite").addEventListener("ui-bottom-in-view", () => {
                   if (list.children.length >= 12) return loader.remove()
                   loader.visible = true
                   setTimeout(() => {
@@ -567,7 +567,7 @@
                   - **Reactive content**: change an element as the user scrolls past it.
                   - **Event tracking**: log engagement, e.g. when a post is scrolled past (`ui-bottom-passed`).
                   - **Infinite scroll**: load more content when the bottom of a list comes on screen
-                    (`ui-bottom-visible`).
+                    (`ui-bottom-in-view`).
                   - Sticky headers are `<ui-sticky>`'s job, on CSS `position: sticky`.
 
                   Wrap the content in `<ui-visibility>` and listen. It runs Fomantic's callbacks on an
@@ -587,20 +587,20 @@
                   screen. By default each event fires at most once (`once`, Fomantic's default); `once="false"` fires
                   it each time its condition turns true.
 
-                  - `ui-visible` (`onOnScreen`): some of it came on screen.
-                  - `ui-hidden` (`onOffScreen`): none of it is on screen.
-                  - `ui-top-visible` (`onTopVisible`): its top came on screen.
-                  - `ui-bottom-visible` (`onBottomVisible`): its bottom came on screen.
+                  - `ui-in-view` (`onOnScreen`): some of it came on screen.
+                  - `ui-out-of-view` (`onOffScreen`): none of it is on screen.
+                  - `ui-top-in-view` (`onTopVisible`): its top came on screen.
+                  - `ui-bottom-in-view` (`onBottomVisible`): its bottom came on screen.
                   - `ui-top-passed` (`onTopPassed`): its top passed the screen's top.
                   - `ui-bottom-passed` (`onBottomPassed`): its bottom passed the screen's top.
                   - `ui-passing` (`onPassing`): it spans the screen's top.
-                  - `ui-load` (`{ image }`): with `type="image"`, an image got its source (and finished its fade).
+                  - `ui-loaded` (`{ image }`): with `type="image"`, an image got its source (and finished its fade).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const watched = document.querySelector("#watched")
-                  watched.addEventListener("ui-visible", (event) => console.log("on screen", event.detail.percentagePassed))
+                  watched.addEventListener("ui-in-view", (event) => console.log("on screen", event.detail.percentagePassed))
                   watched.addEventListener("ui-bottom-passed", () => analytics.track("read to the end"))
                 </script>
               </ui-code>
@@ -636,7 +636,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   `type="image"` is Fomantic's lazy image loading: each `<img data-src>` (and `data-srcset`) inside
-                  gets its source once it's on screen, preloaded, then fades in; `ui-load` fires per image. For
+                  gets its source once it's on screen, preloaded, then fades in; `ui-loaded` fires per image. For
                   images alone, the browser's own `loading="lazy"` needs no script at all; `type="image"` adds the
                   fade and the event.
                 </script>
@@ -683,14 +683,14 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-visibility once="false" @ui-bottom-visible="loadMore">...</ui-visibility>
+                  <ui-visibility once="false" @ui-bottom-in-view="loadMore">...</ui-visibility>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
-                  <ui-visibility once="false" on-ui-bottom-visible={loadMore}>
+                  <ui-visibility once="false" on-ui-bottom-in-view={loadMore}>
                     ...
                   </ui-visibility>
                 </script>

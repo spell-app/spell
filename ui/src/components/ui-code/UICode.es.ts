@@ -2,7 +2,7 @@ import type { E } from "spell-ui/core"
 
 /**
  * `<ui-code>` in Spanish:  `<es-codigo>`, with the names and texts only it uses (from `UICode.en.ts`).
- * - The names it shares with other tags (`size`, `color`, `ui-change` ...) are translated once, for every tag:
+ * - The names it shares with other tags (`size`, `color`, `ui-changed` ...) are translated once, for every tag:
  *   in `components.es.ts`, with the values every tag shares.
  * - Names stay ASCII (no accents):  tags and attributes are typed, and a tag can't hold every letter safely.
  */
@@ -18,7 +18,7 @@ export const codeEs = {
     wrap: "ajustar-lineas",
     copy: "copiar"
   },
-  events: { "ui-highlight": "resaltar", "ui-copy": "copiar" },
+  events: { "ui-coloured": "resaltado", "ui-copied": "copiado" },
   parts: { pre: "pre", code: "codigo", copy: "copiar" },
   texts: {
     sourceLoading: "Cargando {source}",

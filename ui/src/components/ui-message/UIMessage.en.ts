@@ -84,12 +84,12 @@ export const messageVocabulary = {
       name: "dismissible",
       group: "behaviour",
       kind: "boolean",
-      description: "Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message."
+      description: "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message."
     }
   ],
   events: [
     {
-      name: "ui-dismiss",
+      name: "ui-closing",
       detail: "{ originalEvent?: Event }",
       cancelable: true,
       description:

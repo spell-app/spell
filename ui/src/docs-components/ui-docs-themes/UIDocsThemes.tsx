@@ -48,7 +48,7 @@ import themesCSS from "./UIDocsThemes.css?inline"
  * - The look itself is `ThemePreference`'s
  *   (one per page, remembered per viewer, the scheme shared with every doc site's header).
  *   - Picking calls `ThemePreference.setTheme()` / `setScheme()` / `flipScheme()`,
- *     then fires ONE `ui-change` (the dropdown's own is stopped).
+ *     then fires ONE `ui-changed` (the dropdown's own is stopped).
  *   - Every picker on the page follows any picker's change, and the OS's while following it
  *     (`subscribe()`, while connected).
  * - Keyboard, in the overlay:  focus moves to the chosen theme as it opens.
@@ -159,7 +159,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
     this.emitChange(event)
   }
 
-  /** Fire `ui-change` with the look now:  no `theme` key for our own look. */
+  /** Fire `ui-changed` with the look now:  no `theme` key for our own look. */
   private emitChange(originalEvent?: Event): void {
     const look = ThemePreference.look
     const detail: DocsThemesChange = {
@@ -168,7 +168,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
       shown: ThemePreference.shownScheme(),
       originalEvent
     }
-    this.send("ui-change", detail)
+    this.send("ui-changed", detail)
   }
 
   ////////////////
@@ -409,7 +409,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         title={this.compact ? label() : undefined}
         aria-label={this.compact ? label() : undefined}
         value={this.chosenTheme}
-        ref={(dropdown: HTMLElement) => dropdown.addEventListener("ui-change", (event) => this.onDropdownChange(event))}
+        ref={(dropdown: HTMLElement) => dropdown.addEventListener("ui-changed", (event) => this.onDropdownChange(event))}
       >
         <span slot="trigger">
           <Show when={this.compact} fallback={label()}>
@@ -431,7 +431,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
     )
   }
 
-  /** The dropdown's `ui-change`:  stop it (the DOM element fires its own), and choose its value. */
+  /** The dropdown's `ui-changed`:  stop it (the DOM element fires its own), and choose its value. */
   private onDropdownChange(event: Event): void {
     event.stopPropagation()
     const { value } = (event as CustomEvent<{ value: string }>).detail
@@ -488,14 +488,14 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   }
 
   /**
-   * Follow the overlay:  `isOpen` from its `ui-open` / `ui-close`,
+   * Follow the overlay:  `isOpen` from its `ui-opening` / `ui-closing`,
    * and focus the chosen theme once it shows (`toggle`), its tab stop reset to it.
    */
   private wireOverlay(popup: HTMLElement): void {
-    popup.addEventListener("ui-open", (event) => {
+    popup.addEventListener("ui-opening", (event) => {
       if (!event.defaultPrevented) this.isOpen = true
     })
-    popup.addEventListener("ui-close", (event) => {
+    popup.addEventListener("ui-closing", (event) => {
       if (!event.defaultPrevented) this.isOpen = false
     })
     popup.addEventListener("toggle", (event) => {

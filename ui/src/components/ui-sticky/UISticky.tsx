@@ -9,7 +9,7 @@ import stickyCSS from "./UISticky.css?inline"
  * ### `UISticky`
  * The component behind `<ui-sticky>`:  content that sticks as the page scrolls,
  * `position: sticky` on `<div class="ui … sticky" part="sticky">`, between two 1px sentinels.
- * It only REPORTS what CSS does (`:state(stuck)`, `ui-stick` / `ui-unstick`),
+ * It only REPORTS what CSS does (`:state(stuck)`, `ui-stuck` / `ui-unstuck`),
  * through an `IntersectionObserver`:  no scroll listener, no JS positioning.
  *
  * - The DOM element is `display: contents`, so the sentinels and the box are children of its PARENT,
@@ -64,7 +64,7 @@ export class UISticky extends E.UIComponent<StickyVocabulary> {
   accessor isBound = false
 
   /**
-   * The watcher's report:  publish `stuckEdge` / `isBound`, firing `ui-unstick` then `ui-stick` on a change.
+   * The watcher's report:  publish `stuckEdge` / `isBound`, firing `ui-unstuck` then `ui-stuck` on a change.
    * - Above `stickyWatch`, whose initializer reads it.
    */
   private readonly onStickChange = ({ edge, isBound, previous }: E.StickyWatchState) => {
@@ -73,11 +73,11 @@ export class UISticky extends E.UIComponent<StickyVocabulary> {
     this.stuckEdge = edge
     if (previous) {
       const detail: UIT.StickyDetail = { edge: previous }
-      this.send("ui-unstick", detail)
+      this.send("ui-unstuck", detail)
     }
     if (edge) {
       const detail: UIT.StickyDetail = { edge }
-      this.send("ui-stick", detail)
+      this.send("ui-stuck", detail)
     }
   }
 

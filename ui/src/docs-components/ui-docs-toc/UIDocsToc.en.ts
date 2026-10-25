@@ -46,12 +46,12 @@ export const docsTocVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-scrolled-to",
       detail: "{ value: string }",
       description: "The entry in view changed (scroll, a link, the tabs);  `value` is its target's id."
     },
     {
-      name: "ui-render",
+      name: "ui-drawn",
       detail: "{ ids: string[] }",
       description: "The list was built (again):  the ids of every entry, in page order."
     }

@@ -89,10 +89,10 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     if (this.input && this.input.value !== query) this.input.value = query
   }
 
-  /** Commit `value` as the input's text, with `ui-change`;  if the page cancels it, the input shows its value. */
+  /** Commit `value` as the input's text, with `ui-changed`;  if the page cancels it, the input shows its value. */
   private commit(value: string, originalEvent?: Event) {
     this.requestChange("value", value, () => {
-      this.send("ui-change", { value, originalEvent })
+      this.send("ui-changed", { value, originalEvent })
       return true
     })
     this.valueAtFocus = value
@@ -214,7 +214,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         // cached, not shown
         if (running.signal.aborted) return
         this.remoteAnswer = { query, groups, status: RemoteStatus.done }
-        this.send("ui-results", { query, results: groups.flatMap((group) => group.results) })
+        this.send("ui-replied", { query, results: groups.flatMap((group) => group.results) })
       })
       .catch((error: unknown) => {
         if (running.signal.aborted || (error as Error)?.name === "AbortError") return
@@ -295,7 +295,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * Show or hide the results, dispatching the cancelable `ui-open` / `ui-close` first.
+   * Show or hide the results, dispatching the cancelable `ui-opening` / `ui-closing` first.
    * - Not `open()` / `close()`:  `open` is the attribute's.
    */
   @E.untracked
@@ -303,7 +303,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     if (open === this.isOpen) return false
     if (open && (this.isDisabled || this.isReadOnly)) return false
     const isDone = this.requestChange("isOpen", open, () =>
-      this.send(open ? "ui-open" : "ui-close", { open, originalEvent })
+      this.send(open ? "ui-opening" : "ui-closing", { open, originalEvent })
     )
     if (isDone && open) this.highlightedIndex = this.selectFirstResult ? 0 : -1
     return isDone
@@ -311,13 +311,13 @@ export class UISearch extends F.FormComponent<Vocabulary> {
 
   /**
    * Choose `result`, as someone did with `originalEvent`:
-   * the cancelable `ui-select` first, then its title in the input (`ui-change`), the results hidden,
+   * the cancelable `ui-select` first, then its title in the input (`ui-changed`), the results hidden,
    * and its `url` followed.
    * - A click on a result LINK follows it natively (new tabs work);
    *   other ways follow it with `location.assign()`, the DOM element's own document's.
    */
   select(result: UIT.SearchResult, originalEvent?: Event) {
-    if (!this.send("ui-select", { result, originalEvent })) {
+    if (!this.send("ui-choosing", { result, originalEvent })) {
       originalEvent?.preventDefault()
       return
     }
@@ -640,12 +640,12 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   // ## Handlers
   ////////////////
 
-  /** Typing:  the value (with `ui-search` once long enough), then the query. */
+  /** Typing:  the value (with `ui-searched` once long enough), then the query. */
   private readonly onInput = (event: Event) => {
     const text = (event.currentTarget as HTMLInputElement).value
     const isLong = this.isLongEnough(text)
     this.requestChange("value", text, () => {
-      if (isLong) this.send("ui-search", { query: text.trim(), originalEvent: event })
+      if (isLong) this.send("ui-searched", { query: text.trim(), originalEvent: event })
       return true
     })
     this.inputRevision++
@@ -665,7 +665,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     if (!this.isOpen) this.rerunQuery(event)
   }
 
-  /** Leaving:  close (unless focus stays inside);  an edited text commits with `ui-change`. */
+  /** Leaving:  close (unless focus stays inside);  an edited text commits with `ui-changed`. */
   @E.untracked
   private readonly onBlur = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
@@ -673,7 +673,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     this.requestOpen(false, event)
     const value = this.query
     if (this.valueAtFocus !== undefined && value !== this.valueAtFocus) {
-      this.send("ui-change", { value, originalEvent: event })
+      this.send("ui-changed", { value, originalEvent: event })
     }
     this.valueAtFocus = undefined
   }

@@ -110,7 +110,7 @@ function labelOf(host: Element) {
 
 /** Pick `value` in `host`'s dropdown, as the dropdown reports a viewer's choice. */
 function pick(host: Element, value: string) {
-  part(host, "theme").dispatchEvent(new CustomEvent("ui-change", { detail: { value }, bubbles: true, composed: true }))
+  part(host, "theme").dispatchEvent(new CustomEvent("ui-changed", { detail: { value }, bubbles: true, composed: true }))
 }
 
 /** `<html>`'s scheme:  its `ui-light` / `ui-dark` class and inline `color-scheme`. */
@@ -299,11 +299,11 @@ describe("<ui-docs-themes> overlay", () => {
     expect(focused()).toBe(palette)
   })
 
-  it("a theme row picks it:  classic + the theme, on the page and in shadow roots;  one ui-change;  stays open", async () => {
+  it("a theme row picks it:  classic + the theme, on the page and in shadow roots;  one ui-changed;  stays open", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
     const probe = await ElementFixture.render<HTMLElement>(`<ui-button>Probe</ui-button>`)
     const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
     row(host, "github").click()
     await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.theme)).toBe(true))
     expect(UI.themes.current).toBe("github")
@@ -342,7 +342,7 @@ describe("<ui-docs-themes> scheme", () => {
   it('show="scheme":  a click flips the shown scheme and stores it:  ui-dark / ui-light + color-scheme on <html>', async () => {
     const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
     const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
     part(host, "scheme").click()
     await ElementFixture.settle()
     expect(htmlScheme()).toEqual({ light: false, dark: true, colorScheme: "dark" })
@@ -361,11 +361,11 @@ describe("<ui-docs-themes> scheme", () => {
     ])
   })
 
-  it("Dark and Light store the scheme;  Auto drops it, and the OS's shows;  one ui-change each", async () => {
+  it("Dark and Light store the scheme;  Auto drops it, and the OS's shows;  one ui-changed each", async () => {
     os = "dark"
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
     const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
     choice(host, "light").click()
     await ElementFixture.settle()
     expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("light")
@@ -457,11 +457,11 @@ describe("<ui-docs-themes> dropdown (show=theme)", () => {
     expect(labelOf(host)).toBe(`${listed.length} themes`)
   })
 
-  it("a pick applies it and fires one ui-change (the dropdown's own is stopped)", async () => {
+  it("a pick applies it and fires one ui-changed (the dropdown's own is stopped)", async () => {
     const host = await render(`<ui-docs-themes show="theme"></ui-docs-themes>`)
     const inner: Event[] = []
     const changes: DocsThemesChange[] = []
-    document.body.addEventListener("ui-change", (event) => {
+    document.body.addEventListener("ui-changed", (event) => {
       if (event.target === host) changes.push((event as CustomEvent<DocsThemesChange>).detail)
       else inner.push(event)
     })

@@ -128,7 +128,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   protected classValue(name: E.AttributeName<typeof itemVocabulary>): unknown {
-    return name === UIT.SELECTED ? this.isSelected : super.classValue(name)
+    if (name === UIT.SELECTED) return this.isSelected
+    return name === UIT.DISABLED ? this.isDisabled : super.classValue(name)
   }
 
   /** `aria-current` while selected:  the owner's value on a link (`page`), else `true`. */
@@ -229,23 +230,23 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   /**
-   * The owned item box, around the default slot.
+   * The owned item box, around its content (`boxContent()`).
    * - The DOM element's `aria-label` names it (an icon-only item);  its `aria-expanded` goes to a `<button>` box.
    */
   private box(): JSX.Element {
-    const isDisabledButton = () => this.rootTag === "button" && this.disabled
+    const isDisabledButton = () => this.rootTag === "button" && this.isDisabled
     return (
       <Dynamic
         ref={(element: HTMLElement) => (this.boxElement = element)}
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("item")}
-        href={this.rootTag === "a" && !this.disabled ? this.href : undefined}
+        href={this.rootTag === "a" && !this.isDisabled ? this.href : undefined}
         target={this.rootTag === "a" ? this.target : undefined}
         type={this.rootTag === "button" ? "button" : undefined}
         role={this.type === UIT.ITEM ? this.itemContext?.role : undefined}
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}
-        aria-disabled={this.disabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
+        aria-disabled={this.isDisabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
         aria-current={this.ariaCurrent}
         aria-label={this.attributes["aria-label"] ?? undefined}
         aria-expanded={
@@ -268,9 +269,14 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
           </span>
         </Show>
-        <slot />
+        {this.boxContent()}
       </Dynamic>
     )
+  }
+
+  /** What the box holds after its image and icon:  the default slot;  `<ui-action>` adds its title and keys. */
+  protected boxContent(): JSX.Element {
+    return <slot />
   }
 }
 

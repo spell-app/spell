@@ -18,7 +18,7 @@ import codeCSS from "./UICode.css?inline"
 export class DOMCodeElement extends E.DOMLoadableElement<UICode> {
   /**
    * What auto-detection picked (when no `language` is given);
-   * `undefined` otherwise, or before the colours arrive (`ui-highlight` says when).
+   * `undefined` otherwise, or before the colours arrive (`ui-coloured` says when).
    * - Untracked:  it's for scripts.
    */
   @E.untracked
@@ -111,7 +111,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
     if (loadStatus === "loaded") void this.highlight(code, language || undefined)
   }
 
-  /** Colour `code` as `language`;  `ui-highlight` when done, a `render` `ui-error` (code left plain) when not. */
+  /** Colour `code` as `language`;  `ui-coloured` when done, a `render` `ui-error` (code left plain) when not. */
   @E.untracked
   private async highlight(code: string, language: string | undefined) {
     const ticket = ++this.ticket
@@ -120,7 +120,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
       const result = await CodeHighlighter.highlight(code, language)
       if (ticket !== this.ticket) return
       this.highlighted = { ...result, code }
-      this.send("ui-highlight", { language: result.language, detected: result.detected })
+      this.send("ui-coloured", { language: result.language, detected: result.detected })
     } catch (error) {
       if (ticket !== this.ticket) return
       this.highlighted = undefined
@@ -141,12 +141,12 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   /** Clears `wasJustCopied`. */
   private copiedTimer?: E.CancelablePromise<unknown>
 
-  /** The copy button:  the code to the clipboard, `ui-copy`, "Copied" for a moment. */
+  /** The copy button:  the code to the clipboard, `ui-copied`, "Copied" for a moment. */
   private readonly onCopy = async () => {
     const { content } = this
     await navigator.clipboard.writeText(content)
     this.wasJustCopied = true
-    this.send("ui-copy", { content })
+    this.send("ui-copied", { content })
     this.copiedTimer?.cancel()
     this.copiedTimer = E.after(COPIED_MS / 1000, () => (this.wasJustCopied = false))
   }

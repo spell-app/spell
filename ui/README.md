@@ -165,7 +165,7 @@ attributes, properties and events outside, and a component behind it drawing int
 So any framework drives it as it drives a built-in element, by three rules every element keeps:
 - primitives are ATTRIBUTES:  `<ui-dropdown placeholder="Fruit" open>`
 - rich data is a PROPERTY:  `dropdown.options = [...]`
-- events are `ui-*` `CustomEvent`s, with their state in `detail`:  `ui-change` → `event.detail.value`
+- events are `ui-*` `CustomEvent`s, with their state in `detail`:  `ui-changed` → `event.detail.value`
 
 `yarn smoke` holds Spell UI to that on four pages, in plain JavaScript, React 19, Vue 3 and Solid 2:
 one `<ui-dropdown>` each, no wrapper component, the same round trip in headless Chromium.

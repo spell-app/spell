@@ -1089,7 +1089,7 @@
               <ui-code language="jsx">
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
-                  <ui-list selection on-ui-select={(event) => setChoice(event.detail.value)}>
+                  <ui-list selection on-ui-chosen={(event) => setChoice(event.detail.value)}>
                     ...
                   </ui-list>
                 </script>

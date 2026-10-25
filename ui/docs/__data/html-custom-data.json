@@ -5,7 +5,7 @@
       "name": "ui-accordion",
       "description": {
         "kind": "markdown",
-        "value": "An accordion lets people show and hide sections of content.\n\nAlso known as:  collapse, collapsible, disclosure, expander, details, faq.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-close`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "An accordion lets people show and hide sections of content.\n\nAlso known as:  collapse, collapsible, disclosure, expander, details, faq.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-closing`, `ui-loading`, `ui-loaded`, `ui-error`"
       },
       "attributes": [
         {
@@ -73,7 +73,7 @@
           "name": "open",
           "description": {
             "kind": "markdown",
-            "value": "Indexes of the open panels (0-based), space-separated:  `open=\"0\"`, `open=\"0 2\"`.  Controlled:  set it to open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the first index counts.\n\nTakes:  text"
+            "value": "Indexes of the open panels (0-based), space-separated:  `open=\"0\"`, `open=\"0 2\"`.  Controlled:  set it to open / close panels;  `ui-opening` / `ui-closing` can veto people's changes.  When `exclusive`, only the first index counts.\n\nTakes:  text"
           }
         },
         {
@@ -95,6 +95,329 @@
           "description": {
             "kind": "markdown",
             "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ui-action",
+      "description": {
+        "kind": "markdown",
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  hue of the item while selected (`red active item`).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            }
+          ]
+        },
+        {
+          "name": "position",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  `right` pushes the item (and what follows) to the far end.\n\nTakes:  `left` · `right`"
+          },
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "Value;  defaults to `text`.  Ordered list:  shown as the marker.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "text",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  text;  defaults to the text content.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "description",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  secondary text, shown at the end.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "icon",
+          "description": {
+            "kind": "markdown",
+            "value": "Icon name, shown before the text.\n\nTakes:  icon name"
+          }
+        },
+        {
+          "name": "image",
+          "description": {
+            "kind": "markdown",
+            "value": "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "flag",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  country code, shown as a flag before the text.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "List / menu:  renders a link (`<a>`).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Link target, with `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be chosen or followed.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "selected",
+          "description": {
+            "kind": "markdown",
+            "value": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "fitted",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.\n\nTakes:  flag, or `horizontally` · `vertically`"
+          },
+          "values": [
+            {
+              "name": "horizontally"
+            },
+            {
+              "name": "vertically"
+            }
+          ]
+        },
+        {
+          "name": "type",
+          "description": {
+            "kind": "markdown",
+            "value": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
+          },
+          "values": [
+            {
+              "name": "item"
+            },
+            {
+              "name": "header"
+            },
+            {
+              "name": "divider"
+            }
+          ]
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's.\n\nTakes:  text"
           }
         },
         {
@@ -1290,7 +1613,7 @@
       "name": "ui-button",
       "description": {
         "kind": "markdown",
-        "value": "A button indicates a possible action.\n\nAlso known as:  btn, action, submit, link button.\n\n**Slots:**  default, `icon`, `label`\n\n**Events:**  `ui-toggle`"
+        "value": "A button indicates a possible action.\n\nAlso known as:  btn, action, submit, link button.\n\n**Slots:**  default, `icon`, `label`\n\n**Events:**  `ui-selected`, `ui-deselected`"
       },
       "attributes": [
         {
@@ -1433,7 +1756,7 @@
           "name": "toggle",
           "description": {
             "kind": "markdown",
-            "value": "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`.\n\nTakes:  flag (present / absent)"
+            "value": "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -2267,7 +2590,7 @@
       "name": "ui-calendar",
       "description": {
         "kind": "markdown",
-        "value": "A calendar lets a person pick a date, a time, or both.\n\nAlso known as:  date picker, datepicker, time picker, datetime, date range.\n\n**Events:**  `ui-change`, `ui-open`, `ui-close`"
+        "value": "A calendar lets a person pick a date, a time, or both.\n\nAlso known as:  date picker, datepicker, time picker, datetime, date range.\n\n**Events:**  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -2389,7 +2712,7 @@
           "name": "open",
           "description": {
             "kind": "markdown",
-            "value": "The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.\n\nTakes:  flag (present / absent)"
+            "value": "The popup is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -3388,7 +3711,7 @@
       "name": "ui-checkbox",
       "description": {
         "kind": "markdown",
-        "value": "A checkbox lets people choose a value from a small set of options, often on or off.\n\nAlso known as:  check box, toggle, switch, tick box.\n\n**Slots:**  default\n\n**Events:**  `ui-change`"
+        "value": "A checkbox lets people choose a value from a small set of options, often on or off.\n\nAlso known as:  check box, toggle, switch, tick box.\n\n**Slots:**  default\n\n**Events:**  `ui-changed`"
       },
       "attributes": [
         {
@@ -3546,7 +3869,7 @@
           "name": "selected",
           "description": {
             "kind": "markdown",
-            "value": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.\n\nTakes:  flag (present / absent)"
+            "value": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -3718,7 +4041,7 @@
       "name": "ui-code",
       "description": {
         "kind": "markdown",
-        "value": "Code shows a block of source code coloured by its language, from the element's own text or a file on this site.\n\nAlso known as:  code block, syntax highlighting, highlighter, pre, snippet, source code, listing.\n\n**Events:**  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-highlight`, `ui-copy`"
+        "value": "Code shows a block of source code coloured by its language, from the element's own text or a file on this site.\n\nAlso known as:  code block, syntax highlighting, highlighter, pre, snippet, source code, listing.\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-coloured`, `ui-copied`"
       },
       "attributes": [
         {
@@ -5967,7 +6290,7 @@
       "name": "ui-dimmer",
       "description": {
         "kind": "markdown",
-        "value": "A dimmer hides distractions to focus attention on particular content.\n\nAlso known as:  overlay, backdrop, scrim, mask, blocker.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-show`, `ui-close`, `ui-hide`"
+        "value": "A dimmer hides distractions to focus attention on particular content.\n\nAlso known as:  overlay, backdrop, scrim, mask, blocker.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`"
       },
       "attributes": [
         {
@@ -6510,7 +6833,7 @@
       "name": "ui-dropdown",
       "description": {
         "kind": "markdown",
-        "value": "A dropdown lets people choose a value from a series of options.\n\nAlso known as:  select, combobox, picker, autocomplete, menu button, multi select.\n\n**Slots:**  default, `trigger`, `header`, `icon`\n\n**Events:**  `ui-change`, `ui-open`, `ui-close`, `ui-search`, `ui-add`, `ui-remove`"
+        "value": "A dropdown lets people choose a value from a series of options.\n\nAlso known as:  select, combobox, picker, autocomplete, menu button, multi select.\n\n**Slots:**  default, `trigger`, `header`, `icon`\n\n**Events:**  `ui-changed`, `ui-opening`, `ui-closing`, `ui-searched`, `ui-added`, `ui-removed`"
       },
       "attributes": [
         {
@@ -6786,7 +7109,7 @@
           "name": "open",
           "description": {
             "kind": "markdown",
-            "value": "The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.\n\nTakes:  flag (present / absent)"
+            "value": "The menu is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -7062,7 +7385,7 @@
       "name": "ui-embed",
       "description": {
         "kind": "markdown",
-        "value": "An embed displays content from other websites, like YouTube videos, loaded only when asked for.\n\nAlso known as:  iframe, video, youtube, vimeo, player.\n\n**Slots:**  default\n\n**Events:**  `ui-activate`, `ui-reset`"
+        "value": "An embed displays content from other websites, like YouTube videos, loaded only when asked for.\n\nAlso known as:  iframe, video, youtube, vimeo, player.\n\n**Slots:**  default\n\n**Events:**  `ui-loading`, `ui-reset`"
       },
       "attributes": [
         {
@@ -7161,7 +7484,7 @@
           "name": "active",
           "description": {
             "kind": "markdown",
-            "value": "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-activate` first.\n\nTakes:  flag (present / absent)"
+            "value": "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-loading` first.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -8840,7 +9163,7 @@
       "name": "ui-flyout",
       "description": {
         "kind": "markdown",
-        "value": "A flyout is a modal that slides in from a side of the page.\n\nAlso known as:  drawer, sheet, side panel, off canvas, slide over.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`"
+        "value": "A flyout is a modal that slides in from a side of the page.\n\nAlso known as:  drawer, sheet, side panel, off canvas, slide over.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`"
       },
       "attributes": [
         {
@@ -9129,7 +9452,7 @@
       "name": "ui-form",
       "description": {
         "kind": "markdown",
-        "value": "A form displays a set of related input fields in a structured way.\n\nAlso known as:  form layout, fieldset, validation.\n\n**Slots:**  default\n\n**Events:**  `ui-valid`, `ui-invalid`, `ui-success`, `ui-failure`, `ui-saving`, `ui-saved`, `ui-cancelling`, `ui-cancelled`"
+        "value": "A form displays a set of related input fields in a structured way.\n\nAlso known as:  form layout, fieldset, validation.\n\n**Slots:**  default\n\n**Events:**  `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`"
       },
       "attributes": [
         {
@@ -10534,7 +10857,7 @@
       "name": "ui-icon-picker",
       "description": {
         "kind": "markdown",
-        "value": "An icon picker lets people choose an icon by searching for it and clicking its glyph.\n\nAlso known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search.\n\n**Events:**  `ui-change`"
+        "value": "An icon picker lets people choose an icon by searching for it and clicking its glyph.\n\nAlso known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search.\n\n**Events:**  `ui-changing`, `ui-changed`"
       },
       "attributes": [
         {
@@ -11534,7 +11857,7 @@
       "name": "ui-include",
       "description": {
         "kind": "markdown",
-        "value": "An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view.\n\nAlso known as:  island, partial, fragment, server-side include, html import, transclusion, embed.\n\n**Slots:**  default\n\n**Events:**  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-insert`"
+        "value": "An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view.\n\nAlso known as:  island, partial, fragment, server-side include, html import, transclusion, embed.\n\n**Slots:**  default\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawing`"
       },
       "attributes": [
         {
@@ -11717,7 +12040,7 @@
       "name": "ui-input",
       "description": {
         "kind": "markdown",
-        "value": "An input is a field used to elicit a response from a person.\n\nAlso known as:  text field, text box, textbox, input field, search box.\n\n**Slots:**  `label`, `action`, `icon`\n\n**Events:**  `ui-input`, `ui-change`"
+        "value": "An input is a field used to elicit a response from a person.\n\nAlso known as:  text field, text box, textbox, input field, search box.\n\n**Slots:**  `label`, `action`, `icon`\n\n**Events:**  `ui-typed`, `ui-changed`"
       },
       "attributes": [
         {
@@ -12776,7 +13099,7 @@
       "name": "ui-label",
       "description": {
         "kind": "markdown",
-        "value": "A label displays content classification.\n\nAlso known as:  badge, chip, tag, pill, lozenge, count.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-remove`"
+        "value": "A label displays content classification.\n\nAlso known as:  badge, chip, tag, pill, lozenge, count.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-removing`"
       },
       "attributes": [
         {
@@ -13068,7 +13391,7 @@
           "name": "removable",
           "description": {
             "kind": "markdown",
-            "value": "Shows a delete icon button;  clicking it dispatches `ui-remove`.\n\nTakes:  flag (present / absent)"
+            "value": "Shows a delete icon button;  clicking it dispatches `ui-removing`.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -13513,7 +13836,7 @@
       "name": "ui-list",
       "description": {
         "kind": "markdown",
-        "value": "A list groups related content.\n\nAlso known as:  ul, ol, bullet list, list view.\n\n**Slots:**  default\n\n**Events:**  `ui-select`"
+        "value": "A list groups related content.\n\nAlso known as:  ul, ol, bullet list, list view.\n\n**Slots:**  default\n\n**Events:**  `ui-chosen`"
       },
       "attributes": [
         {
@@ -14107,7 +14430,7 @@
       "name": "ui-markdown",
       "description": {
         "kind": "markdown",
-        "value": "Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.\n\nAlso known as:  markdown, md, gfm, readme, rich text, prose.\n\n**Events:**  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-render`"
+        "value": "Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.\n\nAlso known as:  markdown, md, gfm, readme, rich text, prose.\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawn`"
       },
       "attributes": [
         {
@@ -14193,7 +14516,7 @@
           "name": "editable",
           "description": {
             "kind": "markdown",
-            "value": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` writes it.\n\nTakes:  flag (present / absent)"
+            "value": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -14344,7 +14667,7 @@
       "name": "ui-menu",
       "description": {
         "kind": "markdown",
-        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default\n\n**Events:**  `ui-select`"
+        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -14894,7 +15217,7 @@
       "name": "ui-message",
       "description": {
         "kind": "markdown",
-        "value": "A message displays information that explains nearby content.\n\nAlso known as:  alert, callout, notice, banner, info box, error message.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-dismiss`"
+        "value": "A message displays information that explains nearby content.\n\nAlso known as:  alert, callout, notice, banner, info box, error message.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -15087,7 +15410,7 @@
           "name": "dismissible",
           "description": {
             "kind": "markdown",
-            "value": "Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message.\n\nTakes:  flag (present / absent)"
+            "value": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -15375,7 +15698,7 @@
       "name": "ui-modal",
       "description": {
         "kind": "markdown",
-        "value": "A modal displays content that temporarily blocks interactions with the main view of a site.\n\nAlso known as:  dialog, popup window, lightbox, confirm, alert dialog.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`"
+        "value": "A modal displays content that temporarily blocks interactions with the main view of a site.\n\nAlso known as:  dialog, popup window, lightbox, confirm, alert dialog.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`"
       },
       "attributes": [
         {
@@ -15641,7 +15964,7 @@
       "name": "ui-nag",
       "description": {
         "kind": "markdown",
-        "value": "A nag is a persistent message that stays until dismissed, and can remember the dismissal.\n\nAlso known as:  banner, cookie notice, announcement bar, sticky banner.\n\n**Slots:**  default\n\n**Events:**  `ui-show`, `ui-close`, `ui-hide`"
+        "value": "A nag is a persistent message that stays until dismissed, and can remember the dismissal.\n\nAlso known as:  banner, cookie notice, announcement bar, sticky banner.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-closing`, `ui-closed`"
       },
       "attributes": [
         {
@@ -17411,7 +17734,7 @@
       "name": "ui-popup",
       "description": {
         "kind": "markdown",
-        "value": "A popup displays additional information on top of a page.\n\nAlso known as:  tooltip, popover, hint, hover card, info bubble.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-close`"
+        "value": "A popup displays additional information on top of a page.\n\nAlso known as:  tooltip, popover, hint, hover card, info bubble.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -17797,7 +18120,7 @@
       "name": "ui-progress",
       "description": {
         "kind": "markdown",
-        "value": "A progress bar shows the progression of a task.\n\nAlso known as:  progress bar, meter, percent bar, upload progress.\n\n**Slots:**  default\n\n**Events:**  `ui-change`, `ui-complete`"
+        "value": "A progress bar shows the progression of a task.\n\nAlso known as:  progress bar, meter, percent bar, upload progress.\n\n**Slots:**  default\n\n**Events:**  `ui-changed`, `ui-completed`"
       },
       "attributes": [
         {
@@ -18186,7 +18509,7 @@
       "name": "ui-property",
       "description": {
         "kind": "markdown",
-        "value": "A property is one field of a property editor:  its label, tip, choices and rules come from the editor's schema.\n\nAlso known as:  property, inspector row, setting, schema field.\n\n**Slots:**  default, `label`, `description`, `hint`, `output`, `actions`\n\n**Events:**  `ui-change`"
+        "value": "A property is one field of a property editor:  its label, tip, choices and rules come from the editor's schema.\n\nAlso known as:  property, inspector row, setting, schema field.\n\n**Slots:**  default, `label`, `description`, `hint`, `output`, `actions`\n\n**Events:**  `ui-changed`"
       },
       "attributes": [
         {
@@ -18499,7 +18822,7 @@
       "name": "ui-property-editor",
       "description": {
         "kind": "markdown",
-        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-change`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-success`, `ui-failure`, `ui-saving`, `ui-saved`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
+        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
       },
       "attributes": [
         {
@@ -19103,7 +19426,7 @@
       "name": "ui-property-group",
       "description": {
         "kind": "markdown",
-        "value": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-invalid`, `ui-success`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`"
       },
       "attributes": [
         {
@@ -19905,7 +20228,7 @@
       "name": "ui-radio",
       "description": {
         "kind": "markdown",
-        "value": "A radio button chooses exactly one value of a group.\n\nAlso known as:  radio button, option button, radio group.\n\n**Slots:**  default\n\n**Events:**  `ui-change`"
+        "value": "A radio button chooses exactly one value of a group.\n\nAlso known as:  radio button, option button, radio group.\n\n**Slots:**  default\n\n**Events:**  `ui-changed`"
       },
       "attributes": [
         {
@@ -20056,7 +20379,7 @@
           "name": "selected",
           "description": {
             "kind": "markdown",
-            "value": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.\n\nTakes:  flag (present / absent)"
+            "value": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -20446,7 +20769,7 @@
       "name": "ui-rating",
       "description": {
         "kind": "markdown",
-        "value": "A rating indicates people's interest in content.\n\nAlso known as:  stars, star rating, score, review stars, hearts.\n\n**Events:**  `ui-change`"
+        "value": "A rating indicates people's interest in content.\n\nAlso known as:  stars, star rating, score, review stars, hearts.\n\n**Events:**  `ui-changed`"
       },
       "attributes": [
         {
@@ -21285,7 +21608,7 @@
           "name": "pure",
           "description": {
             "kind": "markdown",
-            "value": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.\n\nTakes:  flag (present / absent)"
+            "value": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-changed={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -21812,7 +22135,7 @@
       "name": "ui-search",
       "description": {
         "kind": "markdown",
-        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-search`, `ui-select`, `ui-change`, `ui-results`, `ui-open`, `ui-close`"
+        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -21951,7 +22274,7 @@
           "name": "open",
           "description": {
             "kind": "markdown",
-            "value": "The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show.\n\nTakes:  flag (present / absent)"
+            "value": "The results are showing.  Controlled:  `ui-opening` / `ui-closing` can veto;  shown only with something to show.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -23514,7 +23837,7 @@
       "name": "ui-select",
       "description": {
         "kind": "markdown",
-        "value": "A select lets people choose one or more values from a native list of options.\n\nAlso known as:  select box, native select, picker, option list.\n\n**Slots:**  default\n\n**Events:**  `ui-change`"
+        "value": "A select lets people choose one or more values from a native list of options.\n\nAlso known as:  select box, native select, picker, option list.\n\n**Slots:**  default\n\n**Events:**  `ui-changed`"
       },
       "attributes": [
         {
@@ -23775,7 +24098,7 @@
       "name": "ui-shape",
       "description": {
         "kind": "markdown",
-        "value": "A shape is a three dimensional object displayed on a two dimensional plane.\n\nAlso known as:  3d flip, cube, flip card, carousel.\n\n**Slots:**  default\n\n**Events:**  `ui-change`"
+        "value": "A shape is a three dimensional object displayed on a two dimensional plane.\n\nAlso known as:  3d flip, cube, flip card, carousel.\n\n**Slots:**  default\n\n**Events:**  `ui-animated`"
       },
       "attributes": [
         {
@@ -24118,7 +24441,7 @@
       "name": "ui-sidebar",
       "description": {
         "kind": "markdown",
-        "value": "A sidebar hides additional content beside a page.\n\nAlso known as:  drawer, off canvas, side menu, nav drawer, hamburger menu.\n\n**Slots:**  default\n\n**Events:**  `ui-open`, `ui-show`, `ui-close`, `ui-hide`"
+        "value": "A sidebar hides additional content beside a page.\n\nAlso known as:  drawer, off canvas, side menu, nav drawer, hamburger menu.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`"
       },
       "attributes": [
         {
@@ -24406,7 +24729,7 @@
       "name": "ui-slider",
       "description": {
         "kind": "markdown",
-        "value": "A slider lets people select values within a range.\n\nAlso known as:  range, range slider, volume, scrubber, track bar.\n\n**Events:**  `ui-input`, `ui-change`"
+        "value": "A slider lets people select values within a range.\n\nAlso known as:  range, range slider, volume, scrubber, track bar.\n\n**Events:**  `ui-moved`, `ui-changed`"
       },
       "attributes": [
         {
@@ -25993,7 +26316,7 @@
       "name": "ui-sticky",
       "description": {
         "kind": "markdown",
-        "value": "Sticky content stays fixed to the viewport while its container is on screen.\n\nAlso known as:  affix, pinned, fixed header, sticky header.\n\n**Slots:**  default\n\n**Events:**  `ui-stick`, `ui-unstick`"
+        "value": "Sticky content stays fixed to the viewport while its container is on screen.\n\nAlso known as:  affix, pinned, fixed header, sticky header.\n\n**Slots:**  default\n\n**Events:**  `ui-stuck`, `ui-unstuck`"
       },
       "attributes": [
         {
@@ -26302,7 +26625,7 @@
       "name": "ui-tab",
       "description": {
         "kind": "markdown",
-        "value": "A tab pane:  the content shown while its tab is selected.\n\nAlso known as:  tab panel, pane.\n\n**Slots:**  default\n\n**Events:**  `ui-show`"
+        "value": "A tab pane:  the content shown while its tab is selected.\n\nAlso known as:  tab panel, pane.\n\n**Slots:**  default\n\n**Events:**  `ui-opened`"
       },
       "attributes": [
         {
@@ -26358,7 +26681,7 @@
           "name": "lazy",
           "description": {
             "kind": "markdown",
-            "value": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with `first: true` to fill it yourself).\n\nTakes:  flag (present / absent)"
+            "value": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself).\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -26517,7 +26840,7 @@
       "name": "ui-table",
       "description": {
         "kind": "markdown",
-        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default\n\n**Events:**  `ui-sort`"
+        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default\n\n**Events:**  `ui-sorting`"
       },
       "attributes": [
         {
@@ -26667,7 +26990,7 @@
           "name": "sortable",
           "description": {
             "kind": "markdown",
-            "value": "Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable=\"false\"` (or Fomantic's `class=\"disabled\"`).\n\nTakes:  flag (present / absent)"
+            "value": "Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable=\"false\"` (or Fomantic's `class=\"disabled\"`).\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -26957,7 +27280,7 @@
           "name": "client-sort",
           "description": {
             "kind": "markdown",
-            "value": "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  Off, the app sorts its own rows.\n\nTakes:  flag (present / absent)"
+            "value": "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  Off, the app sorts its own rows.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -27101,7 +27424,7 @@
       "name": "ui-tabs",
       "description": {
         "kind": "markdown",
-        "value": "A tab is a hidden section of content activated by a menu.\n\nAlso known as:  tab bar, tab strip, tabbed panel, tab view.\n\n**Slots:**  default\n\n**Events:**  `ui-change`"
+        "value": "A tab is a hidden section of content activated by a menu.\n\nAlso known as:  tab bar, tab strip, tabbed panel, tab view.\n\n**Slots:**  default\n\n**Events:**  `ui-changing`, `ui-changed`"
       },
       "attributes": [
         {
@@ -27325,7 +27648,7 @@
           "name": "value",
           "description": {
             "kind": "markdown",
-            "value": "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.\n\nTakes:  text"
+            "value": "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.\n\nTakes:  text"
           }
         },
         {
@@ -27750,7 +28073,7 @@
       "name": "ui-textarea",
       "description": {
         "kind": "markdown",
-        "value": "A textarea is a multi-line field used to elicit a longer response.\n\nAlso known as:  multiline, text area, memo, comment box.\n\n**Events:**  `ui-input`, `ui-change`"
+        "value": "A textarea is a multi-line field used to elicit a longer response.\n\nAlso known as:  multiline, text area, memo, comment box.\n\n**Events:**  `ui-typed`, `ui-changed`"
       },
       "attributes": [
         {
@@ -28032,7 +28355,7 @@
       "name": "ui-theme-editor",
       "description": {
         "kind": "markdown",
-        "value": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens.\n\n**Events:**  `ui-change`, `ui-copy`, `ui-save`"
+        "value": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens.\n\n**Events:**  `ui-changed`, `ui-copied`, `ui-saved`"
       },
       "attributes": [
         {
@@ -28334,7 +28657,7 @@
       "name": "ui-toast",
       "description": {
         "kind": "markdown",
-        "value": "A toast gives people a short, non-blocking notification.\n\nAlso known as:  snackbar, notification, growl, flash message, toaster.\n\n**Slots:**  default, `actions`\n\n**Events:**  `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`"
+        "value": "A toast gives people a short, non-blocking notification.\n\nAlso known as:  snackbar, notification, growl, flash message, toaster.\n\n**Slots:**  default, `actions`\n\n**Events:**  `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`"
       },
       "attributes": [
         {
@@ -28668,7 +28991,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-select`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -29218,7 +29541,7 @@
       "name": "ui-transition",
       "description": {
         "kind": "markdown",
-        "value": "A transition is an animation used to show or hide content, or to draw attention to it.\n\nAlso known as:  animate, fade, slide, motion, effect.\n\n**Slots:**  default\n\n**Events:**  `ui-show`, `ui-hide`, `ui-complete`"
+        "value": "A transition is an animation used to show or hide content, or to draw attention to it.\n\nAlso known as:  animate, fade, slide, motion, effect.\n\n**Slots:**  default\n\n**Events:**  `ui-opened`, `ui-closed`, `ui-animated`"
       },
       "attributes": [
         {
@@ -29760,7 +30083,7 @@
       "name": "ui-visibility",
       "description": {
         "kind": "markdown",
-        "value": "Visibility provides a set of callbacks for when content appears in the viewport.\n\nAlso known as:  scroll spy, in view, intersection, lazy load, on screen.\n\n**Slots:**  default\n\n**Events:**  `ui-visible`, `ui-hidden`, `ui-top-visible`, `ui-bottom-visible`, `ui-top-passed`, `ui-bottom-passed`, `ui-passing`, `ui-load`"
+        "value": "Visibility provides a set of callbacks for when content appears in the viewport.\n\nAlso known as:  scroll spy, in view, intersection, lazy load, on screen.\n\n**Slots:**  default\n\n**Events:**  `ui-in-view`, `ui-out-of-view`, `ui-top-in-view`, `ui-bottom-in-view`, `ui-top-passed`, `ui-bottom-passed`, `ui-passing`, `ui-loaded`"
       },
       "attributes": [
         {
@@ -29788,7 +30111,7 @@
           "name": "type",
           "description": {
             "kind": "markdown",
-            "value": "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`).\n\nTakes:  `image`"
+            "value": "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-loaded`).\n\nTakes:  `image`"
           },
           "values": [
             {

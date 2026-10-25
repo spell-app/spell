@@ -24,7 +24,7 @@
         <es-contenido><es-encabezado>Informe</es-encabezado></es-contenido>
       </es-tarjeta>
     </ui-root>
-    <p>Último <code>es-cambio</code>: <output id="value">(ninguno)</output></p>
+    <p>Último <code>es-cambiado</code>: <output id="value">(ninguno)</output></p>
     <pre id="result">checking...</pre>
     <script type="module">
       import { flush } from "solid-js"
@@ -37,7 +37,7 @@
       const failed = await root.component.settled
       const dropdown = document.querySelector("#colores")
       const output = document.querySelector("#value")
-      dropdown.addEventListener("es-cambio", (event) => (output.textContent = JSON.stringify(event.detail.value)))
+      dropdown.addEventListener("es-cambiado", (event) => (output.textContent = JSON.stringify(event.detail.value)))
       const buttons = [...document.querySelectorAll("es-boton")]
       const card = document.querySelector("es-tarjeta")
       await Promise.all([...buttons, dropdown, card].map((element) => element.ready))

@@ -19,7 +19,7 @@ import type { E } from "spell-ui/core"
 // ## Button
 ////////////////
 
-/** `detail` of `ui-toggle`, from a `toggle` `<ui-button>`. */
+/** `detail` of `ui-selected` / `ui-deselected`, from a `toggle` `<ui-button>`. */
 export type ButtonToggleDetail = {
   /** new `active` state */
   active: boolean
@@ -37,7 +37,7 @@ export type DropdownValue = string | string[]
 /** `options` property of `<ui-dropdown>`:  the `MenuOptions` model's option shape. */
 export type DropdownOptions = readonly E.MenuOption[]
 
-/** `detail` of `ui-change`. */
+/** `detail` of `ui-changed`. */
 export type DropdownChangeDetail = {
   /** value after the change */
   value: DropdownValue
@@ -45,7 +45,7 @@ export type DropdownChangeDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-open` / `ui-close`. */
+/** `detail` of the cancelable `ui-opening` / `ui-closing`. */
 export type DropdownOpenDetail = {
   /** state it's ABOUT to enter */
   open: boolean
@@ -53,7 +53,7 @@ export type DropdownOpenDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-search`. */
+/** `detail` of `ui-searched`. */
 export type DropdownSearchDetail = {
   /** current query */
   query: string
@@ -61,7 +61,7 @@ export type DropdownSearchDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-add` / `ui-remove`:  the one value added or removed. */
+/** `detail` of `ui-added` / `ui-removed`:  the one value added or removed. */
 export type DropdownItemDetail = {
   /** value added or removed */
   value: string
@@ -212,7 +212,7 @@ export type IconOwnerToken =
 // ## Label
 ////////////////
 
-/** `detail` of the cancelable `ui-remove`, from a `removable` `<ui-label>`'s delete icon. */
+/** `detail` of the cancelable `ui-removing`, from a `removable` `<ui-label>`'s delete icon. */
 export type LabelRemoveDetail = {
   /** click / key event on the delete icon */
   originalEvent?: Event
@@ -378,7 +378,7 @@ export type ItemAlignment = (typeof ItemAlignments)[number]
 // ## Message
 ////////////////
 
-/** `detail` of the cancelable `ui-dismiss`, from a `dismissible` `<ui-message>`'s close button. */
+/** `detail` of the cancelable `ui-closing`, from a `dismissible` `<ui-message>`'s close button. */
 export type MessageDismissDetail = {
   /** click / key event on the close button */
   originalEvent?: Event
@@ -418,7 +418,7 @@ export const PLACEHOLDER_HOST_STATE = "placeholder"
 // ## Input
 ////////////////
 
-/** `detail` of `ui-input` (every keystroke) and `ui-change` (commit), from `<ui-input>` / `<ui-textarea>`. */
+/** `detail` of `ui-input` (every keystroke) and `ui-changed` (commit), from `<ui-input>` / `<ui-textarea>`. */
 export type InputChangeDetail = {
   /** value after the change */
   value: string
@@ -443,7 +443,7 @@ export const InputOwnerTokens = {
 // ## Checkbox
 ////////////////
 
-/** `detail` of `ui-change`, from `<ui-checkbox>` / `<ui-radio>`. */
+/** `detail` of `ui-changed`, from `<ui-checkbox>` / `<ui-radio>`. */
 export type CheckboxChangeDetail = {
   /** chosen after the change */
   selected: boolean
@@ -505,7 +505,7 @@ export type FormInvalidDetail = FormValidDetail & {
   errors: string[]
 }
 
-/** `detail` of the cancelable `ui-success`. */
+/** `detail` of the cancelable `ui-saving`. */
 export type FormSuccessDetail = {
   /** every field's value */
   values: FormValues
@@ -513,7 +513,7 @@ export type FormSuccessDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-failure`. */
+/** `detail` of `ui-save-failed`. */
 export type FormFailureDetail = FormSuccessDetail & {
   /** prompts by field */
   errors: Record<string, string[]>
@@ -557,7 +557,7 @@ export const FIELD_HOST_STATE = "field"
 /** Direction of a sorted `<ui-table>` column (`sort-direction`, `aria-sort`). */
 export type TableSortDirection = "ascending" | "descending"
 
-/** `detail` of the cancelable `ui-sort`, from a `sortable` `<ui-table>`'s header. */
+/** `detail` of the cancelable `ui-sorting`, from a `sortable` `<ui-table>`'s header. */
 export type TableSortDetail = {
   /** column index (0-based, counting `colspan`s) */
   column: number
@@ -592,7 +592,7 @@ export type TableRow = Record<string, unknown>
  */
 export const TABLE_SORT_OPT_OUT = { attribute: "data-sortable", value: "false" } as const
 
-/** Header attribute naming a slotted column for `ui-sort`'s `key`, e.g. `<th data-key="name">`. */
+/** Header attribute naming a slotted column for `ui-sorting`'s `key`, e.g. `<th data-key="name">`. */
 export const TABLE_SORT_KEY = "data-key"
 
 ////////////////
@@ -635,7 +635,7 @@ export type PopupTrigger = (typeof PopupTrigger)[keyof typeof PopupTrigger]
 /** Every `PopupTrigger`, in Fomantic's order:  the vocabulary's `open-on` values. */
 export const PopupTriggers = [PopupTrigger.hover, PopupTrigger.focus, PopupTrigger.click, PopupTrigger.manual] as const
 
-/** `detail` of the cancelable `ui-open` / `ui-close`, from a `<ui-popup>`. */
+/** `detail` of the cancelable `ui-opening` / `ui-closing`, from a `<ui-popup>`. */
 export type PopupOpenDetail = {
   /** state it's ABOUT to enter:  shown or hidden (the shared `visible`) */
   visible: boolean
@@ -648,15 +648,15 @@ export type PopupOpenDetail = {
 ////////////////
 
 /**
- * Why a `<ui-modal>` is closing, in `ui-close`'s `detail.reason`.
+ * Why a `<ui-modal>` is closing, in `ui-closing`'s `detail.reason`.
  * - `escape` / `outside` / `close-all` -- as `UI.overlays` asks (`DismissReason`);
  *   `outside` is a click on the `::backdrop`
  * - `close` -- the close icon
- * - `approve` / `deny` -- an approve / deny button (after its own `ui-approve` / `ui-deny`)
+ * - `approve` / `deny` -- an approve / deny button (after its own `ui-approving` / `ui-denying`)
  */
 export type ModalCloseReason = "escape" | "outside" | "close-all" | "close" | "approve" | "deny"
 
-/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+/** `detail` of the cancelable `ui-opening`, and of `ui-opened` / `ui-closed` (after the transition). */
 export type ModalOpenDetail = {
   /** state it's entering / entered:  shown or hidden (the shared `visible`) */
   visible: boolean
@@ -664,7 +664,7 @@ export type ModalOpenDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-close`. */
+/** `detail` of the cancelable `ui-closing`. */
 export type ModalCloseDetail = {
   /** always `false`:  it's closing */
   visible: false
@@ -674,7 +674,7 @@ export type ModalCloseDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-approve` / `ui-deny`. */
+/** `detail` of the cancelable `ui-approving` / `ui-denying`. */
 export type ModalActionDetail = {
   /** the button (or other element) that was activated, in the light DOM */
   action: Element
@@ -703,7 +703,7 @@ export type SelectValue = string | string[]
 /** `options` property of `<ui-select>`:  the `MenuOptions` model's option shape, as the dropdown's. */
 export type SelectOptions = readonly E.MenuOption[]
 
-/** `detail` of `ui-change`, from `<ui-select>`. */
+/** `detail` of `ui-changed`, from `<ui-select>`. */
 export type SelectChangeDetail = {
   /** value after the change */
   value: SelectValue
@@ -789,7 +789,7 @@ export type SearchSelectDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-search`:  the query about to run. */
+/** `detail` of `ui-searched`:  the query about to run. */
 export type SearchQueryDetail = {
   /** the query */
   query: string
@@ -797,7 +797,7 @@ export type SearchQueryDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-results`:  what a query found (before `max-results` for a remote one). */
+/** `detail` of `ui-replied`:  what a query found (before `max-results` for a remote one). */
 export type SearchResultsDetail = {
   /** the query */
   query: string
@@ -805,7 +805,7 @@ export type SearchResultsDetail = {
   results: readonly SearchResult[]
 }
 
-/** `detail` of `ui-change`, from `<ui-search>`:  its text was committed. */
+/** `detail` of `ui-changed`, from `<ui-search>`:  its text was committed. */
 export type SearchChangeDetail = {
   /** the committed text */
   value: string
@@ -825,12 +825,12 @@ export const SEARCH_ANCHOR_PROPERTY = "--_ui-search-anchor"
 ////////////////
 
 /**
- * Why a `<ui-toast>` is closing, in `ui-close` / `ui-hide`'s `detail.reason`.
+ * Why a `<ui-toast>` is closing, in `ui-closing` / `ui-closed`'s `detail.reason`.
  * - `timeout` -- its display time ran out
  * - `close` -- the close icon
  * - `click` -- a click on it (`close-on-click`)
  * - `escape` -- Escape with focus inside it
- * - `approve` / `deny` / `action` -- an action button (after its own `ui-approve` / `ui-deny`)
+ * - `approve` / `deny` / `action` -- an action button (after its own `ui-approving` / `ui-denying`)
  * - `dismiss` -- script:  `element.close()`, `UI.toasts.dismiss(id)`
  * - `close-all` -- `UI.overlays.closeAll("toast")`
  */
@@ -845,7 +845,7 @@ export type ToastCloseReason =
   | "dismiss"
   | "close-all"
 
-/** `detail` of the cancelable `ui-close`, and of `ui-hide` (without the event). */
+/** `detail` of the cancelable `ui-closing`, and of `ui-closed` (without the event). */
 export type ToastCloseDetail = {
   /** why it's closing */
   reason: ToastCloseReason
@@ -853,13 +853,13 @@ export type ToastCloseDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-show`. */
+/** `detail` of `ui-opened`. */
 export type ToastShowDetail = {
   /** ms it stays before closing itself;  `0` for "until closed" */
   displayTime: number
 }
 
-/** `detail` of the cancelable `ui-approve` / `ui-deny`, from a `<ui-toast>`. */
+/** `detail` of the cancelable `ui-approving` / `ui-denying`, from a `<ui-toast>`. */
 export type ToastActionDetail = {
   /** the button (or other element) that was activated, in the light DOM */
   action: Element
@@ -875,14 +875,14 @@ export type ToastActionDetail = {
 export type NagStorage = "local" | "session" | "cookie"
 
 /**
- * Why a `<ui-nag>` is closing, in `ui-close` / `ui-hide`'s `detail.reason`.
+ * Why a `<ui-nag>` is closing, in `ui-closing` / `ui-closed`'s `detail.reason`.
  * - `close` -- its close icon (the dismissal is stored)
  * - `timeout` -- its display time ran out (nothing stored)
  * - `dismiss` -- script:  `element.close()` (stored)
  */
 export type NagCloseReason = "close" | "timeout" | "dismiss"
 
-/** `detail` of the cancelable `ui-close`, and of `ui-hide` (without the event). */
+/** `detail` of the cancelable `ui-closing`, and of `ui-closed` (without the event). */
 export type NagCloseDetail = {
   /** why it's closing */
   reason: NagCloseReason
@@ -897,9 +897,9 @@ export type NagCloseDetail = {
 /** Which viewport edge a `<ui-sticky>` is stuck to. */
 export type StickyEdge = "top" | "bottom"
 
-/** `detail` of `ui-stick` / `ui-unstick`. */
+/** `detail` of `ui-stuck` / `ui-unstuck`. */
 export type StickyDetail = {
-  /** the edge it stuck to (`ui-stick`) or left (`ui-unstick`) */
+  /** the edge it stuck to (`ui-stuck`) or left (`ui-unstuck`) */
   edge: StickyEdge
 }
 
@@ -910,7 +910,7 @@ export type StickyDetail = {
 /** Known video hosts of `<ui-embed source>`. */
 export type EmbedSource = "youtube" | "vimeo"
 
-/** `detail` of the cancelable `ui-activate`, from a `<ui-embed>` about to load its frame. */
+/** `detail` of the cancelable `ui-loading`, from a `<ui-embed>` about to load its frame. */
 export type EmbedActivateDetail = {
   /** the frame's `src`, parameters included */
   url: string
@@ -1039,7 +1039,7 @@ const RUNTIME_ANIMATION_NAMES: Readonly<Record<string, string>> = {
 // ## Transition
 ////////////////
 
-/** `detail` of `ui-show` / `ui-hide` / `ui-complete`, from a `<ui-transition>` once an animation has run. */
+/** `detail` of `ui-opened` / `ui-closed` / `ui-animated`, from a `<ui-transition>` once an animation has run. */
 export type TransitionDetail = {
   /** shown now */
   visible: boolean
@@ -1064,14 +1064,14 @@ export const TransitionCommands = {
 ////////////////
 
 /**
- * Why a `<ui-dimmer>` is hiding, in `ui-close`'s `detail.reason`.
+ * Why a `<ui-dimmer>` is hiding, in `ui-closing`'s `detail.reason`.
  * - `escape` / `close-all` -- as `UI.overlays` asks (a page dimmer)
  * - `click` -- a click on the dimmer itself, outside its content (`closedby="any"`)
  * - `hover` -- the pointer and focus left a `show-on="hover"` dimmer's target
  */
 export type DimmerCloseReason = "escape" | "close-all" | "click" | "hover"
 
-/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+/** `detail` of the cancelable `ui-opening`, and of `ui-opened` / `ui-closed` (after the transition). */
 export type DimmerOpenDetail = {
   /** state it's entering / entered:  shown or hidden (the shared `visible`) */
   visible: boolean
@@ -1079,7 +1079,7 @@ export type DimmerOpenDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-close`. */
+/** `detail` of the cancelable `ui-closing`. */
 export type DimmerCloseDetail = {
   /** always `false`:  it's hiding */
   visible: false
@@ -1094,14 +1094,14 @@ export type DimmerCloseDetail = {
 ////////////////
 
 /**
- * Why a `<ui-sidebar>` is closing, in `ui-close`'s `detail.reason`.
+ * Why a `<ui-sidebar>` is closing, in `ui-closing`'s `detail.reason`.
  * - `escape` / `outside` / `close-all` -- as `UI.overlays` asks;
  *   `outside` is a click on the pusher (or anywhere else outside the sidebar)
  * - `close` -- the `--close` / `--toggle` invoker command
  */
 export type SidebarCloseReason = "escape" | "outside" | "close-all" | "close"
 
-/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+/** `detail` of the cancelable `ui-opening`, and of `ui-opened` / `ui-closed` (after the transition). */
 export type SidebarOpenDetail = {
   /** state it's entering / entered */
   visible: boolean
@@ -1109,7 +1109,7 @@ export type SidebarOpenDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-close`. */
+/** `detail` of the cancelable `ui-closing`. */
 export type SidebarCloseDetail = {
   /** always `false`:  it's closing */
   visible: false
@@ -1125,7 +1125,7 @@ export type SidebarCloseDetail = {
  * answered by `<ui-modal>`, `<ui-flyout>`, `<ui-sidebar>`, `<ui-dimmer>`, `<ui-popup>`, `<ui-dropdown>`
  * and `<ui-toast>` (`--close` only).
  * - Custom commands, since a custom element gets no built-in ones (`show-modal` only reaches a real `<dialog>`).
- * - All are user actions:  the cancelable `ui-open` / `ui-close` first.
+ * - All are user actions:  the cancelable `ui-opening` / `ui-closing` first.
  * - The words, `ToggleCommands.show` ... (as `TransitionCommands` / `ShapeCommands` hold theirs), and `action()`,
  *   the shared first step of every family's `onCommand`.
  * - Static:  one set of words per page.
@@ -1233,7 +1233,7 @@ export type ShapeFlip = (typeof ShapeFlips)[number]
  */
 export const ShapeCommands = { next: "--next", previous: "--previous", flip: "--flip-" } as const
 
-/** `detail` of `ui-change`, from a `<ui-shape>` once it shows another side. */
+/** `detail` of `ui-changed`, from a `<ui-shape>` once it shows another side. */
 export type ShapeChangeDetail = {
   /** index of the side now shown */
   activeIndex: number
@@ -1286,7 +1286,7 @@ export type SectionToggleDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-open` / `ui-close`, from a `<ui-accordion>`. */
+/** `detail` of the cancelable `ui-opening` / `ui-closing`, from a `<ui-accordion>`. */
 export type AccordionToggleDetail = {
   /** panel index (0-based) */
   index: number
@@ -1332,7 +1332,7 @@ export class TitleControls {
 /** `<ui-tabs activation>`:  the WAI-ARIA APG's two ways a focused tab gets selected. */
 export type TabActivation = "automatic" | "manual"
 
-/** `detail` of the cancelable `ui-change`, from a `<ui-tabs>`. */
+/** `detail` of the cancelable `ui-changed`, from a `<ui-tabs>`. */
 export type TabChangeDetail = {
   /** value of the tab about to be selected */
   value: string
@@ -1342,7 +1342,7 @@ export type TabChangeDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of `ui-show`, from a `<ui-tab>` each time it becomes the shown pane. */
+/** `detail` of `ui-opened`, from a `<ui-tab>` each time it becomes the shown pane. */
 export type TabShowDetail = {
   /** the pane's value */
   value: string
@@ -1360,7 +1360,7 @@ export type CalendarType = "date" | "time" | "datetime" | "month" | "year"
 /** A view of the picker, coarse to fine;  also the unit a cell stands for. */
 export type CalendarMode = "year" | "month" | "day" | "hour" | "minute"
 
-/** `detail` of the cancelable `ui-change`, from a `<ui-calendar>`. */
+/** `detail` of the cancelable `ui-changed`, from a `<ui-calendar>`. */
 export type CalendarChangeDetail = {
   /**
    * the new value, ISO by `type`:  `2026-09-30`, `14:30`, `2026-09-30T14:30`, `2026-09`, `2026`;
@@ -1371,7 +1371,7 @@ export type CalendarChangeDetail = {
   originalEvent?: Event
 }
 
-/** `detail` of the cancelable `ui-open` / `ui-close`, from a popup `<ui-calendar>`. */
+/** `detail` of the cancelable `ui-opening` / `ui-closing`, from a popup `<ui-calendar>`. */
 export type CalendarOpenDetail = {
   /** the state it's about to take */
   open: boolean
@@ -1577,17 +1577,17 @@ export const SourceAttributes = [
 /** Events every source element dispatches;  spread into its vocabulary's `events`. */
 export const SourceEvents = [
   {
-    name: "ui-load",
+    name: "ui-loaded",
     detail: "{ source?: string, content: string }",
     description: "Content arrived:  fetched from `source`, or read from the element's own content."
   },
   {
-    name: "ui-change",
+    name: "ui-changed",
     detail: "{ content: string }",
     description: "The `content` property was set:  the element shows the new text, and is `dirty` until saved."
   },
   {
-    name: "ui-save",
+    name: "ui-saving",
     detail: "{ source?: string, content: string, etag?: string }",
     cancelable: true,
     description:
@@ -1648,7 +1648,7 @@ export const SourceTexts = [
   ...SourceFailureTexts
 ] as const
 
-/** `detail` of `ui-load`. */
+/** `detail` of `ui-loaded`. */
 export type SourceLoadDetail = {
   /** `source` as written, or `undefined` for the element's own content */
   source?: string
@@ -1656,13 +1656,13 @@ export type SourceLoadDetail = {
   content: string
 }
 
-/** `detail` of `ui-change`. */
+/** `detail` of `ui-changed`. */
 export type SourceChangeDetail = {
   /** the new text */
   content: string
 }
 
-/** `detail` of the cancelable `ui-save`. */
+/** `detail` of the cancelable `ui-saving`. */
 export type SourceSaveDetail = {
   /** `source` as written, or `undefined` for the element's own content */
   source?: string
@@ -1793,7 +1793,7 @@ export type ThemeGlass = (typeof ThemeGlasses)[number]
 
 /**
  * A theme as `<ui-theme-editor>` makes it:  a base theme, and what's changed on it.
- * - Its `value`, its `ui-change` and `ui-save` details, and what `SavedTheme` keeps in the browser.
+ * - Its `value`, its `ui-changed` and `ui-saved` details, and what `SavedTheme` keeps in the browser.
  * - Every choice but `name` and `base` is optional:  left out, the base theme's own stays.
  */
 export type ThemeChoices = {

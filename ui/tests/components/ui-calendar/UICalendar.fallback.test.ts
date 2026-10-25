@@ -37,14 +37,14 @@ describe("CalendarFallback", () => {
     expect(FallbackStub.shadow(fallback).querySelector("input")!.type).toBe("datetime-local")
   })
 
-  it("is still a form control:  value, validity, host.value and ui-change", () => {
+  it("is still a form control:  value, validity, host.value and ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-calendar name="due" type="date" required aria-label="Due"></x-fb-calendar></form>`
     )
     const host = form.querySelector<StubHost & { value?: string }>("x-fb-calendar")!
     expect(form.checkValidity()).toBe(false)
     const changes: unknown[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent).detail.value))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent).detail.value))
     const input = FallbackStub.shadow(host).querySelector("input")!
     input.value = "2026-10-04"
     input.dispatchEvent(new Event("input", { bubbles: true }))

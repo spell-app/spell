@@ -29,14 +29,14 @@ describe("RatingFallback", () => {
     await expectAccessible(host, AXE)
   })
 
-  it("is still a form control:  value, validity, host.value, ui-change", () => {
+  it("is still a form control:  value, validity, host.value, ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-rating name="stars" required aria-label="Stars"></x-fb-rating></form>`
     )
     const host = form.querySelector<StubHost & { value?: number }>("x-fb-rating")!
     expect(form.checkValidity()).toBe(false)
     const values: unknown[] = []
-    host.addEventListener("ui-change", (event) => values.push((event as CustomEvent).detail.value))
+    host.addEventListener("ui-changed", (event) => values.push((event as CustomEvent).detail.value))
     FallbackStub.shadow(host).querySelectorAll("input")[1]!.click()
     expect(new FormData(form).get("stars")).toBe("2")
     expect(form.checkValidity()).toBe(true)

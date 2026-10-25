@@ -36,7 +36,7 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
     host.removeAttribute("desactivado")
     await ElementFixture.tick()
     const toggles: unknown[] = []
-    host.addEventListener("es-alternar", (event) => toggles.push((event as CustomEvent).detail.active))
+    host.addEventListener("es-seleccionado", (event) => toggles.push((event as CustomEvent).detail.active))
     host.shadowRoot!.querySelector("button")!.click()
     expect(toggles).toEqual([true])
   })

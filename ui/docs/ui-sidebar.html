@@ -615,19 +615,19 @@
                   `hide` / `toggle` behaviours).
 
                   - User actions -- the invoker commands `--show`, `--close` and `--toggle` from a button's `commandfor`, Escape,
-                    a click beside it -- dispatch the cancelable `ui-open` / `ui-close` first. `detail.reason` is `escape`,
+                    a click beside it -- dispatch the cancelable `ui-opening` / `ui-closing` first. `detail.reason` is `escape`,
                     `outside`, `close` or `close-all`.
-                  - `ui-show` / `ui-hide` follow after the slide (Fomantic's `onVisible` / `onHidden`).
+                  - `ui-opened` / `ui-closed` follow after the slide (Fomantic's `onVisible` / `onHidden`).
                   - A hidden sidebar is `visibility: hidden`: out of the tab order and the accessibility tree, but still laid out.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const menu = document.querySelector("#site-menu")
-                  menu.addEventListener("ui-close", (event) => {
+                  menu.addEventListener("ui-closing", (event) => {
                     if (event.detail.reason === "outside" && pinned) event.preventDefault()
                   })
-                  menu.visible = true // show from code:  no ui-open
+                  menu.visible = true // show from code:  no ui-opening
                 </script>
               </ui-code>
             </ui-section>
@@ -660,7 +660,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `visible` to your state and listen for `ui-close` to follow the user.
+                  Bind `visible` to your state and listen for `ui-closing` to follow the user.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -675,7 +675,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-sidebar :visible="open" aria-label="Site" @ui-close="open = false">...</ui-sidebar>
+                  <ui-sidebar :visible="open" aria-label="Site" @ui-closing="open = false">...</ui-sidebar>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -685,7 +685,7 @@
                   <ui-sidebar
                     visible={open()}
                     aria-label="Site"
-                    on-ui-close={() => setOpen(false)}
+                    on-ui-closing={() => setOpen(false)}
                   >
                     ...
                   </ui-sidebar>

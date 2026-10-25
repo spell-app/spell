@@ -26,7 +26,7 @@ import { FIELD_SELECTOR, type FieldApply } from "./UIForm.types"
  *   - a radio is chosen while `value` is its own value
  *   - anything else shows `value` (`""` for nullish)
  * - A dotted `name` reaches into nested things:  `name="font.size"` shows and writes `scope.font.size`.
- * - Control => object:  a change from a bound control (`input`, `change`, `ui-change`) writes `scope[name]`,
+ * - Control => object:  a change from a bound control (`input`, `change`, `ui-changed`) writes `scope[name]`,
  *   when its `<ui-field apply>` says (`applyOf()`):
  *   - `immediately` (the default):  a microtask later, once the control holds its new value
  *   - `delayed [ms]`:  after a pause in typing (300ms);  a committed `change` writes at once
