@@ -53,10 +53,10 @@
 
 	<draw "front">
 		<comment>One line of text, the size of the text around it:  its pile scales it to fit.</>
-		<ui-text part="face" color={its color}>{its rank} {its symbol}</ui-text>
+		<text part="face" color={its color}>{its rank} {its symbol}</>
 	</draw>
 	<draw "back">
-		<ui-image part="back" src="card-back.svg" alt="the back of a card" />
+		<image part="back" src="card-back.svg" alt="the back of a card" />
 	</draw>
 
 	<test "card setup">

@@ -160,6 +160,11 @@ export type ProjectManifestJSON5 = {
   exports?: string[]
   /** Targets it compiles to, from its project file, e.g. `["ts/solid"]` -- `js/solid` always:  see `SP.TARGETS`. */
   targets?: string[]
+  /**
+   * The component packs its spellx drawings name components from, by their bare names (`<button>`), first first,
+   * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
+   */
+  packs?: string[]
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
   /**

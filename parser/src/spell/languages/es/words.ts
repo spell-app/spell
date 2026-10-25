@@ -271,6 +271,13 @@ export const spanishWords: SP.LanguageWords = {
      */
     typeDeclaration:
       /^[ \t]*(?:-[ \t]+)?(?:un[oa]?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+es\b|un[oa]?[ \t]+["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es[ \t]+un[oa]?|alias)\b|crear[ \t]+un[ \t]+tipo[ \t]+(?:llamado|nombrado)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:un[oa]?|el|la|los|las|su|sus)\b)((?:(?!es\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!es\b)[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+una[ \t]+aplicaci[oó]n\b)/gimu,
+    /**
+     * A line naming its kind, its groups an article (if any), its name and its kind's words, up to 4 of each:
+     * `una "página de puntos" es una página`, `puntuaciones altas es una página de puntos:`.
+     * - The kind ends at `donde`, `con`, a `:` or the line's end.
+     */
+    kindDeclaration:
+      /^[ \t]*(?:-[ \t]+)?(un[oa]?[ \t]+)?(?!(?:sus?|el|la|los|las|un[oa]?)[ \t])["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+alias[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+es[ \t]+un[oa]?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:donde\b|con\b|:|$))/gimu,
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,

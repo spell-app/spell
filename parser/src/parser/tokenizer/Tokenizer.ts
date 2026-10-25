@@ -24,6 +24,13 @@ export class Tokenizer {
   rawTextTags: string[] = []
 
   /**
+   * Does `</>` close the innermost open JSX element, as in a spellx drawing (`<text>{its rank}</>`;  epic
+   * `elemental-spell` P7, Q40)?
+   * - Off by default:  in code spell, `</>` only ends a fragment, `<>...</>`.
+   */
+  emptyEndTagCloses = false
+
+  /**
    * Quote symbols recognized by `matchText`.
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
@@ -628,7 +635,10 @@ export class Tokenizer {
     if (start >= end) return undefined
 
     const nextStart = this.eatWhitespace(text, start, end)
-    const endTag = `</${endTagName}>`
+    const named = `</${endTagName}>`
+    // `</>` closes any element where `emptyEndTagCloses` says so:  a spellx drawing's
+    const endTag =
+      this.emptyEndTagCloses && endTagName && this.matchStringAtHead("</>", text, nextStart, end) ? "</>" : named
     if (!this.matchStringAtHead(endTag, text, nextStart, end)) return undefined
 
     end = nextStart + endTag.length
@@ -1069,6 +1079,8 @@ export type TokenizerProps = {
   quoteSymbols?: string[]
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
+  /** See `Tokenizer.emptyEndTagCloses`. */
+  emptyEndTagCloses?: boolean
 }
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */

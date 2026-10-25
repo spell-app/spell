@@ -1150,6 +1150,16 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
   - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
   - A tag spellx can't read yet (`<menu>`, P10) is the line's error, `spellx-not-yet`, with its block.
+- A spellx DRAWING's markup (epic `elemental-spell` P7):
+  - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
+    name may hold any letter (`<botón>`).
+  - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
+    its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
+    carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
+    imports Spell UI.
+  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a control inside an element,
+    `spellx-tag-in-markup` (C29).
+  - Code spell's drawings are untouched.
 - The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
   file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
 - Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):

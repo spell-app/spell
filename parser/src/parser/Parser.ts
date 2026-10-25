@@ -174,9 +174,11 @@ export class Parser extends Derivative {
    * Names of the types `text` declares, found WITHOUT parsing it, e.g. `["card"]` for `a card is a thing`.
    * - Why:  so a line can name a type declared further down, or in a later file -- see `stubDeclaredTypes()`.
    * - A cheap scan, not a parse:  a stray extra name just makes one more type known.
+   * - `scope`, when given:  what's known already (an earlier file, an import, a built-in), for a declaration that
+   *   names one, e.g. spell's `klondike is a card game`.
    * - Default:  none.  Languages override, e.g. `SpellParser`.
    */
-  declaredTypes(_text: string): string[] {
+  declaredTypes(_text: string, _scope?: P.Scope): string[] {
     return []
   }
 
@@ -191,7 +193,7 @@ export class Parser extends Derivative {
   stubDeclaredTypes(scope: P.Scope, texts: string[]): string[] {
     // our language in play:  a name is made singular by its own language's inflector (`pila de descartes`)
     return this.inPlay(() => {
-      const names = texts.flatMap((text) => this.declaredTypes(text))
+      const names = texts.flatMap((text) => this.declaredTypes(text, scope))
       const lang = this.inflector?.lang
       for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true, lang })
       return names

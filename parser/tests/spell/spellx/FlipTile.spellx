@@ -15,10 +15,10 @@
 			set its side to up
 	</action>
 	<draw "face">
-		<ui-text>face</ui-text>
+		<text>face</text>
 	</draw>
 	<draw "back">
-		<ui-text>back</ui-text>
+		<text>back</>
 	</draw>
 	<draw>
 		<if it is showing up>

@@ -555,6 +555,14 @@ export type SpellxControlKind = "if" | "otherwise if" | "otherwise" | "for each"
 export type DeclarationPatterns = {
   /** A line declaring a type:  `gim`, its groups a one-word name, a several-word name, a created type, an app. */
   typeDeclaration: RegExp
+  /**
+   * A line naming its kind:  `gim`, its groups an article (when it has one), its name, and its kind's words,
+   * up to 4 of each:  `a card game is an app`, `klondike is a card game:` (epic `elemental-spell` J50).
+   * - With no article, its name the first words:  never `its` / `the` / an article.
+   * - Read by `SpellParser.oneOfAKindsIn()`:  a line with no article declares a one-of-a-kind only when its kind is
+   *   an app or a page, or a kind of one.
+   */
+  kindDeclaration: RegExp
   /** A line declaring a value kind:  `gim`, its plural name captured, e.g. `suits`. */
   valueKindDeclaration: RegExp
   /**

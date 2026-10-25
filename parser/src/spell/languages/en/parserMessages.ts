@@ -62,6 +62,12 @@ export const PARSER_MESSAGES = {
   "inline-and-nested-body": "Got both inline statement and nested block",
   /** A dotted tag, `<UI.Form>`. */
   "not-an-element": "<{tag}> isn't an element:  write Spell UI's own tag, e.g. <ui-form>",
+  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
+  "spellx-unknown-component":
+    "<{tag}> isn't a component any pack here has (searched:  {packs}):  check its name, or add its pack to the project's packs",
+  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
+  "spellx-tag-in-markup":
+    "<{tag} ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element",
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',

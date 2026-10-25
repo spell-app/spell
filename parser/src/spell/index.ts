@@ -32,6 +32,7 @@ export * from "./SpellParser"
 export * from "./SpellxTokens"
 export * from "./SpellxTokenizer"
 export * from "./SpellxTwin"
+export * from "./ComponentPacks"
 export * from "./builtinTypes"
 export * from "./builtInTemplates"
 

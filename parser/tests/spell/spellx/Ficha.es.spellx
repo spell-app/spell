@@ -15,10 +15,10 @@
 			poner su lado a arriba
 	</acción>
 	<dibujar "cara">
-		<es-texto>cara</es-texto>
+		<texto>cara</texto>
 	</dibujar>
 	<dibujar "dorso">
-		<es-texto>dorso</es-texto>
+		<texto>dorso</>
 	</dibujar>
 	<dibujar>
 		<si está arriba>

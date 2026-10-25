@@ -401,6 +401,76 @@ describe("outline style", () => {
       expect(compile(lines)).toContain("if (klondike instanceof CardGame) core.console.log(1)")
     })
 
+    // epic `elemental-spell` J50:  the scan before parsing finds it, so a line ABOVE it can name its type
+    test("a line above `klondike is a card game` can name `klondike`", () => {
+      const lines = [
+        'a "card game" is an app',
+        "to check it (x):",
+        "\tif x is a klondike",
+        "\t\tprint 1",
+        "klondike is a card game"
+      ]
+      const { files } = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      expect(files[0]!.compiled).toContain("instanceof Klondike")
+      expect(SP.spellParser.declaredTypes(lines.join("\n"))).toEqual(["card-game", "klondike"])
+    })
+
+    test("the scan invents nothing:  an undeclared kind, a test of a kind, any other `x is a y`", () => {
+      const scan = (...lines: string[]) => SP.spellParser.declaredTypes(lines.join("\n"))
+      expect(scan("klondike is a card game")).toEqual([])
+      expect(scan('a "card game" is a thing', "klondike is a card game")).toEqual(["card-game"])
+      expect(scan('a "card game" is an app', "if klondike is a card game", "\tprint 1")).toEqual(["card-game"])
+      expect(scan("the score is a number", "x is a list")).toEqual([])
+    })
+
+    test("a kind of a kind, a page, a longer line:  `klondike is a fancy game for two:`", () => {
+      const scan = (...lines: string[]) => SP.spellParser.declaredTypes(lines.join("\n"))
+      expect(
+        scan("klondike is a fancy game for two:", 'a "fancy game" is a card game', 'a "card game" is an app')
+      ).toEqual(["fancy-game", "card-game", "klondike"])
+      expect(scan("high scores is a score page where:", 'a "score page" is a page')).toEqual([
+        "score-page",
+        "high-scores"
+      ])
+      expect(scan("leaderboard is a page")).toEqual(["leaderboard"])
+    })
+
+    test("its kind known to the scope, from another file:  `klondike is a card game`", () => {
+      const { files } = parseSpellProject([
+        { path: "/game.spell", contents: 'a "card game" is an app' },
+        {
+          path: "/klondike.spell",
+          contents: ["to check it (x):", "\tif x is a klondike", "\t\tprint 1", "klondike is a card game"].join("\n")
+        }
+      ])
+      expect(files.flatMap((file) => file.errors)).toEqual([])
+      expect(files[1]!.compiled).toContain("instanceof Klondike")
+    })
+
+    test("a method in its body is called ahead:  `- to deal:` under `klondike is a card game where:`", () => {
+      const lines = ['a "card game" is an app', "klondike is a card game where:", "\t- to deal:", "\t\tprint 1"]
+      expect(SP.spellParser.declaredMethods(lines.join("\n"))).toEqual(["klondike\tto deal"])
+    })
+
+    test("in Spanish, the scan:  `puntuaciones altas es una página de puntos`", () => {
+      const spanish = SP.Language.for("es").parser
+      const lines = ['una "página de puntos" es una página', "puntuaciones altas es una página de puntos"]
+      expect(spanish.declaredTypes(lines.join("\n"))).toEqual(["página-de-puntos", "puntuaciones-altas"])
+      expect(spanish.declaredTypes("si el juego es una página de puntos")).toEqual([])
+    })
+
+    test('in spellx, the scan:  `<spell-app "klondike" template="card game">`', () => {
+      const spellx = SP.spellParser.twinFor(SP.Language.default, "spellx")
+      const text = [
+        '<spell-app-template "card game">',
+        "</>",
+        '<spell-app "klondike" template="card game">',
+        "</>"
+      ].join("\n")
+      expect(spellx.declaredTypes(text)).toContain("klondike")
+    })
+
     test("in Spanish:  `puntuaciones altas es una página de puntos`", () => {
       const lines = [
         'una "página de puntos" es una página donde:',

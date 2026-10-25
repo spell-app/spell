@@ -107,6 +107,14 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
+   * A markup tag's head, as spell's, but its name may hold any letter:  a Spanish drawing writes `<botón>`
+   * (epic `elemental-spell` P7, Q49);  `SpellJSX.componentTagFor()` finds its component.
+   */
+  get JSX_TAG_START() {
+    return /^<(\p{L}[\p{L}\p{N}_.-]*)(\s*\/>|\s*>|\s+)/u
+  }
+
+  /**
    * Where markup's next element would start, for a run of them (`matchJSXElements()`):  never at a line a spellx tag
    * starts, e.g. `<if ...>` or `<for each ...>` after a drawing's `<toolbar />`, which is a tag of its own.
    */

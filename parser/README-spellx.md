@@ -176,9 +176,18 @@ for (const { node, depth } of file.walk()) ...
 **Real today:**  a `.spellx` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
 its tree reads as above.
 
+**Components by their bare names:**  a drawing writes `<text>`, `<button>`, `<botón>` in a Spanish file, and gets
+Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
+- A name is one of the project's own views first (`<card>`, its `<solitaire-card>`), then the first of the project's
+  packs that has it:  its project file's `"packs"`, Spell UI's alone unless it says more.
+- There's no plain HTML:  `<div>` is an error naming the packs it looked in.
+- `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
+- Plain Spell is untouched:  its drawings name tags as before.
+
 **Not yet:**
-- A drawing in spellx's own markup:  bare component names (`<text>` for `<ui-text>`) and `<for each>` in a drawing.
-  Write `ui-*` names until then.
+- `<for each>` in a drawing, and a drawing of several elements with Spell between them:  plain Spell can't say them
+  yet either.
+- A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
 - `<menu>`:  read into the tree, but an error when compiled, until menus come.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - The editor's colours and hover inside a tag's head, and the way back, from a `.spell` file to `.spellx`.

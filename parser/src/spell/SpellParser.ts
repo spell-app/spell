@@ -18,6 +18,21 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   rawTextTags: ["css", "markdown"]
 }
 
+// Above the class:  read while this module is still loading (the built-in templates compile then)
+/** The built-in kinds a thing may be the one of:  an app, or a page (epic `elemental-spell` Q16). */
+const ONE_OF_A_KIND_DATATYPES: ReadonlySet<P.Datatype> = new Set(["app", "page"])
+
+/**
+ * The kinds each scope's files declare, as the scan before parsing read them:  `card-game` => `["app"]`
+ * (`SpellParser.oneOfAKindsIn()`).
+ * - By a project's scope, so a file scanned later knows an earlier file's kinds.
+ * - Only grows:  a kind an edit removed stays until the project is parsed afresh, which at worst stubs one more type.
+ */
+const SCANNED_KINDS = new WeakMap<P.Scope, Map<string, string[]>>()
+
+/** Words each `statement` rule starts with -- see `SpellParser.statementWordsFor()`. */
+const STATEMENT_WORDS = new WeakMap<P.Rule, Set<string>>()
+
 /**
  * `P.Parser` subclass for the spell language.
  * - Holds spell's `tokenizer`:
@@ -54,6 +69,8 @@ export class SpellParser extends P.Parser {
           new SP.SpellxTokenizer({
             ...SPELL_TOKENIZER_PROPS,
             language: this.language ?? SP.Language.default,
+            // a drawing's markup:  `</>` closes any element there (Q40, P7)
+            emptyEndTagCloses: true,
             spell: this.spellTokenizer
           })
       )
@@ -73,6 +90,13 @@ export class SpellParser extends P.Parser {
    * - A project's spellx files parse with its twin of that form (`twinFor()`).
    */
   declare form: SP.SpellForm | undefined
+
+  /**
+   * The component packs a spellx drawing names components from, by their bare names (`<button>`):
+   * its project file's `packs`, set on the project's parser and its twins (`SP.ComponentPacks`;  P7).
+   * - `undefined`:  `SP.ComponentPacks.DEFAULT`.
+   */
+  declare packs: readonly string[] | undefined
 
   /**
    * Register a rule class with ONLY its `syntax` + `tests` -- everything else lives on the class as `@proto static`.
@@ -204,7 +228,11 @@ export class SpellParser extends P.Parser {
     const twins = (this.twins ??= [this])
     const existing = twins.find((twin) => twin.language === language && formOf(twin) === form)
     if (existing) return existing
-    const twin = language.parser.clone({ module: this.module, ...(form === "spellx" ? { form } : {}) } as P.ParserProps)
+    const twin = language.parser.clone({
+      module: this.module,
+      ...(form === "spellx" ? { form } : {}),
+      ...(this.packs ? { packs: this.packs } : {})
+    } as P.ParserProps)
     for (const layer of this.layersOver(this.language.parser).reverse()) {
       for (const [ruleName, rule] of Object.entries(layer.ownRules)) twin.addTwinsRule(ruleName, rule)
     }
@@ -304,9 +332,10 @@ export class SpellParser extends P.Parser {
    * - A name of several words too, e.g. `a stock pile is a pile`, `a bank account aka account is a thing`.
    *   Only before `is a` / `is an` or `aka`:  `a cards color is black` names no type.
    * - A one-of-a-kind app too, with no article:  `solitaire is an app` (`create_one_of_a_kind`).
+   *   - And one of a declared kind of app or page, `klondike is a card game`:  see `oneOfAKindsIn()`.
    * - The kind of a property's values too, e.g. `card suit` (epic `spanish` P22):  see `declaredPropertyKinds()`.
    */
-  declaredTypes(text: string): string[] {
+  declaredTypes(text: string, scope?: P.Scope): string[] {
     if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
     const types = [...text.matchAll(this.declarations.typeDeclaration)].map(
       ([, type, words, created, onlyOne]) =>
@@ -317,8 +346,62 @@ export class SpellParser extends P.Parser {
           .join("-") ??
         created!
     )
+    const onlyOnes = this.oneOfAKindsIn(text, scope).filter((name) => !types.includes(name))
     const kinds = [...text.matchAll(this.declarations.valueKindDeclaration)].map(([, plural]) => P.singularize(plural!))
-    return [...types, ...kinds, ...this.declaredPropertyKinds(text)]
+    return [...types, ...onlyOnes, ...kinds, ...this.declaredPropertyKinds(text, new Set(onlyOnes))]
+  }
+
+  /**
+   * One-of-a-kinds `text` declares by a kind other than `app`, its name dashed:  `klondike` for
+   * `klondike is a card game`, `high-scores` for `high scores is a score page` (epic `elemental-spell` J50, C27).
+   * - Two passes, so no type is invented from any `x is a y`:
+   *   1. each declaration's kind, read from `text` (`a "card game" is an app`)
+   *   2. each line with no article, `<name> is a <kind>`, whose kind is an app or a page, or a kind of one
+   * - The kind is known from `text` itself, or, with `scope`, from a file scanned before it (`SCANNED_KINDS`),
+   *   an import or a built-in.
+   *   One declared only in a file scanned AFTER it isn't known yet:  its line says so when it parses.
+   * - Longest kind first, up to 4 words, as `create_one_of_a_kind` reads it:  `card game` in
+   *   `klondike is a card game for two:`.
+   * - Never a line a statement starts, e.g. `if klondike is a card game`:  that's a test of its kind.
+   */
+  private oneOfAKindsIn(text: string, scope?: P.Scope): string[] {
+    const language = this.language ?? SP.Language.default
+    const dashed = (words: string) =>
+      words
+        .trim()
+        .split(/[ \t]+/)
+        .join("-")
+    const lines = [...text.matchAll(this.declarations.kindDeclaration)].map(([, article, name, kind]) => ({
+      article: !!article,
+      name: dashed(name!),
+      kind: kind!.trim().split(/[ \t]+/)
+    }))
+    // the kinds every file scanned so far declares, ours among them:  so a later file knows an earlier one's
+    const kindOf = scope ? (SCANNED_KINDS.get(scope) ?? new Map<string, string[]>()) : new Map<string, string[]>()
+    if (scope) SCANNED_KINDS.set(scope, kindOf)
+    for (const { name, kind } of lines) kindOf.set(name.toLowerCase(), kind)
+    if (!lines.some(({ article }) => !article)) return []
+    const statementWords = SpellParser.statementWordsFor(scope ?? language.rootScope)
+
+    // Is `kind` an app or a page, or a kind of one?  `seen`:  the kinds this question passed through
+    const isOneOfAKindKind = (kind: string[], seen: Set<string>): boolean => {
+      for (let count = Math.min(MAX_KIND_WORDS, kind.length); count > 0; count--) {
+        const words = kind.slice(0, count).join("-")
+        const datatype = P.typeName(words, language.typeWords, language.words.listOfWord)
+        if (ONE_OF_A_KIND_DATATYPES.has(datatype)) return true
+        const declared = kindOf.get(words.toLowerCase())
+        if (declared && !seen.has(words) && isOneOfAKindKind(declared, new Set(seen).add(words))) return true
+        const known = scope?.getType(P.isValueType(datatype) ? datatype : P.classCase(datatype))
+        if (known instanceof P.TypeScope && (known.isA("App") || known.isA("Page"))) return true
+      }
+      return false
+    }
+    return lines
+      .filter(({ article, name, kind }) => {
+        if (article || statementWords.has(name.split("-")[0]!.toLowerCase())) return false
+        return isOneOfAKindKind(kind, new Set())
+      })
+      .map(({ name }) => name)
   }
 
   /**
@@ -329,15 +412,16 @@ export class SpellParser extends P.Parser {
    * - Only a list with `one of` / `either`, as `propertyListDeclaration` finds it:
    *   a bare `up or down` is known once its line parses.
    * - Blank lines don't end a body;  any other line at the left edge does.
+   * - `onlyOnes`:  the one-of-a-kinds `text` declares by a kind other than `app` (`oneOfAKindsIn()`).
    */
-  private declaredPropertyKinds(text: string): string[] {
+  private declaredPropertyKinds(text: string, onlyOnes?: ReadonlySet<string>): string[] {
     const language = this.language ?? SP.Language.default
     const found: string[] = []
     let subject = ""
     for (const line of text.split("\n")) {
       if (!line.trim()) continue
       if (!/^\s/.test(line)) {
-        subject = this.subjectOf(line) ?? ""
+        subject = this.subjectOf(line, onlyOnes) ?? ""
         continue
       }
       const listed = subject ? this.declarations.propertyListDeclaration.exec(line) : undefined
@@ -358,11 +442,12 @@ export class SpellParser extends P.Parser {
    */
   declaredMethods(text: string): string[] {
     if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    const onlyOnes = new Set(this.oneOfAKindsIn(text))
     const found: string[] = []
     let subject = ""
     for (const line of text.split("\n")) {
       if (!/^\s/.test(line)) {
-        subject = this.subjectOf(line) ?? ""
+        subject = this.subjectOf(line, onlyOnes) ?? ""
         if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
         continue
       }
@@ -420,9 +505,13 @@ export class SpellParser extends P.Parser {
     return (this.language ?? SP.Language.default).words.declarations
   }
 
-  /** Type a top-level `line` declares or re-opens, e.g. `solitaire` for `a solitaire:` -- `undefined` if none. */
-  subjectOf(line: string): string | undefined {
-    const { typeDeclaration, reopenedType } = this.declarations
+  /**
+   * Type a top-level `line` declares or re-opens, e.g. `solitaire` for `a solitaire:` -- `undefined` if none.
+   * - `onlyOnes`:  the one-of-a-kinds its text declares by a kind other than `app` (`oneOfAKindsIn()`),
+   *   e.g. `klondike` for `klondike is a card game where:`.
+   */
+  subjectOf(line: string, onlyOnes?: ReadonlySet<string>): string | undefined {
+    const { typeDeclaration, kindDeclaration, reopenedType } = this.declarations
     const declared = new RegExp(typeDeclaration.source, "iu").exec(line)
     if (declared) {
       const [, type, words, created, onlyOne] = declared
@@ -435,10 +524,38 @@ export class SpellParser extends P.Parser {
         created
       )
     }
+    const onlyOne = onlyOnes?.size ? new RegExp(kindDeclaration.source, "iu").exec(line) : undefined
+    const onlyOneName =
+      onlyOne && !onlyOne[1]
+        ? onlyOne[2]!
+            .trim()
+            .split(/[ \t]+/)
+            .join("-")
+        : undefined
+    if (onlyOneName && onlyOnes!.has(onlyOneName)) return onlyOneName
     return reopenedType
       .exec(line)?.[1]
       ?.split(/[ \t]+/)
       .join("-")
+  }
+
+  /**
+   * The words any of `scope`'s statements starts with, lower case, e.g. `return`, `print`, `if`.
+   * - From the statements themselves:  each `statement` rule's first fixed word, so a statement added later
+   *   guards its word too.
+   * - Worked out once per `statement` rule, which changes when a rule is added.
+   * - Read by `body_member_words` (`- return x is 1` stays a `return`) and `oneOfAKindsIn()`
+   *   (`if klondike is a card game` declares nothing).
+   */
+  static statementWordsFor(scope: P.Scope): ReadonlySet<string> {
+    const statement = scope.getRuleOrDie("statement")
+    let words = STATEMENT_WORDS.get(statement)
+    if (!words) {
+      words = new Set()
+      addLeadingWords(statement, words)
+      STATEMENT_WORDS.set(statement, words)
+    }
+    return words
   }
 
   /** Commit a spell statement parsed on its own -- see `SP.commitStatement()`. */
@@ -525,3 +642,26 @@ function firstLineOf(line: string): string {
 
 /** A rule which can make its method callable ahead of its definition:  `MethodDefinition`'s. */
 type CallsAhead = { callAhead?: (match: P.Match) => void }
+
+/** Most words a kind's name may have, as `create_one_of_a_kind` reads it:  as many as a type's (drawable-thing J7). */
+const MAX_KIND_WORDS = 4
+
+/** Add the fixed words `rule` may start with to `words`:  none for a subrule, which could start with anything. */
+function addLeadingWords(rule: P.Rule, words: Set<string>): void {
+  if (rule instanceof P.Literal) {
+    const [word] = [rule.literal].flat()
+    if (word) words.add(word.toLowerCase())
+  } else if (rule instanceof P.Literals) {
+    for (const { literal } of rule.literals) {
+      const [word] = [literal].flat()
+      if (word) words.add(word.toLowerCase())
+    }
+  } else if (rule instanceof P.Choice) {
+    for (const alternative of rule.rules) addLeadingWords(alternative, words)
+  } else if (rule instanceof P.Sequence) {
+    for (const child of rule.rules) {
+      addLeadingWords(child, words)
+      if (!child.optional) break
+    }
+  }
+}

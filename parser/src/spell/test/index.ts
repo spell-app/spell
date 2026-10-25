@@ -9,6 +9,7 @@ export { unitTestModuleRules } from "spell-parser/parser/test"
 export { tsxBinary } from "./tsxBinary"
 export { solidSample } from "./samples"
 export { runSpell, runSpellFiles, type RunOptions } from "./runSpell"
+export { registerTestComponentPack } from "./testComponentPack"
 export {
   parseSpellProject,
   compiledSpellProject,

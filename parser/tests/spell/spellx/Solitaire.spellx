@@ -20,7 +20,7 @@
 	</>
 
 	<draw>
-		<ui-text>{its moves} moves</ui-text>
+		<text>{its moves} moves</text>
 	</draw>
 </spell-app>
 
@@ -32,6 +32,6 @@
 <spell-page "leaderboard" template="score page">
 	The ten best games, fastest first.
 	<draw>
-		<ui-header>High scores</ui-header>
+		<header>High scores</>
 	</draw>
 </spell-page>

@@ -1,9 +1,10 @@
 import { readFileSync } from "fs"
-import { describe, test, expect } from "vite-plus/test"
+import { beforeAll, describe, test, expect } from "vite-plus/test"
 
 import {
   incrementalSpellProject,
   parseSpellProject,
+  registerTestComponentPack,
   summarize,
   summarizeIncremental,
   type SpellSourceFile
@@ -14,16 +15,20 @@ import {
  * each tag line reads as its code-spell twin (`SP.SpellxTwin`), so a `.spellx` file compiles to EXACTLY what its
  * twin `.spell` file does.
  * - The pairs are in `spellx/`:  each `X.spellx` beside the `X.spell` it means.
- *   - `Card`:  o1's playing card, its drawings in `ui-*` markup until P7, and no `pass event` (P9).
+ *   - `Card`:  o1's playing card, its drawings naming components bare (`<text>`, P7), and no `pass event` (P9).
  *   - `FlipTile`:  an event, an action's details, a drawing's if-chain placing parts.
  *   - `Deck`:  a template with nothing inside, a list template, bodies on a tag's own line.
  *   - `Scores`:  a page template, an app, a test.
  *   - `DoubleSidedView`:  o1's two sided view, renamed:  two sided view is spell's own template now (J35).
  *   - `Solitaire`:  o1's app, page template and page, without what later phases build (its menus, P10;
- *     the original target, P9;  bare component names and `<for each>` in a drawing, P7).
+ *     the original target, P9;  `<for each>` in a drawing, C28).
+ * - A spellx drawing names components bare, `<text>`;  its twin, `<ui-text>`:  the tests' pack says which
+ *   (`registerTestComponentPack()`;  spell-app registers Spell UI's).
  *   - `Carta.es`, `Ficha.es`:  Spanish, the card and a tile with an app.
  */
 describe("spellx:  a third style of spell", () => {
+  beforeAll(registerTestComponentPack)
+
   test.each(["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"])(
     "%s.spellx compiles as its twin, %s.spell, does",
     (name) => {
@@ -97,6 +102,92 @@ describe("spellx:  a third style of spell", () => {
         summarize(parseSpellProject([{ path: "/Card.spellx", contents }]))
       )
     }
+  })
+
+  // epic `elemental-spell` P7
+  describe("a drawing names its components bare", () => {
+    test("a pack's component:  <button> is <ui-button>, and </> closes it", () => {
+      const { code, errors } = compiledText([
+        '<spell-view "card">',
+        "\t<draw>",
+        "\t\t<button>Go</>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain('h("ui-button", "Go")')
+    })
+
+    test("in Spanish, with or without its accent:  <botón> is <es-boton>", () => {
+      const spanish = ['<encanto-vista "carta">', "\t<dibujar>", "\t\t<botón>Ir</>", "\t</dibujar>", "</encanto-vista>"]
+      const { code, errors } = compiledText(spanish, { path: "/test.es.spellx" })
+      expect(errors).toEqual([])
+      expect(code).toContain('h("es-boton", "Ir")')
+    })
+
+    test("one of the project's own views first:  <card> is the card's own element", () => {
+      const lines = [
+        '<spell-view "card" />',
+        '<spell-view "table">',
+        "\t<draw>",
+        "\t\t<card />",
+        "\t</draw>",
+        "</spell-view>"
+      ]
+      const { code, errors } = compiledText(lines)
+      expect(errors).toEqual([])
+      expect(code).toMatch(/h\("[a-z-]+-card"\)/)
+    })
+
+    test("a name no pack has is an error naming the packs searched;  no native HTML (<div>)", () => {
+      const { errors } = compiledText([
+        '<spell-view "card">',
+        "\t<draw>",
+        "\t\t<div>Go</div>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(errors).toEqual([
+        "3:2 <div> isn't a component any pack here has (searched:  spell-ui):  check its name, or add its pack to the project's packs"
+      ])
+    })
+
+    test("a closer for another element is an error on its line", () => {
+      const { errors } = compiledText([
+        '<spell-view "card">',
+        "\t<draw>",
+        "\t\t<text>hi</image>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(errors).toEqual(['3:10 Don\'t understand "</image>"'])
+    })
+
+    test("a control inside an element says to write it on a line of its own (C29)", () => {
+      const lines = [
+        '<spell-view "card">',
+        "\t<draw>",
+        "\t\t<segment>",
+        "\t\t\t<if it is a card>",
+        "\t\t\t\t<text>a</>",
+        "\t\t\t</>",
+        "\t\t</segment>",
+        "\t</draw>",
+        "</spell-view>"
+      ]
+      const { errors } = compiledText(lines)
+      expect(errors).toEqual([
+        "4:3 <if ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element"
+      ])
+    })
+
+    test("code spell keeps its tags as written:  <div> is the web's", () => {
+      const { code, errors } = compiledText(['a "card" is a view where:', "\t- to draw it:", "\t\t<div>Go</div>"], {
+        path: "/test.spell"
+      })
+      expect(errors).toEqual([])
+      expect(code).toContain('h("div", "Go")')
+    })
   })
 
   describe("a mistake is an error on its own line", () => {

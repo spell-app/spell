@@ -53,10 +53,10 @@
 
 	<dibujar "frente">
 		<comentario>Una línea de texto, del tamaño del texto de alrededor:  su pila la escala para que quepa.</>
-		<es-texto part="cara" color={su color}>{su rango} {su símbolo}</es-texto>
+		<texto part="cara" color={su color}>{su rango} {su símbolo}</texto>
 	</dibujar>
 	<dibujar "dorso">
-		<es-imagen part="dorso" src="dorso.svg" alt="el dorso de una carta" />
+		<imagen part="dorso" src="dorso.svg" alt="el dorso de una carta" />
 	</dibujar>
 
 	<probar "preparación de la carta">

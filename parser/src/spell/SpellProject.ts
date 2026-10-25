@@ -409,7 +409,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   getScope(parentScope: P.Scope = SP.Language.rootScopeFor(this.languages)): P.ProjectScope {
     // Make a parser that depends on the parentScope's parser
     // This way rules added to the project won't leak out.
-    const parser = parentScope.parser!.clone({ module: this.path })
+    const parser = parentScope.parser!.clone({
+      module: this.path,
+      ...(this.contents?.packs ? { packs: this.contents.packs } : {})
+    } as P.ParserProps)
     return new P.ProjectScope({
       name: this.projectName,
       path: this.path,
