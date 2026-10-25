@@ -90,6 +90,16 @@ export type PageChange = { path: string; html: string; etag?: string; reload: ()
 export type FileChange = { path: string }
 
 /**
+ * `detail` of `spell-server:scripts`, the CANCELABLE event `liveClient()` fires on `window` before a hot reload:
+ * the scripts the page loaded that changed (`liveAction()`), once they've been quiet half a second.
+ * - `paths`:  their URL paths, as `FileChange`'s
+ * - a page that runs the new code of EVERY one itself calls `preventDefault()`:  no reload
+ *   - e.g. a rebuilt component pack, swapped in place (Spell UI's `PackHotSwap`, epic `epic-engine` I116)
+ * - not fired when the server restarted:  that always reloads
+ */
+export type ScriptsChange = { paths: string[] }
+
+/**
  * One save of a whole file (`PUT /api/pages`), or of one element of a page (`fragment`:  its `id`, `PATCH`).
  * - `path`:  URL path of the file, e.g. `/guides/notes.md`
  * - `etag`:  the version it was edited from (the `ETag` it was fetched with);  REQUIRED by the server
@@ -118,6 +128,8 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  * - a stylesheet the page uses (linked, or `@import`ed by one it links) changed:  swapped in place, no reload
  * - a script the page loaded, or one beside it, changed (`liveAction()`):  HOT RELOAD, so the page runs the new code
  *   - e.g. a merge rebuilt `spell-ui.js` and its lazy chunks, or `epics.pack.js`
+ *   - first OFFERED to the page (`spell-server:scripts`, `ScriptsChange`):  a page that runs every changed script's
+ *     new code itself takes it, and doesn't reload (a rebuilt component pack swapped in place, epic `epic-engine` I116)
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
  *   - ONE reload, half a second after the last change (a build writes many files), through `reloadGate()`
@@ -185,7 +197,11 @@ export function liveClient(): void {
   const fetched = new Set<string>()
   // the small "Updated" pill, while a hot reload waits for the reader to finish typing
   let pill: HTMLButtonElement | undefined
-  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload, waiting: showPill })
+  // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
+  const changedScripts = new Set<string>()
+  // the server restarted since:  the page reloads whatever it takes, for the new client and write token
+  let restarted = false
+  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload, waiting: showPill })
 
   restoreScroll()
   watchFetches()
@@ -266,8 +282,10 @@ export function liveClient(): void {
     const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded() })
     if (action === "page") updating = updating.then(updatePage).catch(reload)
     else if (action === "style") swapStyles(path)
-    else if (action === "script") gate.request()
-    else if (action === "file")
+    else if (action === "script") {
+      changedScripts.add(path)
+      gate.request()
+    } else if (action === "file")
       dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path } satisfies FileChange }))
   }
 
@@ -291,7 +309,10 @@ export function liveClient(): void {
       const { event, data } = JSON.parse(message.data) as { event: string; data: { path?: string; run?: string } }
       if (event === "change" && data.path) onChange(data.path)
       // a server run other than the one that served the page:  it restarted, maybe on new code
-      if (event === "hello" && config!.run && data.run && data.run !== config!.run) gate.request()
+      if (event === "hello" && config!.run && data.run && data.run !== config!.run) {
+        restarted = true
+        gate.request()
+      }
     })
     socket.addEventListener("close", () => {
       const retry = opened ? 500 : wait
@@ -315,6 +336,24 @@ export function liveClient(): void {
   }
 
   /** reload, keeping the scroll position */
+  /**
+   * The scripts changed (or the server restarted):  offer the changed scripts to the page first
+   * (`spell-server:scripts`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
+   * itself, else it reloads.
+   * - a server restart always reloads:  the page needs the new client and write token
+   */
+  function hotReload() {
+    const paths = [...changedScripts]
+    changedScripts.clear()
+    const offer = new CustomEvent("spell-server:scripts", {
+      cancelable: true,
+      detail: { paths } satisfies ScriptsChange
+    })
+    if (!restarted && paths.length && !dispatchEvent(offer)) return
+    restarted = false
+    reload()
+  }
+
   function reload() {
     try {
       sessionStorage.setItem(scrollKey, JSON.stringify({ path: location.pathname, y: scrollY }))

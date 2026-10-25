@@ -98,7 +98,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     }
     // capture on the DOM element itself, so a disabled element swallows clicks before page listeners on it run
     this.addEventListener("click", (event) => this.swallowClickWhileDisabled(event), { capture: true })
-    if (import.meta.hot) DOMElement.hotReloadHooks?.created(this)
+    DOMElement.hotReloadHooks?.created(this)
   }
 
   ////////////////
@@ -249,7 +249,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   private storeValue(attribute: E.ResolvedAttribute, value: unknown, source: ValueSource) {
     const old = this.attributeValues[attribute.key]
     this.attributeValues[attribute.key] = value
-    if (import.meta.hot) DOMElement.hotReloadHooks?.valueSet(this, attribute.key, source)
+    DOMElement.hotReloadHooks?.valueSet(this, attribute.key, source)
     for (const callback of this.connectedState.propertyChangedCallbacks.slice()) {
       callback(attribute.key, value, old, source)
     }
@@ -697,9 +697,12 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   ////////////////
 
   /**
-   * Development only:  what every DOM element tells hot reload (`HotDefinitions` installs it):
-   * that it was made, and where each attribute value came from.
-   * - Every call is under `import.meta.hot`, so a build drops them.
+   * What every DOM element tells hot reload (`HotDefinitions` installs it):  that it was made, and where each
+   * attribute value came from.
+   * - In `yarn dev`, and on a page that swaps in a rebuilt component pack (Spell UI's `PackHotSwap`, epic
+   *   `epic-engine` I116);  none on any other page, so each call is one property read.
+   * - Until I116 every call was under `import.meta.hot`, so a build dropped them:  a page's elements were never
+   *   tracked, and a swapped pack's elements never re-rendered.
    */
   static hotReloadHooks?: DOMElementHotHooks
 }
