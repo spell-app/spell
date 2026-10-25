@@ -1,0 +1,27 @@
+<!-- `<ui-stack>`:  a column, a row, a row that wraps, one thing left and one right. -->
+<div class="ui-stack">
+  <section>
+    <h4>Stack</h4>
+    <ui-stack>
+      <ui-segment>First</ui-segment>
+      <ui-segment>Second</ui-segment>
+      <ui-segment>Third</ui-segment>
+    </ui-stack>
+  </section>
+  <section>
+    <h4>Horizontal, wrapping</h4>
+    <ui-stack direction="horizontal" wrap spacing="sm">
+      <ui-label>Design</ui-label>
+      <ui-label>Engineering</ui-label>
+      <ui-label>Research</ui-label>
+      <ui-label>Writing</ui-label>
+    </ui-stack>
+  </section>
+  <section>
+    <h4>One left, one right</h4>
+    <ui-stack direction="horizontal" justify="between">
+      <ui-header level="4">Inbox</ui-header>
+      <ui-button color="primary">New message</ui-button>
+    </ui-stack>
+  </section>
+</div>

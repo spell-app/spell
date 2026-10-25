@@ -6,6 +6,8 @@ import { E } from "spell-ui/core"
 // (SIDE EFFECT:  defines `<ui-panel>`, and `<ui-section>` / `<ui-sections>`:  a group is a panel's band)
 import { UIPanel } from "spell-ui/components/ui-panel"
 import type { SectionVocabulary } from "spell-ui/components/ui-section/UISection.types"
+// Import directly to avoid circular import:  the DOM element class below extends it
+import { DOMSectionElement } from "spell-ui/components/ui-section/UISection"
 import { propertyGroupVocabulary } from "./UIPropertyGroup.en"
 
 import groupCSS from "./UIPropertyGroup.css?inline"
@@ -15,7 +17,7 @@ import groupCSS from "./UIPropertyGroup.css?inline"
  * The DOM element of `<ui-property-group>`:  a section's, plus what its editor tells it.
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
-export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
+export class DOMPropertyGroupElement extends DOMSectionElement {
   /** A property in it (`identifier`) failed validation, or passed again:  `:state(error)` follows. */
   markFieldFailed(identifier: string, isFailed: boolean) {
     ;(this.component as UIPropertyGroup | undefined)?.markFieldFailed(identifier, isFailed)

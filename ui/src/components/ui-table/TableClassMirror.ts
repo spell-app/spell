@@ -2,7 +2,8 @@ import { UIT } from "spell-ui/core"
 
 /****************
  * ### `TableClassMirror`
- * Writes an element's Fomantic class string (`ui celled striped table`) onto a LIGHT-DOM `<table>`,
+ * Writes an element's Fomantic class string (`ui celled striped table`) onto a LIGHT-DOM `<table>`
+ * (or, for a table of `<ui-row>`s, onto the `<ui-table>` itself),
  * so `UITable.css`'s class-grammar rules style it.
  * - Owns only its words:  the author's other classes stay, in their order.
  *   The element's phrase follows them as one run in grammar order,
@@ -16,7 +17,7 @@ import { UIT } from "spell-ui/core"
  ****************/
 export class TableClassMirror {
   /** Table mirrored onto, if any. */
-  private table: HTMLTableElement | undefined
+  private table: Element | undefined
 
   /** Class string to mirror. */
   private classes = ""
@@ -31,7 +32,7 @@ export class TableClassMirror {
    * Mirror `classes` onto `table`, switching tables when it changed;  `undefined` lets go.
    * - SIDE EFFECT:  writes `table`'s `class` attribute (only when the text changes).
    */
-  apply(table: HTMLTableElement | undefined, classes: string) {
+  apply(table: Element | undefined, classes: string) {
     this.classes = classes
     if (table !== this.table) {
       this.detach()

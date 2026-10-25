@@ -6,6 +6,7 @@ import { E, UI, UIT } from "spell-ui/core"
 import { tableVocabulary } from "./UITable.en"
 import { TableClassMirror } from "./TableClassMirror"
 import { ATTACH, TableGrammar } from "./TableGrammar"
+import { TableRows } from "./TableRows"
 import { TableSort } from "./TableSort"
 
 import tableCSS from "./UITable.css?inline"
@@ -61,6 +62,17 @@ import tableCSS from "./UITable.css?inline"
  *
  * - NOTE: `sort-column` counts `colspan`s but not `rowspan`s (see `TableSort`).
  *
+ * - Rows mode (epic `ui-gaps` P7):  `<ui-row>`s of `<ui-cell>`s, with no native table, for a drawing,
+ *   which holds no native HTML.
+ *   - The DOM element is then the table box:  the class mirror writes its class words onto the DOM element itself,
+ *     so the same class-grammar page rules style it ("Rows and cells" in `UITable.css`).
+ *   - The scroller is a CSS grid of `--_table-columns` columns (`TableRows.columnCount()`), each row a subgrid.
+ *   - ARIA `table`, its rows `row`, its cells `cell` / `columnheader` / `rowheader`, named by its `caption`.
+ *   - Sorting works the same (`TableRows`):  header cells sort, and `client-sort` moves the row elements.
+ *   - NOTE: not in a static server render, which draws a rows-mode table unstyled.
+ *
+ * - `caption`:  drawn above the scroller (attribute, or the `caption` slot);  a native table's `<caption>` wins.
+ *
  * - Static server render (`spell-ui/static`):  no observers, effects or listeners.
  *   `decorateStatic()` writes the author table's classes, marker and `aria-sort` once,
  *   and data mode draws its table inside the scroller (the page's static style sheet styles it there).
@@ -94,7 +106,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     // and a throw in its compute (the classes) must reach the element's error boundary --
     // a plain effect's error is only logged
     createRenderEffect(
-      () => [this.managedTable, this.rootClass] as const,
+      () => [this.mirrorTarget, this.rootClass] as const,
       ([table, classes]) => this.classMirror.apply(table, classes)
     )
     return content
@@ -104,9 +116,15 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     this.registerPageSheets()
     return (
       <>
+        <Show when={this.hasOwnCaption}>
+          <div class={CAPTION} part={this.partForName("caption")}>
+            <slot name="caption">{this.caption}</slot>
+          </div>
+        </Show>
         <div
           ref={(box: HTMLDivElement) => (this.scroller = box)}
           class={[this.scrollerClasses, { [SIDEWAYS]: this.isTooWide }]}
+          style={this.isInRowsMode ? { [COLUMNS_TOKEN]: String(this.columnCount) } : undefined}
           part={this.partForName("scroller")}
           tabindex={this.isScrollRegion ? 0 : undefined}
           role={this.isScrollRegion ? "region" : undefined}
@@ -165,6 +183,16 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return this.authorTable ?? (this.isInDataMode ? this.dataTable : undefined)
   }
 
+  /** Where the class words go:  the managed table, else (rows mode) the DOM element itself. */
+  get mirrorTarget(): Element | undefined {
+    return this.managedTable ?? (this.isInRowsMode ? this.domElement : undefined)
+  }
+
+  /** What's sorted, and watched for changes:  the managed table, else (rows mode) the DOM element and its rows. */
+  get sortTarget(): Element | undefined {
+    return this.mirrorTarget
+  }
+
   /** Mirrors `rootClass` onto `managedTable`. */
   private readonly classMirror = new TableClassMirror()
 
@@ -184,12 +212,14 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * and bump `tableRevision` when it changes.
    * - Returns the cleanup (run when the table changes).
    */
-  @E.onChange("managedTable")
-  protected onManagedTableChanged(table: HTMLTableElement | undefined): (() => void) | undefined {
+  @E.onChange("sortTarget")
+  protected onManagedTableChanged(table: Element | undefined): (() => void) | undefined {
     if (!table) return undefined
     // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the managed TABLE, swapped with it
     const observer = new MutationObserver(() => this.tableRevision++)
-    observer.observe(table, { childList: true, subtree: true, characterData: true, attributeFilter: ["aria-label"] })
+    // rows mode:  the rows' `header` / `footer` and the cells' `span` move columns and headers too
+    const attributeFilter = this.isInRowsMode ? ["aria-label", ...ROW_ATTRIBUTES] : ["aria-label"]
+    observer.observe(table, { childList: true, subtree: true, characterData: true, attributeFilter })
     return () => observer.disconnect()
   }
 
@@ -211,6 +241,65 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     const direction = this.effectiveSortDirection
     if (!this.sortable || column === undefined || !direction) return
     TableSort.staticHeaderAt(table, column)?.setAttribute("aria-sort", direction)
+  }
+
+  ////////////////
+  // ## Rows mode
+  ////////////////
+
+  /** The DOM element's `<ui-row>` children;  follows them. */
+  @E.watches({ childList: true, equals: E.isSameList })
+  get rowElements(): readonly Element[] {
+    return TableRows.rows(this.domElement)
+  }
+
+  /** Rows mode:  `<ui-row>`s, and neither an author table nor data mode. */
+  @E.cssState("rows")
+  get isInRowsMode(): boolean {
+    return this.rowElements.length > 0 && !this.authorTable && this.dataRows === undefined
+  }
+
+  /** Columns of the rows-mode grid;  follows the rows and their cells' `span`s (`tableRevision`). */
+  get columnCount(): number {
+    void this.tableRevision
+    return TableRows.columnCount(this.domElement)
+  }
+
+  /** ARIA:  `table` in rows mode (a native table is its own). */
+  @E.aria("role")
+  get ariaRole(): string | undefined {
+    return this.isInRowsMode ? "table" : undefined
+  }
+
+  /** ARIA name in rows mode:  the `caption` text, unless the DOM element has an `aria-label`. */
+  @E.aria("label")
+  get ariaName(): string | undefined {
+    return this.isInRowsMode ? this.caption || undefined : undefined
+  }
+
+  ////////////////
+  // ## Caption
+  ////////////////
+
+  /** Draws its own caption:  `caption` or the slot, and no native `<caption>` of the managed table's. */
+  @E.cssState("captioned")
+  get hasOwnCaption(): boolean {
+    void this.tableRevision
+    if (this.managedTable?.caption) return false
+    return !!this.caption || this.slots.hasContent(this.slotForName("caption"))
+  }
+
+  /** Which named slots have content (the `caption` slot). */
+  readonly slots = new E.SlotContent(this.domElement)
+
+  /** Name the native managed table by `caption`, while it has no name of its own:  the one this element set. */
+  @E.onChange("managedTable", "caption", { writesDOMElement: true })
+  protected onCaptionChanged(table: HTMLTableElement | undefined, caption: string | undefined) {
+    if (!table || !caption || table.caption || table.hasAttribute("aria-label")) return undefined
+    table.setAttribute("aria-label", caption)
+    return () => {
+      if (table.getAttribute("aria-label") === caption) table.removeAttribute("aria-label")
+    }
   }
 
   ////////////////
@@ -346,16 +435,16 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   }
 
   /** Headers this element made focusable (`tabindex="0"`). */
-  private readonly headersMadeFocusable = new Set<HTMLTableCellElement>()
+  private readonly headersMadeFocusable = new Set<Element>()
 
   /** Header this element set `aria-sort` on. */
-  private sortedHeader: HTMLTableCellElement | undefined
+  private sortedHeader: Element | undefined
 
   /** The table, its content, `sortable` or the sort changed:  decorate the headers again. */
-  @E.onChange("tableRevision", "managedTable", "sortable", "sortColumn", "effectiveSortDirection")
+  @E.onChange("tableRevision", "sortTarget", "sortable", "sortColumn", "effectiveSortDirection")
   protected onSortChanged(
     _revision: number,
-    table: HTMLTableElement | undefined,
+    table: Element | undefined,
     isSortable: boolean,
     column: number | undefined,
     direction: UIT.TableSortDirection | undefined
@@ -370,7 +459,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * - the sorted column's header gets `aria-sort`;  every other header in the `thead` loses it
    */
   private decorateHeaders({ table, isSortable, column, direction }: HeaderSort) {
-    const headers = table && isSortable ? TableSort.headers(table) : []
+    const headers = table && isSortable ? this.headersOf(table) : []
     const focusable = new Set(
       headers.filter((header) => TableSort.isSortable(header) && !header.querySelector("button"))
     )
@@ -385,7 +474,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
       header.setAttribute("tabindex", "0")
       this.headersMadeFocusable.add(header)
     }
-    const sorted = table && isSortable && column !== undefined ? TableSort.headerAt(table, column) : undefined
+    const sorted = table && isSortable && column !== undefined ? this.headerAt(table, column) : undefined
     if (this.sortedHeader && this.sortedHeader !== sorted) this.sortedHeader.removeAttribute("aria-sort")
     for (const header of headers) if (header !== sorted) header.removeAttribute("aria-sort")
     if (sorted && direction) sorted.setAttribute("aria-sort", direction)
@@ -393,14 +482,27 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   }
 
   /** `client-sort`:  reorder the author table's `tbody` rows by the sorted column's cell text. */
-  @E.onChange("authorTable", "clientSort", "sortColumn", "effectiveSortDirection")
+  @E.onChange("authorTable", "isInRowsMode", "clientSort", "sortColumn", "effectiveSortDirection")
   protected onClientSortChanged(
     table: HTMLTableElement | undefined,
+    isInRowsMode: boolean,
     clientSort: boolean,
     column: number | undefined,
     direction: UIT.TableSortDirection | undefined
   ) {
-    if (table && clientSort && column !== undefined && direction) TableSort.sortRows(table, column, direction)
+    if (!clientSort || column === undefined || !direction) return
+    if (table) TableSort.sortRows(table, column, direction)
+    else if (isInRowsMode) TableRows.sortRows(this.domElement, column, direction, TableSort.compare)
+  }
+
+  /** Header cells of `table`:  a native table's `thead` headers, or the header rows' cells. */
+  private headersOf(table: Element): Element[] {
+    return table instanceof HTMLTableElement ? TableSort.headers(table) : TableRows.headers(table)
+  }
+
+  /** The header for `column`, either kind of table. */
+  private headerAt(table: Element, column: number): Element | undefined {
+    return table instanceof HTMLTableElement ? TableSort.headerAt(table, column) : TableRows.headerAt(table, column)
   }
 
   /** A click on (or inside) a sortable header sorts by it. */
@@ -422,10 +524,11 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
 
   /** The sortable header `event` happened in, while the table is `sortable`. */
   @E.untracked
-  private sortableHeader(event: Event): HTMLTableCellElement | undefined {
-    const table = this.managedTable
+  private sortableHeader(event: Event): Element | undefined {
+    const table = this.sortTarget
     if (!table || !this.sortable) return undefined
-    const header = TableSort.header(table, event.target)
+    const header =
+      table instanceof HTMLTableElement ? TableSort.header(table, event.target) : TableRows.header(table, event.target)
     return header && TableSort.isSortable(header) ? header : undefined
   }
 
@@ -435,8 +538,8 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * - Nothing changes when the event is cancelled, or when a handler set either property itself.
    */
   @E.untracked
-  private requestSort(header: HTMLTableCellElement, originalEvent: Event) {
-    const column = TableSort.column(header)
+  private requestSort(header: Element, originalEvent: Event) {
+    const column = header instanceof HTMLTableCellElement ? TableSort.column(header) : TableRows.column(header)
     const current = this.sortColumn
     const direction: UIT.TableSortDirection =
       column === current && this.effectiveSortDirection === "ascending" ? "descending" : "ascending"
@@ -544,8 +647,8 @@ export interface UITable extends E.AttributeValues<typeof tableVocabulary> {}
 
 /** What `decorateHeaders()` decorates for. */
 type HeaderSort = {
-  /** the managed table, if any */
-  table: HTMLTableElement | undefined
+  /** the managed table (or, in rows mode, the DOM element), if any */
+  table: Element | undefined
   /** `sortable` */
   isSortable: boolean
   /** sorted column, if any */
@@ -562,3 +665,12 @@ const STACK_BY_CLASS = "stack-by-"
 
 /** The scroller's class while the table is too wide for it (`isTooWide`):  `UITable.css` scrolls it sideways. */
 const SIDEWAYS = "sideways"
+
+/** The caption box's class. */
+const CAPTION = "caption"
+
+/** The rows-mode grid's column count, on the scroller. */
+const COLUMNS_TOKEN = "--_table-columns"
+
+/** Rows-mode attributes that move columns or headers:  a row's `header` / `footer`, a cell's `span`. */
+const ROW_ATTRIBUTES = ["header", "footer", "span"]

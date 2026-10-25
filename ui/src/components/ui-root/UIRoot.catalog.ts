@@ -247,6 +247,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted"
     ]
   },
+  "ui-cell": { folder: "ui-table", attributes: ["header", "span", "align", "vertical-align"] },
   "ui-checkbox": {
     folder: "ui-checkbox",
     skeleton: { display: "inline", width: "6em", height: "1.25em" },
@@ -1029,6 +1030,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "badge",
       "description",
       "collapsible",
+      "open",
       "collapsed",
       "fold-icon",
       "sticky",
@@ -1175,6 +1177,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "badge",
       "description",
       "collapsible",
+      "open",
       "collapsed",
       "fold-icon",
       "sticky",
@@ -1216,6 +1219,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "badge",
       "description",
       "collapsible",
+      "open",
       "collapsed",
       "fold-icon",
       "sticky",
@@ -1316,6 +1320,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-row": {
     folder: "ui-grid",
     attributes: [
+      "header",
+      "footer",
       "color",
       "columns",
       "equal-width",
@@ -1385,6 +1391,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "badge",
       "description",
       "collapsible",
+      "open",
       "collapsed",
       "fold-icon",
       "sticky",
@@ -1531,6 +1538,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-stack": { folder: "ui-stack", attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid"] },
   "ui-statistic": {
     folder: "ui-statistic",
     skeleton: { display: "inline", width: "6em", height: "4em" },
@@ -1645,6 +1653,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "sort-direction",
       "client-sort",
       "column-defs",
+      "caption",
       "rows"
     ]
   },

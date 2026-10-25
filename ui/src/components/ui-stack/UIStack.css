@@ -1,0 +1,19 @@
+/*
+ * The style sheet of `<ui-stack>`:  a flex box, its children the items, with no look of its own.
+ * - The shadow root is a bare slot, so the children are the DOM element's flex items.
+ * - What its attributes set (direction, wrap, spacing, align, justify, fluid) is a `:host` rule the component
+ *   writes for each element (`UIStack.hostLayout`):  this sheet is the default, a column 1em apart.
+ * - Its children's own block margins are dropped, as `.ui-stack`'s are:  the stack's spacing is the space.
+ */
+
+@layer ui.components.stack.types {
+  :host {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-m);
+    min-inline-size: 0;
+  }
+  ::slotted(:where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, blockquote, figure, pre)) {
+    margin-block: 0;
+  }
+}

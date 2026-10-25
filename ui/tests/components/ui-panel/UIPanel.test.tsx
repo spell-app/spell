@@ -208,7 +208,7 @@ describe("<ui-panel> spacing", () => {
   it("closes the box with a folded LAST sub-panel's band:  no padding left under it", async () => {
     const host = await ElementFixture.render(`<ui-panel label="Color Set">
       <p>name</p>
-      <ui-panel label="Presets" collapsible collapsed><p>chips</p></ui-panel>
+      <ui-panel label="Presets" collapsible open="false"><p>chips</p></ui-panel>
     </ui-panel>`)
     await ElementFixture.settle()
     const inner = host.querySelector("ui-panel")!
@@ -221,7 +221,7 @@ describe("<ui-panel> spacing", () => {
   it("puts each sub-panel band 20px under what's above it, flush under a folded band;  padding in px", async () => {
     const host = await ElementFixture.render(`<ui-panel label="Theme" style="--ui-font-size: 16px">
       <p style="margin: 0">name</p>
-      <ui-panel label="Color" collapsible collapsed><p>chips</p></ui-panel>
+      <ui-panel label="Color" collapsible open="false"><p>chips</p></ui-panel>
       <ui-panel label="Type" collapsible><p style="margin: 0">fonts</p></ui-panel>
       <ui-panel label="Shape" collapsible><p>corners</p></ui-panel>
     </ui-panel>`)

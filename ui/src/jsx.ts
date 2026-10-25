@@ -4194,6 +4194,218 @@ export interface UICardsAttributes {
 export interface UICardsJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UICardsAttributes>, UICardsAttributes {}
 
+/** `<ui-cell>`'s own attributes, from its vocabulary. */
+export interface UICellAttributes {
+  /**
+   * A header cell:  in a `header` row it names its column;  in a body row, its row (the first cell, say).
+   * - takes:  flag (present / absent)
+   */
+  header?: boolean | ""
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
+  "prop:header"?: boolean | ""
+  /**
+   * How many columns it covers;  default 1.  Cells never span rows.
+   * - takes:  number
+   */
+  span?: number | `${number}`
+  /**
+   * `span`, as the DOM element's property.
+   * @deprecated write `span` -- `prop:` stays only for compiled spell
+   */
+  "prop:span"?: number | `${number}`
+  /**
+   * Aligns its text:  `left`, `center`, `right` or `justified`.
+   * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "left" | "center" | "right" | "justified"
+  /**
+   * Aligns its content to the `top`, `middle` or `bottom` of the row.
+   * - takes:  `top` · `middle` · `bottom`
+   */
+  "vertical-align"?: "top" | "middle" | "bottom"
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-cell>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UICellJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UICellAttributes>, UICellAttributes {}
+
 /** `<ui-checkbox>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UICheckboxEventMap {
   /**
@@ -18473,7 +18685,7 @@ export interface UIPanelEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -18484,7 +18696,7 @@ export interface UIPanelEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -18593,15 +18805,20 @@ export interface UIPanelAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
@@ -18994,7 +19211,7 @@ export interface UIPanelAttributes {
    */
   "on-ui-opening"?: (event: UIPanelEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPanelEventMap["ui-opened"]) => void
@@ -19005,7 +19222,7 @@ export interface UIPanelAttributes {
    */
   "on-ui-closing"?: (event: UIPanelEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPanelEventMap["ui-closed"]) => void
@@ -21246,7 +21463,7 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -21257,7 +21474,7 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -21576,15 +21793,20 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -21971,7 +22193,7 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-opening"?: (event: UIPropertyEditorEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyEditorEventMap["ui-opened"]) => void
@@ -21982,7 +22204,7 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-closing"?: (event: UIPropertyEditorEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyEditorEventMap["ui-closed"]) => void
@@ -22024,7 +22246,7 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -22035,7 +22257,7 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -22193,15 +22415,20 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -22580,7 +22807,7 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-opening"?: (event: UIPropertyGroupEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyGroupEventMap["ui-opened"]) => void
@@ -22591,7 +22818,7 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-closing"?: (event: UIPropertyGroupEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyGroupEventMap["ui-closed"]) => void
@@ -24641,6 +24868,26 @@ export interface UIRootJSXAttributes
 /** `<ui-row>`'s own attributes, from its vocabulary. */
 export interface UIRowAttributes {
   /**
+   * In a table:  the header row, its cells the column headers.
+   * - takes:  flag (present / absent)
+   */
+  header?: boolean | ""
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
+  "prop:header"?: boolean | ""
+  /**
+   * In a table:  a footer row, under the body (totals, notes).
+   * - takes:  flag (present / absent)
+   */
+  footer?: boolean | ""
+  /**
+   * `footer`, as the DOM element's property.
+   * @deprecated write `footer` -- `prop:` stays only for compiled spell
+   */
+  "prop:footer"?: boolean | ""
+  /**
    * Fills the row with a hue, contrast text on top.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
@@ -25548,7 +25795,7 @@ export interface UISectionEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -25559,7 +25806,7 @@ export interface UISectionEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -25668,15 +25915,20 @@ export interface UISectionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -26069,7 +26321,7 @@ export interface UISectionAttributes {
    */
   "on-ui-opening"?: (event: UISectionEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UISectionEventMap["ui-opened"]) => void
@@ -26080,7 +26332,7 @@ export interface UISectionAttributes {
    */
   "on-ui-closing"?: (event: UISectionEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UISectionEventMap["ui-closed"]) => void
@@ -28463,6 +28715,240 @@ export interface UISliderAttributes {
 export interface UISliderJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UISliderEventMap>>, keyof UISliderAttributes>, UISliderAttributes {}
 
+/** `<ui-stack>`'s own attributes, from its vocabulary. */
+export interface UIStackAttributes {
+  /**
+   * `vertical`, a column (the default), or `horizontal`, a row.
+   * - takes:  `vertical` · `horizontal`
+   * - default:  `vertical`
+   */
+  direction?: "vertical" | "horizontal"
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "vertical" | "horizontal"
+  /**
+   * A row wraps onto the next line when its children don't fit (Web Awesome's cluster).
+   * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrap"?: boolean | ""
+  /**
+   * The space between children:  `none` to `xl`;  `md` (1em) by default.
+   * - takes:  `none` · `xs` · `sm` · `md` · `lg` · `xl`
+   * - default:  `md`
+   */
+  spacing?: "none" | "xs" | "sm" | "md" | "lg" | "xl"
+  /**
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "none" | "xs" | "sm" | "md" | "lg" | "xl"
+  /**
+   * Lines children up ACROSS the stack:  a column's left edges, centres or right edges;  a row's tops, middles, bottoms or text baselines.  By default a column stretches them, a row centres them.
+   * - takes:  `start` · `center` · `end` · `stretch` · `baseline`
+   */
+  align?: "start" | "center" | "end" | "stretch" | "baseline"
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "start" | "center" | "end" | "stretch" | "baseline"
+  /**
+   * Places children ALONG the stack:  packed at its `start`, `center` or `end`, or spread out (`between`:  the first and last at the ends, `around`:  equal space around each).  `<ui-stack direction="horizontal" justify="between">` puts one thing left and one right.
+   * - takes:  `start` · `center` · `end` · `between` · `around`
+   */
+  justify?: "start" | "center" | "end" | "between" | "around"
+  /**
+   * `justify`, as the DOM element's property.
+   * @deprecated write `justify` -- `prop:` stays only for compiled spell
+   */
+  "prop:justify"?: "start" | "center" | "end" | "between" | "around"
+  /**
+   * Takes the full width of its container.
+   * - takes:  flag (present / absent)
+   */
+  fluid?: boolean | ""
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
+  "prop:fluid"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-stack>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIStackJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIStackAttributes>, UIStackAttributes {}
+
 /** `<ui-statistic>`'s own attributes, from its vocabulary. */
 export interface UIStatisticAttributes {
   /**
@@ -30744,6 +31230,16 @@ export interface UITableAttributes {
    * @deprecated write `columnDefs` -- `prop:` stays only for compiled spell
    */
   "prop:columnDefs"?: unknown
+  /**
+   * The table's title, drawn above it and naming it for screen readers.  The `caption` slot is its rich version;  a native table's own `<caption>` wins.
+   * - takes:  text
+   */
+  caption?: string
+  /**
+   * `caption`, as the DOM element's property.
+   * @deprecated write `caption` -- `prop:` stays only for compiled spell
+   */
+  "prop:caption"?: string
   /**
    * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -34361,6 +34857,13 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-cards": UICardsJSXAttributes
       /**
+       * `<ui-cell>`:  A cell holds one value of a table row;  a header cell names its column or row.
+       * - also known as:  table cell, td, th, header cell
+       * - slots:
+       *   - default:  The cell's content:  text, or any element.
+       */
+      "ui-cell": UICellJSXAttributes
+      /**
        * `<ui-checkbox>`:  A checkbox lets people choose a value from a small set of options, often on or off.
        * - also known as:  check box, toggle, switch, tick box
        * - slots:
@@ -34861,10 +35364,10 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-root": UIRootJSXAttributes
       /**
-       * `<ui-row>`:  A row is a horizontal grouping of columns.
-       * - also known as:  grid row
+       * `<ui-row>`:  A row is a horizontal grouping of columns;  in a table, of cells.
+       * - also known as:  grid row, table row, tr
        * - slots:
-       *   - default:  `<ui-column>`s.
+       *   - default:  `<ui-column>`s;  in a table, `<ui-cell>`s.
        */
       "ui-row": UIRowJSXAttributes
       /**
@@ -34948,6 +35451,13 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-slider": UISliderJSXAttributes
       /**
+       * `<ui-stack>`:  A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own.
+       * - also known as:  stack, cluster, flex box, row, column, hbox, vbox, spacer
+       * - slots:
+       *   - default:  What it lays out:  any elements.
+       */
+      "ui-stack": UIStackJSXAttributes
+      /**
        * `<ui-statistic>`:  A statistic emphasizes the current value of an attribute.
        * - also known as:  stat, kpi, metric, counter, number display
        * - slots:
@@ -35003,7 +35513,8 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-table>`:  A table displays a collection of data grouped into rows.
        * - also known as:  data table, data grid, grid, spreadsheet
        * - slots:
-       *   - default:  One native `<table>`.
+       *   - default:  One native `<table>`, or `<ui-row>`s of `<ui-cell>`s.
+       *   - `caption`:  The rich version of `caption`:  links, emphasis, an icon.
        * - events:  `ui-sorting`
        */
       "ui-table": UITableJSXAttributes
@@ -35166,6 +35677,7 @@ declare global {
     "ui-calendar": UIHTMLElement<UICalendarEventMap>
     "ui-card": HTMLElement
     "ui-cards": HTMLElement
+    "ui-cell": HTMLElement
     "ui-checkbox": UIHTMLElement<UICheckboxEventMap>
     "ui-code": UIHTMLElement<UICodeEventMap>
     "ui-column": HTMLElement
@@ -35242,6 +35754,7 @@ declare global {
     "ui-side": HTMLElement
     "ui-sidebar": UIHTMLElement<UISidebarEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
+    "ui-stack": HTMLElement
     "ui-statistic": HTMLElement
     "ui-statistics": HTMLElement
     "ui-step": HTMLElement

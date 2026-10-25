@@ -82,13 +82,13 @@
 
               <ui-section id="examples-types-collapsible" label="Collapsible" sticky collapsible dividing>
                 <ui-docs-example
-                  description="`collapsible` bands close and open when clicked;  `collapsed` starts one closed.  A closed LAST band closes the box, no gap under it."
+                  description="`collapsible` bands close and open when clicked;  `open=\"false\"` starts one closed.  A closed LAST band closes the box, no gap under it."
                 >
                   <ui-panel label="Color Set" collapsible style="max-width: 320px">
                     <ui-panel label="Tweak" collapsible>
                       <ui-slider min="0" max="200" step="20" value="100" aria-label="Vibrancy"></ui-slider>
                     </ui-panel>
-                    <ui-panel label="Presets" collapsible collapsed>
+                    <ui-panel label="Presets" collapsible open="false">
                       <p>Six preset chips.</p>
                     </ui-panel>
                   </ui-panel>
@@ -202,13 +202,13 @@
                 <script type="text/markdown">
                   A `<ui-panel>` is a [`<ui-section>`](ui-section.html) in an inspector's look, so it takes EVERY section
                   attribute, slot, part and event: `label`, `hint`, `icon`, `badge`, `description`, `level`, `collapsible`,
-                  `collapsed`, `fold-icon`, `sticky`, the `label`, `hint`, `icon`, `badge`, `actions` and `description`
+                  `open`, `fold-icon`, `sticky`, the `label`, `hint`, `icon`, `badge`, `actions` and `description`
                   slots, `ui-opening` / `ui-closing` and `ui-opened` / `ui-closed`. Its vocabulary is built on the section's, so an attribute the section
                   gains, the panel gains too.
 
                   - Put fields straight inside: inputs, sliders, checkboxes, `<ui-field>`s. They stack 8px apart.
                   - Nest a panel to start a sub-head band; its fields follow it.
-                  - `collapsed` is controlled: set it to close or open; cancel `ui-opening` / `ui-closing` to keep the
+                  - `open` is controlled: set it to close or open; cancel `ui-opening` / `ui-closing` to keep the
                     user's click from changing it.
                   - It needs no theme: under any theme it's a `primary`-tinted box. The brand pages' `spell-brand`
                     theme adds the `accent` hue (Polished Ivory) and the brand's shadow.
@@ -233,7 +233,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <ui-panel label="Theme" collapsible>
-                    <ui-panel label="Advanced" collapsible collapsed source="advanced.html"></ui-panel>
+                    <ui-panel label="Advanced" collapsible open="false" source="advanced.html"></ui-panel>
                   </ui-panel>
                 </script>
               </ui-code>

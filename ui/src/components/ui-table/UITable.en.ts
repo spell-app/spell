@@ -7,6 +7,8 @@
  *   `ui small celled very basic head stuck first stuck table`.
  * - Row / cell classes (`positive`, `red marked`, `collapsing`, `four wide` ...) are the author's,
  *   on native `tr` / `td` / `th`:  no attribute here.
+ * - Or ROWS AND CELLS as tags, with no native table:  `<ui-row>` and `<ui-cell>` (epic `ui-gaps` P7, for drawings,
+ *   which hold no native HTML).  The table then owns them (`ownsParts`), and the same class words style them.
  * - NOTE: `columns` is Fomantic's (and `<ui-grid>`'s) equal-width COUNT (`four column`);
  *   the data-mode column list is `column-defs` (`columnDefs`), so the two never collide.
  */
@@ -15,7 +17,8 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `tableVocabulary`
- * The names of `<ui-table>`, a native `<table>` (slotted, or rendered from `rows`) in Fomantic's table look.
+ * The names of `<ui-table>`, a native `<table>` (slotted, or rendered from `rows`) in Fomantic's table look,
+ * or its own `<ui-row>`s and `<ui-cell>`s.
  ****************/
 export const tableVocabulary = {
   tag: "ui-table",
@@ -222,6 +225,14 @@ export const tableVocabulary = {
         "row's keys."
     },
     {
+      name: "caption",
+      group: "content",
+      kind: "string",
+      description:
+        "The table's title, drawn above it and naming it for screen readers.  The `caption` slot is its rich " +
+        "version;  a native table's own `<caption>` wins."
+    },
+    {
       name: "rows",
       group: "content",
       kind: "json",
@@ -241,8 +252,15 @@ export const tableVocabulary = {
         "reordering)."
     }
   ],
-  slots: [{ name: "", description: "One native `<table>`." }],
+  slots: [
+    { name: "", description: "One native `<table>`, or `<ui-row>`s of `<ui-cell>`s." },
+    { name: "caption", description: "The rich version of `caption`:  links, emphasis, an icon." }
+  ],
   parts: [
+    {
+      name: "caption",
+      description: "The caption above the table (`caption`)."
+    },
     {
       name: "scroller",
       description:
@@ -251,6 +269,14 @@ export const tableVocabulary = {
     }
   ],
   states: [
+    {
+      name: "rows",
+      description: "Set while it holds `<ui-row>`s rather than a native table:  a CSS grid, its rows subgrids."
+    },
+    {
+      name: "captioned",
+      description: "Set while it draws its own caption (`caption`, or the `caption` slot)."
+    },
     {
       name: "attached",
       description: "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
@@ -267,5 +293,6 @@ export const tableVocabulary = {
       text: "Table",
       description: "Name of the scrolling region when the host has no `aria-label` and the table no `<caption>`."
     }
-  ]
+  ],
+  ownsParts: ["row", "cell"]
 } as const satisfies E.ComponentVocabulary
