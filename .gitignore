@@ -28,3 +28,6 @@ dist-types/
 
 # `spell publish`'s packed packages and their staging folders (epic repo-split P19):  never committed
 /dist-packs/
+
+# Claude Code's own worktrees (an agent's isolated copy):  never the kit's files
+/.claude/worktrees/

@@ -203,6 +203,12 @@ export type PropInfo = {
    * - A setter WARNS when a value breaks one (epic `property-editor` P9).
    */
   rules?: readonly PropRule[]
+  /**
+   * `true`:  the running app keeps its value for the next run, in the person's preferences (epic `prefs-and-undo` P8).
+   * - Spell's runtime reads and saves it (`spell-parser/core/remembered`):  nothing here does.
+   * - Compiled spell, once its syntax is settled:  `this.declareProp("theme", { oneOf: THEMES, remembered: true })`.
+   */
+  remembered?: boolean
 }
 
 ////////////////

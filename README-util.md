@@ -365,6 +365,8 @@ Python's runtime reads the same.
 - A drawn thing's element shows no attribute for an implied default, only for what was set:
   `<solitaire-card>` doesn't grow `suit="clubs"` (`readsAsImpliedDefault()`).
 - A pref store declares its prefs with the same rule, through the same helper (`defaultFor()`).
+- A prop declared `remembered: true` keeps its value from run to run, in the person's preferences:
+  Spell's runtime reads and saves it, under the project's id (`core.remember()`);  the schema only carries the flag.
 
 A schema warns;  it never refuses.
 On an `Observable` (every compiled `Thing` and `List` is one), `card.suit = "stars"` printed
