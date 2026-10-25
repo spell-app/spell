@@ -28,7 +28,7 @@ import filterCSS from "./EpicStateFilter.css?inline"
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
  *   one hides;  the only one showing, everything again);  the owner filters, and sets `shown`
  * - each chip's tooltip and name:  how many, which state, what its click does
- * - the items MARKED in this pass (`marked`, epic `epic-engine` P43):  a blue badge with a dotted outline, first,
+ * - the items MARKED in this pass (`marked`, epic `epic-engine` P43):  a solid dark blue badge (a dotted outline at first;  Owen chose solid), first,
  *   left of the chips (Owen, 2026-10-25:  "remove from the red/green/etc and put in a blue badge with dotted outline
  *   to the left");  drawn whatever `shown` says, and not a filter:  a click does nothing
  * - drawn by:  `<epic-section>` (an item section's title), `<epic-page>` (its toolbar:  every section at once), the

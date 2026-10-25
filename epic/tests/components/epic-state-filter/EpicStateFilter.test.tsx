@@ -64,7 +64,7 @@ describe("<epic-state-filter>", () => {
   })
 
   // epic `epic-engine` P43 (Owen, 2026-10-25:  "a blue badge with dotted outline to the left")
-  test("`marked`:  a blue dotted badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
+  test("`marked`:  a solid dark blue badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="open:2 recent:1" shown="recent" marked="3"></epic-state-filter>`
     )
@@ -72,7 +72,8 @@ describe("<epic-state-filter>", () => {
     expect(badge.localName).toBe("span")
     expect(badge.parentElement!.firstElementChild).toBe(badge)
     expect([badge.textContent, badge.title]).toEqual(["3", "3 marked in this pass, waiting for Claude"])
-    expect(getComputedStyle(badge).borderTopStyle).toBe("dotted")
+    expect(getComputedStyle(badge).borderTopStyle).toBe("solid")
+    expect(getComputedStyle(badge).color).toBe("rgb(255, 255, 255)")
     expect(chips(host)).toEqual(["open:2", "recent:1+"])
     await expectAccessible(host)
     // every item marked:  the badge alone;  none marked, no badge

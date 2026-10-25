@@ -69,7 +69,7 @@
               </ui-content>
             </ui-accordion>
             <p>Red and yellow show, green is hidden. A click here only says so: nothing on this page listens.</p>
-            <p>Mid-pass, three items marked: they leave their chips for the blue dotted badge, first, whatever the filter.</p>
+            <p>Mid-pass, three items marked: they leave their chips for the dark blue badge, first, whatever the filter.</p>
 <epic-state-filter counts="open:2 recent:3" shown="open" marked="3"></epic-state-filter>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The marked example · 1 lines</ui-title>
@@ -119,7 +119,7 @@
                 <tbody>
                   <tr><td><code>counts</code></td><td>How many items are in each state: <code>attention:2 open:5</code>. A chip per state with any, in the filter's order: progress, attention, replied, open, recent, old.</td></tr>
                   <tr><td><code>shown</code></td><td>The states showing. No attribute: every state; <code>""</code>: none.</td></tr>
-                  <tr><td><code>marked</code></td><td>How many items Owen marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the blue dotted badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
+                  <tr><td><code>marked</code></td><td>How many items Owen marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the dark blue badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -159,7 +159,7 @@
               <li>Each state in its colour: blue Claude is on it, red needs Owen, orange his turn to pick, yellow open, green done lately, grey older.</li>
               <li>The colours come from the page: an epic page's <code>--epic-state-*</code>, a docs page's <code>--spell-state-*</code>.</li>
               <li>Each chip's tooltip says how many, which state, and what a click does.</li>
-              <li>The marked badge: blue, a dotted outline over a light blue wash, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</li>
+              <li>The marked badge: solid dark blue with white numbers, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</li>
             </ul>
           </ui-section>
 
