@@ -403,6 +403,7 @@ export class SpellxTwin {
    * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
    *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
    * - Its block is the line's:  nothing left to parse under it.
+   * - Its `description=` is its docstring, as every member's is.
    */
   private menu(): SpellxTwinLine {
     const tokens = this.expand(this.words.menu)
@@ -416,7 +417,9 @@ export class SpellxTwin {
       tokens.push(item)
       spaceAfter(tokens)
     })
-    const line = new P.LineToken({ ...this.line.record, tokens })
+    // its description, `description="..."`, as comments ending its line:  its docstring
+    const { description } = this.descriptionOf(this.block)
+    const line = new P.LineToken({ ...this.line.record, tokens: [...tokens, ...description] })
     return { line, takesNextItem: !!this.block, swallowsNextItem: !!this.block }
   }
 
@@ -495,16 +498,30 @@ export class SpellxTwin {
     const last = tokens.at(-1)
     const bodiless = !rest.length && !before.length && !after.length && !this.inlineBody.length
     if (bodiless && last && SpellxTwin.isSynthetic(last) && last.value === ":") tokens.pop()
-    const lineTokens = [...tokens, ...this.inlineBody, ...description]
+    // a body on its line under lines at the top of its block, `<action "deal" shortcut="meta+D">deal it</>`:
+    // its own line after them, as code spell can't have both a body on its line and a block under it
+    const inlineBelow = before.length && this.inlineBody.length ? this.inlineBody : []
+    const lineTokens = [...tokens, ...(inlineBelow.length ? [] : this.inlineBody), ...description]
     spaceAfter(tokens)
     const twinLine = new P.LineToken({ ...line.record, tokens: lineTokens })
     const takesNextItem = !!this.block
-    const extra = [...before, ...after]
+    const extra = [...before, ...inlineBelow, ...after]
     if (!extra.length && rest === this.block?.tokens) return { line: twinLine, body: this.block, takesNextItem }
     const indent = this.block?.indent ?? (line.indent ?? 0) + 1
     const lineOf = (lineTokens: P.Token[]) =>
       new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens: lineTokens })
-    const items = [...before.map(lineOf), ...rest, ...after.map(lineOf)]
+    const below = inlineBelow.length
+      ? [
+          new P.LineToken({
+            start: inlineBelow[0]!.start,
+            line: this.head.line,
+            ch: this.head.ch,
+            indent,
+            tokens: inlineBelow
+          })
+        ]
+      : []
+    const items = [...before.map(lineOf), ...below, ...rest, ...after.map(lineOf)]
     if (!items.length) return { line: twinLine, takesNextItem, swallowsNextItem: takesNextItem }
     const body = new P.BlockToken({
       start: this.block?.start ?? this.head.start,

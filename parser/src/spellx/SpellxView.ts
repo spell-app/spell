@@ -180,6 +180,7 @@ export class SpellxView {
           word: tag.word,
           phrase: tag.phrase?.text ?? "",
           phraseSpan: this.textSpan(tag.phrase) ?? headSpan,
+          attributes: tag.attributes.map((attribute) => this.attribute(attribute)),
           children: inner,
           headSpan,
           span

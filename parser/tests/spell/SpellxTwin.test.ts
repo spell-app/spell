@@ -9,6 +9,7 @@ import {
   summarizeIncremental,
   type SpellSourceFile
 } from "spell-parser/spell/test"
+import { SX } from "spell-parser/spellx"
 
 /**
  * SPELLX read by spell's own rules, as a third style of spell (epic `elemental-spell` P6, Q69 A):
@@ -384,6 +385,73 @@ describe("spellx:  a third style of spell", () => {
     )
     expect(errors).toEqual([])
     expect(code).toContain("/** ace = 1 */")
+  })
+
+  // Owen, 2026-10-25:  "comments go in attribute names" -- a member's comment is its `description=`, handlers' too
+  describe("description= on every member", () => {
+    test("a handler's phrase may end in description= and group=:  its docstring and its group, not its phrase", () => {
+      const lines = [
+        '<spell-view "card">',
+        '\t<group "playing"/>',
+        '\t<group "looks"/>',
+        '\t<on click description="A click turns it over" group="playing">print "turned"</on>',
+        '\t<while the mouse is down description="Held:  it says so">',
+        '\t\tprint "held"',
+        "\t</while>",
+        "</spell-view>"
+      ]
+      const { code, errors } = compiledText(lines, { keepDocs: true })
+      expect(errors).toEqual([])
+      expect(code).toContain("/** A click turns it over */\n  onClick(event) {")
+      // as its twin's comment is, above a `- while ...:` with a block
+      expect(code).toContain("// Held:  it says so\n  whileMouseDown() {")
+      const [card] = SX.SpellxView.read(lines.join("\n"), { path: "/Card.spellx" }).templates
+      const groups = SX.SpellxFile.groupsOf(card!).map(({ name, members }) => [name, members.length])
+      expect(groups).toEqual([
+        ["playing", 1],
+        ["looks", 1]
+      ])
+    })
+
+    test("in Spanish:  descripción= ends an <al ...>'s phrase", () => {
+      const { code, errors } = compiledText(
+        [
+          '<encanto-vista "carta">',
+          '\t<al clic descripción="Un clic la voltea">imprimir "volteada"</>',
+          "</encanto-vista>"
+        ],
+        { path: "/Carta.es.spellx", keepDocs: true }
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain("/** Un clic la voltea */")
+    })
+
+    test("a menu's description= is its docstring", () => {
+      const { code, errors } = compiledText(
+        [
+          '<spell-app "game">',
+          '\t<action "deal">print "dealt"</>',
+          '\t<menu "game menu" description="What the game can do">',
+          '\t\t<action "deal" />',
+          "\t</menu>",
+          "</spell-app>"
+        ],
+        { keepDocs: true }
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain('// What the game can do\n// - its "game menu" is a menu of "deal"')
+    })
+
+    test('an action with details keeps its body on its line:  <action "deal" shortcut="D">deal it</>', () => {
+      const { code, errors } = compiledText([
+        '<spell-app "game">',
+        '\t<action "deal" shortcut="meta+D" description="Deals">print "dealt"</>',
+        "</spell-app>"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain('deal() {\n    core.console.log("dealt")\n  }')
+      expect(code).toContain('core.describeAction(Game, "deal", { title: "deal", shortcuts: ["meta+D"] })')
+    })
   })
 })
 

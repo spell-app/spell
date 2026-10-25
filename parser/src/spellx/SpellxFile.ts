@@ -59,7 +59,7 @@ export class SpellxFile {
         continue
       }
       if (node.kind !== "declaration" && node.kind !== "handler" && node.kind !== "note") continue
-      const own = node.kind === "declaration" ? node.attributes.find((each) => each.name === "group")?.value : undefined
+      const own = node.kind === "note" ? undefined : node.attributes.find((each) => each.name === "group")?.value
       ;(own ? named(own) : current).members.push(node)
     }
     return groups[0]!.members.length ? groups : groups.slice(1)
@@ -129,7 +129,10 @@ export class SpellxFile {
           .filter(Boolean)
           .join(" ")
       case "handler":
-        return `handler ${node.type} <${node.word}> ${quoted(node.phrase)} ${at}`
+        return [
+          `handler ${node.type} <${node.word}> ${quoted(node.phrase)} ${at}`,
+          ...node.attributes.map(attributeText)
+        ].join(" ")
       case "note":
         return `note ${node.type} <${node.word}> ${at} ${quoted(node.text)}`
       case "prose":

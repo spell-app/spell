@@ -427,15 +427,49 @@ export class SpellxTokenizer extends P.Tokenizer {
     return attribute
   }
 
-  /** Read a handler's or control's head, from its word:  its phrase, to its `>`. */
+  /**
+   * Read a handler's or control's head, from its word:  its phrase, to its `>`.
+   * - A handler's phrase may end in the attributes every member takes, `description="..."` and `group="..."`
+   *   (Owen, 2026-10-25:  "comments go in attribute names"):  `<on click description="A click plays it">`.
+   *   They're its attributes, not its phrase's words.
+   */
   private readPhraseHead(text: string, word: TagWord): Head {
     const phrase = this.phraseFrom(text, word.wordEnd)
     const head: Head = { attributes: [], selfClosing: phrase.selfClosing, end: phrase.end, errors: [] }
     if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
-    if (phrase.text) head.phrase = this.textAt(text, phrase.start, phrase.start + phrase.text.length, false)
+    let phraseText = phrase.text
+    if (word.category === "handler") {
+      for (let attribute = this.trailingAttribute(phraseText); attribute;) {
+        const start = phrase.start + attribute.at
+        head.attributes.unshift({
+          name: attribute.name,
+          word: attribute.word,
+          start,
+          value: this.textAt(text, attribute.valueAt + phrase.start, attribute.valueEnd + phrase.start, true)
+        })
+        phraseText = phraseText.slice(0, attribute.at).trimEnd()
+        attribute = this.trailingAttribute(phraseText)
+      }
+    }
+    if (phraseText) head.phrase = this.textAt(text, phrase.start, phrase.start + phraseText.length, false)
     else if (word.kind !== "otherwise")
       head.errors.push(this.message("spellx-missing-phrase", { tag: `<${word.word}>`, word: word.word }))
     return head
+  }
+
+  /**
+   * The attribute ending a handler's `phrase`, if it's one a phrase head takes:  `description="..."` or `group="..."`,
+   * in the file's language;  where it starts, and its value's place, in `phrase`.
+   */
+  private trailingAttribute(phrase: string) {
+    const match = phrase.match(TRAILING_ATTRIBUTE)
+    if (!match) return undefined
+    const [, space, word, value] = match as unknown as [string, string, string, string]
+    const name = this.words.attributes[word.toLowerCase()]
+    if (name !== "description" && name !== "group") return undefined
+    const at = match.index! + space.length
+    const valueAt = at + word.length + 2
+    return { name, word, at, valueAt, valueEnd: valueAt + value.length }
   }
 
   /**
@@ -839,6 +873,9 @@ const ATTRIBUTE_NAME = /^[\p{L}\p{M}\d_:.@-]+/u
 /** A closer:  `</>`, or `</word>`, spaces allowed before its `>`. */
 /** A comment after a line's closer:  `</>   // ace = 1`. */
 const TRAILING_COMMENT = /^\s+\/\//
+
+/** An attribute ending a handler's phrase, `description="..."`:  its leading space, its word and its value. */
+const TRAILING_ATTRIBUTE = /(\s+)([\p{L}\p{M}\d_-]+)="([^"]*)"\s*$/u
 
 const CLOSER = /^<\/([\p{L}\p{M}\d_-]*)[ \t]*>/u
 

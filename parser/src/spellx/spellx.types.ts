@@ -141,6 +141,8 @@ export type SpellxHandler = {
   phrase: string
   /** its phrase's span */
   phraseSpan: SpellxSpan
+  /** the attributes ending its phrase:  `description="..."`, `group="..."` (`<on click description="...">`) */
+  attributes: SpellxAttribute[]
   /** its body:  `SpellxCode` and `SpellxNote`s */
   children: SpellxNode[]
   /** from its `<` to its `>` */

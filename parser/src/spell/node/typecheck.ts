@@ -127,9 +127,20 @@ function nodeModulesDir(): string {
  * - Types only:  nothing of Spell UI's runs here.
  * - Translated tags (a Spanish program's `<es-boton>`) stay loose, as the app types them:
  *   the generated types name the English tags only.
+ * - Plus what a running program adds to them:  a toolbar's or menu's `menu="..."`, the template's menu its actions
+ *   fill (spellx's `<menu>`, epic `elemental-spell` P10).  `context-menu=` needs nothing:  JSX takes any dashed name.
  */
 const UI_JSX_TYPES = `import type { JSX } from "@solidjs/web"
 import type {} from "spell-ui/jsx"
+
+declare module "spell-ui/jsx" {
+  interface UIToolbarJSXAttributes {
+    menu?: string
+  }
+  interface UIMenuJSXAttributes {
+    menu?: string
+  }
+}
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
