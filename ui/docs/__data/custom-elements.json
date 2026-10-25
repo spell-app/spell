@@ -11509,7 +11509,11 @@
             },
             {
               "name": "grid",
-              "description": "The grid of glyphs (`role=listbox`)."
+              "description": "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
+            },
+            {
+              "name": "heading",
+              "description": "A group's heading in the grid;  the one at the grid's top stays there as it scrolls."
             },
             {
               "name": "cell",
@@ -11695,6 +11699,14 @@
             {
               "name": "--ui-icon-picker-none-color",
               "default": "var(--ui-text-light)"
+            },
+            {
+              "name": "--ui-icon-picker-heading-color",
+              "default": "var(--ui-text-light)"
+            },
+            {
+              "name": "--ui-icon-picker-heading-size",
+              "default": "0.8125em"
             }
           ]
         }

@@ -576,6 +576,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - A fresh checkout can't run `gen:icons` and `gen:emoji`.
   - Both need the git-ignored clone of Fomantic UI, `reference/Fomantic-UI/`.
   - `gen:icons` needs the network too.
+  - `gen:icons --search-only` needs no clone:  it rewrites the icons' search words alone, not the packs.
 
 </details>
 

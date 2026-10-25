@@ -2,13 +2,13 @@
  * The icons `spell-ui` ships, by the names `UI.icons` knows them by -- for `spell icon`.
  * - Read from each built-in pack's `pack.js` (`spell-ui/icons`, `BuiltInPacks`), named as the runtime names them:
  *   `IconName.claim()`.  An icon no name reaches is left out.
- * - Search keywords from ui's `data/search.json`, keyed by Font Awesome file name, e.g. `bell` -> `alarm`.
+ * - Search keywords from ui's `data/search.json` (its `terms`), keyed by Font Awesome file name, e.g. `bell` -> `alarm`.
  */
 import { readFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { BuiltInIconPacks, BuiltInPacks, IconName, type IconPackIndex } from "spell-ui/icons"
+import { BuiltInIconPacks, BuiltInPacks, IconName, type IconPackIndex, type IconSearchFile } from "spell-ui/icons"
 
 /** ui's search keywords:  `src/icons/data/search.json`, beside `icon-packs/`. */
 const SEARCH_FILE = resolve(dirname(fileURLToPath(BuiltInPacks.url("fa7-free"))), "..", "..", "data", "search.json")
@@ -31,7 +31,7 @@ export type IconInfo = {
 
 /** Every icon of `packs` -- default, all the built-in ones -- in pack order, then index order. */
 export async function loadIcons(packs: readonly string[] = BuiltInIconPacks): Promise<IconInfo[]> {
-  const keywordsByFile = JSON.parse(readFileSync(SEARCH_FILE, "utf8")) as Record<string, string[]>
+  const { terms: keywordsByFile } = JSON.parse(readFileSync(SEARCH_FILE, "utf8")) as IconSearchFile
   const icons: IconInfo[] = []
   for (const pack of packs) {
     if (!BuiltInPacks.has(pack)) throw new Error(`No icon pack '${pack}' -- packs:  ${BuiltInIconPacks.join(", ")}`)
@@ -52,7 +52,7 @@ export async function loadIcons(packs: readonly string[] = BuiltInIconPacks): Pr
         name,
         pack,
         aliases: claimed.filter((it) => it !== name),
-        keywords: keywordsByFile[key.slice(key.lastIndexOf("/") + 1)] ?? [],
+        keywords: [...(keywordsByFile[key.slice(key.lastIndexOf("/") + 1)] ?? [])],
         svg: resolve(folder, `${key}.svg`)
       })
     }

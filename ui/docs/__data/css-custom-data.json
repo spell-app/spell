@@ -3502,6 +3502,20 @@
       }
     },
     {
+      "name": "--ui-icon-picker-heading-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-icon-picker>`'s token.  Default:  `var(--ui-text-light)`"
+      }
+    },
+    {
+      "name": "--ui-icon-picker-heading-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-icon-picker>`'s token.  Default:  `0.8125em`"
+      }
+    },
+    {
       "name": "--ui-image-placeholder-color",
       "description": {
         "kind": "markdown",
@@ -9996,7 +10010,7 @@
       "name": "::part(grid)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-calendar>`:  The `<table role=grid>`.\n- `<ui-grid>`:  The grid box (the flex container).\n- `<ui-icon-picker>`:  The grid of glyphs (`role=listbox`)."
+        "value": "Part of:\n\n- `<ui-calendar>`:  The `<table role=grid>`.\n- `<ui-grid>`:  The grid box (the flex container).\n- `<ui-icon-picker>`:  The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
       }
     },
     {
@@ -10017,7 +10031,7 @@
       "name": "::part(heading)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-panel>`:  The `<h1>` ... `<h6>`.\n- `<ui-property-editor>`:  The `<h1>` ... `<h6>`.\n- `<ui-property-group>`:  The `<h1>` ... `<h6>`.\n- `<ui-section>`:  The `<h1>` ... `<h6>`."
+        "value": "Part of:\n\n- `<ui-icon-picker>`:  A group's heading in the grid;  the one at the grid's top stays there as it scrolls.\n- `<ui-panel>`:  The `<h1>` ... `<h6>`.\n- `<ui-property-editor>`:  The `<h1>` ... `<h6>`.\n- `<ui-property-group>`:  The `<h1>` ... `<h6>`.\n- `<ui-section>`:  The `<h1>` ... `<h6>`."
       }
     },
     {

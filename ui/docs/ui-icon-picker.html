@@ -56,7 +56,7 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-icon-picker" label="Icon picker" sticky collapsible dividing>
                 <ui-docs-example
-                  description="Click the field:  a search box and a grid of every icon the page knows.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter."
+                  description="Click the field:  a search box and a grid of every icon the page knows, in Font Awesome's categories.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter."
                 >
                   <ui-icon-picker value="star" aria-label="Icon"></ui-icon-picker>
                 </ui-docs-example>
@@ -144,11 +144,18 @@
               <ui-markdown>
                 <script type="text/markdown">
                   It offers every icon its page knows:  its nearest `<ui-root icons>`'s packs, else the page's
-                  (Font Awesome's free icons by default), one cell per glyph, A-Z.
+                  (Font Awesome's free icons by default), one cell per glyph.
 
+                  - With no search, they're in groups:  Font Awesome's own categories, A-Z
+                    (Accessibility, Alert, Alphabet, Animals ...), each under its heading.
+                    - A glyph in several categories is in each, as on Font Awesome's site.
+                    - Glyphs in none come last, under Other:  most brands, and every glyph of a pack of your own.
+                    - The heading of the group at the top stays there as you scroll.
+                  - A search is one list:  names first (exact, then starting with what you typed, then holding it),
+                    then Font Awesome's search terms.
+                  - The categories and the search terms are one file, loaded as a picker first opens:
+                    until it's in, the grid is one list, A-Z.
                   - With `<ui-root icons="fomantic">`, Fomantic's names go to the glyphs they draw there.
-                  - A search matches names first (exact, then starting with what you typed, then holding it),
-                    then Font Awesome's search terms, loaded on the first search.
                   - The grid draws only the rows in view:  each glyph is a file of its own, fetched as it scrolls in.
                 </script>
               </ui-markdown>
@@ -158,7 +165,7 @@
                 <script type="text/markdown">
                   - On the field:  Enter, Space, Down or Up opens it;  a letter opens it searching for that letter.
                   - In the panel, the focus stays in the search box:
-                    - the arrows move through the grid, Enter picks
+                    - the arrows move through the grid, Enter picks;  Down and Up step over a group's heading
                     - Escape closes it, back on the field;  Tab closes it and moves on
                 </script>
               </ui-markdown>
@@ -170,6 +177,7 @@
                     `aria-label`, then what it shows ("Icon, star").
                   - The search box is a combobox over the grid, a listbox of options, each named for its icon,
                     the chosen one `aria-selected`.
+                  - The group headings are hidden from screen readers:  a listbox holds only options.
                   - Each glyph's name is its tooltip too.
                 </script>
               </ui-markdown>

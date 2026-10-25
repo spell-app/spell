@@ -6,6 +6,7 @@ import { readJSON5File } from "spell/util/node/json5"
 
 import { SharedVocabulary } from "spell-ui/vocabulary/SharedVocabulary"
 import { ValueSets } from "spell-ui/vocabulary/ValueSets"
+import type { IconSearchFile } from "spell-ui/icons"
 import {
   SITE_DATA_VERSION,
   type SiteAttribute,
@@ -108,12 +109,13 @@ export class SiteDataBuilder {
 
   /**
    * The text of `icons.json5` (`SiteIconsFile`):
-   * Font Awesome's search terms, `src/icons/data/search.json`, for the icon browser's search.
+   * Font Awesome's search terms, from `src/icons/data/search.json` (`IconSearchFile`), for the icon browser's search.
+   * - The terms alone:  the icon browser shows no categories.
    * - One icon per line (not `stringify()`'s one term per line):
    *   a third of the size, and a diff still names the icon that changed.
    */
   iconsText(): string {
-    const terms: Record<string, string[]> = JSON.parse(
+    const { terms }: IconSearchFile = JSON.parse(
       readFileSync(join(this.root, "src", "icons", "data", "search.json"), "utf8")
     )
     const comment =
