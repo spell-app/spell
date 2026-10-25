@@ -1,10 +1,10 @@
 /**
- * Names for a drawable thing's own custom element (epic `drawable-thing`):
- * `a card is a drawable thing` in a solitaire app is `<solitaire-card>`, and its `rank` is the attribute `rank`.
+ * Names for a view's own custom element:
+ * `a card is a view` in a solitaire app is `<solitaire-card>`, and its `rank` is the attribute `rank`.
  * - Here, not in `core` or `app`, so every side names them alike:
  *   - core names the tag as the class is declared (`core.defineElement()`)
  *   - app's `SpellElement` makes the element, with an attribute per property
- *   - the TypeScript writer (`P.TSWriter`, in `parser`, which can't import either) writes each type's element class
+ *   - the TypeScript writer (`P.TSWriter`, in `parser`, which can't import either) writes each view's element class
  */
 
 import { camelCase, kebabCase } from "spell/util/string"
@@ -18,6 +18,8 @@ import { camelCase, kebabCase } from "spell/util/string"
  * - The word "drawable" in the project's name is left out, so its tags don't all say it (epic `drawable-thing` P18):
  *   `Drawable Solitaire`, `Tableau` => `solitaire-tableau`, never `drawable-solitaire-tableau`.
  *   - Spanish's word too (epic `spanish` P9):  `Solitario Dibujable`, `Carta` => `solitario-carta`.
+ *   - Kept for projects named before "drawable thing" became "view" (epic `elemental-spell` P1);
+ *     "view" is NOT left out:  it's a word a project's name may mean (`Map View`).
  * - Only letters, digits and dashes, starting with a letter:  always a valid custom element name, as it has a dash.
  *   - A letter's accent is dropped, as Spell UI's Spanish tags drop it (`<es-boton>`):
  *     `canciones`, `Canción` => `canciones-cancion`.
@@ -50,7 +52,7 @@ function tagWords(name: string): string {
 }
 
 /**
- * The attribute a drawable type's property `name` is on its element, e.g. `short-rank` for `shortRank` --
+ * The attribute a view's property `name` is on its element, e.g. `short-rank` for `shortRank` --
  * `undefined` for a name the page or Spell UI already means something by (`id`, `hidden` ...).
  * - `type`:  the property's declared type, as `core.elementApiOf()` gives it:
  *   e.g. `number`, `Pile`, `list`;  none is text.
@@ -60,7 +62,7 @@ function tagWords(name: string): string {
  *   - a thing, e.g. a pile, or the list holding it:  `string`, holding the thing's reference, `pile="Tableau#T1"`
  *   - anything else, e.g. a list:  `json`, a property only
  */
-export function drawableAttributeFor(name: string, type?: string, owner?: boolean): DrawableAttribute | undefined {
+export function viewAttributeFor(name: string, type?: string, owner?: boolean): ViewAttribute | undefined {
   const attribute = kebabCase(name.replace(/_/g, "-"))
   if (TAKEN_ATTRIBUTES.has(attribute)) return undefined
   const reference = owner ? "owner" : type && THING_TYPE.test(type) ? "thing" : undefined
@@ -74,8 +76,8 @@ export function drawableAttributeFor(name: string, type?: string, owner?: boolea
   }
 }
 
-/** A drawable type's property, as its element's attribute -- see `drawableAttributeFor()`. */
-export type DrawableAttribute = {
+/** A view's property, as its element's attribute -- see `viewAttributeFor()`. */
+export type ViewAttribute = {
   /** The attribute, e.g. `short-rank`. */
   name: string
   /** The element's property, e.g. `shortRank`. */
@@ -97,7 +99,7 @@ export type DrawableAttribute = {
  * - A thing, e.g. a pile, is a reference instead (`THING_TYPE`).
  * - Any other type, e.g. a list:  `json`.
  */
-const ATTRIBUTE_KINDS: Record<string, DrawableAttribute["kind"]> = {
+const ATTRIBUTE_KINDS: Record<string, ViewAttribute["kind"]> = {
   text: "string",
   character: "string",
   date: "string",

@@ -1,7 +1,7 @@
 # Spell in VS Code
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "suit" is one of clubs, diamonds, hearts or spades
 	- its "color" is:
 		red if its suit is diamonds or hearts
@@ -19,7 +19,7 @@ and this opens beside it:
 ```ts
 export type Suit = (typeof Card.Suits)[number]
 
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
@@ -51,13 +51,13 @@ Type in the Spell, and 300 ms after you stop, it asks again, unsaved edits and a
 <summary>The whole file, with the card's own element</summary>
 
 ```ts
-import { core, Thing, List, App, Drawable, DrawableList, prop } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList, prop } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 export type Suit = (typeof Card.Suits)[number]
 export type Rank = (typeof Card.Ranks)[number]
 
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
@@ -279,10 +279,10 @@ spell-app marks both unwanted, and pins its formatter to Oxc for each language.
 The colours start in the grammar inside the `.vsix`;  everything else comes from your checkout, as it is on disk.
 
 - **Colours.**  Spell's grammar,
-  with the `<css>` and `<markdown>` blocks inside a type coloured as CSS and Markdown.
+  with the `<css>` and `<markdown>` blocks inside a template coloured as CSS and Markdown.
   - Comments are Markdown:  `#` headings and `**bold**` come out bold;  `*italic*`, links and `~~struck~~` too.
   - A `` css`...` `` template in a JavaScript or TypeScript file is coloured as CSS:
-    that's how compiled Spell writes a drawable type's style sheet.
+    that's how compiled Spell writes a view's style sheet.
   - `.spell` files indent with tabs.
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) lists every feature.

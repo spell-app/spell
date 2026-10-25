@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { drawableAttributeFor, elementTagFor } from "spell/util/spell/drawable"
+import { elementTagFor, viewAttributeFor } from "spell/util/spell/view"
 
-describe("a drawable type's element names", () => {
+describe("a view's element names", () => {
   test("its tag:  the project's name as written, without the word drawable, then the class's", () => {
     expect(elementTagFor("Solitaire", "Card")).toBe("solitaire-card")
     expect(elementTagFor("Drawable Solitaire", "StockPile")).toBe("solitaire-stock-pile")
@@ -17,23 +17,23 @@ describe("a drawable type's element names", () => {
   })
 
   test("a property's attribute, by its declared type", () => {
-    expect(drawableAttributeFor("shortRank", "number")).toEqual({
+    expect(viewAttributeFor("shortRank", "number")).toEqual({
       name: "short-rank",
       property: "shortRank",
       kind: "number",
       description: "Its shortRank."
     })
-    expect(drawableAttributeFor("rank")?.kind).toBe("string")
-    expect(drawableAttributeFor("faceUp", "choice")?.kind).toBe("boolean")
-    expect(drawableAttributeFor("cards", "list")?.kind).toBe("json")
+    expect(viewAttributeFor("rank")?.kind).toBe("string")
+    expect(viewAttributeFor("faceUp", "choice")?.kind).toBe("boolean")
+    expect(viewAttributeFor("cards", "list")?.kind).toBe("json")
     // a thing, or the list holding it:  its reference, as text
-    expect(drawableAttributeFor("home", "Pile")).toMatchObject({ kind: "string", reference: "thing" })
-    expect(drawableAttributeFor("pile", "Pile", true)).toMatchObject({ kind: "string", reference: "owner" })
+    expect(viewAttributeFor("home", "Pile")).toMatchObject({ kind: "string", reference: "thing" })
+    expect(viewAttributeFor("pile", "Pile", true)).toMatchObject({ kind: "string", reference: "owner" })
   })
 
   test("none for a name the page or Spell UI already means something by", () => {
-    expect(drawableAttributeFor("id")).toBeUndefined()
-    expect(drawableAttributeFor("hidden", "choice")).toBeUndefined()
-    expect(drawableAttributeFor("thing")).toBeUndefined()
+    expect(viewAttributeFor("id")).toBeUndefined()
+    expect(viewAttributeFor("hidden", "choice")).toBeUndefined()
+    expect(viewAttributeFor("thing")).toBeUndefined()
   })
 })
