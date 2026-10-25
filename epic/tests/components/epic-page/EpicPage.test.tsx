@@ -239,7 +239,7 @@ describe("<epic-page>", () => {
     expect(crumbs.nextElementSibling!.textContent).toBe("demo")
 
     const old = await render(
-      `<main><ui-breadcrumbs class="spell-crumbs"><ui-breadcrumb active>Demo</ui-breadcrumb></ui-breadcrumbs>` +
+      `<main><ui-breadcrumbs class="spell-crumbs"><ui-breadcrumb selected>Demo</ui-breadcrumb></ui-breadcrumbs>` +
         `${page("", ["todo"])}</main>`
     )
     expect(old.querySelector("epic-page")!.shadowRoot!.querySelector('[part~="crumbs"]')).toBeNull()
@@ -1149,11 +1149,11 @@ describe("<epic-page> what Claude is doing", () => {
     expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, C3")
     // a grey pill like the step label, its spinner where the label's icon goes (Owen, 2026-10-25)
     const pill = line()!.querySelector("ui-label")!
-    expect([pill.getAttribute("color"), pill.hasAttribute("basic"), pill.querySelector(".spinner")!.slot]).toEqual([
-      "grey",
-      true,
-      "icon"
-    ])
+    expect([
+      pill.getAttribute("color"),
+      pill.getAttribute("appearance") === "basic",
+      pill.querySelector(".spinner")!.slot
+    ]).toEqual(["grey", true, "icon"])
     const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([

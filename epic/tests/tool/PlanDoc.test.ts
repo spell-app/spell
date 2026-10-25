@@ -635,8 +635,8 @@ describe("PlanDoc questions and decisions", () => {
   /** Option cards A and B (B recommended), as an agent writes them for the old markup. */
   const GRID =
     '<ui-grid class="spell-pros-cons" columns="2" stackable>' +
-    '<ui-column><ui-segment><ui-label attached="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
-    '<ui-column><ui-segment><ui-label attached="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
     "</ui-grid>"
 
   test("one section (D13):  open questions on top, then the answered ones in id order;  a decision is born answered", () => {
@@ -707,12 +707,12 @@ describe("PlanDoc questions and decisions", () => {
   test("P14:  an agent's old prose shapes come in as elements, option grids on ANY item kind and inside a reply", () => {
     const plan = freshPlan()
     const code =
-      '<ui-accordion class="spell-code" styled open="0"><ui-title>a.ts · 1 line</ui-title>' +
+      '<ui-accordion class="spell-code" appearance="styled" open="0"><ui-title>a.ts · 1 line</ui-title>' +
       '<ui-content><pre><code class="language-ts">const a = 1</code></pre></ui-content></ui-accordion>'
     plan.addItem("judgement", "which way?", {
       details:
         `<p>The call.</p><p><b>The options:</b></p>${GRID}<p><b>Net effect (A):</b></p><ul><li>n</li></ul>${code}` +
-        '<ui-message class="plan-update" state="warning" header="UPDATE"><p>changed</p></ui-message>'
+        '<ui-message class="plan-update" state="warning" heading="UPDATE"><p>changed</p></ui-message>'
     })
     expect(kids(el(plan, "j1"))).toEqual(["p", "p", "epic-choices", "epic-net-effect", "epic-code", "epic-note"])
     expect(Markup.read(el(plan, "j1").querySelector("epic-code")!)).toEqual({
@@ -735,7 +735,7 @@ describe("PlanDoc questions and decisions", () => {
     expect(html).toContain("<p><b>a.ts · 1 line</b></p><pre>const a = 1</pre>")
     // a phase's Updated line and its fields take them too
     plan.addPhase("One", { goal: "<p><b>Net effect:</b></p><ul><li>g</li></ul>" })
-    plan.addPhaseUpdate(1, '<ui-message class="plan-update" header="DONE · J1"><p>moved</p></ui-message>')
+    plan.addPhaseUpdate(1, '<ui-message class="plan-update" heading="DONE · J1"><p>moved</p></ui-message>')
     expect(kids(el(plan, "p1").querySelector('epic-field[name="goal"]')!)).toEqual(["epic-net-effect"])
     expect(kids(el(plan, "p1").querySelector("epic-update")!)).toEqual(["epic-note"])
     expect(problems(plan)).toEqual([])

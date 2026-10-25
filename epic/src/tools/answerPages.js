@@ -79,7 +79,7 @@ export function htmlIn(document, tag, html) {
 export function fillHead(document, { title, description, asked, date }) {
   document.querySelector("title").textContent = title
   document.querySelector("h1").textContent = title
-  const crumb = document.querySelector("ui-breadcrumb[active]")
+  const crumb = document.querySelector("ui-breadcrumb[selected]")
   if (crumb) crumb.textContent = title
   document.querySelector('meta[name="description"]').setAttribute("content", description)
   const line = document.querySelector(asked)
@@ -189,7 +189,7 @@ export function choiceSections(document, data) {
     const rule = section.description
       ? [make(document, "p", { class: "spell-choices-rule" }, withCode(document, section.description))]
       : []
-    return make(document, "ui-section", { id: section.id, label: section.title, ...SECTION_FLAGS, collapsed: true }, [
+    return make(document, "ui-section", { id: section.id, label: section.title, ...SECTION_FLAGS, open: "false" }, [
       make(document, "ui-icon", { slot: "icon", name: section.icon ?? SECTION_ICON }),
       ...rule,
       table

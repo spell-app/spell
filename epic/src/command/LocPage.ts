@@ -185,7 +185,7 @@ export class LocPage {
     }
     const skipped = this.scan.skipped
     const why = { generated: "GENERATED on its first line", bundled: "a bundle:  long lines" }
-    const aside = Markup.plain(document, "ui-accordion", { class: "spell-aside", styled: true }, [
+    const aside = Markup.plain(document, "ui-accordion", { class: "spell-aside", appearance: "styled" }, [
       Markup.plain(document, "ui-title", {}, [
         `The ${skipped.length} files left out this scan, besides ${this.scan.generatedByAttribute} marked ` +
           "linguist-generated"
@@ -214,7 +214,7 @@ export class LocPage {
         "epic loc --json     # the exact numbers"
     ])
     section.append(
-      Markup.plain(document, "ui-accordion", { class: "spell-code", styled: true }, [
+      Markup.plain(document, "ui-accordion", { class: "spell-code", appearance: "styled" }, [
         Markup.plain(document, "ui-title", {}, ["Rescan · 3 lines"]),
         Markup.plain(document, "ui-content", {}, [Markup.plain(document, "pre", {}, [code])])
       ]),
@@ -308,13 +308,18 @@ export class LocPage {
       this.row(document, "Tests", tests, true),
       this.row(document, "Both", LinesOfCode.sum(code, tests), true)
     ]
-    return Markup.plain(document, "ui-table", { celled: true, compact: true, striped: true, unstackable: true }, [
-      Markup.plain(document, "table", {}, [
-        Markup.plain(document, "thead", {}, [groups, names]),
-        Markup.plain(document, "tbody", {}, body),
-        Markup.plain(document, "tfoot", {}, foot)
-      ])
-    ])
+    return Markup.plain(
+      document,
+      "ui-table",
+      { celled: true, padding: "compact", appearance: "striped", unstackable: true },
+      [
+        Markup.plain(document, "table", {}, [
+          Markup.plain(document, "thead", {}, [groups, names]),
+          Markup.plain(document, "tbody", {}, body),
+          Markup.plain(document, "tfoot", {}, foot)
+        ])
+      ]
+    )
   }
 
   /** A row:  its name (bold for a repo's code and the totals), then a cell per column. */
@@ -340,7 +345,7 @@ export class LocPage {
   }
 
   /**
-   * `parent`'s sub-section `id`, made when missing:  `<ui-section id label sticky collapsible dividing collapsed>`,
+   * `parent`'s sub-section `id`, made when missing:  `<ui-section id label sticky collapsible dividing open="false">`,
    * its icon first;  a top-level one goes before the page's footer.
    */
   private section(document: Document, parent: Element, id: string, label: string, icon?: string): Element {
@@ -352,7 +357,7 @@ export class LocPage {
       sticky: true,
       collapsible: true,
       dividing: true,
-      collapsed: true
+      open: "false"
     })
     if (icon) section.append(Markup.plain(document, "ui-icon", { slot: "icon", name: icon }))
     const footer = parent.querySelector(":scope > footer")

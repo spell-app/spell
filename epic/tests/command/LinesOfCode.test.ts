@@ -189,7 +189,7 @@ describe("LocPage", () => {
 <ui-section id="folders-gone" label="gone"><ui-table><table></table></ui-table></ui-section>
 <ui-section id="folders-alpha" label="alpha"><ui-table><table></table></ui-table></ui-section></ui-section>
 <ui-section id="3-how-its-counted" label="3."><ui-section id="left-out" label="Left out"><p>Why.</p>
-<ui-accordion class="spell-aside" styled><ui-title>old</ui-title><ui-content></ui-content></ui-accordion></ui-section></ui-section>
+<ui-accordion class="spell-aside" appearance="styled"><ui-title>old</ui-title><ui-content></ui-content></ui-accordion></ui-section></ui-section>
 <ui-section id="4-refresh-it" label="4."><p>Run it.</p></ui-section>
 <footer class="spell-doc-footer"><p class="meta">Last checked 2020-01-01.</p></footer>
 </main></body></html>`
@@ -239,7 +239,7 @@ describe("LocPage", () => {
       (row) => row.firstElementChild!.textContent
     )
     expect(rows).toEqual(["src/a/", "other"])
-    expect(document.querySelector("#folders-beta")!.hasAttribute("collapsed")).toBe(true)
+    expect(document.querySelector("#folders-beta")!.getAttribute("open")).toBe("false")
     // left out
     expect(document.querySelector("#left-out ui-title")!.textContent).toBe(
       "The 1 files left out this scan, besides 4 marked linguist-generated"

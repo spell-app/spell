@@ -189,7 +189,7 @@ async function open(viewport) {
  *   - old pages:  the first `section.s2`'s h2
  * - clicks its toggle as a reader would:  the shadow `button[part~=toggle]`, or the old chevron `ui-button.spell-fold`
  * - expects it:
- *   - folded (`collapsed` + `:state(collapsed)`, or `section.spell-folded`), with its content hidden
+ *   - folded (not `open`, and `:state(collapsed)`;  or `section.spell-folded`), with its content hidden
  *   - still folded after a reload
  *   - unfolded by a second click
  * - returns `{ target, steps, problem? }`;  starts from the page's own state, whatever it is
@@ -344,7 +344,7 @@ function foldTarget() {
   ]
   if (sections.length) {
     const best =
-      sections.find((section) => filled(section) && !section.hasAttribute("collapsed")) ??
+      sections.find((section) => filled(section) && section.getAttribute("open") !== "false") ??
       sections.find(filled) ??
       sections[0]
     return { id: best.id, kind: "ui-section" }
@@ -367,7 +367,7 @@ function foldToggle({ id, kind }) {
 
 /**
  * The target's fold:  `{ folded, contentVisible }`.
- * - `<ui-section>`:  folded when its `collapsed` is true AND it says `:state(collapsed)`;
+ * - `<ui-section>`:  folded when its `open` is false AND it says `:state(collapsed)`;
  *   content:  its first unslotted child
  * - an epic page's block:  folded when it isn't `open` and doesn't say `:state(open)`;  content:  the same
  * - old markup:  `section.spell-folded`;  content:  the element after the heading's `ui-sticky`
@@ -383,7 +383,7 @@ function foldState({ id, kind }) {
     }
   }
   if (kind === "ui-section") {
-    let state = !!element.collapsed
+    let state = !element.open
     try {
       state = element.matches(":state(collapsed)")
     } catch {
@@ -391,7 +391,7 @@ function foldState({ id, kind }) {
     }
     const content = [...element.children].find((child) => !child.hasAttribute("slot"))
     return {
-      folded: !!element.collapsed && state,
+      folded: !element.open && state,
       contentVisible: content ? content.checkVisibility({ visibilityProperty: true }) : null
     }
   }

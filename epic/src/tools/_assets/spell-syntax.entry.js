@@ -166,7 +166,7 @@ function moduleSection({ module, rules }, prefix) {
     },
     el(
       "ui-table",
-      { id: `rules-${slug(module)}`, class: "spell-syntax-table", celled: "", compact: "", unstackable: "" },
+      { id: `rules-${slug(module)}`, class: "spell-syntax-table", celled: "", padding: "compact", unstackable: "" },
       table
     )
   )
@@ -272,8 +272,7 @@ function purposeCell(rule) {
   const tip = `${WAND_WORDS}:  ask Claude, in a comment here`
   const wand = el("ui-button", {
     class: "spell-syntax-wand",
-    circular: "",
-    basic: "",
+    appearance: "circular basic",
     size: "mini",
     icon: "wand magic sparkles",
     title: tip,
@@ -331,8 +330,7 @@ function resetButton(one) {
 function iconButton(className, icon, tip, label) {
   const button = el("ui-button", {
     class: className,
-    circular: "",
-    basic: "",
+    appearance: "circular basic",
     size: "tiny",
     icon,
     title: tip,
@@ -361,8 +359,8 @@ function drawBar() {
     "ui-button",
     {
       class: "spell-choices-send",
-      primary: "",
-      circular: "",
+      color: "primary",
+      appearance: "circular",
       icon: "paper plane",
       title: "Send every changed box, and the feedback, to Claude"
     },
@@ -671,8 +669,9 @@ function showAsked(className, isAsked) {
   const wand = wands.get(className)
   if (!wand) return
   wand.toggleAttribute("data-asked", isAsked)
-  wand.toggleAttribute("primary", isAsked)
-  wand.toggleAttribute("basic", !isAsked)
+  if (isAsked) wand.setAttribute("color", "primary")
+  else wand.removeAttribute("color")
+  wand.setAttribute("appearance", isAsked ? "circular" : "circular basic")
   wand.title = isAsked
     ? "Asked Claude for more details:  the thread is below"
     : `${WAND_WORDS}:  ask Claude, in a comment here`

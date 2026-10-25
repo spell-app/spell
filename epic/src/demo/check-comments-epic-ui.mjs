@@ -274,7 +274,7 @@ async function checkWidth(width) {
     if (!found) return {}
     found.dataset.checkText = ""
     for (let open = found.closest("ui-section"); open; open = open.parentElement?.closest("ui-section"))
-      open.collapsed = false
+      open.open = true
     return { section: found.closest("ui-section").id, holder: found.localName }
   })
   await page.waitForTimeout(500)
@@ -476,7 +476,7 @@ async function checkToolbar(page, name, held) {
   await page.waitForSelector("ui-modal .spell-jump input", { timeout: 5000 }).catch(() => {})
   await page.waitForTimeout(400)
   const dialog = await page.evaluate(() => ({
-    header: document.querySelector("ui-modal[header]")?.getAttribute("header"),
+    header: document.querySelector("ui-modal[heading]")?.getAttribute("heading"),
     open: document.querySelectorAll("dialog[open], ui-modal:not([hidden])").length,
     lines: [...document.querySelectorAll(".spell-jump-thread > b")].map((each) => each.textContent),
     search: document.querySelector("ui-docs-search")?.matches(":focus-within") ?? false

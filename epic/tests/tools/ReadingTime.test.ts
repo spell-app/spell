@@ -44,7 +44,7 @@ describe("readingTime()", () => {
 
   test("folded sections count;  scripts and the runtime's own additions don't", () => {
     const main = mainOf(`
-      <ui-section collapsed><p>${wordsOf(460)}</p></ui-section>
+      <ui-section open="false"><p>${wordsOf(460)}</p></ui-section>
       <span data-spell-added>DOCS / GUIDES</span>
       <script>${wordsOf(1000)}</script>`)
     expect(readingTime(main)).toEqual({ words: 460, code: 0, minutes: 2 })

@@ -1055,11 +1055,11 @@ In `tools/`:
   - The markup, nested for sub-sections:
 
     ```html
-    <ui-section id="..." label="1. Summary" sticky collapsible dividing collapsed>
+    <ui-section id="..." label="1. Summary" sticky collapsible dividing open="false">
     ```
 
-    - EVERY one is `sticky collapsible dividing collapsed`:  a rule under every title, and every section folds.
-  - They MUST start folded:  every section and sub-section `collapsed`, every code block and aside without `open`.
+    - EVERY one is `sticky collapsible dividing open="false"`:  a rule under every title, and every section folds.
+  - They MUST start folded:  every section and sub-section `open="false"`, every code block and aside without `open`.
     - The reader opens what they want (Owen, 2026-10-03:  "default to closed, open on demand").
     - The ONE exception:  the spell syntax guide starts with everything open (Owen, 2026-10-12), a comment in it says so.
     - The runtime remembers the reader's folds per page, and a link to an id unfolds what hides it.
@@ -1285,7 +1285,7 @@ In `tools/`:
   - footer:  `<footer class="spell-doc-footer"><ui-divider>` + a `.meta` "last checked" line
   - asides / digressions:  `<ui-accordion class="spell-aside" appearance="styled">`
     - with ONE `<ui-title>` / `<ui-content>` pair
-    - collapsed (no `open`)
+    - folded (no `open`)
     - never a `<details>` / `<summary>`:  `components-not-markup` turns one into this
   - buttons:  ALWAYS the pill style, with an icon that says what they do:
     `<ui-button appearance="circular" icon="paper plane">Send</ui-button>`
@@ -1607,7 +1607,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - asked again:  `epic ask round <page> [--from <spec.json>]` (a choice page:  `epic choices round <page> --rows ...`)
     rewrites the ONE page in place;  without `--from`, a details page stays as it is, for Claude to edit
   - the round before folds into the page, at its bottom, above the notes box or the bar:
-    a `<ui-section data-round="1" id="round-1" collapsed>`, "Round 1 · 10/24 · what you sent"
+    a `<ui-section data-round="1" id="round-1" open="false">`, "Round 1 · 10/24 · what you sent"
     - what it asked (its lede), and what was sent as `answer` prints it, as a list:  no live question, so the form
       never sends an old round again
     - nothing sent:  "nothing sent", or what was typed ("typed, not sent")

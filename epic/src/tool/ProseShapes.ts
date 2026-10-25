@@ -71,7 +71,8 @@ export class ProseShapes {
    * - two `<pre>`s, a `<ui-code>`, markup in the code or the title:  `undefined`
    */
   static code(accordion: Element): CodeShape | undefined {
-    if (!accordion.matches(ProseBlocks.code) || !hasOnly(accordion, ["class", "styled", "open"])) return undefined
+    if (!accordion.matches(ProseBlocks.code) || !hasOnly(accordion, ["class", "appearance", "styled", "open"]))
+      return undefined
     const panel = panelOf(accordion)
     const [pre, ...more] = panel ? significantChildren(panel.content) : []
     if (!panel || more.length || !PlanMarkup.isElement(pre) || pre.localName !== "pre" || pre.attributes.length)
@@ -90,7 +91,8 @@ export class ProseShapes {
 
   /** Aside accordion `accordion` (`ui-accordion.spell-aside`) as `<epic-aside>`:  its title without `Aside: `. */
   static aside(accordion: Element): AsideShape | undefined {
-    if (!accordion.matches(ProseBlocks.aside) || !hasOnly(accordion, ["class", "styled"])) return undefined
+    if (!accordion.matches(ProseBlocks.aside) || !hasOnly(accordion, ["class", "appearance", "styled"]))
+      return undefined
     const panel = panelOf(accordion)
     if (!panel) return undefined
     return {
@@ -108,10 +110,10 @@ export class ProseShapes {
    * - other headers (`DEFERRED`, `DECIDED`):  `undefined`
    */
   static note(message: Element): NoteShape | undefined {
-    if (!message.matches(ProseBlocks.note) || !hasOnly(message, ["class", "state", "size", "header", "data-phase"]))
+    if (!message.matches(ProseBlocks.note) || !hasOnly(message, ["class", "state", "size", "heading", "data-phase"]))
       return undefined
     if (Array.from(message.children).some((child) => child.hasAttribute("slot"))) return undefined
-    const match = Drawn.noteHeader.exec(PlanMarkup.squeeze(message.getAttribute("header") ?? ""))
+    const match = Drawn.noteHeader.exec(PlanMarkup.squeeze(message.getAttribute("heading") ?? ""))
     if (!match) return undefined
     const state = match[1] === "DONE" ? "done" : "update"
     const phase = Number(message.getAttribute("data-phase") ?? NaN)

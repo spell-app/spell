@@ -26,13 +26,13 @@ const PAGE = `<!doctype html>
           ><header class="spell-page-head"><h1>Test page</h1></header></ui-sticky
         >
         <p class="lede">What this settles.</p>
-        <ui-section id="model" label="1. The model" sticky collapsible dividing collapsed>
+        <ui-section id="model" label="1. The model" sticky collapsible dividing open="false">
           <p>Body.</p>
-          <ui-section id="inner" label="Inner" sticky collapsible dividing collapsed>
+          <ui-section id="inner" label="Inner" sticky collapsible dividing open="false">
             <p>Inner body.</p>
           </ui-section>
         </ui-section>
-        <ui-section id="later" label="2. Later" sticky collapsible dividing collapsed>
+        <ui-section id="later" label="2. Later" sticky collapsible dividing open="false">
           <p>More.</p>
         </ui-section>
       </main>

@@ -585,9 +585,9 @@ describe("Markup.plain()", () => {
       "n = ",
       code
     ])
-    const section = Markup.plain(document, "ui-section", { id: "s", collapsed: true })
+    const section = Markup.plain(document, "ui-section", { id: "s", sticky: true })
     expect(cell.outerHTML).toBe('<td class="num" colspan="2">n = <code>&lt;b&gt;x&lt;/b&gt;</code></td>')
-    expect(section.hasAttribute("collapsed")).toBe(true)
-    expect(section.getAttribute("collapsed")).toBe("")
+    expect(section.hasAttribute("sticky")).toBe(true)
+    expect(section.getAttribute("sticky")).toBe("")
   })
 })

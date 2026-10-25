@@ -28,7 +28,7 @@ body{margin:0}
 <div style="padding: 32px">
 <h1>{{title}}</h1>
 <sc-if value="{{happy}}" hint-placeholder-val="{{ true }}"><ui-label color="violet">Happy</ui-label></sc-if>
-<ui-button primary="" icon="horse" onClick="{{gallop}}">Clicked {{count}} times</ui-button>
+<ui-button color="primary" icon="horse" onClick="{{gallop}}">Clicked {{count}} times</ui-button>
 </div>
 </ui-root>
 </x-dc>
@@ -43,7 +43,7 @@ describe("pullBoard()", () => {
   const { html, notes } = pullBoard(BOARD, page, { from: "https://claude.ai/artifact/x", board: "Main.dc.html" })
 
   it("keeps the ui-* markup and drops Claude Design's runtime", () => {
-    expect(html).toContain('<ui-button primary="" icon="horse">')
+    expect(html).toContain('<ui-button color="primary" icon="horse">')
     expect(html).not.toContain("support.js")
     expect(html).not.toContain("<x-dc>")
     expect(html).not.toContain("data-dc-script")

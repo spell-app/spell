@@ -16,7 +16,7 @@
       <main class="spell-doc-main">
         <!--
           TEMPLATE:  copy to `<topic>/<topic>.html` (same depth, so `../_assets/` still works).
-          - One `<ui-section id label sticky collapsible dividing collapsed>` per area, one `ui-card` per feature;  the card's
+          - One `<ui-section id label sticky collapsible dividing open="false">` per area, one `ui-card` per feature;  the card's
             `h3` is its contents entry.
           - The filter matches every typed word against a card's text, and remembers it per page.
           - Wide cards (long code):  `data-spell-wide` on the `ui-card`.
@@ -60,7 +60,7 @@
         </div>
         <p class="spell-filter-empty" id="empty" hidden>No card matches.</p>
 
-        <ui-section id="first-area" label="First area" sticky collapsible dividing collapsed>
+        <ui-section id="first-area" label="First area" sticky collapsible dividing open="false">
           <ui-cards class="spell-grid" stackable>
             <ui-card>
               <ui-content>
@@ -90,7 +90,7 @@
           </ui-cards>
         </ui-section>
 
-        <ui-section id="second-area" label="Second area" sticky collapsible dividing collapsed>
+        <ui-section id="second-area" label="Second area" sticky collapsible dividing open="false">
           <ui-cards class="spell-grid" stackable>
             <ui-card>
               <ui-content>

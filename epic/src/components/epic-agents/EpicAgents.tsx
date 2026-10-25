@@ -111,7 +111,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
                 aria-label={this.doingLabel(doing())}
               >
                 {/* the header's step label's pill, its spinner in place of the label's icon (Owen, 2026-10-25) */}
-                <ui-label basic="" color="grey" class={DOING_PILL}>
+                <ui-label appearance="basic" color="grey" class={DOING_PILL}>
                   <span slot="icon" class={SPINNER} aria-hidden="true" />
                   <span class={WORDS}>{doing().text}</span>
                 </ui-label>

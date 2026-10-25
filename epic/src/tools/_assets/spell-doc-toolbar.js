@@ -251,7 +251,7 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
     "ui-item",
     {
       class: "spell-toolbar-item",
-      href: `#${id}`,
+      link: `#${id}`,
       "data-rail": id,
       icon: glyph,
       // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's
@@ -264,7 +264,7 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
     mark,
     title && el("span", { class: "spell-toolbar-label" }, ...titleWithKey(title, letter)),
     ...badges.map(([kind, number]) =>
-      el("ui-label", { class: `spell-toolbar-count ${kind}`, circular: true, size: "mini" }, String(number))
+      el("ui-label", { class: `spell-toolbar-count ${kind}`, appearance: "circular", size: "mini" }, String(number))
     )
   )
   titleInside(item, "item")
@@ -474,14 +474,14 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
   const header = epicPage ? "Jump to which item?" : search ? "Jump to a comment, or search" : "Jump to which comment?"
   const input = el("input", { type: "text", autofocus: true, autocomplete: "off", spellcheck: "false" })
   const miss = el("p", { class: "spell-jump-miss", role: "alert", hidden: true })
-  const approve = el("ui-button", { class: "approve", primary: true }, "Go")
+  const approve = el("ui-button", { class: "approve", color: "primary" }, "Go")
   const waiting = jumpWaitingList((id) => {
     input.value = id
     approve.click()
   })
   const modal = el(
     "ui-modal",
-    { size: "tiny", closedby: "closerequest", header, "data-spell-added": true },
+    { size: "tiny", closedby: "closerequest", heading: header, "data-spell-added": true },
     el(
       "ui-content",
       {},
@@ -582,8 +582,14 @@ function jumpWaitingList(pick) {
   })
   return el(
     "ui-menu",
-    { class: "spell-jump-waiting", vertical: true, secondary: true, fluid: true, link: true, "aria-label": title },
-    el("ui-item", { class: "spell-jump-waiting-title", type: "header" }, title),
+    {
+      class: "spell-jump-waiting",
+      direction: "vertical",
+      appearance: "secondary link",
+      fluid: true,
+      "aria-label": title
+    },
+    el("ui-item", { class: "spell-jump-waiting-title", kind: "header" }, title),
     ...lines
   )
 }

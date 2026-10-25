@@ -5,7 +5,7 @@
  * - Two page markups, read into ONE outline (`outlineOf()`) that everything below works from:
  *   - SECTIONS (every page but the saga pages):
  *     `<ui-section id label sticky collapsible dividing>` in `main`, nested for sub-sections,
- *     `collapsed` to start folded.
+ *     `open="false"` to start folded.
  *     - the element draws the title, the fold button, the rule and the stack of stuck titles
  *     - this runtime sets the top-level `offset`s, remembers folds, writes counts
  *     - an EPIC PAGE is `<epic-page>` markup (the `epics` pack, `spell-epic`):
@@ -29,7 +29,7 @@
  *   CSS variables on the sections let anchors land below them all
  * - everything that sticks or lands at the top starts BELOW the fixed site header (`<spell-site-header>`,
  *   `siteHeaderHeight()`):  the page header and its toolbar, the titles
- * - folding:  every section folds from a chevron on its title;  folds are remembered per page, and `collapsed`
+ * - folding:  every section folds from a chevron on its title;  folds are remembered per page, and `open="false"`
  *   (`data-fold="closed"` on HEADINGS pages) starts one folded
  * - counts:  a top-level section holding `[data-status]` items (the Epics index's epic cards, the saga pages' items)
  *   shows open / all on its title;
@@ -137,7 +137,7 @@ const TAGS = [
 ]
 
 /**
- * Frames a `<ui-section>` takes to draw what `collapsed = false` revealed:  the write lands on a microtask, the
+ * Frames a `<ui-section>` takes to draw what opening it (`open`) revealed:  the write lands on a microtask, the
  * render on the next frame.  A jump lands only then:  before, the target is laid out in a box of no height.
  */
 const UNFOLD_FRAMES = 2
@@ -380,7 +380,7 @@ function oneLineHead(main) {
   trail.classList.add("spell-head-crumbs")
   trail.dataset.spellAdded = ""
   trail.removeAttribute("id")
-  const page = trail.querySelector(":scope > ui-breadcrumb[active]")
+  const page = trail.querySelector(":scope > ui-breadcrumb[selected]")
   if (page) {
     page.textContent = ""
     // the space before it too:  the divider sits as the old one did, `spell-doc.css` spacing it
@@ -414,7 +414,7 @@ function drawReadingTime(main) {
   const { words, code, minutes } = readingTime(main)
   let chip = h1.querySelector(":scope > ui-label.spell-reading-time")
   if (!chip) {
-    chip = el("ui-label", { class: "spell-reading-time", size: "tiny", basic: true, "data-spell-added": true })
+    chip = el("ui-label", { class: "spell-reading-time", size: "tiny", appearance: "basic", "data-spell-added": true })
     h1.append(chip)
   }
   const counted = code
@@ -468,7 +468,7 @@ function wireTableWidths(main) {
     if (!box.style.width && box.getClientRects().length) narrow.set(box, box.getBoundingClientRect().width)
     toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
     const wide = isWide(box) && !toggle.hidden
-    toggle.toggleAttribute("active", wide)
+    toggle.toggleAttribute("selected", wide)
     toggle.title = wide ? "Back into the column" : "Expand to the page's width"
     toggle.setAttribute("aria-label", toggle.title)
     toggle.setAttribute("icon", wide ? "arrows left right to line" : "arrows left right")
@@ -503,7 +503,7 @@ function wireTableWidths(main) {
   const toggleFor = (box) => {
     const toggle = document.createElement("ui-button")
     toggle.className = "spell-table-toggle"
-    toggle.setAttribute("basic", "")
+    toggle.setAttribute("appearance", "basic")
     toggle.setAttribute("size", "mini")
     toggle.addEventListener("click", () => flip(box))
     return toggle
@@ -951,9 +951,9 @@ const EPIC_PAGE_STATE = ["open", "reviewing", "data-epic-filtered"]
 
 /**
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):
- * a patch keeps them (`PagePatch`'s `keptAttributes`, beside the shared `collapsed` and `open`).
+ * a patch keeps them (`PagePatch`'s `keptAttributes`, beside the shared `open`).
  */
-const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", "data-epic-zoom", ...EPIC_PAGE_STATE]
+const KEPT_ATTRIBUTES = ["badge", "data-show", "data-epic-zoom", ...EPIC_PAGE_STATE]
 
 /**
  * Elements that manage their children (panels and tabs by index, options):  a change inside replaces the whole
@@ -1257,16 +1257,16 @@ function carryState(copy) {
 
 /**
  * Fold every collapsible section in `copy` as the reader has it:  as the live one with its `id`, else as saved
- * (`spell-folds:<path>`), else an epic page's start-folded (`wireFolds()`);  else the markup's `collapsed` stands.
+ * (`spell-folds:<path>`), else an epic page's start-folded (`wireFolds()`);  else the markup's `open` stands.
  */
 function carryFolds(copy) {
   const saved = readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`)
   const planDoc = document.body.classList.contains("plan-doc")
   for (const section of PagePatch.withSelf(copy, "ui-section[collapsible]")) {
     const old = section.id ? document.getElementById(section.id) : null
-    if (old?.localName === "ui-section") section.toggleAttribute("collapsed", isCollapsed(old))
-    else if (section.id && section.id in saved) section.toggleAttribute("collapsed", !!saved[section.id])
-    else if (planDoc) section.setAttribute("collapsed", "")
+    if (old?.localName === "ui-section") foldAttribute(section, isCollapsed(old))
+    else if (section.id && section.id in saved) foldAttribute(section, !!saved[section.id])
+    else if (planDoc) foldAttribute(section, true)
   }
 }
 
@@ -1489,22 +1489,28 @@ function uniqueId(id) {
 }
 
 /**
- * Is `section` folded?  A `<ui-section>`:  its `collapsed` property, else (not upgraded yet) the attribute;
+ * Is `section` folded?  A `<ui-section>`:  not `open`, by the property, else (not upgraded yet) `open="false"`;
  * an epic page's block (or item):  not `open`, by the property, else the attribute.
  */
 function isCollapsed(section) {
   if (section.matches(EPIC_OPENERS))
     return !(typeof section.open === "boolean" ? section.open : section.hasAttribute("open"))
-  return typeof section.collapsed === "boolean" ? section.collapsed : section.hasAttribute("collapsed")
+  return typeof section.open === "boolean" ? !section.open : section.getAttribute("open") === "false"
 }
 
 /**
- * Fold or unfold a section without an event:  `collapsed` (`<ui-section>`) and `open` (an epic page's blocks and
- * items) are controlled, so writing them announces nothing.
+ * Fold or unfold a section without an event:  `open` (a `<ui-section>`, and an epic page's blocks and
+ * items) is controlled, so writing it announces nothing.
  */
 function setCollapsed(section, collapsed) {
   if (section.matches(EPIC_OPENERS)) section.toggleAttribute("open", !collapsed)
-  else section.toggleAttribute("collapsed", collapsed)
+  else foldAttribute(section, collapsed)
+}
+
+/** Fold a `<ui-section>` (`open="false"`) or open it (no `open`:  open is its default), by the attribute. */
+function foldAttribute(section, isFolded) {
+  if (isFolded) section.setAttribute("open", "false")
+  else section.removeAttribute("open")
 }
 
 /**
@@ -1616,7 +1622,7 @@ function countItems(outline) {
     const label = document.createElement("ui-label")
     label.className = "spell-count"
     label.setAttribute("size", "tiny")
-    label.setAttribute("basic", "")
+    label.setAttribute("appearance", "basic")
     label.title = `${open} open of ${items.length}`
     label.textContent = `${open}/${items.length}`
     element.append(label)
@@ -1938,7 +1944,7 @@ function buildToolbar(page, outline, counts) {
 /**
  * Every section folds, and the reader's folds are remembered per page (`localStorage`, `{ [id]: folded }`).
  * - SECTIONS:  `<ui-section collapsible>` folds itself;
- *   this restores the saved folds (else the markup's `collapsed` stands)
+ *   this restores the saved folds (else the markup's `open` stands)
  *   and saves the reader's toggles (`ui-opening` / `ui-closing`;  an `<epic-*>` block's `ui-opening` / `ui-closing`)
  *   - an EPIC PAGE (`body.plan-doc`):  every section and sub-section not in the saved folds starts FOLDED,
  *     whatever its markup says:  Owen opens what he wants to read (2026-10-03)
@@ -1975,7 +1981,7 @@ function addFoldAll(main, folds) {
   if (!head || document.body.classList.contains("plan-doc") || head.querySelector('[data-head-tool="folds"]')) return
   if (!main.querySelector("ui-section[collapsible]")) return
   const buttons = FOLD_ALL.map(([isFolded, icon, tip]) => {
-    const button = el("ui-button", { circular: true, basic: true, size: "mini", icon, title: tip, "aria-label": tip })
+    const button = el("ui-button", { appearance: "circular basic", size: "mini", icon, title: tip, "aria-label": tip })
     titleInside(button)
     button.addEventListener("click", () => folds.foldAll(isFolded))
     return button
@@ -3044,7 +3050,7 @@ function wireNewEpic(main) {
   const tip = "Write an idea down as a future epic"
   const button = el(
     "ui-button",
-    { circular: true, basic: true, size: "tiny", icon: "seedling", title: tip },
+    { appearance: "circular basic", size: "tiny", icon: "seedling", title: tip },
     "New epic"
   )
   button.addEventListener("click", openNewEpicBox)

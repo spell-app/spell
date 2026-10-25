@@ -55,7 +55,7 @@ describe("ProseRewrite.rewrite():  Net effect", () => {
 describe("ProseRewrite.rewrite():  code, asides, notes", () => {
   test("a code accordion:  title, language, open, the code as a <pre>'s text", () => {
     const html =
-      '<ui-accordion class="spell-code" styled open="0"><ui-title>design.ts · 2 lines</ui-title>' +
+      '<ui-accordion class="spell-code" appearance="styled" open="0"><ui-title>design.ts · 2 lines</ui-title>' +
       '<ui-content><pre><code class="language-ts">const a = 1 &lt; 2\nconst b = 3</code></pre></ui-content></ui-accordion>'
     expect(rewritten(html)).toBe(
       '<epic-code title="design.ts · 2 lines" language="ts" open><pre>const a = 1 &lt; 2\nconst b = 3</pre></epic-code>'
@@ -75,12 +75,12 @@ describe("ProseRewrite.rewrite():  code, asides, notes", () => {
   test("an aside:  `Aside:` off its title, its content in;  any other title kept as it is", () => {
     expect(
       rewritten(
-        '<ui-accordion class="spell-aside" styled><ui-title>Aside: why not now</ui-title><ui-content><p>later</p></ui-content></ui-accordion>'
+        '<ui-accordion class="spell-aside" appearance="styled"><ui-title>Aside: why not now</ui-title><ui-content><p>later</p></ui-content></ui-accordion>'
       )
     ).toBe('<epic-aside title="why not now"><p>later</p></epic-aside>')
     expect(
       rewritten(
-        '<ui-accordion class="spell-aside" styled><ui-title>As first written</ui-title><ui-content><p>x</p></ui-content></ui-accordion>'
+        '<ui-accordion class="spell-aside" appearance="styled"><ui-title>As first written</ui-title><ui-content><p>x</p></ui-content></ui-accordion>'
       )
     ).toBe('<epic-aside title="As first written"><p>x</p></epic-aside>')
   })
@@ -88,27 +88,27 @@ describe("ProseRewrite.rewrite():  code, asides, notes", () => {
   test("an UPDATE / DONE message:  its state and title;  another word:  left", () => {
     expect(
       rewritten(
-        '<ui-message class="plan-update" state="warning" size="tiny" header="UPDATE"><p>changed</p></ui-message>'
+        '<ui-message class="plan-update" state="warning" size="tiny" heading="UPDATE"><p>changed</p></ui-message>'
       )
     ).toBe('<epic-note state="update"><p>changed</p></epic-note>')
     expect(
       rewritten(
-        '<ui-message class="plan-update" state="success" header="DONE · option A, 2026-10-06"><p>done</p></ui-message>'
+        '<ui-message class="plan-update" state="success" heading="DONE · option A, 2026-10-06"><p>done</p></ui-message>'
       )
     ).toBe('<epic-note state="done" title="option A, 2026-10-06"><p>done</p></epic-note>')
-    const deferred = '<ui-message class="plan-update" header="DEFERRED"><p>x</p></ui-message>'
+    const deferred = '<ui-message class="plan-update" heading="DEFERRED"><p>x</p></ui-message>'
     expect(rewritten(deferred)).toBe(deferred)
     // a phase's bare UPDATE:  that phase's marker, gone when it's done
     expect(
-      rewritten('<ui-message class="plan-update" header="UPDATE" data-phase="7"><p>what changed</p></ui-message>')
+      rewritten('<ui-message class="plan-update" heading="UPDATE" data-phase="7"><p>what changed</p></ui-message>')
     ).toBe('<epic-update phase="7"><p>what changed</p></epic-update>')
   })
 
   test("an option grid:  its lettered cards as <epic-option>s, the chosen one on <epic-choices>", () => {
     expect(
       rewritten(
-        '<ui-grid class="spell-pros-cons"><ui-column><ui-segment><ui-label attached>A · Keep it (recommended)</ui-label>' +
-          "<p>a</p></ui-segment></ui-column><ui-column data-chosen><ui-segment><ui-label attached>B · Drop it</ui-label>" +
+        '<ui-grid class="spell-pros-cons"><ui-column><ui-segment><ui-label attach="top">A · Keep it (recommended)</ui-label>' +
+          '<p>a</p></ui-segment></ui-column><ui-column data-chosen><ui-segment><ui-label attach="top">B · Drop it</ui-label>' +
           "<p>b</p></ui-segment></ui-column></ui-grid>"
       )
     ).toBe(

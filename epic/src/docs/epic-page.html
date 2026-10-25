@@ -76,7 +76,7 @@
             >.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>As markup only, not drawn live: the note below says why.</p>
             <ui-message state="info" heading="Not live on this page">
@@ -144,7 +144,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               The opening of a real epic page (<a
@@ -204,17 +204,17 @@
             </ul>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="compass"></ui-icon>
 
-            <ui-section id="epic-page-parents" label="Its parents" sticky collapsible dividing collapsed>
+            <ui-section id="epic-page-parents" label="Its parents" sticky collapsible dividing open="false">
               <p>
                 None: it's the page. An epic page's file holds exactly one, in <code>main.spell-doc-main</code>, inside
                 <code>&lt;ui-root&gt;</code>.
               </p>
             </ui-section>
 
-            <ui-section id="epic-page-children" label="Its children" sticky collapsible dividing collapsed>
+            <ui-section id="epic-page-children" label="Its children" sticky collapsible dividing open="false">
               <p>
                 The Overview first, then the sections, each <code>kind</code> once at most, with its fixed id. A report
                 (<code>kind="report"</code>) is the one section that isn't numbered: it sits right after the Overview.
@@ -347,7 +347,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <p>The epic's data. Dates are WRITTEN <code>2026-10-08</code> and DRAWN <code>10/8/26</code>.</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
@@ -501,7 +501,7 @@
               draws its test run over its blocks (<a href="epic-test-run.html" target="src-spell-epic-src-docs-epic-test-run-html"><code>&lt;epic-test-run&gt;</code></a>, its part <code>test-run</code>;
               <code>:state(testing)</code>). Only the header and the pill stay;  Esc or Done testing brings the blocks back, the run's unsent answers sent to Claude.
             </p>
-            <ui-section id="epic-page-slots" label="Slots" sticky collapsible dividing collapsed>
+            <ui-section id="epic-page-slots" label="Slots" sticky collapsible dividing open="false">
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -528,7 +528,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-page-parts" label="Parts" sticky collapsible dividing collapsed>
+            <ui-section id="epic-page-parts" label="Parts" sticky collapsible dividing open="false">
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -636,7 +636,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-page-states" label="States" sticky collapsible dividing collapsed>
+            <ui-section id="epic-page-states" label="States" sticky collapsible dividing open="false">
               <p>Custom states: CSS can match them with <code>epic-page:state(name)</code>.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -661,7 +661,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -756,7 +756,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed>
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
@@ -803,7 +803,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="7-saga-page" label="7. As a saga page" sticky collapsible dividing collapsed>
+          <ui-section id="7-saga-page" label="7. As a saga page" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="map"></ui-icon>
             <p>
               With <code>kind="saga"</code> it's a SAGA page (epic <code>epic-workflow</code> P15): one saga's page,
@@ -856,7 +856,7 @@
               </ui-content>
             </ui-accordion>
           </ui-section>
-          <ui-section id="8-stages" label="8. Stages" sticky collapsible dividing collapsed>
+          <ui-section id="8-stages" label="8. Stages" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="route"></ui-icon>
             <p>
               A page goes through three stages (epic <code>epic-engine</code> P29): the Overview is agreed first, then

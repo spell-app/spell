@@ -254,7 +254,7 @@ async function guideCases(size) {
 
   const { page, logs } = await openPage(size, `${url}#${target.heading}`)
   const where = `guide-link #${target.section} ${size.width}px`
-  await page.waitForFunction((id) => !document.getElementById(id)?.collapsed, target.section, { timeout: 15_000 })
+  await page.waitForFunction((id) => document.getElementById(id)?.open, target.section, { timeout: 15_000 })
   await page.waitForTimeout(150)
   const measure = `document.getElementById(${JSON.stringify(target.section)}).shadowRoot.querySelector('[part~="title"]')`
   // on the title's words:  the title's bar runs the window's width, its words in the reading column (its padding)
@@ -265,14 +265,14 @@ async function guideCases(size) {
     return { x: start + Math.min(80, (box.right - start) / 2), y: box.top + box.height / 2 }
   }, measure)
   const watched = await watchWhile(page, () => clickAt(page, point), { measure })
-  if (!(await page.evaluate((id) => document.getElementById(id).collapsed, target.section)))
+  if (await page.evaluate((id) => document.getElementById(id).open, target.section))
     problems.push(`${where}:  didn't fold`)
   report(where, watched)
   await page.screenshot({ path: join(out, `guide-link-${size.width}.png`) })
 
   // plain text, in the window:  a click there must not move the page
   const textWhere = `guide-text ${size.width}px`
-  await page.evaluate((id) => document.getElementById(id).removeAttribute("collapsed"), target.section)
+  await page.evaluate((id) => document.getElementById(id).removeAttribute("open"), target.section)
   await page.waitForTimeout(500)
   const text = await page.evaluate(() => {
     for (const paragraph of document.querySelectorAll("main ui-section p")) {

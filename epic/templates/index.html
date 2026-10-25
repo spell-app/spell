@@ -12,8 +12,8 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>
-          <ui-breadcrumb active>Templates</ui-breadcrumb>
+          <ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Templates</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head"><h1>Templates</h1></header></ui-sticky
@@ -123,7 +123,7 @@
           </ui-cards>
         </ui-section>
         <!-- index:end -->
-        <ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing collapsed>
+        <ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="pen to square"></ui-icon>
           <ul>
             <li>
