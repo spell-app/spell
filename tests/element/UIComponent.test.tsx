@@ -1,4 +1,4 @@
-import { onTestFinished, describe, expect, test } from "vite-plus/test"
+import { onTestFinished, describe, expect, test, vi } from "vite-plus/test"
 import { createContext, createSignal, flush, Show, useContext } from "solid-js"
 import { Dynamic, render, type JSX } from "@solidjs/web"
 
@@ -237,5 +237,63 @@ describe("UIComponent.mount() Solid roots", () => {
     const readerTag = defineElement("slot-reader", () => <span>{useContext(Context)}</span>)
     const host = await ElementFixture.render(`<${providerTag}><${readerTag}></${readerTag}></${providerTag}>`)
     expect(text(host.querySelector(readerTag)!)).toBe("missing")
+  })
+})
+
+////////////////
+// ## Shared words
+//
+// `link`, `font`, `tooltip` and `label`:  every element takes them (epic `ui-gaps` P3).
+////////////////
+
+/** `UIComponent`'s protected `followLink()` hook, as a test spies on it. */
+type LinkFollower = { followLink(link: string, target: string | undefined): void }
+
+describe("UIComponent shared words", () => {
+  /** Render `<tag ...>` (`attributes`:  its attribute text) and wait for it. */
+  async function shown(attributes: string, draw: (component: TestComponent) => JSX.Element = () => <span>text</span>) {
+    const tag = defineElement("words", draw)
+    return ElementFixture.render<DOMElement>(`<${tag} ${attributes}></${tag}>`)
+  }
+
+  test("a click goes to its `link`, in its `target`", async () => {
+    const follow = vi.spyOn(UIComponent.prototype as unknown as LinkFollower, "followLink").mockImplementation(() => {})
+    onTestFinished(() => follow.mockRestore())
+    const element = await shown(`link="help.html" target="_blank"`)
+    expect(element.matches(":state(linked)")).toBe(true)
+    element.click()
+    expect(follow).toHaveBeenCalledWith("help.html", "_blank")
+  })
+
+  test("a click on a control of its own inside stays that control's", async () => {
+    const follow = vi.spyOn(UIComponent.prototype as unknown as LinkFollower, "followLink").mockImplementation(() => {})
+    onTestFinished(() => follow.mockRestore())
+    const element = await shown(`link="help.html"`, () => <button>Inside</button>)
+    element.shadowRoot!.querySelector("button")!.click()
+    expect(follow).not.toHaveBeenCalled()
+  })
+
+  test("`font` sets a state per word written, and clears the rest", async () => {
+    const element = await shown(`font="bold italic"`)
+    expect([element.matches(":state(font-bold)"), element.matches(":state(font-italic)")]).toEqual([true, true])
+    element.setAttribute("font", "italic")
+    await ElementFixture.settle()
+    expect([element.matches(":state(font-bold)"), element.matches(":state(font-italic)")]).toEqual([false, true])
+  })
+
+  test("`tooltip` writes the element's `title`, and takes it away again", async () => {
+    const element = await shown(`tooltip="Saves it"`)
+    expect(element.title).toBe("Saves it")
+    element.removeAttribute("tooltip")
+    await ElementFixture.settle()
+    expect(element.hasAttribute("title")).toBe(false)
+  })
+
+  test("`label` names the element;  a family's own `label` is left to mean what it means", async () => {
+    const element = await shown(`label="Close"`)
+    expect(element.internals.ariaLabel).toBe("Close")
+    const tag = defineLabel()
+    const own = await ElementFixture.render<DOMElement>(`<${tag} label="Shown"></${tag}>`)
+    expect(own.internals.ariaLabel).toBe(null)
   })
 })

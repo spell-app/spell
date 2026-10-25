@@ -517,7 +517,14 @@ export type SharedDictionary = {
   /** BCP 47 language tag, e.g. `es`:  the dictionaries it serves. */
   lang: string
   /** Shared attribute name => localized, e.g. `{ disabled: "desactivado" }`. */
-  attributes: Readonly<Partial<Record<"disabled" | "loading" | "visible" | "animation", string>>>
+  attributes: Readonly<
+    Partial<
+      Record<
+        "disabled" | "loading" | "visible" | "animation" | "link" | "target" | "font" | "tooltip" | "label",
+        string
+      >
+    >
+  >
 }
 
 /** Per-component part of a `Dictionary`:  wins over the dictionary-wide maps for that component only. */

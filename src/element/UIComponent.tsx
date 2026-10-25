@@ -208,7 +208,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const decorated = E.Reactive.cssStatesOf(this, this.elementSetup.cssStates)
     createRenderEffect(
       () => {
-        const states: Record<string, boolean | undefined> = { ...this.cssStates() }
+        const states: Record<string, boolean | undefined> = { ...this.fontStates, ...this.cssStates() }
         for (const { member, state: name } of decorated) states[name] = !!(this as Record<PropertyKey, unknown>)[member]
         return states
       },
@@ -319,11 +319,101 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     aria: {},
     disabled: "unusable",
     loading: "loader",
+    link: "click",
     visible: "shown",
     // the runtime's (Spell UI's `"fade"`):  read as an element shows or hides, by then installed
     get animation() {
       return E.SpellSolid.settings.motion.defaultAnimation
     }
+  }
+
+  ////////////////
+  // ## Shared words:  link, font, tooltip, label
+  //
+  // Four more attributes every element takes (`SharedVocabulary`;  epic `ui-gaps` P3, Owen's request r1),
+  // unless its vocabulary declares its own of that name:
+  // - `link` (and `target`):  where a click goes (`elementSetup.link`);  `:state(linked)`
+  // - `font`:  how its letters look, several words at once (`font="bold italic"`):  `:state(font-bold)` ...
+  // - `tooltip`:  the browser's own tooltip, its `title`
+  // - `label`:  its accessible name, `aria-label`
+  ////////////////
+
+  /**
+   * The shared `link`:  where a click on the element goes (`elementSetup.link`).
+   * - `undefined` without one, or where the family declares its own `link` (a card's look, until epic `ui-gaps` P4).
+   */
+  @cssState("linked")
+  get sharedLink(): string | undefined {
+    return this.sharedText(LINK)
+  }
+
+  /**
+   * The words of the shared `font` (`bold italic`), as `:state(font-<word>)`s:  every word its spec lists, on or off.
+   * - Empty where the family declares its own `font`.
+   */
+  get fontStates(): Record<string, boolean> {
+    if (!this.elementDefinition.takesShared(FONT)) return {}
+    const written = new Set((this.sharedText(FONT) ?? "").split(/\s+/))
+    const { values } = this.elementDefinition.attribute(FONT).spec
+    const words = Array.isArray(values) ? values : [...written]
+    return Object.fromEntries(words.filter(Boolean).map((word) => [`${FONT}-${word}`, written.has(word)]))
+  }
+
+  /** The shared `tooltip`:  the browser's own tooltip, written as the element's `title`. */
+  get sharedTooltip(): string | undefined {
+    return this.sharedText(TOOLTIP)
+  }
+
+  /** The shared `label`:  the element's accessible name (`aria-label`). */
+  get sharedLabel(): string | undefined {
+    return this.sharedText(LABEL)
+  }
+
+  /**
+   * `tooltip` or `label` changed:  the element's `title`, and its accessible name.
+   * - `title` only while `tooltip` says, or once it said:  a page's own `title` is left alone otherwise.
+   * - The accessible name only where `label` is the shared one:  a family's own `label` means something else
+   *   (a field's label, a statistic's), and names it its own way.
+   */
+  @onChange("sharedTooltip", "sharedLabel", { writesDOMElement: true })
+  protected onSharedWordsChanged(tooltip: string | undefined, label: string | undefined) {
+    const { domElement, internalState } = this
+    if (tooltip !== undefined) domElement.setAttribute("title", tooltip)
+    else if (internalState.wroteTitle) domElement.removeAttribute("title")
+    internalState.wroteTitle = tooltip !== undefined
+    if (this.elementDefinition.takesShared(LABEL)) domElement.internals.ariaLabel = label ?? null
+  }
+
+  /**
+   * A click on the element goes to its `link`, where `elementSetup.link` is `"click"`.
+   * - Not when the click was a control's of its own inside:  a button, a link, a field.
+   * - Not while it's disabled, nor when someone called `preventDefault()`.
+   */
+  @on("click")
+  protected onSharedLinkClick(event: MouseEvent) {
+    const link = this.sharedLink
+    if (!link || this.elementSetup.link !== "click" || this.isDisabled || event.defaultPrevented) return
+    const path = event.composedPath()
+    const inside = path.slice(0, Math.max(0, path.indexOf(this.domElement)))
+    if (inside.some((node) => (node as Element).matches?.(OWN_CONTROLS))) return
+    this.followLink(link, this.sharedText(TARGET))
+  }
+
+  /**
+   * Hook:  go to `link`, in `target` if there is one (`_blank`, a window's name).
+   * - SIDE EFFECT:  leaves the page, or opens a window.
+   * - Tests override it, rather than leave their page.
+   */
+  protected followLink(link: string, target: string | undefined) {
+    if (target && target !== "_self") window.open(link, target)
+    else window.location.assign(link)
+  }
+
+  /** A shared attribute's text, where the element takes it and it isn't empty;  else `undefined`. */
+  private sharedText(name: string): string | undefined {
+    if (!this.elementDefinition.takesShared(name)) return undefined
+    const value = E.Reactive.attributeValue(this, name)
+    return typeof value === "string" && value !== "" ? value : undefined
   }
 
   ////////////////
@@ -1168,6 +1258,16 @@ type AppContextHolder = Element & { appContext?: unknown }
 /** `<ui-root>`'s tag:  a root even before its family loads (`UIComponent.isRootTag()`). */
 const ROOT_TAG = "ui-root"
 
+/** The shared attributes' canonical names ("Shared words"). */
+const LINK = "link"
+const TARGET = "target"
+const FONT = "font"
+const TOOLTIP = "tooltip"
+const LABEL = "label"
+
+/** What a click on is that control's, not the element's `link` (`onSharedLinkClick()`). */
+const OWN_CONTROLS = "a[href], button, input, select, textarea, label, [role=button], [role=link]"
+
 /** `UIComponent.internalState`:  what only the base class uses inside. */
 type InternalState = {
   /**
@@ -1179,6 +1279,8 @@ type InternalState = {
   listeners?: AbortController
   /** the boxes the shared states made inert (disabled or loading), the only ones they clear again */
   madeInert?: HTMLElement[]
+  /** the shared `tooltip` wrote the element's `title`, so a later empty one removes it again */
+  wroteTitle?: boolean
   /** `isVisible` as `onVisibleChange()` last ran with it;  `undefined` before the element first drew */
   wasVisible?: boolean
   /** counts `onVisibleChange()` runs, so only the latest ends the hiding */

@@ -38,13 +38,13 @@ type HotClass = UIComponentClass & typeof UIComponent
 type HotElement = DOMElement & Record<string, any> & { shadowRoot: ShadowRoot }
 
 /** The attribute every test tag has, unless a test says otherwise. */
-const LABEL = { name: "label", kind: "string", description: "A label." } as const
+const CAPTION = { name: "caption", kind: "string", description: "A caption." } as const
 
 /** What every element starts with for the shared attributes (as Spell UI's `SharedVocabulary`), never written here. */
 const SHARED_STARTING_VALUES = { disabled: false, loading: false, visible: true, animation: undefined } as const
 
-/** The Spanish names of a test tag:  `<x-hot-1-es etiqueta="...">`. */
-const SPANISH = { lang: "es", attributes: { label: "etiqueta" } } as const satisfies Dictionary
+/** The Spanish names of a test tag:  `<x-hot-1-es leyenda="...">`. */
+const SPANISH = { lang: "es", attributes: { caption: "leyenda" } } as const satisfies Dictionary
 
 /** How many tags `nextTag()` has handed out. */
 let tagCount = 0
@@ -55,7 +55,7 @@ function nextTag(): string {
 }
 
 /** A vocabulary for test tag `tag`, with `attributes` and nothing else. */
-function vocabularyFor(tag: string, attributes: readonly object[] = [LABEL]): ComponentVocabulary {
+function vocabularyFor(tag: string, attributes: readonly object[] = [CAPTION]): ComponentVocabulary {
   return {
     tag,
     noun: "hot",
@@ -147,11 +147,11 @@ describe("HotDefinitions.liveElements()", () => {
 describe("HotDefinitions.update()", () => {
   test("re-renders every live element IN PLACE:  same element and shadow root, values kept, state reset", async () => {
     const tag = nextTag()
-    const vocabulary = vocabularyFor(tag, [LABEL, { name: "size", kind: "string", description: "A size." }])
+    const vocabulary = vocabularyFor(tag, [CAPTION, { name: "size", kind: "string", description: "A size." }])
     makeVersion("one", vocabulary).define()
-    const element = await mount(`<${tag} label="a"></${tag}>`)
+    const element = await mount(`<${tag} caption="a"></${tag}>`)
     const holder = (await mount(`<div></div>`)).attachShadow({ mode: "open" })
-    holder.innerHTML = `<${tag} label="s"></${tag}>`
+    holder.innerHTML = `<${tag} caption="s"></${tag}>`
     const nested = holder.firstElementChild as HotElement
     await ElementFixture.settle()
     element.size = "big"
@@ -170,11 +170,11 @@ describe("HotDefinitions.update()", () => {
     expect(element.shadowRoot).toBe(root)
     expect(textOf(element)).toBe("two a big")
     expect(textOf(nested)).toBe("two s -")
-    expect(element.getAttribute("label")).toBe("a")
+    expect(element.getAttribute("caption")).toBe("a")
     expect(element.component).toBeInstanceOf(Next)
     expect((element.component as unknown as { taps: number }).taps).toBe(0)
     // and the new component is live, not a snapshot
-    element.label = "b"
+    element.caption = "b"
     await ElementFixture.tick()
     expect(textOf(element)).toBe("two b big")
   })
@@ -186,15 +186,15 @@ describe("HotDefinitions.update()", () => {
     const First = makeVersion("one", vocabulary)
     First.define()
     First.define(alias, SPANISH)
-    const english = await mount(`<${tag} label="a"></${tag}>`)
-    const spanish = await mount(`<${alias} etiqueta="b"></${alias}>`)
+    const english = await mount(`<${tag} caption="a"></${tag}>`)
+    const spanish = await mount(`<${alias} leyenda="b"></${alias}>`)
     expect(textOf(spanish)).toBe("one b")
 
     makeVersion("two", vocabulary).define()
     expect(await update()).toEqual({ reloaded: [tag, alias], refused: [] })
     expect(textOf(english)).toBe("two a")
     expect(textOf(spanish)).toBe("two b")
-    spanish.etiqueta = "c"
+    spanish.leyenda = "c"
     await ElementFixture.tick()
     expect(textOf(spanish)).toBe("two c")
   })
@@ -202,10 +202,10 @@ describe("HotDefinitions.update()", () => {
   test.each([
     [
       "a new observed attribute",
-      { attributes: [LABEL, { name: "extra", kind: "string" }] },
+      { attributes: [CAPTION, { name: "extra", kind: "string" }] },
       "observed attributes changed (+extra)"
     ],
-    ["a removed observed attribute", { attributes: [] }, "observed attributes changed (-label)"],
+    ["a removed observed attribute", { attributes: [] }, "observed attributes changed (-caption)"],
     [
       "the DOM element class",
       { elementSetup: { DOMElement: class extends DOMElement {} } },
@@ -218,7 +218,7 @@ describe("HotDefinitions.update()", () => {
     async (_title, change, reason) => {
       const tag = nextTag()
       makeVersion("one", vocabularyFor(tag)).define()
-      const element = await mount(`<${tag} label="a"></${tag}>`)
+      const element = await mount(`<${tag} caption="a"></${tag}>`)
       const vocabulary = change.attributes ? vocabularyFor(tag, change.attributes) : vocabularyFor(tag)
       makeVersion("two", vocabulary, { elementSetup: change.elementSetup }).define()
       const invalidate = vi.fn()
@@ -239,7 +239,7 @@ describe("HotDefinitions.update()", () => {
     const tag = nextTag()
     const vocabulary = vocabularyFor(tag)
     makeVersion("one", vocabulary).define()
-    const element = await mount(`<${tag} label="a"></${tag}>`)
+    const element = await mount(`<${tag} caption="a"></${tag}>`)
     const render = () => {
       throw new Error("boom in render")
     }
@@ -260,7 +260,7 @@ describe("HotDefinitions.update()", () => {
     const tag = nextTag()
     const vocabulary = vocabularyFor(tag)
     makeVersion("one", vocabulary).define()
-    const element = await mount(`<${tag} label="a"></${tag}>`)
+    const element = await mount(`<${tag} caption="a"></${tag}>`)
     const container = element.parentElement!
     element.remove()
     const Next = makeVersion("two", vocabulary)
@@ -277,10 +277,10 @@ describe("HotDefinitions.update()", () => {
 describe("HotDefinitions.define()", () => {
   test("throws, changing nothing, when the new version's property would hide a member of the element", async () => {
     const tag = nextTag()
-    makeVersion("one", vocabularyFor(tag, [{ ...LABEL, name: "title", property: "heading" }])).define()
+    makeVersion("one", vocabularyFor(tag, [{ ...CAPTION, name: "title", property: "heading" }])).define()
     const element = await mount(`<${tag} title="a"></${tag}>`)
     // `title` camelCased is `title`:  the new property would hide `HTMLElement.title`
-    const Next = makeVersion("two", vocabularyFor(tag, [{ ...LABEL, name: "title" }]))
+    const Next = makeVersion("two", vocabularyFor(tag, [{ ...CAPTION, name: "title" }]))
     expect(() => Next.define()).toThrow(/would hide the element's own member/)
     expect(await update()).toEqual({ reloaded: [], refused: [] })
     expect(element.heading).toBe("a")
@@ -319,8 +319,8 @@ describe("HotDefinitions.keeps", () => {
     const [kept, swapped] = [nextTag(), nextTag()]
     makeVersion("one", vocabularyFor(kept)).define()
     makeVersion("one", vocabularyFor(swapped)).define()
-    const keptElement = await mount(`<${kept} label="a"></${kept}>`)
-    const swappedElement = await mount(`<${swapped} label="a"></${swapped}>`)
+    const keptElement = await mount(`<${kept} caption="a"></${kept}>`)
+    const swappedElement = await mount(`<${swapped} caption="a"></${swapped}>`)
     const keptComponent = keptElement.component
     HotDefinitions.keeps = (tag) => tag === kept
     try {
