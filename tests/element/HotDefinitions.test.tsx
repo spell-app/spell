@@ -313,6 +313,45 @@ describe("HotDefinitions.migrate()", () => {
   })
 })
 
+// epic `epic-engine` I116:  a rebuilt component pack swapped into a page (Spell UI's `PackHotSwap`)
+describe("HotDefinitions.keeps", () => {
+  test("a tag it keeps stays on its live class:  nothing swapped, nothing re-rendered;  the others swap", async () => {
+    const [kept, swapped] = [nextTag(), nextTag()]
+    makeVersion("one", vocabularyFor(kept)).define()
+    makeVersion("one", vocabularyFor(swapped)).define()
+    const keptElement = await mount(`<${kept} label="a"></${kept}>`)
+    const swappedElement = await mount(`<${swapped} label="a"></${swapped}>`)
+    const keptComponent = keptElement.component
+    HotDefinitions.keeps = (tag) => tag === kept
+    try {
+      makeVersion("two", vocabularyFor(kept)).define()
+      makeVersion("two", vocabularyFor(swapped)).define()
+    } finally {
+      HotDefinitions.keeps = undefined
+    }
+    expect(await update()).toEqual({ reloaded: [swapped], refused: [] })
+    expect(keptElement.component).toBe(keptComponent)
+    expect(textOf(keptElement)).toBe("one a")
+    expect(textOf(swappedElement)).toBe("two a")
+  })
+
+  test("a swapped class's changed style sheets are registered again, by name;  unchanged ones aren't", async () => {
+    const tag = nextTag()
+    const vocabulary = vocabularyFor(tag)
+    makeVersion("one", vocabulary, { elementSetup: { styleSheets: { "hot-a": ".a {}", "hot-b": ".b {}" } } }).define()
+    const register = vi.spyOn(SpellSolid.settings.styles, "register").mockImplementation(() => {})
+    try {
+      makeVersion("two", vocabulary, {
+        elementSetup: { styleSheets: { "hot-a": ".a { color: red }", "hot-b": ".b {}" } }
+      }).define()
+      expect(register).toHaveBeenCalledWith("hot-a", ".a { color: red }")
+      expect(register).not.toHaveBeenCalledWith("hot-b", expect.anything())
+    } finally {
+      register.mockRestore()
+    }
+  })
+})
+
 describe("HotDefinitions.updateStyle()", () => {
   test.each([
     ["/components/ui-button/UIButton.css?inline", "button"],

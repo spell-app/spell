@@ -131,6 +131,29 @@ describe("ComponentPack.hash() / sources()", () => {
     ])
   })
 
+  // epic `epic-engine` I116:  a page swapping in the rebuilt pack re-renders only the families whose hash changed
+  test("familyHashes():  a family's hash moves with its own files and what it imports, never another family's", () => {
+    const folder = writePack("two", {
+      ...card("two"),
+      "package.json": { name: "two", spellPack: { prefix: "two-" } },
+      "components/index.ts": `export * from "./two-card"\nexport * from "./two-dot"\n`,
+      "components/two-card/TwoCard.tsx": `import { WORDS } from "two/shared"\nexport const CARD = WORDS\n`,
+      "components/two-dot/index.ts": `export const DOT = 1\n`,
+      "src/shared/index.ts": `export const WORDS = 1\n`
+    })
+    const pack = ComponentPack.read(folder)
+    const before = pack.familyHashes()
+    expect(Object.keys(before)).toEqual(["two-card", "two-dot"])
+    write(folder, "components/two-dot/index.ts", `export const DOT = 2\n`)
+    const dotChanged = pack.familyHashes()
+    expect(dotChanged["two-card"]).toBe(before["two-card"])
+    expect(dotChanged["two-dot"]).not.toBe(before["two-dot"])
+    write(folder, "src/shared/index.ts", `export const WORDS = 2\n`)
+    const sharedChanged = pack.familyHashes()
+    expect(sharedChanged["two-card"]).not.toBe(dotChanged["two-card"])
+    expect(sharedChanged["two-dot"]).toBe(dotChanged["two-dot"])
+  })
+
   test("tests and the pack's own generated folder are never sources", () => {
     const folder = writePack("tidy", {
       ...card("tidy"),
