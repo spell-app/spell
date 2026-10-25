@@ -190,6 +190,10 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
      it ends.
    - It says `wake` (one of the epic's sessions is running):  that one got the prompt;  say so, and that this tab
      can be closed.
+   - It says "this session can't move" (the end-of-turn hook won't run, epic `epic-engine` P26):  it started a NEW
+     session in the epic's window instead.  One line:  that, its `fix:` line, and that this tab can be closed.
+   - It names a broken worktree (git no longer knows the one this session is in):  the settings came from the main
+     checkout anyway;  pass its fix line on to Owen.
 
 **Launched:**  the new session's `/epic <name>`, its worktree made, this window its own:
 - The worktree:  `epic worktree path <name>` (`.claude/worktrees/<name>`, or beside the repo).

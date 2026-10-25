@@ -538,8 +538,8 @@ Without the extension, the window verbs exit 1, and say so.
 | --- | --- |
 | `epic window open <name>` | opens worktree `<name>` in a new window, from its window file;  `--color <look>`;  `--no-open`:  only writes the file |
 | `epic window close <name>` | closes that window and deletes its file |
-| `epic window launch <name>` | wakes an epic:  its running session;  else a new session in its open window;  else makes worktree `<name>` if needed, opens its window and starts a session there;  `--prompt <text>`, `--color <look>` |
-| `epic window handoff <name>` | moves this session to `<name>`'s window when this turn ends;  `--prompt <text>`:  typed into the new tab;  `--back`:  from it to its package's window |
+| `epic window launch <name>` | wakes an epic:  its running session;  else a new session in its open window;  else makes worktree `<name>` if needed, opens its window and starts a session there;  `--prompt <text>`, `--color <look>`;  `--move`:  this session goes there instead, as its turn ends, or, when nothing would carry the move out, a new session there and a line saying why |
+| `epic window handoff <name>` | moves this session to `<name>`'s window when this turn ends;  `--prompt <text>`:  typed into the new tab;  `--back`:  from it to its package's window;  exits 1, saying why and what fixes it, when the end-of-turn hook won't run |
 | `epic window resume <record>` | the move itself:  the turn-end hook runs it |
 | `epic window should-stay [--epic]` | recommends staying in this window or moving to a new one, when isolating, and says why |
 | `epic window stay <name>` | a session staying in this window for worktree `<name>`:  titles and tints the window;  `--end` puts both back |
