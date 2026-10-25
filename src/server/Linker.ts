@@ -912,9 +912,16 @@ function contentAreasOf(root: string, content: string): string[] {
     })
 }
 
-/** Whether `path` is a symlink whose target isn't there. */
+/**
+ * Whether `path` is a symlink whose target isn't there.
+ * - NEVER throws:  a path through a FILE (`<worktree>/.git/x`, a worktree's `.git` is a file) is no link
+ */
 function isDanglingLink(path: string): boolean {
-  return Boolean(lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink()) && !existsSync(path)
+  try {
+    return Boolean(lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink()) && !existsSync(path)
+  } catch {
+    return false
+  }
 }
 
 /** Whether `path` is a folder (following symlinks);  `false` when it doesn't exist. */
