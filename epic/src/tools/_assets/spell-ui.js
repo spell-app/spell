@@ -257,8 +257,8 @@ footer button.primary { border-color: transparent; background: light-dark(#5b3fd
     <p class="spell-note-hint">\u2318 Enter saves.  It's written down as a future epic, with a seedling on this page;  /airplane land asks whether to start it.</p>
   </ui-content>
   <ui-actions>
-    <ui-button class="spell-note-cancel" circular basic>Cancel</ui-button>
-    <ui-button class="spell-note-save" circular primary icon="seedling">Make the epic</ui-button>
+    <ui-button class="spell-note-cancel" appearance="circular basic">Cancel</ui-button>
+    <ui-button class="spell-note-save" appearance="circular" color="primary" icon="seedling">Make the epic</ui-button>
   </ui-actions>
 </ui-modal>`,i=e.content.firstElementChild;let[t,r]=i.querySelectorAll("input, textarea"),a=i.querySelector(".spell-note-save"),o=()=>i.visible=!1,n=()=>jn(u4,{title:t.value,prompt:r.value}),s=async()=>{if(!t.value.trim())return t.focus();a.setAttribute("loading","");try{let{name:l}=await Ta.forPage().post(iBe,{title:t.value.trim(),prompt:r.value.trim()});jn(u4,{}),o(),Fo(`Future epic ${l} written down`,"success")}catch(l){Fo(`Couldn't make the epic:  ${l.message}`,"error")}finally{a.removeAttribute("loading")}};t.addEventListener("input",n),r.addEventListener("input",()=>{Qu(r),n()});for(let l of[t,r])l.addEventListener("keydown",c=>{c.key==="Enter"&&(c.metaKey||c.ctrlKey)&&s()});return a.addEventListener("click",()=>{s()}),i.querySelector(".spell-note-cancel").addEventListener("click",o),document.body.append(i),i}function nBe(i){let e=[];for(let r of i.childNodes){if(r.nodeType===Node.ELEMENT_NODE&&r.matches("epic-page-note-head, spell-note-reply"))continue;let a=r.nodeType===Node.ELEMENT_NODE?t(r):r.textContent;a.trim()&&e.push(a.trim())}return e.join(`
 

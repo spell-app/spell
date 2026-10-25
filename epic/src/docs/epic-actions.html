@@ -28,7 +28,7 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-actions&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-actions&gt;
@@ -57,19 +57,19 @@
             <p>A row with two buttons, before a paragraph, as the docs runtime makes it.</p>
             <div style="position: relative; padding: 8px; border: 1px dashed var(--ui-border-color)">
               <epic-actions style="--spell-block-gap: 0px">
-                <ui-button basic circular size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
-                <ui-button basic size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
+                <ui-button appearance="basic circular" size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
+                <ui-button appearance="basic" size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
               </epic-actions>
               <p style="margin: 0">A paragraph of an epic page: its controls sit over its top right corner, on the page's ground, and never push its text aside.</p>
             </div>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 5 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
                     <epic-actions data-spell-added>
-                      <ui-button basic circular size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
-                      <ui-button basic size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
+                      <ui-button appearance="basic circular" size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
+                      <ui-button appearance="basic" size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
                     </epic-actions>
                     <p>A paragraph of an epic page ...</p>
                   </script></ui-code
@@ -103,7 +103,7 @@
 
           <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Name</th><th>What it is</th></tr>

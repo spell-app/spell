@@ -648,7 +648,7 @@ class PageComments {
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
-   *   a `<ui-item link>` (a button), its count a `<ui-label>` over the icon's top right, as a section's badge
+   *   a `<ui-item appearance="link">` (a button), its count a `<ui-label>` over the icon's top right, as a section's badge
    * - kept when the toolbar is built anew (a live update), and drawn again with the comments
    * - where it goes:  `waitingHome()`, the one place to change to move it
    */
@@ -1669,7 +1669,7 @@ const UNDO_MS = 6000
 
 /**
  * A control the comments draw (epic `epic-engine` I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> ...
- * components for these pages?"):  a `<ui-button circular basic size="mini">` with `icon`, never a raw `<button>`, so
+ * components for these pages?"):  a `<ui-button appearance="circular basic" size="mini">` with `icon`, never a raw `<button>`, so
  * the component centres its icon;  `tip` its tooltip and name, on the inner button too (`titleInside()`).
  * - `size`:  another size (Send's pill:  `tiny`, as the New epic pill)
  */

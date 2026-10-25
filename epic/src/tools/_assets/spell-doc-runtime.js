@@ -427,7 +427,7 @@ function drawReadingTime(main) {
  * - Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ...
  *   Remember that setting per table"
  * - The button is a bare icon in the table's ACTIONS ROW (`addBlockAction()`), right of its bullhorn.
- *   - `.spell-table-toggle`, a `<ui-button basic>` with no edge (`spell-doc.css`)
+ *   - `.spell-table-toggle`, a `<ui-button appearance="basic">` with no edge (`spell-doc.css`)
  *   - Owen, 2026-10-19:  "The expand button should be to the right of the bullhorn rather than in its own line"
  *   - the row is a line of no height, so it takes no room;  a click flips it back
  * - Expanded, the row moves with the table:  its buttons stay over the table's top right corner.
@@ -3095,8 +3095,8 @@ function newEpicBox() {
     <p class="spell-note-hint">⌘ Enter saves.  It's written down as a future epic, with a seedling on this page;  /airplane land asks whether to start it.</p>
   </ui-content>
   <ui-actions>
-    <ui-button class="spell-note-cancel" circular basic>Cancel</ui-button>
-    <ui-button class="spell-note-save" circular primary icon="seedling">Make the epic</ui-button>
+    <ui-button class="spell-note-cancel" appearance="circular basic">Cancel</ui-button>
+    <ui-button class="spell-note-save" appearance="circular" color="primary" icon="seedling">Make the epic</ui-button>
   </ui-actions>
 </ui-modal>`
   box = template.content.firstElementChild
