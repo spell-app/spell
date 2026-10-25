@@ -6,11 +6,11 @@
  *   `<ui-section color="teal" dividing sticky>` => `ui teal dividing sticky section`.
  * - Not class words, which the component draws or reads instead:
  *   - the strings and numbers:  `label`, `hint`, `description`, `level`, `badge`, `offset`, `height`
- *   - the booleans:  `collapsible`, `collapsed`
+ *   - the booleans:  `collapsible`, `open` (`collapsed` its old name, turned round)
  *   - `fold-icon`
  * - `source` (`UIT.LoadableBody*`):  the content comes from a file the first time the section unfolds.
  *   Spread in here, so a subclass reusing this vocabulary (`<ui-panel>`) has it too.
- * - `collapsed` is CONTROLLED, like the accordion's `open`:  set it to fold or unfold.
+ * - `open` is CONTROLLED, like the accordion's:  set it to fold or unfold (`open="false"` folds).
  *   `ui-opening` / `ui-closing` can veto a person's change.
  * - Its words match `<ui-field>`'s (epic `property-editor` P10, decision Q12):
  *   - `label`, `hint`, `description`
@@ -89,12 +89,15 @@ export const sectionVocabulary = {
         '`<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.'
     },
     {
-      name: "collapsed",
+      name: "open",
       group: "states",
       kind: "boolean",
+      default: true,
+      replaces: [{ from: "collapsed", value: "false" }],
       description:
-        "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto " +
-        "a person's changes.  Find-in-page unfolds a match."
+        'Unfolded;  `open="false"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  ' +
+        "`ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is " +
+        "`collapsed` (turned round), still a property of the element too."
     },
     {
       name: "fold-icon",
@@ -224,7 +227,7 @@ export const sectionVocabulary = {
     {
       name: "ui-opened",
       detail: "{ open: boolean, section: Element }",
-      description: "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+      description: "Unfolded, by any route:  the title, the page setting `open`, find-in-page."
     },
     {
       name: "ui-closing",
@@ -235,7 +238,7 @@ export const sectionVocabulary = {
     {
       name: "ui-closed",
       detail: "{ open: boolean, section: Element }",
-      description: "Folded, by any route:  the title, or the page setting `collapsed`."
+      description: 'Folded, by any route:  the title, or the page setting `open="false"`.'
     },
     ...UIT.SourceBodyEvents
   ],

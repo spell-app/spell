@@ -18473,7 +18473,7 @@ export interface UIPanelEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -18484,7 +18484,7 @@ export interface UIPanelEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -18583,15 +18583,20 @@ export interface UIPanelAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Unfolded;  `open="false"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
@@ -18984,7 +18989,7 @@ export interface UIPanelAttributes {
    */
   "on-ui-opening"?: (event: UIPanelEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPanelEventMap["ui-opened"]) => void
@@ -18995,7 +19000,7 @@ export interface UIPanelAttributes {
    */
   "on-ui-closing"?: (event: UIPanelEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPanelEventMap["ui-closed"]) => void
@@ -21236,7 +21241,7 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -21247,7 +21252,7 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -21556,15 +21561,20 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Unfolded;  `open="false"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
@@ -21951,7 +21961,7 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-opening"?: (event: UIPropertyEditorEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyEditorEventMap["ui-opened"]) => void
@@ -21962,7 +21972,7 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-closing"?: (event: UIPropertyEditorEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyEditorEventMap["ui-closed"]) => void
@@ -22004,7 +22014,7 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -22015,7 +22025,7 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -22163,15 +22173,20 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Unfolded;  `open="false"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
@@ -22550,7 +22565,7 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-opening"?: (event: UIPropertyGroupEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyGroupEventMap["ui-opened"]) => void
@@ -22561,7 +22576,7 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-closing"?: (event: UIPropertyGroupEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyGroupEventMap["ui-closed"]) => void
@@ -25518,7 +25533,7 @@ export interface UISectionEventMap {
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
@@ -25529,7 +25544,7 @@ export interface UISectionEventMap {
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -25628,15 +25643,20 @@ export interface UISectionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Unfolded;  `open="false"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.
    * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  open?: boolean | ""
+  /**
+   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
    */
   collapsed?: boolean | ""
   /**
-   * `collapsed`, as the DOM element's property.
-   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsed"?: boolean | ""
+  "prop:open"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
@@ -26029,7 +26049,7 @@ export interface UISectionAttributes {
    */
   "on-ui-opening"?: (event: UISectionEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Unfolded, by any route:  the title, the page setting `open`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UISectionEventMap["ui-opened"]) => void
@@ -26040,7 +26060,7 @@ export interface UISectionAttributes {
    */
   "on-ui-closing"?: (event: UISectionEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Folded, by any route:  the title, or the page setting `open="false"`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UISectionEventMap["ui-closed"]) => void

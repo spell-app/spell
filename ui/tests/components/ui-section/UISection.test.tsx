@@ -23,8 +23,8 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-section/examples/e
   eager: true
 })
 
-/** A `<ui-section>` DOM element with its controlled `collapsed` property. */
-type SectionElement = DOMElement & { collapsed: boolean }
+/** A `<ui-section>` DOM element with its controlled `open` property, and `collapsed`, its old name turned round. */
+type SectionElement = DOMElement & { open: boolean; collapsed: boolean }
 
 /** Render one `<ui-section>`;  returns it with its shadow parts. */
 async function section(html: string) {
@@ -256,10 +256,10 @@ describe("<ui-section> folding", () => {
     await userEvent.click(host.querySelector("a")!)
     await ElementFixture.tick()
     expect(seen).toEqual([])
-    expect(host.collapsed).toBeFalsy()
+    expect(host.open).toBe(true)
   })
 
-  it("folds on a click:  a cancelable, composed ui-closing first, then `collapsed`", async () => {
+  it("folds on a click:  a cancelable, composed ui-closing first, then `open` off", async () => {
     const { host, toggle, content } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
     const seen = record(host)
     await userEvent.click(toggle)
@@ -272,23 +272,23 @@ describe("<ui-section> folding", () => {
       bubbles: true,
       detail: { open: false, section: host, originalEvent: expect.any(MouseEvent) }
     })
-    expect(host.collapsed).toBe(true)
-    expect(host.hasAttribute("collapsed")).toBe(true)
+    expect(host.open).toBe(false)
+    expect(host.getAttribute("open")).toBe("false")
     expect(host.matches(":state(collapsed)")).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("false")
     await expect.poll(() => folded(content)).toBe(true)
   })
 
   it("unfolds on the next click, announcing ui-opening", async () => {
-    const { host, toggle, content } = await section(`<ui-section label="H" collapsible collapsed>Body</ui-section>`)
+    const { host, toggle, content } = await section(`<ui-section label="H" collapsible open="false">Body</ui-section>`)
     expect(folded(content)).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("false")
     const seen = record(host)
     await userEvent.click(toggle)
     await ElementFixture.tick()
     expect(seen.map(({ type, event }) => [type, event.detail.open])).toEqual([["ui-opening", true]])
-    expect(host.collapsed).toBe(false)
-    expect(host.hasAttribute("collapsed")).toBe(false)
+    expect(host.open).toBe(true)
+    expect(host.getAttribute("open")).not.toBe("false")
     expect(host.matches(":state(collapsed)")).toBe(false)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
     expect(content.hasAttribute("hidden")).toBe(false)
@@ -300,10 +300,10 @@ describe("<ui-section> folding", () => {
     toggle.focus()
     await userEvent.keyboard("{Enter}")
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(true)
+    expect(host.open).toBe(false)
     await userEvent.keyboard(" ")
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(false)
+    expect(host.open).toBe(true)
     expect(seen.map(({ type }) => type)).toEqual(["ui-closing", "ui-opening"])
   })
 
@@ -322,33 +322,44 @@ describe("<ui-section> folding", () => {
     host.addEventListener("ui-closing", (event) => event.preventDefault(), { once: true })
     await userEvent.click(toggle)
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(false)
+    expect(host.open).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
     expect(content.hasAttribute("hidden")).toBe(false)
-    host.collapsed = true
+    host.open = false
     await ElementFixture.tick()
     host.addEventListener("ui-opening", (event) => event.preventDefault(), { once: true })
     await userEvent.click(toggle)
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(true)
+    expect(host.open).toBe(false)
   })
 
-  it("is controlled:  `collapsed` set by the page folds and unfolds without events", async () => {
+  it("is controlled:  `open` set by the page folds and unfolds without events", async () => {
     const { host, toggle, content } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
     const seen = record(host)
-    host.collapsed = true
+    host.open = false
     await ElementFixture.tick()
     expect(toggle.getAttribute("aria-expanded")).toBe("false")
     await expect.poll(() => folded(content)).toBe(true)
-    host.removeAttribute("collapsed")
+    host.setAttribute("open", "")
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(false)
+    expect(host.open).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
     expect(content.hasAttribute("hidden")).toBe(false)
-    host.setAttribute("collapsed", "")
+    host.setAttribute("open", "false")
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(true)
+    expect(host.open).toBe(false)
     expect(seen).toEqual([])
+  })
+
+  it("still takes `collapsed`, its old name turned round, as an attribute and a property", async () => {
+    const { host, content } = await section(`<ui-section label="H" collapsible collapsed>Body</ui-section>`)
+    expect(host.open).toBe(false)
+    expect(host.collapsed).toBe(true)
+    await expect.poll(() => folded(content)).toBe(true)
+    host.collapsed = false
+    await ElementFixture.tick()
+    expect(host.open).toBe(true)
+    expect(content.hasAttribute("hidden")).toBe(false)
   })
 
   it("doesn't fold while `disabled`", async () => {
@@ -358,12 +369,12 @@ describe("<ui-section> folding", () => {
     toggle.click()
     await ElementFixture.tick()
     expect(seen).toEqual([])
-    expect(host.collapsed).toBe(false)
+    expect(host.open).toBe(true)
     expect(content.hasAttribute("hidden")).toBe(false)
   })
 
   it("without `collapsible`:  no button, and the content always shows", async () => {
-    const { toggle, content, foldIcon } = await section(`<ui-section label="H" collapsed>Body</ui-section>`)
+    const { toggle, content, foldIcon } = await section(`<ui-section label="H" open="false">Body</ui-section>`)
     expect(toggle.localName).toBe("span")
     expect(foldIcon).toBeNull()
     expect(content.hasAttribute("hidden")).toBe(false)
@@ -371,7 +382,9 @@ describe("<ui-section> folding", () => {
   })
 
   it("unfolds when find-in-page matches inside, announcing an uncancelable ui-opening", async () => {
-    const { host, toggle, content } = await section(`<ui-section label="H" collapsible collapsed>Needle</ui-section>`)
+    const { host, toggle, content } = await section(
+      `<ui-section label="H" collapsible open="false">Needle</ui-section>`
+    )
     const seen = record(host)
     // what find-in-page does on a match in `hidden="until-found"`:  `beforematch`, then the browser drops `hidden`
     content.dispatchEvent(new Event("beforematch", { bubbles: true }))
@@ -380,7 +393,7 @@ describe("<ui-section> folding", () => {
     expect(seen.map(({ type }) => type)).toEqual(["ui-opening"])
     expect(seen[0]!.event.cancelable).toBe(false)
     expect(seen[0]!.event.detail.originalEvent).toBeUndefined()
-    await expect.poll(() => host.collapsed).toBe(false)
+    await expect.poll(() => host.open).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
   })
 
@@ -576,18 +589,18 @@ describe("<ui-sections>", () => {
     const { byId } = await group(
       `<ui-sections collapsing>` +
         `<ui-section id="a" label="A"><ui-section id="b" label="B"><ui-section id="c" label="C">x</ui-section>` +
-        `</ui-section></ui-section><ui-section id="d" label="D" collapsed>y</ui-section></ui-sections>`
+        `</ui-section></ui-section><ui-section id="d" label="D" open="false">y</ui-section></ui-sections>`
     )
     for (const id of ["a", "b", "c", "d"]) await expect.poll(() => foldable(byId(id))).toBe(true)
     expect(folded(parts(byId("d")).content)).toBe(true)
     await userEvent.click(parts(byId("b")).toggle)
     await ElementFixture.tick()
-    await expect.poll(() => byId("b").collapsed).toBe(true)
+    await expect.poll(() => byId("b").open).toBe(false)
   })
 
   it('a section opts out with `collapsible="false"`;  its sub-sections still follow the group', async () => {
     const { byId } = await group(
-      `<ui-sections collapsing><ui-section id="a" label="A" collapsible="false" collapsed>` +
+      `<ui-sections collapsing><ui-section id="a" label="A" collapsible="false" open="false">` +
         `<ui-section id="b" label="B">x</ui-section></ui-section></ui-sections>`
     )
     await expect.poll(() => foldable(byId("b"))).toBe(true)
@@ -649,10 +662,10 @@ describe("<ui-sections>", () => {
   it("stacks folded sections with no space between;  an open one keeps its space below, not above", async () => {
     const { byId } = await group(
       `<ui-sections collapsing>` +
-        `<ui-section id="a" label="A" dividing collapsed>x</ui-section>` +
-        `<ui-section id="b" label="B" dividing collapsed>x</ui-section>` +
+        `<ui-section id="a" label="A" dividing open="false">x</ui-section>` +
+        `<ui-section id="b" label="B" dividing open="false">x</ui-section>` +
         `<ui-section id="c" label="C" dividing>open</ui-section>` +
-        `<ui-section id="d" label="D" dividing collapsed>x</ui-section>` +
+        `<ui-section id="d" label="D" dividing open="false">x</ui-section>` +
         `</ui-sections>`
     )
     await expect.poll(() => folded(parts(byId("a")).content)).toBe(true)
@@ -665,8 +678,8 @@ describe("<ui-sections>", () => {
   it("keeps the usual space in a plain group, and a section's space around the group", async () => {
     const { host, byId } = await group(
       `<div><p style="margin: 0">Before</p><ui-sections id="g">` +
-        `<ui-section id="a" label="A" collapsible collapsed>x</ui-section>` +
-        `<ui-section id="b" label="B" collapsible collapsed>x</ui-section></ui-sections></div>`
+        `<ui-section id="a" label="A" collapsible open="false">x</ui-section>` +
+        `<ui-section id="b" label="B" collapsible open="false">x</ui-section></ui-sections></div>`
     )
     await expect.poll(() => folded(parts(byId("a")).content)).toBe(true)
     expect(box(byId("b")).top - box(byId("a")).bottom).toBeCloseTo(24, 0)
@@ -677,8 +690,8 @@ describe("<ui-sections>", () => {
   it("overlaps stacked boxes' edges:  no doubled border, and the first box stays inside the group", async () => {
     const { host, byId } = await group(
       `<ui-sections collapsing>` +
-        `<ui-section id="a" label="A" styled collapsed>x</ui-section>` +
-        `<ui-section id="b" label="B" styled collapsed>x</ui-section>` +
+        `<ui-section id="a" label="A" styled open="false">x</ui-section>` +
+        `<ui-section id="b" label="B" styled open="false">x</ui-section>` +
         `<ui-section id="c" label="C" styled>open</ui-section>` +
         `</ui-sections>`
     )
@@ -726,7 +739,7 @@ describe("<ui-section source>", () => {
   it("fetches nothing while folded;  the first unfold fetches once, and shows the body", async () => {
     const count = fetches("body.html")
     const { host, toggle, content } = await sourced(
-      `<ui-section label="H" source="${DIR}/body.html" collapsible collapsed><p class="wait">Wait</p></ui-section>`
+      `<ui-section label="H" source="${DIR}/body.html" collapsible open="false"><p class="wait">Wait</p></ui-section>`
     )
     await ElementFixture.tick()
     expect(count()).toBe(0)
@@ -750,11 +763,11 @@ describe("<ui-section source>", () => {
     let respond!: (response: Response) => void
     vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise<Response>((resolve) => (respond = resolve)))
     const { host, toggle, content, root } = await sourced(
-      `<ui-section label="H" source="${DIR}/slow.html" collapsible collapsed><p>Wait</p></ui-section>`
+      `<ui-section label="H" source="${DIR}/slow.html" collapsible open="false"><p>Wait</p></ui-section>`
     )
     toggle.click()
     await ElementFixture.tick()
-    expect(host.collapsed).toBe(false)
+    expect(host.open).toBe(true)
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
     expect(content.getAttribute("hidden")).toBe("until-found")
     // past the hold:  the placeholder shows under the loading look
@@ -810,13 +823,13 @@ describe("<ui-section source>", () => {
     expect([...host.children].map((child) => child.id)).toEqual(["item"])
   })
 
-  it("loads when the page removes `collapsed` (a #id link's unfold), with no event", async () => {
+  it("loads when the page sets `open` (a #id link's unfold), with no event", async () => {
     const count = fetches("body.html")
     const { host } = await sourced(
-      `<ui-section id="s" label="H" source="${DIR}/body.html" collapsible collapsed></ui-section>`
+      `<ui-section id="s" label="H" source="${DIR}/body.html" collapsible open="false"></ui-section>`
     )
     const seen = record(host)
-    host.removeAttribute("collapsed")
+    host.setAttribute("open", "")
     await ElementFixture.tick()
     await host.load()
     expect(count()).toBe(1)
@@ -826,12 +839,12 @@ describe("<ui-section source>", () => {
 
   it("`load()` inserts the body while folded, without unfolding", async () => {
     const { host, content } = await sourced(
-      `<ui-section label="H" source="${DIR}/body.html" collapsible collapsed></ui-section>`
+      `<ui-section label="H" source="${DIR}/body.html" collapsible open="false"></ui-section>`
     )
     await host.load()
     await ElementFixture.tick()
     expect(host.querySelector("p.body")).not.toBeNull()
-    expect(host.collapsed).toBe(true)
+    expect(host.open).toBe(false)
     expect(content.getAttribute("hidden")).toBe("until-found")
   })
 
@@ -922,7 +935,7 @@ describe("<ui-section> end chevron", () => {
     await userEvent.click(foldIcon!)
     await ElementFixture.tick()
     expect(seen.map(({ type }) => type)).toEqual(["ui-closing"])
-    expect(host.collapsed).toBe(true)
+    expect(host.open).toBe(false)
     expect(toggle.getAttribute("aria-expanded")).toBe("false")
     await expect.poll(() => folded(content)).toBe(true)
     await expect.poll(() => getComputedStyle(foldIcon!).rotate).toBe("-90deg")
@@ -1054,7 +1067,7 @@ describe("<ui-section> its words:  `<ui-field>`'s (epic `property-editor` P10)",
   it("`ui-closed` too when the page folds it", async () => {
     const { host } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
     const seen = record(host, ["ui-closed", "ui-opened"])
-    host.collapsed = true
+    host.open = false
     await expect.poll(() => seen.map(({ type, event }) => [type, event.detail.open])).toEqual([["ui-closed", false]])
   })
 

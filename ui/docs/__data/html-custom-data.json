@@ -21575,10 +21575,17 @@
           }
         },
         {
+          "name": "open",
+          "description": {
+            "kind": "markdown",
+            "value": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "An old name:  write `open=\"false\"`.  It still works until every page is rewritten."
           }
         },
         {
@@ -24837,10 +24844,17 @@
           }
         },
         {
+          "name": "open",
+          "description": {
+            "kind": "markdown",
+            "value": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "An old name:  write `open=\"false\"`.  It still works until every page is rewritten."
           }
         },
         {
@@ -25422,10 +25436,17 @@
           }
         },
         {
+          "name": "open",
+          "description": {
+            "kind": "markdown",
+            "value": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "An old name:  write `open=\"false\"`.  It still works until every page is rewritten."
           }
         },
         {
@@ -29387,10 +29408,17 @@
           }
         },
         {
+          "name": "open",
+          "description": {
+            "kind": "markdown",
+            "value": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "An old name:  write `open=\"false\"`.  It still works until every page is rewritten."
           }
         },
         {

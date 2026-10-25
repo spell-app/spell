@@ -18056,9 +18056,16 @@
           "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
-          "name": "collapsed",
+          "name": "open",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "default": true,
+          "replaces": [
+            {
+              "name": "collapsed",
+              "value": "false"
+            }
+          ],
+          "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too."
         },
         {
           "name": "fold-icon",
@@ -18386,7 +18393,7 @@
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page."
         },
         {
           "name": "ui-closing",
@@ -18397,7 +18404,7 @@
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`."
         },
         {
           "name": "ui-loading",
@@ -20882,9 +20889,16 @@
           "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
-          "name": "collapsed",
+          "name": "open",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "default": true,
+          "replaces": [
+            {
+              "name": "collapsed",
+              "value": "false"
+            }
+          ],
+          "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too."
         },
         {
           "name": "fold-icon",
@@ -21228,7 +21242,7 @@
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page."
         },
         {
           "name": "ui-closing",
@@ -21239,7 +21253,7 @@
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`."
         },
         {
           "name": "ui-error",
@@ -21592,9 +21606,16 @@
           "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
-          "name": "collapsed",
+          "name": "open",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "default": true,
+          "replaces": [
+            {
+              "name": "collapsed",
+              "value": "false"
+            }
+          ],
+          "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too."
         },
         {
           "name": "fold-icon",
@@ -21921,7 +21942,7 @@
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page."
         },
         {
           "name": "ui-closing",
@@ -21932,7 +21953,7 @@
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`."
         },
         {
           "name": "ui-loading",
@@ -24989,9 +25010,16 @@
           "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
-          "name": "collapsed",
+          "name": "open",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "default": true,
+          "replaces": [
+            {
+              "name": "collapsed",
+              "value": "false"
+            }
+          ],
+          "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too."
         },
         {
           "name": "fold-icon",
@@ -25319,7 +25347,7 @@
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page."
         },
         {
           "name": "ui-closing",
@@ -25330,7 +25358,7 @@
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`."
         },
         {
           "name": "ui-loading",

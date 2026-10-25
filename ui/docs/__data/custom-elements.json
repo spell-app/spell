@@ -17804,12 +17804,13 @@
               "fieldName": "collapsible"
             },
             {
-              "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
+              "name": "open",
+              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "collapsed"
+              "default": "true",
+              "fieldName": "open"
             },
             {
               "name": "fold-icon",
@@ -18016,7 +18017,7 @@
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.",
+              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -18030,7 +18031,7 @@
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `collapsed`.",
+              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -23140,12 +23141,13 @@
               "fieldName": "collapsible"
             },
             {
-              "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
+              "name": "open",
+              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "collapsed"
+              "default": "true",
+              "fieldName": "open"
             },
             {
               "name": "fold-icon",
@@ -23406,7 +23408,7 @@
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.",
+              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -23420,7 +23422,7 @@
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `collapsed`.",
+              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -23754,12 +23756,13 @@
               "fieldName": "collapsible"
             },
             {
-              "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
+              "name": "open",
+              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "collapsed"
+              "default": "true",
+              "fieldName": "open"
             },
             {
               "name": "fold-icon",
@@ -23964,7 +23967,7 @@
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.",
+              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -23978,7 +23981,7 @@
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `collapsed`.",
+              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -25963,12 +25966,13 @@
               "fieldName": "collapsible"
             },
             {
-              "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
+              "name": "open",
+              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "collapsed"
+              "default": "true",
+              "fieldName": "open"
             },
             {
               "name": "fold-icon",
@@ -26175,7 +26179,7 @@
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.",
+              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -26189,7 +26193,7 @@
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `collapsed`.",
+              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
