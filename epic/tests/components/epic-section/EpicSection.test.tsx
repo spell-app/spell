@@ -473,7 +473,7 @@ function roundedEnds(host: Element): Record<string, string> {
   for (const item of host.querySelectorAll("epic-item")) {
     if (getComputedStyle(item).display === "none") continue
     const line = getComputedStyle(item.shadowRoot!.querySelector("[part~='line']")!)
-    // an open item's bottom is its drawer's (I105:  its line's own bottom touches the drawer, square)
+    // an open item's bottom is its drawer's (I105), its line rounded all round too
     const end = item.hasAttribute("open")
       ? getComputedStyle(item.shadowRoot!.querySelector("[part~='details']")!)
       : line

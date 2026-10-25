@@ -97,9 +97,7 @@
    *   corners;  the note box, when there, IS that bottom (below)
    */
   .item.unfolded > .line {
-    /* its drawer hangs under it:  square there, touching (I105:  "touching items are square, round when free") */
-    border-end-start-radius: 0;
-    border-end-end-radius: 0;
+    /* rounded all round:  its drawer hangs 4px in from its edges, so its bottom corners are free (Owen, 2026-10-25) */
     box-shadow: var(--epic-bar-shadow, 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45)));
   }
   .item.unfolded > .details {
