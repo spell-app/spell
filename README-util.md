@@ -367,6 +367,7 @@ Python's runtime reads the same.
 - A pref store declares its prefs with the same rule, through the same helper (`defaultFor()`).
 - A prop declared `remembered: true` keeps its value from run to run, in the person's preferences:
   Spell's runtime reads and saves it, under the project's id (`core.remember()`);  the schema only carries the flag.
+- A prop declared `undoable: false` (a selection, a hover) is left out of every undo step Spell's runtime records.
 
 A schema warns;  it never refuses.
 On an `Observable` (every compiled `Thing` and `List` is one), `card.suit = "stars"` printed

@@ -209,6 +209,12 @@ export type PropInfo = {
    * - Compiled spell, once its syntax is settled:  `this.declareProp("theme", { oneOf: THEMES, remembered: true })`.
    */
   remembered?: boolean
+  /**
+   * `false`:  left out of every undo step, e.g. a selection or a hover (epic `prefs-and-undo` P6, Q10).
+   * - Spell's runtime reads it (`spell-parser/core/undoing`);  nothing here does.
+   * - Only `false` says anything:  every other prop is undone with the action that set it.
+   */
+  undoable?: boolean
 }
 
 ////////////////
