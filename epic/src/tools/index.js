@@ -661,7 +661,7 @@ function areaCard(area) {
   const title = area.href
     ? `<a href="${escapeHTML(area.href)}" target="_self">${escapeHTML(area.title)}</a>`
     : `<span>${escapeHTML(area.title)}</span>`
-  const meta = [area.count, area.meta].filter(Boolean).map(text).join(" · ")
+  const meta = [area.count, area.meta].filter(Boolean).map((part) => escapeHTML(part)).join(" · ")
   return `<ui-card id="${area.id}"><ui-content>
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
