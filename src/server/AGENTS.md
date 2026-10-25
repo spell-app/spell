@@ -116,7 +116,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       on the same watcher and heartbeat as `wait()`), `take()`, passes as data (`startPass()` / `updatePass()`,
       throttled / `endPass()`), and `effort`, read fresh before each pass
 - It's a LEAF of the kit:  node, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded when it's first
-  called);  esbuild comes in as a hook;  of the kit, only util's json5 and the toolchain's format settings.
+  called);  esbuild comes in as a hook;  of the kit, only util's json5, util's `persist/` (the site header's
+  preferences:  `spell/util/persist`, never the `spell/util` barrel, which would bundle lodash into every page) and the
+  toolchain's format settings.
   - So anything node-side may import it:
     ui's tools and site, spaces' node server, cli, app, epics, goals, the VS Code extension.
 - It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.

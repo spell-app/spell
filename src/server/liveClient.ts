@@ -150,6 +150,7 @@ export function liveClient(): void {
   if (!config || holder.__spellLive) return
   holder.__spellLive = true
   // `sessionStorage` key for the scroll position kept across a reload
+  // NOT util's `PrefStore`:  this file is sent to the page as text (`editPage()`), so it imports nothing
   const scrollKey = "spell-server:scroll"
   // the scroll position a live reload left, until restored (`takeScroll()`, or `load`)
   let savedScroll: number | undefined

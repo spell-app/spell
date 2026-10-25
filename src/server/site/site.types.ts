@@ -107,6 +107,11 @@ export function docsArea(path: string, areas: readonly string[]): string | undef
  */
 export const SCHEME_KEY = "spell-site:scheme"
 
+/** The site's preferences' store:  `SCHEME_KEY` is its `scheme`, `spell-site:edit` (per tab) its `edit`. */
+export const SITE_PREFS = "spell-site"
+/** The chosen color scheme's key in `SITE_PREFS`:  `SCHEME_KEY`. */
+export const SCHEME_PREF = "scheme"
+
 /**
  * Keys the scheme lived under before `SCHEME_KEY` (2026-10-04).
  * Read once while `SCHEME_KEY` is absent, copied to it, then removed;  the first valid one wins.
@@ -138,5 +143,5 @@ export function forcedScheme(classes: { contains(token: string): boolean }): Sit
   return undefined
 }
 
-/** `sessionStorage` key:  edit mode on for this tab. */
-export const EDIT_KEY = "spell-site:edit"
+/** Edit mode on for this tab:  its key in `SITE_PREFS`, kept per tab (`sessionStorage`'s `spell-site:edit`). */
+export const EDIT_PREF = "edit"
