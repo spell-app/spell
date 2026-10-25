@@ -47,6 +47,11 @@
       "types": "./dist-types/src/spell/test/index.d.ts",
       "default": "./src/spell/test/index.ts"
     },
+    "./spellx": {
+      "spell-parser-source": "./src/spellx/index.ts",
+      "types": "./dist-types/src/spellx/index.d.ts",
+      "default": "./src/spellx/index.ts"
+    },
     "./cli": {
       "spell-parser-source": "./src/cli/index.ts",
       "types": "./dist-types/src/cli/index.d.ts",

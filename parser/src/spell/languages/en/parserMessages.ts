@@ -142,6 +142,48 @@ export const PARSER_MESSAGES = {
   "the-property-of-a-type": "the {property} of a {type}",
 
   ////////////////
+  // ## Spellx:  what `SX.SpellxReader` says about a .spellx file (epic `elemental-spell`)
+  ////////////////
+
+  /** A tag word spellx doesn't know, with the closest it does:  `{tag}` is `<propety>`, `{suggestion}` `<property>`. */
+  "spellx-unknown-word": '"{tag}" isn\'t a spellx word:  did you mean "{suggestion}"?',
+  /** A tag word spellx doesn't know, nothing close:  `{words}` are the ones it could be here. */
+  "spellx-unknown-word-here": '"{tag}" isn\'t a spellx word:  here, use one of {words}',
+  /** An attribute its tag doesn't take, with the closest it does. */
+  "spellx-unknown-attribute": '{tag} has no "{attribute}":  did you mean "{suggestion}"?',
+  /** An attribute its tag doesn't take, nothing close:  `{attributes}` are the ones it has. */
+  "spellx-unknown-attribute-here": '{tag} has no "{attribute}":  it takes {attributes}',
+  /** A `</>` or `</word>` with nothing open to close. */
+  "spellx-unexpected-closer": '"{closer}" closes nothing:  remove it',
+  /** A named closer for another tag than the one open:  `{open}` is `<property>`. */
+  "spellx-mismatched-closer": '"{closer}" can\'t close {open}:  write "</>"',
+  /** A tag the file ends inside. */
+  "spellx-unclosed-tag": '{tag} is never closed:  end it with "</>"',
+  /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
+  "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
+  /** An `<otherwise>` with no `<if>` before it. */
+  "spellx-otherwise-without-if": '{tag} needs an "{if}" before it',
+  /** An `<otherwise>` after a `</>` that closed its `<if>` (Q53). */
+  "spellx-otherwise-after-closed-if":
+    '{tag} goes on with the "{if}" above it, but a "</>" closed that:  remove the "</>"',
+  /** `<if>` or a handler with no phrase after its word:  `{word}` is `if`, `on` ... */
+  "spellx-missing-phrase": '{tag} needs words after its "{word}"',
+  /** A line of a body indented less than the body's first line (Q7). */
+  "spellx-indented-less": "This line is indented less than the rest of {tag}:  indent it one step more than {tag}",
+  /** A template inside another template. */
+  "spellx-nested-template": '{tag} can\'t go inside {outer}:  close {outer} first, with "</>"',
+  /** A member outside any template, e.g. `<property>` at the top of a file. */
+  "spellx-outside-template": '{tag} goes inside a template, e.g. "{template}"',
+  /** A tag that can't go where it is, e.g. `<if>` among a template's members, `<on ...>` in a drawing. */
+  "spellx-misplaced-tag": "{tag} can't go here:  {where}",
+  /** Where an `<if>` or a loop goes. */
+  "spellx-where-control": "it goes inside a drawing;  an action says it as a line",
+  /** Where a handler or a member goes. */
+  "spellx-where-member": "it goes among its template's members, beside the drawing",
+  /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
+  "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+
+  ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`
   ////////////////
 

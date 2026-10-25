@@ -92,6 +92,29 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "the-property-of-a-type": "{theProperty} de {aType}",
 
   ////////////////
+  // ## Spellx
+  ////////////////
+
+  "spellx-unknown-word": '"{tag}" no es una palabra de spellx:  ¿querías decir "{suggestion}"?',
+  "spellx-unknown-word-here": '"{tag}" no es una palabra de spellx:  aquí, usa una de {words}',
+  "spellx-unknown-attribute": '{tag} no tiene "{attribute}":  ¿querías decir "{suggestion}"?',
+  "spellx-unknown-attribute-here": '{tag} no tiene "{attribute}":  lleva {attributes}',
+  "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
+  "spellx-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
+  "spellx-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
+  "spellx-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
+  "spellx-otherwise-without-if": '{tag} necesita un "{if}" antes',
+  "spellx-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
+  "spellx-missing-phrase": '{tag} necesita palabras después de su "{word}"',
+  "spellx-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
+  "spellx-nested-template": '{tag} no puede ir dentro de {outer}:  cierra {outer} primero, con "</>"',
+  "spellx-outside-template": '{tag} va dentro de una plantilla, p. ej. "{template}"',
+  "spellx-misplaced-tag": "{tag} no puede ir aquí:  {where}",
+  "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
+  "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
+  "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
+
+  ////////////////
   // ## Long forms
   ////////////////
 
