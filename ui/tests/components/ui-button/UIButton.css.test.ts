@@ -149,18 +149,34 @@ describe("UIButton.css examples", () => {
     }
   })
 
-  it("rounds only a group's outer corners", () => {
+  it("draws a group as a track:  its buttons set in, see-through, every corner the track's inner radius", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
     const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
-    const [first, middle, last] = root.querySelectorAll<HTMLElement>(".ui.buttons > .button")
-    expect(radius(first!, "start-start")).toBeGreaterThan(0)
-    expect(radius(first!, "start-end")).toBe(0)
-    expect(radius(middle!, "start-start") + radius(middle!, "end-end")).toBe(0)
-    expect(radius(last!, "end-end")).toBeGreaterThan(0)
-    expect(radius(last!, "end-start")).toBe(0)
-    const vertical = root.querySelector(".ui.vertical.buttons:not(.basic, .labeled) > .button")!
-    expect(radius(vertical, "start-end")).toBeGreaterThan(0)
-    expect(radius(vertical, "end-start")).toBe(0)
+    const group = root.querySelector<HTMLElement>(".ui.buttons")!
+    const track = getComputedStyle(group)
+    const inset = parseFloat(track.paddingTop)
+    expect(inset).toBeGreaterThan(0)
+    expect(track.backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    const inner = parseFloat(track.borderTopLeftRadius) - inset
+    const [first, middle, last] = group.querySelectorAll<HTMLElement>(".button")
+    expect(getComputedStyle(middle!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    for (const button of [first!, middle!, last!]) {
+      for (const corner of CORNERS) expect(radius(button, corner)).toBeCloseTo(inner, 1)
+    }
+    // as tall as a lone button:  the buttons give up the inset from their own padding
+    const lone = Fixture.render(`<button class="ui button">Lone</button>`)
+    expect(group.getBoundingClientRect().height).toBeCloseTo(lone.getBoundingClientRect().height, 1)
+  })
+
+  it("rounds a vertical group with the theme's corner, never a pill's", () => {
+    adoptIntoPage([...foundationCSS, buttonCSS])
+    const root = Fixture.render(
+      `<div style="--ui-button-radius: 9999px"><div class="ui vertical buttons">` +
+        `<button class="ui button">A</button><button class="ui button">B</button></div></div>`
+    )
+    const group = root.querySelector(".ui.vertical.buttons")!
+    const theme = Fixture.render(`<span style="border-radius: var(--ui-radius)"></span>`)
+    expect(getComputedStyle(group).borderTopLeftRadius).toBe(getComputedStyle(theme).borderTopLeftRadius)
   })
 
   it("gives equal-width groups equal buttons, and basic groups one border", () => {
@@ -213,14 +229,14 @@ describe("UIButton.css in shadow roots", () => {
     const [first, second] = children.map(inner)
     expect(getComputedStyle(first!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(radius(first!, "start-start")).toBeGreaterThan(0)
-    expect(radius(first!, "start-end")).toBe(0)
-    expect(radius(second!, "start-start")).toBe(0)
-    expect(radius(second!, "end-end")).toBeGreaterThan(0)
-    expect(getComputedStyle(second!).boxShadow).toContain("inset")
+    expect(radius(second!, "start-start")).toBeGreaterThan(0)
+    // the divider:  a straight line on the second host's start, beside its rounded button
+    expect(getComputedStyle(children[1]!).borderInlineStartStyle).toBe("solid")
+    expect(getComputedStyle(children[0]!).borderInlineStartStyle).toBe("none")
+    expect(getComputedStyle(second!).boxShadow).not.toContain("inset")
     expect(or.getBoundingClientRect().width).toBeLessThan(10)
-    expect(
-      Math.abs(children[0]!.getBoundingClientRect().width - children[1]!.getBoundingClientRect().width)
-    ).toBeLessThan(1)
+    // equal buttons, a divider or not
+    expect(Math.abs(first!.getBoundingClientRect().width - second!.getBoundingClientRect().width)).toBeLessThan(1)
   })
 
   it('sizes a fallback icon inside <slot name="icon"> to the icon box, not the button block', () => {
@@ -315,6 +331,9 @@ function styleRules(sheet: CSSStyleSheet | CSSGroupingRule): CSSStyleRule[] {
   }
   return rules
 }
+
+/** The four logical corners, for `radius()`. */
+const CORNERS = ["start-start", "start-end", "end-start", "end-end"] as const
 
 /** Resolved px of one logical corner radius, e.g. `start-end`. */
 function radius(element: Element, corner: "start-start" | "start-end" | "end-start" | "end-end"): number {

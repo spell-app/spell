@@ -181,13 +181,36 @@ export class UINag extends E.UIComponent<Vocabulary> {
   private isClosing = false
 
   /**
+   * Shown until it closes:  the cancelable `ui-closing` as it's asked to close, `ui-closed` once it has gone.
+   * - Its `ui-opening` comes as it has slid in (`appear()`), not as a request:  `show()` is the page's.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    kept: {
+      isOpen: () => !this.isClosing && !this.domElement.hidden,
+      setOpen: (open) => {
+        if (!open) this.startClosing()
+      }
+    },
+    detail: (_open, originalEvent): UIT.NagCloseDetail => ({ reason: this.closeReason, originalEvent }),
+    afterDetail: (): UIT.NagCloseDetail => ({ reason: this.closeReason })
+  })
+
+  /** Why it was asked to close:  `ui-closing`'s and `ui-closed`'s `reason`. */
+  private closeReason: UIT.NagCloseReason = "dismiss"
+
+  /**
    * Close for `reason`:  the cancelable `ui-closing`, the dismissal stored (not for `timeout`),
    * then the exit animation, `hidden` on the DOM element and `ui-closed`.  True when it closes.
    */
   close(reason: UIT.NagCloseReason = "dismiss", originalEvent?: Event): boolean {
-    if (this.isClosing || this.domElement.hidden) return false
-    const detail: UIT.NagCloseDetail = { reason, originalEvent }
-    if (!this.send("ui-closing", detail)) return false
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
+  }
+
+  /** `ui-closing` wasn't cancelled:  the dismissal stored, the exit animation, `hidden`, `ui-closed`. */
+  private startClosing() {
+    const reason = this.closeReason
     this.isClosing = true
     this.displayTimer?.cancel()
     if (reason !== "timeout") {
@@ -202,10 +225,8 @@ export class UINag extends E.UIComponent<Vocabulary> {
       this.isClosing = false
       this.hasShown = false
       this.domElement.hidden = true
-      const hidden: UIT.NagCloseDetail = { reason }
-      this.send("ui-closed", hidden)
+      this.disclosure.sendAfter(false)
     })
-    return true
   }
 
   /** An invoker command aimed at the DOM element (`UIT.ToggleCommands`):  open means not `hidden`. */

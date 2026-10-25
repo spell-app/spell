@@ -97,13 +97,15 @@
     scroll-padding-inline: var(--_ui-toolbar-button-size);
     --_toolbar-fade-start: 0px;
     --_toolbar-fade-end: 0px;
-    --_toolbar-fade: 0px;
+    /* each end's own fade:  one shared width faded the start of a row that could only scroll on (debut I31) */
+    --_toolbar-fade-in: 0px;
+    --_toolbar-fade-out: 0px;
     /* clear under a key, then fading in over 1em */
     mask-image: linear-gradient(
       to right,
       transparent var(--_toolbar-fade-start),
-      #000 calc(var(--_toolbar-fade-start) + var(--_toolbar-fade)),
-      #000 calc(100% - var(--_toolbar-fade-end) - var(--_toolbar-fade)),
+      #000 calc(var(--_toolbar-fade-start) + var(--_toolbar-fade-in)),
+      #000 calc(100% - var(--_toolbar-fade-end) - var(--_toolbar-fade-out)),
       transparent calc(100% - var(--_toolbar-fade-end))
     );
   }
@@ -112,11 +114,11 @@
   }
   .ui.toolbar:has(> .scroll.start[data-can]) > .ui.menu {
     --_toolbar-fade-start: var(--_ui-toolbar-button-size);
-    --_toolbar-fade: 1em;
+    --_toolbar-fade-in: 1em;
   }
   .ui.toolbar:has(> .scroll.end[data-can]) > .ui.menu {
     --_toolbar-fade-end: var(--_ui-toolbar-button-size);
-    --_toolbar-fade: 1em;
+    --_toolbar-fade-out: 1em;
   }
   .ui.toolbar > .scroll {
     position: absolute;

@@ -546,7 +546,16 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-dimmer" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-dimmer" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <button type="button" class="ui button" commandfor="dimmer-types-plain-playground" command="--toggle">Toggle</button>
+                <ui-segment>
+                  <p>A segment holding some text that the dimmer covers.</p>
+                  <p>Another paragraph, so the segment has some height.</p>
+                  <ui-dimmer id="dimmer-types-plain-playground" visible></ui-dimmer>
+                </ui-segment>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

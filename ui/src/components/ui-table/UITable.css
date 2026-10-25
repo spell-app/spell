@@ -5,10 +5,10 @@
  *   - registered as a PAGE sheet (`UI.styles.register("table", css, { page: true })`),
  *     where its class-grammar rules style the LIGHT-DOM `<table>`:
  *     a slotted table's `td` is out of reach of shadow CSS (`::slotted()` reaches the top level only)
- * - Shadow markup contract:  `<div class="[resizable] [attached ...] [scrolling ...] [overflowing ...] scroller"
- *   part="scroller"><slot></slot></div>`.
- *   While scrolling / overflowing, the scroller is a focusable, named region
- *   (`tabindex="0" role="region" aria-label`).
+ * - Shadow markup contract:  `<div class="[resizable] [attached ...] [scrolling ...] [overflowing ...] [sideways]
+ *   scroller" part="scroller"><slot></slot></div>`.
+ *   While scrolling / overflowing, or `sideways` (a table too wide for it, which doesn't stack),
+ *   the scroller is a focusable, named region (`tabindex="0" role="region" aria-label`).
  * - Light-DOM contract:  the element MIRRORS its class string (`ui small celled striped red table`)
  *   onto the slotted `<table>`'s `class`, adding and removing only the words it owns (author classes stay).
  *   Why:
@@ -995,6 +995,14 @@
   }
   .overflowing.scroller {
     max-block-size: calc(var(--_ui-table-row-height) * var(--_table-overflow-rows) * var(--_table-scroll-factor));
+  }
+  /*
+   * A table that doesn't stack and is wider than its box (`UITable.isTooWide` adds `sideways`):
+   * it scrolls sideways in the scroller, never the page, its height uncapped.
+   */
+  .sideways.scroller {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
   }
   .resizable.scrolling.scroller {
     block-size: calc(var(--_ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));

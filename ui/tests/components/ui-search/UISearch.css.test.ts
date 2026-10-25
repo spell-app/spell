@@ -49,14 +49,13 @@ describe("UISearch.css source", () => {
     expect(Sheets.withoutComments(searchRaw).trim().replace(/\s+/g, " ").startsWith(Sheets.layers("search"))).toBe(true)
   })
 
-  it("parses with replaceSync, keeping the anchor positioning", () => {
+  it("parses with replaceSync, keeping the popover positioning", () => {
     for (const css of [searchCSS, searchRaw]) {
       const sheet = new CSSStyleSheet()
       sheet.replaceSync(css)
       const rules = Sheets.rules(sheet)
       expect(rules.length).toBeGreaterThan(50)
       expect(rules.some((rule) => rule.style.getPropertyValue("position-area") !== "")).toBe(true)
-      expect(rules.some((rule) => rule.style.getPropertyValue("anchor-name") !== "")).toBe(true)
     }
   })
 
@@ -81,7 +80,6 @@ describe("UISearch.css examples", () => {
     for (const search of searches) {
       const style = getComputedStyle(search)
       expect(style.position, search.className).toBe("relative")
-      expect(style.anchorName).toBe("--ui-search")
       const prompt = search.querySelector<HTMLElement>(".prompt")!
       expect(parseFloat(getComputedStyle(prompt).borderTopLeftRadius)).toBeGreaterThan(100)
     }
@@ -110,9 +108,7 @@ describe("UISearch.css examples", () => {
     Sheets.adopt(SHEETS)
     const root = Fixture.render(`<div style="padding-left: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
     const search = root.querySelector<HTMLElement>(".ui.search")!
-    search.style.setProperty("--_ui-search-anchor", "--test-search")
     const results = open(search)
-    expect(getComputedStyle(results).positionAnchor).toBe("--test-search")
     const box = search.getBoundingClientRect()
     const rect = results.getBoundingClientRect()
     expect(rect.top).toBeGreaterThanOrEqual(box.bottom)
@@ -182,8 +178,11 @@ describe("UISearch.css examples", () => {
  * Open `search`'s popover results;  return them.
  * - SIDE EFFECT:  closed again when the test finishes.
  */
-function open(search: Element): HTMLElement {
+function open(search: HTMLElement): HTMLElement {
   const results = search.querySelector<HTMLElement>(":scope > .results")!
+  // the anchor, inline, as the component's `PopoverPanel` names it
+  search.style.setProperty("anchor-name", "--test-search")
+  results.style.setProperty("position-anchor", "--test-search")
   results.showPopover()
   onTestFinished(() => {
     if (results.matches(":popover-open")) results.hidePopover()

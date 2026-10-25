@@ -1622,7 +1622,15 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-menu" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-menu" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-menu items="3" aria-label="Menu demo">
+                  <ui-item link="#editorials" selected>Editorials</ui-item>
+                  <ui-item link="#reviews">Reviews</ui-item>
+                  <ui-item link="#events">Upcoming Events</ui-item>
+                </ui-menu>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

@@ -34,6 +34,10 @@ import tableCSS from "./UITable.css?inline"
  * - Scrolling:  `scrolling` and `overflowing` cap the scroller's height.
  *   It then scrolls, and is a focusable, named region
  *   (the DOM element's `aria-label`, else the `<caption>`, else the translated `label`).
+ *   - A table that doesn't stack (`unstackable`, `stack-by="none"`, or too wide for the stacking breakpoint)
+ *     and is wider than its box scrolls SIDEWAYS in the scroller, its height uncapped:
+ *     the same focusable, named region, never the page (`isTooWide`, measured).
+ *   - A stacked table always fits its box, so it never does.
  *
  * - Sorting (`sortable`):  every `thead` header sorts, except `th[data-sortable="false"]` and `th.disabled`.
  *   - A header's `<button>` is its control (APG's sortable table:  authors SHOULD put one in each sortable header);
@@ -101,11 +105,12 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return (
       <>
         <div
-          class={this.scrollerClasses}
+          ref={(box: HTMLDivElement) => (this.scroller = box)}
+          class={[this.scrollerClasses, { [SIDEWAYS]: this.isTooWide }]}
           part={this.partForName("scroller")}
-          tabindex={this.scrollerScrolls ? 0 : undefined}
-          role={this.scrollerScrolls ? "region" : undefined}
-          aria-label={this.scrollerScrolls ? this.regionLabel : undefined}
+          tabindex={this.isScrollRegion ? 0 : undefined}
+          role={this.isScrollRegion ? "region" : undefined}
+          aria-label={this.isScrollRegion ? this.regionLabel : undefined}
         >
           <slot />
           {isServer ? <Show when={this.isInDataMode}>{this.staticTable()}</Show> : undefined}
@@ -175,7 +180,8 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   }
 
   /**
-   * Watch the managed table's content (rows, header cells, caption text) and bump `tableRevision` when it changes.
+   * Watch the managed table's content (rows, header cells, caption text, its `aria-label`)
+   * and bump `tableRevision` when it changes.
    * - Returns the cleanup (run when the table changes).
    */
   @E.onChange("managedTable")
@@ -183,7 +189,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     if (!table) return undefined
     // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the managed TABLE, swapped with it
     const observer = new MutationObserver(() => this.tableRevision++)
-    observer.observe(table, { childList: true, subtree: true, characterData: true })
+    observer.observe(table, { childList: true, subtree: true, characterData: true, attributeFilter: ["aria-label"] })
     return () => observer.disconnect()
   }
 
@@ -450,20 +456,59 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return TableGrammar.scroller((name) => this.scrollerValue(name))
   }
 
-  /** Scrolling or overflowing:  the scroller is a focusable region. */
+  /** Scrolling or overflowing:  the scroller's height is capped, and it scrolls. */
   get scrollerScrolls(): boolean {
     return TableGrammar.scrolls((name) => this.scrollerValue(name))
   }
 
+  /** The scroller scrolls, either way:  a focusable, named region. */
+  get isScrollRegion(): boolean {
+    return this.scrollerScrolls || this.isTooWide
+  }
+
+  /** The shadow scroller, once drawn (from its `ref`). */
+  private scroller: HTMLDivElement | undefined
+
+  /**
+   * The table is wider than the scroller:  it doesn't stack, and the scroller scrolls it sideways (`SIDEWAYS`).
+   * - Measured (`onReadyToMeasure()`):  whether a table stacks is the sheet's call
+   *   (viewport, its own width, tokens), so the width it ends up is the one fact to go on.
+   */
+  @E.state accessor isTooWide = false
+
+  /**
+   * SIDE EFFECT:  follows the sizes of the scroller and the managed table, once drawn;  the cleanup stops.
+   * - Never on a server (an effect's apply):  a static page's wide table spills, as before.
+   */
+  @E.onChange("isReady", "managedTable")
+  protected onReadyToMeasure(isReady: boolean, table: HTMLTableElement | undefined) {
+    const box = this.scroller
+    if (!isReady || !box) return
+    const resizes = new ResizeObserver(() => this.measureWidth())
+    resizes.observe(box)
+    if (table) resizes.observe(table)
+    this.measureWidth()
+    return () => resizes.disconnect()
+  }
+
+  /** Is the table wider than the scroller?  A pixel of slack:  fractional widths round either way. */
+  private measureWidth() {
+    const box = this.scroller
+    if (box) this.isTooWide = box.scrollWidth > box.clientWidth + 1
+  }
+
   /**
    * Name of the scroller region:  the DOM element's `aria-label`, else the table's `<caption>` text,
-   * else the `label` text.
-   * - Read in `render()`:  the translated text needs the loaded runtime;  follows `tableRevision` (a new caption).
+   * else the table's own `aria-label`, else the `label` text.
+   * - Read in `render()`:  the translated text needs the loaded runtime;
+   *   follows `tableRevision` (a new caption or `aria-label`).
+   * - The table's own name before `label`:  several tables on a page, each its own region, need names apart.
    */
   private get regionLabel(): string {
     void this.tableRevision
-    const caption = this.managedTable?.caption?.textContent?.trim()
-    return this.attributes["aria-label"] ?? (caption || this.translationForKey("label"))
+    const table = this.managedTable
+    const caption = table?.caption?.textContent?.trim()
+    return this.attributes["aria-label"] ?? (caption || table?.ariaLabel || this.translationForKey("label"))
   }
 
   // `attached` (any edge), `attached-top`, `attached-bottom`, from `attach`:
@@ -514,3 +559,6 @@ const GENERATED = new WeakSet<HTMLTableElement>()
 
 /** Prefix of the class `stack-by` adds to the table:  `stack-by-container`, `stack-by-viewport`. */
 const STACK_BY_CLASS = "stack-by-"
+
+/** The scroller's class while the table is too wide for it (`isTooWide`):  `UITable.css` scrolls it sideways. */
+const SIDEWAYS = "sideways"

@@ -133,63 +133,69 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   @E.state
   accessor isOpen = false
 
-  /** This element's `UI.overlays` entry:  an outside click or Escape closes the panel. */
-  private readonly overlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
+  /**
+   * The panel, a popover panel on `isOpen`:  the cancelable `ui-opening` / `ui-closing`, the overlay entry,
+   * the anchor.
+   * - Never opens while disabled or readonly.
+   * - An outside click or Escape closes it;  Escape puts the focus back on the field.
+   */
+  readonly popover = new F.PopoverPanel({
+    component: this,
+    member: "isOpen",
     restoreFocus: false,
+    canChange: (open) => !open || !(this.isDisabled || this.isReadOnly),
+    onChange: (open) => {
+      if (!open) return
+      this.query = this.queryOnOpen
+      this.highlighted = -1
+      this.scrollTop = 0
+    },
     onDismiss: (reason) => {
       this.close({ refocus: reason === ESCAPE_REASON })
     }
-  }
+  })
+
+  /** What the search box starts with as the panel opens (`open()`'s `query`). */
+  private queryOnOpen = ""
 
   /**
-   * Open the panel, searching for `query`:  its search box empty, unless a letter typed on the field opened it.
-   * - Not while disabled or readonly.
+   * Open the panel as a person would, searching for `query`:
+   * its search box empty, unless a letter typed on the field opened it.
+   * - The cancelable `ui-opening` first (`popover.request()`).
    * - Returns true when it opened.
    */
-  @E.untracked
-  open(query = ""): boolean {
-    if (this.isOpen || this.isDisabled || this.isReadOnly) return false
-    this.query = query
-    this.highlighted = -1
-    this.scrollTop = 0
-    this.isOpen = true
-    return true
+  open(query = "", originalEvent?: Event): boolean {
+    this.queryOnOpen = query
+    return this.popover.request(true, originalEvent)
   }
 
   /**
-   * Close the panel;  `refocus`:  the focus back on the field (a pick, Escape).
+   * Close the panel as a person would;  `refocus`:  the focus back on the field (a pick, Escape).
+   * - The cancelable `ui-closing` first (`popover.request()`).
    * - Returns true when it closed.
    */
-  @E.untracked
-  close({ refocus = false }: { refocus?: boolean } = {}): boolean {
-    if (!this.isOpen) return false
-    this.isOpen = false
+  close({ refocus = false, originalEvent }: { refocus?: boolean; originalEvent?: Event } = {}): boolean {
+    if (!this.popover.request(false, originalEvent)) return false
     if (refocus) this.field?.focus()
     return true
   }
 
   /**
-   * The popover and the overlay entry while open AND connected, once rendered;  the search box focused,
-   * the grid measured.
+   * The panel shows while open AND connected, once rendered (`PopoverPanel.follow()`):
+   * the search box focused, the grid measured.
    * - `isConnected`:  a removed element keeps its state (`keepAlive`), but the page must not keep its overlay entry.
    */
   @E.onChange("isOpen", "isConnected", "isReady")
   protected onOpenChanged(isOpen: boolean, isConnected: boolean, isReady: boolean) {
     const { panel, search } = this
-    if (!isOpen || !isConnected || !isReady || !panel) return undefined
-    if (!panel.matches(":popover-open")) panel.showPopover()
-    UI.overlays.open(this.overlay)
+    const undo = this.popover.follow(panel, isOpen && isConnected && isReady)
+    if (!undo) return undefined
     this.measureGrid()
     if (search) {
       search.value = this.query
       search.focus()
     }
-    return () => {
-      if (panel.matches(":popover-open")) panel.hidePopover()
-      UI.overlays.close(this.overlay)
-    }
+    return undo
   }
 
   ////////////////
@@ -471,8 +477,8 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Ids and the anchor name, from `UI.ids` once rendering. */
-  private ids = { panel: "", grid: "", anchor: "" }
+  /** Ids, from `UI.ids` once rendering. */
+  private ids = { panel: "", grid: "" }
 
   /** The field (the closed control). */
   private field?: HTMLButtonElement
@@ -490,8 +496,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   private rowsBox?: HTMLElement
 
   render(): JSX.Element {
-    this.ids = { panel: UI.ids.next(ID_PREFIX), grid: UI.ids.next(ID_PREFIX), anchor: `--${UI.ids.next(ID_PREFIX)}` }
-    const anchor = { [ANCHOR_PROPERTY]: this.ids.anchor }
+    this.ids = { panel: UI.ids.next(ID_PREFIX), grid: UI.ids.next(ID_PREFIX) }
     return (
       <>
         <button
@@ -499,10 +504,10 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           type="button"
           class={this.rootClass}
           part={this.partForName("field")}
-          style={anchor}
+          style={this.popover.anchorStyle}
           disabled={this.isDisabled}
           aria-haspopup="listbox"
-          aria-expanded={this.isOpen ? "true" : "false"}
+          aria-expanded={this.popover.ariaExpanded}
           aria-controls={this.ids.panel}
           aria-label={this.fieldLabel}
           aria-invalid={this.isShownInvalid ? "true" : undefined}
@@ -519,20 +524,20 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
             {this.iconName || this.placeholderText}
           </span>
         </button>
-        {this.panelBox(anchor)}
+        {this.panelBox()}
       </>
     )
   }
 
   /** The panel:  the search box over the grid. */
-  private panelBox(anchor: JSX.CSSProperties): JSX.Element {
+  private panelBox(): JSX.Element {
     return (
       <div
         ref={(element) => (this.panel = element)}
         id={this.ids.panel}
         class={PANEL}
         part={this.partForName("panel")}
-        style={anchor}
+        style={this.popover.panelStyle}
         // a server render can't show a popover:  the panel stays shut
         popover={isServer ? undefined : "manual"}
         onMouseDown={this.onPanelMouseDown}
@@ -545,7 +550,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           role="combobox"
           placeholder={this.translationForKey("searchIcons")}
           aria-label={this.translationForKey("searchIcons")}
-          aria-expanded={this.isOpen ? "true" : "false"}
+          aria-expanded={this.popover.ariaExpanded}
           aria-controls={this.ids.grid}
           aria-autocomplete="list"
           aria-activedescendant={this.highlighted >= 0 ? this.cellId(this.highlighted) : undefined}
@@ -647,9 +652,9 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
 
   /** The field opens and closes the panel. */
   @E.untracked
-  private readonly onFieldClick = () => {
-    if (this.isOpen) this.close()
-    else this.open()
+  private readonly onFieldClick = (event: MouseEvent) => {
+    if (this.isOpen) this.close({ originalEvent: event })
+    else this.open("", event)
   }
 
   /** Down / Up open the panel (Enter and Space click the field);  a letter opens it searching for that letter. */
@@ -659,10 +664,10 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     const { key } = event
     if (key === UIT.Key.arrowDown || key === UIT.Key.arrowUp) {
       event.preventDefault()
-      this.open()
+      this.open("", event)
     } else if (key.length === 1 && key !== UIT.Key.space) {
       event.preventDefault()
-      this.open(key)
+      this.open(key, event)
     }
   }
 
@@ -686,11 +691,11 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     if (key === UIT.Key.escape) {
       event.preventDefault()
       event.stopPropagation()
-      this.close({ refocus: true })
+      this.close({ refocus: true, originalEvent: event })
       return
     }
     if (key === UIT.Key.tab) {
-      this.close()
+      this.close({ originalEvent: event })
       return
     }
     if (key === UIT.Key.enter) {
@@ -802,11 +807,8 @@ const FIRST_DRAW = 60
 /** Rows drawn beyond those in view, above and below:  so a fast scroll rarely shows an empty row. */
 const SPARE_ROWS = 3
 
-/** `UI.ids` prefix of the panel's, the grid's and the cells' ids, and the anchor name. */
+/** `UI.ids` prefix of the panel's, the grid's and the cells' ids. */
 const ID_PREFIX = "ui-icon-picker"
-
-/** Private custom property the field's anchor name rides in, to the field and the panel. */
-const ANCHOR_PROPERTY = "--_ui-icon-picker-anchor"
 
 /** `UI.overlays`' reason for an Escape. */
 const ESCAPE_REASON = "escape"

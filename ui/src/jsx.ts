@@ -1981,7 +1981,7 @@ export interface UIButtonEventMap {
 /** `<ui-button>`'s own attributes, from its vocabulary. */
 export interface UIButtonAttributes {
   /**
-   * Size, `mini` ... `massive`;  `medium` is the default.
+   * How big it is, from `mini` to `massive`.  The default is `medium`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    * - default:  `medium`
    */
@@ -1992,7 +1992,7 @@ export interface UIButtonAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, `positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Those four also work written alone, their old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2052,7 +2052,7 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), `tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone.
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Each word also works written alone, its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
@@ -2084,7 +2084,7 @@ export interface UIButtonAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.
+   * Each click turns `selected` on or off, and `aria-pressed` with it.  It sends `ui-selected` or `ui-deselected` as it turns.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
@@ -2108,7 +2108,7 @@ export interface UIButtonAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
+   * The text shown while `selected`, instead of the content:  `Following`.  It's Fomantic's `state` behaviour.  With either state text the label says the state, so a toggle button leaves `aria-pressed` off (WAI-ARIA APG).
    * - takes:  text
    */
   "active-text"?: string
@@ -2118,7 +2118,7 @@ export interface UIButtonAttributes {
    */
   "prop:activeText"?: string
   /**
-   * Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content.
+   * The text shown while NOT `selected`, instead of the content:  `Follow`.  It's Fomantic's `state` behaviour, as `active-text` is.
    * - takes:  text
    */
   "inactive-text"?: string
@@ -2200,7 +2200,7 @@ export interface UIButtonAttributes {
    */
   "prop:ellipsis"?: boolean | ""
   /**
-   * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `badge`:  which side the badge goes, `labeled` (end) or `labeled="left"`.
+   * With `icon`, the icon gets a block of its own:  at the start, or at the end with `labeled="right"`.  With `badge`, it picks which side the badge goes:  the end, or the start with `labeled="left"`.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
@@ -2210,7 +2210,7 @@ export interface UIButtonAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  Its old name is `animated`.
+   * On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name is `animated`.
    * - takes:  `slide` · `fade` · `vertical`
    */
   reveal?: "slide" | "fade" | "vertical"
@@ -2224,7 +2224,7 @@ export interface UIButtonAttributes {
    */
   "prop:reveal"?: "slide" | "fade" | "vertical"
   /**
-   * Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
@@ -2248,7 +2248,7 @@ export interface UIButtonAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the `icon` class (square padding);  with `labeled` it becomes a `labeled icon` button.
+   * Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button.
    * - takes:  icon name
    */
   icon?: string
@@ -2258,7 +2258,7 @@ export interface UIButtonAttributes {
    */
   "prop:icon"?: string
   /**
-   * Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`.
+   * Which side of the text the icon goes:  `left` (the default) or `right`.  `right` is Fomantic's right icon, as in `Next →`.  The space between them is `--ui-button-icon-spacing`.  A labeled icon block takes its side from `labeled` instead.
    * - takes:  `left` · `right`
    */
   "icon-position"?: "left" | "right"
@@ -2268,7 +2268,7 @@ export interface UIButtonAttributes {
    */
   "prop:iconPosition"?: "left" | "right"
   /**
-   * Shorthand for the button's text, instead of the default slot;  slotted children win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`.
+   * The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.
    * - takes:  text
    */
   label?: string
@@ -2282,7 +2282,7 @@ export interface UIButtonAttributes {
    */
   "prop:label"?: string
   /**
-   * Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  It was `label` (no old name:  `label` is the text now).
+   * A badge joined to the button, such as a count:  it draws a `ui labeled button` round the button.  It used to be `label`, which is the button's text now, so it has no old name.
    * - takes:  text
    */
   badge?: string
@@ -2292,7 +2292,7 @@ export interface UIButtonAttributes {
    */
   "prop:badge"?: string
   /**
-   * Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`.
+   * What it does in a form, as the native `<button type>`.  `submit` calls `form.requestSubmit()`.
    * - takes:  `button` · `submit` · `reset`
    * - default:  `button`
    */
@@ -2303,7 +2303,7 @@ export interface UIButtonAttributes {
    */
   "prop:type"?: "button" | "submit" | "reset"
   /**
-   * Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in commands itself.
+   * The id of the element `command` acts on, as the native `<button commandfor>`.  It's looked up in the button's own tree.  The inner button gets the element itself (`commandForElement`), since a shadow button can't see a light-DOM id.  In a browser without invoker commands (`UI.browser.supports.invokers`), a click runs the built-in commands itself.
    * - takes:  text
    */
   commandfor?: string
@@ -2313,7 +2313,7 @@ export interface UIButtonAttributes {
    */
   "prop:commandFor"?: string
   /**
-   * Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a `<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`).
+   * The invoker command to run, as the native `<button command>`.  A dialog takes `show-modal / close / request-close`, a popover `show-popover / hide-popover / toggle-popover`.  Any other is a custom `--name`, which the target hears as a `command` event.  `<ui-modal>` answers `--show / --close / --toggle`.
    * - takes:  text
    */
   command?: string
@@ -2515,7 +2515,7 @@ export interface UIButtonsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Those four also work written alone, their old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2575,7 +2575,7 @@ export interface UIButtonsAttributes {
     | "positive"
     | "negative"
   /**
-   * The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` (text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`.
+   * The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Each word also works written alone, its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
@@ -2617,7 +2617,7 @@ export interface UIButtonsAttributes {
    */
   "prop:icon"?: boolean | ""
   /**
-   * With `icon`:  `labeled icon` buttons;  `labeled="right"` puts the icons at the end.
+   * With `icon`, labeled icon buttons.  `labeled="right"` puts the icons at the end.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
@@ -2719,7 +2719,7 @@ export interface UIButtonsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
@@ -2743,7 +2743,7 @@ export interface UIButtonsAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width="3"` => `three`) or `"equal"` (`equal width`).
+   * The older, count-based way to write `equal fluid`:  equal-width buttons that fill the row.  A count draws its word (`width="3"` draws `three buttons`).  `"equal"` draws `equal width buttons`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */
   width?:
@@ -12196,6 +12196,18 @@ export interface UIIconPickerEventMap {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
 }
 
 /** `<ui-icon-picker>`'s own attributes, from its vocabulary. */
@@ -12445,6 +12457,18 @@ export interface UIIconPickerAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UIIconPickerEventMap["ui-changed"]) => void
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-opening"?: (event: UIIconPickerEventMap["ui-opening"]) => void
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIIconPickerEventMap["ui-closing"]) => void
 }
 
 /** `<ui-icon-picker>` in JSX:  its own attributes, and HTML's global ones. */
@@ -30460,7 +30484,7 @@ export interface UITableAttributes {
    */
   "prop:appearance"?: string
   /**
-   * Never stacks rows into blocks, even on a viewport below 768px.
+   * Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
@@ -30512,7 +30536,7 @@ export interface UITableAttributes {
    */
   "prop:stackable"?: boolean | "" | "tablet"
   /**
-   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
+   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
    * - takes:  `viewport` · `container` · `none`
    */
   "stack-by"?: "viewport" | "container" | "none"
@@ -34476,7 +34500,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
        * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
-       * - events:  `ui-changing`, `ui-changed`
+       * - events:  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`
        */
       "ui-icon-picker": UIIconPickerJSXAttributes
       /**
