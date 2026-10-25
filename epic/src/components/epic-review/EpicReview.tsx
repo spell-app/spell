@@ -181,7 +181,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             from me") */}
         <ui-buttons
           class={REVIEW_GROUP}
-          basic=""
+          appearance="basic"
           icon=""
           size="mini"
           data-asks={
@@ -214,7 +214,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         role="group"
         aria-label={this.translationForKey("threadAnswer")}
       >
-        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+        <ui-buttons class={REVIEW_GROUP} appearance="basic" icon="" size="mini">
           <For each={specs()}>
             {(spec) => (
               <ui-button

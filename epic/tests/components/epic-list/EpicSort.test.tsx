@@ -13,7 +13,7 @@ import { SORT_KEY } from "spell-epic/components/epic-list/EpicList.types"
 function buttons(host: Element): string[] {
   return Array.from(
     host.shadowRoot!.querySelectorAll("ui-button"),
-    (button) => `${button.textContent!.trim()}${button.hasAttribute("active") ? "*" : ""}`
+    (button) => `${button.textContent!.trim()}${button.hasAttribute("selected") ? "*" : ""}`
   )
 }
 

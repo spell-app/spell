@@ -79,7 +79,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 class={SAGA}
                 part={this.partForName("saga")}
                 size="mini"
-                basic=""
+                appearance="basic"
                 icon="bullseye"
                 title={this.sagaPurpose ?? ""}
               >
@@ -123,7 +123,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           />
         }
       >
-        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" basic="" title={state().tip}>
+        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" appearance="basic" title={state().tip}>
           {state().count || this.translationForKey("planning")}
         </ui-label>
       </Show>
@@ -141,7 +141,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
       <ui-button
         class={STAR}
         part={this.partForName("star")}
-        tertiary=""
+        appearance="tertiary"
         size="small"
         icon={this.favorite ? "star" : "star outline"}
         title={tip()}

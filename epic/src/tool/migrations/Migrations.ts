@@ -1,7 +1,9 @@
 import { CaveatsAndTests } from "./CaveatsAndTests"
+import { ChangesAfterGoal } from "./ChangesAfterGoal"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
 import { TakenInPhase } from "./TakenInPhase"
+import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
 import type { Migration, MigrationContext } from "./migrations.types"
@@ -33,7 +35,9 @@ export class Migrations {
     new CaveatsAndTests(),
     new TookAsMinutes(),
     new WholePhaseNumbers(),
-    new TakenInPhase()
+    new TakenInPhase(),
+    new ToReviewMarks(),
+    new ChangesAfterGoal()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

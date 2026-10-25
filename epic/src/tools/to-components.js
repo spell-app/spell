@@ -2,13 +2,13 @@
  * A page's CONTENTS in components, not hand-written markup:  the migration step `components-not-markup`
  * (epic `epic-engine` P3, Owen on I26, 2026-10-19:  "page controls AND contents" are components).
  * - a bare `<table>` (no `<ui-table>` around it) gets one, the house comparison table's:
- *   `<ui-table celled compact striped unstackable>`, the table inside it unchanged (its id too)
+ *   `<ui-table celled padding="compact" appearance="striped" unstackable>`, the table inside it unchanged (its id too)
  * - a `<ui-table>` without `unstackable` gets it, its other attributes as they were (epic `epic-engine` I36;  Owen,
  *   2026-10-19, on a table drawn as its header cells, then each row's cells one under another:  "I hate it"):  no
  *   table ever stacks.  `spell-doc.css` holds them all unstacked anyway;  this keeps the page true without it.
  *   - one that asks to stack (`stackable`, `stack-by`) is left, and listed:  a demo of stacking
  * - a `<details>` aside (its first child a `<summary>`) becomes the house aside, the durable template's:
- *   `<ui-accordion class="spell-aside" styled>` > `<ui-title>` (the summary's contents) + `<ui-content>` (the rest)
+ *   `<ui-accordion class="spell-aside" appearance="styled">` > `<ui-title>` (the summary's contents) + `<ui-content>` (the rest)
  *   - just a code block in it:  `class="spell-code"`, as every folded code block is
  *   - its `id` and classes kept
  *   - folded, as every aside starts (src/AGENTS.md, "Sections"):  an `open` one is listed (`opened`)
@@ -29,7 +29,7 @@
 import { make } from "./answerPages.js"
 
 /** The house comparison table's flags (src/AGENTS.md, "Writing a page"). */
-const TABLE_FLAGS = { celled: true, compact: true, striped: true, unstackable: true }
+const TABLE_FLAGS = { celled: true, padding: "compact", appearance: "striped", unstackable: true }
 
 /** Where a table or `<details>` is an example or data, not the page's content:  never looked at. */
 const NOT_CONTENT = "template, pre, code, svg, textarea, noscript, ui-code, ui-markdown, ui-include, epic-code"
@@ -113,7 +113,7 @@ export function unstackTables(root) {
 }
 
 /**
- * Give `element` the boolean attribute `name`, AFTER its others (`<ui-table compact celled unstackable>`), as a
+ * Give `element` the boolean attribute `name`, AFTER its others (`<ui-table padding="compact" celled unstackable>`), as a
  * person adds a word.
  * - linkedom puts each new attribute FIRST (`make()`):  there they're all set again, backwards;  a browser's DOM
  *   adds it last already
@@ -175,7 +175,7 @@ function convertAside(document, details) {
   const accordion = make(document, "ui-accordion", {
     id: details.getAttribute("id") ?? undefined,
     class: classes.join(" "),
-    styled: true
+    appearance: "styled"
   })
   const lead = isSpace(rest[0]) ? rest.shift() : undefined
   const trail = rest.length && isSpace(rest.at(-1)) ? rest.pop() : undefined

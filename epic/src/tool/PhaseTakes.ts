@@ -71,10 +71,13 @@ export class PhaseTakes {
     return done
   }
 
-  /** The item ids phase `phase`'s text links (lower case), its "To review" field and nested items left out. */
+  /**
+   * The item ids phase `phase`'s text links or marks (lower case:  `<a href="#i1">`, `<epic-link item>`,
+   * `<epic-mark item>`), its "To review" field and nested items left out.
+   */
   private static linkedIds(phase: Element): Set<string> {
     const ids = new Set<string>()
-    for (const link of Array.from(phase.querySelectorAll('a[href^="#"], epic-link[item]'))) {
+    for (const link of Array.from(phase.querySelectorAll('a[href^="#"], epic-link[item], epic-mark[item]'))) {
       if (link.closest(TO_REVIEW) || link.closest("epic-item")) continue
       if (link.localName === "epic-link" && link.getAttribute("epic")) continue
       const id = (

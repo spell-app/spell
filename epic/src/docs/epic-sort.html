@@ -28,7 +28,7 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-sort&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-sort&gt;
@@ -60,7 +60,7 @@
             <ui-icon slot="icon" name="eye"></ui-icon>
             <epic-sort></epic-sort>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 1 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -83,7 +83,7 @@
 
           <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="compass"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Parent</th><th>How many</th><th>As</th></tr>
@@ -101,20 +101,20 @@
             <p>None.</p>
             <ui-section id="epic-sort-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Part</th><th>What it is</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>base</code></td><td>The pair, a <code>&lt;ui-buttons circular basic size="tiny"&gt;</code>.</td></tr>
+                  <tr><td><code>base</code></td><td>The pair, a <code>&lt;ui-buttons appearance=&quot;circular basic&quot; size=&quot;tiny&quot;&gt;</code>.</td></tr>
                 </tbody>
               </table>
             </ui-table>
             </ui-section>
             <ui-section id="epic-sort-events" label="Events" sticky collapsible dividing collapsed>
               <p>What it tells the page.</p>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>

@@ -515,7 +515,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The toolbar's state chips:  every section's filter (`DOMEpicSectionElement.stateFilter`) added up.
    * - a state is on while every section having it shows it
-   * - read again on every layout change and section filter change
+   * - read again on every layout change and section filter change, and after every mark (`followMarks`):
+   *   a marked item leaves its state's count
    */
   readonly filterChips = createMemo((): StateFilterEntry[] => {
     this.signals.layout.get()
@@ -531,6 +532,30 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
     return FILTER_STATES.flatMap((it) => totals.get(it.state) ?? [])
   })
+
+  /**
+   * Each section's `markedCount`, as one string (`"2 0 1"`):  what `followMarks()` follows.
+   * - read again on every layout change and section filter change too:  a section drawn later counts from then
+   * - a string, so an unchanged one stops there (the memo's `===`), and the bump it causes ends
+   */
+  readonly markedCounts = createMemo((): string => {
+    this.signals.layout.get()
+    void this.filterTick
+    if (isServer) return ""
+    return this.filterHosts()
+      .map((section) => section.markedCount ?? 0)
+      .join(" ")
+  })
+
+  /**
+   * The items marked in this pass, every section's added up (epic `epic-engine` P43):  the toolbar's blue badge.
+   * - tracked:  each section's `markedCount` follows the review inbox
+   */
+  readonly markedTotal = createMemo((): number =>
+    this.markedCounts()
+      .split(" ")
+      .reduce((total, count) => total + Number(count || 0), 0)
+  )
 
   ////////////////
   // ## Rendering
@@ -599,6 +624,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     E.afterSolidUpdate(() => {
       this.filterTick++
     })
+
+  /** Each section's `markedCount`, as one string (`markedCounts`):  what `followMarks()` follows. */
+  get sectionMarks(): string {
+    return this.markedCounts()
+  }
+
+  /**
+   * A mark came or went in any section (its `markedCount`, P43):  the toolbar's chips read again, once the sections'
+   * own counts have taken it (`bumpFilters()`).
+   * - not read in `filterChips` itself:  there the sections' counts could still be the old ones
+   */
+  @E.onChange("sectionMarks")
+  protected followMarks() {
+    this.bumpFilters()
+  }
 
   /** Follow the review inbox while connected (kept alive:  a removed page stops). */
   @E.whileConnected
@@ -698,7 +738,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               {(phases) => (
                 <ui-label
                   class="bedtime-label"
-                  basic=""
+                  appearance="basic"
                   color="violet"
                   icon="bed"
                   title={this.translationForKey("bedtimeTip", { phases: phases() })}
@@ -712,7 +752,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               class={STEP_PILL}
               part={this.partForName("step-pill")}
               style={{
-                "--epic-pill-color": `var(--ui-${this.step()?.color ?? "grey"})`
+                "--epic-pill-color": `var(--ui-${pillColorOf(this.step()?.color)})`,
+                "--epic-pill-ink": `var(--ui-${pillColorOf(this.step()?.color)}-text)`
               }}
             >
               <Show when={this.step()}>
@@ -720,10 +761,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   <ui-label
                     part={this.state() ? this.partForName("state") : undefined}
                     data-state={this.state()?.name}
-                    basic={step().color === "green" ? undefined : ""}
-                    color={step().color}
+                    appearance={step().color === "green" ? undefined : "basic"}
+                    color={pillColorOf(step().color)}
                     icon={step().icon}
-                    href={step().href}
+                    link={step().href}
                     title={step().tip}
                   >
                     {step().words}
@@ -766,11 +807,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           size="small"
           aria-label={this.translationForKey("crumbs")}
         >
-          <ui-breadcrumb href={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
+          <ui-breadcrumb link={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
             {this.translationForKey("crumbDocs")}
           </ui-breadcrumb>
           <ui-breadcrumb
-            href={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
+            link={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
             target={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].target}
           >
             {this.translationForKey(this.isSaga ? "crumbSagas" : "crumbEpics")}
@@ -932,11 +973,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
    * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
+   * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
    */
   private pageFilter(): JSX.Element {
     const chips = () => this.filterChips()
     return (
-      <Show when={chips().length}>
+      <Show when={chips().length || this.markedTotal()}>
         <span class={FILTER} part={this.partForName("filter")}>
           <epic-state-filter
             counts={chips()
@@ -950,6 +992,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     .map((chip) => chip.state)
                     .join(" ")
             }
+            marked={this.markedTotal() || undefined}
           />
         </span>
       </Show>
@@ -1174,7 +1217,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("notice")}
         state="info"
         size="small"
-        header={this.translationForKey("futureHeader")}
+        heading={this.translationForKey("futureHeader")}
       >
         <p>
           {this.translationForKey("futureBody")}{" "}
@@ -1430,6 +1473,7 @@ export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}
  */
 type FilterHost = E.DOMElement & {
   readonly stateFilter?: readonly StateFilterEntry[]
+  readonly markedCount?: number
   showStates?(states: readonly string[] | undefined): void
 }
 
@@ -1466,3 +1510,13 @@ const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[stat
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"
+
+/**
+ * The header pill's colour for a step's:  blue drawn grey, the rest as they are.
+ * - the pill is quiet, a grey rim and ink (Owen, 2026-10-25:  "Make the P1/agent pill non-blue");
+ *   green (done) and red (the epic's state:  errors) still say something there
+ * - none:  grey
+ */
+function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] {
+  return !color || color === "blue" ? "grey" : color
+}

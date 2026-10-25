@@ -98,8 +98,8 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
           <ui-button
             class={SEND}
             part={this.partForName("send")}
-            primary=""
-            circular=""
+            color="primary"
+            appearance="circular"
             icon="paper plane"
             loading={this.isSending ? "" : undefined}
             title={this.sendTip}
@@ -118,8 +118,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={COPY}
             part={this.partForName("copy")}
             size="mini"
-            basic=""
-            circular=""
+            appearance="basic circular"
             icon={this.copyState === "copied" ? "check" : "copy"}
             title={this.translationForKey(this.copyState === "failed" ? "copyFailed" : "copyTip")}
             onClick={this.onCopy}
@@ -130,8 +129,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={EXPAND}
             part={this.partForName("expand")}
             size="mini"
-            basic=""
-            circular=""
+            appearance="basic circular"
             icon={this.isAllOpen ? "angles up" : "angles down"}
             onClick={this.onExpand}
           >

@@ -76,25 +76,21 @@ const HEAD_TOOLS = ["folds", "send", "page", "comment"]
  * - in `BLOCK_ACTIONS`' order, whoever adds first:  the bullhorn, then the expand button
  * - made on first use, `data-spell-added` (a live update steps around it);
  *   `dropBlockAction()` takes it away with its last control
+ * - on an epic page (inside `<epic-page>`), an `<epic-actions>` (epic `epic-engine` P45):  the element draws and
+ *   places its controls itself;  elsewhere a `div.spell-block-actions` holding a `span.spell-block-buttons`,
+ *   which `spell-comments.css` styles
  * - `kind`:  one of `BLOCK_ACTIONS`;  returns the row
  */
 export function addBlockAction(block, control, kind) {
   let row = block.previousElementSibling
-  if (!row?.classList.contains("spell-block-actions")) {
-    row = document.createElement("div")
-    row.className = "spell-block-actions"
-    row.dataset.spellAdded = ""
-    // the buttons in a box of their own, out of the flow:  the row stays a line of no height;
-    // over the block's top edge however its margin falls (`alignBlockActions()`)
-    const buttons = document.createElement("span")
-    buttons.className = "spell-block-buttons"
-    row.append(buttons)
+  if (!row?.matches(BLOCK_ROW)) {
+    row = block.closest(EPIC_PAGE) ? epicActionsRow() : plainActionsRow()
     // a block slotted into an element (a docs example's description) takes its row with it:
     // unslotted, the row landed in the element's default slot, somewhere else entirely
     if (block.slot) row.slot = block.slot
     block.before(row)
   }
-  const buttons = row.firstElementChild
+  const buttons = buttonsOf(row)
   control.dataset.action = kind
   const rank = BLOCK_ACTIONS.indexOf(kind)
   const after = [...buttons.children].find((each) => BLOCK_ACTIONS.indexOf(each.dataset.action) > rank)
@@ -105,9 +101,37 @@ export function addBlockAction(block, control, kind) {
 
 /** Take `control` away, and its block's actions row with it once that's empty (`addBlockAction()`). */
 export function dropBlockAction(control) {
-  const row = control.closest(".spell-block-actions")
+  const row = control.closest(BLOCK_ROW)
   control.remove()
   if (row && !row.querySelector("[data-action]")) row.remove()
+}
+
+/**
+ * Every block's actions row, of either kind (`addBlockAction()`):  an epic page's `<epic-actions>`, any other page's
+ * `div.spell-block-actions`.
+ */
+export const BLOCK_ROW = ".spell-block-actions, epic-actions"
+
+/** An epic page:  its blocks' actions rows are `<epic-actions>`. */
+const EPIC_PAGE = "epic-page"
+
+/** A new `<epic-actions>`:  its controls are its own children, which it places itself (P45). */
+function epicActionsRow() {
+  return el("epic-actions", { "data-spell-added": true })
+}
+
+/**
+ * A new `div.spell-block-actions`:  the buttons in a box of their own, out of the flow, so the row stays a line of no
+ * height, over the block's top edge however its margin falls (`alignBlockActions()`).
+ */
+function plainActionsRow() {
+  const buttons = el("span", { class: "spell-block-buttons" })
+  return el("div", { class: "spell-block-actions", "data-spell-added": true }, buttons)
+}
+
+/** The box `row`'s controls go in:  an `<epic-actions>` itself, a plain row's `span.spell-block-buttons`. */
+function buttonsOf(row) {
+  return row.localName === "epic-actions" ? row : row.firstElementChild
 }
 
 /** The controls of a block's actions row, in their order:  the bullhorn first (`addBlockAction()`). */
@@ -128,7 +152,7 @@ const BLOCK_ACTIONS = ["comment", "expand"]
  *   its callers run again on a resize (the comments' `makeRoom()`, a table's `place()`)
  */
 export function alignBlockActions(root) {
-  const rows = root.matches?.(".spell-block-actions") ? [root] : [...root.querySelectorAll(".spell-block-actions")]
+  const rows = root.matches?.(BLOCK_ROW) ? [root] : [...root.querySelectorAll(BLOCK_ROW)]
   const sizes = rows.map((row) => {
     const block = row.nextElementSibling
     if (!block || !row.getClientRects().length || !block.getClientRects().length) return undefined
@@ -146,7 +170,9 @@ export function alignBlockActions(root) {
       if (value === undefined) row.style.removeProperty(name)
       else if (row.style.getPropertyValue(name) !== value) row.style.setProperty(name, value)
     }
-    row.classList.toggle("at-head-row", !!size.head)
+    // an `<epic-actions>` takes it as its attribute `head-row`, a plain row as its class
+    if (row.localName === "epic-actions") row.toggleAttribute("head-row", !!size.head)
+    else row.classList.toggle("at-head-row", !!size.head)
   })
 }
 

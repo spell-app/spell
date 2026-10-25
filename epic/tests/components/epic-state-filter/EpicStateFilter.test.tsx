@@ -62,6 +62,29 @@ describe("<epic-state-filter>", () => {
     chip(host, "open").click()
     expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["attention", "open", "recent"] })
   })
+
+  // epic `epic-engine` P43 (Owen, 2026-10-25:  "a blue badge with dotted outline to the left")
+  test("`marked`:  a blue dotted badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
+    const host = await ElementFixture.render(
+      `<epic-state-filter counts="open:2 recent:1" shown="recent" marked="3"></epic-state-filter>`
+    )
+    const badge = host.shadowRoot!.querySelector<HTMLElement>('[part~="marked"]')!
+    expect(badge.localName).toBe("span")
+    expect(badge.parentElement!.firstElementChild).toBe(badge)
+    expect([badge.textContent, badge.title]).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect(getComputedStyle(badge).borderTopStyle).toBe("dotted")
+    expect(chips(host)).toEqual(["open:2", "recent:1+"])
+    await expectAccessible(host)
+    // every item marked:  the badge alone;  none marked, no badge
+    host.setAttribute("counts", "")
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector('[part~="marked"]')!.textContent).toBe("3")
+    expect(chips(host)).toEqual([])
+    host.setAttribute("counts", "open:2")
+    host.setAttribute("marked", "0")
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector('[part~="marked"]')).toBeNull()
+  })
 })
 
 describe("<epic-hidden-note>", () => {

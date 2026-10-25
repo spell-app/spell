@@ -32,8 +32,7 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
       <ui-buttons
         class={this.rootClass}
         part={this.partForName("base")}
-        circular=""
-        basic=""
+        appearance="circular basic"
         size="tiny"
         aria-label={this.translationForKey("label")}
       >
@@ -44,7 +43,7 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
             return (
               <ui-button
                 icon={button.icon}
-                active={inUse() ? "" : undefined}
+                selected={inUse() ? "" : undefined}
                 title={this.translationForKey(button.tip)}
                 aria-label={inUse() ? this.translationForKey("inUse", { words: words() }) : words()}
                 onClick={() => this.pick(button.sort)}

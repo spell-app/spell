@@ -46,7 +46,7 @@
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);
-    /* an item list's runs:  the corners at each end (`EpicSection.runRules()` hands it to the items) */
+    /* an item list's runs:  the corners at each end (the page sheet, `EpicSection.runs.css`, hands it to the items) */
     --_epic-run-radius: var(--epic-section-run-radius, 8px);
   }
   /* a section its page's stage hides (`<epic-page stage>`, epic `epic-engine` P29):  still in the file, drawn as nothing */
@@ -62,7 +62,7 @@
     --epic-inset: var(--epic-card-inset, 16px);
   }
   /*
-   * an Overview part's title row:  square, but at a run's ends, which the Overview rounds (`EpicOverview.runEnds`;
+   * an Overview part's title row:  square, but at a run's ends, which the Overview rounds (`EpicSection.runs.css`;
    * Owen, 2026-10-25:  "1.3 top and 1.4 bottom should be rounded");  square while stuck, flush under the titles above
    */
   :host([kind="overview-part"]) ui-section:not(:state(stuck))::part(title) {

@@ -212,7 +212,7 @@ body.spell-doc-page
     epic-choices-bar,
     .spell-toolbar-alone,
     .spell-crumbs,
-    .spell-block-actions:has(+ .spell-full-width),
+    :is(.spell-block-actions, epic-actions):has(+ .spell-full-width),
     .spell-table-pin,
     epic-comment-pane,
     [slot]
@@ -233,7 +233,7 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
  * - a BARE icon (Owen, 2026-10-19:  "Should be bare icon without the circle border"):  no edge, no fill, hovered or
  *   pressed;  hovered, the icon darkens
  */
-:is(.spell-doc-main, .site-main) .spell-block-actions ui-button.spell-table-toggle {
+:is(.spell-doc-main, .site-main) :is(.spell-block-actions, epic-actions) ui-button.spell-table-toggle {
   --ui-button-basic-border-width: 0px;
   --ui-button-basic-background-hover: transparent;
   --ui-button-basic-background-down: transparent;

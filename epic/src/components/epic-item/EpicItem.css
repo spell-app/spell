@@ -9,7 +9,7 @@
  *   - `--epic-band-row`:  the line's band
  *   - `--epic-stack`:  how far below the window's top an open item's line sticks (the stuck section titles)
  *   - `--epic-item-top-radius` / `--epic-item-bottom-radius`:  its line's corners, set by its section
- *     on the first and last line of each run of lines (`EpicSection.runRules()`)
+ *     on the first and last line of each run of lines (`EpicSection.runs.css`, by position)
  * - Every box on the line sits in a `.cell` one line tall, centred in it:
  *   so the chevron, chip and label centre on the title's FIRST line, however many lines it wraps to.
  * - Public tokens (`--epic-item-*`) are never declared here:  read through private aliases.
@@ -35,7 +35,7 @@
     --_epic-item-muted: var(--ui-text-muted, GrayText);
     --_epic-chip-size: var(--epic-chip-font-size, 0.8em);
     --_epic-chip-height: var(--epic-chip-height, 1.6em);
-    /* its line's corners:  square, but at a run's ends, which its section rounds (`EpicSection.runRules()`) */
+    /* its line's corners:  square, but at a run's ends, which its section rounds (`EpicSection.runs.css`, by position) */
     --_epic-item-top-radius: var(--epic-item-top-radius, 0px);
     --_epic-item-bottom-radius: var(--epic-item-bottom-radius, 0px);
     display: block;
@@ -73,7 +73,11 @@
      * its chevron, id chip and title in the same columns as a phase's chevron, status icon and title (Owen,
      * 2026-10-25:  "icon / Q# and text should line up horizontally between the two sections";  2px in, before)
      */
-    padding: 5px 6px 5px 14px;
+    /*
+     * - 1px more below than above:  the shadow over its top reads as a border
+     * - no right padding:  the review buttons sit as far from its right as from its top, 2px (Owen, 2026-10-25)
+     */
+    padding: 5px 0 6px 6px;
     border-start-start-radius: var(--_epic-item-top-radius);
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
@@ -99,7 +103,7 @@
   /*
    * OPEN, a DRAWER pulled out under its line (epic `epic-engine` I104;  Owen, 2026-10-25:  "item header is rounded when
    * it's open, with 1px shadow ... lines extending down ... making it look like a drawer that was opened"):
-   * - the line rounded all round (a run of its own:  `EpicSection.runEnds`), the bars' one line of shadow under it
+   * - the line rounded all round (a run of its own:  `EpicSection.runs.css`), the bars' one line of shadow under it
    * - its details:  half-white, thin side rules running down from under the line, closed at the bottom with rounded
    *   corners;  the note box, when there, IS that bottom (below)
    */
@@ -122,16 +126,18 @@
    */
   .item.unfolded > .details > [part~="note-box"]:last-child {
     bottom: 0;
-    margin-inline: calc(var(--_epic-drawer-inset) + 1px - var(--_epic-item-indent)) -6px;
+    /* over the drawer's side rules (1px out):  they run down into its rounded top corners, no gap (Owen, 2026-10-25) */
+    margin-inline: calc(var(--_epic-drawer-inset) - var(--_epic-item-indent)) -7px;
     /* over the drawer's bottom padding:  the box IS its bottom */
-    margin-block-end: -10px;
+    margin-block-end: -11px;
   }
   .item.unfolded > .details > [part~="note-box"]:last-child::part(base) {
     margin: 8px 0 0;
     /* its frame all round, light (the answer-look page's Q2:  "lose heavy border on top") */
     /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
-    border-radius: 10px 10px max(0px, calc(var(--_epic-item-bottom-radius) - 1px))
-      max(0px, calc(var(--_epic-item-bottom-radius) - 1px));
+    border-radius: 10px 10px var(--_epic-item-bottom-radius) var(--_epic-item-bottom-radius);
+    /* its paper ring only above, 1px in at the sides:  the drawer's side rules show down to its rounded corners */
+    box-shadow: 0 -4px 0 -1px var(--ui-background, Canvas);
     /* one line of shadow, its own (EpicReview.css) */
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */

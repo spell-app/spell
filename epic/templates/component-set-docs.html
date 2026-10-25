@@ -25,7 +25,7 @@
     (spell-epic, for Epic UI).
   - Sections:  nested `<ui-section id label sticky collapsible dividing collapsed>`, every one folded to start, as on
     every docs page.  Code:  `<ui-code language>` around a `<script type="text/plain">`, folded in a
-    `<ui-accordion class="spell-code" styled>`.
+    `<ui-accordion class="spell-code" appearance="styled">`.
   - Check it:  `node tools/check-spell.js ../../<set folder>/<page>.html` (in `packages/docs`):  it loads a set's page
     from the page server at its short address.
   - Opened as it is (from the page server, `/templates/component-set-docs.html`), it shows in Epic UI's chrome with
@@ -61,10 +61,10 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="{{title}}">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
-            <ui-item href="{{code}}" icon="code" aria-label="Its code" title="Its code"></ui-item>
+            <ui-item link="{{code}}" icon="code" aria-label="Its code" title="Its code"></ui-item>
           </ui-menu>
           <ui-header level="1" class="site-title">
             {{title}}
@@ -86,7 +86,7 @@
 
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>Where it's from · N lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -100,7 +100,7 @@
 
           <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>

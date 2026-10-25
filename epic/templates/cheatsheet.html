@@ -24,8 +24,8 @@
           - The badge filter (`data-spell-filter-badge`) keeps the cards with a `ui-label` of the chosen text.
         -->
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb href="../pages/index.html" target="src-packages-docs-index-html">Docs</ui-breadcrumb>
-          <ui-breadcrumb active>Short Title Cheat Sheet</ui-breadcrumb>
+          <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Short Title Cheat Sheet</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head"><h1>Short Title Cheat Sheet</h1></header></ui-sticky
@@ -95,7 +95,7 @@
             <ui-card>
               <ui-content>
                 <h3 id="a-feature-with-variants">A feature with variants</h3>
-                <ui-tabs class="spell-tabs" pointing secondary basic size="small" aria-label="Variants">
+                <ui-tabs class="spell-tabs" appearance="pointing secondary basic" size="small" aria-label="Variants">
                   <ui-tab label="TS">
                     <pre><code class="language-ts">const n: number = count(items)</code></pre>
                   </ui-tab>

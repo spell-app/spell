@@ -1,10 +1,11 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  84499b9b9376d959
+// sources:  2d1c24c23c2c8292
 
 import type { RootCatalogEntry } from "spell-ui"
 
 /** Every tag of the `epics` pack => what `<ui-root>` needs before its family loads. */
 export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
+  "epic-actions": {"folder":"epic-actions","attributes":["head-row"]},
   "epic-agents": {"folder":"epic-agents","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["draws"]},
   "epic-answer": {"folder":"epic-answer","attributes":["id","title"]},
   "epic-aside": {"folder":"epic-aside","attributes":["title"]},
@@ -25,6 +26,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
+  "epic-mark": {"folder":"epic-mark","attributes":["item","link"]},
   "epic-more": {"folder":"epic-answer","attributes":[]},
   "epic-net-effect": {"folder":"epic-net-effect","attributes":["option","recommended"]},
   "epic-new-item": {"folder":"epic-new-item","skeleton":{"display":"inline","width":"1em","height":"1em"},"attributes":["open","adds","near","editing"]},
@@ -45,11 +47,11 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","wand"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
-  "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","shown"]},
+  "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-test-run": {"folder":"epic-test-run","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":6}]},"attributes":["all"]},
-  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
+  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
   "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},

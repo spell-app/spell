@@ -40,6 +40,7 @@ import { DraftSaver } from "spell-epic/answers"
 import { ServerLink } from "spell-epic/review"
 import {
   addBlockAction,
+  BLOCK_ROW,
   addHeadTool,
   alignBlockActions,
   dropBlockAction,
@@ -121,7 +122,7 @@ const SEND_POLL_MS = 30_000
  * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`)
  * - every other block (a paragraph, a table, a list, a message, cards, a phase's field, the summary) has no title row:
  *   its bullhorn sits over its corner, first in its actions row
- *   (`.at-block`, in `.spell-block-actions`:  `addBlockAction()`)
+ *   (`.at-block`, in `.spell-block-actions`, an epic page's `<epic-actions>`:  `addBlockAction()`)
  */
 const TITLE_ROW_BLOCKS = "epic-overview, epic-item, epic-update[at], epic-aside, epic-code"
 
@@ -408,7 +409,7 @@ class PageComments {
   /**
    * Keep a corner bullhorn off a thread's buttons (Owen, 2026-10-10:  "Overlap in bullhorn buttons").
    * - a block with no title row has its bullhorn over its top right corner, in its actions row
-   *   (`.spell-block-actions`, with a table's expand button)
+   *   (`.spell-block-actions` or `<epic-actions>`, with a table's expand button)
    * - so a thread just under a short block (a one-line paragraph) can lie under them:
    *   that thread's header leaves room on its right, its buttons moving left
    *   (`--epic-thread-head-room`, which `<epic-thread>` reads)
@@ -419,7 +420,7 @@ class PageComments {
    */
   makeRoom() {
     alignBlockActions(this.main)
-    const horns = [...this.main.querySelectorAll(".spell-block-actions ui-button")]
+    const horns = [...this.main.querySelectorAll(`:is(${BLOCK_ROW}) ui-button`)]
       .filter((each) => each?.checkVisibility?.({ contentVisibilityAuto: true }) !== false)
       .map((each) => each?.getBoundingClientRect())
       .filter((rect) => rect?.width)
@@ -648,7 +649,7 @@ class PageComments {
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
-   *   a `<ui-item link>` (a button), its count a `<ui-label>` over the icon's top right, as a section's badge
+   *   a `<ui-item appearance="link">` (a button), its count a `<ui-label>` over the icon's top right, as a section's badge
    * - kept when the toolbar is built anew (a live update), and drawn again with the comments
    * - where it goes:  `waitingHome()`, the one place to change to move it
    */
@@ -1669,7 +1670,7 @@ const UNDO_MS = 6000
 
 /**
  * A control the comments draw (epic `epic-engine` I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> ...
- * components for these pages?"):  a `<ui-button circular basic size="mini">` with `icon`, never a raw `<button>`, so
+ * components for these pages?"):  a `<ui-button appearance="circular basic" size="mini">` with `icon`, never a raw `<button>`, so
  * the component centres its icon;  `tip` its tooltip and name, on the inner button too (`titleInside()`).
  * - `size`:  another size (Send's pill:  `tiny`, as the New epic pill)
  */
@@ -1734,6 +1735,6 @@ const bullhornBlocks = new WeakMap()
 function standsBy(mark, block) {
   if (!mark.isConnected || !block.isConnected) return false
   if (mark.parentElement === block || mark.classList.contains("at-page")) return true
-  const row = mark.closest(".spell-block-actions")
+  const row = mark.closest(BLOCK_ROW)
   return Boolean(row) && row.nextElementSibling === block
 }

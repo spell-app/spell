@@ -161,7 +161,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
         {this.withCode(this.purpose ?? "")}
         <Show when={this.isKept}>
           {" "}
-          <ui-label class={STAYS} size="mini" basic="">
+          <ui-label class={STAYS} size="mini" appearance="basic">
             {this.translationForKey("stays")}
           </ui-label>
         </Show>

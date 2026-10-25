@@ -267,10 +267,17 @@ function main() {
     if (!existsSync(file)) writeFileSync(file, atDepth(skeleton(list), pagePath(file).split("/").length - 1))
     const mine = list.id === "sagas" ? pages : pages.filter((page) => list.has(page.path))
     const body = listSection(list, mine, undefined, sagas)
-    // the engine's Templates page (spell-epic's `templates/`):  every repo's `epic` writes the same list, so it's
-    // written only when its templates changed, never churned (`sameList()`)
-    if (list.dir === TEMPLATES && sameList(readFileSync(file, "utf8"), body)) {
-      report.push(`${pagePath(file)}:  ${mine.length} (unchanged)`)
+    // the engine's Templates page (spell-epic's `templates/`, a TRACKED file):  every repo's `epic` writes the same
+    // list, so it's written only when its templates changed, never churned (`sameList()`), never from a made-up
+    // checkout (`writesEngineList()`), and tidied at once (`writeEngineList()`)
+    if (list.dir === TEMPLATES) {
+      const unchanged = sameList(readFileSync(file, "utf8"), body)
+      if (unchanged || !writesEngineList()) {
+        report.push(`${pagePath(file)}:  ${mine.length} (${unchanged ? "unchanged" : "left alone:  no epic config"})`)
+        continue
+      }
+      if (!writeEngineList(file, body)) process.exit(1)
+      report.push(`${pagePath(file)}:  ${mine.length}`)
       continue
     }
     if (!writeBetween(file, START, END, body)) process.exit(1)
@@ -310,8 +317,48 @@ export function sameList(html, body) {
   const from = html.indexOf(START)
   const to = html.indexOf(END)
   if (from < 0 || to < from) return false
-  const plain = (text) => text.replace(/\s+target="[^"]*"/g, "").replace(/\s+/g, "")
+  const plain = (text) => decodeReferences(text.replace(/\s+target="[^"]*"/g, "")).replace(/\s+/g, "")
   return plain(html.slice(from + START.length, to)) === plain(body)
+}
+
+/**
+ * `text` with its character references written out:  `&#39;` => `'`.
+ * - the list's body escapes them (`escapeHTML()`), and oxfmt writes them back as plain characters, so a tidied page
+ *   and a fresh body only compare once both are decoded (epic `epic-engine` I131:  every run saw a change)
+ */
+function decodeReferences(text) {
+  return text.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, (reference, name) => {
+    if (name[0] === "#")
+      return String.fromCodePoint(
+        name[1] === "x" || name[1] === "X" ? parseInt(name.slice(2), 16) : Number(name.slice(1))
+      )
+    return NAMED_REFERENCES[name.toLowerCase()]
+  })
+}
+
+/** The named character references `decodeReferences()` writes out. */
+const NAMED_REFERENCES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0" }
+
+/**
+ * Whether this run may rewrite the engine's Templates page:  only from a checkout with an epic config
+ * (`.epic/config.json5`), a repo's real checkout.
+ * - NOT a test's made-up checkout (`PlanDocCommands`' scratch root, through `reindex()`):  the page is a file
+ *   spell-epic tracks, which no test may write (epic `epic-engine` I131)
+ */
+function writesEngineList() {
+  return existsSync(EpicConfig.of(ROOT).file)
+}
+
+/**
+ * Write list `body` into the engine's Templates page `file`, tidied at once (`tidy()`);  `false` when it can't.
+ * - its bytes are put back when tidying fails:  a run that dies later (a checkout with no `pages/`) never leaves it
+ *   raw, with no link targets and unformatted (epic `epic-engine` I131)
+ */
+function writeEngineList(file, body) {
+  const before = readFileSync(file, "utf8")
+  if (writeBetween(file, START, END, body) && tidy([file])) return true
+  writeFileSync(file, before)
+  return false
 }
 
 /**
@@ -661,7 +708,10 @@ function areaCard(area) {
   const title = area.href
     ? `<a href="${escapeHTML(area.href)}" target="_self">${escapeHTML(area.title)}</a>`
     : `<span>${escapeHTML(area.title)}</span>`
-  const meta = [area.count, area.meta].filter(Boolean).map((part) => escapeHTML(part)).join(" · ")
+  const meta = [area.count, area.meta]
+    .filter(Boolean)
+    .map((part) => escapeHTML(part))
+    .join(" · ")
   return `<ui-card id="${area.id}"><ui-content>
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
@@ -724,8 +774,8 @@ export function skeleton(list) {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>
-<ui-breadcrumb active>${escapeHTML(list.title)}</ui-breadcrumb>
+<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb selected>${escapeHTML(list.title)}</ui-breadcrumb>
 </ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>
 <p class="lede">${list.lede}</p>

@@ -28,6 +28,9 @@ import filterCSS from "./EpicStateFilter.css?inline"
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
  *   one hides;  the only one showing, everything again);  the owner filters, and sets `shown`
  * - each chip's tooltip and name:  how many, which state, what its click does
+ * - the items MARKED in this pass (`marked`, epic `epic-engine` P43):  a blue badge with a dotted outline, first,
+ *   left of the chips (Owen, 2026-10-25:  "remove from the red/green/etc and put in a blue badge with dotted outline
+ *   to the left");  drawn whatever `shown` says, and not a filter:  a click does nothing
  * - drawn by:  `<epic-section>` (an item section's title), `<epic-page>` (its toolbar:  every section at once), the
  *   docs runtime's lists (the Epics page's cards:  `wireItemFilters()`), so a guide and an epic page look alike
  * - NEVER filters anything itself:  it only says what was picked
@@ -68,19 +71,41 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return new Set(this.shown.split(/\s+/).filter((state) => present.includes(state)))
   }
 
+  /** How many items are marked in this pass:  the blue badge's count;  0, no badge. */
+  get markedCount(): number {
+    const marked = Number(this.marked ?? 0)
+    return marked > 0 ? marked : 0
+  }
+
   ////////////////
   // ## Drawing
   ////////////////
 
   render(): JSX.Element {
     return (
-      <Show when={this.present.length}>
+      <Show when={this.present.length || this.markedCount}>
         <span
           class={FILTER}
           part={this.partForName("base")}
           role="group"
           aria-label={this.translationForKey("filterLabel")}
         >
+          <Show when={this.markedCount}>
+            {(count) => {
+              const words = () => this.translationForKey("markedWords", { count: count() })
+              return (
+                <span
+                  class={[CHIP, MARKED]}
+                  part={this.partForName("marked")}
+                  role="img"
+                  aria-label={words()}
+                  title={words()}
+                >
+                  {count()}
+                </span>
+              )
+            }}
+          </Show>
           <For each={this.present}>
             {(state) => {
               const words = () => this.chipWords(state)
@@ -123,6 +148,9 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     this.send(STATE_PICK, { state, shown } satisfies StatePickDetail)
   }
 }
+
+/** Class of the blue badge, the items marked in this pass (P43). */
+const MARKED = "marked"
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicStateFilter extends E.AttributeValues<typeof epicStateFilterVocabulary> {}

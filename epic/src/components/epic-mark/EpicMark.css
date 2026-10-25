@@ -1,0 +1,79 @@
+/*
+ * `<epic-mark>` (`EpicMark.tsx`):  an item's id as a chip, in running text, in the item's state colour.
+ * - The chip's colour comes from `data-state` on it (the item's state as drawn), through the page's state tokens
+ *   (`--epic-state-*`, declared by `<epic-page>`), the same as the item's own id chip;  no item:  the accent.
+ * - Its size and shape are the mark's public tokens, read through private aliases;  each falls back to the older
+ *   shared chip tokens (`--epic-chip-*`) the To review links read before P45.
+ *   - `--epic-mark-height` (1.6em), `--epic-mark-min-width` (2.6em), `--epic-mark-padding` (0 6px)
+ *   - `--epic-mark-radius` (a pill), `--epic-mark-font-size` (0.8em), `--epic-mark-font-weight` (600)
+ */
+
+@layer ui.components.epic-mark.types, ui.components.epic-mark.content;
+
+@layer ui.components.epic-mark.types {
+  /* no box of its own:  the chip sits in the line itself, as the To review links did, centred on its x-height */
+  :host {
+    display: contents;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-mark.content {
+  .chip {
+    --_epic-mark-height: var(--epic-mark-height, var(--epic-chip-height, 1.6em));
+    --_epic-mark-radius: var(--epic-mark-radius, var(--epic-chip-radius, 999px));
+    --_epic-mark-font-size: var(--epic-mark-font-size, var(--epic-chip-font-size, 0.8em));
+    --_epic-mark-background: var(--epic-accent-soft, var(--ui-primary-background));
+    --_epic-mark-color: var(--epic-accent, var(--ui-link));
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: var(--epic-mark-min-width, 2.6em);
+    height: var(--_epic-mark-height);
+    padding: var(--epic-mark-padding, 0 6px);
+    border-radius: var(--_epic-mark-radius);
+    background: var(--_epic-mark-background);
+    color: var(--_epic-mark-color);
+    font: var(--epic-mark-font-weight, 600) var(--_epic-mark-font-size) / 1 var(--epic-mono, var(--ui-font-family-mono));
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  a.chip:hover {
+    filter: brightness(0.95);
+  }
+  a.chip:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
+    outline-offset: 1px;
+  }
+
+  /* the item's state, as its own id chip draws it */
+  .chip[data-state="attention"] {
+    --_epic-mark-background: var(--epic-state-attention, light-dark(var(--ui-red), var(--ui-red-on-light)));
+    --_epic-mark-color: var(--epic-state-attention-on, light-dark(var(--ui-red-on), var(--ui-ink-on-dark)));
+  }
+  .chip[data-state="replied"] {
+    --_epic-mark-background: var(--epic-state-replied, var(--ui-orange));
+    --_epic-mark-color: var(--epic-state-replied-on, var(--ui-orange-on));
+  }
+  .chip[data-state="open"] {
+    --_epic-mark-background: var(--epic-state-open, var(--ui-yellow));
+    --_epic-mark-color: var(--epic-state-open-on, var(--ui-yellow-on));
+  }
+  .chip[data-state="progress"] {
+    --_epic-mark-background: var(--epic-state-progress, var(--ui-blue));
+    --_epic-mark-color: var(--epic-state-progress-on, var(--ui-blue-on));
+  }
+  .chip[data-state="recent"] {
+    --_epic-mark-background: var(--epic-state-recent, var(--ui-green));
+    --_epic-mark-color: var(--epic-state-recent-on, var(--ui-green-on));
+  }
+  .chip:is([data-state="old"], [data-state="handled"]) {
+    --_epic-mark-background: var(--epic-state-old, var(--ui-grey-background));
+    --_epic-mark-color: var(--epic-state-old-on, var(--ui-grey-text));
+  }
+}

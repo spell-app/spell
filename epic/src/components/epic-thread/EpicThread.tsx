@@ -243,8 +243,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
         <Show when={this.hasPen}>
           <ui-button
             class={[TOOL, "edit"]}
-            circular=""
-            basic=""
+            appearance="circular basic"
             size="mini"
             icon="edit"
             title={this.translationForKey("editTitle")}
@@ -254,8 +253,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
         </Show>
         <ui-button
           class={[TOOL, "delete"]}
-          circular=""
-          basic=""
+          appearance="circular basic"
           size="mini"
           icon="trash can"
           title={this.translationForKey("deleteTitle")}

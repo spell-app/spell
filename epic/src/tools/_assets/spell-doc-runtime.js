@@ -85,6 +85,7 @@ import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
   addBlockAction,
+  BLOCK_ROW,
   addHeadTool,
   alignBlockActions,
   dropBlockAction,
@@ -430,7 +431,7 @@ function drawReadingTime(main) {
  * - Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ...
  *   Remember that setting per table"
  * - The button is a bare icon in the table's ACTIONS ROW (`addBlockAction()`), right of its bullhorn.
- *   - `.spell-table-toggle`, a `<ui-button basic>` with no edge (`spell-doc.css`)
+ *   - `.spell-table-toggle`, a `<ui-button appearance="basic">` with no edge (`spell-doc.css`)
  *   - Owen, 2026-10-19:  "The expand button should be to the right of the bullhorn rather than in its own line"
  *   - the row is a line of no height, so it takes no room;  a click flips it back
  * - Expanded, the row moves with the table:  its buttons stay over the table's top right corner.
@@ -461,7 +462,7 @@ function wireTableWidths(main) {
     const toggle = toggles.get(box)
     const parent = box.parentElement
     if (!toggle || !parent || !box.isConnected) return
-    const row = toggle.closest(".spell-block-actions")
+    const row = toggle.closest(BLOCK_ROW)
     // its width in the column, measured while not widened:
     // the column is often the table's own `max-width`, not its parent's
     if (!box.style.width && box.getClientRects().length) narrow.set(box, box.getBoundingClientRect().width)
@@ -510,7 +511,7 @@ function wireTableWidths(main) {
   const watch = () => {
     // a table a live update replaced:  its button goes with it
     for (const [box, toggle] of toggles) {
-      const row = toggle.closest(".spell-block-actions")
+      const row = toggle.closest(BLOCK_ROW)
       if (box.isConnected && row?.nextElementSibling === box) continue
       for (const name of ["width", "margin-inline-start"]) row?.style.removeProperty(name)
       dropBlockAction(toggle)
@@ -608,7 +609,7 @@ function wireTableHeads(main) {
       pin.hidden = true
       pins.set(box, pin)
       const row = box.previousElementSibling
-      ;(row?.classList.contains("spell-block-actions") ? row : box).before(pin)
+      ;(row?.matches(BLOCK_ROW) ? row : box).before(pin)
     }
     // shown again:  the header as it is now (a live update may have changed it)
     if (pin.hidden) copyHead(pin, box, table, rows)
@@ -941,11 +942,12 @@ const ADDED = ".spell-item-filter, .spell-hidden-note, [data-spell-added]"
 
 /**
  * The page state of an `<epic-*>` element (epic `epic-components`, P10):  folded or open (items, sections, phases,
- * the Overview), and the page being reviewed (`<epic-page reviewing>`);  never in the file, so a patch keeps them
+ * the Overview), the page being reviewed (`<epic-page reviewing>`), and an item its section's filter hides
+ * (`data-epic-filtered`, epic `epic-engine` P45);  never in the file, so a patch keeps them
  * (`KEPT_ATTRIBUTES`), and a replaced subtree carries them over (`carryEpicState()`).
  * - NOTE: their review controls and note boxes are in their shadow roots (P9):  a patch never sees them
  */
-const EPIC_PAGE_STATE = ["open", "reviewing"]
+const EPIC_PAGE_STATE = ["open", "reviewing", "data-epic-filtered"]
 
 /**
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):
@@ -1319,10 +1321,21 @@ async function rewire(page, changed) {
 function railKey(outline, counts) {
   return JSON.stringify(outline.groups.map(entry))
 
-  /** One top-level entry:  its id, label, icon and state, and how many of its items need Owen (and how). */
+  /**
+   * One top-level entry:  its id, label, icon and state, how many of its items need Owen (and how), and how many of
+   * its phases run now.
+   */
   function entry(node) {
     const count = counts.get(node.element)
-    return [node.id, node.label, node.glyph, node.element.dataset.state, count?.attention ?? 0, count?.replied ?? 0]
+    return [
+      node.id,
+      node.label,
+      node.glyph,
+      node.element.dataset.state,
+      count?.attention ?? 0,
+      count?.replied ?? 0,
+      count?.running ?? 0
+    ]
   }
 }
 
@@ -1549,6 +1562,12 @@ const EPIC_ATTENTION =
  */
 const EPIC_REPLIED = ':scope > :is(epic-item, epic-phase)[state="replied"]'
 
+/**
+ * The Phases section's phases running now (`status="active"`):  the toolbar's blue badge on the Phases button
+ * (epic `epic-engine` P43;  Owen, 2026-10-25:  "blue badge for the number of things currently running")
+ */
+const EPIC_RUNNING = ':scope > epic-phase[status="active"]'
+
 /** A count pill's tooltip:  "2 need you", "1 needs you". */
 function needYou({ attention }) {
   return `${attention} ${attention === 1 ? "needs" : "need"} you`
@@ -1564,7 +1583,8 @@ function needYou({ attention }) {
  * - an epic page's sections count themselves (`<epic-section>`, on their titles):  their count is read from their
  *   hosts' `contentsEntry`, never written;
  *   its `attention` too, else the items' `state="attention"` (`EPIC_ATTENTION`);
- *   and `replied`, how many of those wait on Owen's pick (`EPIC_REPLIED`:  the toolbar's orange badge)
+ *   and `replied`, how many of those wait on Owen's pick (`EPIC_REPLIED`:  the toolbar's orange badge);
+ *   and `running`, the Phases section's phases at work now (`EPIC_RUNNING`:  the toolbar's blue badge, P43)
  * - SIDE EFFECT:  writes `open/total` on the section's title:  its `badge` (SECTIONS), or a `ui-label.spell-count`
  *   at the right of the h2 (HEADINGS);  callable again (it replaces both)
  */
@@ -1576,7 +1596,8 @@ function countItems(outline) {
       if (count) {
         const attention = count.attention ?? element.querySelectorAll(EPIC_ATTENTION).length
         const replied = Math.min(attention, element.querySelectorAll(EPIC_REPLIED).length)
-        counts.set(element, { ...count, attention, replied })
+        const running = element.querySelectorAll(EPIC_RUNNING).length
+        counts.set(element, { ...count, attention, replied, running })
       }
       continue
     }
@@ -1863,7 +1884,8 @@ function buildPageToolbar(main, outline, counts) {
  * - BADGES:  how many of the block's items wait on Owen, from `counts` (none:  no badge)
  *   - red:  urgent (`state="attention"`)
  *   - orange:  Claude answered with options, his turn to pick (`state="replied"`)
- *   - both kinds:  both badges, red first
+ *   - blue:  the Phases button's, how many phases run now (`status="active"`;  epic `epic-engine` P43)
+ *   - several kinds:  every one, red first, then orange, then blue
  *   - over the icon's top right, a third of a badge on the icon:  every button is the same width, badge or not
  *     (Owen, 2026-10-10:  "Make badge 1/3 way overlap the icon")
  * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header,
@@ -1881,6 +1903,7 @@ function buildToolbar(page, outline, counts) {
     const replied = count?.replied ?? 0
     const urgent = (count?.attention ?? 0) - replied
     const name = shortLabel(label)
+    const running = count?.running ?? 0
     const waits = replied === 1 ? "waits" : "wait"
     return toolbarItem({
       id,
@@ -1890,7 +1913,8 @@ function buildToolbar(page, outline, counts) {
       mark: glyph ? undefined : el("b", { slot: "icon" }, name.charAt(0)),
       badges: [
         ["urgent", urgent, `${urgent} urgent`],
-        ["replied", replied, `${replied} replied:  ${waits} for your pick`]
+        ["replied", replied, `${replied} replied:  ${waits} for your pick`],
+        ["running", running, `${running} running now`]
       ].filter(([, number]) => number > 0)
     })
   })
@@ -3058,8 +3082,8 @@ function newEpicBox() {
     <p class="spell-note-hint">⌘ Enter saves.  It's written down as a future epic, with a seedling on this page;  /airplane land asks whether to start it.</p>
   </ui-content>
   <ui-actions>
-    <ui-button class="spell-note-cancel" circular basic>Cancel</ui-button>
-    <ui-button class="spell-note-save" circular primary icon="seedling">Make the epic</ui-button>
+    <ui-button class="spell-note-cancel" appearance="circular basic">Cancel</ui-button>
+    <ui-button class="spell-note-save" appearance="circular" color="primary" icon="seedling">Make the epic</ui-button>
   </ui-actions>
 </ui-modal>`
   box = template.content.firstElementChild

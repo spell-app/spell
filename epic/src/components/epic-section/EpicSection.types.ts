@@ -242,18 +242,10 @@ export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 /** The attributes of a counted child that change its count or its state:  a change re-counts. */
 export const COUNT_ATTRIBUTES = ["status", "state"]
 
-/** Its items, by themselves:  their runs (`EpicSection.runEnds`). */
-export const ITEMS = ":scope > epic-item"
-
-/** The Phases section's phases, by themselves:  their title rows' runs too (`EpicSection.runEnds`, I96). */
-export const PHASES = ":scope > epic-phase"
-
-/**
- * The attributes of an item (or a phase) that change where its list's runs start and end (`EpicSection.runEnds`):
- * - `open`:  unfolded, its details between its line and the next item's
- * - `hidden`:  not drawn at all
+/*
+ * Its runs (the item lines and phase title rows drawn as rounded cards) are the page sheet's since epic `epic-engine`
+ * P45, by position (`EpicSection.runs.css`):  no list of items, no attributes to watch.
  */
-export const RUN_ATTRIBUTES = ["open", "hidden"]
 
 /**
  * Where an item stands, in the filter's order:  its state, its chip's colour, its texts' keys (the tooltip's words).
@@ -281,6 +273,11 @@ export const FILTER_TEXTS = [
     key: "chipWords",
     text: "{count} {words}:  {does}",
     description: "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+  },
+  {
+    key: "markedWords",
+    text: "{count} marked in this pass, waiting for Claude",
+    description: "The blue badge's name and tooltip:  how many items Owen marked in this pass (epic `epic-engine` P43)."
   },
   { key: "showAll", text: "show everything", description: "A state chip's click:  every state shows again." },
   { key: "chipOnly", text: "show only these", description: "A state chip's click:  only its state shows." },

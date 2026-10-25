@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-field&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -108,7 +108,7 @@
                   /></a></p></epic-field></epic-field
             >
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 19 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -153,7 +153,7 @@
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>Fields, from real epic pages · 4 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -196,7 +196,7 @@
             <ui-icon slot="icon" name="compass"></ui-icon>
 
             <ui-section id="epic-field-parents" label="Its parents" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -350,7 +350,7 @@
                 Prose: text, a <code>&lt;p&gt;</code>, a list. A first paragraph runs on after the label; lists and
                 later paragraphs go below it.
               </p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -376,7 +376,7 @@
           <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
 
-            <ui-table celled compact striped unstackable>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
@@ -416,7 +416,7 @@
             </ui-table>
             <ui-section id="epic-field-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -436,7 +436,7 @@
 
             <ui-section id="epic-field-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

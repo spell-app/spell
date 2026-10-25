@@ -603,9 +603,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         class={FAILED}
         part={this.partForName("failed")}
         size="mini"
-        basic=""
+        appearance="basic"
         color="red"
-        href={issue() ? `#${issue()}` : undefined}
+        link={issue() ? `#${issue()}` : undefined}
         title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
@@ -634,8 +634,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         class={HANDLED}
         part={this.partForName("handled")}
         size="mini"
-        basic=""
-        href={`#${phaseId()}`}
+        appearance="basic"
+        link={`#${phaseId()}`}
         title={this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}

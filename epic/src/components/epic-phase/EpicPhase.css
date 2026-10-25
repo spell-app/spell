@@ -36,7 +36,11 @@
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
   }
   ui-section {
-    --ui-section-title-padding: 8px var(--epic-inset, 16px);
+    /*
+     * as an item's line:  its chevron 8px in, in the items' column;  its buttons as far from the right as from the top,
+     * 6px (Owen, 2026-10-25)
+     */
+    --ui-section-title-padding: 8px 6px 8px 8px;
     --ui-section-content-padding: 10px var(--epic-inset, 16px) 0;
     /* its title is an h3:  the line everything in its title row centres on (`EpicFold.css`) */
     --_epic-fold-line: calc(var(--ui-font-size, 16px) * var(--ui-section-h3) * var(--ui-section-title-line-height));
@@ -56,7 +60,7 @@
   }
   /*
    * the title rows as RUNS, as an item list's lines (epic `epic-engine` I96;  Owen, 2026-10-24:  "showed the white
-   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runRules()`),
+   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runs.css`, by position),
    * rounded at a run's top (the first phase, the one after an open phase) and bottom (the last);  square while stuck
    */
   ui-section:not(:state(stuck))::part(title) {

@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="&lt;epic-prompt&gt;">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -83,7 +83,7 @@
               <p>&lt;epic-page epic="windows-and-review" title="xxx"&gt; ... &lt;/epic-page&gt;</p>
             </epic-prompt>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The example above · 4 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -102,7 +102,7 @@
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
 
-            <ui-accordion class="spell-code" styled>
+            <ui-accordion class="spell-code" appearance="styled">
               <ui-title>A kickoff prompt · 1 line</ui-title>
               <ui-content>
                 <ui-code language="html"
@@ -127,7 +127,7 @@
             <ui-icon slot="icon" name="compass"></ui-icon>
 
             <ui-section id="epic-prompt-parents" label="Its parents" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -154,7 +154,7 @@
             </ui-section>
 
             <ui-section id="epic-prompt-children" label="Its children" sticky collapsible dividing collapsed>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -182,7 +182,7 @@
             <p>None: it takes no attributes.</p>
             <ui-section id="epic-prompt-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -202,7 +202,7 @@
 
             <ui-section id="epic-prompt-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
-              <ui-table celled compact striped unstackable>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
                     <tr>

@@ -157,8 +157,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
               <ui-button
                 class={KEPT_DROP}
                 size="mini"
-                basic=""
-                circular=""
+                appearance="basic circular"
                 icon="xmark"
                 aria-label={this.translationForKey("keptDrop", { label: item.label })}
                 title={this.translationForKey("keptDropTip")}

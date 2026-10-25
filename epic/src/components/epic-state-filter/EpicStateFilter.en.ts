@@ -24,7 +24,8 @@ export const epicStateFilterVocabulary = {
     "per state the items are in, in the state's colour, with how many;  solid while that state's items show, " +
     "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
-    "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
+    "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items " +
+    "marked in this pass (`marked`) count in a blue dotted badge first, whatever the filter.",
   attributes: [
     {
       name: "counts",
@@ -32,6 +33,14 @@ export const epicStateFilterVocabulary = {
       description:
         "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state " +
         "with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+    },
+    {
+      name: "marked",
+      kind: "number",
+      description:
+        "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
+        "badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a " +
+        "click does nothing.  None, or 0:  no badge."
     },
     {
       name: "shown",
@@ -52,7 +61,8 @@ export const epicStateFilterVocabulary = {
   slots: [],
   parts: [
     { name: "base", description: "The group of chips." },
-    { name: "chip", description: "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`." }
+    { name: "chip", description: "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`." },
+    { name: "marked", description: "The blue badge of the items marked in this pass (`marked`):  not a button." }
   ],
   states: [],
   texts: [...FILTER_TEXTS],

@@ -11,6 +11,7 @@
  *   - what changed BELOW its heading, folded `until-found`
  * - A request (a labelled field in a Requests field, r31):  a fold, its chevron and label the title row,
  *   its prose below, folded `until-found`;  its screenshots' thumbnails are the page sheet's (`EpicField.requests.css`)
+ * - To review:  its `<epic-mark>`s draw their own chips (epic `epic-engine` P45).
  * - Public tokens (`--epic-field-*`) are never declared here:  read through private aliases.
  */
 
@@ -79,49 +80,6 @@
   ::slotted(:is(ul, ol)) {
     margin: 2px 0 4px;
     padding-left: 1.2em;
-  }
-
-  /* ## To review:  each link a chip in its item's state colour (`data-spell-state`, set by the field) */
-  :host([name="to-review"]) ::slotted(a[href^="#"]) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    min-width: 2.6em;
-    height: var(--epic-chip-height, 1.6em);
-    padding: 0 6px;
-    border-radius: var(--epic-chip-radius, 999px);
-    background: var(--_epic-chip-background, var(--epic-accent-soft, var(--ui-primary-background)));
-    /* `!important`:  the page's link rules (`.spell-doc-main a`) are the outer tree, which beats `::slotted()`;
-       an important declaration of the inner tree wins back */
-    color: var(--_epic-chip-color, var(--epic-accent, var(--ui-link))) !important;
-    font: 600 var(--epic-chip-font-size, 0.8em)/1 var(--epic-mono, var(--ui-font-family-mono));
-    text-decoration: none !important;
-    vertical-align: middle;
-  }
-  ::slotted(a[data-spell-state="attention"]) {
-    --_epic-chip-background: var(--epic-state-attention);
-    --_epic-chip-color: var(--epic-state-attention-on);
-  }
-  ::slotted(a[data-spell-state="replied"]) {
-    --_epic-chip-background: var(--epic-state-replied);
-    --_epic-chip-color: var(--epic-state-replied-on);
-  }
-  ::slotted(a[data-spell-state="open"]) {
-    --_epic-chip-background: var(--epic-state-open);
-    --_epic-chip-color: var(--epic-state-open-on);
-  }
-  ::slotted(a[data-spell-state="progress"]) {
-    --_epic-chip-background: var(--epic-state-progress);
-    --_epic-chip-color: var(--epic-state-progress-on);
-  }
-  ::slotted(a[data-spell-state="recent"]) {
-    --_epic-chip-background: var(--epic-state-recent);
-    --_epic-chip-color: var(--epic-state-recent-on);
-  }
-  ::slotted(a[data-spell-state="old"]) {
-    --_epic-chip-background: var(--epic-state-old);
-    --_epic-chip-color: var(--epic-state-old-on);
   }
 
   /* ## `<epic-updated>`:  the fence -- the fold chevron, the icon, its heading;  what changed under the heading */

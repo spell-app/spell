@@ -1,0 +1,48 @@
+/*
+ * `<epic-actions>` (`EpicActions.tsx`):  a block's actions row on an epic page (epic `epic-engine` P45).
+ * - The host is a line of no height just before its block;  its controls' box is out of the flow,
+ *   over the block's top right corner.
+ * - Where that corner is, the docs runtime measures (`alignBlockActions()`) and hands in on the host:
+ *   - `--spell-block-gap`:  from the row down to the block's top edge (its own top margin may lie between)
+ *   - `--spell-block-head`:  a table's header row's height, with `head-row`:  the buttons centred on that row
+ * - Public tokens, read through private aliases:
+ *   - `--epic-actions-inset` (2px):  how far inside the block's top and right edges
+ *   - `--epic-actions-gap` (2px):  between the controls
+ *   - `--epic-actions-background`:  a control's fill, the page's ground under it
+ */
+
+@layer ui.components.epic-actions.types, ui.components.epic-actions.content;
+
+@layer ui.components.epic-actions.types {
+  :host {
+    position: relative;
+    z-index: 2;
+    display: block;
+    height: 0;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-actions.content {
+  .buttons {
+    --_epic-actions-inset: var(--epic-actions-inset, 2px);
+
+    position: absolute;
+    top: calc(var(--spell-block-gap, 0px) + var(--_epic-actions-inset));
+    right: var(--_epic-actions-inset);
+    display: flex;
+    align-items: center;
+    gap: var(--epic-actions-gap, 2px);
+  }
+  /* a table's:  centred on its header row (Owen, 2026-10-19:  "expand button is not centered vertically") */
+  :host([head-row]) .buttons {
+    top: var(--spell-block-gap, 0px);
+    height: var(--spell-block-head);
+  }
+  ::slotted(ui-button) {
+    border-radius: 999px;
+    background: var(--epic-actions-background, var(--spell-bg, var(--epic-bg, var(--ui-background))));
+  }
+}

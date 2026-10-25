@@ -49,7 +49,7 @@ export function isPhaseStatus(status: string): status is PhaseStatus {
  * - `Done` has its own command (`phase <N> done --done`);  `To review` is the script's (`PlanDoc.updateToReview()`)
  */
 /** A phase's body fields, `setPhaseFields()`'s;  `plan`:  Claude's build plan, for Owen to accept (epic `epic-engine` P33). */
-export const PHASE_FIELDS = ["symptom", "changes", "goal", "plan", "files", "verify"] as const
+export const PHASE_FIELDS = ["symptom", "goal", "changes", "plan", "files", "verify"] as const
 
 /** One of `PHASE_FIELDS`. */
 export type PhaseField = (typeof PHASE_FIELDS)[number]

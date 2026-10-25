@@ -3,9 +3,6 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UI } from "spell-ui/core"
 
-// Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
-import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
-import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
 // plain DOM, the page's ONE zoom:  the docs runtime's too
@@ -27,9 +24,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - A labelled block in prose (`label`, no `name`:  `Where:`, P14):  the bold label and its prose, no icon column.
  * - Files and Verify are hidden until the Phases title's toggles show them
  *   (`--epic-files-display` / `--epic-verify-display`, inherited from the Phases section).
- * - To review:  each `#link` shows as a chip in its item's state colour.
- *   SIDE EFFECT:  writes `data-spell-state` on those links (light DOM), as today's runtime did,
- *   again whenever the page's layout changes.
+ * - To review:  its `<epic-mark item link>`s draw themselves, each in its item's state colour (epic `epic-engine` P45:
+ *   this field coloured `<a href>` links by writing `data-spell-state` on them before).
  * - A REQUEST (a labelled field right inside a Requests field, as `epic file` writes it;  Owen, 2026-10-25, r31:
  *   "this needs to be collapsable.  Don't need to show image at full size, smaller with click to show in modal"):
  *   - a fold:  the chevron (`fold.button()`) and its label as the title row, folded to start with
@@ -55,23 +51,6 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
 
   /** Its icon. */
   readonly glyph = new E.IconGlyph({ owner: this, name: () => this.look.icon })
-
-  /** The `<epic-page>` around it, once connected. */
-  get page(): Element | null {
-    return this.isConnected ? this.domElement.closest(EpicPage.TAG) : null
-  }
-
-  /** The page's layout counter:  bumped when sections come or go, or a phase changes (`EpicPage`). */
-  get layout(): number {
-    const page = this.page
-    return page ? EpicPage.signalsOf(page).layout.get() : 0
-  }
-
-  /** To review:  colour its links by their items' states, again as the page changes (`layout`). */
-  @E.onChange("name", "isConnected", "layout")
-  protected onLayoutChanged(name: string | undefined, connected: boolean) {
-    if (name === TO_REVIEW && connected) this.colourLinks()
-  }
 
   /** A labelled block in prose (`label`, no `name`):  its label alone, no icon (P14). */
   get isLabelled(): boolean {
@@ -177,18 +156,6 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
       </div>
     )
   }
-
-  /** Mark each To review link with its item's state:  `state`, else by its status (`STATUS_STATES`). */
-  private colourLinks() {
-    for (const link of this.domElement.querySelectorAll(':scope > a[href^="#"]')) {
-      const item = document.getElementById(decodeURIComponent(link.getAttribute("href")!.slice(1)))
-      if (!item) continue
-      const written = item.getAttribute("state") ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
-      // a decided or done item a week old, or approved since it changed, draws grey (`ItemAge`)
-      const state = ItemAge.shown(written as ItemState, item.getAttribute("changed"), item.getAttribute("reviewed"))
-      if (link.getAttribute(LINK_STATE) !== state) link.setAttribute(LINK_STATE, state)
-    }
-  }
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
@@ -215,15 +182,6 @@ type FieldName = keyof typeof FIELD_LOOKS
 
 /** One of `FIELD_LOOKS`. */
 type FieldLook = (typeof FIELD_LOOKS)[FieldName]
-
-/** The To review field:  its links show as chips in their items' state colours. */
-const TO_REVIEW = "to-review"
-
-/**
- * The attribute the To review links get, their item's state (`attention`, `open` ...):
- * the name today's runtime gave it, which the field's sheet colours by.
- */
-const LINK_STATE = "data-spell-state"
 
 /** Class word of its box. */
 const FIELD = "field"

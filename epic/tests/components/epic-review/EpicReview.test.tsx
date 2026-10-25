@@ -476,8 +476,8 @@ describe("<epic-item> review controls", () => {
     const docked = deep(full!).querySelector<HTMLElement>("[part~='details'] [part~='note-box']")!
     // where an item's details start:  under the id chip, not the item's edge
     expect(box.getBoundingClientRect().left - bare!.getBoundingClientRect().left).toBeGreaterThan(20)
-    // an open item's box is its drawer's bottom (I104):  side to side, inside the drawer's rules (6px in, 1px rule)
-    expect(Math.round(docked.getBoundingClientRect().left - full!.getBoundingClientRect().left)).toBe(5)
+    // an open item's box is its drawer's bottom (I104):  side to side, over the drawer's rules (4px in, the rule under its edge)
+    expect(Math.round(docked.getBoundingClientRect().left - full!.getBoundingClientRect().left)).toBe(4)
     expect(toggle()?.getAttribute("aria-expanded")).toBe("true")
     // its box holds a todo's "do it", selected:  words selected in a field are no drag over the title, so it folds
     expect(String(window.getSelection())).toBe("do it")

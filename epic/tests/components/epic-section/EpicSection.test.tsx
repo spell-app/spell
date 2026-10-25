@@ -551,6 +551,25 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     await ElementFixture.tick()
     expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "bottom", q4: "top", q5: "bottom" })
   })
+
+  // by position, with sibling selectors, the filter's hidden items marked (epic `epic-engine` P45;  Owen, 2026-10-25:
+  // "generic CSS, using sibling selectors ... rather than with explicit ids")
+  test("a run starts after an unfolded line even with hidden lines between;  the hidden ones marked, not by id", async () => {
+    // q4 red:  showing only yellow hides it, between unfolded q3 and q5
+    const host = await render(seven([3], ["open", "open", "open", "attention", "open", "open", "open"]))
+    chip(host, "open").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "bottom", q5: "top", q6: "", q7: "bottom" })
+    const filtered = Array.from(host.querySelectorAll("[data-epic-filtered]"), (item) => item.id)
+    expect(filtered).toEqual(["q4"])
+    expect(host.shadowRoot!.querySelector("style")?.textContent ?? "").not.toContain("::slotted(#")
+    // shown again:  the mark comes off
+    chip(host, "attention").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(host.querySelectorAll("[data-epic-filtered]").length).toBe(0)
+  })
 })
 
 // epic `epic-engine` I96, Owen, 2026-10-24:  "showed the white corners at the bottom above P29"

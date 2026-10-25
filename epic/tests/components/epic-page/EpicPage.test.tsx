@@ -44,7 +44,7 @@ function step(host: Element) {
   return {
     words: label.textContent!.trim(),
     color: label.getAttribute("color"),
-    href: label.getAttribute("href") ?? undefined,
+    href: label.getAttribute("link") ?? undefined,
     // its first line:  the state's why follows on the next
     tip: label.getAttribute("title")?.split("\n")[0]
   }
@@ -127,7 +127,7 @@ describe("<epic-page>", () => {
     expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe("Copy /epic review SAGA:/epics")
     const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
-      crumb.getAttribute("href")
+      crumb.getAttribute("link")
     ])
     expect(crumbs).toEqual([
       ["Docs", "../../pages/index.html"],
@@ -228,8 +228,8 @@ describe("<epic-page>", () => {
     expect(
       Array.from(crumbs.querySelectorAll("ui-breadcrumb"), (crumb) => [
         crumb.textContent,
-        crumb.getAttribute("href"),
-        crumb.hasAttribute("active")
+        crumb.getAttribute("link"),
+        crumb.hasAttribute("selected")
       ])
     ).toEqual([
       ["Docs", "../../pages/index.html", false],
@@ -271,13 +271,14 @@ describe("<epic-page>", () => {
       `<epic-item id="q2" title="Two" status="decided" state="recent"></epic-item></epic-section>` +
       `<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="Later" status="open" state="open"></epic-item></epic-section>`
     const mark = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>('[part~="state"]')
-    // between phases, items open, touched today:  in progress (it used to sleep)
+    // between phases, items open, touched today:  in progress (it used to sleep);  drawn grey, as the header's pill
+    // never draws blue (Owen, 2026-10-25:  "Make the P1/agent pill non-blue"):  the tooltip says which
     const busy = await render(page(`updated="${today}"`, ["done", "todo"], items))
     expect([
       mark(busy)?.dataset.state,
       mark(busy)?.getAttribute("color"),
       mark(busy)?.title.split("\n").at(-1)
-    ]).toEqual(["progress", "blue", `in progress:  1/2 phases done, updated ${today}`])
+    ]).toEqual(["progress", "grey", `in progress:  1/2 phases done, updated ${today}`])
     busy.remove()
     // a phase active, but nobody on it for days:  paused, in grey;  the icon the PHASE's own (P33:  as its row draws it)
     const idle = await render(page(`updated="2026-01-01"`, ["done", "active"], items))
@@ -821,6 +822,69 @@ describe("<epic-page> toolbar", () => {
   })
 })
 
+/** The blue badge `host` draws (its `<epic-state-filter>`'s marked count):  its count and tooltip;  none, `null`. */
+function markedBadge(host: Element): [string, string] | null {
+  const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
+  const badge = filter?.shadowRoot?.querySelector<HTMLElement>('[part~="marked"]')
+  return badge ? [badge.textContent!, badge.title] : null
+}
+
+// Owen, 2026-10-25:  "if any in that section have been actioned in this pass, remove from the red/green/etc and put in
+// a blue badge with dotted outline to the left.  These should always remain visible, no matter the status filter.  Do
+// the same thing at the top"
+describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
+  afterEach(() => {
+    ReviewClient.adopt(undefined)
+    localStorage.clear()
+  })
+
+  test("a mark takes its item out of its state's chip and into the blue badge, in its section and the toolbar;  a filter keeps both;  applied, it's gone", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = await render(filterPage(["attention", "open", "open"], ["open", "recent"]))
+    const questions = host.querySelector("#decisions")!
+    const caveats = host.querySelector("#caveats")!
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"]))
+    expect([markedBadge(host), markedBadge(questions)]).toEqual([null, null])
+    // Owen marks two questions and a caveat, one sent and two not:  each counts
+    const at = new Date().toISOString()
+    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at }, c1: { action: "approve", at } }
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1"]))
+    expect(markedBadge(host)).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
+    expect(markedBadge(questions)).toEqual(["2", "2 marked in this pass, waiting for Claude"])
+    // a section whose items are all marked keeps its badge alone
+    expect(chipsOf(caveats).map((chip) => chip.dataset.state)).toEqual(["recent"])
+    expect(markedBadge(caveats)?.[0]).toBe("1")
+    // filtered to recent:  the badges stay, and so do the marked items;  the hidden line leaves them out
+    await pickPageState(host, "recent")
+    expect(pageChips(host)).toEqual(["open-1", "recent+1"])
+    expect(markedBadge(host)?.[0]).toBe("3")
+    expect(markedBadge(questions)?.[0]).toBe("2")
+    expect(shownItems(host)).toEqual(["q1", "q2", "c1", "c2"])
+    const note = questions.shadowRoot!.querySelector('[part~="hidden-note"]')!.shadowRoot!.querySelector("button")!
+    expect(note.textContent).toBe("1 hidden · show all")
+    // Claude applies them:  the badges go, the counts come back
+    await pickPageState(host, "recent")
+    routes.inbox.marks = {}
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(pageChips(host)).toEqual(["attention+1", "open+3", "recent+1"])
+    expect([markedBadge(host), markedBadge(questions), markedBadge(caveats)]).toEqual([null, null, null])
+  })
+
+  test("outside a review (no inbox):  no badge, every count as before", async () => {
+    await adoptClient(new FakeRoutes(), { served: false })
+    const host = await render(filterPage(["attention", "open"], ["open"]))
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+2"]))
+    expect(markedBadge(host)).toBeNull()
+  })
+})
+
 /** Is `host` (a fold or an item) open, as drawn? */
 function isOpen(host: Element): boolean {
   return host.matches(":state(open)")
@@ -934,13 +998,31 @@ describe("<epic-page> Agents running", () => {
     AgentsClient.adopt(undefined)
   })
 
-  test("in the toolbar (P35):  '2 agents running', its popover a row per agent:  name, status, age, task, redirects;  axe", async () => {
+  test("in the header's pill (P35):  `2 🤖`, its popover a row per agent:  name, status, age, task, redirects;  axe", async () => {
     await adoptAgents(new FakeAgents())
     const host = await renderWithAgents()
-    const button = agentsRoot(host).querySelector(".agents-button")!
-    expect([button.querySelector(".words")!.textContent, button.getAttribute("aria-label")]).toEqual([
+    const button = agentsRoot(host).querySelector<HTMLButtonElement>(".agents-button")!
+    // the count and the robot, never the words (Owen, 2026-10-25):  they're its name and tooltip
+    expect([button.textContent!.trim(), button.getAttribute("aria-label"), button.title]).toEqual([
+      "2",
       "2 agents running",
       "2 agents running"
+    ])
+    expect(button.querySelector('ui-icon[name="robot"]')).not.toBeNull()
+    // Send:  a round blue plane, no word, named and titled
+    const send = agentsRoot(host).querySelector(".agent-send")!
+    expect([
+      send.textContent,
+      send.getAttribute("icon"),
+      send.getAttribute("color"),
+      send.getAttribute("aria-label"),
+      send.getAttribute("title")
+    ]).toEqual([
+      "",
+      "paper plane",
+      "blue",
+      "Send your note to demo-aaa",
+      "Send your note to demo-aaa:  it changes what the agent does next"
     ])
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
@@ -1065,6 +1147,13 @@ describe("<epic-page> what Claude is doing", () => {
     const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
     expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, M3")
+    // a grey pill like the step label, its spinner where the label's icon goes (Owen, 2026-10-25)
+    const pill = line()!.querySelector("ui-label")!
+    expect([pill.getAttribute("color"), pill.hasAttribute("basic"), pill.querySelector(".spinner")!.slot]).toEqual([
+      "grey",
+      true,
+      "icon"
+    ])
     const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
