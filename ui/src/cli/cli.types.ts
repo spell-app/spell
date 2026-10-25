@@ -20,6 +20,16 @@ import type {
  * - `json`:  print the icons found as JSON
  * - `open`:  show them in a browser, as pictures
  */
+/** `spell ui rename`'s options. */
+export type RenameOptions = CLI.GlobalOptions & {
+  /** rewrite the files;  without it, list what it would change */
+  write?: boolean
+  /** list only the total, not each file */
+  quiet?: boolean
+  /** only tags a browser draws, never escaped markup:  for pages that quote old names on purpose */
+  markupOnly?: boolean
+}
+
 export type IconsOptions = CLI.GlobalOptions & {
   pack?: string
   json?: boolean

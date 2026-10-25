@@ -21,13 +21,13 @@ What you can't do yet is offer people a theme menu on your own page:  🌱 comin
 ```html
 <ui-header level="3">Account settings<ui-header>Manage your preferences</ui-header></ui-header>
 <div class="row">
-  <ui-button primary>Save</ui-button>
+  <ui-button color="primary">Save</ui-button>
   <ui-button>Cancel</ui-button>
-  <ui-button basic icon="user">Profile</ui-button>
+  <ui-button appearance="basic" icon="user">Profile</ui-button>
 </div>
 <div class="row">
   <ui-input icon="magnifying glass" placeholder="Search..." aria-label="Search"></ui-input>
-  <ui-checkbox type="toggle" selected>Email me</ui-checkbox>
+  <ui-checkbox appearance="toggle" selected>Email me</ui-checkbox>
 </div>
 ```
 

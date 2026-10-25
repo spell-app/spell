@@ -561,7 +561,7 @@ describe("<ui-toast> keyboard", () => {
 ////////////////
 
 describe("UI.toast()", () => {
-  it("builds a <ui-toast> in a top-right container:  a region popover in the top layer", async () => {
+  it("builds a <ui-toast> in a bottom-right container, with its type's icon:  a region popover in the top layer", async () => {
     const handle = UI.toast({ title: "Saved", message: "All good", class: "success", displayTime: 0 })
     const element = handle.element as Toast
     await element.ready
@@ -571,14 +571,21 @@ describe("UI.toast()", () => {
     expect(element.getAttribute("heading")).toBe("Saved")
     expect(element.getAttribute("message")).toBe("All good")
     expect(element.getAttribute("type")).toBe("success")
+    expect(element.getAttribute("icon")).toBe("")
     const container = element.parentElement!
-    expect(container.className).toBe("ui top right toast-container")
+    expect(container.className).toBe("ui bottom right toast-container")
     expect(container.getAttribute("role")).toBe("region")
     expect(container.getAttribute("aria-label")).toBe("Notifications")
     expect(container.matches(":popover-open")).toBe(true)
     expect(getComputedStyle(container).position).toBe("fixed")
     const box = container.getBoundingClientRect()
     expect(window.innerWidth - box.right).toBeCloseTo(12, 0)
+  })
+
+  it("`showIcon: false` shows none", () => {
+    const handle = UI.toast({ message: "Bare", showIcon: false, displayTime: 0 })
+    expect(handle.element!.hasAttribute("icon")).toBe(false)
+    UI.toasts.dismiss(handle.id)
   })
 
   it("defaults to 3 seconds, and resolves `closed` once the toast is gone (removed)", async () => {

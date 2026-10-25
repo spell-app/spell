@@ -760,7 +760,25 @@
                 </ui-markdown>
               </ui-message>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-sidebar" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-sidebar" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-pushable style="height: 14em">
+                  <ui-sidebar id="sidebar-demo-left-playground" inverted aria-label="Site">
+                    <ui-menu direction="vertical" inverted fluid aria-label="Site">
+                      <ui-item link="#home">Home</ui-item>
+                      <ui-item link="#games">Games</ui-item>
+                      <ui-item link="#channels">Channels</ui-item>
+                    </ui-menu>
+                  </ui-sidebar>
+                  <ui-pusher>
+                    <ui-segment appearance="basic">
+                      <button type="button" class="ui button" commandfor="sidebar-demo-left-playground" command="--toggle">Menu</button>
+                      <p>The default left sidebar uncovers itself from under this content, which dims.</p>
+                    </ui-segment>
+                  </ui-pusher>
+                </ui-pushable>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

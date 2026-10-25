@@ -184,15 +184,14 @@ describe("<ui-docs-api tag>", () => {
     expect([...tablesOf(other).keys()]).toEqual(["Parts"])
   })
 
-  // never stacked (Owen, 2026-10-25):  too wide, it scrolls sideways in its own box, which takes focus
-  it("draws Fomantic's compact celled definition tables, never stacked, scrolling in their own box", async () => {
+  // a table never stacks (epic `debut` J64):  too wide, it scrolls sideways in `<ui-table>`'s own box
+  it("draws Fomantic's compact celled definition tables, never stacked", async () => {
     const host = await render(`<ui-docs-api tag="x-or"></ui-docs-api>`)
     const table = host.shadowRoot!.querySelector("ui-table")!
     for (const name of ["celled", "definition"]) expect(table.hasAttribute(name)).toBe(true)
     expect(table.hasAttribute("stackable")).toBe(false)
     expect(table.getAttribute("padding")).toBe("compact")
-    expect([table.getAttribute("stack-by"), table.getAttribute("tabindex")]).toEqual(["none", "0"])
-    expect(getComputedStyle(table).overflowX).toBe("auto")
+    expect(table.getAttribute("stack-by")).toBe("none")
     const native = table.querySelector("table")!
     expect(native.classList.contains("definition")).toBe(true)
     expect(native.getAttribute("aria-label")).toBe("Parts of <x-or>")
@@ -234,6 +233,24 @@ describe("<ui-docs-api tag>", () => {
     expect(offset.querySelector("small")!.textContent).toBe("property headingLevelOffset")
     expect(rowOf(attributes, "text").cells[0]!.querySelector("small")!.textContent).toBe("not reflected")
     expect(rowOf(attributes, "type").cells[3]!.textContent).toBe("button")
+  })
+
+  it("heads every column alike, the first too;  values and descriptions keep a width to read, cells at the top", async () => {
+    const host = await render(`<ui-docs-api tag="x-button"></ui-docs-api>`)
+    const attributes = tablesOf(host).get("Attributes")!
+    expect(attributes.tHead!.classList.contains("full-width")).toBe(true)
+    const [first, second] = [...attributes.tHead!.rows[0]!.cells].map((cell) => getComputedStyle(cell))
+    expect({ weight: first!.fontWeight, background: first!.backgroundColor, color: first!.color }).toEqual({
+      weight: second!.fontWeight,
+      background: second!.backgroundColor,
+      color: second!.color
+    })
+    const color = rowOf(attributes, "color")
+    expect([...color.cells].map((cell) => cell.className)).toEqual(["", "", "values", "", "description"])
+    const fontSize = parseFloat(getComputedStyle(color.cells[2]!).fontSize)
+    expect(color.cells[2]!.getBoundingClientRect().width).toBeGreaterThanOrEqual(14 * fontSize - 1)
+    expect(color.cells[4]!.getBoundingClientRect().width).toBeGreaterThanOrEqual(16 * fontSize - 1)
+    expect(getComputedStyle(color.cells[4]!).verticalAlign).toBe("top")
   })
 
   it("draws values as mini labels:  hues in their colour, a numeric run as one label, the set named", async () => {

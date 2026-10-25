@@ -23,6 +23,9 @@
   *******************************/
 
   :root {
+    /* groups stay joined, as each button draws its own ring:  no inset track, square joints */
+    --ui-button-group-padding: 0px;
+    --ui-button-group-item-radius: 0px;
     --ui-button-background: light-dark(oklch(0.979 0 0), oklch(from var(--ui-ink) l c h / 0.08));
     --ui-button-radius: 0.4em;
     --ui-button-padding-block: 1em;

@@ -302,7 +302,12 @@ export class UIRating extends F.FormComponent<typeof ratingVocabulary> {
     this.choose(Number((event.currentTarget as HTMLInputElement).value), event)
   }
 
-  /** `readonly` blocks the native keys;  Home / End jump;  Backspace / Delete clear a clearable rating. */
+  /**
+   * `readonly` blocks the keys;  the arrows move through the points, wrapping, Home / End jump, each choosing;
+   * Backspace / Delete clear a clearable rating.
+   * - The arrows are ours, not the browser's:  its own stop at the ends (WebKit).
+   * - The radios keep their native tab stop (`tabindex: "left alone"`).
+   */
   @E.untracked
   private readonly onKeyDown = (event: KeyboardEvent) => {
     const { key } = event
@@ -310,47 +315,21 @@ export class UIRating extends F.FormComponent<typeof ratingVocabulary> {
       if (CHOICE_KEYS.has(key)) event.preventDefault()
       return
     }
-    if (!this.isInteractive) return
-    if (key === UIT.Key.home || key === UIT.Key.end) {
-      event.preventDefault()
-      const radios = this.radios()
-      const target = key === UIT.Key.home ? radios[0] : radios.at(-1)
-      target?.focus()
-      if (target && !target.checked) this.choose(Number(target.value), event)
-      return
-    }
-    const step = this.wrapStep(event)
-    if (step) {
-      // the browser's own arrow keys stop at the ends (WebKit):  wrap round, as the others do
-      const radios = this.radios().filter((radio) => !radio.disabled)
-      const target = step < 0 ? radios.at(-1) : radios[0]
-      event.preventDefault()
-      target?.focus()
-      if (target && !target.checked) this.choose(Number(target.value), event)
-      return
-    }
-    if (CLEAR_KEYS.has(key) && this.isClearable) {
+    if (!this.isInteractive || event.shiftKey) return
+    const moved = UI.focus.arrowKey(event, {
+      container: this.group!,
+      items: RADIO_SELECTOR,
+      orientation: "both",
+      tabindex: "left alone",
+      onChange: (radio) => {
+        const { checked, value } = radio as HTMLInputElement
+        if (!checked) this.choose(Number(value), event)
+      }
+    })
+    if (!moved && CLEAR_KEYS.has(key) && this.isClearable) {
       event.preventDefault()
       this.choose(0, event)
     }
-  }
-
-  /**
-   * Which way an arrow key would run off the end of the group:
-   * -1 before the first radio, 1 past the last,
-   * 0 when it is not that (the browser moves, or wraps, on its own).
-   */
-  private wrapStep(event: KeyboardEvent): -1 | 0 | 1 {
-    let step = ARROW_STEPS[event.key]
-    if (!step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return 0
-    // a right-to-left group runs the horizontal arrows backwards
-    const isHorizontal = event.key === UIT.Key.arrowLeft || event.key === UIT.Key.arrowRight
-    if (isHorizontal && getComputedStyle(this.domElement).direction === "rtl") step = -step
-    const radios = this.radios().filter((radio) => !radio.disabled)
-    const active = this.domElement.shadowRoot?.activeElement
-    if (step < 0 && active === radios[0]) return -1
-    if (step > 0 && active === radios.at(-1)) return 1
-    return 0
   }
 
   /** A click aimed at the DOM element itself (its `<label for>`) focuses the group's tab stop. */
@@ -403,11 +382,3 @@ const CHOICE_KEYS: ReadonlySet<string> = new Set([
   UIT.Key.end,
   ...CLEAR_KEYS
 ])
-
-/** Which way each arrow key moves through the points:  `-1` back, `1` on (left-to-right). */
-const ARROW_STEPS: Readonly<Record<string, number>> = {
-  [UIT.Key.arrowUp]: -1,
-  [UIT.Key.arrowDown]: 1,
-  [UIT.Key.arrowLeft]: -1,
-  [UIT.Key.arrowRight]: 1
-}

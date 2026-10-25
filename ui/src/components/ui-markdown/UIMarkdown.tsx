@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 import type { codeVocabulary } from "spell-ui/components/ui-code/UICode.en"
 import { MarkdownRenderer } from "./MarkdownRenderer"
 import type { MarkdownHeading, MarkdownOptions, MarkdownRendering } from "./UIMarkdown.types"
@@ -53,6 +53,7 @@ export class DOMMarkdownElement extends E.DOMLoadableElement<UIMarkdown> {
  *   set it for text you didn't write.
  * - After rendering:
  *   - each fenced code block becomes a `<ui-code language="x" copy>` (one highlighter, one palette)
+ *   - each short inline code span is marked `short`, kept on one line (`keepShortCode()`)
  *   - each task-list checkbox is named by its item's text (marked leaves it unlabelled)
  *   - relative `href` / `src` resolve against `source`, so a README's links and images work where it's shown
  *   - `#id` links scroll to the heading INSIDE the shadow root
@@ -216,11 +217,14 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
 
   /** `editable`'s tab list:  arrows move between the tabs (wrapping), Home / End to the ends;  focus follows. */
   private readonly onTabKeyDown = (event: KeyboardEvent) => {
-    const to = UIMarkdown.tabAfter(this.shownTab, event.key)
-    if (!to) return
-    event.preventDefault()
-    this.shownTab = to
-    this.tabButtons.get(to)?.focus()
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: () => MarkdownTabs.map((tab) => this.tabButtons.get(tab)!),
+      orientation: "horizontal",
+      // the shown tab is the tab stop, drawn by `tabs()`
+      tabindex: "left alone",
+      onChange: (_button, index) => (this.shownTab = MarkdownTabs[index]!)
+    })
   }
 
   ////////////////
@@ -303,6 +307,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
         ? sanitizer.sanitize(html, { uiTags: !!engine.drawsUITags })
         : this.domElement.ownerDocument.createRange().createContextualFragment(html)
       this.upgradeCode(fragment)
+      this.keepShortCode(fragment)
       this.labelTaskItems(fragment)
       this.resolveUrls(fragment)
       if (isEditable) this.patchBody(this.body, fragment)
@@ -328,6 +333,17 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
       block.setAttribute(COPY, "")
       block.textContent = (code.textContent ?? "").replace(/\n$/, "")
       pre.replaceWith(block)
+    }
+  }
+
+  /**
+   * Mark each short inline code span `short`, so it never breaks across lines (`UIMarkdown.css`):
+   * a browser breaks `--toggle` after its dashes.
+   * - Only short ones (`SHORT_CODE_LENGTH`):  a long span kept whole would run off a phone's screen.
+   */
+  private keepShortCode(fragment: DocumentFragment) {
+    for (const code of fragment.querySelectorAll(INLINE_CODE)) {
+      if ((code.textContent ?? "").length <= SHORT_CODE_LENGTH) code.classList.add(SHORT_CLASS)
     }
   }
 
@@ -416,17 +432,6 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   private static panelId(tab: MarkdownTab): string {
     return `ui-markdown-${tab}-panel`
   }
-
-  /** The tab `key` moves to from `tab`;  `undefined` for any other key. */
-  private static tabAfter(tab: MarkdownTab, key: string): MarkdownTab | undefined {
-    const index = MarkdownTabs.indexOf(tab)
-    const count = MarkdownTabs.length
-    if (key === UIT.Key.arrowLeft) return MarkdownTabs[(index + count - 1) % count]
-    if (key === UIT.Key.arrowRight) return MarkdownTabs[(index + 1) % count]
-    if (key === UIT.Key.home) return MarkdownTabs[0]
-    if (key === UIT.Key.end) return MarkdownTabs[count - 1]
-    return undefined
-  }
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
@@ -465,6 +470,15 @@ const LEADING_TITLE = /^(?:[ \t]*\n)*[ ]{0,3}(?:#(?=[ \t\n]|$)[^\n]*|[^\s][^\n]*
 
 /** A fenced code block, as both engines write it. */
 const CODE_BLOCK = "pre > code"
+
+/** An inline code span:  any `<code>` outside a code block (the blocks are `<ui-code>`s by then). */
+const INLINE_CODE = ":not(pre) > code"
+
+/** Longest inline code span kept on one line, in characters:  a token name (`--ui-button-padding-block`) fits a phone's line. */
+const SHORT_CODE_LENGTH = 28
+
+/** Class of a short inline code span. */
+const SHORT_CLASS = "short"
 
 /** A code block's language, from its class:  `language-js` => `js`. */
 const LANGUAGE_CLASS = /\blanguage-(\S+)/

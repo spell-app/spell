@@ -453,7 +453,7 @@
       "name": "--ui-button-or-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-button>`'s token.  Default:  `0.3em`"
+        "value": "the gap `<ui-or>` leaves between its buttons: none, its badge overlapping both\n\n`<ui-button>`'s token.  Default:  `0px`"
       }
     },
     {
@@ -475,6 +475,20 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-button>`'s token.  Default:  `var(--ui-text-light)`"
+      }
+    },
+    {
+      "name": "--ui-button-group-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "a group's inset: how far its buttons sit in from its edge\n\n`<ui-button>`'s token.  Default:  `var(--ui-space-3xs)`"
+      }
+    },
+    {
+      "name": "--ui-button-group-item-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "the corners where a group's buttons meet; by default its inner radius, so every tile is rounded all round\n\n`<ui-button>`'s token.  Default:  `the group's corner, less its border and inset`"
       }
     },
     {
@@ -5171,7 +5185,7 @@
       "name": "--ui-markdown-code-background",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-markdown>`'s token.  Default:  `var(--ui-surface-muted)`"
+        "value": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space\n\n`<ui-markdown>`'s token.  Default:  `var(--ui-surface-strong)`"
       }
     },
     {
@@ -10290,7 +10304,7 @@
       "name": "::part(scroller)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-root>`:  With `width` / `height` / `fixed`:  the region around the content that scrolls (a tab stop, named by the host's `aria-label`, else \"Content\").\n- `<ui-table>`:  Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`."
+        "value": "Part of:\n\n- `<ui-root>`:  With `width` / `height` / `fixed`:  the region around the content that scrolls (a tab stop, named by the host's `aria-label`, else \"Content\").\n- `<ui-table>`:  Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, and sideways, its height uncapped, while a table that doesn't stack is wider than it."
       }
     },
     {
@@ -10782,7 +10796,7 @@
       "name": ":state(fluid)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`.\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
+        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or attached top, bottom or both (`attach`).\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or attached top, bottom or both.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
       }
     },
     {
@@ -11006,7 +11020,7 @@
       "name": ":state(invalid)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-calendar>`:  Fails validation (`required`).\n- `<ui-checkbox>`:  Fails validation, once someone has interacted with it (`:user-invalid` semantics).\n- `<ui-dropdown>`:  Fails validation (`required` ...).\n- `<ui-icon-picker>`:  Fails validation, once a person has interacted (`:user-invalid` semantics).\n- `<ui-input>`:  Fails validation, once someone has interacted (`:user-invalid` semantics).\n- `<ui-radio>`:  Fails validation, once someone has interacted with it (`:user-invalid` semantics).\n- `<ui-rating>`:  Fails validation, once a person has interacted (`:user-invalid` semantics).\n- `<ui-search>`:  Fails validation (`required`).\n- `<ui-select>`:  Fails validation (`required`).\n- `<ui-slider>`:  Fails validation (`required`), once a person has interacted.\n- `<ui-textarea>`:  Fails validation, once someone has interacted (`:user-invalid` semantics)."
+        "value": "Custom state of:\n\n- `<ui-calendar>`:  Fails validation (`required`).\n- `<ui-checkbox>`:  Fails validation, once someone has interacted with it (`:user-invalid` semantics).\n- `<ui-dropdown>`:  Fails validation (`required` ...).\n- `<ui-icon-picker>`:  Fails validation, once a person has interacted (`:user-invalid` semantics).\n- `<ui-input>`:  Fails validation, once a person has interacted (`:user-invalid` semantics).\n- `<ui-radio>`:  Fails validation, once someone has interacted with it (`:user-invalid` semantics).\n- `<ui-rating>`:  Fails validation, once a person has interacted (`:user-invalid` semantics).\n- `<ui-search>`:  Fails validation (`required`).\n- `<ui-select>`:  Fails validation (`required`).\n- `<ui-slider>`:  Fails validation (`required`), once a person has interacted.\n- `<ui-textarea>`:  Fails validation, once a person has interacted (`:user-invalid` semantics)."
       }
     },
     {

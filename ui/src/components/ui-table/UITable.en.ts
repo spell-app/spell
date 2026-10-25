@@ -93,7 +93,9 @@ export const tableVocabulary = {
       name: "unstackable",
       group: "layout",
       kind: "keyOnly",
-      description: "Never stacks rows into blocks, even on a viewport below 768px."
+      description:
+        "Never stacks rows into blocks, even on a viewport below 768px:  " +
+        "wider than its box, it scrolls sideways in it instead."
     },
     {
       name: "padding",
@@ -136,7 +138,8 @@ export const tableVocabulary = {
       description:
         "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width " +
         "(`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, " +
-        "as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` " +
+        "as `unstackable`, and scrolls sideways when too wide).  " +
+        "Also a token for a whole region or page:  `--ui-table-stack-by: container` " +
         "(or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` " +
         "(`<ui-root stack-with>`;  `page` ~== `viewport`)."
     },
@@ -243,7 +246,8 @@ export const tableVocabulary = {
     {
       name: "scroller",
       description:
-        "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`."
+        "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, " +
+        "and sideways, its height uncapped, while a table that doesn't stack is wider than it."
     }
   ],
   states: [

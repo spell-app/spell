@@ -614,7 +614,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-tabs tabular attached value={tab} onui-changed={(e) => setTab(e.detail.value)}>
+                  <ui-tabs appearance="tabular" attach="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -623,7 +623,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-tabs tabular attached :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
+                  <ui-tabs appearance="tabular" attach="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -633,8 +633,8 @@
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-tabs
-                    tabular
-                    attached
+                    appearance="tabular"
+                    attach="top"
                     value={tab()}
                     on-ui-changing={(e) => setTab(e.detail.value)}
                   >
@@ -701,7 +701,15 @@
                 </script>
               </ui-code>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-tab" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-tab" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-tabs appearance="tabular" attach="top" aria-label="Tabular demo">
+                  <ui-tab label="First">First</ui-tab>
+                  <ui-tab label="Second">Second</ui-tab>
+                  <ui-tab label="Third">Third</ui-tab>
+                </ui-tabs>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

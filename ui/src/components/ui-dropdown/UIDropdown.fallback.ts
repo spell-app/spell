@@ -68,9 +68,7 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
     this.listen(select, "change", (event) => {
       const value = this.sync(select, isMultiple)
       domElement.value = value
-      domElement.dispatchEvent(
-        new CustomEvent(CHANGE_EVENT, { bubbles: true, composed: true, detail: { value, originalEvent: event } })
-      )
+      this.send(CHANGE_EVENT, { value, originalEvent: event })
     })
     this.select = select
     return [select]

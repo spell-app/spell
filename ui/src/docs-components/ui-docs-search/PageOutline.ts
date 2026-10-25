@@ -13,7 +13,7 @@ import { TRAIL, type SearchEntry } from "./UIDocsSearch.types"
  * What it reads:
  * - a section:  a `<ui-section id>`, or a level 2-4 header with an id (`<ui-header level id>`, `<h2 id>` ...)
  *   - so a page not nested into sections yet (the overview) still lists its headings
- *   - never one inside an example, a `<template>` or a `<script>`
+ *   - never one inside an example, a token playground's preview, a `<template>` or a `<script>`
  * - its title:  the section's `label`, else its `slot="label"` child's text
  *   - a header's own text, without its sub header or icon
  * - its `parent`:  the section around it
@@ -99,8 +99,8 @@ export class PageOutline {
 const SECTIONS =
   "ui-section[id], ui-header[id][level='2'], ui-header[id][level='3'], ui-header[id][level='4'], h2[id], h3[id], h4[id]"
 
-/** Never a page section:  demo markup. */
-const NOT_PAGE = "ui-docs-example, template, script"
+/** Never a page section:  demo markup (an example, a Theming playground's live example). */
+const NOT_PAGE = "ui-docs-example, ui-docs-tokens, template, script"
 
 /** A tab pane of the page. */
 const PANES = "ui-tabs#site-tabs > ui-tab[value]"

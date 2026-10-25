@@ -1,5 +1,10 @@
+import { LoadOnce } from "spell-ui/util"
+
 import {
+  answerOf,
+  fetchText,
   SourceError,
+  type FetchFailure,
   type SourceLoadOptions,
   type SourceSaveRequest,
   type SourceSaveResult,
@@ -11,7 +16,8 @@ import {
  * ### `Sources`
  * Text files elements show and save, as `UI.sources`:  `<ui-include>`, `<ui-code>` and `<ui-markdown>` load their
  * `source` here, and `save()` goes back through here.
- * - In the runtime's lazy chunk;  imports only `./runtime.types`.  `LoadableComponent` (the elements' base) calls it.
+ * - In the runtime's lazy chunk;  imports only `./runtime.types` and `LoadOnce` (`spell-ui/util`).
+ *   `LoadableComponent` (the elements' base) calls it.
  * - Same origin ONLY:  a URL on another origin is refused before any fetch (`SourceError` `cross-origin`), and so
  *   is everything on a `file://` page (`file-protocol`), whose fetches the browser blocks anyway.  Why:  included
  *   markup runs in this page, and a save must go to the server that served it.
@@ -27,8 +33,8 @@ export class Sources {
   /** writes text back;  set by the host page, e.g. the docs runtime on the page server */
   saver?: SourceSaver
 
-  /** absolute URL -> its load, in flight or done */
-  private readonly cache = new Map<string, Promise<SourceText>>()
+  /** absolute URL -> its load, in flight or done;  a failure isn't kept:  the next caller tries again */
+  private readonly cache = new LoadOnce<string, SourceText>({ failures: "forgotten" })
 
   ////////////////
   // ## URLs
@@ -69,23 +75,13 @@ export class Sources {
     } catch (error) {
       return Promise.reject(error)
     }
-    const key = url.href
-    let pending = fresh ? undefined : this.cache.get(key)
-    if (!pending) {
-      pending = this.fetch(key)
-      this.cache.set(key, pending)
-      // a failure isn't cached:  the next caller tries again
-      pending.catch(() => {
-        if (this.cache.get(key) === pending) this.cache.delete(key)
-      })
-    }
+    const pending = this.cache.get(url.href, () => this.fetch(url.href), { fresh })
     return signal ? Sources.abortable(pending, signal) : pending
   }
 
   /** Drop `source`'s cache entry, or every entry. */
   forget(source?: string) {
-    if (source === undefined) this.cache.clear()
-    else this.cache.delete(new URL(source, document.baseURI).href)
+    this.cache.forget(source === undefined ? undefined : new URL(source, document.baseURI).href)
   }
 
   /**
@@ -94,24 +90,10 @@ export class Sources {
    *   the method its callers called.
    */
   private async fetch(url: string): Promise<SourceText> {
-    let response: Response
-    try {
-      response = await fetch(url, { cache: "no-cache" })
-    } catch (error) {
-      const said = error instanceof Error ? error.message : String(error)
-      throw new SourceError(`Sources.load():  ${url} didn't answer (${said});  is its server up?`, {
-        cause: { kind: "load", error }
-      })
-    }
-    if (!response.ok) {
-      const answer = `${response.status} ${response.statusText}`.trim()
-      throw new SourceError(`Sources.load():  ${url} answered ${answer};  check the path`, {
-        cause: { kind: "load", status: response.status }
-      })
-    }
+    const { text, response } = await fetchText(url, Sources.failed, { cache: "no-cache" })
     return {
       url,
-      text: await response.text(),
+      text,
       etag: response.headers.get("etag") ?? undefined,
       type: response.headers.get("content-type") ?? undefined
     }
@@ -149,8 +131,8 @@ export class Sources {
         }
       })
     }
-    if (request.fragment) this.cache.delete(url)
-    else this.cache.set(url, Promise.resolve({ url, text: request.text, etag: result.etag }))
+    if (request.fragment) this.cache.forget(url)
+    else this.cache.set(url, { url, text: request.text, etag: result.etag })
     return result
   }
 
@@ -177,6 +159,23 @@ export class Sources {
           reject(error)
         }
       )
+    })
+  }
+
+  /**
+   * The `load` `SourceError` a failed fetch throws, the network error (if any) as `cause.error`;
+   * its message says `Sources.load()`, the method its callers called.
+   * - STATIC:  pure, needs no instance.
+   */
+  private static failed({ url, response, error }: FetchFailure): SourceError {
+    if (response) {
+      return new SourceError(`Sources.load():  ${url} answered ${answerOf(response)};  check the path`, {
+        cause: { kind: "load", status: response.status }
+      })
+    }
+    const said = error instanceof Error ? error.message : String(error)
+    return new SourceError(`Sources.load():  ${url} didn't answer (${said});  is its server up?`, {
+      cause: { kind: "load", error }
     })
   }
 }

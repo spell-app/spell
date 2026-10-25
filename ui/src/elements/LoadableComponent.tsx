@@ -415,7 +415,7 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
    */
   protected checkSource(_source: string) {}
 
-  /** `id` of the one element a save replaces (`<ui-include select>`);  default the whole file. */
+  /** `id` of the one element a save replaces (`<ui-include selector>`);  default the whole file. */
   protected saveFragment(): string | undefined {
     return undefined
   }

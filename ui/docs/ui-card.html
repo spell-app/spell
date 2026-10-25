@@ -85,7 +85,7 @@
                 <ui-docs-example>
                   <ui-card>
                     <ui-content>
-                      <ui-avatar src="images/avatar/large/elliot.jpg" alt=""></ui-avatar> Elliot
+                      <ui-avatar src="images/avatar/large/elliot.jpg" tooltip=""></ui-avatar> Elliot
                       <ui-meta>14h</ui-meta>
                     </ui-content>
                     <img src="images/wireframe/image.png" alt="" />
@@ -576,7 +576,7 @@
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" alt=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
                 </ui-docs-example>
 
@@ -589,7 +589,7 @@
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" alt=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>
@@ -606,7 +606,7 @@
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" alt=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
                 </ui-docs-example>
 
@@ -619,7 +619,7 @@
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" alt=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>
@@ -635,7 +635,7 @@
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" alt=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>
@@ -651,7 +651,7 @@
                         <p>Jenny is a student studying Media Management at the New School</p>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/jenny.jpg" alt=""></ui-avatar> Jenny</ui-extra>
+                    <ui-extra><ui-avatar src="images/avatar/small/jenny.jpg" tooltip=""></ui-avatar> Jenny</ui-extra>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>
@@ -1041,7 +1041,7 @@
               <ui-code language="jsx">
                 <script type="text/plain">
                   <ui-cards columns="3">
-                    {people.map((p) => <ui-card key={p.id} href={p.url} image={p.photo} alt={p.name} heading={p.name} meta={p.role} />)}
+                    {people.map((p) => <ui-card key={p.id} link={p.url} image={p.photo} alt={p.name} heading={p.name} meta={p.role} />)}
                   </ui-cards>
                 </script>
               </ui-code>
@@ -1058,7 +1058,7 @@
               <ui-code language="jsx">
                 <script type="text/plain">
                   <ui-cards columns="3">
-                    <For each={people()}>{(p) => <ui-card href={p.url} image={p.photo} alt={p.name} heading={p.name} />}</For>
+                    <For each={people()}>{(p) => <ui-card link={p.url} image={p.photo} alt={p.name} heading={p.name} />}</For>
                   </ui-cards>
                 </script>
               </ui-code>
@@ -1126,7 +1126,24 @@
                 </script>
               </ui-code>
               <ui-markdown>Edit a value below to try it.</ui-markdown>
-              <ui-docs-tokens family="ui-card" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-card" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-card>
+                  <img
+                    src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
+                    alt="Kristy"
+                  />
+                  <ui-content>
+                    <ui-header link="#kristy">Kristy</ui-header>
+                    <ui-meta><span>Joined in 2013</span></ui-meta>
+                    <ui-description>Kristy is an art director living in New York.</ui-description>
+                  </ui-content>
+                  <ui-extra
+                    ><a href="#kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a></ui-extra
+                  >
+                </ui-card>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
 
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>

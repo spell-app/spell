@@ -39,9 +39,8 @@ import tokensCSS from "./UIDocsTokens.css?inline"
  *   - An empty input removes the token.
  * - Events:  the inner `<ui-input>`s' `ui-input` / `ui-changed` stop here;
  *   the element's own `ui-input` (`{ token, value }`) and `ui-reset` (`{ tokens }`) say what the playground did.
- * - Phone width:  every table is `stackable` by its OWN width
- *   (the sheet sets `--ui-table-stack-by: container` on the DOM element),
- *   or by the screen's when the page-wide `--ui-stack-with` says `page` (`<ui-root stack-with="page">`).
+ * - NEVER stacks (the sheet sets `--ui-table-stack-by: none` on the DOM element;  epic `debut` J64):
+ *   too wide for its column (phone width), a table scrolls sideways in `<ui-table>`'s own scroller, a focusable region.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet,
  *   which never reaches a table inside this shadow root (as in `<ui-docs-api>`).
@@ -338,12 +337,21 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
 
   /**
    * One table:  bare for a family;  with `global`, in a group section under its header and description.
-   * - No description column when no row has one (most families' tokens carry none).
+   * - A description column only when at least a quarter of the rows have one (`DESCRIBED_SHARE`);
+   *   with fewer (most families' tokens carry none), each description sits under its token's name instead,
+   *   so a mostly empty column doesn't squeeze the defaults.
    */
   private table(table: TokenTable): JSX.Element {
-    const isDescribed = table.rows.some((row) => row.description)
+    const described = table.rows.filter((row) => row.description).length
+    const isDescribed = described > 0 && described >= table.rows.length * DESCRIBED_SHARE
     const grid = (
-      <ui-table part={this.partForName("table")} celled="" padding="compact">
+      <ui-table
+        part={this.partForName("table")}
+        celled=""
+        padding="compact"
+        // too wide, it scrolls in a region (`<ui-table>`):  a playground's apart from the same group's table elsewhere
+        aria-label={this.tryLabel(table)}
+      >
         <table>
           <Show when={table.title ?? this.caption}>
             <caption class={table.title ? VISUALLY_HIDDEN_CLASS : undefined}>{table.title ?? this.caption}</caption>
@@ -382,13 +390,32 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
     )
   }
 
-  /** One token's row:  name, default (and swatch), description (`isDescribed`), and the playground's input. */
+  /**
+   * A playground's table's name, `Try Typography`:  the region it scrolls in when too wide is named by it,
+   * apart from the same group's table in a plain `<ui-docs-tokens>` (the theming page has both).
+   * - A family's table has no title:  `Try the button tokens`, from the family's.
+   * - Without a playground:  none, so the region takes the table's caption.
+   */
+  private tryLabel(table: TokenTable): string | undefined {
+    if (!this.playground) return undefined
+    const title = table.title ?? this.caption
+    if (title) return this.translationForKey("tryTable", { table: title })
+    return table.family ? this.translationForKey("tryFamily", { family: table.family.toLowerCase() }) : undefined
+  }
+
+  /**
+   * One token's row:  name, default (and swatch), description, and the playground's input.
+   * - Its description in its own column (`isDescribed`), else under its name.
+   */
   private row(row: SiteToken, { isDescribed }: { isDescribed: boolean }): JSX.Element {
     const isColor = row.type === COLOR_TYPE
     return (
       <tr>
         <th scope="row">
           <code class={NAME_CLASS}>{row.name}</code>
+          <Show when={!isDescribed && row.description}>
+            <small class={CAPTION_CLASS}>{this.inline(row.description ?? "")}</small>
+          </Show>
         </th>
         <td>
           <span class={DEFAULT_CLASS}>
@@ -481,6 +508,12 @@ const GROUP_CLASS = "group"
 
 /** Class word of a row's token name. */
 const NAME_CLASS = "name"
+
+/** Class of a description under a token's name:  the caption utility. */
+const CAPTION_CLASS = "ui-caption"
+
+/** A table gets a description column when at least this share of its rows have one;  else each sits under its name. */
+const DESCRIBED_SHARE = 0.25
 
 /** Class word of a row's default cell content:  the swatch and the value. */
 const DEFAULT_CLASS = "default"

@@ -145,6 +145,17 @@ describe("<ui-markdown> rendering", () => {
     expect(code.textContent).toBe("const a = 1")
   })
 
+  it("keeps a SHORT inline code span on one line;  a long one may still wrap", async () => {
+    const long = "spell-ui/components/ui-button/UIButton"
+    const host = await markdown(md(`Run \`--toggle\` or read \`${long}\`.`))
+    const [short, path] = [...body(host).querySelectorAll("code")]
+    expect([short!.className, path!.className]).toEqual(["short", ""])
+    expect(getComputedStyle(short!).whiteSpace).toBe("nowrap")
+    expect(getComputedStyle(path!).whiteSpace).not.toBe("nowrap")
+    // no margin at its sides:  punctuation sits against the chip
+    expect([getComputedStyle(short!).marginLeft, getComputedStyle(short!).marginRight]).toEqual(["0px", "0px"])
+  })
+
   it("loads a `source` file, its relative links resolved beside it", async () => {
     const host = await markdown(`<ui-markdown source="${README}"></ui-markdown>`)
     expect(body(host).querySelector("h1")!.textContent).toBe("Release notes")
@@ -366,9 +377,10 @@ describe("<ui-markdown editable>", () => {
     await press("Home")
     expect(tabs(host)[0].getAttribute("aria-selected")).toBe("true")
 
-    /** Press `key` on the tab list. */
+    /** Press `key` on the shown tab, as a person does. */
     async function press(key: string) {
-      tabs(host)[0].parentElement!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))
+      const shown = tabs(host).find((tab) => tab.getAttribute("aria-selected") === "true")!
+      shown.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
       await ElementFixture.settle(host)
     }
   })

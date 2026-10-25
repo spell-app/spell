@@ -362,10 +362,15 @@
 
     /* Buttons:  the brand's UI weight (500);  the default button a quiet grey-blue fill, aubergine text */
     --ui-button-font-weight: 500;
+    /*
+     * hover, down and on:  a see-through blue ink in light, as dark's lilac, so in a group they show ON its track
+     * (a `brand-150` tile on the `brand-100` track was 1.05:1);  on the page alone they still come out
+     * `brand-150` / `brand-200`, as before
+     */
     --ui-button-background: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.1));
-    --ui-button-background-hover: light-dark(var(--spell-brand-150), rgb(200 206 231 / 0.16));
-    --ui-button-background-down: light-dark(var(--spell-brand-200), rgb(200 206 231 / 0.22));
-    --ui-button-background-active: light-dark(var(--spell-brand-200), rgb(200 206 231 / 0.2));
+    --ui-button-background-hover: light-dark(rgb(32 63 175 / 0.1), rgb(200 206 231 / 0.16));
+    --ui-button-background-down: light-dark(rgb(32 63 175 / 0.14), rgb(200 206 231 / 0.22));
+    --ui-button-background-active: light-dark(rgb(32 63 175 / 0.14), rgb(200 206 231 / 0.2));
     --ui-button-color: var(--ui-text-dark);
     --ui-button-color-hover: var(--ui-text-dark);
     --ui-label-font-weight: 500;

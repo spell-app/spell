@@ -46,7 +46,7 @@ export class IconPickerFallback extends E.NativeFallback<typeof iconPickerVocabu
     })
     this.listen(control, "change", (originalEvent) => {
       const detail = { value: control.value, originalEvent }
-      this.domElement.dispatchEvent(new CustomEvent("ui-changed", { bubbles: true, composed: true, detail }))
+      this.send("ui-changed", detail)
     })
     this.control = control
     return [control]

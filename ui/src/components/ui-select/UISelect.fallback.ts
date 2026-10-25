@@ -94,9 +94,7 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
       shown = [...select.options].map((option) => option.selected)
       const value = this.sync(select)
       domElement.value = value
-      domElement.dispatchEvent(
-        new CustomEvent(CHANGE_EVENT, { bubbles: true, composed: true, detail: { value, originalEvent: event } })
-      )
+      this.send(CHANGE_EVENT, { value, originalEvent: event })
     })
     this.select = select
     return [select]

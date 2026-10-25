@@ -511,6 +511,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `yarn site:index`:  the cards of [the component index](docs/components.html) (`--check`)
   - `yarn site:kitchen`:  the examples of [the kitchen sink](docs/kitchen-sink.html) (`--check`),
     from every family's `types.html` in `examples/elements/`
+    - and every component page's Theming playground:  its family's main example, the kitchen sink's first
   - `yarn site:bundle`:  `site/_assets/`, sizes printed
   - Rerun it after changing a vocabulary, a family sheet, an example, or any source the site shows.
   - Then commit `docs/`:  `site/_assets/` is git-ignored.

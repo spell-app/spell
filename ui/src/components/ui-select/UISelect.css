@@ -4,7 +4,7 @@
  * where the browser has the customizable select, its picker in the look of the dropdown's menu.
  * - The shadow markup it expects (class grammar on the native element):
  *
- *     <select class="ui [size state] [compact fluid inverted disabled multiple] select" part="select">
+ *     <select class="ui [size state] [compact fluid inverted disabled read-only multiple] select" part="select">
  *       <button part="button"><selectedcontent></selectedcontent></button>   (customizable select only)
  *       <option class="placeholder" value="" part="placeholder">Gender</option>
  *       <optgroup label="Fruit" part="group"> <option ...> </optgroup>
@@ -443,5 +443,10 @@
     cursor: default;
     opacity: var(--_ui-select-disabled-opacity);
     pointer-events: none;
+  }
+
+  /* Read-only:  shown, not changed (a change is undone);  the arrow, as every control's `read-only`. */
+  .ui.read-only.select {
+    cursor: default;
   }
 }

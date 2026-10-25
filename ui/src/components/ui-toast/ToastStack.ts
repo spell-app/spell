@@ -72,12 +72,13 @@ export class ToastStack implements E.ToastProvider {
   private toastFor(options: E.ToastOptions, id: string): HTMLElement {
     const toast = this.document.createElement(toastVocabulary.tag)
     toast.id = id
+    const showIcon = options.showIcon ?? true
     // keys checked against the vocabulary
     const attributes: Partial<Record<E.AttributeNameOf<Vocabulary>, string>> = {
       heading: options.title,
       message: options.message,
       "display-time": String(options.displayTime ?? DEFAULT_DISPLAY_TIME),
-      icon: options.showIcon === true ? "" : options.showIcon || undefined,
+      icon: showIcon === true ? "" : showIcon || undefined,
       progress: options.showProgress || undefined,
       "progress-up": options.progressUp ? "" : undefined,
       "pause-on-hover": options.pauseOnHover === false ? "false" : undefined,
@@ -257,7 +258,7 @@ type ToastRecord = {
 /** The event that ends a toast:  the stack removes its toasts on it. */
 const HIDE_EVENT: E.EventName<Vocabulary> = "ui-closed"
 
-/** Positions a toast container takes (Fomantic's);  the first is the default. */
+/** Positions a toast container takes (Fomantic's). */
 const ToastPositions = [
   "top right",
   "top left",
@@ -271,8 +272,8 @@ const ToastPositions = [
 /** One of `ToastPositions`. */
 type ToastPosition = (typeof ToastPositions)[number]
 
-/** Position of a toast that names none. */
-const DEFAULT_POSITION: ToastPosition = ToastPositions[0]
+/** Position of a toast that names none:  out of the way of what a page's top holds (Fomantic's is top right). */
+const DEFAULT_POSITION: ToastPosition = "bottom right"
 
 /** `UI.ids` prefix of toast ids. */
 const ID_PREFIX = toastVocabulary.tag

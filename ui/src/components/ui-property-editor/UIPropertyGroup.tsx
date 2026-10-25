@@ -2,9 +2,9 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
-// the family barrel, not the leaf:  the lib build then imports `ui-section.js` instead of splitting a shared chunk
-// (SIDE EFFECT:  defines `<ui-section>` / `<ui-sections>`:  a group is a section)
-import { UISection } from "spell-ui/components/ui-section"
+// the family barrel, not the leaf:  the lib build then imports `ui-panel.js` instead of splitting a shared chunk
+// (SIDE EFFECT:  defines `<ui-panel>`, and `<ui-section>` / `<ui-sections>`:  a group is a panel's band)
+import { UIPanel } from "spell-ui/components/ui-panel"
 import type { SectionVocabulary } from "spell-ui/components/ui-section/UISection.types"
 import { propertyGroupVocabulary } from "./UIPropertyGroup.en"
 
@@ -32,7 +32,11 @@ export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
  * ### `UIPropertyGroup`
  * The component behind `<ui-property-group>`:  a folding band of properties in a `<ui-property-editor>`.
  *
- * - It IS a `<ui-section>` (it extends `UISection`):  the same attributes, slots, parts, events and folding.
+ * - It IS a `<ui-section>`, drawn as a panel's SUB-HEAD BAND (it extends `UIPanel`, which extends `UISection`):
+ *   the same attributes, slots, parts, events and folding.
+ *   - Its title a band across its editor (small capitals, tinted, a hairline above), the chevron at its far end:
+ *     the theme editor's bands (Owen:  "Property panels should have this styling for section headers").
+ *   - The band reaches out through the panel padding around it (`--ui-panel-padding`), to its container's edges.
  *   - All but `source`:  a group's properties come from its editor.
  *   - Its `select` picks its part of the editor's page (P6).
  * - Its own:
@@ -45,11 +49,11 @@ export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
  * - The editor tells it about its properties (`markFieldFailed()`, `markChanged()`),
  *   and sends it `ui-invalid` and `ui-saved`.
  ****************/
-export class UIPropertyGroup extends UISection {
+export class UIPropertyGroup extends UIPanel {
   // the section's names under the group's tag, and its own:  TypeScript only knows the section's literals
   @E.proto static vocabulary = propertyGroupVocabulary as unknown as SectionVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { ...UISection.prototype.elementSetup.styleSheets, group: groupCSS },
+    styleSheets: { ...UIPanel.prototype.elementSetup.styleSheets, group: groupCSS },
     DOMElement: DOMPropertyGroupElement
   } satisfies Partial<E.ElementSetup>
 
@@ -94,10 +98,16 @@ export class UIPropertyGroup extends UISection {
     return readonly != null && readonly !== "false"
   }
 
-  /** `state`'s class word on the box (`error`, `info` ...):  shown as an error while one is. */
+  /**
+   * Always a band (`sub`), in a panel or not:  `loose` with no panel around it, so it takes `primary`'s colours
+   * as a panel does (`UIPanel.css`);  and `state`'s class word on the box (`error`, `info` ...), shown as an
+   * error while one is.
+   */
   protected get extraClass(): string | undefined {
     const state = this.isError ? ERROR : (this.attributes.state ?? undefined)
-    return [super.extraClass, GROUP, state].filter(Boolean).join(" ")
+    const loose = this.enclosingSection instanceof UIPanel ? undefined : LOOSE
+    const words = new Set([...(super.extraClass ?? "").split(" "), BAND, loose, GROUP, state])
+    return [...words].filter(Boolean).join(" ")
   }
 
   ////////////////
@@ -128,6 +138,12 @@ export class UIPropertyGroup extends UISection {
     )
   }
 }
+
+/** The panel's class word for a sub-head band (`UIPanel.css`):  every group is one. */
+const BAND = "sub"
+
+/** Class word of a band with no panel around it (`UIPanel.css`). */
+const LOOSE = "loose"
 
 /** Class word before the section's noun:  `ui … property-group section`. */
 const GROUP = "property-group"

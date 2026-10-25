@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
+import { DARK_QUERY } from "spell/util/persist"
 import { Browser } from "spell-ui/runtime/Browser"
 
 ////////////////
@@ -33,7 +34,7 @@ describe("Browser.isReducedMotion / isDark", () => {
   it("reads live media preferences", () => {
     const browser = new Browser()
     expect(browser.isReducedMotion).toBe(matchMedia("(prefers-reduced-motion: reduce)").matches)
-    expect(browser.isDark).toBe(matchMedia("(prefers-color-scheme: dark)").matches)
+    expect(browser.isDark).toBe(matchMedia(DARK_QUERY).matches)
   })
 })
 

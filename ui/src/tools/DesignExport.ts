@@ -224,6 +224,7 @@ export class DesignExport {
           "src/styles/sizes.css",
           "src/styles/colors.css",
           "src/styles/themes/classic.css",
+          "src/styles/themes/spell.css",
           "src/styles/themes/spell-brand.css"
         ],
         docs: [

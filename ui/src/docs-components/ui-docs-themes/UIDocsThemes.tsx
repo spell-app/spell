@@ -404,10 +404,10 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         floating=""
         scrolling=""
         button=""
-        compact={this.compact ? "" : undefined}
+        padding={this.compact ? "compact" : undefined}
         inverted={this.inverted ? "" : undefined}
         size={this.size}
-        text={this.translationForKey("themeName")}
+        label={this.translationForKey("themeName")}
         title={this.compact ? label() : undefined}
         aria-label={this.compact ? label() : undefined}
         value={this.chosenTheme}

@@ -104,15 +104,6 @@ export class RadioGroup {
     return this.membersInOrder.find((member) => !member.isDisabled)
   }
 
-  /** The enabled member `delta` steps from `from` in document order, wrapping;  reads the live set, untracked. */
-  step(from: RadioMember, delta: number): RadioMember | undefined {
-    const ordered = [...this.current].sort(RadioGroup.byDocumentOrder)
-    const enabled = ordered.filter((member) => member === from || !member.isDisabled)
-    if (enabled.length < 2) return undefined
-    const index = enabled.indexOf(from)
-    return enabled[(index + delta + enabled.length) % enabled.length]
-  }
-
   ////////////////
   // ## Helpers
   ////////////////

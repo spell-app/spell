@@ -143,6 +143,18 @@ export const docsTokensVocabulary = {
     { key: "preview", text: "Preview", description: "Accessible name of the playground's preview." },
     { key: "setToken", text: "Set {token}", description: "Accessible name of a token's input." },
     {
+      key: "tryTable",
+      text: "Try {table}",
+      description:
+        "Accessible name of a playground's table, when it scrolls:  apart from the same group's table elsewhere."
+    },
+    {
+      key: "tryFamily",
+      text: "Try the {family} tokens",
+      description:
+        "Accessible name of a playground's family table, when it scrolls:  `{family}` is the family's name, lower case."
+    },
+    {
       key: "noTokens",
       text: "{tag} exposes no tokens of its own.",
       description: "Message for a family without public tokens."

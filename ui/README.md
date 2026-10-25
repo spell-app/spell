@@ -24,7 +24,7 @@
     <ui-root>
       <ui-segment>
         <ui-header>Report</ui-header>
-        <ui-button primary icon="check">Save</ui-button>
+        <ui-button color="primary" icon="check">Save</ui-button>
       </ui-segment>
     </ui-root>
   </body>
@@ -75,7 +75,7 @@ The page above maps `spell-ui/` onto the kit's own build of the library, and Sol
 <summary>What the button drew inside its shadow root</summary>
 
 ```html
-<ui-button primary icon="check">
+<ui-button color="primary" icon="check">
   #shadow-root (open)
     <button type="button" class="ui primary button" part="button">
       <span class="icon" part="icon">
@@ -308,7 +308,7 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 <ui-root theme="dark" size="small" icons="fa7-brands" loading="Loading reports…">
   <ui-segment>
     <ui-header>Report</ui-header>
-    <ui-button primary>Save</ui-button>
+    <ui-button color="primary">Save</ui-button>
   </ui-segment>
 </ui-root>
 ```

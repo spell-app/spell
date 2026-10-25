@@ -24,7 +24,12 @@
     "ui-button": {
       "title": "Button",
       "summary": "A button indicates a possible user action.",
-      "status": "done"
+      "status": "done",
+      "tokens": {
+        "defaults": {
+          "--ui-button-group-item-radius": "the group's corner, less its border and inset"
+        }
+      }
     },
     "ui-calendar": {
       "title": "Calendar",

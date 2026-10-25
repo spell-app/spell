@@ -1,14 +1,13 @@
-// Import directly:  in `core`'s util barrel it cost every page 1.9 kB
+// Import directly:  in `core`'s util barrel the pref store cost every page 1.9 kB
+import { ColorScheme } from "spell/util/persist/ColorScheme"
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist/persist.types"
 import { E, UI } from "spell-ui/core"
 import {
-  DOCS_DARK_QUERY,
   DOCS_DEFAULT_THEME,
-  DOCS_LEGACY_SCHEME_KEYS,
   DOCS_LOOK_KEYS,
   DOCS_PLAIN_THEME,
   DOCS_SCHEME_SWITCHING,
-  DocsSchemes,
   type DocsLook,
   type DocsScheme,
   type DocsShownScheme
@@ -24,17 +23,15 @@ import {
  * - Stored in `localStorage` (`DOCS_LOOK_KEYS`), through `PrefStore`:
  *   a private window or blocked storage just forgets between pages.
  *   The look is ALSO kept in memory, so it works for the page either way.
- * - Scheme:  ONE store for every doc site.
- *   - `DOCS_LOOK_KEYS.scheme` is the key `<spell-site-header>` uses on the docs, epic pages and saga pages
- *     (`SCHEME_KEY`), with the same values (`light` / `dark`, absent:  follow the OS).
- *   - Applied the same way:  `ui-light` / `ui-dark` on `<html>` (UI's tokens and `--ui-scheme` follow)
- *     AND inline `color-scheme` (the site header's own `light-dark()`).
- *   - The old keys (`DOCS_LEGACY_SCHEME_KEYS`) are read once, when the new one is absent.
+ * - Scheme:  the kit's `ColorScheme` (`spell/util/persist`), the one choice every Spell site shares
+ *   with `<spell-site-header>` on the docs, epic pages and saga pages:
+ *   its key, its old keys moved once, `ui-light` / `ui-dark` and inline `color-scheme` on `<html>`.
+ *   - Here, following the OS is called `system`.
  *   - For the frame it switches in, `DOCS_SCHEME_SWITCHING` is on `<html>` too:
  *     a theme can turn transitions off under it.
- * - `system` follows the OS:  `shownScheme()` resolves it through `prefers-color-scheme`,
+ * - `system` follows the OS:  `shownScheme()` resolves it (`ColorScheme.osScheme()`),
  *   and `subscribe()`d listeners hear when the OS switches (the icon showing the scheme stays right).
- *   - Other tabs' switches arrive through `storage` events.
+ *   - Other tabs' switches arrive the same way (`ColorScheme.watch()`).
  * - Before first paint:  a module script runs too late,
  *   so pages inline `HEAD_SCRIPT` in `<head>` (the page template, `templates/spell-ui-docs.html`).
  *   - It re-applies the SCHEME synchronously.
@@ -71,11 +68,12 @@ export class ThemePreference {
    * - The page template (`templates/spell-ui-docs.html`) inlines it, in `<head>` before the stylesheet `<link>`.
    * - ES5, no dependencies, never throws:  so it reads the key raw, not through `PrefStore`,
    *   whose text it matches (a scheme is kept as `dark`, unquoted).
-   * - Reads the old keys too (`DOCS_LEGACY_SCHEME_KEYS`) while the new one is absent:  `restore()` moves them over.
+   * - Reads the old keys too (`OLD_COLOR_SCHEME_KEYS`) while the new one is absent:  `restore()` moves them over.
+   * - Its keys are `ColorScheme`'s own constants;  every page that inlines it holds a copy of its text.
    */
   static readonly HEAD_SCRIPT =
     `try{var l=localStorage,d=document.documentElement,s=` +
-    [DOCS_LOOK_KEYS.scheme, ...DOCS_LEGACY_SCHEME_KEYS].map((key) => `l.getItem(${JSON.stringify(key)})`).join("||") +
+    [COLOR_SCHEME_KEY, ...OLD_COLOR_SCHEME_KEYS].map((key) => `l.getItem(${JSON.stringify(key)})`).join("||") +
     `;if(s==="light"||s==="dark"){d.classList.add("ui-"+s);d.style.colorScheme=s}}catch(e){}`
 
   /** The look now:  stored on first read, then kept in memory. */
@@ -83,9 +81,9 @@ export class ThemePreference {
     return (ThemePreference.current ??= ThemePreference.read())
   }
 
-  /** The scheme the OS asks for (`prefers-color-scheme`);  `light` where there's no `matchMedia` (a server). */
+  /** The scheme the OS asks for (`ColorScheme.osScheme()`);  `light` where there's no `matchMedia` (a server). */
   static osScheme(): DocsShownScheme {
-    return typeof matchMedia === "function" && matchMedia(DOCS_DARK_QUERY).matches ? "dark" : "light"
+    return ColorScheme.osScheme()
   }
 
   /** The scheme the page SHOWS:  the chosen one, or while following the OS, the OS's. */
@@ -109,8 +107,8 @@ export class ThemePreference {
   /** Choose colour scheme `scheme` (`system`:  follow the OS):  remember it, tell subscribers, show it on `<html>`. */
   static setScheme(scheme: DocsScheme): void {
     ThemePreference.update({ ...ThemePreference.look, scheme })
-    ThemePreference.store(DOCS_LOOK_KEYS.scheme, scheme === "system" ? undefined : scheme)
-    ThemePreference.applyScheme(scheme)
+    ThemePreference.withoutTransitions(document.documentElement)
+    ColorScheme.choose(chosenFor(scheme))
   }
 
   /** Flip the scheme the page shows, light <-> dark, and remember it (no longer following the OS).  Returns it. */
@@ -127,10 +125,7 @@ export class ThemePreference {
    */
   static applyScheme(scheme: DocsScheme, root: HTMLElement = document.documentElement): void {
     ThemePreference.withoutTransitions(root)
-    root.classList.toggle("ui-light", scheme === "light")
-    root.classList.toggle("ui-dark", scheme === "dark")
-    if (scheme === "system") root.style.removeProperty("color-scheme")
-    else root.style.colorScheme = scheme
+    ColorScheme.apply(chosenFor(scheme), root)
   }
 
   /**
@@ -182,19 +177,15 @@ export class ThemePreference {
   private static readonly listeners = new Set<(look: DocsLook) => void>()
 
   /**
-   * Once per page:
+   * Once per page, through `ColorScheme.watch()`:
    * - tell listeners when the OS switches scheme (the shown scheme changed while following it)
-   * - take other tabs' scheme switches (`storage`):  applied here too
+   * - take other tabs' scheme switches:  ColorScheme applied it, this keeps the look in step
    * - page-wide for the page's life:  nothing to undo
    */
   @E.once private static watch(): void {
-    if (typeof window === "undefined") return
-    matchMedia(DOCS_DARK_QUERY).addEventListener("change", () => ThemePreference.osChanged())
-    window.addEventListener("storage", (event) => {
-      if (event.key !== DOCS_LOOK_KEYS.scheme && event.key !== null) return
-      const scheme = ThemePreference.read().scheme
-      ThemePreference.update({ ...ThemePreference.look, scheme })
-      ThemePreference.applyScheme(scheme)
+    ColorScheme.watch((change) => {
+      if (change === "os") return ThemePreference.osChanged()
+      ThemePreference.update({ ...ThemePreference.look, scheme: ColorScheme.chosen() ?? "system" })
     })
   }
 
@@ -239,32 +230,14 @@ export class ThemePreference {
 
   /** The stored look;  anything unreadable is the default (`defaultTheme`, `system`). */
   private static read(): DocsLook {
-    const scheme = (ThemePreference.load(DOCS_LOOK_KEYS.scheme) ?? ThemePreference.migrateScheme()) as
-      | DocsScheme
-      | undefined
     const theme = ThemePreference.load(ThemePreference.themeKey) || ThemePreference.defaultTheme
     return {
       theme: theme === DOCS_PLAIN_THEME ? undefined : theme,
-      scheme: scheme && scheme !== "system" && DocsSchemes.includes(scheme) ? scheme : "system"
+      scheme: ColorScheme.chosen() ?? "system"
     }
   }
 
-  /**
-   * Move the scheme from its old keys (`DOCS_LEGACY_SCHEME_KEYS`), while the new one is absent:
-   * the first valid one is copied to `DOCS_LOOK_KEYS.scheme`, and every old key removed, so this runs once.
-   * - Returns the scheme.
-   * - The same steps as `<spell-site-header>`'s:  whichever site the viewer opens first moves it.
-   */
-  private static migrateScheme(): string | undefined {
-    const found = DOCS_LEGACY_SCHEME_KEYS.map((key) => ThemePreference.load(key)).find(
-      (value) => value === "light" || value === "dark"
-    )
-    if (found) ThemePreference.store(DOCS_LOOK_KEYS.scheme, found)
-    for (const key of DOCS_LEGACY_SCHEME_KEYS) ThemePreference.store(key, undefined)
-    return found
-  }
-
-  /** The text kept at `key` (`spell-site:scheme`), or `undefined`:  none, or not text. */
+  /** The text kept at `key` (`spell-ui-site:theme`), or `undefined`:  none, or not text. */
   private static load(key: string): string | undefined {
     const value = PrefStore.getAt(key)
     return typeof value === "string" ? value : undefined
@@ -285,4 +258,9 @@ export type ThemeSite = {
   defaultTheme: string
   /** the `localStorage` key of the chosen theme, e.g. `spell-app:theme` */
   themeKey: string
+}
+
+/** `scheme` as `ColorScheme` keeps it:  `system` is nothing chosen. */
+function chosenFor(scheme: DocsScheme): DocsShownScheme | undefined {
+  return scheme === "system" ? undefined : scheme
 }

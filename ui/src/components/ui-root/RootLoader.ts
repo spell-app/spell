@@ -46,7 +46,7 @@ const LANGUAGES: Readonly<Record<string, () => Promise<E.Dictionary>>> = {
  ****************/
 export class RootLoader {
   /** Folder => its import, started once.  Page-wide, never reset:  a family defines its tags once per page. */
-  private static readonly loads = new Map<string, Promise<void>>()
+  private static readonly loads = new E.LoadOnce<string, void>()
 
   /** Folder => importer of its barrel, for the families a bundle added (`add()`).  Page-wide. */
   private static readonly added = new Map<string, () => Promise<unknown>>()
@@ -55,7 +55,7 @@ export class RootLoader {
   private static readonly translatedTags = new Map<string, string>()
 
   /** Language code => its load, started once (`useLanguage()`).  Page-wide. */
-  private static readonly languages = new Map<string, Promise<void>>()
+  private static readonly languages = new E.LoadOnce<string, void>()
 
   ////////////////
   // ## Tags
@@ -130,13 +130,10 @@ export class RootLoader {
    * - Rejects if it can't be imported, or no glob or `add()` knows the folder.
    */
   static load(folder: string): Promise<void> {
-    let load = RootLoader.loads.get(folder)
-    if (!load) {
+    return RootLoader.loads.get(folder, () => {
       const importer = FAMILIES[`../${folder}/index.ts`] ?? RootLoader.added.get(folder)
-      load = importer ? importer().then(() => undefined) : Promise.reject(RootLoader.noFamily(folder))
-      RootLoader.loads.set(folder, load)
-    }
-    return load
+      return importer ? importer().then(() => undefined) : Promise.reject(RootLoader.noFamily(folder))
+    })
   }
 
   ////////////////
@@ -162,19 +159,15 @@ export class RootLoader {
     const code = RootLoader.languageOf(lang)
     const loadDictionary = Object.hasOwn(LANGUAGES, code) ? LANGUAGES[code] : undefined
     if (!loadDictionary) return Promise.resolve()
-    let load = RootLoader.languages.get(code)
-    if (!load) {
-      load = Promise.all([loadDictionary(), UI.load()]).then(([dictionary, ui]) => {
-        for (const [canonical, name] of Object.entries(dictionary.tags ?? {})) {
-          RootLoader.translatedTags.set(`${code}-${name}`, canonical)
-        }
-        ui.vocabulary.defineComponents({ prefix: code, dictionary })
-        ui.i18n.registerDictionary(dictionary)
-        ui.i18n.locale = lang
-      })
-      RootLoader.languages.set(code, load)
-    }
-    return load
+    return RootLoader.languages.get(code, async () => {
+      const [dictionary, ui] = await Promise.all([loadDictionary(), UI.load()])
+      for (const [canonical, name] of Object.entries(dictionary.tags ?? {})) {
+        RootLoader.translatedTags.set(`${code}-${name}`, canonical)
+      }
+      ui.vocabulary.defineComponents({ prefix: code, dictionary })
+      ui.i18n.registerDictionary(dictionary)
+      ui.i18n.locale = lang
+    })
   }
 
   ////////////////
