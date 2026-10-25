@@ -19,7 +19,7 @@ function tagName(): string {
   return `x-rich-${++tagCount}`
 }
 
-/** Define `tag`:  an element with a `json` attribute `items`, a `string` attribute `label`, and a `ui-change` event. */
+/** Define `tag`:  an element with a `json` attribute `items`, a `string` attribute `label`, and a `ui-changed` event. */
 function define(tag: string) {
   const attributes: readonly AttributeSpec[] = [
     { name: "items", kind: "json", description: "A list." },
@@ -29,7 +29,7 @@ function define(tag: string) {
     tag,
     noun: "rich",
     attributes,
-    events: [{ name: "ui-change", detail: "unknown", description: "It changed." }],
+    events: [{ name: "ui-changed", detail: "unknown", description: "It changed." }],
     slots: [],
     parts: [],
     states: [],
@@ -73,24 +73,24 @@ describe("RichAttributes, plain calls", () => {
     const heard: unknown[] = []
     const items = [1, 2, 3]
 
-    element.setAttribute("on-ui-change", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
+    element.setAttribute("on-ui-changed", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
     element.setAttribute("items", items as unknown as string)
     element.setAttribute("label", "Hello")
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "one" }))
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "one" }))
 
     expect(heard).toEqual(["one"])
     expect(element.items).toBe(items)
     expect(element.getAttribute("items")).toBeNull()
     expect(element.label).toBe("Hello")
-    expect(element.getAttribute("on-ui-change")).toBeNull()
+    expect(element.getAttribute("on-ui-changed")).toBeNull()
 
     // a new function replaces the old;  removing the attribute drops the listener and clears the property
-    element.setAttribute("on-ui-change", ((event: CustomEvent) =>
+    element.setAttribute("on-ui-changed", ((event: CustomEvent) =>
       heard.push(`new ${event.detail}`)) as unknown as string)
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "two" }))
-    element.removeAttribute("on-ui-change")
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "two" }))
+    element.removeAttribute("on-ui-changed")
     element.removeAttribute("items")
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "three" }))
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "three" }))
     expect(heard).toEqual(["one", "new two"])
     expect(element.items).toBeUndefined()
   })
@@ -100,10 +100,10 @@ describe("RichAttributes, plain calls", () => {
     const element = document.createElement(tag) as HTMLElement & { items?: unknown }
     const heard: unknown[] = []
     const items = { a: 1 }
-    element.setAttribute("on-ui-change", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
+    element.setAttribute("on-ui-changed", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
     element.setAttribute("items", items as unknown as string)
     // held, not turned into text
-    expect(element.getAttribute("on-ui-change")).toBeNull()
+    expect(element.getAttribute("on-ui-changed")).toBeNull()
     expect(element.getAttribute("items")).toBeNull()
 
     document.body.append(element)
@@ -111,7 +111,7 @@ describe("RichAttributes, plain calls", () => {
     define(tag)
     await customElements.whenDefined(tag)
 
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "late" }))
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "late" }))
     expect(heard).toEqual(["late"])
     expect(element.items).toEqual(items)
   })
@@ -139,20 +139,20 @@ describe("RichAttributes, plain calls", () => {
 })
 
 describe("RichAttributes from Solid JSX", () => {
-  test("plain props on a defined element:  on-ui-change, an object, text;  each follows its signal", () => {
+  test("plain props on a defined element:  on-ui-changed, an object, text;  each follows its signal", () => {
     defineOnce(JSX_TAG)
     const heard: string[] = []
     const [items, setItems] = createSignal<unknown[]>([1])
     const [label, setLabel] = createSignal("one")
     const root = mount(() => (
       <x-rich-jsx
-        on-ui-change={(event: CustomEvent) => heard.push(event.detail as string)}
+        on-ui-changed={(event: CustomEvent) => heard.push(event.detail as string)}
         items={items()}
         label={label()}
       />
     ))
     const element = find(root, JSX_TAG)
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "clicked" }))
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "clicked" }))
     expect(heard).toEqual(["clicked"])
     expect(element.items).toEqual([1])
     expect(element.label).toBe("one")
@@ -168,14 +168,14 @@ describe("RichAttributes from Solid JSX", () => {
     const heard: string[] = []
     const items = [3, 4]
     const root = mount(() => (
-      <x-rich-late on-ui-change={(event: CustomEvent) => heard.push(event.detail as string)} items={items} />
+      <x-rich-late on-ui-changed={(event: CustomEvent) => heard.push(event.detail as string)} items={items} />
     ))
     const element = find(root, LATE_TAG)
     expect(element.getAttribute("items")).toBeNull()
 
     define(LATE_TAG)
     await customElements.whenDefined(LATE_TAG)
-    element.dispatchEvent(new CustomEvent("ui-change", { detail: "late" }))
+    element.dispatchEvent(new CustomEvent("ui-changed", { detail: "late" }))
     expect(heard).toEqual(["late"])
     expect(element.items).toEqual(items)
   })
@@ -194,7 +194,7 @@ function defineOnce(tag: string) {
 
 /** What the two JSX tags take. */
 type RichTestAttributes = {
-  "on-ui-change"?: (event: CustomEvent) => void
+  "on-ui-changed"?: (event: CustomEvent) => void
   items?: unknown
   label?: string
 }

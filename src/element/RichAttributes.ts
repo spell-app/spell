@@ -5,7 +5,7 @@ import type { E } from "spell/element"
  * ### `RichAttributes`
  * Turns a function or an object given to an attribute of a dashed tag into a listener or a property:
  * what Solid hands our elements for a plain JSX prop.
- * - `<ui-select on-ui-change={f}>`:  a listener for the element's `ui-change` event
+ * - `<ui-select on-ui-changed={f}>`:  a listener for the element's `ui-changed` event
  *   - on a translated tag, its own name for that event (`ElementDefinition.event()`), given the tag's `definition`
  * - `<ui-tree-diagram tree={tree}>`, `options={[...]}`:  the element's PROPERTY, `el.tree = tree`
  * - Text stays an attribute, as the browser has it.
@@ -151,7 +151,7 @@ export class RichAttributes {
   // ## Helpers
   ////////////////
 
-  /** Listen for `name`'s event (`on-ui-change` => `ui-change`, localized) with `listener`, replacing a former one. */
+  /** Listen for `name`'s event (`on-ui-changed` => `ui-changed`, localized) with `listener`, replacing a former one. */
   private static listen(
     element: Element,
     name: string,
@@ -176,7 +176,7 @@ function isUndefinedTag(element: Element): boolean {
   return element.localName.includes("-") && !customElements.get(element.localName)
 }
 
-/** The attribute prefix that makes a listener:  `on-ui-change`. */
+/** The attribute prefix that makes a listener:  `on-ui-changed`. */
 const EVENT_PREFIX = "on-"
 
 /** The page saying "no patch":  `<ui-root pure>`. */

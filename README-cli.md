@@ -8,9 +8,9 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell 0.0.0
+spell 0.8.0
 spell-parser 0.8.0
-spell-ui 0.0.1
+spell-ui 0.8.0
 spell-app 0.8.0
 ```
 
@@ -91,12 +91,16 @@ spell lint @spell/examples
 
 ```text
 @spell/examples holds several projects -- name one, or pass --all:
+  @spell/examples/bill-splitter
   @spell/examples/calculator
   @spell/examples/fizzbuzz
+  @spell/examples/flash-cards
+  @spell/examples/habit-tracker
   @spell/examples/ListaDeTareas
   @spell/examples/Solitaire
   @spell/examples/Solitario
   @spell/examples/TaskList
+  @spell/examples/tic-tac-toe
 ```
 
 </details>
@@ -109,12 +113,16 @@ spell lint --all @spell/examples
 <summary>Output</summary>
 
 ```text
+✓ @spell/examples/bill-splitter
 ✓ @spell/examples/calculator
 ✓ @spell/examples/fizzbuzz
+✓ @spell/examples/flash-cards
+✓ @spell/examples/habit-tracker
 ✓ @spell/examples/ListaDeTareas
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
 ✓ @spell/examples/TaskList
+✓ @spell/examples/tic-tac-toe
 ```
 
 </details>
@@ -359,9 +367,10 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
+| `spell spellx convert [projects...]` | writes each `.spell` file as spellx, the same program in tags, `Card.spell` => `Card.spellx` beside it;  never in the frozen test projects |
 
 <details>
-<summary>Every option of compile, lint, watch and format</summary>
+<summary>Every option of compile, lint, watch, format and spellx convert</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -375,6 +384,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
+| `spell spellx convert --dry-run` | writes nothing, prints each `.spellx` file instead |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
   ([spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
@@ -897,8 +907,8 @@ spell projects
 
 ```text
 owen@spell       Projects       ...
-@spell/examples  Examples       6 projects
-@spell/guides    Guides         0 projects
+@spell/examples  Examples       10 projects
+@spell/guides    Guides         12 projects
 @spell/library   Libraries      1 project
 @spell/test      Test fixtures  7 projects
 ```
@@ -1021,6 +1031,10 @@ After an unknown command it adds `(spell help lists the commands)`.
 - `compile` writes the compiled JavaScript, `<Project>.spell.js`, into the project's build folder, as the app does.
   - The build folder:  `build/` at `spell-app`'s root, never committed, at the project's own path
     (`build/spaces/@spell/examples/Solitaire`);  `SPELL_BUILD_DIR` sets another.
+  - Beside it, its source map, `<Project>.spell.js.map`:
+    each line of JavaScript back to the `.spell` line it came from.
+    `spell run`, the editor's runner and `<spell-viewer>` carry it into what they run,
+    so an error's stack, and the browser's debugger, show Spell's lines.
   - With no errors, also its scope pack there, `<Project>.scopes.js`, as the language server does:
     what the Type Explorer reads.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:

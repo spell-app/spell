@@ -8,7 +8,8 @@ import { E } from "spell/element"
  *   - `runtime`:  always loaded, so an element draws as it connects
  *   - `words`:
  *     - English names;  a dictionary renames only tags and attributes (no values, events, slots or parts)
- *     - the four shared attributes every element takes:  `disabled`, `loading`, `visible`, `animation`
+ *     - the shared attributes every element takes:  `disabled`, `loading`, `visible`, `animation`,
+ *       `link`, `target`, `font`, `tooltip`, `label`
  *     - a converter for each kind of attribute;  only a list of values written in the vocabulary is checked
  *     - no class words, and every text is its key
  *   - `styles`, `focus`:  nothing, so elements draw unstyled
@@ -153,7 +154,12 @@ const SHARED_ATTRIBUTES: readonly E.AttributeSpec[] = [
   { name: "disabled", kind: "boolean", description: "Can't be used." },
   { name: "loading", kind: "boolean", description: "Busy." },
   { name: "visible", kind: "boolean", description: "Shown:  the platform's `hidden`, turned round." },
-  { name: "animation", kind: "string", description: "How it shows and hides;  `none` for no motion." }
+  { name: "animation", kind: "string", description: "How it shows and hides;  `none` for no motion." },
+  { name: "link", kind: "string", description: "Where a click goes." },
+  { name: "target", kind: "string", description: "Where `link` opens." },
+  { name: "font", kind: "multiple", values: ["bold", "italic"], description: "How its letters look." },
+  { name: "tooltip", kind: "string", description: "The browser's tooltip." },
+  { name: "label", kind: "string", description: "Its accessible name." }
 ]
 
 /** Spellings of false;  everything else present is true. */

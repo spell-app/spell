@@ -60,13 +60,15 @@ export class SectionEditor extends HTMLElement {
     }
     document.addEventListener("pointerover", this.onPointer)
     addEventListener("scroll", this.place, { passive: true })
-    document.addEventListener("spell-site:edit", this.place)
+    document.addEventListener("spell-site:edit-opened", this.place)
+    document.addEventListener("spell-site:edit-closed", this.place)
   }
 
   disconnectedCallback(): void {
     document.removeEventListener("pointerover", this.onPointer)
     removeEventListener("scroll", this.place)
-    document.removeEventListener("spell-site:edit", this.place)
+    document.removeEventListener("spell-site:edit-opened", this.place)
+    document.removeEventListener("spell-site:edit-closed", this.place)
   }
 
   /** track the editable thing under the pointer */

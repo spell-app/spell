@@ -111,7 +111,7 @@ export type CamelCase<S extends string> = S extends `${infer Head}-${infer Tail}
 /** Canonical attribute names of `V`. */
 export type AttributeName<V extends E.ComponentVocabulary> = V["attributes"][number]["name"]
 
-/** Canonical event names of `V`, e.g. `ui-change`. */
+/** Canonical event names of `V`, e.g. `ui-changed`. */
 export type EventName<V extends E.ComponentVocabulary> = V["events"][number]["name"]
 
 /** Canonical slot names of `V`;  `""` is the default slot. */
@@ -388,6 +388,15 @@ export type ElementSetup = {
   loading: LoadingMeaning
 
   /**
+   * What the shared `link` does for this family (every element takes it:  `SharedVocabulary`, epic `ui-gaps`).
+   * - `"click"` (the default):  a click on the element goes there, in its `target` if it has one;
+   *   a click on a control of its own inside (a button, a link, a field) stays that control's.
+   * - `"its own"`:  the family draws a real link itself (`<ui-text link>`'s `<a>`).
+   * - `:state(linked)` either way, while it has one.
+   */
+  link: LinkMeaning
+
+  /**
    * What the element shows when the page writes neither `visible` nor `hidden`.
    * - Every element takes both (`SharedVocabulary`):  one fact, two names (`DOMElement`, "Shown or hidden").
    * - `"shown"` (the default):  a message, a segment, a menu ...
@@ -435,6 +444,9 @@ export type DisabledMeaning = "unusable" | "its own"
 
 /** `elementSetup.loading`:  what `loading` does for a family. */
 export type LoadingMeaning = "loader" | "its own"
+
+/** `elementSetup.link`:  a click goes there (`"click"`), or the family draws its own link (`"its own"`). */
+export type LinkMeaning = "click" | "its own"
 
 /**
  * A text property of `ElementInternals`' ARIA (DOM API `ARIAMixin`):  `role`, `ariaBusy`, `ariaLabel` ...

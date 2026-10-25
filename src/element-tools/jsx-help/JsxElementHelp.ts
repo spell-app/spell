@@ -100,7 +100,7 @@ export class JsxElementHelp {
   /**
    * A warning when `attribute` is a dashed name its custom tag doesn't have, e.g. `text-alin` on `<ui-button>`.
    * - Allowed besides the tag's attributes:
-   *   `data-*`, `aria-*`, and `on-<event>` for each event it dispatches (`on-ui-change`).
+   *   `data-*`, `aria-*`, and `on-<event>` for each event it dispatches (`on-ui-changed`).
    * - Namespaced names (`on:click`, `prop:value`) and undashed ones are TypeScript's to check.
    * - A tag the catalog doesn't know, or whose manifest lists no attributes, says nothing:  no warning.
    */
