@@ -138,6 +138,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     what shows (`spell-doc-runtime.js` reads the same rule)
  *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON
  *     (Q14:  "Accept Overview", then "Accept Phases";  `stageButton()`)
+ *   - building, while a phase's build plan waits:  "Accept plan" / "Accept 3 plans" there too (I119), so it shows
+ *     however far the page is scrolled;  a press accepts them all and sends
  *     - a press sends what's unsent, with an accept mark (`accept()`),
  *       and the session moves the page on (`epic inbox apply`)
  *     - its tooltip says what's still open ("2 questions open"):  a reminder, never a lock
@@ -392,7 +394,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     this.signals.layout.get()
     const stage = this.pageStage
     const client = this.review.client
-    if (!PageStages.isPlanning(stage) || !this.review.reviewing() || !client) return undefined
+    if (!this.review.reviewing() || !client) return undefined
+    if (!PageStages.isPlanning(stage)) return this.plansButton()
     const mark = client.inbox.marks[STAGE_ID]
     const accepted = mark?.action === "accept" && mark.stage === stage
     const texts = STAGE_TEXTS[stage]
@@ -412,6 +415,28 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           .join(" · ")
     return { label: this.translationForKey(texts.label), tip, accepted }
   })
+
+  /**
+   * While building, the header's button for Claude's build plans that wait (epic `epic-engine` I119;  Owen, 2026-10-25:
+   * "Accept plan needs to be in the top bar, otherwise I won't see it if it's scrolled off"):  "Accept plan", or
+   * "Accept 3 plans";  its tooltip names them.  `undefined` while none waits.
+   * - a press:  Accept plan on every one of them, then Send (`accept()`), so Claude builds them straight through
+   */
+  private plansButton(): StageButton | undefined {
+    const client = this.review.client!
+    const waiting = Array.from(this.domElement.querySelectorAll(PLANS_WAITING))
+    if (!waiting.length) return undefined
+    const accepted = waiting.every((phase) => client.markOf(phase.id)?.action === "approve")
+    const names = waiting.map((phase) => PhaseIds.labelOf(phase)).join(", ")
+    const label =
+      waiting.length === 1
+        ? this.translationForKey("acceptPlanOne")
+        : this.translationForKey("acceptPlansMany", { count: waiting.length })
+    const tip = accepted
+      ? this.translationForKey("acceptedPlans")
+      : this.translationForKey("acceptPlansTip", { phases: names })
+    return { label, tip, accepted }
+  }
 
   /**
    * The step label;  `undefined` for none.
@@ -977,7 +1002,14 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     if (!client) return
     const stage = this.pageStage
-    if (!PageStages.isPlanning(stage)) return
+    if (!PageStages.isPlanning(stage)) {
+      // building:  Accept plan on every phase whose plan waits (I119), then Send
+      for (const phase of Array.from(this.domElement.querySelectorAll(PLANS_WAITING)))
+        if (client.markOf(phase.id)?.action !== "approve" && !(await client.save(phase.id, { action: "approve" })))
+          return
+      await client.send()
+      return
+    }
     const mark = client.markOf(STAGE_ID)
     if (mark?.action !== "accept" || mark.stage !== stage) {
       if (!(await client.save(STAGE_ID, { action: "accept", stage }))) return
@@ -1400,6 +1432,9 @@ type FilterHost = E.DOMElement & {
 const SECTIONS = "epic-section"
 
 /** The stage button's texts, by the stage it ends. */
+/** The phases whose build plan waits for Owen's Accept, not done (`plansButton()`). */
+const PLANS_WAITING = ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"])'
+
 const STAGE_TEXTS = {
   overview: {
     label: "acceptOverview",

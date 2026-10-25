@@ -3766,6 +3766,26 @@
           "description": "The stage button's tooltip:  nothing open."
         },
         {
+          "key": "acceptPlanOne",
+          "text": "Accept plan",
+          "description": "While building, the header's button for one waiting build plan (epic `epic-engine` I119)."
+        },
+        {
+          "key": "acceptPlansMany",
+          "text": "Accept {count} plans",
+          "description": "The same, for several waiting build plans."
+        },
+        {
+          "key": "acceptPlansTip",
+          "text": "Claude's build plans for {phases} wait:  a press accepts them all, and Claude builds straight through",
+          "description": "Its tooltip:  which phases (`P5, P6`)."
+        },
+        {
+          "key": "acceptedPlans",
+          "text": "Plans accepted:  waiting for Claude to build",
+          "description": "Its tooltip once pressed."
+        },
+        {
           "key": "acceptSends",
           "text": "sends {count} unsent with it",
           "description": "The stage button's tooltip:  marks and comments a press sends along."
