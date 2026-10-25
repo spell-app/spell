@@ -61,13 +61,16 @@
     --_chip-on: var(--epic-state-recent-on, var(--ui-green-on));
   }
   /*
-   * the items marked in this pass (epic `epic-engine` P43):  blue, a DOTTED outline over a light blue wash, first;
+   * the items marked in this pass (epic `epic-engine` P43):  SOLID blue, Send's plane's (`--ui-blue`), white ink, first (Owen,
+   * 2026-10-25:  "go with dark blue solid, the light blue looks like filter turned off", then "Use same blue as plane";
+   * a dotted outline over a light wash, before);
    * not a filter, so no pointer and no hover ring
    */
   .chip.marked {
-    --_chip: var(--epic-state-progress, var(--ui-blue));
-    border-style: dotted;
-    background: color-mix(in srgb, var(--_chip) 14%, transparent);
+    --_chip: var(--ui-blue, #2185d0);
+    border-color: var(--_chip);
+    background: var(--_chip);
+    color: white;
     cursor: default;
   }
   .chip.marked:hover {

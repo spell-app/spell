@@ -25,7 +25,7 @@ export const epicStateFilterVocabulary = {
     "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
     "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items " +
-    "marked in this pass (`marked`) count in a blue dotted badge first, whatever the filter.",
+    "marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
   attributes: [
     {
       name: "counts",

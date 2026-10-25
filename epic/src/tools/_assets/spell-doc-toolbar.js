@@ -26,9 +26,6 @@ const MIN_TITLE_PX = 50
 /** The widest a titled toolbar's title may be while they shrink (`fitTitles()`), set on the toolbar. */
 const TITLE_MAX = "--spell-toolbar-title-max"
 
-/** Epic UI's page bar, which holds its toolbar (`spell-comments.js`;  the site's `PAGE_BAR`). */
-const SITE_BAR = ".spell-site-toolbar"
-
 /**
  * A TITLED toolbar's items (a guide's, a details page's, Epic UI's):  one per top-level section, its mark and title.
  * - `groups`:  `{ element, id, label, glyph }` each, the outline's top-level entries
@@ -288,12 +285,12 @@ export function removeToolbar() {
 }
 
 /**
- * A titled toolbar's titles:  shown, shrinking with `...` (CSS), while each gets `MIN_TITLE_PX` or more of the row;
+ * A titled toolbar's titles:  shown, shrinking with `...` (CSS), while none is cut under `MIN_TITLE_PX`;
  * else gone (`spell-toolbar-icons`), the marks only (Owen, 2026-10-10:  "remove the titles entirely if they each only
  * get less than 50px").
- * - each title's share:  the row's room, less every button's mark, badge and padding, and what else the row holds (the
- *   bullhorn, the spell syntax guide's Expand all), split evenly
- * - shrinking, the longest titles give way first, down to one width (`--spell-toolbar-title-max`, `titleCap()`):
+ * - the titles' room:  the row's, less every button's mark, badge and padding, and what else the row holds (the
+ *   bullhorn, the spell syntax guide's Expand all)
+ * - shrinking, the longest titles give way first, down to one width (`--spell-toolbar-title-max`, `titleFit()`):
  *   so no short title is cut to its first letter while a long one stays whole
  * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
  * - which toolbars:  `fitsTitles()`
@@ -316,25 +313,37 @@ export function fitTitles(toolbar) {
     others
   const labels = items.map((item) => item.querySelector(".spell-toolbar-label"))
   const fixed = items.reduce((sum, item, index) => sum + boxOf(item).width - (labels[index]?.offsetWidth ?? 0), 0)
-  if ((room - fixed) / items.length < MIN_TITLE_PX) return void toolbar.classList.add("spell-toolbar-icons")
-  const cap = titleCap(
+  const fit = titleFit(
     labels.map((label) => label?.scrollWidth ?? 0),
     room - fixed
   )
-  if (cap !== undefined) toolbar.style.setProperty(TITLE_MAX, `${cap}px`)
+  if (fit === "icons") toolbar.classList.add("spell-toolbar-icons")
+  else if (fit !== "whole") toolbar.style.setProperty(TITLE_MAX, `${fit}px`)
 }
 
 /**
  * Does `fitTitles()` fit `toolbar`'s titles, or does it keep them whole and scroll?
- * - a `<ui-menu>` (a page without Spell UI's toolbar):  fits
- * - a `<ui-toolbar>`:  keeps them whole, scrolling, its `‹` / `›` buttons showing what's past either end (epic `debut`)
- *   - EXCEPT Epic UI's page bar (`.spell-site-toolbar`), as the docs pages' rule says (Owen, epic `epic-engine` I132:
- *     its row ran off the page's right at the side bar's width);  scrolling only once even the marks don't fit
- *   - but not a SEGMENTED one there, under a page's tabs:  its track is only as wide as its buttons
+ * - fits:  a guide's, a details page's, Epic UI's band (Owen, epic `epic-engine` I132:  Epic UI's ran off the page's
+ *   right at the side bar's width;  I133:  the guides' too);  scrolling only once even the marks don't fit
+ * - keeps them whole, scrolling:  a SEGMENTED one, under a page's tabs (Spell UI's components pages, epic `debut`),
+ *   its `‹` / `›` buttons showing what's past either end;  its track is only as wide as its buttons
  */
 function fitsTitles(toolbar) {
-  if (toolbar.localName !== "ui-toolbar") return true
-  return !!toolbar.closest(SITE_BAR) && !toolbar.classList.contains("spell-toolbar-segmented")
+  return !toolbar.classList.contains("spell-toolbar-segmented")
+}
+
+/**
+ * How a titled toolbar's titles fit `room`, their natural `widths` (px) given:
+ * - `"whole"`:  every one, uncut
+ * - a number:  the widest a title may be (`titleCap()`), the longest giving way first
+ * - `"icons"`:  none, the marks only, once a title would be cut under `MIN_TITLE_PX`:  a stub like "6 W…" says
+ *   nothing, so the titles go to the tooltips instead
+ * - e.g. `[30, 80, 120]`:  in 230px `"whole"`, in 200px 90, in 120px `"icons"` (45 each)
+ * - pure:  no DOM
+ */
+export function titleFit(widths, room) {
+  const cap = titleCap(widths, room)
+  return cap === undefined ? "whole" : cap < MIN_TITLE_PX ? "icons" : cap
 }
 
 /**
@@ -354,14 +363,27 @@ export function titleCap(widths, room) {
 
 /**
  * Fit a titled toolbar's titles (`fitTitles()`) now and whenever they could change:  the window's width, the items
- * drawing, the fonts loading.
+ * drawing, the fonts loading, the row's padding or a button's width changing (its styles arriving late).
+ * - the row and the buttons are watched too:  on Epic UI's pages the toolbar's styles land after its first fit, and
+ *   the toolbar itself stays the same width, so its titles stayed cut with room to spare at 1200px (epic
+ *   `epic-engine` I133)
+ *   - no loop:  each fit ends at the same sizes as the one before, so the watcher has nothing new to say
  * - `signal`:  stops watching (Epic UI's pages, whose `main` the site's router swaps for the next page's)
  */
 export function keepFitted(toolbar, { signal } = {}) {
   const sizes = new ResizeObserver(() => fitTitles(toolbar))
   sizes.observe(toolbar)
   signal?.addEventListener("abort", () => sizes.disconnect(), { once: true })
-  void customElements.whenDefined("ui-item").then(() => nextFrame(2).then(() => fitTitles(toolbar)))
+  const watchDrawn = () => {
+    const row = toolbarRow(toolbar)
+    if (row) sizes.observe(row)
+    for (const item of toolbar.querySelectorAll(":scope > [data-rail]")) {
+      const box = item.shadowRoot?.querySelector('[part~="item"]')
+      if (box) sizes.observe(box)
+    }
+    fitTitles(toolbar)
+  }
+  void customElements.whenDefined("ui-item").then(() => nextFrame(2).then(watchDrawn))
   void document.fonts?.ready.then(() => fitTitles(toolbar))
 }
 
