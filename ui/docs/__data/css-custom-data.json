@@ -9709,7 +9709,7 @@
       "name": "::part(card)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-card>`:  The card box (`<article>`, or `<a>` with `href`)."
+        "value": "Part of:\n\n- `<ui-card>`:  The card box (`<article>`, or `<a>` with `link`)."
       }
     },
     {
@@ -10101,7 +10101,7 @@
       "name": "::part(label)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-button>`:  The joined label of a `label` button.\n- `<ui-checkbox>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-dropdown>`:  Each chosen value of a `multiple` dropdown.\n- `<ui-event>`:  The label box beside the content.\n- `<ui-field>`:  The label.\n- `<ui-input>`:  The joined label box.\n- `<ui-label>`:  The label box (`<span>`, or `<a>` with `link`).\n- `<ui-progress>`:  The label under the track.\n- `<ui-property>`:  The label.\n- `<ui-radio>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-slider>`:  One step label (and its tick).\n- `<ui-statistic>`:  The `label` shorthand."
+        "value": "Part of:\n\n- `<ui-button>`:  The joined badge of a `badge` button.\n- `<ui-checkbox>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-dropdown>`:  Each chosen value of a `multiple` dropdown.\n- `<ui-event>`:  The label box beside the content.\n- `<ui-field>`:  The label.\n- `<ui-input>`:  The joined label box.\n- `<ui-label>`:  The label box (`<span>`, or `<a>` with `link`).\n- `<ui-progress>`:  The label under the track.\n- `<ui-property>`:  The label.\n- `<ui-radio>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-slider>`:  One step label (and its tick).\n- `<ui-statistic>`:  The `label` shorthand."
       }
     },
     {
@@ -10642,7 +10642,7 @@
       "name": ":state(active)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-breadcrumb-section>`:  The current page.\n- `<ui-button>`:  Pressed / on.\n- `<ui-embed>`:  The frame is loaded.\n- `<ui-label>`:  Selected / on.\n- `<ui-progress>`:  Shows activity.\n- `<ui-reveal>`:  Revealed by `active`.\n- `<ui-side>`:  The side shown (set by the shape)."
+        "value": "Custom state of:\n\n- `<ui-button>`:  Pressed / on (`selected`).\n- `<ui-embed>`:  The frame is loaded.\n- `<ui-label>`:  Selected / on (`selected`).\n- `<ui-progress>`:  Shows activity.\n- `<ui-reveal>`:  Revealed by `active`.\n- `<ui-side>`:  The side shown (set by the shape)."
       }
     },
     {
@@ -10663,21 +10663,21 @@
       "name": ":state(attached)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attached` (any edge):  the host drops the outer margin it carries."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is set (any edge):  the host drops the outer margin it carries."
       }
     },
     {
       "name": ":state(attached-bottom)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attached` is `bottom`:  the host keeps only its bottom margin."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is `bottom`:  the host keeps only its bottom margin."
       }
     },
     {
       "name": ":state(attached-top)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attached` is `top`:  the host keeps only its top margin."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is `top`:  the host keeps only its top margin."
       }
     },
     {
@@ -10740,7 +10740,7 @@
       "name": ":state(circular)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-steps>`:  Set while `circular`:  with `block`, the host keeps both margins, even first or last."
+        "value": "Custom state of:\n\n- `<ui-steps>`:  Set while `appearance=\"circular\"`:  with `block`, the host keeps both margins, even first or last."
       }
     },
     {
@@ -10873,7 +10873,7 @@
       "name": ":state(fluid)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or attached `top` / `bottom` / bare.\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or attached `top` / `bottom`.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
+        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`.\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
       }
     },
     {
@@ -11293,7 +11293,7 @@
       "name": ":state(selected)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-action>`:  Chosen (`selected` or `active`).\n- `<ui-checkbox>`:  Chosen.\n- `<ui-item>`:  Chosen (`selected` or `active`).\n- `<ui-radio>`:  Chosen.\n- `<ui-step>`:  The current step (`selected` or `active`).\n- `<ui-tab>`:  The shown pane."
+        "value": "Custom state of:\n\n- `<ui-action>`:  Chosen (`selected` or `active`).\n- `<ui-breadcrumb-section>`:  The current page (`selected`).\n- `<ui-checkbox>`:  Chosen.\n- `<ui-item>`:  Chosen (`selected` or `active`).\n- `<ui-radio>`:  Chosen.\n- `<ui-step>`:  The current step (`selected` or `active`).\n- `<ui-tab>`:  The shown pane."
       }
     },
     {
@@ -11363,7 +11363,7 @@
       "name": ":state(vertical)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-menu>`:  Items stacked (`vertical`).\n- `<ui-tabs>`:  Tabs in a column (`vertical`).\n- `<ui-toolbar>`:  Items stacked (`vertical`)."
+        "value": "Custom state of:\n\n- `<ui-menu>`:  Items stacked (`direction=\"vertical\"`).\n- `<ui-tabs>`:  Tabs in a column (`direction=\"vertical\"`).\n- `<ui-toolbar>`:  Items stacked (`direction=\"vertical\"`)."
       }
     },
     {

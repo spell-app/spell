@@ -58,7 +58,15 @@ export const adVocabulary = {
         "IAB unit, e.g. `medium rectangle` (300 x 250), `leaderboard` (728 x 90).  Mobile units (`mobile leaderboard`, " +
         "`large mobile banner`) show only on phone-sized viewports."
     },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container." },
+    {
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  centred in its container.  Its old name is `centered`."
+    },
     {
       name: "test",
       group: "appearance",

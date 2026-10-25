@@ -94,11 +94,16 @@ describe("<ui-section> classes", () => {
     ['color="teal" dividing sticky', "ui teal dividing sticky section"],
     ['size="small" block', "ui small block section"],
     ['size="medium"', "ui section"],
-    ["bordered raised compact", "ui bordered compact raised section"],
-    ['padded="very" attached="top" bordered', "ui bordered very padded top attached section"],
+    // old names and new draw the same words (epic `ui-gaps` P4)
+    ["bordered raised compact", "ui compact bordered raised section"],
+    ['appearance="bordered raised" padding="compact"', "ui compact bordered raised section"],
+    ['padded="very" attached="top" bordered', "ui very padded top attached bordered section"],
+    ['padding="lg" attach="top" appearance="bordered"', "ui very padded top attached bordered section"],
+    ['text-align="center"', "ui center aligned section"],
+    ['align="center"', "ui center aligned section"],
     ['scrolling="very short"', "ui very short scrolling section"],
     ['text-align="center" inverted', "ui inverted center aligned section"],
-    ["styled basic loading disabled", "ui basic disabled loading styled section"],
+    ["styled basic loading disabled", "ui disabled loading styled basic section"],
     ['collapsible collapsed label="H" hint="S" level="3" badge="2" icon="bug" offset="4"', "ui section"]
   ])("<ui-section %s>", async (attributes, classes) => {
     const { root } = await section(`<ui-section ${attributes}>Body</ui-section>`)

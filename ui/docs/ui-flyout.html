@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Flyout">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-flyout%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-flyout%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/flyout.html"
+              link="https://fomantic-ui.com/modules/flyout.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's flyout page, section by section, in its order (Types, Variations), plus our extras
@@ -215,7 +215,7 @@
                   ></ui-flyout>
                   <ui-flyout id="flyout-position-bottom" position="bottom" aria-label="Cookies">
                     <ui-content><p>This page uses no cookies.</p></ui-content>
-                    <ui-actions><ui-button class="approve" primary>Got it</ui-button></ui-actions>
+                    <ui-actions><ui-button class="approve" color="primary">Got it</ui-button></ui-actions>
                   </ui-flyout>
                 </ui-docs-example>
               </ui-section>
@@ -259,7 +259,7 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       <p>Until the very end.</p>
                     </ui-content>
-                    <ui-actions><ui-button class="approve" primary>I agree</ui-button></ui-actions>
+                    <ui-actions><ui-button class="approve" color="primary">I agree</ui-button></ui-actions>
                   </ui-flyout>
                 </ui-docs-example>
               </ui-section>
@@ -271,11 +271,11 @@
                 >
                   <ui-button commandfor="flyout-center" command="--show">Show</ui-button>
                   <ui-flyout id="flyout-center">
-                    <ui-header text-align="center">Header is centered</ui-header>
-                    <ui-content text-align="center"><p>Content is centered</p></ui-content>
+                    <ui-header align="center">Header is centered</ui-header>
+                    <ui-content align="center"><p>Content is centered</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
                 </ui-docs-example>
@@ -289,8 +289,8 @@
                     <ui-header>Look at the Actions</ui-header>
                     <ui-content><p>They are aligned to the left</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
                 </ui-docs-example>
@@ -312,8 +312,8 @@
                     <ui-header>Basic Header</ui-header>
                     <ui-content><p>Basic Actions below</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
                 </ui-docs-example>
@@ -400,14 +400,13 @@
                 <ui-docs-example
                   description='A menu item drives the flyout through a button with `command="--toggle"`.'
                 >
-                  <ui-menu attached="top">
+                  <ui-menu attach="top">
                     <ui-item>
-                      <ui-button basic commandfor="flyout-usage-menu" command="--toggle" icon="sidebar"
-                        >Toggle flyout</ui-button
+                      <ui-button commandfor="flyout-usage-menu" command="--toggle" icon="sidebar" appearance="basic">Toggle flyout</ui-button
                       >
                     </ui-item>
                   </ui-menu>
-                  <ui-segment attached="bottom">
+                  <ui-segment attach="bottom">
                     <ui-header level="3">Application Content</ui-header>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>

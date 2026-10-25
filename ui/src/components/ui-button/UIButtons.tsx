@@ -12,17 +12,17 @@ import buttonCSS from "./UIButton.css?inline"
  * - Its shadow DOM is one box, `<div class="ui … buttons" role="group">`, around a slot.
  * - Almost no code:  `UIButton.css` hands the group's look to the slotted buttons through inherited tokens.
  * - Its `:state()`s are only for layout the DOM element itself must do:
- *   `fluid` (also for a `width`, or attached top / bottom) and the floats.
+ *   `fluid` (also for a `width`, or `attach` top / bottom / both) and the floats.
  ****************/
 export class UIButtons extends E.UIComponent<typeof buttonsVocabulary> {
   @E.proto static vocabulary = buttonsVocabulary
   @E.protoMerged static elementSetup = { styleSheets: { button: buttonCSS } } satisfies Partial<E.ElementSetup>
 
-  /** Full width:  `fluid`, a `width` (equal-width buttons), or attached as a whole row. */
+  /** Full width:  `fluid`, a `width` (equal-width buttons), or attached as a whole row (`attach`). */
   @E.cssState("fluid")
   get isFluid(): boolean {
-    const { attached } = this
-    return this.fluid || !!this.width || attached === true || attached === "top" || attached === "bottom"
+    const { attach } = this
+    return this.fluid || !!this.width || attach === "both" || attach === "top" || attach === "bottom"
   }
 
   /** `floated="left"`:  the whole element floats left. */

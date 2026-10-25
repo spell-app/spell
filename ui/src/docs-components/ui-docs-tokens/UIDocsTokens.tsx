@@ -28,7 +28,7 @@ import tokensCSS from "./UIDocsTokens.css?inline"
  *
  * - Data:  `components.json5` through `SiteData` (`families[folder].tokens`, `foundation`);
  *   NEVER the sheets or the vocabularies.  The rows come from `TokenRows`.
- * - Swatches are `<ui-label circular empty>` painted with `--ui-label-background: var(<token>, <default>)`:
+ * - Swatches are `<ui-label empty appearance="circular">` painted with `--ui-label-background: var(<token>, <default>)`:
  *   they resolve where they're drawn, so they follow the theme, the scheme (dark mode) and anything the page sets.
  *   - A family token's default is given as the `var()`'s fallback, since no sheet declares the public name.
  * - `playground`:  the children are a live preview, in a `<ui-segment>` with a reset `<ui-button>`,
@@ -299,10 +299,10 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
               <ui-button
                 part={this.partForName("reset")}
                 size={SMALL}
-                basic=""
                 icon={RESET_ICON}
                 disabled={this.isModified ? undefined : ""}
                 ref={(button: HTMLElement) => button.addEventListener("click", (event) => this.reset(event))}
+                appearance="basic"
               >
                 {this.translationForKey("reset")}
               </ui-button>
@@ -343,7 +343,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
   private table(table: TokenTable): JSX.Element {
     const isDescribed = table.rows.some((row) => row.description)
     const grid = (
-      <ui-table part={this.partForName("table")} celled="" compact="">
+      <ui-table part={this.partForName("table")} celled="" padding="compact">
         <table>
           <Show when={table.title ?? this.caption}>
             <caption class={table.title ? VISUALLY_HIDDEN_CLASS : undefined}>{table.title ?? this.caption}</caption>
@@ -395,10 +395,10 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
             <Show when={isColor}>
               <ui-label
                 part={this.partForName("swatch")}
-                circular=""
                 empty=""
                 aria-hidden="true"
                 style={{ "--ui-label-background": this.swatch(row) }}
+                appearance="circular"
               />
             </Show>
             <code>{row.default}</code>

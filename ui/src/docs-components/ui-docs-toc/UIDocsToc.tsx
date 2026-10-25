@@ -22,7 +22,7 @@ import tocCSS from "./UIDocsToc.css?inline"
  *
  * - Its shadow DOM:
  *   `<div class="ui [size] toc" part="toc">` holding an optional `<ui-header part="header">`
- *   and ONE `<ui-menu vertical text fluid part="menu">` (the landmark) of section links.
+ *   and ONE `<ui-menu direction="vertical" appearance="text" fluid part="menu">` (the landmark) of section links.
  *   Under the section in view, an item holds a `<ui-menu part="entries">` of its entries' links.
  * - It lists the FOLLOWED content (`for`;  of a `<ui-tabs>`, its shown pane) by `TocIndex.scan()`:
  *   - level 2 headings and top-level `<ui-section>`s are sections;
@@ -130,7 +130,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const isOpen = () => !!parent.entries.length && (!!this.expanded || this.pathInView.includes(parent.id))
     return (
       <Show when={isOpen()}>
-        <ui-item class={ENTRIES} fitted="vertically">
+        <ui-item class={ENTRIES} padding="none-y">
           <ui-menu part={this.partForName("entries")} vertical="" text="" fluid="" size={this.menuSize}>
             <For each={parent.entries}>
               {(entry) => (

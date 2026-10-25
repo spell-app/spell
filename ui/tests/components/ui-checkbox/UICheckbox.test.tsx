@@ -73,6 +73,10 @@ describe("<ui-checkbox> classes", () => {
     ['type="slider" size="small" color="green"', "ui small green slider checkbox"],
     ["fitted invisible", "ui fitted invisible checkbox"],
     ["right-aligned", "ui right aligned checkbox"],
+    // the new words (epic `ui-gaps` P4):  the old names above draw the same
+    ['appearance="toggle"', "ui toggle checkbox"],
+    ['padding="none" invisible', "ui fitted invisible checkbox"],
+    ['align="right"', "ui right aligned checkbox"],
     ["readonly", "ui read-only checkbox"],
     ["disabled", "ui disabled checkbox"],
     ["inverted indeterminate", "ui indeterminate inverted checkbox"],

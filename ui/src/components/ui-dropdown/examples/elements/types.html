@@ -2,11 +2,11 @@
 <div class="ui-stack" style="padding-bottom: 12em">
   <section>
     <h4>Dropdown</h4>
-    <ui-dropdown text="File">
+    <ui-dropdown label="File">
       <ui-item>New</ui-item>
       <ui-item description="ctrl + o">Open...</ui-item>
       <ui-item description="ctrl + s">Save as...</ui-item>
-      <ui-item type="divider"></ui-item>
+      <ui-item kind="divider"></ui-item>
       <ui-item>Edit</ui-item>
       <ui-item>Share</ui-item>
     </ui-dropdown>
@@ -81,8 +81,8 @@
 
   <section>
     <h4>Floating labeled icon button</h4>
-    <ui-dropdown floating labeled button icon="filter" text="Filter Posts">
-      <ui-item type="header">Filter by tag</ui-item>
+    <ui-dropdown floating labeled button icon="filter" label="Filter Posts">
+      <ui-item kind="header">Filter by tag</ui-item>
       <ui-item>Important</ui-item>
       <ui-item>Announcement</ui-item>
     </ui-dropdown>
@@ -90,7 +90,7 @@
 
   <section>
     <h4>Button</h4>
-    <ui-dropdown color="primary" button text="Actions">
+    <ui-dropdown color="primary" button label="Actions">
       <ui-item>Edit</ui-item>
       <ui-item>Delete</ui-item>
     </ui-dropdown>
@@ -98,7 +98,7 @@
 
   <section>
     <h4>Simple (hover, no popover)</h4>
-    <ui-dropdown simple text="Hover me">
+    <ui-dropdown appearance="simple" label="Hover me">
       <ui-item>One</ui-item>
       <ui-item>Two</ui-item>
     </ui-dropdown>

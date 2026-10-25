@@ -68,7 +68,9 @@ describe("<ui-feed> classes and markup", () => {
     ["", "ui feed"],
     ['size="small"', "ui small feed"],
     ['color="blue" connected ordered', "ui blue connected ordered feed"],
-    ["divided basic inverted", "ui basic divided inverted feed"],
+    // the old name and the new draw the same words (epic `ui-gaps` P4)
+    ["divided basic inverted", "ui divided inverted basic feed"],
+    ['divided appearance="basic" inverted', "ui divided inverted basic feed"],
     ['divided="no" disabled', "ui disabled feed"]
   ])("<ui-feed %s>", async (attributes, classes) => {
     const { root } = await feed(attributes)
@@ -78,7 +80,8 @@ describe("<ui-feed> classes and markup", () => {
   it.each([
     ["", "event"],
     ['color="red"', "red ui-red event"],
-    ["basic disabled", "basic disabled event"]
+    ["basic disabled", "disabled basic event"],
+    ['appearance="basic" disabled', "disabled basic event"]
   ])("<ui-event %s>", async (attributes, classes) => {
     const { events } = await feed("", `<ui-event ${attributes}>${CONTENT}</ui-event>`)
     expect(rootOf(events[0]!).className).toBe(classes)

@@ -43,7 +43,14 @@ export const calendarVocabulary = {
       kind: "keyOnly",
       description: "For dark backgrounds:  the dark scheme's colours."
     },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Tighter cells." },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  tighter cells.  Old name:  `compact`."
+    },
     {
       name: "fluid",
       group: "layout",

@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Message">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-message%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-message%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/collections/message.html"
+              link="https://fomantic-ui.com/collections/message.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's message page, section by section, in its order (Types, States, Variations), plus our own
@@ -164,7 +164,7 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
                 <ui-docs-example description='A message can be displayed center aligned:  `text-align="center"`.'>
-                  <ui-message text-align="center" heading="New Version is available!">
+                  <ui-message align="center" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
                 </ui-docs-example>
@@ -172,14 +172,14 @@
 
               <ui-section id="examples-variations-right-aligned" label="Right Aligned" sticky collapsible dividing>
                 <ui-docs-example description='A message can be displayed right aligned:  `text-align="right"`.'>
-                  <ui-message text-align="right" heading="New Version is available!">
+                  <ui-message align="right" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
-                <ui-docs-example description="`centered` centres the text and an icon together with the content.">
+                <ui-docs-example description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
                   <ui-message centered icon="envelope" heading="Centered icon">
                     <p>Icon and content centred together.</p>
                   </ui-message>
@@ -196,7 +196,7 @@
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
                 <ui-docs-example description="A message can only take up the width of its content.">
-                  <ui-message compact>
+                  <ui-message padding="compact">
                     <p>Get all the best inventions in your e-mail every day. Sign up now!</p>
                   </ui-message>
                 </ui-docs-example>
@@ -204,12 +204,12 @@
 
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A message can be formatted to attach itself to other content:  `attached` joins the content below, `attached="bottom"` the content above.'
+                  description='A message can be formatted to attach itself to other content:  `attach="both"` or `attach="top"` joins the content below, `attach="bottom"` the content above.'
                 >
-                  <ui-message attached heading="Welcome to our site!">
+                  <ui-message attach="both" heading="Welcome to our site!">
                     <p>Fill out the form below to sign-up for a new account</p>
                   </ui-message>
-                  <ui-segment attached>
+                  <ui-segment attach="both">
                     <ui-form>
                       <form>
                         <ui-fields widths="2">
@@ -237,7 +237,7 @@
                       </form>
                     </ui-form>
                   </ui-segment>
-                  <ui-message attached="bottom" state="warning" icon="help">
+                  <ui-message attach="bottom" state="warning" icon="help">
                     Already signed up? <a href="#login">Login here</a> instead.
                   </ui-message>
                 </ui-docs-example>
@@ -363,7 +363,7 @@
                     `<ui-icon loading>`).
                   - `state` picks the consequence (`positive`, `success`, `negative`, `error`, `warning`, `info`); `color` any hue.
                     Both tint the surface, border and text.
-                  - `attached` joins the message to the segment or form below it; `attached="bottom"` to the one above.
+                  - `attach="both"` (or `top`) joins the message to the segment or form below it; `attach="bottom"` to the one above.
                 </script>
               </ui-markdown>
             </ui-section>

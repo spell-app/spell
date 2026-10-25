@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Accordion">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-accordion%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-accordion%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/accordion.html"
+              link="https://fomantic-ui.com/modules/accordion.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's accordion page, section by section, in its order (Types, Variations, Examples), plus our
@@ -99,7 +99,7 @@
 
               <ui-section id="examples-types-styled" label="Styled" sticky collapsible dividing>
                 <ui-docs-example description="A styled accordion adds basic formatting.">
-                  <ui-accordion styled open="0">
+                  <ui-accordion appearance="styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
                       <p>
@@ -134,7 +134,7 @@
 
               <ui-section id="examples-types-basic-styled" label="Basic Styled" sticky collapsible dividing>
                 <ui-docs-example description="A basic styled accordion limits the formatting to the header only.">
-                  <ui-accordion basic styled open="0">
+                  <ui-accordion appearance="basic styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
                       <p>
@@ -220,7 +220,7 @@
                 <ui-docs-example
                   description="An open panel shows its content;  its title is the active one.  `open` counts from 0."
                 >
-                  <ui-accordion styled open="1">
+                  <ui-accordion appearance="styled" open="1">
                     <ui-title>Closed panel</ui-title>
                     <ui-content><p>Hidden until opened.</p></ui-content>
                     <ui-title>Open panel</ui-title>
@@ -233,7 +233,7 @@
                 <ui-docs-example
                   description='By default opening one panel closes the others.  `exclusive="no"` lets any number stay open, so `open` can list several:  `open="0 1"`.'
                 >
-                  <ui-accordion styled exclusive="no" open="0 1">
+                  <ui-accordion appearance="styled" exclusive="no" open="0 1">
                     <ui-title>First</ui-title>
                     <ui-content><p>Both panels can be open.</p></ui-content>
                     <ui-title>Second</ui-title>
@@ -246,7 +246,7 @@
                 <ui-docs-example
                   description='`collapsible="no"` keeps one panel open:  activating the open title does nothing.'
                 >
-                  <ui-accordion styled collapsible="no" open="0">
+                  <ui-accordion appearance="styled" collapsible="no" open="0">
                     <ui-title>Always one open</ui-title>
                     <ui-content><p>Open another panel to close this one.</p></ui-content>
                     <ui-title>Another panel</ui-title>
@@ -259,7 +259,7 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
                 <ui-docs-example description="An accordion can take up the width of its container.">
-                  <ui-accordion styled fluid open="0">
+                  <ui-accordion appearance="styled" fluid open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
                       <p>
@@ -328,7 +328,7 @@
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example description="A styled accordion can be inverted too.">
-                  <ui-accordion inverted styled open="0">
+                  <ui-accordion inverted appearance="styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
                       <p>
@@ -364,7 +364,7 @@
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
                 <ui-docs-example description="An accordion can reduce its padding to appear compact.">
                   <ui-segment>
-                    <ui-accordion compact open="0">
+                    <ui-accordion padding="compact" open="0">
                       <ui-title>What is a dog?</ui-title>
                       <ui-content>
                         <p>
@@ -396,9 +396,9 @@
                     </ui-accordion>
                   </ui-segment>
                 </ui-docs-example>
-                <ui-docs-example description='The following accordion appears very compact:  `compact="very"`.'>
+                <ui-docs-example description='The following accordion appears very compact:  `padding="xs"`.'>
                   <ui-segment>
-                    <ui-accordion compact="very" open="0">
+                    <ui-accordion padding="xs" open="0">
                       <ui-title>What is a dog?</ui-title>
                       <ui-content>
                         <p>
@@ -447,7 +447,7 @@
                     <code>&lt;ui-accordion&gt;</code> inside a panel's content. It takes its parent's look; its own
                     <code>open</code> is its own.
                   </p>
-                  <ui-accordion styled open="0">
+                  <ui-accordion appearance="styled" open="0">
                     <ui-title>Level 1</ui-title>
                     <ui-content>
                       Welcome to level 1
@@ -521,7 +521,7 @@
                             <ui-input id="accordion-form-maiden" placeholder="Maiden Name"></ui-input>
                           </ui-field>
                         </ui-accordion>
-                        <ui-button secondary type="submit">Sign Up</ui-button>
+                        <ui-button type="submit" color="secondary">Sign Up</ui-button>
                       </form>
                     </ui-form>
                   </ui-segment>
@@ -540,7 +540,7 @@
                     The content of a panel is simply the element after its title: a <code>&lt;ui-content&gt;</code> is
                     usual, but any element works.
                   </p>
-                  <ui-accordion styled open="0">
+                  <ui-accordion appearance="styled" open="0">
                     <ui-title>A list</ui-title>
                     <ui-list bulleted>
                       <ui-item>Apples</ui-item>
@@ -579,7 +579,7 @@
                   - An `exclusive` accordion (the default) is one `<details name>` group, so opening a panel closes the others;
                     `exclusive="no"` lets any number stay open.
                   - `collapsible="no"` keeps one panel open: activating the open title does nothing.
-                  - `styled`, `basic`, `fluid`, `inverted`, `compact` and `tree` are the look; a nested `<ui-accordion>` takes its
+                  - `appearance` (`styled`, `basic`), `fluid`, `inverted`, `padding` and `tree` are the look; a nested `<ui-accordion>` takes its
                     parent's.
                 </script>
               </ui-markdown>
@@ -632,7 +632,7 @@
                 </script>
               </ui-markdown>
               <ui-docs-example description="Open the question:  its answer comes from `examples/answer.html`.">
-                <ui-accordion styled source="examples/answer.html">
+                <ui-accordion appearance="styled" source="examples/answer.html">
                   <ui-title>What is a dog?</ui-title>
                 </ui-accordion>
               </ui-docs-example>
@@ -682,14 +682,14 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-accordion styled open={String(index)} onui-open={(e) => setIndex(e.detail.index)}>...</ui-accordion>
+                  <ui-accordion appearance="styled" open={String(index)} onui-open={(e) => setIndex(e.detail.index)}>...</ui-accordion>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-accordion styled :open="String(index)" @ui-opening="(e) => (index = e.detail.index)">...</ui-accordion>
+                  <ui-accordion appearance="styled" :open="String(index)" @ui-opening="(e) => (index = e.detail.index)">...</ui-accordion>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -738,7 +738,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `styled`, `compact` and `basic` replace the paddings and colours whatever you set. Open and hovered title
+                    the `styled` and `basic` looks and `padding` replace the paddings and colours whatever you set. Open and hovered title
                     colours follow `--ui-accordion-title-color` unless set. A nested accordion takes the outermost one's look, so
                     theme the outer one. Never set the `--_ui-accordion-*` names: they're the sheet's private plumbing.
                   </script>

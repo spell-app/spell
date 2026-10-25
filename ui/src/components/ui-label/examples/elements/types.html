@@ -5,9 +5,9 @@
     <ui-label icon="envelope">23</ui-label>
     <p>
       <kbd><ui-label>Ctrl</ui-label></kbd> + <kbd><ui-label>Alt</ui-label></kbd> + <kbd><ui-label>Del</ui-label></kbd>
-      <kbd><ui-label basic>W</ui-label></kbd
-      ><kbd><ui-label basic>A</ui-label></kbd
-      ><kbd><ui-label basic>S</ui-label></kbd>
+      <kbd><ui-label appearance="basic">W</ui-label></kbd
+      ><kbd><ui-label appearance="basic">A</ui-label></kbd
+      ><kbd><ui-label appearance="basic">S</ui-label></kbd>
     </p>
   </section>
 
@@ -58,7 +58,7 @@
         ><input type="password" aria-label="Password" />
       </div>
       <div>
-        <input type="text" aria-label="Name" /><ui-label color="red" basic pointing="left"
+        <input type="text" aria-label="Name" /><ui-label color="red" pointing="left" appearance="basic"
           >That name is taken!</ui-label
         >
       </div>
@@ -146,7 +146,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="top">HTML</ui-label>
+        <ui-label attach="top">HTML</ui-label>
         <p style="margin-top: 2em">Top</p>
       </div>
       <div
@@ -158,7 +158,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="bottom">CSS</ui-label>
+        <ui-label attach="bottom">CSS</ui-label>
         <p style="margin-bottom: 2em">Bottom</p>
       </div>
       <div
@@ -170,7 +170,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="top right">Code</ui-label>
+        <ui-label attach="top right">Code</ui-label>
         <p style="margin-top: 2em">Top right</p>
       </div>
       <div
@@ -182,7 +182,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="top left">View</ui-label>
+        <ui-label attach="top left">View</ui-label>
         <p style="margin-top: 2em">Top left</p>
       </div>
       <div
@@ -194,7 +194,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="bottom left">Axis</ui-label>
+        <ui-label attach="bottom left">Axis</ui-label>
         <p style="margin-bottom: 2em">Bottom left</p>
       </div>
       <div
@@ -206,7 +206,7 @@
           --ui-label-owner-edge: 1px;
         "
       >
-        <ui-label attached="bottom right">Footer</ui-label>
+        <ui-label attach="bottom right">Footer</ui-label>
         <p style="margin-bottom: 2em">Bottom right</p>
       </div>
     </div>
@@ -214,9 +214,9 @@
 
   <section>
     <h4>Horizontal</h4>
-    <p><ui-label horizontal>Fruit</ui-label>Kumquats</p>
-    <p><ui-label color="purple" horizontal>Candy</ui-label>Ice Cream</p>
-    <p><ui-label color="red" horizontal>Fruit</ui-label>Orange</p>
+    <p><ui-label direction="horizontal">Fruit</ui-label>Kumquats</p>
+    <p><ui-label color="purple" direction="horizontal">Candy</ui-label>Ice Cream</p>
+    <p><ui-label color="red" direction="horizontal">Fruit</ui-label>Orange</p>
   </section>
 
   <section>
@@ -238,6 +238,6 @@
     <h4>Inverted</h4>
     <ui-label inverted>Inverted</ui-label>
     <ui-label color="red" inverted>Red</ui-label>
-    <ui-label basic inverted>Basic</ui-label>
+    <ui-label inverted appearance="basic">Basic</ui-label>
   </section>
 </div>

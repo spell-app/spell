@@ -187,7 +187,8 @@ describe("<ui-docs-api tag>", () => {
   it("draws Fomantic's compact celled definition tables, stacking by their own width", async () => {
     const host = await render(`<ui-docs-api tag="x-or"></ui-docs-api>`)
     const table = host.shadowRoot!.querySelector("ui-table")!
-    for (const name of ["celled", "compact", "definition", "stackable"]) expect(table.hasAttribute(name)).toBe(true)
+    for (const name of ["celled", "definition", "stackable"]) expect(table.hasAttribute(name)).toBe(true)
+    expect(table.getAttribute("padding")).toBe("compact")
     expect(table.getAttribute("stack-by")).toBe("container")
     const native = table.querySelector("table")!
     expect(native.classList.contains("definition")).toBe(true)
@@ -238,7 +239,13 @@ describe("<ui-docs-api tag>", () => {
     const labels = (name: string) => [...rowOf(attributes, name).cells[2]!.querySelectorAll("ui-label")]
 
     const hues = labels("color")
-    expect(hues.map((label) => [label.textContent, label.getAttribute("color"), label.hasAttribute("basic")])).toEqual([
+    expect(
+      hues.map((label) => [
+        label.textContent,
+        label.getAttribute("color"),
+        label.getAttribute("appearance") === "basic"
+      ])
+    ).toEqual([
       ["red", "red", false],
       ["blue", "blue", false]
     ])
@@ -246,7 +253,7 @@ describe("<ui-docs-api tag>", () => {
     expect(rowOf(attributes, "color").cells[2]!.querySelector("small")!.textContent).toBe("set hues")
 
     const sizes = labels("size")
-    expect(sizes.map((label) => [label.textContent, label.hasAttribute("basic")])).toEqual([
+    expect(sizes.map((label) => [label.textContent, label.getAttribute("appearance") === "basic"])).toEqual([
       ["small", true],
       ["large", true]
     ])

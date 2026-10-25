@@ -23,7 +23,7 @@ import apiCSS from "./UIDocsApi.css?inline"
  * The component behind `<ui-docs-api>`:  the API reference of a tag (`tag="ui-button"`),
  * or of every tag of a family (`family="ui-button"`), as Fomantic tables.
  *
- * - One `<ui-table celled compact definition>` per section, each under a `<ui-header>` title:
+ * - One `<ui-table celled padding="compact" definition>` per section, each under a `<ui-header>` title:
  *   attributes, properties, events, slots, parts, states, texts;  only the sections the tag has.
  * - Data:  `components.json5`, through `SiteData` (fetched once per page);  NEVER the vocabularies.
  *   What the tables hold comes from `ApiModel`.
@@ -180,7 +180,14 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
             {this.inline(section.note ? this.translationForKey(section.note) : "")}
           </p>
         </Show>
-        <ui-table part={this.partForName("table")} celled="" compact="" definition="" stackable="" stack-by="container">
+        <ui-table
+          part={this.partForName("table")}
+          celled=""
+          padding="compact"
+          definition=""
+          stackable=""
+          stack-by="container"
+        >
           <table
             aria-label={this.translationForKey("tableLabel", { section: this.translationForKey(section.id), tag })}
           >
@@ -235,7 +242,10 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           <For each={ApiModel.labelsFor(cell)}>
             {(value) => (
               // a swatch's value is a hue's name, from the site data:  JSON, so TypeScript can't see which
-              <ui-label basic={cell.isSwatch ? undefined : ""} color={cell.isSwatch ? (value as UIHue) : undefined}>
+              <ui-label
+                appearance={cell.isSwatch ? undefined : "basic"}
+                color={cell.isSwatch ? (value as UIHue) : undefined}
+              >
                 {value}
               </ui-label>
             )}

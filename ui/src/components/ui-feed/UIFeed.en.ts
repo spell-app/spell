@@ -51,10 +51,15 @@ export const feedVocabulary = {
     },
     { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between events." },
     {
-      name: "basic",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Ordered:  outlined number circles instead of filled ones."
+      kind: "multiple",
+      values: ["basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description:
+        "The look:  `basic`, ordered with outlined number circles instead of filled ones.  Old name:  `basic`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }

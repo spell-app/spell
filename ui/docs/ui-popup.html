@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Popup">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-popup%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-popup%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/popup.html"
+              link="https://fomantic-ui.com/modules/popup.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's popup page, section by section, in its order (Types:  JavaScript, then No JavaScript;  States;
@@ -71,18 +71,18 @@
                     description="An element can specify popup content to appear.  With no `for`, the popup attaches to the element just before it."
                   >
                     <ui-button icon="plus" aria-label="Add users"></ui-button>
-                    <ui-popup content="Add users to your feed"></ui-popup>
+                    <ui-popup label="Add users to your feed"></ui-popup>
                   </ui-docs-example>
                 </ui-section>
 
                 <ui-section id="examples-types-popup-element-titled" label="Titled" sticky collapsible dividing>
                   <ui-docs-example description="An element can specify popup content with a title:  `header`.">
                     <ui-image avatar src="images/avatar/small/elliot.jpg" alt="Elliot Fu"></ui-image>
-                    <ui-popup heading="Elliot Fu" content="Elliot has been a member since July 2012"></ui-popup>
+                    <ui-popup heading="Elliot Fu" label="Elliot has been a member since July 2012"></ui-popup>
                     <ui-image avatar src="images/avatar/small/stevie.jpg" alt="Stevie Feliciano"></ui-image>
-                    <ui-popup heading="Stevie Feliciano" content="Stevie has been a member since August 2013"></ui-popup>
+                    <ui-popup heading="Stevie Feliciano" label="Stevie has been a member since August 2013"></ui-popup>
                     <ui-image avatar src="images/avatar/small/matt.jpg" alt="Matt"></ui-image>
-                    <ui-popup heading="Matt" content="Matt has been a member since July 2014"></ui-popup>
+                    <ui-popup heading="Matt" label="Matt has been a member since July 2014"></ui-popup>
                   </ui-docs-example>
                 </ui-section>
 
@@ -99,9 +99,9 @@
                           mother, and discover the surrounding trees are inhabited by magical spirits.</ui-description
                         >
                       </ui-content>
-                      <ui-buttons width="2" attached="bottom">
+                      <ui-buttons width="2" attach="bottom">
                         <ui-button icon="plus">Queue</ui-button>
-                        <ui-button primary icon="play">Watch</ui-button>
+                        <ui-button icon="play" color="primary">Watch</ui-button>
                       </ui-buttons>
                     </ui-card>
                     <ui-popup>
@@ -134,9 +134,9 @@
                           investigation into the killer is initiated.</ui-description
                         >
                       </ui-content>
-                      <ui-buttons width="2" attached="bottom">
+                      <ui-buttons width="2" attach="bottom">
                         <ui-button icon="plus">Queue</ui-button>
-                        <ui-button primary icon="play">Watch</ui-button>
+                        <ui-button icon="play" color="primary">Watch</ui-button>
                       </ui-buttons>
                     </ui-card>
                     <ui-popup heading="User Rating">
@@ -152,7 +152,7 @@
                     <ui-button id="popup-types-plan">Choose a plan</ui-button>
                     <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
                       <p>Does not include upload or chat.</p>
-                      <ui-button size="small" primary>Choose</ui-button>
+                      <ui-button size="small" color="primary">Choose</ui-button>
                     </ui-popup>
                   </ui-docs-example>
                 </ui-section>
@@ -378,7 +378,7 @@
                   <ui-docs-example
                     description="A tooltip can have different colors via the `data-variation` attribute."
                   >
-                    <ui-buttons spaced compact wrapping>
+                    <ui-buttons spacing="md" wrapping padding="compact">
                       <ui-button data-variation="red" data-tooltip="Red">Red</ui-button>
                       <ui-button data-variation="orange" data-tooltip="Orange">Orange</ui-button>
                       <ui-button data-variation="yellow" data-tooltip="Yellow">Yellow</ui-button>
@@ -408,7 +408,7 @@
                     position="bottom left"
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
                   <ui-popup
@@ -416,7 +416,7 @@
                     inverted
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                 </ui-docs-example>
                 <!-- GAP I41:  no `double` loader or loader speed on a popup;  those two show the plain loader. -->
@@ -427,7 +427,7 @@
                     color="purple"
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
                   <ui-popup
@@ -435,7 +435,7 @@
                     color="orange"
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
                   <ui-popup
@@ -443,7 +443,7 @@
                     color="blue"
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
                   <ui-popup
@@ -451,7 +451,7 @@
                     color="green"
                     loading
                     heading="Matt"
-                    content="Matt has been a member since July 2014"
+                    label="Matt has been a member since July 2014"
                   ></ui-popup>
                 </ui-docs-example>
               </ui-section>
@@ -461,7 +461,7 @@
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A popup can provide more basic formatting:  no pointing arrow.">
                   <ui-button icon="plus" aria-label="Add"></ui-button>
-                  <ui-popup basic content="The default theme's basic popup removes the pointing arrow."></ui-popup>
+                  <ui-popup appearance="basic" label="The default theme's basic popup removes the pointing arrow."></ui-popup>
                 </ui-docs-example>
               </ui-section>
 
@@ -475,15 +475,15 @@
                     <code>wide</code>. Add <code>fixed</code> to make it always that wide;  the CSS-only tooltip takes
                     these in its <code>data-variation</code>:  fixed, wide fixed and very wide fixed.</ui-message
                   >
-                  <ui-icon circular link name="heart" aria-label="Wide"></ui-icon>
+                  <ui-icon name="heart" aria-label="Wide" appearance="circular link"></ui-icon>
                   <ui-popup
                     wide
-                    content="Hello. This is a wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."
+                    label="Hello. This is a wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."
                   ></ui-popup>
-                  <ui-icon circular link name="heart" aria-label="Very wide"></ui-icon>
+                  <ui-icon name="heart" aria-label="Very wide" appearance="circular link"></ui-icon>
                   <ui-popup
                     wide="very"
-                    content="Hello. This is a very wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."
+                    label="Hello. This is a very wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."
                   ></ui-popup>
                 </ui-docs-example>
               </ui-section>
@@ -497,7 +497,7 @@
                   >
                   <ui-button fluid>Show fluid popup</ui-button>
                   <ui-popup fluid position="bottom left">
-                    <ui-grid columns="4" divided text-align="center">
+                    <ui-grid columns="4" divided align="center">
                       <ui-column>1</ui-column>
                       <ui-column>2</ui-column>
                       <ui-column>3</ui-column>
@@ -509,16 +509,16 @@
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
                 <ui-docs-example description="A popup can vary in size.">
-                  <ui-icon circular link name="heart" aria-label="Mini"></ui-icon>
-                  <ui-popup size="mini" content="Hello. This is a mini popup"></ui-popup>
-                  <ui-icon circular link name="heart" aria-label="Tiny"></ui-icon>
-                  <ui-popup size="tiny" content="Hello. This is a tiny popup"></ui-popup>
-                  <ui-icon circular link name="heart" aria-label="Small"></ui-icon>
-                  <ui-popup size="small" content="Hello. This is a small popup"></ui-popup>
-                  <ui-icon circular link name="heart" aria-label="Large"></ui-icon>
-                  <ui-popup size="large" content="Hello. This is a large popup"></ui-popup>
-                  <ui-icon circular link name="heart" aria-label="Huge"></ui-icon>
-                  <ui-popup size="huge" content="Hello. This is a huge popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Mini" appearance="circular link"></ui-icon>
+                  <ui-popup size="mini" label="Hello. This is a mini popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Tiny" appearance="circular link"></ui-icon>
+                  <ui-popup size="tiny" label="Hello. This is a tiny popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Small" appearance="circular link"></ui-icon>
+                  <ui-popup size="small" label="Hello. This is a small popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Large" appearance="circular link"></ui-icon>
+                  <ui-popup size="large" label="Hello. This is a large popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Huge" appearance="circular link"></ui-icon>
+                  <ui-popup size="huge" label="Hello. This is a huge popup"></ui-popup>
                 </ui-docs-example>
               </ui-section>
 
@@ -528,7 +528,7 @@
                 >
                   <ui-button>Show flowing popup</ui-button>
                   <ui-popup flowing>
-                    <ui-grid columns="3" divided text-align="center">
+                    <ui-grid columns="3" divided align="center">
                       <ui-column>
                         <ui-header level="4">Basic Plan</ui-header>
                         <p><b>2</b> projects, $10 a month</p>
@@ -551,8 +551,8 @@
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
                 <ui-docs-example description="A popup can have its colors inverted.">
-                  <ui-icon circular link name="heart" aria-label="Inverted"></ui-icon>
-                  <ui-popup inverted content="Hello. This is an inverted popup"></ui-popup>
+                  <ui-icon name="heart" aria-label="Inverted" appearance="circular link"></ui-icon>
+                  <ui-popup inverted label="Hello. This is an inverted popup"></ui-popup>
                   <ui-button
                     icon="plus"
                     aria-label="Add"
@@ -566,31 +566,31 @@
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
                 <ui-docs-example description="A popup can have different colors.">
                   <ui-button>Red</ui-button>
-                  <ui-popup color="red" content="Red"></ui-popup>
+                  <ui-popup color="red" label="Red"></ui-popup>
                   <ui-button>Orange</ui-button>
-                  <ui-popup color="orange" content="Orange"></ui-popup>
+                  <ui-popup color="orange" label="Orange"></ui-popup>
                   <ui-button>Yellow</ui-button>
-                  <ui-popup color="yellow" content="Yellow"></ui-popup>
+                  <ui-popup color="yellow" label="Yellow"></ui-popup>
                   <ui-button>Olive</ui-button>
-                  <ui-popup color="olive" content="Olive"></ui-popup>
+                  <ui-popup color="olive" label="Olive"></ui-popup>
                   <ui-button>Green</ui-button>
-                  <ui-popup color="green" content="Green"></ui-popup>
+                  <ui-popup color="green" label="Green"></ui-popup>
                   <ui-button>Teal</ui-button>
-                  <ui-popup color="teal" content="Teal"></ui-popup>
+                  <ui-popup color="teal" label="Teal"></ui-popup>
                   <ui-button>Blue</ui-button>
-                  <ui-popup color="blue" content="Blue"></ui-popup>
+                  <ui-popup color="blue" label="Blue"></ui-popup>
                   <ui-button>Violet</ui-button>
-                  <ui-popup color="violet" content="Violet"></ui-popup>
+                  <ui-popup color="violet" label="Violet"></ui-popup>
                   <ui-button>Purple</ui-button>
-                  <ui-popup color="purple" content="Purple"></ui-popup>
+                  <ui-popup color="purple" label="Purple"></ui-popup>
                   <ui-button>Pink</ui-button>
-                  <ui-popup color="pink" content="Pink"></ui-popup>
+                  <ui-popup color="pink" label="Pink"></ui-popup>
                   <ui-button>Brown</ui-button>
-                  <ui-popup color="brown" content="Brown"></ui-popup>
+                  <ui-popup color="brown" label="Brown"></ui-popup>
                   <ui-button>Grey</ui-button>
-                  <ui-popup color="grey" content="Grey"></ui-popup>
+                  <ui-popup color="grey" label="Grey"></ui-popup>
                   <ui-button>Black</ui-button>
-                  <ui-popup color="black" content="Black"></ui-popup>
+                  <ui-popup color="black" label="Black"></ui-popup>
                 </ui-docs-example>
               </ui-section>
 
@@ -598,14 +598,14 @@
                 <ui-docs-example
                   description='A popup can be positioned around its target.  These are `open` from the start (`open-on="manual"`);  each flips to the other side when there is no room.'
                 >
-                  <ui-segment basic padded="very">
+                  <ui-segment padding="lg" appearance="basic">
                     <ui-button id="popup-variations-top">Top right</ui-button>
                     <ui-popup
                       for="popup-variations-top"
                       open-on="manual"
                       visible
                       position="top right"
-                      content="Top right"
+                      label="Top right"
                     ></ui-popup>
                     <ui-button id="popup-variations-bottom">Bottom center</ui-button>
                     <ui-popup
@@ -613,7 +613,7 @@
                       open-on="manual"
                       visible
                       position="bottom center"
-                      content="Bottom center"
+                      label="Bottom center"
                     ></ui-popup>
                     <ui-button id="popup-variations-right">Right center</ui-button>
                     <ui-popup
@@ -621,7 +621,7 @@
                       open-on="manual"
                       visible
                       position="right center"
-                      content="Right"
+                      label="Right"
                     ></ui-popup>
                   </ui-segment>
                 </ui-docs-example>
@@ -632,29 +632,29 @@
                   description="Fomantic's eight positions, plus four of ours:  `left top`, `left bottom`, `right top` and `right bottom` sit beside the target, lined up with its top or bottom edge.  Word order matters:  `top left` is above.  Hover each button."
                 >
                   <ui-button>Top left</ui-button>
-                  <ui-popup position="top left" content="top left"></ui-popup>
+                  <ui-popup position="top left" label="top left"></ui-popup>
                   <ui-button>Top center</ui-button>
-                  <ui-popup position="top center" content="top center"></ui-popup>
+                  <ui-popup position="top center" label="top center"></ui-popup>
                   <ui-button>Top right</ui-button>
-                  <ui-popup position="top right" content="top right"></ui-popup>
+                  <ui-popup position="top right" label="top right"></ui-popup>
                   <ui-button>Bottom left</ui-button>
-                  <ui-popup position="bottom left" content="bottom left"></ui-popup>
+                  <ui-popup position="bottom left" label="bottom left"></ui-popup>
                   <ui-button>Bottom center</ui-button>
-                  <ui-popup position="bottom center" content="bottom center"></ui-popup>
+                  <ui-popup position="bottom center" label="bottom center"></ui-popup>
                   <ui-button>Bottom right</ui-button>
-                  <ui-popup position="bottom right" content="bottom right"></ui-popup>
+                  <ui-popup position="bottom right" label="bottom right"></ui-popup>
                   <ui-button>Left center</ui-button>
-                  <ui-popup position="left center" content="left center"></ui-popup>
+                  <ui-popup position="left center" label="left center"></ui-popup>
                   <ui-button>Right center</ui-button>
-                  <ui-popup position="right center" content="right center"></ui-popup>
+                  <ui-popup position="right center" label="right center"></ui-popup>
                   <ui-button>Left top</ui-button>
-                  <ui-popup position="left top" content="left top"></ui-popup>
+                  <ui-popup position="left top" label="left top"></ui-popup>
                   <ui-button>Left bottom</ui-button>
-                  <ui-popup position="left bottom" content="left bottom"></ui-popup>
+                  <ui-popup position="left bottom" label="left bottom"></ui-popup>
                   <ui-button>Right top</ui-button>
-                  <ui-popup position="right top" content="right top"></ui-popup>
+                  <ui-popup position="right top" label="right top"></ui-popup>
                   <ui-button>Right bottom</ui-button>
-                  <ui-popup position="right bottom" content="right bottom"></ui-popup>
+                  <ui-popup position="right bottom" label="right bottom"></ui-popup>
                 </ui-docs-example>
               </ui-section>
 
@@ -663,9 +663,9 @@
                   description='A hover popup stays open while the pointer is over it (WCAG 1.4.13).  `hoverable="false"` is Fomantic&apos;s default:  it closes as the pointer leaves the target.'
                 >
                   <ui-button>Hoverable (default)</ui-button>
-                  <ui-popup hide-delay="200" content="Move the pointer onto me"></ui-popup>
+                  <ui-popup hide-delay="200" label="Move the pointer onto me"></ui-popup>
                   <ui-button>Not hoverable</ui-button>
-                  <ui-popup hoverable="false" content="I close as you leave the button"></ui-popup>
+                  <ui-popup hoverable="false" label="I close as you leave the button"></ui-popup>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -686,7 +686,7 @@
                   It then sits in the top layer, positioned by CSS anchor positioning: no script measures anything, and when
                   there is no room it flips to the other side (top to bottom, left to right) by itself.
 
-                  Content comes from the `header` / `content` shorthands (Fomantic's `data-title` / `data-content`), slotted
+                  Content comes from the `heading` / `label` shorthands (Fomantic's `data-title` / `data-content`), slotted
                   markup (Fomantic's `data-html` and pre-existing popups), or `<ui-header>` / `<ui-content>` parts. A pre-existing
                   popup anywhere in the page is just a `<ui-popup for="...">` placed there.
                 </script>
@@ -697,7 +697,7 @@
                 >
                   <ui-label id="popup-usage-target" icon="user">Anna</ui-label>
                   <ui-button>Hover me</ui-button>
-                  <ui-popup for="popup-usage-target" content="Anna, project owner"></ui-popup>
+                  <ui-popup for="popup-usage-target" label="Anna, project owner"></ui-popup>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -733,10 +733,10 @@
                     for="popup-usage-click"
                     open-on="click"
                     heading="Clicked"
-                    content="Click again, or press Escape, to close."
+                    label="Click again, or press Escape, to close."
                   ></ui-popup>
                   <ui-input id="popup-usage-focus" placeholder="Focus me" icon="search"></ui-input>
-                  <ui-popup for="popup-usage-focus" open-on="focus" content="Type to search"></ui-popup>
+                  <ui-popup for="popup-usage-focus" open-on="focus" label="Type to search"></ui-popup>
                 </ui-docs-example>
               </ui-section>
               <ui-section id="usage-triggers-wide-popup-menu" label="Wide popup menu" sticky collapsible dividing>
@@ -744,34 +744,34 @@
                   description="Complex content, like a wide menu, is markup already in the page:  a `flowing` hover popup that stays open while the pointer is on it works like a dropdown menu."
                 >
                   <ui-menu>
-                    <ui-item id="popup-usage-browse" icon="dropdown" link>Browse</ui-item>
+                    <ui-item id="popup-usage-browse" icon="dropdown" appearance="link">Browse</ui-item>
                   </ui-menu>
                   <ui-popup for="popup-usage-browse" flowing position="bottom left" hide-delay="300">
-                    <ui-grid columns="3" divided relaxed>
+                    <ui-grid columns="3" divided spacing="lg">
                       <ui-column>
                         <ui-header level="4">Fabrics</ui-header>
-                        <ui-list link>
-                          <ui-item href="#cashmere">Cashmere</ui-item>
-                          <ui-item href="#linen">Linen</ui-item>
-                          <ui-item href="#cotton">Cotton</ui-item>
-                          <ui-item href="#viscose">Viscose</ui-item>
+                        <ui-list appearance="link">
+                          <ui-item link="#cashmere">Cashmere</ui-item>
+                          <ui-item link="#linen">Linen</ui-item>
+                          <ui-item link="#cotton">Cotton</ui-item>
+                          <ui-item link="#viscose">Viscose</ui-item>
                         </ui-list>
                       </ui-column>
                       <ui-column>
                         <ui-header level="4">Size</ui-header>
-                        <ui-list link>
-                          <ui-item href="#small">Small</ui-item>
-                          <ui-item href="#medium">Medium</ui-item>
-                          <ui-item href="#large">Large</ui-item>
-                          <ui-item href="#plus-sizes">Plus Sizes</ui-item>
+                        <ui-list appearance="link">
+                          <ui-item link="#small">Small</ui-item>
+                          <ui-item link="#medium">Medium</ui-item>
+                          <ui-item link="#large">Large</ui-item>
+                          <ui-item link="#plus-sizes">Plus Sizes</ui-item>
                         </ui-list>
                       </ui-column>
                       <ui-column>
                         <ui-header level="4">Colors</ui-header>
-                        <ui-list link>
-                          <ui-item href="#neutrals">Neutrals</ui-item>
-                          <ui-item href="#brights">Brights</ui-item>
-                          <ui-item href="#pastels">Pastels</ui-item>
+                        <ui-list appearance="link">
+                          <ui-item link="#neutrals">Neutrals</ui-item>
+                          <ui-item link="#brights">Brights</ui-item>
+                          <ui-item link="#pastels">Pastels</ui-item>
                         </ui-list>
                       </ui-column>
                     </ui-grid>
@@ -811,7 +811,7 @@
                 dividing
               >
                 <ui-docs-example description="It appears at the label, not at the buttons.">
-                  <ui-buttons size="small" basic>
+                  <ui-buttons size="small" appearance="basic">
                     <ui-button commandfor="popup-invoker-tip" command="--toggle">Toggle</ui-button>
                     <ui-button commandfor="popup-invoker-tip" command="--close">Close</ui-button>
                   </ui-buttons>
@@ -820,7 +820,7 @@
                     id="popup-invoker-tip"
                     for="popup-invoker-target"
                     open-on="manual"
-                    content="Anna, project owner"
+                    label="Anna, project owner"
                   ></ui-popup>
                 </ui-docs-example>
               </ui-section>

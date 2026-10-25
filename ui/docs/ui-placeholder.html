@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Placeholder">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-placeholder%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-placeholder%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/placeholder.html"
+              link="https://fomantic-ui.com/elements/placeholder.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -55,7 +55,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's placeholder page, section by section, in its order (Types, Content, Variations), plus our
@@ -91,7 +91,7 @@
                 <ui-docs-example>
                   <ui-grid columns="3" stackable>
                     <ui-column>
-                      <ui-segment raised>
+                      <ui-segment appearance="raised">
                         <ui-placeholder>
                           <ui-placeholder-header image>
                             <ui-placeholder-line></ui-placeholder-line>
@@ -105,7 +105,7 @@
                       </ui-segment>
                     </ui-column>
                     <ui-column>
-                      <ui-segment raised>
+                      <ui-segment appearance="raised">
                         <ui-placeholder>
                           <ui-placeholder-header image>
                             <ui-placeholder-line></ui-placeholder-line>
@@ -119,7 +119,7 @@
                       </ui-segment>
                     </ui-column>
                     <ui-column>
-                      <ui-segment raised>
+                      <ui-segment appearance="raised">
                         <ui-placeholder>
                           <ui-placeholder-header image>
                             <ui-placeholder-line></ui-placeholder-line>
@@ -157,7 +157,7 @@
                         </ui-placeholder>
                       </ui-content>
                       <ui-extra>
-                        <ui-button primary disabled>Add</ui-button>
+                        <ui-button disabled color="primary">Add</ui-button>
                         <ui-button disabled>Delete</ui-button>
                       </ui-extra>
                     </ui-card>
@@ -177,7 +177,7 @@
                         </ui-placeholder>
                       </ui-content>
                       <ui-extra>
-                        <ui-button primary disabled>Add</ui-button>
+                        <ui-button disabled color="primary">Add</ui-button>
                         <ui-button disabled>Delete</ui-button>
                       </ui-extra>
                     </ui-card>
@@ -197,7 +197,7 @@
                         </ui-placeholder>
                       </ui-content>
                       <ui-extra>
-                        <ui-button primary disabled>Add</ui-button>
+                        <ui-button disabled color="primary">Add</ui-button>
                         <ui-button disabled>Delete</ui-button>
                       </ui-extra>
                     </ui-card>

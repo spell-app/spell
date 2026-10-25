@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Calendar">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-calendar%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-calendar%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/calendar.html"
+              link="https://fomantic-ui.com/modules/calendar.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's calendar page, section by section, in its order (Types, Variations, States, then its Examples
@@ -222,7 +222,7 @@
                 <ui-docs-example description="A compact calendar has tighter cells.">
                   <ui-calendar
                     inline
-                    compact
+                    padding="compact"
                     type="month"
                     value="2026-09"
                     locale="en-US"

@@ -47,7 +47,14 @@ describe("<ui-grid> classes", () => {
     ['columns="equal"', "ui equal width grid"],
     ["equal-width", "ui equal width grid"],
     ['divided="vertically" stackable', "ui stackable vertically divided grid"],
-    ['celled="internally" relaxed="very"', "ui internally celled very relaxed grid"],
+    // the old names (epic ui-gaps P4), and the new
+    ['celled="internally" relaxed="very"', "ui very relaxed internally celled grid"],
+    ['celled="internally" spacing="xl"', "ui very relaxed internally celled grid"],
+    ['compact="very"', "ui very compact grid"],
+    ['padded="vertically"', "ui vertically padded grid"],
+    ['padding="md-y"', "ui vertically padded grid"],
+    ['text-align="center"', "ui center aligned grid"],
+    ['align="center"', "ui center aligned grid"],
     ['padded="horizontally" compact', "ui horizontally padded compact grid"],
     ['centered="yes" doubling="no" inverted', "ui centered inverted grid"],
     ['only="mobile tablet"', "ui mobile only tablet only grid"],
@@ -88,7 +95,8 @@ describe("<ui-grid> classes", () => {
       'width-tablet="8" width-computer="4" width-large="3" width-widescreen="2"',
       "ui eight wide tablet four wide computer three wide large screen two wide widescreen column"
     ],
-    ['color="teal" floated="right" attached="left"', "ui teal right floated left attached column"],
+    ['color="teal" floated="right" attached="left"', "ui teal left attached right floated column"],
+    ['color="teal" floated="right" attach="left"', "ui teal left attached right floated column"],
     ['centered stretched="no"', "ui centered column"],
     ['only="computer" text-align="center"', "ui computer only center aligned column"]
   ])("<ui-column %s>", async (attributes, classes) => {

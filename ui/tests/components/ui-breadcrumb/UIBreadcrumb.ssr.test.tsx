@@ -26,7 +26,7 @@ describe("<ui-breadcrumb> static render", () => {
         `<nav data-ui="breadcrumb" class="ui breadcrumb" part="breadcrumb" aria-label="Trail"><ol part="list">` +
           `<li data-ui-slotted="" data-ui="breadcrumb-section"><span class="divider" part="divider" aria-hidden="true"></span>` +
           `<a class="section" part="section" href="#home">Home</a></li>` +
-          `<li data-ui-slotted="" data-ui="breadcrumb-section" data-state="active">` +
+          `<li data-ui-slotted="" data-ui="breadcrumb-section" data-state="selected">` +
           `<span class="divider" part="divider" aria-hidden="true"></span>` +
           `<span class="active section" part="section" aria-current="page">Shirt</span></li></ol></nav>`
       )

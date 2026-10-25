@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Content">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-content%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-content%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -47,7 +47,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  `<ui-content>` in each owner that gives it a look (from the owners' own pages and
@@ -97,7 +97,7 @@
 
               <ui-section id="examples-owners-list" label="List" sticky collapsible dividing>
                 <ui-docs-example description="A list item's content sits beside its icon.">
-                  <ui-list relaxed>
+                  <ui-list spacing="lg">
                     <ui-item icon="github">
                       <ui-content>
                         <ui-header link="#list">fomantic/Fomantic-UI</ui-header>
@@ -125,7 +125,7 @@
                 <ui-docs-example
                   description="An accordion's panels:  each `<ui-content>` shows while the title before it is open."
                 >
-                  <ui-accordion styled open="0">
+                  <ui-accordion appearance="styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content><p>A dog is a type of domesticated animal.</p></ui-content>
                     <ui-title>What kinds of dogs are there?</ui-title>
@@ -146,7 +146,7 @@
                         <p>Is it okay to use this photo?</p>
                       </ui-description>
                     </ui-content>
-                    <ui-actions><ui-button class="approve" primary>Use it</ui-button></ui-actions>
+                    <ui-actions><ui-button class="approve" color="primary">Use it</ui-button></ui-actions>
                   </ui-modal>
                 </ui-docs-example>
               </ui-section>
@@ -155,14 +155,14 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example
-                  description="In a card, `text-align` aligns one content block:  Fomantic's `center aligned content`."
+                  description="In a card, `align` aligns one content block:  Fomantic's `center aligned content`."
                 >
                   <ui-card>
-                    <ui-content text-align="center">
+                    <ui-content align="center">
                       <ui-header>Centered</ui-header>
                       <ui-description>A center aligned content block.</ui-description>
                     </ui-content>
-                    <ui-content text-align="right">
+                    <ui-content align="right">
                       <ui-description>A right aligned one.</ui-description>
                     </ui-content>
                   </ui-card>
@@ -204,7 +204,7 @@
                   a message's, a list item's, a step's, an accordion panel's.
 
                   - Inside it go the other parts: `<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>` ...
-                  - `text-align` aligns one block (a card's `center aligned content`); `vertical-align` lines it up against the image
+                  - `align` aligns one block (a card's `center aligned content`); `vertical-align` lines it up against the image
                     or icon beside it in an item or a list; `floated` floats it.
                   - In a modal, `image` puts an image beside the description and `scrolling` caps the height and scrolls.
                   - In a `<ui-header>` it is the text column beside an icon or image.

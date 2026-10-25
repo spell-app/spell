@@ -51,16 +51,38 @@ export const cardsVocabulary = {
         "`page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides " +
         "(`<ui-root stack-with>`)."
     },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Centres each row of cards." },
-    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Every card horizontal." },
-    { name: "raised", group: "appearance", kind: "keyOnly", description: "Every card raised." },
     {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Every card rises on hover (a look;  links need `href`)."
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  centres each row of cards.  Its old name is `centered`."
     },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "Every card without border or shadow." },
+    {
+      name: "direction",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description: "`horizontal`:  every card horizontal.  Its old name is `horizontal`."
+    },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["raised", "link", "basic"],
+      classes: {},
+      replaces: [
+        { from: "raised", value: "raised" },
+        // `link` written bare, the old look, is read by the group itself:  `link` is every tag's link now
+        { from: "basic", value: "basic" }
+      ],
+      description:
+        "Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need " +
+        "`link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`."
+    },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every card in the dark scheme." }
   ],
   events: [],

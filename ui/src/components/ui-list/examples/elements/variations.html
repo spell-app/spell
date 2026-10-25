@@ -2,7 +2,7 @@
 <div class="ui-stack">
   <section>
     <h4>Horizontal</h4>
-    <ui-list horizontal>
+    <ui-list direction="horizontal">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -32,7 +32,7 @@
 
   <section>
     <h4>Horizontal ordered</h4>
-    <ui-list horizontal ordered>
+    <ui-list direction="horizontal" ordered>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2348c%22/%3E%3C/svg%3E"
       >
@@ -62,17 +62,17 @@
 
   <section>
     <h4>Horizontal bulleted link</h4>
-    <ui-list horizontal bulleted link>
-      <ui-item href="#terms">Terms and Conditions</ui-item>
-      <ui-item href="#privacy">Privacy Policy</ui-item>
-      <ui-item href="#contact">Contact Us</ui-item>
+    <ui-list direction="horizontal" bulleted appearance="link">
+      <ui-item link="#terms">Terms and Conditions</ui-item>
+      <ui-item link="#privacy">Privacy Policy</ui-item>
+      <ui-item link="#contact">Contact Us</ui-item>
     </ui-list>
   </section>
 
   <section>
     <h4>Inverted</h4>
     <ui-segment inverted>
-      <ui-list inverted relaxed divided>
+      <ui-list inverted spacing="lg" divided>
         <ui-item>
           <ui-content>
             <ui-header>Snickerdoodle</ui-header>
@@ -128,7 +128,7 @@
 
   <section>
     <h4>Fitted selection</h4>
-    <ui-list fitted selection>
+    <ui-list padding="none" selection>
       <ui-item>Inbox</ui-item>
       <ui-item>Starred</ui-item>
       <ui-item>Sent</ui-item>
@@ -137,7 +137,7 @@
 
   <section>
     <h4>Animated</h4>
-    <ui-list animated vertical-align="middle">
+    <ui-list hover="indent" vertical-align="middle">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -164,7 +164,7 @@
 
   <section>
     <h4>Relaxed</h4>
-    <ui-list relaxed>
+    <ui-list spacing="lg">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%23c84%22/%3E%3C/svg%3E"
       >
@@ -194,7 +194,7 @@
 
   <section>
     <h4>Relaxed horizontal</h4>
-    <ui-list relaxed horizontal>
+    <ui-list spacing="lg" direction="horizontal">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%23c84%22/%3E%3C/svg%3E"
       >
@@ -221,7 +221,7 @@
 
   <section>
     <h4>Very relaxed</h4>
-    <ui-list relaxed="very">
+    <ui-list spacing="xl">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%23c84%22/%3E%3C/svg%3E"
       >
@@ -251,7 +251,7 @@
 
   <section>
     <h4>Very relaxed horizontal</h4>
-    <ui-list relaxed="very" horizontal>
+    <ui-list spacing="xl" direction="horizontal">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%23c84%22/%3E%3C/svg%3E"
       >
@@ -351,7 +351,7 @@
 
   <section>
     <h4>Celled horizontal</h4>
-    <ui-list celled horizontal>
+    <ui-list celled direction="horizontal">
       <ui-item>About Us</ui-item>
       <ui-item>Contact</ui-item>
       <ui-item>Support</ui-item>
@@ -360,7 +360,7 @@
 
   <section>
     <h4>Size</h4>
-    <ui-list size="mini" horizontal divided>
+    <ui-list size="mini" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -383,7 +383,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="tiny" horizontal divided>
+    <ui-list size="tiny" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -406,7 +406,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="small" horizontal divided>
+    <ui-list size="small" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -429,7 +429,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="medium" horizontal divided>
+    <ui-list size="medium" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -452,7 +452,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="large" horizontal divided>
+    <ui-list size="large" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -475,7 +475,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="big" horizontal divided>
+    <ui-list size="big" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -498,7 +498,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="huge" horizontal divided>
+    <ui-list size="huge" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -521,7 +521,7 @@
         </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list size="massive" horizontal divided>
+    <ui-list size="massive" direction="horizontal" divided>
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
@@ -548,21 +548,21 @@
 
   <section>
     <h4>Vertically aligned</h4>
-    <ui-list horizontal vertical-align="top">
+    <ui-list direction="horizontal" vertical-align="top">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
       >
         <ui-content> Top aligned </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list horizontal vertical-align="middle">
+    <ui-list direction="horizontal" vertical-align="middle">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%234a8%22/%3E%3C/svg%3E"
       >
         <ui-content> Middle aligned </ui-content>
       </ui-item>
     </ui-list>
-    <ui-list horizontal vertical-align="bottom">
+    <ui-list direction="horizontal" vertical-align="bottom">
       <ui-item
         image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%23c84%22/%3E%3C/svg%3E"
       >
@@ -573,15 +573,15 @@
 
   <section>
     <h4>Floated</h4>
-    <ui-list floated="right" horizontal>
+    <ui-list floated="right" direction="horizontal">
       <ui-item>&copy; GitHub, Inc.</ui-item>
-      <ui-item href="#terms">Terms</ui-item>
-      <ui-item href="#privacy">Privacy</ui-item>
-      <ui-item href="#contact">Contact</ui-item>
+      <ui-item link="#terms">Terms</ui-item>
+      <ui-item link="#privacy">Privacy</ui-item>
+      <ui-item link="#contact">Contact</ui-item>
     </ui-list>
-    <ui-list horizontal>
-      <ui-item href="#about">About Us</ui-item>
-      <ui-item href="#jobs">Jobs</ui-item>
+    <ui-list direction="horizontal">
+      <ui-item link="#about">About Us</ui-item>
+      <ui-item link="#jobs">Jobs</ui-item>
     </ui-list>
   </section>
 </div>

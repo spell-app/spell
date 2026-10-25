@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Feed">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-feed%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-feed%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/views/feed.html"
+              link="https://fomantic-ui.com/views/feed.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's feed page, section by section, in its order (Types, Content, States, Variations).
@@ -206,7 +206,7 @@
                     <ui-event color="red" label="Stop">
                       <ui-content> Don't move! </ui-content>
                     </ui-event>
-                    <ui-event color="yellow" basic label="Zzz">
+                    <ui-event color="yellow" appearance="basic" label="Zzz">
                       <ui-content> Nap time </ui-content>
                     </ui-event>
                   </ui-feed>
@@ -408,7 +408,7 @@
                         <ui-summary>Content via the label attribute</ui-summary>
                       </ui-content>
                     </ui-event>
-                    <ui-event basic>
+                    <ui-event appearance="basic">
                       <ui-content>
                         <ui-summary>Basic Label</ui-summary>
                       </ui-content>
@@ -630,8 +630,8 @@
                     - `<ui-date>` says when: inline inside the summary, a line of its own outside it
                     - `<ui-extra>` adds more: `text` for a block of text, or a `<ui-images size="tiny">` for pictures
                     - `<ui-meta>` holds small actions such as a like count
-                  - `connected`, `ordered`, `divided`, `basic` and `color` are set on the feed and reach every event; `color` and
-                    `basic` also work on a single event.
+                  - `connected`, `ordered`, `divided`, `appearance="basic"` and `color` are set on the feed and reach every event; `color` and
+                    `appearance="basic"` also work on a single event.
                 </script>
               </ui-markdown>
               <ui-code language="html">
@@ -734,7 +734,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `connected`, `ordered`, `divided` and `basic` reach the events as private switches (`--_feed-connected` ...);
+                    `connected`, `ordered`, `divided` and the `basic` look reach the events as private switches (`--_feed-connected` ...);
                     use the attributes, never set the `--_*` names. `color` (on the feed or one event) colours the number circles
                     and the connecting line through `--ui-color`.
                   </script>

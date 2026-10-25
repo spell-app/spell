@@ -53,13 +53,15 @@ export const revealVocabulary = {
     },
     { name: "instant", group: "appearance", kind: "keyOnly", description: "No delay before the transition starts." },
     {
-      name: "unclipped",
+      name: "clip",
       group: "appearance",
-      kind: "keyOnly",
-      key: "visible",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "visible" },
+      replaces: [{ from: "unclipped", value: "none" }],
       description:
-        "Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays " +
-        "`visible`).  Renamed because `visible` shows or hides every element."
+        "`none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class " +
+        "word stays `visible`).  Its old name is `unclipped`."
     },
     { name: "active", group: "states", kind: "keyOnly", description: "Revealed now, without hover or focus." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Never reveals." }

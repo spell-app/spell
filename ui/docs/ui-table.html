@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Table">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-table%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-table%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/collections/table.html"
+              link="https://fomantic-ui.com/collections/table.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's table page, section by section, in its order (Types, States, Variations), plus our own
@@ -99,7 +99,7 @@
                   </ui-table>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-table celled padded>
+                  <ui-table celled padding="md">
                     <table>
                       <thead>
                         <tr>
@@ -113,7 +113,7 @@
                       <tbody>
                         <tr>
                           <td>
-                            <ui-header level="2" text-align="center">A</ui-header>
+                            <ui-header level="2" align="center">A</ui-header>
                           </td>
                           <td class="single line">Power Output</td>
                           <td>
@@ -136,7 +136,7 @@
                         </tr>
                         <tr>
                           <td>
-                            <ui-header level="2" text-align="center">A</ui-header>
+                            <ui-header level="2" align="center">A</ui-header>
                           </td>
                           <td class="single line">Weight</td>
                           <td>
@@ -162,12 +162,12 @@
                         <tr>
                           <th colspan="5">
                             <ui-menu floated="right" pagination aria-label="Pages">
-                              <ui-item href="#previous" icon="chevron left" aria-label="Previous page"></ui-item>
-                              <ui-item href="#page-1">1</ui-item>
-                              <ui-item href="#page-2">2</ui-item>
-                              <ui-item href="#page-3">3</ui-item>
-                              <ui-item href="#page-4">4</ui-item>
-                              <ui-item href="#next" icon="chevron right" aria-label="Next page"></ui-item>
+                              <ui-item link="#previous" icon="chevron left" aria-label="Previous page"></ui-item>
+                              <ui-item link="#page-1">1</ui-item>
+                              <ui-item link="#page-2">2</ui-item>
+                              <ui-item link="#page-3">3</ui-item>
+                              <ui-item link="#page-4">4</ui-item>
+                              <ui-item link="#next" icon="chevron right" aria-label="Next page"></ui-item>
                             </ui-menu>
                           </th>
                         </tr>
@@ -177,7 +177,7 @@
                 </ui-docs-example>
                 <!-- GAP I104:  the `<ui-image>` stacks above the name instead of sitting beside it. -->
                 <ui-docs-example>
-                  <ui-table basic="very" collapsing celled>
+                  <ui-table appearance="very-basic" collapsing celled>
                     <table>
                       <thead>
                         <tr>
@@ -189,7 +189,7 @@
                         <tr>
                           <td>
                             <ui-header level="4">
-                              <ui-image src="images/avatar2/small/lena.png" size="mini" rounded alt=""></ui-image>
+                              <ui-image src="images/avatar2/small/lena.png" size="mini" alt="" appearance="rounded"></ui-image>
                               <ui-content>
                                 Lena
                                 <ui-header sub>Human Resources</ui-header>
@@ -201,7 +201,7 @@
                         <tr>
                           <td>
                             <ui-header level="4">
-                              <ui-image src="images/avatar2/small/matthew.png" size="mini" rounded alt=""></ui-image>
+                              <ui-image src="images/avatar2/small/matthew.png" size="mini" alt="" appearance="rounded"></ui-image>
                               <ui-content>
                                 Matthew
                                 <ui-header sub>Fabric Design</ui-header>
@@ -213,7 +213,7 @@
                         <tr>
                           <td>
                             <ui-header level="4">
-                              <ui-image src="images/avatar2/small/lindsay.png" size="mini" rounded alt=""></ui-image>
+                              <ui-image src="images/avatar2/small/lindsay.png" size="mini" alt="" appearance="rounded"></ui-image>
                               <ui-content>
                                 Lindsay
                                 <ui-header sub>Entertainment</ui-header>
@@ -225,7 +225,7 @@
                         <tr>
                           <td>
                             <ui-header level="4">
-                              <ui-image src="images/avatar2/small/mark.png" size="mini" rounded alt=""></ui-image>
+                              <ui-image src="images/avatar2/small/mark.png" size="mini" alt="" appearance="rounded"></ui-image>
                               <ui-content>
                                 Mark
                                 <ui-header sub>Executive</ui-header>
@@ -239,7 +239,7 @@
                   </ui-table>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-table celled striped>
+                  <ui-table celled appearance="striped">
                     <table>
                       <thead>
                         <tr>
@@ -312,7 +312,7 @@
                   </ui-table>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-table compact celled definition>
+                  <ui-table padding="compact" celled definition>
                     <table>
                       <thead>
                         <tr>
@@ -326,7 +326,7 @@
                       <tbody>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for John Lilki"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for John Lilki"></ui-checkbox>
                           </td>
                           <td>John Lilki</td>
                           <td>September 14, 2013</td>
@@ -335,7 +335,7 @@
                         </tr>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for Jamie Harington"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for Jamie Harington"></ui-checkbox>
                           </td>
                           <td>Jamie Harington</td>
                           <td>January 11, 2014</td>
@@ -344,7 +344,7 @@
                         </tr>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for Jill Lewis"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for Jill Lewis"></ui-checkbox>
                           </td>
                           <td>Jill Lewis</td>
                           <td>May 11, 2014</td>
@@ -356,7 +356,7 @@
                         <tr>
                           <th></th>
                           <th colspan="4">
-                            <ui-button floated="right" size="small" primary labeled icon="user">Add User</ui-button>
+                            <ui-button floated="right" size="small" labeled icon="user" color="primary">Add User</ui-button>
                             <ui-button size="small">Approve</ui-button>
                             <ui-button size="small" disabled>Approve All</ui-button>
                           </th>
@@ -395,7 +395,7 @@
                       all valid HTML table content.
                     </p></ui-message
                   >
-                  <ui-table celled structured>
+                  <ui-table celled appearance="structured">
                     <table>
                       <thead>
                         <tr>
@@ -467,7 +467,7 @@
                 <ui-docs-example
                   description='A table keeps every native part:  a `<caption>`, and row headers (`th scope="row"`).  The `full-width` class works on `thead` / `tfoot` too.'
                 >
-                  <ui-table definition compact celled>
+                  <ui-table definition padding="compact" celled>
                     <table>
                       <caption>
                         Team members
@@ -1172,7 +1172,7 @@
                 dividing
               >
                 <ui-docs-example description="A table header, row, or cell can adjust its vertical alignment.">
-                  <ui-table striped>
+                  <ui-table appearance="striped">
                     <table>
                       <thead>
                         <tr>
@@ -1207,7 +1207,7 @@
               </ui-section>
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example description="A table header, row, or cell can adjust its text alignment.">
-                  <ui-table striped>
+                  <ui-table appearance="striped">
                     <table>
                       <thead>
                         <tr>
@@ -1241,7 +1241,7 @@
                 <ui-docs-example
                   description="A table can stripe alternate rows of content with a darker color to increase contrast."
                 >
-                  <ui-table striped>
+                  <ui-table appearance="striped">
                     <table>
                       <thead>
                         <tr>
@@ -1346,7 +1346,7 @@
               </ui-section>
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A table can reduce its complexity to increase readability.">
-                  <ui-table basic>
+                  <ui-table appearance="basic">
                     <table>
                       <thead>
                         <tr>
@@ -1381,7 +1381,7 @@
                     <a href="#examples-variations-sortable"><code>sortable</code></a> or <a href="#examples-variations-striped"><code>striped</code></a
                     >.</ui-message
                   >
-                  <ui-table basic="very">
+                  <ui-table appearance="very-basic">
                     <table>
                       <thead>
                         <tr>
@@ -2222,7 +2222,7 @@
                 <ui-docs-example
                   description="A definition table can have a full width header or footer, filling in the gap left by the first column."
                 >
-                  <ui-table compact celled definition>
+                  <ui-table padding="compact" celled definition>
                     <table>
                       <thead class="full-width">
                         <tr>
@@ -2236,7 +2236,7 @@
                       <tbody>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for John Lilki"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for John Lilki"></ui-checkbox>
                           </td>
                           <td>John Lilki</td>
                           <td>September 14, 2013</td>
@@ -2245,7 +2245,7 @@
                         </tr>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for Jamie Harington"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for Jamie Harington"></ui-checkbox>
                           </td>
                           <td>Jamie Harington</td>
                           <td>January 11, 2014</td>
@@ -2254,7 +2254,7 @@
                         </tr>
                         <tr>
                           <td class="collapsing">
-                            <ui-checkbox type="slider" fitted aria-label="Premium for Jill Lewis"></ui-checkbox>
+                            <ui-checkbox appearance="slider" padding="none" aria-label="Premium for Jill Lewis"></ui-checkbox>
                           </td>
                           <td>Jill Lewis</td>
                           <td>May 11, 2014</td>
@@ -2266,7 +2266,7 @@
                         <tr>
                           <th></th>
                           <th colspan="4">
-                            <ui-button floated="right" size="small" primary labeled icon="user">Add User</ui-button>
+                            <ui-button floated="right" size="small" labeled icon="user" color="primary">Add User</ui-button>
                             <ui-button size="small">Approve</ui-button>
                             <ui-button size="small" disabled>Approve All</ui-button>
                           </th>
@@ -2278,7 +2278,7 @@
               </ui-section>
               <ui-section id="examples-variations-padded" label="Padded" sticky collapsible dividing>
                 <ui-docs-example description="A table may sometimes need to be more padded for legibility.">
-                  <ui-table padded>
+                  <ui-table padding="md">
                     <table>
                       <thead>
                         <tr>
@@ -2306,7 +2306,7 @@
                   </ui-table>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-table padded="very">
+                  <ui-table padding="lg">
                     <table>
                       <thead>
                         <tr>
@@ -2338,7 +2338,7 @@
                 <ui-docs-example
                   description="A table may sometimes need to be more compact to make more rows visible at a time."
                 >
-                  <ui-table compact>
+                  <ui-table padding="compact">
                     <table>
                       <thead>
                         <tr>
@@ -2393,7 +2393,7 @@
                   </ui-table>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-table compact="very">
+                  <ui-table padding="xs">
                     <table>
                       <thead>
                         <tr>
@@ -2459,9 +2459,9 @@
               </ui-section>
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A table can be attached to other content on a page:  `attached="top"`, `attached` (the middle) or `attached="bottom"`.'
+                  description='A table can be attached to other content on a page:  `attach="top"`, `attach="both"` (the middle) or `attach="bottom"`.'
                 >
-                  <ui-table attached="top">
+                  <ui-table attach="top">
                     <table>
                       <tbody>
                         <tr>
@@ -2472,7 +2472,7 @@
                       </tbody>
                     </table>
                   </ui-table>
-                  <ui-table attached>
+                  <ui-table attach="both">
                     <table>
                       <tbody>
                         <tr>
@@ -2483,7 +2483,7 @@
                       </tbody>
                     </table>
                   </ui-table>
-                  <ui-table attached="bottom">
+                  <ui-table attach="bottom">
                     <table>
                       <tbody>
                         <tr>
@@ -2499,9 +2499,9 @@
 
               <ui-section id="examples-variations-table-alignment" label="Table alignment" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A table's cells can all share one text alignment (`text-align`);  `vertical-align` does the same vertically."
+                  description="A table's cells can all share one text alignment (`align`);  `vertical-align` does the same vertically."
                 >
-                  <ui-table text-align="center" celled>
+                  <ui-table align="center" celled>
                     <table>
                       <thead>
                         <tr>
@@ -3131,7 +3131,7 @@
                   find-in-page, copy and your own CSS all work as on any table. The element only adds the look, sorting and a
                   scroller.
 
-                  - It copies its class words onto the table (`<ui-table celled striped>` gives
+                  - It copies its class words onto the table (`<ui-table celled appearance="striped">` gives
                     `<table class="ui celled striped table">`), adding and removing only its own words, so your classes
                     stay. A server can write that class string itself, and the table paints before any script runs.
                   - Rows and cells keep Fomantic's classes on the native `tr`, `td` and `th`: `positive`, `left red marked`,
@@ -3248,7 +3248,7 @@
               </ui-markdown>
               <ui-code language="html">
                 <script type="text/plain">
-                  <ui-table celled striped sortable aria-label="Planets"></ui-table>
+                  <ui-table celled appearance="striped" sortable aria-label="Planets"></ui-table>
                 </script>
               </ui-code>
               <ui-code language="js">
@@ -3365,7 +3365,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `inverted` swaps in its own `--ui-table-inverted-*` colours, and `padded` / `compact` replace the cell padding
+                    `inverted` swaps in its own `--ui-table-inverted-*` colours, and `padding` (`compact`, `md` ...) replaces the cell padding
                     with their own steps (`--ui-table-padded`, `--ui-table-compact-padding-*`). `--ui-table-stack-by: container`
                     makes every table in a region stack by its own width;  `--ui-table-stack-by: none`, never. Never set the `--_ui-*` names: they're the sheet's private
                     plumbing.

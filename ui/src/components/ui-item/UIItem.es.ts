@@ -11,5 +11,5 @@ export const itemEs = {
   tag: "ui-item",
   name: "elemento",
   aka: ["elemento", "elemento de lista", "objeto multimedia", "fila"],
-  attributes: { flag: "bandera", type: "tipo" }
+  attributes: { flag: "bandera" }
 } as const satisfies E.TagDictionary

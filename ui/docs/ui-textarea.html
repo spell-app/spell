@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Textarea">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-textarea%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-textarea%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/collections/form.html"
+              link="https://fomantic-ui.com/collections/form.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -53,7 +53,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  `<ui-textarea>`, moved here from the input page when it got its own page (epic ui-docs-rework
@@ -136,7 +136,7 @@
 
               <ui-section id="examples-variations-transparent" label="Transparent" sticky collapsible dividing>
                 <ui-docs-example description="A transparent textarea has no box:  text only.">
-                  <ui-textarea transparent rows="2" placeholder="Write here..." aria-label="Transparent"></ui-textarea>
+                  <ui-textarea appearance="transparent" rows="2" placeholder="Write here..." aria-label="Transparent"></ui-textarea>
                 </ui-docs-example>
               </ui-section>
 
@@ -166,7 +166,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-textarea>` is a multi-line field. It shares its family, sheet, sizes, states and tokens with
-                  [`<ui-input>`](ui-input.html), so most attributes are the same: `size`, `state`, `fluid`, `transparent`,
+                  [`<ui-input>`](ui-input.html), so most attributes are the same: `size`, `state`, `fluid`, `appearance`,
                   `inverted`, `placeholder`.
 
                   - `rows` sets the visible lines; without it the field is Fomantic's form height (12em, between 8em and 24em).

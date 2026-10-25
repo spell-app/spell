@@ -72,8 +72,8 @@ describe("<ui-docs-inspector> rows", () => {
     target!.shadowRoot!.querySelector("button")!.click()
     await expect.poll(() => groups(inspector).States).toEqual([":state(active)", ":state(ready)"])
     const shown = groups(inspector)
-    expect(shown.Attributes).toContain('active = ""')
-    expect(shown.Properties).toContain("active = true")
+    expect(shown.Attributes).toContain('selected = ""')
+    expect(shown.Properties).toContain("selected = true")
   })
 
   it("keeps an unchanged row's node:  only changed rows draw again", async () => {
@@ -89,7 +89,7 @@ describe("<ui-docs-inspector> rows", () => {
   it("`all` shows unset properties too", async () => {
     const { inspector } = await render(TOGGLE.replace("<ui-docs-inspector", "<ui-docs-inspector all"))
     const properties = groups(inspector).Properties!
-    expect(properties).toContain("active = false")
+    expect(properties).toContain("selected = false")
     expect(properties).toContain("color = undefined")
   })
 
@@ -106,14 +106,14 @@ describe("<ui-docs-inspector> rows", () => {
     const { inspector } = await render(`
       <div>
         <ui-button id="one">A</ui-button>
-        <ui-button id="other" primary>B</ui-button>
+        <ui-button id="other" color="primary">B</ui-button>
         <ui-docs-inspector for="one"></ui-docs-inspector>
       </div>`)
     inspector.setAttribute("for", "other")
     await expect
       .poll(() => inspector.shadowRoot!.querySelector("[part~=title]")!.textContent)
       .toBe('<ui-button id="other">')
-    expect(groups(inspector).Properties).toEqual(['size = "medium"', "primary = true", 'type = "button"'])
+    expect(groups(inspector).Properties).toEqual(['size = "medium"', 'color = "primary"', 'type = "button"'])
   })
 })
 

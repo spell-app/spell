@@ -42,7 +42,15 @@ export const textareaVocabulary = {
       values: UIT.FormStates,
       description: "Form state, tinting the box, text and placeholder."
     },
-    { name: "transparent", group: "appearance", kind: "keyOnly", description: "No box:  text only." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["transparent"],
+      classes: {},
+      replaces: [{ from: "transparent", value: "transparent" }],
+      description: "`transparent`:  no box, text only.  Old name:  `transparent`."
+    },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
       name: "disabled",

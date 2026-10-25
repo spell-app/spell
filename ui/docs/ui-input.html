@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Input">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-input%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-input%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/input.html"
+              link="https://fomantic-ui.com/elements/input.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -51,7 +51,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's input page, section by section, in its order (Types, States, Variations), plus our native
@@ -195,12 +195,12 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-input placeholder="Search..." aria-label="Search"
-                    ><ui-icon slot="icon" name="search" circular link></ui-icon
+                    ><ui-icon slot="icon" name="search" appearance="circular link"></ui-icon
                   ></ui-input>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-input placeholder="Search..." aria-label="Search"
-                    ><ui-icon slot="icon" name="search" inverted circular link></ui-icon
+                    ><ui-icon slot="icon" name="search" inverted appearance="circular link"></ui-icon
                   ></ui-input>
                 </ui-docs-example>
               </ui-section>
@@ -223,7 +223,7 @@
                 <!-- GAP I102:  a slotted `<ui-label>` (basic, tag) sits inside the grey joined label box, a label in a label. -->
                 <ui-docs-example>
                   <ui-input labeled="right" placeholder="Enter weight.." aria-label="Weight"
-                    ><ui-label slot="label" basic>kg</ui-label></ui-input
+                    ><ui-label slot="label" appearance="basic">kg</ui-label></ui-input
                   >
                 </ui-docs-example>
                 <!-- GAP I97:  one label per input, so Fomantic's `$` ... `.00` input shows only the `$`. -->
@@ -271,7 +271,7 @@
                 <!-- GAP I11:  a `basic` dropdown button draws no basic look. -->
                 <ui-docs-example>
                   <ui-input icon="search" icon-position="left" placeholder="Search" aria-label="Search">
-                    <ui-dropdown slot="action" button basic floating text="This Page">
+                    <ui-dropdown slot="action" button basic floating label="This Page">
                       <ui-item>This Organization</ui-item>
                       <ui-item>Entire Site</ui-item>
                     </ui-dropdown>
@@ -279,7 +279,7 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-input placeholder="Search..." aria-label="Search">
-                    <ui-dropdown slot="action" selection compact value="articles" aria-label="Search in">
+                    <ui-dropdown slot="action" selection padding="compact" value="articles" aria-label="Search in">
                       <ui-item value="all">All</ui-item>
                       <ui-item value="articles">Articles</ui-item>
                       <ui-item value="products">Products</ui-item>
@@ -308,14 +308,14 @@
 
               <ui-section id="examples-variations-transparent" label="Transparent" sticky collapsible dividing>
                 <ui-docs-example description="A transparent input has no background.">
-                  <ui-input transparent placeholder="Search..." aria-label="Search"></ui-input>
+                  <ui-input appearance="transparent" placeholder="Search..." aria-label="Search"></ui-input>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-input transparent icon="search" placeholder="Search..." aria-label="Search"></ui-input>
+                  <ui-input appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"></ui-input>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-input
-                    transparent
+                    appearance="transparent"
                     icon="search"
                     icon-position="left"
                     placeholder="Search..."
@@ -338,7 +338,7 @@
                       aria-label="Search"
                     ></ui-input>
                     <ui-divider inverted></ui-divider>
-                    <ui-input inverted transparent icon="search" placeholder="Search..." aria-label="Search"></ui-input>
+                    <ui-input inverted appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"></ui-input>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -396,7 +396,7 @@
                   - `type` passes through to the native input (`file` also gets Fomantic's file look).
                   - `icon` draws an icon inside the field, at the end (or the start, with `icon-position="left"`).
                   - `label` joins a label; `labeled` places it (`right`, `corner`, `left corner`). The `label` slot takes markup: a
-                    `<ui-label basic>`, a `<ui-dropdown>`.
+                    `<ui-label appearance="basic">`, a `<ui-dropdown>`.
                   - `<ui-button>`s (or a `<ui-dropdown button>`) in the `action` slot join the field; `action="left"` puts them
                     first.
                   - `state` tints the field: `error`, `info`, `success`, `warning`.

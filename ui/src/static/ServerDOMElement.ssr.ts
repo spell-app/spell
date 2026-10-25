@@ -94,6 +94,8 @@ export class ServerDOMElement {
       const text = element.getAttribute(name)
       const old = definition.oldAttributeNamed(name)!
       if (text === null || element.hasAttribute(old.attribute.attribute)) continue
+      // an old switch named like a new attribute (`link`) is the old one only written bare
+      if (definition.attributeNamed(name) && text !== "") continue
       const next = definition.valueFromOld(old, text, values[old.attribute.key])
       if (next) values[old.attribute.key] = next.value
     }

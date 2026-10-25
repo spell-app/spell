@@ -76,8 +76,8 @@ describe("<ui-items> classes and markup", () => {
     ["", "ui items"],
     ['size="small"', "ui small items"],
     ["divided", "ui divided items"],
-    ['relaxed="very" divided link', "ui divided link very relaxed items"],
-    ["relaxed unstackable inverted", "ui inverted unstackable relaxed items"],
+    ['relaxed="very" divided link', "ui very relaxed divided link items"],
+    ["relaxed unstackable inverted", "ui relaxed inverted unstackable items"],
     ['divided="no" disabled', "ui disabled items"]
   ])("<ui-items %s>", async (attributes, classes) => {
     const { root } = await view(attributes)
@@ -443,5 +443,12 @@ describe("<ui-items> accessibility", () => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await ElementFixture.settle(root)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-items> old names", () => {
+  it("<ui-items relaxed link> draws as the new spelling", async () => {
+    const [before, after] = [await view("relaxed link"), await view(`spacing="lg" appearance="link"`)]
+    expect(before.root.className).toBe(after.root.className)
   })
 })

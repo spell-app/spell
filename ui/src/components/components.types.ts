@@ -131,7 +131,7 @@ const LETTER_A = 0x61
 // ## Item
 ////////////////
 
-/** `<ui-item type>`:  an option, a group header, or a divider. */
+/** `<ui-item kind>`:  an option, a group header, or a divider. */
 export type ItemType = "item" | "header" | "divider"
 
 /**
@@ -355,7 +355,7 @@ export class StackClasses {
  * - `segmented` is ours, a segmented control:  a bordered group of joined items,
  *   the selected one filled with the menu's colour (the primary colour by default).
  *   It hugs its items;  `alignment` places it.
- * - NOTE: not `vertical` (an orientation every look combines with) or `basic` (`<ui-tabs basic>` is the panes')
+ * - NOTE: not `vertical` (an orientation every look combines with) or `basic` (`<ui-tabs appearance="basic">` is the panes')
  */
 export const MenuAppearances = ["tabular", "pointing", "secondary", "text", "segmented"] as const
 
@@ -618,7 +618,7 @@ export type ListSelectDetail = {
  * when it doesn't set the attribute itself (Fomantic's `.ui.raised.cards > .card`).
  * - Read through `UICards.variationFor()`.
  */
-export type CardSharedVariation = "size" | "color" | "horizontal" | "raised" | "link" | "basic" | "inverted"
+export type CardSharedVariation = "size" | "color" | "direction" | "appearance" | "inverted"
 
 ////////////////
 // ## Popup
@@ -689,8 +689,8 @@ export type ModalActionDetail = {
  *   the native fallback uses the same selectors.
  */
 export const ModalActionSelectors = {
-  approve: `.approve, .ok, .positive, [positive]:not([positive="false"], [positive="no"])`,
-  deny: `.deny, .cancel, .negative, [negative]:not([negative="false"], [negative="no"])`
+  approve: `.approve, .ok, .positive, [color="positive"], [positive]:not([positive="false"], [positive="no"])`,
+  deny: `.deny, .cancel, .negative, [color="negative"], [negative]:not([negative="false"], [negative="no"])`
 } as const
 
 ////////////////
@@ -1490,6 +1490,9 @@ export const HEADER = "header"
 
 /** The `heading` attribute:  the heading shorthand of a card, modal, message ... (its old name `header`). */
 export const HEADING = "heading"
+
+/** The `appearance` attribute:  a tag's look, several words at once (epic `ui-gaps` P4;  `basic`, `raised` ...). */
+export const APPEARANCE = "appearance"
 
 /** The `description` word:  a part, a class. */
 export const DESCRIPTION = "description"

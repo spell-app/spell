@@ -44,12 +44,7 @@ export const iconVocabulary = {
         "Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  " +
         "Dashes ~== spaces, so Font Awesome's `circle-check` works too.  See `notes/icons.md`."
     },
-    {
-      name: "outline",
-      group: "appearance",
-      kind: "boolean",
-      description: "Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own."
-    },
+
     {
       name: "label",
       group: "name",
@@ -71,15 +66,33 @@ export const iconVocabulary = {
       kind: "keyOnly",
       description: "Spins, e.g. a `spinner` or `circle-notch` glyph."
     },
-    { name: "fitted", group: "layout", kind: "keyOnly", description: "No gap after the glyph and no extra width." },
     {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Clickable look:  dimmed until hovered, pointer cursor."
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "fitted" },
+      replaces: [{ from: "fitted", value: "none" }],
+      description: "`none`:  no gap after the glyph and no extra width.  Its old name is `fitted`."
     },
-    { name: "circular", group: "appearance", kind: "keyOnly", description: "Inside a circular ring." },
-    { name: "bordered", group: "appearance", kind: "keyOnly", description: "Inside a square ring." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["outline", "link", "circular", "bordered"],
+      classes: { outline: "" },
+      replaces: [
+        { from: "outline", value: "outline" },
+        // NOT the old `link` switch:  `link` is every tag's link now (where a click goes)
+        { from: "circular", value: "circular" },
+        { from: "bordered", value: "bordered" }
+      ],
+      description:
+        "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline " +
+        "icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` " +
+        "(inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, " +
+        '`bordered` written alone;  the old `link` switch is `appearance="link"`, as `link` is where a click goes.'
+    },
     {
       name: "flipped",
       group: "appearance",

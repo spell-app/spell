@@ -40,10 +40,14 @@ export const eventVocabulary = {
       description: "Short text in a circle as the label, e.g. an initial (Fomantic's `data-text`)."
     },
     {
-      name: "basic",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Its number / text circle outlined instead of filled."
+      kind: "multiple",
+      values: ["basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "The look:  `basic`, its number / text circle outlined instead of filled.  Old name:  `basic`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],

@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Toast">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-toast%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-toast%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/toast.html"
+              link="https://fomantic-ui.com/modules/toast.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
@@ -129,8 +129,8 @@
                   description="A toast can be used to display different types of information:  `type` (`class` in `UI.toast()`)."
                 >
                   <template>
-                    <ui-button id="toast-success" positive>Success</ui-button>
-                    <ui-button id="toast-error" negative>Error</ui-button>
+                    <ui-button id="toast-success" color="positive">Success</ui-button>
+                    <ui-button id="toast-error" color="negative">Error</ui-button>
                     <ui-button id="toast-warning" color="yellow">Warning</ui-button>
                     <script type="module">
                       document.querySelector("#toast-success").addEventListener("click", () => {
@@ -457,7 +457,7 @@
                     actions="left vertical attached"
                     message="Do you really want to star Fomantic-UI?"
                   >
-                    <ui-buttons slot="actions" vertical>
+                    <ui-buttons slot="actions" direction="vertical">
                       <ui-button color="green">Yes, really</ui-button>
                       <ui-button color="red">Maybe later</ui-button>
                     </ui-buttons>
@@ -531,8 +531,8 @@
                   </p>
                   <template>
                     <ui-toast id="toast-approve-deny" display-time="0" message="Want to close this DOM toast?">
-                      <ui-button slot="actions" positive>Yes</ui-button>
-                      <ui-button slot="actions" negative>No</ui-button>
+                      <ui-button slot="actions" color="positive">Yes</ui-button>
+                      <ui-button slot="actions" color="negative">No</ui-button>
                     </ui-toast>
                     <script type="module">
                       const toast = document.querySelector("#toast-approve-deny")

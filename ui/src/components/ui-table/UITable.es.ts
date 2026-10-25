@@ -16,8 +16,6 @@ export const tableEs = {
     selectable: "seleccionable",
     "single-line": "una-linea",
     sortable: "ordenable",
-    striped: "rayado",
-    structured: "estructurado",
     "stack-by": "apilar-por",
     overflowing: "desbordante",
     stuck: "fijado",
@@ -26,6 +24,7 @@ export const tableEs = {
     "client-sort": "orden-cliente",
     "column-defs": "definiciones-columnas"
   },
+  values: { appearance: { striped: "rayado", structured: "estructurado" } },
   events: { "ui-sorting": "ordenando" },
   texts: { label: "Tabla" }
 } as const satisfies E.TagDictionary

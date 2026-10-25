@@ -24,11 +24,12 @@ export const radioVocabulary = {
   attributes: [
     ...LEADING_ATTRIBUTES,
     {
-      name: "type",
+      name: "appearance",
       group: "appearance",
       kind: "valueOnly",
       values: ["slider", "toggle"],
-      description: "Look:  a `toggle` or `slider` radio;  default the round radio box."
+      replaces: ["type"],
+      description: "Look:  a `toggle` or `slider` radio;  default the round radio box.  Old name:  `type`."
     },
     ...SHARED_ATTRIBUTES
   ],

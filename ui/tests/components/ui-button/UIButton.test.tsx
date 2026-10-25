@@ -38,11 +38,11 @@ describe("<ui-button> classes", () => {
     ['size="medium"', "ui button"],
     ['color="red"', "ui red button"],
     ['color="rde"', "ui button"],
-    ["secondary basic", "ui basic secondary button"],
+    ["secondary basic", "ui secondary basic button"],
     ["positive", "ui positive button"],
     ["negative tertiary", "ui negative tertiary button"],
     ["inverted", "ui inverted button"],
-    ["fluid circular compact", "ui circular compact fluid button"],
+    ["fluid circular compact", "ui compact fluid circular button"],
     ["unpadded", "ui unpadded button"],
     ["wrapped", "ui wrapped button"],
     ["ellipsis fluid", "ui ellipsis fluid button"],
@@ -76,17 +76,26 @@ describe("<ui-button> classes", () => {
     host.setAttribute("color", "blue")
     await ElementFixture.tick()
     expect(control.className).toBe("ui blue button")
-    ;(host as unknown as { primary: boolean }).primary = true
+    ;(host as unknown as { appearance: string }).appearance = "basic"
     await ElementFixture.tick()
-    expect(control.className).toBe("ui blue primary button")
-    expect(host.getAttribute("primary")).toBe("")
-    ;(host as unknown as { primary: boolean }).primary = false
+    expect(control.className).toBe("ui blue basic button")
+    expect(host.getAttribute("appearance")).toBe("basic")
+    ;(host as unknown as { appearance: string | undefined }).appearance = undefined
     await ElementFixture.tick()
-    expect(host.hasAttribute("primary")).toBe(false)
+    expect(host.hasAttribute("appearance")).toBe(false)
+  })
+
+  it('draws an old name as its new one:  `primary basic` is `color="primary" appearance="basic"`', async () => {
+    const old = await button(`<ui-button primary basic compact attached="top" active>Go</ui-button>`)
+    const now = await button(
+      `<ui-button color="primary" appearance="basic" padding="compact" attach="top" selected>Go</ui-button>`
+    )
+    expect(old.control.className).toBe(now.control.className)
+    expect(now.control.className).toBe("ui primary compact top attached active basic button")
   })
 
   it("wraps a joined label in a `labeled` root", async () => {
-    const { host } = await button(`<ui-button labeled="left" color="red" icon="heart" label="2,048">Like</ui-button>`)
+    const { host } = await button(`<ui-button labeled="left" color="red" icon="heart" badge="2,048">Like</ui-button>`)
     const root = host.shadowRoot!.firstElementChild!
     expect(root.className).toBe("ui red left labeled button")
     expect(root.querySelector("[part~=button]")!.className).toBe("ui red button")
@@ -186,13 +195,13 @@ describe("<ui-button> behaviour", () => {
 
   it("lets a controlling host veto the toggle from its handler", async () => {
     const { host, control } = await button(`<ui-button toggle active>Vote</ui-button>`)
-    host.addEventListener("ui-deselected", () => ((host as unknown as { active: boolean }).active = true))
+    host.addEventListener("ui-deselected", () => ((host as unknown as { selected: boolean }).selected = true))
     control.click()
     await ElementFixture.tick()
     expect(control.getAttribute("aria-pressed")).toBe("true")
   })
 
-  it("state texts (Fomantic's `state`):  the text follows `active`;  the label carries it, so no aria-pressed", async () => {
+  it("state texts (Fomantic's `state`):  the text follows `selected`;  the label carries it, so no aria-pressed", async () => {
     const { host, control } = await button(
       `<ui-button toggle inactive-text="Follow" active-text="Following">Ignored</ui-button>`
     )
@@ -213,10 +222,10 @@ describe("<ui-button> behaviour", () => {
     await expectAccessible(host)
   })
 
-  it("a single state text:  the content shows in the other state;  a host-set `active` switches it", async () => {
+  it("a single state text:  the content shows in the other state;  a host-set `selected` switches it", async () => {
     const { host, control } = await button(`<ui-button active-text="Voted">Vote</ui-button>`)
     expect(control.querySelector("slot")).not.toBeNull()
-    ;(host as unknown as { active: boolean }).active = true
+    ;(host as unknown as { selected: boolean }).selected = true
     await ElementFixture.tick()
     expect(control.textContent).toBe("Voted")
   })

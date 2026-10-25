@@ -84,13 +84,6 @@ export const embedVocabulary = {
       description: "The video plays as soon as the frame loads:  the click on the placeholder already asked for it."
     },
     {
-      name: "branded-ui",
-      group: "advanced",
-      kind: "boolean",
-      property: "brandedUI",
-      description: "Keep the player's own branding (Fomantic's `brandedUI`)."
-    },
-    {
       name: "parameters",
       group: "behaviour",
       kind: "json",

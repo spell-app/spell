@@ -84,7 +84,7 @@ describe("ElementManifests.customElements()", () => {
     const button = manifest.modules
       .flatMap((module) => module.declarations)
       .find((entry) => entry.tagName === "ui-button")!
-    expect(button.attributes).toContainEqual(expect.objectContaining({ name: "primary", type: { text: "boolean" } }))
+    expect(button.attributes).toContainEqual(expect.objectContaining({ name: "toggle", type: { text: "boolean" } }))
     expect(button.events).toContainEqual(expect.objectContaining({ name: "ui-selected" }))
   })
 })

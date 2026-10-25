@@ -360,9 +360,9 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
    */
   @E.untracked
   private onToggle(event: Event) {
-    const button = event.target as HTMLElement & { active?: boolean }
+    const button = event.target as HTMLElement & { selected?: boolean }
     const view = button.getAttribute(DATA.view)
-    if (view) button.active = view === this.view
+    if (view) button.selected = view === this.view
   }
 
   ////////////////
@@ -542,9 +542,9 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
           <ui-buttons
             part={this.partForName("views")}
             size="small"
-            basic=""
             icon=""
             aria-label={this.translationForKey("views")}
+            appearance="basic"
           >
             <For each={NavViews}>{(view) => this.viewButton(view)}</For>
           </ui-buttons>
@@ -624,8 +624,8 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
         <ui-label
           part={this.partForName("count")}
           size="mini"
-          circular=""
           aria-label={this.translationForKey("count", { count: this.matchingTags.size })}
+          appearance="circular"
         >
           {this.matchingTags.size}
         </ui-label>
@@ -640,7 +640,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
       <ui-button
         data-nav-view={view}
         toggle=""
-        active={this.view === view ? "" : undefined}
+        selected={this.view === view ? "" : undefined}
         icon={ICONS[view]}
         aria-label={label}
         title={label}
@@ -671,8 +671,8 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
             <ui-label
               class={COUNT}
               size="mini"
-              circular=""
               aria-label={this.translationForKey("count", { count: rows().length })}
+              appearance="circular"
             >
               {rows().length}
             </ui-label>
@@ -713,7 +713,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
         >
           <span class={NAME}>{row.name}</span>
           {row.status && (
-            <ui-label class={STATUS_BADGE} size="mini" color="yellow" basic="">
+            <ui-label class={STATUS_BADGE} size="mini" color="yellow" appearance="basic">
               {this.translationForKey(row.status === "planned" ? "planned" : "inProgress")}
             </ui-label>
           )}
@@ -722,12 +722,12 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
           class={STAR}
           data-nav-star={row.tag}
           toggle=""
-          active={isStarred() ? "" : undefined}
+          selected={isStarred() ? "" : undefined}
           icon={isStarred() ? ICONS.star : ICONS.starOutline}
           size="mini"
-          tertiary=""
           aria-label={label()}
           title={label()}
+          appearance="tertiary"
         />
       </li>
     )

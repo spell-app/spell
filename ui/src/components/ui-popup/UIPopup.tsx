@@ -441,9 +441,9 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
             {this.heading}
           </div>
         </Show>
-        <Show when={this.content}>
+        <Show when={this.label}>
           <div class={UIT.CONTENT} part={this.partForName("content")}>
-            {this.content}
+            {this.label}
           </div>
         </Show>
         <slot />
@@ -465,9 +465,9 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
             {this.heading}
           </span>
         </Show>
-        <Show when={this.content}>
+        <Show when={this.label}>
           <span class={UIT.CONTENT} part={this.partForName("content")}>
-            {this.content}
+            {this.label}
           </span>
         </Show>
         <slot />

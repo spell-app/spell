@@ -66,8 +66,11 @@ describe("<ui-card> classes and markup", () => {
     ['color="red"', "ui red card"],
     ["raised", "ui raised card"],
     ['raised="no"', "ui card"],
-    ["horizontal fluid", "ui fluid horizontal card"],
-    ["link centered basic", "ui basic centered link card"],
+    // the old names (epic ui-gaps P4), and the new
+    ["horizontal fluid", "ui horizontal fluid card"],
+    ['direction="horizontal" fluid', "ui horizontal fluid card"],
+    ["link centered basic", "ui centered basic link card"],
+    ['appearance="link basic" align="center"', "ui centered link basic card"],
     ["inverted disabled loading", "ui disabled inverted loading card"]
   ])("<ui-card %s>", async (attributes, classes) => {
     const host = await render(`<ui-card ${attributes}></ui-card>`)
@@ -86,6 +89,19 @@ describe("<ui-card> classes and markup", () => {
     expect(link.getAttribute("href")).toBe("#profile")
     expect(link.getAttribute("target")).toBe("_blank")
     expect(link.className).toBe("ui card")
+  })
+
+  it("`link` makes it a link;  written bare, it's the old look (epic ui-gaps P4)", async () => {
+    const linked = await render(`<ui-card link="#profile"></ui-card>`)
+    expect([rootOf(linked).localName, rootOf(linked).getAttribute("href")]).toEqual(["a", "#profile"])
+    const looks = await render(`<ui-card link></ui-card>`)
+    expect([rootOf(looks).localName, rootOf(looks).className]).toEqual(["article", "ui link card"])
+  })
+
+  it("takes its group's looks together with its own", async () => {
+    const group = await render(`<ui-cards appearance="raised"><ui-card appearance="basic"></ui-card></ui-cards>`)
+    await ElementFixture.settle()
+    expect(rootOf(group.querySelector("ui-card")!).className).toBe("ui basic raised card")
   })
 
   it("drops a disabled link card's href;  aria-disabled, :state(disabled)", async () => {

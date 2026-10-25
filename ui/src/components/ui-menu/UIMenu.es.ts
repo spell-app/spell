@@ -11,5 +11,5 @@ export const menuEs = {
   tag: "ui-menu",
   name: "menu",
   aka: ["menú", "barra de navegación", "navegación", "barra de pestañas", "paginación"],
-  attributes: { pagination: "paginacion", borderless: "sin-borde", interactive: "interactivo" }
+  attributes: { pagination: "paginacion", interactive: "interactivo" }
 } as const satisfies E.TagDictionary

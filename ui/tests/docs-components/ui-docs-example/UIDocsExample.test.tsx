@@ -103,15 +103,15 @@ describe("<ui-docs-example> code pane", () => {
     for (const type of ["ui-opened", "ui-closed"])
       host.addEventListener(type, (event) => events.push((event as CustomEvent<{ open: boolean }>).detail.open))
     const demo = host.shadowRoot!.querySelector("[part~=demo]")!
-    expect(demo.hasAttribute("basic")).toBe(true)
+    expect(demo.getAttribute("appearance")).toBe("basic")
 
     toggleOf(host).click()
     await ElementFixture.settle(host)
     expect(events).toEqual([true])
     expect(host.hasAttribute("code")).toBe(true)
     expect(codeOf(host)).not.toBeNull()
-    expect(demo.getAttribute("attached")).toBe("top")
-    expect(demo.hasAttribute("basic")).toBe(false)
+    expect(demo.getAttribute("attach")).toBe("top")
+    expect(demo.hasAttribute("appearance")).toBe(false)
 
     toggleOf(host).click()
     await ElementFixture.settle(host)
@@ -124,8 +124,8 @@ describe("<ui-docs-example> code pane", () => {
 
   it("is never framed when `bare`", async () => {
     const { host } = await render(`<ui-docs-example bare code><ui-button>A</ui-button></ui-docs-example>`)
-    expect(host.shadowRoot!.querySelector("[part~=demo]")!.hasAttribute("basic")).toBe(true)
-    expect(host.shadowRoot!.querySelector("[part~=code]")!.hasAttribute("attached")).toBe(false)
+    expect(host.shadowRoot!.querySelector("[part~=demo]")!.getAttribute("appearance")).toBe("basic")
+    expect(host.shadowRoot!.querySelector("[part~=code]")!.hasAttribute("attach")).toBe(false)
   })
 
   it("takes `language`", async () => {

@@ -5,11 +5,14 @@
  *   `<ui-button size="small" primary basic>` => `ui small basic primary button`.  `UIButton.css` keys on those words.
  * - Group context needs NO element help:  `<ui-buttons basic>` renders `ui basic buttons`,
  *   and `UIButton.css` hands the look to its children through inherited tokens.
- * - `primary` / `secondary` / `positive` / `negative` are words, not colours, as in Fomantic;
- *   they and `color` all remap `--ui-color` (`colors.css`), so the last one in the class string wins.
+ * - `primary` / `secondary` / `positive` / `negative` are values of `color` (epic `ui-gaps` P4, Owen's request r1);
+ *   their old switches (`<ui-button primary>`) still work, and every colour remaps `--ui-color` (`colors.css`).
+ * - The looks are words of `appearance` (`basic`, `tertiary`, `circular`), the padding a value of `padding`;
+ *   each old switch still works, through the attribute's `replaces`.
  */
 
 import type { E } from "spell-ui/core"
+import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
 
 /****************
  * ### `<ui-button>`
@@ -36,43 +39,28 @@ export const buttonVocabulary = {
       name: "color",
       group: "appearance",
       kind: "color",
-      description: "Hue;  fills the button (or its ring and text when `basic`)."
+      replaces: COLOR_SWITCHES,
+      description:
+        "Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, " +
+        "`positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, " +
+        "`negative` written alone."
     },
     {
-      name: "primary",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Primary emphasis:  the `primary` brand colour."
-    },
-    {
-      name: "secondary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Secondary emphasis:  the `secondary` brand colour."
-    },
-    {
-      name: "positive",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Positive consequence:  the `positive` colour."
-    },
-    {
-      name: "negative",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Negative consequence:  the `negative` colour."
-    },
-    {
-      name: "basic",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Less pronounced:  transparent with a hairline ring."
-    },
-    {
-      name: "tertiary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Least pronounced:  text only, underlined on hover."
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["basic", "tertiary", "circular"],
+      replaces: [
+        { from: "basic", value: "basic" },
+        { from: "tertiary", value: "tertiary" },
+        { from: "circular", value: "circular" }
+      ],
+      description:
+        "The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), " +
+        "`tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it " +
+        "holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone."
     },
     {
       name: "inverted",
@@ -84,27 +72,29 @@ export const buttonVocabulary = {
       name: "toggle",
       group: "appearance",
       kind: "keyOnly",
-      description: "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
+      description: "Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
     },
     {
-      name: "active",
+      name: "selected",
       group: "states",
       kind: "keyOnly",
-      description: "Pressed / on;  with `toggle`, in the positive colour."
+      key: "active",
+      replaces: ["active"],
+      description: "Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`."
     },
     {
       name: "active-text",
       group: "states",
       kind: "string",
       description:
-        "Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With " +
+        "Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With " +
         "either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
     },
     {
       name: "inactive-text",
       group: "states",
       kind: "string",
-      description: "Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content."
+      description: "Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
     {
@@ -115,23 +105,27 @@ export const buttonVocabulary = {
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
-      name: "circular",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Pill shaped;  round when it holds only an icon."
-    },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Reduced padding." },
-    {
-      name: "unpadded",
+      name: "padding",
       group: "layout",
-      kind: "keyOnly",
-      description: "No padding at all, as `compact` taken to none:  hugs its content."
+      kind: "valueOnly",
+      values: ["none", "compact"],
+      classes: { none: "unpadded" },
+      replaces: [
+        { from: "compact", value: "compact" },
+        { from: "unpadded", value: "none" }
+      ],
+      description:
+        "Room inside it:  `compact` (reduced) or `none` (hugs its content).  Old names:  `compact`, `unpadded`."
     },
     {
-      name: "wrapped",
+      name: "wrap",
       group: "appearance",
       kind: "keyOnly",
-      description: "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line."
+      key: "wrapped",
+      replaces: ["wrapped"],
+      description:
+        "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  " +
+        "Its old name is `wrapped`."
     },
     {
       name: "ellipsis",
@@ -148,22 +142,29 @@ export const buttonVocabulary = {
       values: ["left", "right"],
       description:
         'With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  ' +
-        'With `label`:  which side the label goes, `labeled` (end) or `labeled="left"`.'
+        'With `badge`:  which side the badge goes, `labeled` (end) or `labeled="left"`.'
     },
     {
-      name: "animated",
+      name: "reveal",
       group: "appearance",
-      kind: "keyOrValueAndKey",
-      label: "Animation",
-      values: ["fade", "vertical"],
-      description: "Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`."
+      kind: "valueOnly",
+      values: ["slide", "fade", "vertical"],
+      classes: { slide: "animated", fade: "fade animated", vertical: "vertical animated" },
+      replaces: [{ from: "animated", value: "slide" }],
+      description:
+        "Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  " +
+        "Its old name is `animated`."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom", "left", "right"],
-      description: "Joined to the edge of a segment or another element:  `top`, `bottom`, `left` or `right`."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom", "left", "right"],
+      classes: ATTACH_CLASSES,
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  " +
+        "Its old name is `attached`."
     },
     {
       name: "floated",
@@ -190,16 +191,21 @@ export const buttonVocabulary = {
         "`Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`."
     },
     {
-      name: "content",
+      name: "label",
       group: "content",
       kind: "string",
-      description: "Shorthand for the button's text, instead of the default slot;  slotted children win."
+      replaces: ["content"],
+      description:
+        "Shorthand for the button's text, instead of the default slot;  slotted children win.  " +
+        "Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`."
     },
     {
-      name: "label",
-      group: "name",
+      name: "badge",
+      group: "content",
       kind: "string",
-      description: "Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button."
+      description:
+        "Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  " +
+        "It was `label` (no old name:  `label` is the text now)."
     },
     {
       name: "type",
@@ -262,29 +268,29 @@ export const buttonVocabulary = {
     {
       name: "ui-selected",
       detail: "{ active: true, originalEvent?: Event }",
-      description: "A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`."
+      description: "A `toggle` button turned `selected` on.  NOTE: plain clicks are the native `click`."
     },
     {
       name: "ui-deselected",
       detail: "{ active: false, originalEvent?: Event }",
-      description: "A `toggle` button turned `active` off."
+      description: "A `toggle` button turned `selected` off."
     }
   ],
   slots: [
-    { name: "", description: "Content, usually text;  instead of the `content` attribute." },
-    { name: "icon", description: "Icon, instead of the `icon` attribute;  the hidden content of `animated`." },
-    { name: "label", description: "Label content, instead of the `label` attribute." }
+    { name: "", description: "Content, usually text;  instead of the `label` attribute." },
+    { name: "icon", description: "Icon, instead of the `icon` attribute;  the hidden content of `reveal`." },
+    { name: "label", description: "The joined badge's content, instead of the `badge` attribute." }
   ],
   parts: [
     { name: "button", description: "The inner `<button>` (or `<a>`)." },
     { name: "icon", description: "The icon box." },
-    { name: "label", description: "The joined label of a `label` button." }
+    { name: "label", description: "The joined badge of a `badge` button." }
   ],
   states: [
-    { name: "active", description: "Pressed / on." },
+    { name: "active", description: "Pressed / on (`selected`)." },
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
-    { name: "fluid", description: "The host is block-level:  `fluid`, or attached `top` / `bottom` / bare." },
+    { name: "fluid", description: "The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`." },
     { name: "left-floated", description: 'The host floats left (`floated="left"`).' },
     { name: "right-floated", description: 'The host floats right (`floated="right"`).' },
     { name: "ellipsis", description: "Cuts its text off with `…`:  the host is never wider than its parent." }

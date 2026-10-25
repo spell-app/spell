@@ -8,7 +8,7 @@
     <ui-section label="Red" color="red" block>
       <p>The hue of the title bar.</p>
     </ui-section>
-    <ui-section label="Blue" color="blue" bordered>
+    <ui-section label="Blue" color="blue" appearance="bordered">
       <p>The hue of the title and the box edge.</p>
     </ui-section>
   </section>
@@ -25,20 +25,20 @@
 
   <section>
     <h4>Compact and padded</h4>
-    <ui-section label="Compact" compact bordered>
+    <ui-section label="Compact" padding="compact" appearance="bordered">
       <p>Less padding and space around the title.</p>
     </ui-section>
-    <ui-section label="Padded" padded bordered>
+    <ui-section label="Padded" padding="md" appearance="bordered">
       <p>More padding in the content.</p>
     </ui-section>
-    <ui-section label="Very padded" padded="very" bordered>
+    <ui-section label="Very padded" padding="lg" appearance="bordered">
       <p>Even more.</p>
     </ui-section>
   </section>
 
   <section>
     <h4>Basic</h4>
-    <ui-section label="Basic" basic bordered dividing>
+    <ui-section label="Basic" appearance="basic bordered" dividing>
       <p>No box, rule or tint, whatever else is set.</p>
     </ui-section>
   </section>
@@ -46,15 +46,15 @@
   <section>
     <h4>Attached</h4>
     <div>
-      <ui-section label="Top" attached="top" bordered><p>Joined to the box below.</p></ui-section>
-      <ui-section label="Middle" attached bordered><p>Between two.</p></ui-section>
-      <ui-section label="Bottom" attached="bottom" bordered><p>Joined to the box above.</p></ui-section>
+      <ui-section label="Top" attach="top" appearance="bordered"><p>Joined to the box below.</p></ui-section>
+      <ui-section label="Middle" attach="both" appearance="bordered"><p>Between two.</p></ui-section>
+      <ui-section label="Bottom" attach="bottom" appearance="bordered"><p>Joined to the box above.</p></ui-section>
     </div>
   </section>
 
   <section>
     <h4>Scrolling</h4>
-    <ui-section label="Log" scrolling="very short" bordered>
+    <ui-section label="Log" scrolling="very short" appearance="bordered">
       <p>The content has a capped height and scrolls.</p>
       <p>Line two of the log.</p>
       <p>Line three of the log.</p>
@@ -62,7 +62,7 @@
       <p>Line five of the log.</p>
       <p>Line six of the log.</p>
     </ui-section>
-    <ui-section label="Six em high" height="6em" bordered>
+    <ui-section label="Six em high" height="6em" appearance="bordered">
       <p>Any CSS length caps the content.</p>
       <p>Line two.</p>
       <p>Line three.</p>
@@ -73,10 +73,10 @@
 
   <section>
     <h4>Text alignment</h4>
-    <ui-section label="Centered" text-align="center" dividing>
+    <ui-section label="Centered" align="center" dividing>
       <p>Aligns the title, not the content.</p>
     </ui-section>
-    <ui-section label="Right" text-align="right" dividing>
+    <ui-section label="Right" align="right" dividing>
       <p>Aligns the title, not the content.</p>
     </ui-section>
   </section>

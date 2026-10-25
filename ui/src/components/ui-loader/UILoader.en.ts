@@ -49,7 +49,15 @@ export const loaderVocabulary = {
       kind: "keyOnly",
       description: "Sits in the text flow instead of centred over its positioned container."
     },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "With `inline`:  a block of its own, centred." },
+    {
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "With `inline`:  `center`, a block of its own, centred.  Old name:  `centered`."
+    },
     {
       name: "indeterminate",
       group: "states",

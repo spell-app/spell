@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Kitchen Sink">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=Kitchen%20Sink%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Kitchen%20Sink%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -65,7 +65,7 @@
             </script>
           </ui-markdown>
           <ui-sticky class="site-sticky-bar">
-            <ui-segment secondary>
+            <ui-segment appearance="secondary">
               <ui-docs-themes></ui-docs-themes>
             </ui-segment>
           </ui-sticky>
@@ -81,14 +81,14 @@
                 <ui-button>Follow</ui-button>
               </ui-docs-example>
               <ui-docs-example description="Emphasis">
-                <ui-button primary>Save</ui-button>
-                <ui-button secondary>Okay</ui-button>
+                <ui-button color="primary">Save</ui-button>
+                <ui-button color="secondary">Okay</ui-button>
                 <ui-button>Cancel</ui-button>
               </ui-docs-example>
               <ui-docs-example description="Animated">
-                <ui-button animated icon="arrow-right">Next</ui-button>
-                <ui-button animated="vertical" icon="cart-shopping">Shop</ui-button>
-                <ui-button animated="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button>
+                <ui-button reveal="slide" icon="arrow-right">Next</ui-button>
+                <ui-button reveal="vertical" icon="cart-shopping">Shop</ui-button>
+                <ui-button reveal="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button>
               </ui-docs-example>
             </ui-section>
 
@@ -160,8 +160,8 @@
                 <ui-header size="massive" level="2">A sized page header</ui-header>
               </ui-docs-example>
               <ui-docs-example description="Icon headers">
-                <ui-header text-align="center" icon level="2">
-                  <ui-icon name="users" circular></ui-icon>
+                <ui-header align="center" icon level="2">
+                  <ui-icon name="users" appearance="circular"></ui-icon>
                   Friends
                 </ui-header>
                 <ui-header icon level="2">
@@ -198,7 +198,7 @@
                   <div>
                     <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
                   </div>
-                  <ui-divider vertical>and</ui-divider>
+                  <ui-divider direction="vertical">and</ui-divider>
                   <div>
                     <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
                   </div>
@@ -207,12 +207,12 @@
               <ui-docs-example description="Horizontal divider">
                 <div style="text-align: center">
                   <button type="button">Search</button>
-                  <ui-divider horizontal>Or</ui-divider>
+                  <ui-divider direction="horizontal">Or</ui-divider>
                   <button type="button">Create new order</button>
                 </div>
-                <ui-divider horizontal icon="tag">Description</ui-divider>
+                <ui-divider direction="horizontal" icon="tag">Description</ui-divider>
                 <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
-                <ui-divider horizontal icon="chart-column">Specifications</ui-divider>
+                <ui-divider direction="horizontal" icon="chart-column">Specifications</ui-divider>
               </ui-docs-example>
             </ui-section>
 
@@ -347,9 +347,9 @@
                 <ui-label icon="envelope">23</ui-label>
                 <p>
                   <kbd><ui-label>Ctrl</ui-label></kbd> + <kbd><ui-label>Alt</ui-label></kbd> + <kbd><ui-label>Del</ui-label></kbd>
-                  <kbd><ui-label basic>W</ui-label></kbd
-                  ><kbd><ui-label basic>A</ui-label></kbd
-                  ><kbd><ui-label basic>S</ui-label></kbd>
+                  <kbd><ui-label appearance="basic">W</ui-label></kbd
+                  ><kbd><ui-label appearance="basic">A</ui-label></kbd
+                  ><kbd><ui-label appearance="basic">S</ui-label></kbd>
                 </p>
               </ui-docs-example>
               <ui-docs-example description="Image">
@@ -396,7 +396,7 @@
                     ><input type="password" aria-label="Password" />
                   </div>
                   <div>
-                    <input type="text" aria-label="Name" /><ui-label color="red" basic pointing="left"
+                    <input type="text" aria-label="Name" /><ui-label color="red" pointing="left" appearance="basic"
                       >That name is taken!</ui-label
                     >
                   </div>
@@ -437,7 +437,7 @@
                 </ui-list>
               </ui-docs-example>
               <ui-docs-example description="Relaxed, divided, with headers">
-                <ui-list relaxed divided>
+                <ui-list spacing="lg" divided>
                   <ui-item icon="github">
                     <ui-content>
                       <ui-header link="#ui">fomantic/Fomantic-UI</ui-header>
@@ -738,7 +738,7 @@
                 </ui-segment>
               </ui-docs-example>
               <ui-docs-example description="Raised">
-                <ui-segment raised><p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p></ui-segment>
+                <ui-segment appearance="raised"><p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p></ui-segment>
               </ui-docs-example>
             </ui-section>
 
@@ -808,26 +808,26 @@
                 <ui-breadcrumb aria-label="Breadcrumb demo">
                   <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
                   <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
+                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
               <ui-docs-example description="Semantic list, token divider">
                 <ui-breadcrumb aria-label="Token divider demo">
                   <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
                   <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
+                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
                 <ui-breadcrumb aria-label="Custom divider demo" divider="›">
                   <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
                   <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
+                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
               <ui-docs-example description="Icon divider">
                 <ui-breadcrumb aria-label="Icon divider demo" divider-icon="chevron right">
                   <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
                   <ui-breadcrumb-section link="#registration">Registration</ui-breadcrumb-section>
-                  <ui-breadcrumb-section active>Personal Information</ui-breadcrumb-section>
+                  <ui-breadcrumb-section selected>Personal Information</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
             </ui-section>
@@ -908,36 +908,36 @@
                   <a href="ui-menu.html">Menu page</a>
                 </p>
                 <ui-menu items="3" aria-label="Menu demo">
-                  <ui-item href="#editorials" selected>Editorials</ui-item>
-                  <ui-item href="#reviews">Reviews</ui-item>
-                  <ui-item href="#events">Upcoming Events</ui-item>
+                  <ui-item link="#editorials" selected>Editorials</ui-item>
+                  <ui-item link="#reviews">Reviews</ui-item>
+                  <ui-item link="#events">Upcoming Events</ui-item>
                 </ui-menu>
               </ui-docs-example>
               <ui-docs-example description="Secondary menu">
-                <ui-menu secondary aria-label="Secondary demo">
-                  <ui-item href="#home" active>Home</ui-item>
-                  <ui-item href="#messages">Messages</ui-item>
-                  <ui-item href="#friends">Friends</ui-item>
+                <ui-menu appearance="secondary" aria-label="Secondary demo">
+                  <ui-item link="#home" active>Home</ui-item>
+                  <ui-item link="#messages">Messages</ui-item>
+                  <ui-item link="#friends">Friends</ui-item>
                   <ui-menu position="right">
-                    <ui-item href="#logout">Logout</ui-item>
+                    <ui-item link="#logout">Logout</ui-item>
                   </ui-menu>
                 </ui-menu>
               </ui-docs-example>
               <ui-docs-example description="Pointing">
-                <ui-menu pointing aria-label="Pointing demo">
-                  <ui-item href="#home">Home</ui-item>
-                  <ui-item href="#messages" selected>Messages</ui-item>
-                  <ui-item href="#friends">Friends</ui-item>
+                <ui-menu appearance="pointing" aria-label="Pointing demo">
+                  <ui-item link="#home">Home</ui-item>
+                  <ui-item link="#messages" selected>Messages</ui-item>
+                  <ui-item link="#friends">Friends</ui-item>
                   <ui-menu position="right">
-                    <ui-item href="#search">Search</ui-item>
+                    <ui-item link="#search">Search</ui-item>
                   </ui-menu>
                 </ui-menu>
-                <ui-menu secondary pointing aria-label="Secondary pointing demo">
-                  <ui-item href="#home" selected>Home</ui-item>
-                  <ui-item href="#messages">Messages</ui-item>
-                  <ui-item href="#friends">Friends</ui-item>
+                <ui-menu appearance="secondary pointing" aria-label="Secondary pointing demo">
+                  <ui-item link="#home" selected>Home</ui-item>
+                  <ui-item link="#messages">Messages</ui-item>
+                  <ui-item link="#friends">Friends</ui-item>
                   <ui-menu position="right">
-                    <ui-item href="#logout">Logout</ui-item>
+                    <ui-item link="#logout">Logout</ui-item>
                   </ui-menu>
                 </ui-menu>
               </ui-docs-example>
@@ -1040,7 +1040,7 @@
                 </ui-table>
               </ui-docs-example>
               <ui-docs-example description="Structured">
-                <ui-table structured celled>
+                <ui-table appearance="structured" celled>
                   <table>
                     <thead>
                       <tr>
@@ -1091,13 +1091,13 @@
                   A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.
                   <a href="ui-toolbar.html">Toolbar page</a>
                 </p>
-                <ui-toolbar secondary aria-label="Sections demo" style="max-width: 360px">
-                  <ui-item href="#types" selected>Types</ui-item>
-                  <ui-item href="#groups">Groups</ui-item>
-                  <ui-item href="#content">Content</ui-item>
-                  <ui-item href="#states">States</ui-item>
-                  <ui-item href="#variations">Variations</ui-item>
-                  <ui-item href="#group-variations">Group Variations</ui-item>
+                <ui-toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
+                  <ui-item link="#types" selected>Types</ui-item>
+                  <ui-item link="#groups">Groups</ui-item>
+                  <ui-item link="#content">Content</ui-item>
+                  <ui-item link="#states">States</ui-item>
+                  <ui-item link="#variations">Variations</ui-item>
+                  <ui-item link="#group-variations">Group Variations</ui-item>
                 </ui-toolbar>
               </ui-docs-example>
               <ui-docs-example description="Segmented">
@@ -1111,10 +1111,10 @@
                 </ui-toolbar>
               </ui-docs-example>
               <ui-docs-example description="Everything fits">
-                <ui-toolbar secondary aria-label="Short demo">
-                  <ui-item href="#one" selected>One</ui-item>
-                  <ui-item href="#two">Two</ui-item>
-                  <ui-item href="#three">Three</ui-item>
+                <ui-toolbar appearance="secondary" aria-label="Short demo">
+                  <ui-item link="#one" selected>One</ui-item>
+                  <ui-item link="#two">Two</ui-item>
+                  <ui-item link="#three">Three</ui-item>
                 </ui-toolbar>
               </ui-docs-example>
             </ui-section>
@@ -1205,7 +1205,7 @@
                 </ui-cards>
               </ui-docs-example>
               <ui-docs-example description="Horizontal card">
-                <ui-card horizontal>
+                <ui-card direction="horizontal">
                   <img
                     src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M1 9l3-4 2 3 1-1 2 2z%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                     alt="Jenny"
@@ -1276,7 +1276,7 @@
                         <ui-form slot="reply"
                     ><form method="dialog">
                       <ui-field><ui-textarea aria-label="Reply"></ui-textarea></ui-field
-                      ><ui-button primary type="submit">Add Reply</ui-button>
+                      ><ui-button type="submit" color="primary">Add Reply</ui-button>
                     </form></ui-form
                   >
                 </ui-comments>
@@ -1488,7 +1488,7 @@
                 </ui-accordion>
               </ui-docs-example>
               <ui-docs-example description="Styled">
-                <ui-accordion styled open="0">
+                <ui-accordion appearance="styled" open="0">
                   <ui-title>What is a dog?</ui-title>
                   <ui-content><p>A dog is a type of domesticated animal.</p></ui-content>
                   <ui-title>What kinds of dogs are there?</ui-title>
@@ -1540,7 +1540,7 @@
                 </div>
               </ui-docs-example>
               <ui-docs-example description="Slider">
-                <ui-checkbox type="slider">Accept terms and conditions</ui-checkbox>
+                <ui-checkbox appearance="slider">Accept terms and conditions</ui-checkbox>
               </ui-docs-example>
             </ui-section>
 
@@ -1581,11 +1581,11 @@
                   A dropdown allows a user to select a value from a series of options.
                   <a href="ui-dropdown.html">Dropdown page</a>
                 </p>
-                <ui-dropdown text="File">
+                <ui-dropdown label="File">
                   <ui-item>New</ui-item>
                   <ui-item description="ctrl + o">Open...</ui-item>
                   <ui-item description="ctrl + s">Save as...</ui-item>
-                  <ui-item type="divider"></ui-item>
+                  <ui-item kind="divider"></ui-item>
                   <ui-item>Edit</ui-item>
                   <ui-item>Share</ui-item>
                 </ui-dropdown>
@@ -1714,18 +1714,18 @@
                   </ui-content>
                   <ui-actions>
                     <ui-button class="deny" color="black">Nope</ui-button>
-                    <ui-button class="approve" positive>Yep, that's me</ui-button>
+                    <ui-button class="approve" color="positive">Yep, that's me</ui-button>
                   </ui-actions>
                 </ui-modal>
               </ui-docs-example>
               <ui-docs-example description="Basic">
                 <button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
-                <ui-modal id="modal-types-basic" basic size="small" heading="Archive Old Messages">
+                <ui-modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
                   <ui-content>
                     <p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</p>
                   </ui-content>
                   <ui-actions>
-                    <ui-button class="cancel" basic inverted>No</ui-button>
+                    <ui-button class="cancel" inverted appearance="basic">No</ui-button>
                     <ui-button class="ok" color="green" inverted>Yes</ui-button>
                   </ui-actions>
                 </ui-modal>
@@ -1758,21 +1758,17 @@
                   <a href="ui-popup.html">Popup page</a>
                 </p>
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
-                <ui-popup content="Add users to your feed"></ui-popup>
+                <ui-popup label="Add users to your feed"></ui-popup>
               </ui-docs-example>
               <ui-docs-example description="Titled">
                 <ui-button id="popup-types-rating">Rating</ui-button>
-                <ui-popup
-                  for="popup-types-rating"
-                  heading="User Rating"
-                  content="A popup can have a header and content."
-                ></ui-popup>
+                <ui-popup for="popup-types-rating" heading="User Rating" label="A popup can have a header and content."></ui-popup>
               </ui-docs-example>
               <ui-docs-example description="HTML content, on click">
                 <ui-button id="popup-types-plan">Choose a plan</ui-button>
                 <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
                   <p>Does not include upload or chat.</p>
-                  <ui-button size="small" primary>Choose</ui-button>
+                  <ui-button size="small" color="primary">Choose</ui-button>
                 </ui-popup>
               </ui-docs-example>
             </ui-section>
@@ -1857,12 +1853,12 @@
               </ui-docs-example>
               <ui-docs-example description="Groups and dividers">
                 <ui-select placeholder="Choose food">
-                  <ui-item type="header">Fruit</ui-item>
+                  <ui-item kind="header">Fruit</ui-item>
                   <ui-item value="apple">Apple</ui-item>
                   <ui-item value="pear">Pear</ui-item>
-                  <ui-item type="header">Vegetables</ui-item>
+                  <ui-item kind="header">Vegetables</ui-item>
                   <ui-item value="leek">Leek</ui-item>
-                  <ui-item type="divider"></ui-item>
+                  <ui-item kind="divider"></ui-item>
                   <ui-item value="none">Nothing</ui-item>
                 </ui-select>
               </ui-docs-example>
@@ -1910,14 +1906,14 @@
                 </p>
                 <ui-pushable style="height: 14em">
                   <ui-sidebar id="sidebar-demo-left" inverted aria-label="Site">
-                    <ui-menu vertical inverted fluid aria-label="Site">
-                      <ui-item href="#home">Home</ui-item>
-                      <ui-item href="#games">Games</ui-item>
-                      <ui-item href="#channels">Channels</ui-item>
+                    <ui-menu direction="vertical" inverted fluid aria-label="Site">
+                      <ui-item link="#home">Home</ui-item>
+                      <ui-item link="#games">Games</ui-item>
+                      <ui-item link="#channels">Channels</ui-item>
                     </ui-menu>
                   </ui-sidebar>
                   <ui-pusher>
-                    <ui-segment basic>
+                    <ui-segment appearance="basic">
                       <button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
                       <p>The default left sidebar uncovers itself from under this content, which dims.</p>
                     </ui-segment>
@@ -1928,26 +1924,28 @@
                 <button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
                 <ui-pushable style="height: 12em">
                   <ui-sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
-                    <ui-menu vertical inverted fluid aria-label="Numbers">
-                      <ui-item href="#one">One</ui-item>
-                      <ui-item href="#two">Two</ui-item>
+                    <ui-menu direction="vertical" inverted fluid aria-label="Numbers">
+                      <ui-item link="#one">One</ui-item>
+                      <ui-item link="#two">Two</ui-item>
                     </ui-menu>
                   </ui-sidebar>
                   <ui-pusher>
-                    <ui-segment basic><p>An overlay sidebar covers the content without moving it.</p></ui-segment>
+                    <ui-segment appearance="basic"><p>An overlay sidebar covers the content without moving it.</p></ui-segment>
                   </ui-pusher>
                 </ui-pushable>
               </ui-docs-example>
               <ui-docs-example description="Persistent">
                 <ui-pushable style="height: 10em">
                   <ui-sidebar position="left" width="thin" transition="push" persistent visible aria-label="Sections">
-                    <ui-menu vertical fluid aria-label="Sections">
-                      <ui-item href="#a">Alpha</ui-item>
-                      <ui-item href="#b">Beta</ui-item>
+                    <ui-menu direction="vertical" fluid aria-label="Sections">
+                      <ui-item link="#a">Alpha</ui-item>
+                      <ui-item link="#b">Beta</ui-item>
                     </ui-menu>
                   </ui-sidebar>
                   <ui-pusher>
-                    <ui-segment basic><p>A persistent sidebar is part of the page: nothing is dimmed or blocked.</p></ui-segment>
+                    <ui-segment appearance="basic"
+                      ><p>A persistent sidebar is part of the page: nothing is dimmed or blocked.</p></ui-segment
+                    >
                   </ui-pusher>
                 </ui-pushable>
               </ui-docs-example>
@@ -2058,14 +2056,14 @@
                   A tab is a hidden section of content activated by a menu.
                   <a href="ui-tab.html">Tab page</a>
                 </p>
-                <ui-tabs tabular attached aria-label="Tabular demo">
+                <ui-tabs appearance="tabular" attach="top" aria-label="Tabular demo">
                   <ui-tab label="First">First</ui-tab>
                   <ui-tab label="Second">Second</ui-tab>
                   <ui-tab label="Third">Third</ui-tab>
                 </ui-tabs>
               </ui-docs-example>
               <ui-docs-example description="Pointing">
-                <ui-tabs pointing secondary aria-label="Pointing demo">
+                <ui-tabs appearance="pointing secondary" aria-label="Pointing demo">
                   <ui-tab label="First">First</ui-tab>
                   <ui-tab label="Second">Second</ui-tab>
                   <ui-tab label="Third">Third</ui-tab>
@@ -2286,7 +2284,7 @@
                   <ui-segment>
                     <ui-header>Report</ui-header>
                     <p>Every component inside was loaded by the root, on demand.</p>
-                    <ui-button primary>Save</ui-button>
+                    <ui-button color="primary">Save</ui-button>
                   </ui-segment>
                 </ui-root>
               </ui-docs-example>
@@ -2295,7 +2293,7 @@
                   <ui-segment>
                     <ui-header>Report</ui-header>
                     <p>Dark and small: everything inside follows.</p>
-                    <ui-button primary>Save</ui-button>
+                    <ui-button color="primary">Save</ui-button>
                   </ui-segment>
                 </ui-root>
               </ui-docs-example>

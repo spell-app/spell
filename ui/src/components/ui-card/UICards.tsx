@@ -32,7 +32,26 @@ export class UICards extends E.UIComponent<typeof cardsVocabulary> {
 
   /** The group's value of variation `name`, which its cards take when they don't set it.  Tracked. */
   variationFor(name: UIT.CardSharedVariation): unknown {
-    return this[name]
+    return name === UIT.APPEARANCE ? this.looks : this[name]
+  }
+
+  /** `appearance`'s words, and `link` for a bare `link`:  the old look (`link` is every tag's link now). */
+  get looks(): string | undefined {
+    return UICards.withBareLinkLook(this.appearance, this.attributes.link)
+  }
+
+  protected classValue(name: E.AttributeName<typeof cardsVocabulary>): unknown {
+    return name === UIT.APPEARANCE ? this.looks : super.classValue(name)
+  }
+
+  /**
+   * `appearance`'s words, plus `link` when the `link` attribute is written bare (`<ui-card link>`):
+   * the old look, from before `link` was a tag's link (epic `ui-gaps` P4).
+   * - Static:  a card and its group both ask, and it reads nothing of either.
+   */
+  static withBareLinkLook(appearance: string | number | undefined, linkText: string | null): string | undefined {
+    if (linkText !== "") return appearance === undefined ? undefined : String(appearance)
+    return [...new Set([...String(appearance ?? "").split(" "), LINK_LOOK].filter(Boolean))].join(" ")
   }
 
   /** Always on:  the DOM element is the `ui-cards` size container (`:state(cards)`). */
@@ -57,3 +76,6 @@ export class UICards extends E.UIComponent<typeof cardsVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UICards extends E.AttributeValues<typeof cardsVocabulary> {}
+
+/** The `link` look word of `appearance`:  "rises on hover, as a link card does". */
+const LINK_LOOK = "link"

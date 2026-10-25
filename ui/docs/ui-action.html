@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Action">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-app/issues/new?title=ui-action%3A%20%20"
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-action%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -47,7 +47,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
@@ -66,9 +66,9 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-menu" label="Menu" sticky collapsible dividing>
                 <ui-docs-example description="A menu of actions:  each its title, then its shortcut's keys.  `meta` is ⌘ on a Mac, Ctrl elsewhere.">
-                  <ui-menu vertical aria-label="Game">
+                  <ui-menu direction="vertical" aria-label="Game">
                     <ui-action icon="play" shortcut="meta+N">New game</ui-action>
-                    <ui-action type="divider"></ui-action>
+                    <ui-action kind="divider"></ui-action>
                     <ui-action icon="undo" shortcut="meta+Z">Undo Turn Card</ui-action>
                     <ui-action icon="redo" shortcut="meta+shift+Z" disabled>Redo</ui-action>
                   </ui-menu>
@@ -87,7 +87,7 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled-and-selected" label="Disabled and selected" sticky collapsible dividing>
                 <ui-docs-example description="Greyed while it can't be done (`disabled`, or its action not enabled);  ticked while it's on (`selected`).">
-                  <ui-menu vertical aria-label="View">
+                  <ui-menu direction="vertical" aria-label="View">
                     <ui-action shortcut="meta+1" selected>Show the grid</ui-action>
                     <ui-action shortcut="meta+2">Show the rulers</ui-action>
                     <ui-action shortcut="meta+3" disabled>Show the guides</ui-action>
@@ -133,7 +133,7 @@
             <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A `<button>` (a link with `href`), named by its title;  `aria-disabled` while it can't be done, the owner's role in a menubar (`menuitem`).  The key caps are part of its name as a screen reader reads it, after the title.
+                  A `<button>` (a link with `link`), named by its title;  `aria-disabled` while it can't be done, the owner's role in a menubar (`menuitem`).  The key caps are part of its name as a screen reader reads it, after the title.
                 </script>
               </ui-markdown>
             </ui-section>

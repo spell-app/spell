@@ -121,8 +121,10 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
   private choices(domElement: SelectDOMElement): Choice[] {
     const choices: Choice[] = []
     for (const item of domElement.querySelectorAll(`:scope > ${itemVocabulary.tag}`)) {
-      const text = SelectFallback.itemAttribute(item, "text") ?? item.textContent?.trim() ?? ""
-      const type = SelectFallback.itemAttribute(item, "type")
+      // `label` and `kind`, or their old names `text` and `type` (epic `ui-gaps` P4)
+      const text =
+        SelectFallback.itemAttribute(item, "label") ?? item.getAttribute(OLD_LABEL) ?? item.textContent?.trim() ?? ""
+      const type = SelectFallback.itemAttribute(item, "kind") ?? item.getAttribute(OLD_KIND) ?? undefined
       const description = SelectFallback.itemAttribute(item, "description")
       const flag = SelectFallback.itemAttribute(item, "flag")
       choices.push({
@@ -173,6 +175,10 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
     return item.getAttribute(name) ?? undefined
   }
 }
+
+/** An item's `label`'s and `kind`'s old names. */
+const OLD_LABEL = "text"
+const OLD_KIND = "type"
 
 /** One option, header or divider, from either source. */
 type Choice = {

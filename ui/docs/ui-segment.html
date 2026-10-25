@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Segment">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-segment%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-segment%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/segment.html"
+              link="https://fomantic-ui.com/elements/segment.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's segment page, section by section, in its order (Types, Groups, States, Variations).
@@ -81,7 +81,7 @@
                       <ui-icon name="file pdf outline"></ui-icon>
                       No documents are listed for this customer.
                     </ui-header>
-                    <ui-button primary>Add Document</ui-button>
+                    <ui-button color="primary">Add Document</ui-button>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -94,8 +94,8 @@
                       <ui-icon name="search"></ui-icon>
                       We don't have any documents matching your query
                     </ui-header>
-                    <ui-buttons spaced>
-                      <ui-button primary>Clear Query</ui-button>
+                    <ui-buttons spacing="md">
+                      <ui-button color="primary">Clear Query</ui-button>
                       <ui-button>Add Document</ui-button>
                     </ui-buttons>
                   </ui-segment>
@@ -103,8 +103,8 @@
                 <!-- GAP I45:  Fomantic's grid is `stackable`, but a stacked grid keeps the divider vertical and clips the form (phones):  left out. -->
                 <ui-docs-example>
                   <ui-segment placeholder>
-                    <ui-grid columns="2" text-align="center">
-                      <ui-divider vertical>Or</ui-divider>
+                    <ui-grid columns="2" align="center">
+                      <ui-divider direction="vertical">Or</ui-divider>
                       <ui-row vertical-align="middle">
                         <ui-column>
                           <ui-header icon>
@@ -118,7 +118,7 @@
                             <ui-icon name="world"></ui-icon>
                             Add New Country
                           </ui-header>
-                          <ui-button primary>Create</ui-button>
+                          <ui-button color="primary">Create</ui-button>
                         </ui-column>
                       </ui-row>
                     </ui-grid>
@@ -128,7 +128,7 @@
 
               <ui-section id="examples-types-raised" label="Raised" sticky collapsible dividing>
                 <ui-docs-example description="A segment may be formatted to raise above the page.">
-                  <ui-segment raised>
+                  <ui-segment appearance="raised">
                     <p>
                       Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
                       Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
@@ -140,9 +140,9 @@
 
               <ui-section id="examples-types-stacked" label="Stacked" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A segment can be formatted to show it contains multiple pages:  `stacked="tall"` shows two.'
+                  description='A segment can be formatted to show it contains multiple pages:  `appearance="tall-stacked"` shows two.'
                 >
-                  <ui-segment stacked>
+                  <ui-segment appearance="stacked">
                     <p>
                       Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
                       Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
@@ -151,7 +151,7 @@
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segment stacked="tall">
+                  <ui-segment appearance="tall-stacked">
                     <p>
                       Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
                       Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
@@ -166,10 +166,10 @@
                   <p slot="description">A segment can be formatted to look like a pile of pages.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Fomantic's piled segments need a <code>z-index</code> on their offset container; a
-                    <code>&lt;ui-segment piled&gt;</code> makes its own host the stacking context the pages sit behind,
+                    <code>&lt;ui-segment appearance="piled"&gt;</code> makes its own host the stacking context the pages sit behind,
                     so nothing is needed.</ui-message
                   >
-                  <ui-segment piled>
+                  <ui-segment appearance="piled">
                     <ui-header level="4">A header</ui-header>
                     <p>
                       Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est
@@ -196,13 +196,13 @@
                 <ui-docs-example
                   description="A vertical segment formats content to be aligned as part of a vertical group."
                 >
-                  <ui-segment vertical>
+                  <ui-segment appearance="vertical">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-segment vertical>
+                  <ui-segment appearance="vertical">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-segment vertical>
+                  <ui-segment appearance="vertical">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-docs-example>
@@ -223,7 +223,7 @@
                   </ui-segments>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segments basic>
+                  <ui-segments appearance="basic">
                     <ui-segment><p>Top</p></ui-segment>
                     <ui-segment><p>Middle</p></ui-segment>
                     <ui-segment><p>Middle</p></ui-segment>
@@ -243,7 +243,7 @@
                 <ui-docs-example>
                   <ui-segments>
                     <ui-segment><p>Top</p></ui-segment>
-                    <ui-segment secondary><p>Secondary Content</p></ui-segment>
+                    <ui-segment appearance="secondary"><p>Secondary Content</p></ui-segment>
                   </ui-segments>
                 </ui-docs-example>
               </ui-section>
@@ -258,7 +258,7 @@
                       <ui-segment><p>Nested Bottom</p></ui-segment>
                     </ui-segments>
                     <ui-segment><p>Middle</p></ui-segment>
-                    <ui-segments horizontal>
+                    <ui-segments direction="horizontal">
                       <ui-segment><p>Top</p></ui-segment>
                       <ui-segment><p>Middle</p></ui-segment>
                       <ui-segment><p>Bottom</p></ui-segment>
@@ -276,14 +276,14 @@
                 dividing
               >
                 <ui-docs-example description="A segment group can appear horizontally.">
-                  <ui-segments horizontal>
+                  <ui-segments direction="horizontal">
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
                   </ui-segments>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segments horizontal basic>
+                  <ui-segments direction="horizontal" appearance="basic">
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
                     <ui-segment><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image></ui-segment>
@@ -301,7 +301,7 @@
                 <ui-docs-example
                   description="A horizontal segment group can automatically divide segments to be equal width."
                 >
-                  <ui-segments horizontal equal-width>
+                  <ui-segments direction="horizontal" equal-width>
                     <ui-segment>Segment One</ui-segment>
                     <ui-segment>Segment Two with a lot of additional content</ui-segment>
                     <ui-segment>Segment Three</ui-segment>
@@ -319,7 +319,7 @@
                 <ui-docs-example
                   description="A horizontal segment group can automatically wrap their segments on smaller screens."
                 >
-                  <ui-segments horizontal wrapping>
+                  <ui-segments direction="horizontal" wrapping>
                     <ui-segment>Segment One</ui-segment>
                     <ui-segment>Segment Two</ui-segment>
                     <ui-segment>Segment Three</ui-segment>
@@ -333,7 +333,7 @@
                 <ui-docs-example
                   description="Fomantic's `horizontal stackable segments` (deprecated there since 2.9.3) still works:  the group stacks on phones."
                 >
-                  <ui-segments horizontal stackable>
+                  <ui-segments direction="horizontal" stackable>
                     <ui-segment>Segment One</ui-segment>
                     <ui-segment>Segment Two</ui-segment>
                     <ui-segment>Segment Three</ui-segment>
@@ -343,7 +343,7 @@
 
               <ui-section id="examples-groups-raised-segments" label="Raised Segments" sticky collapsible dividing>
                 <ui-docs-example description="A group of segments can be raised.">
-                  <ui-segments raised>
+                  <ui-segments appearance="raised">
                     <ui-segment><p>Top</p></ui-segment>
                     <ui-segment><p>Middle</p></ui-segment>
                     <ui-segment><p>Bottom</p></ui-segment>
@@ -353,7 +353,7 @@
 
               <ui-section id="examples-groups-stacked-segments" label="Stacked Segments" sticky collapsible dividing>
                 <ui-docs-example description="A group of segments can be stacked.">
-                  <ui-segments stacked>
+                  <ui-segments appearance="stacked">
                     <ui-segment><p>Top</p></ui-segment>
                     <ui-segment><p>Middle</p></ui-segment>
                     <ui-segment><p>Bottom</p></ui-segment>
@@ -363,7 +363,7 @@
 
               <ui-section id="examples-groups-piled-segments" label="Piled Segments" sticky collapsible dividing>
                 <ui-docs-example description="A group of segments can be piled.">
-                  <ui-segments piled>
+                  <ui-segments appearance="piled">
                     <ui-segment><p>Top</p></ui-segment>
                     <ui-segment><p>Middle</p></ui-segment>
                     <ui-segment><p>Bottom</p></ui-segment>
@@ -417,30 +417,30 @@
                     >Attached segments are designed to be used with other attached variations, like an attached
                     <code>&lt;ui-header&gt;</code> or an attached <code>&lt;ui-message&gt;</code>.</ui-message
                   >
-                  <ui-segment attached="top">
+                  <ui-segment attach="top">
                     <p>This segment is on top</p>
                   </ui-segment>
-                  <ui-segment attached>
+                  <ui-segment attach="both">
                     <p>This segment is attached on both sides</p>
                   </ui-segment>
-                  <ui-segment attached="bottom">
+                  <ui-segment attach="bottom">
                     <p>This segment is on bottom</p>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-header level="5" attached="top">Dogs</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="5" attach="top">Dogs</ui-header>
+                  <ui-segment attach="both">
                     <p>Dogs are one type of animal</p>
                   </ui-segment>
-                  <ui-header level="5" attached>Cats</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="5" attach="both">Cats</ui-header>
+                  <ui-segment attach="both">
                     <p>Cats are thought of as being related to dogs, but only humans think this.</p>
                   </ui-segment>
-                  <ui-header level="5" attached>Lions</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="5" attach="both">Lions</ui-header>
+                  <ui-segment attach="both">
                     <p>Humans don't think of lions as being like cats, but they are.</p>
                   </ui-segment>
-                  <ui-message attached="bottom" state="warning">
+                  <ui-message attach="bottom" state="warning">
                     <ui-icon name="warning"></ui-icon>
                     You've reached the end of this content segment!
                   </ui-message>
@@ -457,11 +457,11 @@
                 <ui-docs-example
                   description="A segment can be seamless attached removing the related sides border.  This is especially useful with a vertical tabbed menu."
                 >
-                  <ui-segments horizontal>
-                    <ui-segment seamless attached="left" text-align="right">
+                  <ui-segments direction="horizontal">
+                    <ui-segment seamless attach="left" align="right">
                       <p>This segment is seamless left attached</p>
                     </ui-segment>
-                    <ui-segment seamless attached="right">
+                    <ui-segment seamless attach="right">
                       <p>This segment is seamless right attached</p>
                     </ui-segment>
                   </ui-segments>
@@ -470,12 +470,12 @@
 
               <ui-section id="examples-variations-padded" label="Padded" sticky collapsible dividing>
                 <ui-docs-example description="A segment can increase its padding.">
-                  <ui-segment padded>
+                  <ui-segment padding="md">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segment padded="very">
+                  <ui-segment padding="lg">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-docs-example>
@@ -483,13 +483,13 @@
 
               <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
                 <ui-docs-example description="A segment can remove its padding, vertically or horizontally.">
-                  <ui-segment fitted>
+                  <ui-segment padding="none">
                     <p>Fitted Segment</p>
                   </ui-segment>
-                  <ui-segment fitted="horizontally">
+                  <ui-segment padding="none-x">
                     <p>Horizontally fitted segment</p>
                   </ui-segment>
-                  <ui-segment fitted="vertically">
+                  <ui-segment padding="none-y">
                     <p>Vertically fitted segment</p>
                   </ui-segment>
                 </ui-docs-example>
@@ -497,12 +497,12 @@
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
                 <ui-docs-example description="A segment may take up only as much space as is necessary.">
-                  <ui-segment compact>
+                  <ui-segment padding="compact">
                     <p>Pellentesque habitant morbi</p>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segments compact>
+                  <ui-segments padding="compact">
                     <ui-segment><p>Pellentesque habitant morbi</p></ui-segment>
                     <ui-segment><p>Pellentesque habitant morbi</p></ui-segment>
                   </ui-segments>
@@ -547,10 +547,10 @@
                   <ui-segment>
                     <p>I'm here to tell you something, and you will probably read me first.</p>
                   </ui-segment>
-                  <ui-segment secondary>
+                  <ui-segment appearance="secondary">
                     <p>I am pretty noticeable but you might check out other content before you look at me.</p>
                   </ui-segment>
-                  <ui-segment tertiary>
+                  <ui-segment appearance="tertiary">
                     <p>If you notice me you must be looking very hard.</p>
                   </ui-segment>
                 </ui-docs-example>
@@ -558,10 +558,10 @@
                   <ui-segment inverted>
                     <p>I'm here to tell you something, and you will probably read me first.</p>
                   </ui-segment>
-                  <ui-segment secondary inverted>
+                  <ui-segment inverted appearance="secondary">
                     <p>I am pretty noticeable but you might check out other content before you look at me.</p>
                   </ui-segment>
-                  <ui-segment tertiary inverted>
+                  <ui-segment inverted appearance="tertiary">
                     <p>If you notice me you must be looking very hard.</p>
                   </ui-segment>
                 </ui-docs-example>
@@ -570,10 +570,10 @@
                   <ui-segment inverted color="red">
                     <p>I'm here to tell you something, and you will probably read me first.</p>
                   </ui-segment>
-                  <ui-segment secondary inverted color="red">
+                  <ui-segment inverted color="red" appearance="secondary">
                     <p>I am pretty noticeable but you might check out other content before you look at me.</p>
                   </ui-segment>
-                  <ui-segment tertiary inverted color="red">
+                  <ui-segment inverted color="red" appearance="tertiary">
                     <p>If you notice me you must be looking very hard.</p>
                   </ui-segment>
                 </ui-docs-example>
@@ -588,13 +588,13 @@
                     <code>display: contents</code>, so size the box through <code>::part(segment)</code> (see the Usage
                     tab).</ui-message
                   >
-                  <ui-segment circular>
+                  <ui-segment appearance="circular">
                     <ui-header level="2">
                       Buy Now
                       <ui-header>$10.99</ui-header>
                     </ui-header>
                   </ui-segment>
-                  <ui-segment inverted circular>
+                  <ui-segment inverted appearance="circular">
                     <ui-header level="2" inverted>
                       Buy Now
                       <ui-header>$10.99</ui-header>
@@ -624,15 +624,15 @@
 
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example description="A segment can have its text aligned to a side.">
-                  <ui-segment text-align="right">Right</ui-segment>
-                  <ui-segment text-align="left">Left</ui-segment>
-                  <ui-segment text-align="center">Center</ui-segment>
+                  <ui-segment align="right">Right</ui-segment>
+                  <ui-segment align="left">Left</ui-segment>
+                  <ui-segment align="center">Center</ui-segment>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A basic segment has no special formatting.">
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <p>
                       Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
                       Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
@@ -747,11 +747,11 @@
             <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment raised padded="very" attached="top">`
+                  Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach="top" appearance="raised">`
                   renders `ui raised very padded top attached segment`.
 
-                  - Group segments in `<ui-segments>`: the group draws one box with dividers, and its words (`horizontal`,
-                    `raised`, `stacked`, `piled`, `compact`, `basic`, `size` ...) apply to the whole group. Groups nest.
+                  - Group segments in `<ui-segments>`: the group draws one box with dividers, and its words (`direction`,
+                    `appearance`, `padding`, `size` ...) apply to the whole group. Groups nest.
                   - The host is `display: contents` and the box lives on the `segment` part, so margins collapse, floats float and
                     attached headers / labels line up exactly as with Fomantic's markup.
                   - A coloured or large segment recolours / resizes only its own box: the slot resets the colour and size tokens
@@ -772,7 +772,7 @@
               </ui-markdown>
               <ui-code language="html">
                 <script type="text/plain">
-                  <ui-segment id="buy-now" circular>
+                  <ui-segment id="buy-now" appearance="circular">
                     <ui-header level="2">Buy Now<ui-header>$10.99</ui-header></ui-header>
                   </ui-segment>
                   <style>
@@ -824,7 +824,7 @@
                   `:root`), or on the box through `::part(segment)`. They inherit into the shadow root, where the sheet reads each
                   through a private alias, so nothing inside blocks them. Set on a `<ui-segments>`, they reach its segments.
 
-                  - Variations build on them: `padded` swaps in `--ui-segment-padded`, `padded="very"` `--ui-segment-very-padded`.
+                  - Variations build on them: `padding="md"` swaps in `--ui-segment-padded`, `padding="lg"` `--ui-segment-very-padded`.
                   - `--ui-segment-scrolling-height` replaces the viewport-based height of `scrolling` segments at every width.
                   - The group's own `--_ui-segments-*` tokens, and every `--_segment-*` / `--_ui-segment-*` name, are private
                     plumbing: never set them.

@@ -14,15 +14,15 @@ import { Invoker } from "./Invoker"
  *   `reset` calls `form.reset()`.
  * - The inner button is always `type="button"`:  a button inside a shadow root belongs to no form,
  *   so the DOM element does the form's work (and a light-DOM root can't submit twice).
- * - `content` is the slot's fallback text, so slotted children win, as in the component.
+ * - `label` is the slot's fallback text, so slotted children win, as in the component.
  ****************/
 export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
   @E.proto static vocabulary = buttonVocabulary
   @E.proto static degraded = [
-    "`ui-selected` / `ui-deselected` events (toggle only flips `aria-pressed` + `active`)",
+    "`ui-selected` / `ui-deselected` events (toggle only flips `aria-pressed` + `selected`)",
     "`icon` glyph and `icon` / `label` slots",
-    "joined `label`",
-    "`animated`",
+    "joined `badge`",
+    "`reveal`",
     "`loading` spinner",
     "`active-text` / `inactive-text` (the content shows;  a toggle keeps `aria-pressed`)",
     "a `click` handler's preventDefault() on the element cannot veto submit / reset"
@@ -36,7 +36,9 @@ export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
     const isToggle = this.flag("toggle")
     // a bare `icon` (`"true"`) names no glyph, so it can't name the button either
     const icon = E.Converters.icon(this.attr("icon"))
-    const isIconOnly = icon && !this.attr("content") && !domElement.textContent?.trim()
+    // `content`:  `label`'s old name (`AttributeSpec.replaces`)
+    const text = this.attr("label") ?? domElement.getAttribute("content") ?? undefined
+    const isIconOnly = icon && !text && !domElement.textContent?.trim()
     const control =
       href !== undefined
         ? this.create("a", {
@@ -50,10 +52,12 @@ export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
         : this.create("button", { type: "button", disabled: isDisabled })
     control.className = this.classes()
     this.decorate(control, "button")
-    if (isToggle) control.setAttribute("aria-pressed", String(this.flag("active")))
+    // `active`:  `selected`'s old name
+    const isSelected = this.flag("selected") || E.Converters.boolean(domElement.getAttribute("active"), "active")
+    if (isToggle) control.setAttribute("aria-pressed", String(isSelected))
     // An icon-only button has no glyph here, so its name would be empty.
     if (isIconOnly && !control.hasAttribute("aria-label")) control.setAttribute("aria-label", icon)
-    control.append(this.slot(this.attr("content")))
+    control.append(this.slot(text))
 
     this.listen<MouseEvent>(control, "click", (event) => {
       if (isDisabled) return event.preventDefault()

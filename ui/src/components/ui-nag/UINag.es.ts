@@ -16,7 +16,6 @@ export const nagEs = {
     key: "clave",
     storage: "almacenamiento",
     expires: "caduca",
-    persist: "persistir",
     path: "ruta",
     domain: "dominio",
     secure: "seguro"

@@ -68,9 +68,9 @@ export class SlottedItems {
   private entry(element: Element, definition: E.ElementDefinition | undefined): E.MenuEntry {
     const read = <N extends E.AttributeName<typeof itemVocabulary>>(name: N) =>
       SlottedItems.valueFor(element, definition, name)
-    const type = read("type")
+    const type = read("kind")
     const isRich = element.children.length > 0
-    const text = (read("text") as string | undefined) ?? element.textContent?.trim() ?? ""
+    const text = (read("label") as string | undefined) ?? element.textContent?.trim() ?? ""
     let next: E.MenuEntry
     if (type === "header" || type === "divider") next = { type, text } satisfies E.MenuSeparator
     else {
@@ -107,7 +107,9 @@ export class SlottedItems {
   private static valueFor(element: Element, definition: E.ElementDefinition | undefined, name: string): unknown {
     if (!definition) {
       const spec: E.AttributeSpec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
-      const raw = element.getAttribute(spec.name)
+      // a plain old name (`type`, `text`:  epic `ui-gaps` P4) stands in while the new one isn't written
+      const oldName = spec.replaces?.find((old): old is string => typeof old === "string")
+      const raw = element.getAttribute(spec.name) ?? (oldName ? element.getAttribute(oldName) : null)
       if (spec.kind === "keyOnly") return E.Converters.boolean(raw, spec.name)
       if (spec.kind === "icon") return E.Converters.icon(raw, spec.default)
       return raw ?? undefined
@@ -116,7 +118,16 @@ export class SlottedItems {
     if (!isServer && element.matches(":defined") && !E.DOMElement.isPending(element)) {
       return (element as unknown as Record<string, unknown>)[attribute.property]
     }
-    return definition.convert(attribute, element.getAttribute(attribute.attribute))
+    const text = element.getAttribute(attribute.attribute)
+    if (text !== null) return definition.convert(attribute, text)
+    // not upgraded yet:  an old name (`type`, `text`) stands in for its new one, as the element would read it
+    for (const oldName of definition.oldAttributeNames) {
+      const old = definition.oldAttributeNamed(oldName)!
+      const oldText = element.getAttribute(oldName)
+      if (old.attribute === attribute && oldText !== null)
+        return definition.valueFromOld(old, oldText, undefined)?.value
+    }
+    return definition.convert(attribute, null)
   }
 
   /**

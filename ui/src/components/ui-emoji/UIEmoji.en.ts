@@ -60,10 +60,15 @@ export const emojiVocabulary = {
         "(decorative).  Default:  the character's own Unicode name, read by assistive tech."
     },
     {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Clickable look:  a pointer cursor.  The page adds the control."
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["link"],
+      description:
+        "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` " +
+        "switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },
     { name: "loading", group: "states", kind: "keyOnly", description: "Spins (a still glyph under reduced motion)." }

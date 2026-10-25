@@ -2,9 +2,9 @@
 <div class="ui-stack">
   <section style="min-height: 22em">
     <h4>Header, divider, icon, description</h4>
-    <ui-dropdown open text="Filter">
-      <ui-item type="header">Filter by tag</ui-item>
-      <ui-item type="divider"></ui-item>
+    <ui-dropdown open label="Filter">
+      <ui-item kind="header">Filter by tag</ui-item>
+      <ui-item kind="divider"></ui-item>
       <ui-item icon="circle" description="2 new">Important</ui-item>
       <ui-item icon="bullhorn">Announcement</ui-item>
       <ui-item icon="comments" disabled>Discussion</ui-item>
@@ -39,7 +39,7 @@
 
   <section style="min-height: 22em">
     <h4>Header slot, scrolling menu</h4>
-    <ui-dropdown open floating labeled button icon="filter" text="Filter Posts">
+    <ui-dropdown open floating labeled button icon="filter" label="Filter Posts">
       <strong slot="header">Tag label</strong>
       <ui-item>Important</ui-item>
       <ui-item>Announcement</ui-item>

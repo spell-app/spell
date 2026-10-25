@@ -147,7 +147,7 @@ describe("<ui-theme-editor> choosing", () => {
 describe("<ui-theme-editor> sheet", () => {
   it("Use this theme keeps it;  `SavedTheme.restore()` puts it back on a page", async () => {
     const host = await editor(`<ui-theme-editor value='{"primary": "green"}'></ui-theme-editor>`)
-    inner(host, ".actions ui-button[primary]").click()
+    inner(host, ".actions ui-button[color=primary]").click()
     await ElementFixture.settle()
     expect(SavedTheme.choices?.primary).toBe("green")
     expect(host.matches(":state(saved)")).toBe(true)

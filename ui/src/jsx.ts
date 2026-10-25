@@ -117,15 +117,23 @@ export interface UIAccordionEventMap {
 /** `<ui-accordion>`'s own attributes, from its vocabulary. */
 export interface UIAccordionAttributes {
   /**
-   * A boxed accordion:  bordered, bold titles, padded content.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `styled` (a boxed accordion:  bordered, bold titles, padded content), `basic` (with `styled`:  no box, no rules between titles -- only the styled spacing and title colours).  Old names:  `styled`, `basic`.
+   * - takes:  space-separated:  `styled` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
    */
   styled?: boolean | ""
   /**
-   * `styled`, as the DOM element's property.
-   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
-  "prop:styled"?: boolean | ""
+  basic?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -147,25 +155,19 @@ export interface UIAccordionAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * With `styled`:  no box, no rules between titles -- only the styled spacing and title colours.
-   * - takes:  flag (present / absent)
+   * Less padding around titles and content:  `compact`, or `xs` for less still.  Old name:  `compact` (`compact="very"` is `xs`).
+   * - takes:  `compact` · `xs`
    */
-  basic?: boolean | ""
+  padding?: "compact" | "xs"
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
-  "prop:basic"?: boolean | ""
+  compact?: boolean | ""
   /**
-   * Less padding around titles and content;  `compact="very"` less still (`very compact`).
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  compact?: boolean | "" | "very"
-  /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
-   */
-  "prop:compact"?: boolean | "" | "very"
+  "prop:padding"?: "compact" | "xs"
   /**
    * Indents each panel's content under its title, like a file tree (nested accordions line up).
    * - takes:  flag (present / absent)
@@ -432,7 +434,7 @@ export interface UIAccordionJSXAttributes
 export interface UIActionAttributes {
   /**
    * Menu:  hue of the item while selected (`red active item`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -450,6 +452,8 @@ export interface UIActionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -470,6 +474,8 @@ export interface UIActionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Menu:  `right` pushes the item (and what follows) to the far end.
    * - takes:  `left` · `right`
@@ -481,7 +487,7 @@ export interface UIActionAttributes {
    */
   "prop:position"?: "left" | "right"
   /**
-   * Value;  defaults to `text`.  Ordered list:  shown as the marker.
+   * Value;  defaults to `label`.  Ordered list:  shown as the marker.
    * - takes:  text
    */
   value?: string
@@ -491,15 +497,19 @@ export interface UIActionAttributes {
    */
   "prop:value"?: string
   /**
-   * Dropdown:  text;  defaults to the text content.
+   * Dropdown:  its words;  defaults to the text content.  Its old name is `text`.
    * - takes:  text
+   */
+  label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
    */
   text?: string
   /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
-  "prop:text"?: string
+  "prop:label"?: string
   /**
    * Dropdown:  secondary text, shown at the end.
    * - takes:  text
@@ -541,17 +551,21 @@ export interface UIActionAttributes {
    */
   "prop:flag"?: string
   /**
-   * List / menu:  renders a link (`<a>`).
+   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.
    * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
    */
   href?: string
   /**
-   * `href`, as the DOM element's property.
-   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
    */
-  "prop:href"?: string
+  "prop:link"?: string
   /**
-   * Link target, with `href`.
+   * Link target, with `link`.
    * - takes:  text
    */
   target?: string
@@ -561,15 +575,15 @@ export interface UIActionAttributes {
    */
   "prop:target"?: string
   /**
-   * List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.
-   * - takes:  flag (present / absent)
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.
+   * - takes:  space-separated:  `link`
    */
-  link?: boolean | ""
+  appearance?: string
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Can't be chosen or followed.
    * - takes:  flag (present / absent)
@@ -591,26 +605,34 @@ export interface UIActionAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.
-   * - takes:  flag, or `horizontally` · `vertically`
+   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).
+   * - takes:  `none` · `none-x` · `none-y`
    */
-  fitted?: boolean | "" | "horizontally" | "vertically"
+  padding?: "none" | "none-x" | "none-y"
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
-  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  fitted?: boolean | ""
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
+   */
+  "prop:padding"?: "none" | "none-x" | "none-y"
+  /**
+   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
+  kind?: "item" | "header" | "divider"
+  /**
+   * @deprecated An old name:  write `kind`.  It still works until every page is rewritten.
+   */
   type?: "item" | "header" | "divider"
   /**
-   * `type`, as the DOM element's property.
-   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   * `kind`, as the DOM element's property.
+   * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
-  "prop:type"?: "item" | "header" | "divider"
+  "prop:kind"?: "item" | "header" | "divider"
   /**
    * PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -752,16 +774,6 @@ export interface UIActionAttributes {
    * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
    */
   "prop:tooltip"?: string
-  /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
 }
 
 /** `<ui-action>` in JSX:  its own attributes, and HTML's global ones. */
@@ -999,15 +1011,19 @@ export interface UIAdAttributes {
     | "half banner"
     | "large mobile banner"
   /**
-   * Centred in its container.
-   * - takes:  flag (present / absent)
+   * `center`:  centred in its container.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
+  "prop:align"?: "center"
   /**
    * A placeholder:  a grey box saying "Ad" (bare `test`), or the given text (`test="Your ad here"`).
    * - takes:  text
@@ -1767,15 +1783,19 @@ export interface UIBreadcrumbJSXAttributes
 /** `<ui-breadcrumb-section>`'s own attributes, from its vocabulary. */
 export interface UIBreadcrumbSectionAttributes {
   /**
-   * The current page:  bold, not a link, `aria-current="page"`.
+   * The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.
    * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
    */
   active?: boolean | ""
   /**
-   * `active`, as the DOM element's property.
-   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
    */
-  "prop:active"?: boolean | ""
+  "prop:selected"?: boolean | ""
   /**
    * Renders a link (`<a>`) to this level.  Its old name is `href`.
    * - takes:  text
@@ -1951,12 +1971,12 @@ export interface UIBreadcrumbSectionJSXAttributes
 /** `<ui-button>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIButtonEventMap {
   /**
-   * `ui-selected`:  A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`.
+   * `ui-selected`:  A `toggle` button turned `selected` on.  NOTE: plain clicks are the native `click`.
    * - `event.detail`:  `{ active: true, originalEvent?: Event }`
    */
   "ui-selected": CustomEvent<{ active: true; originalEvent?: Event }>
   /**
-   * `ui-deselected`:  A `toggle` button turned `active` off.
+   * `ui-deselected`:  A `toggle` button turned `selected` off.
    * - `event.detail`:  `{ active: false, originalEvent?: Event }`
    */
   "ui-deselected": CustomEvent<{ active: false; originalEvent?: Event }>
@@ -1976,8 +1996,8 @@ export interface UIButtonAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue;  fills the button (or its ring and text when `basic`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, `positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -1995,6 +2015,24 @@ export interface UIButtonAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
+  /**
+   * @deprecated An old name:  write `color="primary"`.  It still works until every page is rewritten.
+   */
+  primary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="positive"`.  It still works until every page is rewritten.
+   */
+  positive?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="negative"`.  It still works until every page is rewritten.
+   */
+  negative?: boolean | ""
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -2015,66 +2053,30 @@ export interface UIButtonAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Primary emphasis:  the `primary` brand colour.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), `tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone.
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
-  primary?: boolean | ""
+  appearance?: string
   /**
-   * `primary`, as the DOM element's property.
-   * @deprecated write `primary` -- `prop:` stays only for compiled spell
-   */
-  "prop:primary"?: boolean | ""
-  /**
-   * Secondary emphasis:  the `secondary` brand colour.
-   * - takes:  flag (present / absent)
-   */
-  secondary?: boolean | ""
-  /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
-   */
-  "prop:secondary"?: boolean | ""
-  /**
-   * Positive consequence:  the `positive` colour.
-   * - takes:  flag (present / absent)
-   */
-  positive?: boolean | ""
-  /**
-   * `positive`, as the DOM element's property.
-   * @deprecated write `positive` -- `prop:` stays only for compiled spell
-   */
-  "prop:positive"?: boolean | ""
-  /**
-   * Negative consequence:  the `negative` colour.
-   * - takes:  flag (present / absent)
-   */
-  negative?: boolean | ""
-  /**
-   * `negative`, as the DOM element's property.
-   * @deprecated write `negative` -- `prop:` stays only for compiled spell
-   */
-  "prop:negative"?: boolean | ""
-  /**
-   * Less pronounced:  transparent with a hairline ring.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
-  /**
-   * Least pronounced:  text only, underlined on hover.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
    */
   tertiary?: boolean | ""
   /**
-   * `tertiary`, as the DOM element's property.
-   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
-  "prop:tertiary"?: boolean | ""
+  circular?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
   /**
    * For dark backgrounds:  an outline that fills on hover.
    * - takes:  flag (present / absent)
@@ -2086,7 +2088,7 @@ export interface UIButtonAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.
+   * Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
@@ -2096,17 +2098,21 @@ export interface UIButtonAttributes {
    */
   "prop:toggle"?: boolean | ""
   /**
-   * Pressed / on;  with `toggle`, in the positive colour.
+   * Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`.
    * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
    */
   active?: boolean | ""
   /**
-   * `active`, as the DOM element's property.
-   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
    */
-  "prop:active"?: boolean | ""
+  "prop:selected"?: boolean | ""
   /**
-   * Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
+   * Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
    * - takes:  text
    */
   "active-text"?: string
@@ -2116,7 +2122,7 @@ export interface UIButtonAttributes {
    */
   "prop:activeText"?: string
   /**
-   * Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content.
+   * Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content.
    * - takes:  text
    */
   "inactive-text"?: string
@@ -2156,45 +2162,37 @@ export interface UIButtonAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * Pill shaped;  round when it holds only an icon.
-   * - takes:  flag (present / absent)
+   * Room inside it:  `compact` (reduced) or `none` (hugs its content).  Old names:  `compact`, `unpadded`.
+   * - takes:  `none` · `compact`
    */
-  circular?: boolean | ""
+  padding?: "none" | "compact"
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
-   */
-  "prop:circular"?: boolean | ""
-  /**
-   * Reduced padding.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
-   */
-  "prop:compact"?: boolean | ""
-  /**
-   * No padding at all, as `compact` taken to none:  hugs its content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   unpadded?: boolean | ""
   /**
-   * `unpadded`, as the DOM element's property.
-   * @deprecated write `unpadded` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:unpadded"?: boolean | ""
+  "prop:padding"?: "none" | "compact"
   /**
-   * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.
+   * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name is `wrapped`.
    * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
    */
   wrapped?: boolean | ""
   /**
-   * `wrapped`, as the DOM element's property.
-   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
    */
-  "prop:wrapped"?: boolean | ""
+  "prop:wrap"?: boolean | ""
   /**
    * One line, cut off with `…` where it doesn't fit.  It needs a width to cut at:  `fluid`, a width of its own, or a narrow parent (it's never wider than that).
    * - takes:  flag (present / absent)
@@ -2206,7 +2204,7 @@ export interface UIButtonAttributes {
    */
   "prop:ellipsis"?: boolean | ""
   /**
-   * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `label`:  which side the label goes, `labeled` (end) or `labeled="left"`.
+   * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `badge`:  which side the badge goes, `labeled` (end) or `labeled="left"`.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
@@ -2216,25 +2214,33 @@ export interface UIButtonAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`.
-   * - takes:  flag, or `fade` · `vertical`
+   * Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  Its old name is `animated`.
+   * - takes:  `slide` · `fade` · `vertical`
    */
-  animated?: boolean | "" | "fade" | "vertical"
+  reveal?: "slide" | "fade" | "vertical"
   /**
-   * `animated`, as the DOM element's property.
-   * @deprecated write `animated` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `reveal="slide"`.  It still works until every page is rewritten.
    */
-  "prop:animated"?: boolean | "" | "fade" | "vertical"
+  animated?: boolean | ""
   /**
-   * Joined to the edge of a segment or another element:  `top`, `bottom`, `left` or `right`.
-   * - takes:  flag, or `top` · `bottom` · `left` · `right`
+   * `reveal`, as the DOM element's property.
+   * @deprecated write `reveal` -- `prop:` stays only for compiled spell
    */
-  attached?: boolean | "" | "top" | "bottom" | "left" | "right"
+  "prop:reveal"?: "slide" | "fade" | "vertical"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
+  attach?: "both" | "top" | "bottom" | "left" | "right"
+  /**
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
+   */
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
@@ -2266,25 +2272,29 @@ export interface UIButtonAttributes {
    */
   "prop:iconPosition"?: "left" | "right"
   /**
-   * Shorthand for the button's text, instead of the default slot;  slotted children win.
-   * - takes:  text
-   */
-  content?: string
-  /**
-   * `content`, as the DOM element's property.
-   * @deprecated write `content` -- `prop:` stays only for compiled spell
-   */
-  "prop:content"?: string
-  /**
-   * Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button.
+   * Shorthand for the button's text, instead of the default slot;  slotted children win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`.
    * - takes:  text
    */
   label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
+   */
+  content?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  It was `label` (no old name:  `label` is the text now).
+   * - takes:  text
+   */
+  badge?: string
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
+  "prop:badge"?: string
   /**
    * Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`.
    * - takes:  `button` · `submit` · `reset`
@@ -2481,12 +2491,12 @@ export interface UIButtonAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * `ui-selected`:  A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`.
+   * `ui-selected`:  A `toggle` button turned `selected` on.  NOTE: plain clicks are the native `click`.
    * - `event.detail`:  `{ active: true, originalEvent?: Event }`
    */
   "on-ui-selected"?: (event: UIButtonEventMap["ui-selected"]) => void
   /**
-   * `ui-deselected`:  A `toggle` button turned `active` off.
+   * `ui-deselected`:  A `toggle` button turned `selected` off.
    * - `event.detail`:  `{ active: false, originalEvent?: Event }`
    */
   "on-ui-deselected"?: (event: UIButtonEventMap["ui-deselected"]) => void
@@ -2509,8 +2519,8 @@ export interface UIButtonsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Hue of every button in the group.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -2528,6 +2538,24 @@ export interface UIButtonsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
+  /**
+   * @deprecated An old name:  write `color="primary"`.  It still works until every page is rewritten.
+   */
+  primary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="positive"`.  It still works until every page is rewritten.
+   */
+  positive?: boolean | ""
+  /**
+   * @deprecated An old name:  write `color="negative"`.  It still works until every page is rewritten.
+   */
+  negative?: boolean | ""
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -2548,66 +2576,30 @@ export interface UIButtonsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Every button in the primary colour.
-   * - takes:  flag (present / absent)
+   * The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` (text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`.
+   * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
-  primary?: boolean | ""
+  appearance?: string
   /**
-   * `primary`, as the DOM element's property.
-   * @deprecated write `primary` -- `prop:` stays only for compiled spell
-   */
-  "prop:primary"?: boolean | ""
-  /**
-   * Every button in the secondary colour.
-   * - takes:  flag (present / absent)
-   */
-  secondary?: boolean | ""
-  /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
-   */
-  "prop:secondary"?: boolean | ""
-  /**
-   * Every button in the positive colour.
-   * - takes:  flag (present / absent)
-   */
-  positive?: boolean | ""
-  /**
-   * `positive`, as the DOM element's property.
-   * @deprecated write `positive` -- `prop:` stays only for compiled spell
-   */
-  "prop:positive"?: boolean | ""
-  /**
-   * Every button in the negative colour.
-   * - takes:  flag (present / absent)
-   */
-  negative?: boolean | ""
-  /**
-   * `negative`, as the DOM element's property.
-   * @deprecated write `negative` -- `prop:` stays only for compiled spell
-   */
-  "prop:negative"?: boolean | ""
-  /**
-   * Basic buttons inside one outer border.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
-  /**
-   * Tertiary (text only) buttons.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
    */
   tertiary?: boolean | ""
   /**
-   * `tertiary`, as the DOM element's property.
-   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
-  "prop:tertiary"?: boolean | ""
+  circular?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
   /**
    * Inverted buttons, for dark backgrounds.
    * - takes:  flag (present / absent)
@@ -2639,27 +2631,21 @@ export interface UIButtonsAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * Reduced padding.
-   * - takes:  flag (present / absent)
+   * Room inside every button:  `compact` (reduced).  Its old name is `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
-   * Separate pill-shaped buttons.
-   * - takes:  flag (present / absent)
-   */
-  circular?: boolean | ""
-  /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
-   */
-  "prop:circular"?: boolean | ""
-  /**
-   * `active` buttons show in the positive colour.
+   * `selected` buttons show in the positive colour.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
@@ -2669,15 +2655,19 @@ export interface UIButtonsAttributes {
    */
   "prop:toggle"?: boolean | ""
   /**
-   * Stacks the buttons vertically.
-   * - takes:  flag (present / absent)
+   * Which way the buttons run:  `vertical` stacks them.  Its old name is `vertical`.
+   * - takes:  `vertical`
+   */
+  direction?: "vertical"
+  /**
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:vertical"?: boolean | ""
+  "prop:direction"?: "vertical"
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -2709,15 +2699,19 @@ export interface UIButtonsAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * Separate buttons with gaps between them.
-   * - takes:  flag (present / absent)
+   * Room between the buttons:  `md` separates them with gaps.  Its old name is `spaced`.
+   * - takes:  `md`
+   */
+  spacing?: "md"
+  /**
+   * @deprecated An old name:  write `spacing="md"`.  It still works until every page is rewritten.
    */
   spaced?: boolean | ""
   /**
-   * `spaced`, as the DOM element's property.
-   * @deprecated write `spaced` -- `prop:` stays only for compiled spell
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
    */
-  "prop:spaced"?: boolean | ""
+  "prop:spacing"?: "md"
   /**
    * Stacks vertically on mobile.
    * - takes:  flag (present / absent)
@@ -2729,15 +2723,19 @@ export interface UIButtonsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Joined to the edge of a segment:  `top`, `bottom`, `left` or `right`.
-   * - takes:  flag, or `top` · `bottom` · `left` · `right`
+   * Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  attached?: boolean | "" | "top" | "bottom" | "left" | "right"
+  attach?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
@@ -3003,7 +3001,7 @@ export interface UICalendarAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen cell, the range and the focus ring (a remap of `--ui-color`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -3021,6 +3019,8 @@ export interface UICalendarAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -3041,6 +3041,8 @@ export interface UICalendarAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
@@ -3052,15 +3054,19 @@ export interface UICalendarAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Tighter cells.
-   * - takes:  flag (present / absent)
+   * `compact`:  tighter cells.  Old name:  `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
    * The field takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -3524,7 +3530,7 @@ export interface UICardAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A coloured line along the bottom edge (a tinted fill when `basic`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -3542,6 +3548,8 @@ export interface UICardAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -3562,36 +3570,44 @@ export interface UICardAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Image and content side by side;  the extra content spans the bottom.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
-   * Lifted off the page with a stronger shadow.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`.
+   * - takes:  space-separated:  `raised` · `link` · `basic` · `dashed`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
-  "prop:raised"?: boolean | ""
+  basic?: boolean | ""
   /**
-   * Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="dashed"`.  It still works until every page is rewritten.
    */
-  link?: boolean | ""
+  dashed?: boolean | ""
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Takes the width of its container.
    * - takes:  flag (present / absent)
@@ -3603,35 +3619,19 @@ export interface UICardAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * Centred in its container.
-   * - takes:  flag (present / absent)
+   * `center`:  centred in its container.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
-  /**
-   * No border or shadow.
-   * - takes:  flag (present / absent)
-   */
-  basic?: boolean | ""
-  /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
-  /**
-   * A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's.
-   * - takes:  flag (present / absent)
-   */
-  dashed?: boolean | ""
-  /**
-   * `dashed`, as the DOM element's property.
-   * @deprecated write `dashed` -- `prop:` stays only for compiled spell
-   */
-  "prop:dashed"?: boolean | ""
+  "prop:align"?: "center"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -3643,7 +3643,7 @@ export interface UICardAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Faded and inert;  a link card loses its `href`.
+   * Faded and inert;  a link card loses its `link`.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -3663,17 +3663,21 @@ export interface UICardAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Makes the whole card a link (`<a>`).
+   * Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance="link"`.  Its old name is `href`.
    * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
    */
   href?: string
   /**
-   * `href`, as the DOM element's property.
-   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
    */
-  "prop:href"?: string
+  "prop:link"?: string
   /**
-   * Link target, with `href`.
+   * Link target, with `link`.
    * - takes:  text
    */
   target?: string
@@ -3886,7 +3890,7 @@ export interface UICardsAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Colour of every card in the group.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -3904,6 +3908,8 @@ export interface UICardsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -3924,6 +3930,8 @@ export interface UICardsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Cards per row, `1` ... `10` (`columns="3"` => `three cards`);  default a fixed card width.
    * - takes:  `1`-`10`, a fraction (`1/4`) or a percentage
@@ -3965,55 +3973,51 @@ export interface UICardsAttributes {
    */
   "prop:stackWith"?: "container" | "page"
   /**
-   * Centres each row of cards.
-   * - takes:  flag (present / absent)
+   * `center`:  centres each row of cards.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
+  "prop:align"?: "center"
   /**
-   * Every card horizontal.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  every card horizontal.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
-   * Every card raised.
-   * - takes:  flag (present / absent)
+   * Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`.
+   * - takes:  space-separated:  `raised` · `link` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
-   */
-  "prop:raised"?: boolean | ""
-  /**
-   * Every card rises on hover (a look;  links need `href`).
-   * - takes:  flag (present / absent)
-   */
-  link?: boolean | ""
-  /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
-   */
-  "prop:link"?: boolean | ""
-  /**
-   * Every card without border or shadow.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Every card in the dark scheme.
    * - takes:  flag (present / absent)
@@ -4135,6 +4139,20 @@ export interface UICardsAttributes {
     | "glow"
     | "none"
   /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -4203,7 +4221,7 @@ export interface UICheckboxAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -4221,6 +4239,8 @@ export interface UICheckboxAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -4241,16 +4261,22 @@ export interface UICheckboxAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`.
+   * Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`.  Old name:  `type`.
    * - takes:  `slider` · `toggle`
+   */
+  appearance?: "slider" | "toggle"
+  /**
+   * @deprecated An old name:  write `appearance`.  It still works until every page is rewritten.
    */
   type?: "slider" | "toggle"
   /**
-   * `type`, as the DOM element's property.
-   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:type"?: "slider" | "toggle"
+  "prop:appearance"?: "slider" | "toggle"
   /**
    * Neither on nor off (a dash);  a click clears it, as natively.
    * - takes:  flag (present / absent)
@@ -4262,15 +4288,19 @@ export interface UICheckboxAttributes {
    */
   "prop:indeterminate"?: boolean | ""
   /**
-   * No room for a label:  just the box.
-   * - takes:  flag (present / absent)
+   * `none`:  no room for a label, just the box.  Old name:  `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
@@ -4282,15 +4312,19 @@ export interface UICheckboxAttributes {
    */
   "prop:invisible"?: boolean | ""
   /**
-   * Box after the label, at the end of the line.
-   * - takes:  flag (present / absent)
+   * `right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`.
+   * - takes:  `right`
+   */
+  align?: "right"
+  /**
+   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
    */
   "right-aligned"?: boolean | ""
   /**
-   * `right-aligned`, as the DOM element's property.
-   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:rightAligned"?: boolean | ""
+  "prop:align"?: "right"
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
@@ -4877,7 +4911,7 @@ export interface UICodeJSXAttributes
 export interface UIColumnAttributes {
   /**
    * Fills the column with a hue, contrast text on top.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -4895,6 +4929,8 @@ export interface UIColumnAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -4915,6 +4951,8 @@ export interface UIColumnAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Width in columns of 16:  `4`, `1/4` or `25%`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -5190,15 +5228,19 @@ export interface UIColumnAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * No gutter on the `left` / `right` side.
+   * No gutter on the `left` / `right` side.  Its old name is `attached`.
    * - takes:  `left` · `right`
+   */
+  attach?: "left" | "right"
+  /**
+   * @deprecated An old name:  write `attach`.  It still works until every page is rewritten.
    */
   attached?: "left" | "right"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: "left" | "right"
+  "prop:attach"?: "left" | "right"
   /**
    * Centred in its line.
    * - takes:  flag (present / absent)
@@ -5230,15 +5272,19 @@ export interface UIColumnAttributes {
    */
   "prop:only"?: string
   /**
-   * Aligns its text `left`, `center`, `right` or `justified`.
+   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * Sits at the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
@@ -5624,15 +5670,19 @@ export interface UICommentsAttributes {
    */
   "prop:threaded"?: boolean | ""
   /**
-   * Each comment's actions hidden until the comment is hovered (and shown to keyboard focus).
-   * - takes:  flag (present / absent)
+   * The look:  `minimal`, each comment's actions hidden until the comment is hovered (and shown to keyboard focus).  Old name:  `minimal`.
+   * - takes:  space-separated:  `minimal`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="minimal"`.  It still works until every page is rewritten.
    */
   minimal?: boolean | ""
   /**
-   * `minimal`, as the DOM element's property.
-   * @deprecated write `minimal` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:minimal"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -6048,25 +6098,33 @@ export interface UIContainerAttributes {
    */
   "prop:grid"?: boolean | ""
   /**
-   * With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters.
-   * - takes:  flag, or `very`
+   * With `grid`:  room for a grid's wider gutters (`spacing="lg"`, `xl` wider still).  Its old name is `relaxed`.
+   * - takes:  `lg` · `xl`
    */
-  relaxed?: boolean | "" | "very"
+  spacing?: "lg" | "xl"
   /**
-   * `relaxed`, as the DOM element's property.
-   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
    */
-  "prop:relaxed"?: boolean | "" | "very"
+  relaxed?: boolean | ""
   /**
-   * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "lg" | "xl"
+  /**
+   * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  Heights are tokens:  `--ui-container-scrolling-height` (mobile, 15em), `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -6290,15 +6348,19 @@ export interface UIContentAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).
+   * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.
    * - takes:  `top` · `middle` · `bottom`
@@ -7074,15 +7136,19 @@ export interface UIDimmerAttributes {
    */
   "prop:blurring"?: boolean | ""
   /**
-   * Fomantic's CSS-only dimmer;  the element's look is the same.
-   * - takes:  flag (present / absent)
+   * The look:  `simple`, Fomantic's CSS-only dimmer;  the element's look is the same.  Old name:  `simple`.
+   * - takes:  space-separated:  `simple`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="simple"`.  It still works until every page is rewritten.
    */
   simple?: boolean | ""
   /**
-   * `simple`, as the DOM element's property.
-   * @deprecated write `simple` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:simple"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Never shows.
    * - takes:  flag (present / absent)
@@ -7320,7 +7386,7 @@ export interface UIDividerAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the rule and the text.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -7338,6 +7404,8 @@ export interface UIDividerAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -7358,26 +7426,26 @@ export interface UIDividerAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Text (or an icon) between two horizontal rules.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`.
+   * - takes:  `horizontal` · `vertical`
+   */
+  direction?: "horizontal" | "vertical"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
-   */
-  "prop:horizontal"?: boolean | ""
-  /**
-   * A vertical rule with optional text, centred in a `position: relative` owner (segment, grid).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:vertical"?: boolean | ""
+  "prop:direction"?: "horizontal" | "vertical"
   /**
    * The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  Renamed because `hidden` hides every element, as the platform's does.
    * - takes:  flag (present / absent)
@@ -7389,15 +7457,19 @@ export interface UIDividerAttributes {
    */
   "prop:spacer"?: boolean | ""
   /**
-   * No space above or below.
-   * - takes:  flag (present / absent)
+   * `none`:  no space above or below.  Its old name is `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
    * Clears floated content above it.
    * - takes:  flag (present / absent)
@@ -7429,15 +7501,19 @@ export interface UIDividerAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side.
+   * With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
    * Icon name, shown before the text.
    * - takes:  icon name
@@ -7668,7 +7744,7 @@ export interface UIDropdownAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills a `button` dropdown;  accents a selection's focus border and labels.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -7686,6 +7762,8 @@ export interface UIDropdownAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -7706,6 +7784,8 @@ export interface UIDropdownAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Form state, tinting the box, text and menu.
    * - takes:  `error` · `info` · `success` · `warning`
@@ -7787,15 +7867,19 @@ export interface UIDropdownAttributes {
    */
   "prop:labeled"?: boolean | ""
   /**
-   * No minimum width;  the menu sizes to its items.
-   * - takes:  flag (present / absent)
+   * `compact`:  no minimum width;  the menu sizes to its items.  Old name:  `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -7817,25 +7901,19 @@ export interface UIDropdownAttributes {
    */
   "prop:scrolling"?: boolean | ""
   /**
-   * Opens above (the menu still flips when there's no room).
-   * - takes:  flag (present / absent)
+   * `simple`:  opens on hover / focus, with no script and no popover.  Old name:  `simple`.
+   * - takes:  space-separated:  `simple`
    */
-  upward?: boolean | ""
+  appearance?: string
   /**
-   * `upward`, as the DOM element's property.
-   * @deprecated write `upward` -- `prop:` stays only for compiled spell
-   */
-  "prop:upward"?: boolean | ""
-  /**
-   * Opens on hover / focus, with no script and no popover.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="simple"`.  It still works until every page is rewritten.
    */
   simple?: boolean | ""
   /**
-   * `simple`, as the DOM element's property.
-   * @deprecated write `simple` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:simple"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Shows a clear button while there's a value.
    * - takes:  flag (present / absent)
@@ -7887,15 +7965,19 @@ export interface UIDropdownAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * A selection menu that never scrolls.
-   * - takes:  flag (present / absent)
+   * `none`:  a selection menu that never scrolls.  Old name:  `unlimited`.
+   * - takes:  `none`
+   */
+  limit?: "none"
+  /**
+   * @deprecated An old name:  write `limit="none"`.  It still works until every page is rewritten.
    */
   unlimited?: boolean | ""
   /**
-   * `unlimited`, as the DOM element's property.
-   * @deprecated write `unlimited` -- `prop:` stays only for compiled spell
+   * `limit`, as the DOM element's property.
+   * @deprecated write `limit` -- `prop:` stays only for compiled spell
    */
-  "prop:unlimited"?: boolean | ""
+  "prop:limit"?: "none"
   /**
    * A `scrolling` menu people can resize vertically.
    * - takes:  flag (present / absent)
@@ -7907,45 +7989,31 @@ export interface UIDropdownAttributes {
    */
   "prop:resizable"?: boolean | ""
   /**
-   * A shorter selection menu (3/4 height).
-   * - takes:  flag (present / absent)
+   * A selection menu's height:  `very-short` (1/2), `short` (3/4), `long` (2x), `very-long` (3x).  Old names:  `short`, `very-short`, `long`, `very-long`.
+   * - takes:  `very-short` · `short` · `long` · `very-long`
+   */
+  length?: "very-short" | "short" | "long" | "very-long"
+  /**
+   * @deprecated An old name:  write `length="short"`.  It still works until every page is rewritten.
    */
   short?: boolean | ""
   /**
-   * `short`, as the DOM element's property.
-   * @deprecated write `short` -- `prop:` stays only for compiled spell
-   */
-  "prop:short"?: boolean | ""
-  /**
-   * A much shorter selection menu (1/2 height).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="very-short"`.  It still works until every page is rewritten.
    */
   "very-short"?: boolean | ""
   /**
-   * `very-short`, as the DOM element's property.
-   * @deprecated write `very-short` -- `prop:` stays only for compiled spell
-   */
-  "prop:veryShort"?: boolean | ""
-  /**
-   * A longer selection menu (2x height).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="long"`.  It still works until every page is rewritten.
    */
   long?: boolean | ""
   /**
-   * `long`, as the DOM element's property.
-   * @deprecated write `long` -- `prop:` stays only for compiled spell
-   */
-  "prop:long"?: boolean | ""
-  /**
-   * A much longer selection menu (3x height).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="very-long"`.  It still works until every page is rewritten.
    */
   "very-long"?: boolean | ""
   /**
-   * `very-long`, as the DOM element's property.
-   * @deprecated write `very-long` -- `prop:` stays only for compiled spell
+   * `length`, as the DOM element's property.
+   * @deprecated write `length` -- `prop:` stays only for compiled spell
    */
-  "prop:veryLong"?: boolean | ""
+  "prop:length"?: "very-short" | "short" | "long" | "very-long"
   /**
    * The menu is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto.
    * - takes:  flag (present / absent)
@@ -7997,16 +8065,19 @@ export interface UIDropdownAttributes {
    */
   "prop:columnar"?: "2" | "3" | "4" | "5" | (string & {})
   /**
-   * Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`).
-   * - takes:  `left` · `right`
-   * - default:  `right`
+   * Which way the menu opens:  `up` above the dropdown (it still flips when there's no room);  `left` extends it leftward from the dropdown's edge, `right` (the default) rightward;  `up left` both.  Old name:  `upward`.
+   * - takes:  space-separated:  `up` · `left` · `right`
    */
-  direction?: "left" | "right"
+  direction?: string
+  /**
+   * @deprecated An old name:  write `direction="up"`.  It still works until every page is rewritten.
+   */
+  upward?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:direction"?: "left" | "right"
+  "prop:direction"?: string
   /**
    * Icon name for a `labeled` dropdown's icon block.
    * - takes:  icon name
@@ -8038,15 +8109,19 @@ export interface UIDropdownAttributes {
    */
   "prop:value"?: string
   /**
-   * Text shown for the current value, e.g. before `options` arrive.  Property only by default.
+   * Text shown for the current value, e.g. before `options` arrive.  Property only by default.  Old name:  `text`.
    * - takes:  text
+   */
+  label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
    */
   text?: string
   /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
-  "prop:text"?: string
+  "prop:label"?: string
   /**
    * Form field name;  `multiple` submits one entry per value.
    * - takes:  text
@@ -8264,16 +8339,6 @@ export interface UIDropdownAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
-  /**
    * `ui-changed`:  Someone chose, added, removed or cleared a value.
    * - `event.detail`:  `{ value: string | string[], originalEvent?: Event }`
    */
@@ -8422,16 +8487,6 @@ export interface UIEmbedAttributes {
    * @deprecated write `autoplay` -- `prop:` stays only for compiled spell
    */
   "prop:autoplay"?: boolean | ""
-  /**
-   * Keep the player's own branding (Fomantic's `brandedUI`).
-   * - takes:  flag (present / absent)
-   */
-  "branded-ui"?: boolean | ""
-  /**
-   * `branded-ui`, as the DOM element's property.
-   * @deprecated write `branded-ui` -- `prop:` stays only for compiled spell
-   */
-  "prop:brandedUI"?: boolean | ""
   /**
    * Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute).
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -8657,15 +8712,15 @@ export interface UIEmojiAttributes {
    */
   "prop:label"?: string
   /**
-   * Clickable look:  a pointer cursor.  The page adds the control.
-   * - takes:  flag (present / absent)
+   * The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag.
+   * - takes:  space-separated:  `link`
    */
-  link?: boolean | ""
+  appearance?: string
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
@@ -8777,6 +8832,20 @@ export interface UIEmojiAttributes {
     | "glow"
     | "none"
   /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -8816,7 +8885,7 @@ export interface UIEmojiJSXAttributes
 export interface UIFeedEventAttributes {
   /**
    * Hue of its number circle and of the line to the next event (`connected`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -8834,6 +8903,8 @@ export interface UIFeedEventAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -8854,6 +8925,8 @@ export interface UIFeedEventAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Icon name, shown as the label.
    * - takes:  icon name
@@ -8885,15 +8958,19 @@ export interface UIFeedEventAttributes {
    */
   "prop:label"?: string
   /**
-   * Its number / text circle outlined instead of filled.
-   * - takes:  flag (present / absent)
+   * The look:  `basic`, its number / text circle outlined instead of filled.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
@@ -9250,7 +9327,7 @@ export interface UIFeedAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the events' number circles (`ordered`) and connecting line (`connected`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -9268,6 +9345,8 @@ export interface UIFeedAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -9288,6 +9367,8 @@ export interface UIFeedAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * A line joins each event's label to the next.
    * - takes:  flag (present / absent)
@@ -9319,15 +9400,19 @@ export interface UIFeedAttributes {
    */
   "prop:divided"?: boolean | ""
   /**
-   * Ordered:  outlined number circles instead of filled ones.
-   * - takes:  flag (present / absent)
+   * The look:  `basic`, ordered with outlined number circles instead of filled ones.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -11137,35 +11222,37 @@ export interface UIGridAttributes {
    */
   "prop:celled"?: boolean | "" | "internally"
   /**
-   * Keeps its outer gutters inside its box;  `horizontally` / `vertically` for one axis.
-   * - takes:  flag, or `horizontally` · `vertically`
+   * `md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`.
+   * - takes:  `md` · `md-x` · `md-y`
    */
-  padded?: boolean | "" | "horizontally" | "vertically"
+  padding?: "md" | "md-x" | "md-y"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:padded"?: boolean | "" | "horizontally" | "vertically"
+  padded?: boolean | ""
   /**
-   * Wider gutters;  `relaxed="very"` wider still.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  relaxed?: boolean | "" | "very"
+  "prop:padding"?: "md" | "md-x" | "md-y"
   /**
-   * `relaxed`, as the DOM element's property.
-   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   * The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names are `compact` and `relaxed`.
+   * - takes:  `xs` · `compact` · `lg` · `xl`
    */
-  "prop:relaxed"?: boolean | "" | "very"
+  spacing?: "xs" | "compact" | "lg" | "xl"
   /**
-   * Narrower gutters and row spacing;  `compact="very"` narrower still.
-   * - takes:  flag, or `very`
+   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
    */
-  compact?: boolean | "" | "very"
+  relaxed?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="compact"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | "" | "very"
+  compact?: boolean | ""
+  /**
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "xs" | "compact" | "lg" | "xl"
   /**
    * Centres its columns in each line.
    * - takes:  flag (present / absent)
@@ -11247,15 +11334,19 @@ export interface UIGridAttributes {
    */
   "prop:stackWith"?: "container" | "page"
   /**
-   * Aligns every column's text `left`, `center`, `right` or `justified`.
+   * Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns every column to the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
@@ -11460,7 +11551,7 @@ export interface UIHeaderAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text (and of a `dividing` rule).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -11478,6 +11569,8 @@ export interface UIHeaderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -11498,6 +11591,8 @@ export interface UIHeaderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * A sub heading:  small, uppercase.  Inside a header, its sub header.
    * - takes:  flag (present / absent)
@@ -11539,15 +11634,19 @@ export interface UIHeaderAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two.
-   * - takes:  flag, or `top` · `bottom`
+   * Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom`
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * With `attached`:  no line where it meets the segment.
    * - takes:  flag (present / absent)
@@ -11569,25 +11668,33 @@ export interface UIHeaderAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Aligns its text `left`, `center`, `right` or `justified`.
+   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
-   * No padding.
-   * - takes:  flag (present / absent)
+   * `none`:  no padding.  Its old name is `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
@@ -11782,7 +11889,7 @@ export interface UIIconAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the glyph;  with `inverted` `circular` / `bordered`, the disc.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -11800,6 +11907,8 @@ export interface UIIconAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -11820,6 +11929,8 @@ export interface UIIconAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  Dashes ~== spaces, so Font Awesome's `circle-check` works too.  See `notes/icons.md`.
    * - takes:  text
@@ -11830,16 +11941,6 @@ export interface UIIconAttributes {
    * @deprecated write `name` -- `prop:` stays only for compiled spell
    */
   "prop:name"?: string
-  /**
-   * Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own.
-   * - takes:  flag (present / absent)
-   */
-  outline?: boolean | ""
-  /**
-   * `outline`, as the DOM element's property.
-   * @deprecated write `outline` -- `prop:` stays only for compiled spell
-   */
-  "prop:outline"?: boolean | ""
   /**
    * Accessible name:  makes the icon an image (`role=img`, `aria-label`).  Without it the icon is decorative and hidden from assistive technology.
    * - takes:  text
@@ -11881,45 +11982,41 @@ export interface UIIconAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * No gap after the glyph and no extra width.
-   * - takes:  flag (present / absent)
+   * `none`:  no gap after the glyph and no extra width.  Its old name is `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
-   * Clickable look:  dimmed until hovered, pointer cursor.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance="link"`, as `link` is where a click goes.
+   * - takes:  space-separated:  `outline` · `link` · `circular` · `bordered`
    */
-  link?: boolean | ""
+  appearance?: string
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="outline"`.  It still works until every page is rewritten.
    */
-  "prop:link"?: boolean | ""
+  outline?: boolean | ""
   /**
-   * Inside a circular ring.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
-   */
-  "prop:circular"?: boolean | ""
-  /**
-   * Inside a square ring.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:bordered"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Mirrored:  `flipped` / `horizontally`, or `vertically`.
    * - takes:  flag, or `horizontally` · `vertically`
@@ -12040,6 +12137,20 @@ export interface UIIconAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
   /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
@@ -12389,35 +12500,37 @@ export interface UIIconsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * No gap after the group.
-   * - takes:  flag (present / absent)
+   * `none`:  no gap after the group.  Its old name is `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
-   * Inside a circular ring, the first icon centred.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `circular` (inside a circular ring), `bordered` (inside a square ring), the first icon centred.  Old names:  `circular`, `bordered` written alone.
+   * - takes:  space-separated:  `circular` · `bordered`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
-   */
-  "prop:circular"?: boolean | ""
-  /**
-   * Inside a square ring, the first icon centred.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:bordered"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * A filled `circular` / `bordered` ring, for dark backgrounds.
    * - takes:  flag (present / absent)
@@ -12591,35 +12704,41 @@ export interface UIImageAttributes {
    */
   "prop:avatar"?: boolean | ""
   /**
-   * A hairline border, for images with white edges.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `bordered` (a hairline border, for images with white edges), `circular` (cropped to a circle;  a pill when not square), `rounded` (softly rounded corners).  Old names:  `bordered`, `circular`, `rounded` written alone.
+   * - takes:  space-separated:  `bordered` · `circular` · `rounded`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * A block centred in its container.
-   * - takes:  flag (present / absent)
-   */
-  centered?: boolean | ""
-  /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
-   */
-  "prop:centered"?: boolean | ""
-  /**
-   * Cropped to a circle (a pill when not square).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="rounded"`.  It still works until every page is rewritten.
    */
-  "prop:circular"?: boolean | ""
+  rounded?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
+  /**
+   * `center`:  a block centred in its container.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
+   */
+  centered?: boolean | ""
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "center"
   /**
    * Faded:  shown as unavailable.
    * - takes:  flag (present / absent)
@@ -12651,16 +12770,6 @@ export interface UIImageAttributes {
    */
   "prop:inline"?: boolean | ""
   /**
-   * Softly rounded corners.
-   * - takes:  flag (present / absent)
-   */
-  rounded?: boolean | ""
-  /**
-   * `rounded`, as the DOM element's property.
-   * @deprecated write `rounded` -- `prop:` stays only for compiled spell
-   */
-  "prop:rounded"?: boolean | ""
-  /**
    * Floats `left` or `right` of the text.
    * - takes:  `left` · `right`
    */
@@ -12671,15 +12780,19 @@ export interface UIImageAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Room from the text around it:  both sides, or `spaced="left"` / `"right"` only.
-   * - takes:  flag, or `left` · `right`
+   * Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`.
+   * - takes:  `md` · `left` · `right`
    */
-  spaced?: boolean | "" | "left" | "right"
+  spacing?: "md" | "left" | "right"
   /**
-   * `spaced`, as the DOM element's property.
-   * @deprecated write `spaced` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="md"`.  It still works until every page is rewritten.
    */
-  "prop:spaced"?: boolean | "" | "left" | "right"
+  spaced?: boolean | ""
+  /**
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "md" | "left" | "right"
   /**
    * Aligns `top`, `middle` or `bottom` against the text (or, in a group, the row).
    * - takes:  `top` · `middle` · `bottom`
@@ -12913,35 +13026,41 @@ export interface UIImagesAttributes {
    */
   "prop:avatar"?: boolean | ""
   /**
-   * Every image with a hairline border.
-   * - takes:  flag (present / absent)
+   * Every image's look, several words at once:  `bordered` (a hairline border), `circular` (cropped to a circle), `rounded` (softly rounded corners).  Old names:  `bordered`, `circular`, `rounded` written alone.
+   * - takes:  space-separated:  `bordered` · `circular` · `rounded`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * Rows centred in the container.
-   * - takes:  flag (present / absent)
-   */
-  centered?: boolean | ""
-  /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
-   */
-  "prop:centered"?: boolean | ""
-  /**
-   * Every image cropped to a circle.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="rounded"`.  It still works until every page is rewritten.
    */
-  "prop:circular"?: boolean | ""
+  rounded?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
+  /**
+   * `center`:  rows centred in the container.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
+   */
+  centered?: boolean | ""
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "center"
   /**
    * The whole group faded.
    * - takes:  flag (present / absent)
@@ -12962,16 +13081,6 @@ export interface UIImagesAttributes {
    * @deprecated write `fluid` -- `prop:` stays only for compiled spell
    */
   "prop:fluid"?: boolean | ""
-  /**
-   * Every image with softly rounded corners.
-   * - takes:  flag (present / absent)
-   */
-  rounded?: boolean | ""
-  /**
-   * `rounded`, as the DOM element's property.
-   * @deprecated write `rounded` -- `prop:` stays only for compiled spell
-   */
-  "prop:rounded"?: boolean | ""
   /**
    * Floats the group `left` or `right`.
    * - takes:  `left` · `right`
@@ -13476,7 +13585,7 @@ export interface UIInputAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of a `file` input's choose-file button (Fomantic colours only file inputs).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -13494,6 +13603,8 @@ export interface UIInputAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -13514,6 +13625,8 @@ export interface UIInputAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Form state, tinting the box, text and placeholder.
    * - takes:  `error` · `info` · `success` · `warning`
@@ -13525,15 +13638,19 @@ export interface UIInputAttributes {
    */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
-   * No box:  text only, e.g. inside a menu or header.
-   * - takes:  flag (present / absent)
+   * `transparent`:  no box, text only, e.g. inside a menu or header.  Old name:  `transparent`.
+   * - takes:  space-separated:  `transparent`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="transparent"`.  It still works until every page is rewritten.
    */
   transparent?: boolean | ""
   /**
-   * `transparent`, as the DOM element's property.
-   * @deprecated write `transparent` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:transparent"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -13978,7 +14095,7 @@ export interface UIInputJSXAttributes
 export interface UIItemAttributes {
   /**
    * Menu:  hue of the item while selected (`red active item`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -13996,6 +14113,8 @@ export interface UIItemAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -14016,6 +14135,8 @@ export interface UIItemAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Menu:  `right` pushes the item (and what follows) to the far end.
    * - takes:  `left` · `right`
@@ -14027,7 +14148,7 @@ export interface UIItemAttributes {
    */
   "prop:position"?: "left" | "right"
   /**
-   * Value;  defaults to `text`.  Ordered list:  shown as the marker.
+   * Value;  defaults to `label`.  Ordered list:  shown as the marker.
    * - takes:  text
    */
   value?: string
@@ -14037,15 +14158,19 @@ export interface UIItemAttributes {
    */
   "prop:value"?: string
   /**
-   * Dropdown:  text;  defaults to the text content.
+   * Dropdown:  its words;  defaults to the text content.  Its old name is `text`.
    * - takes:  text
+   */
+  label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
    */
   text?: string
   /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
-  "prop:text"?: string
+  "prop:label"?: string
   /**
    * Dropdown:  secondary text, shown at the end.
    * - takes:  text
@@ -14087,17 +14212,21 @@ export interface UIItemAttributes {
    */
   "prop:flag"?: string
   /**
-   * List / menu:  renders a link (`<a>`).
+   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.
    * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
    */
   href?: string
   /**
-   * `href`, as the DOM element's property.
-   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
    */
-  "prop:href"?: string
+  "prop:link"?: string
   /**
-   * Link target, with `href`.
+   * Link target, with `link`.
    * - takes:  text
    */
   target?: string
@@ -14107,15 +14236,15 @@ export interface UIItemAttributes {
    */
   "prop:target"?: string
   /**
-   * List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.
-   * - takes:  flag (present / absent)
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.
+   * - takes:  space-separated:  `link`
    */
-  link?: boolean | ""
+  appearance?: string
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Can't be chosen or followed.
    * - takes:  flag (present / absent)
@@ -14137,26 +14266,34 @@ export interface UIItemAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.
-   * - takes:  flag, or `horizontally` · `vertically`
+   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).
+   * - takes:  `none` · `none-x` · `none-y`
    */
-  fitted?: boolean | "" | "horizontally" | "vertically"
+  padding?: "none" | "none-x" | "none-y"
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
-  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  fitted?: boolean | ""
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
+   */
+  "prop:padding"?: "none" | "none-x" | "none-y"
+  /**
+   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
+  kind?: "item" | "header" | "divider"
+  /**
+   * @deprecated An old name:  write `kind`.  It still works until every page is rewritten.
+   */
   type?: "item" | "header" | "divider"
   /**
-   * `type`, as the DOM element's property.
-   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   * `kind`, as the DOM element's property.
+   * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
-  "prop:type"?: "item" | "header" | "divider"
+  "prop:kind"?: "item" | "header" | "divider"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
@@ -14277,16 +14414,6 @@ export interface UIItemAttributes {
    * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
    */
   "prop:tooltip"?: string
-  /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
 }
 
 /** `<ui-item>` in JSX:  its own attributes, and HTML's global ones. */
@@ -14316,25 +14443,33 @@ export interface UIItemsAttributes {
    */
   "prop:divided"?: boolean | ""
   /**
-   * More space between items;  `relaxed="very"` even more.
-   * - takes:  flag, or `very`
+   * Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).
+   * - takes:  `lg` · `xl`
    */
-  relaxed?: boolean | "" | "very"
+  spacing?: "lg" | "xl"
   /**
-   * `relaxed`, as the DOM element's property.
-   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
    */
-  "prop:relaxed"?: boolean | "" | "very"
+  relaxed?: boolean | ""
   /**
-   * Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`.
-   * - takes:  flag (present / absent)
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "lg" | "xl"
+  /**
+   * The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name is the bare `link` switch.
+   * - takes:  space-separated:  `link`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
    */
   link?: boolean | ""
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Keeps the image beside the content in a narrow group (mobile widths), where items otherwise stack.
    * - takes:  flag (present / absent)
@@ -14476,6 +14611,15 @@ export interface UIItemsAttributes {
     | "glow"
     | "none"
   /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -14545,7 +14689,7 @@ export interface UILabelAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue;  fills the label (its ring and text when `basic`).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -14563,6 +14707,8 @@ export interface UILabelAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -14583,6 +14729,8 @@ export interface UILabelAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Image label:  a photo flush with the start edge (class `image`).  Presence (`""`, bare `image`) means an image label styled around a slotted `<img>`;  a non-empty value is the `src` of the label's own `img.image` child.
    * - takes:  text
@@ -14644,55 +14792,55 @@ export interface UILabelAttributes {
    */
   "prop:floating"?: boolean | "" | "left" | "bottom" | "bottom left"
   /**
-   * Less pronounced:  an outline on the surface colour.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `basic` (less pronounced:  an outline on the surface colour), `tinted` (soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge;  not Fomantic's), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone.
+   * - takes:  space-separated:  `basic` · `tinted` · `circular`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
-  /**
-   * Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="tinted"`.  It still works until every page is rewritten.
    */
   tinted?: boolean | ""
   /**
-   * `tinted`, as the DOM element's property.
-   * @deprecated write `tinted` -- `prop:` stays only for compiled spell
-   */
-  "prop:tinted"?: boolean | ""
-  /**
-   * Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`.
-   * - takes:  flag, or `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
-   */
-  attached?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
-  /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
-   */
-  "prop:attached"?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
-  /**
-   * A fixed-width tag before a line of text, e.g. in a list.
-   * - takes:  flag (present / absent)
-   */
-  horizontal?: boolean | ""
-  /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
-   */
-  "prop:horizontal"?: boolean | ""
-  /**
-   * A round badge.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:circular"?: boolean | ""
+  "prop:appearance"?: string
+  /**
+   * Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` (bare:  `top`).
+   * - takes:  `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
+   */
+  attach?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
+  /**
+   * @deprecated An old name:  write `attach="top"`.  It still works until every page is rewritten.
+   */
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
+  /**
+   * `horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
+   */
+  horizontal?: boolean | ""
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "horizontal"
   /**
    * With `circular`:  an empty dot.
    * - takes:  flag (present / absent)
@@ -14714,15 +14862,19 @@ export interface UILabelAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * Centres its content.
-   * - takes:  flag (present / absent)
+   * `center` centres its content.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
+  "prop:align"?: "center"
   /**
    * A form field's validation message:  the negative colour on the surface, wins over `color`.
    * - takes:  flag (present / absent)
@@ -14734,15 +14886,19 @@ export interface UILabelAttributes {
    */
   "prop:prompt"?: boolean | ""
   /**
-   * Selected / on.
+   * Selected / on.  Its old name is `active`.
    * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
    */
   active?: boolean | ""
   /**
-   * `active`, as the DOM element's property.
-   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
    */
-  "prop:active"?: boolean | ""
+  "prop:selected"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
@@ -14973,7 +15129,7 @@ export interface UILabelsAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every label in the group.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -14991,6 +15147,8 @@ export interface UILabelsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -15011,6 +15169,8 @@ export interface UILabelsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Every label shaped like a price tag.
    * - takes:  flag (present / absent)
@@ -15022,45 +15182,41 @@ export interface UILabelsAttributes {
    */
   "prop:tag"?: boolean | ""
   /**
-   * Every label basic (outlined).
-   * - takes:  flag (present / absent)
+   * Every label's look, several words at once:  `basic` (outlined), `tinted` (the colour's soft fill and text), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone.
+   * - takes:  space-separated:  `basic` · `tinted` · `circular`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
-  /**
-   * Every label tinted (the colour's soft fill and text).
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="tinted"`.  It still works until every page is rewritten.
    */
   tinted?: boolean | ""
   /**
-   * `tinted`, as the DOM element's property.
-   * @deprecated write `tinted` -- `prop:` stays only for compiled spell
-   */
-  "prop:tinted"?: boolean | ""
-  /**
-   * Every label a round badge.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:circular"?: boolean | ""
+  "prop:appearance"?: string
   /**
-   * Every label a fixed-width tag.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
    * Every label an image label.
    * - takes:  flag (present / absent)
@@ -15082,15 +15238,19 @@ export interface UILabelsAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * Every label centred.
-   * - takes:  flag (present / absent)
+   * `center`:  every label centred.  Its old name is `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
+  "prop:align"?: "center"
   /**
    * Every label for dark backgrounds.
    * - takes:  flag (present / absent)
@@ -15323,15 +15483,19 @@ export interface UIListAttributes {
    */
   "prop:suffixed"?: boolean | ""
   /**
-   * Items are links:  muted until hovered, the selected one strongest.
-   * - takes:  flag (present / absent)
+   * The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name is the bare `link` switch.
+   * - takes:  space-separated:  `link`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
    */
   link?: boolean | ""
   /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Items are choices:  `<button>`s with a hover background, `ui-select` on activation.
    * - takes:  flag (present / absent)
@@ -15343,25 +15507,33 @@ export interface UIListAttributes {
    */
   "prop:selection"?: boolean | ""
   /**
-   * Items indent when hovered.
-   * - takes:  flag (present / absent)
+   * What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`.
+   * - takes:  `indent`
+   */
+  hover?: "indent"
+  /**
+   * @deprecated An old name:  write `hover="indent"`.  It still works until every page is rewritten.
    */
   animated?: boolean | ""
   /**
-   * `animated`, as the DOM element's property.
-   * @deprecated write `animated` -- `prop:` stays only for compiled spell
+   * `hover`, as the DOM element's property.
+   * @deprecated write `hover` -- `prop:` stays only for compiled spell
    */
-  "prop:animated"?: boolean | ""
+  "prop:hover"?: "indent"
   /**
-   * Items sit in a row.
-   * - takes:  flag (present / absent)
+   * Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name is the bare `horizontal` switch.
+   * - takes:  `vertical` · `horizontal`
+   */
+  direction?: "vertical" | "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "vertical" | "horizontal"
   /**
    * A rule between items.
    * - takes:  flag (present / absent)
@@ -15383,25 +15555,33 @@ export interface UIListAttributes {
    */
   "prop:celled"?: boolean | ""
   /**
-   * More space between items;  `relaxed="very"` even more.
-   * - takes:  flag, or `very`
+   * Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).
+   * - takes:  `lg` · `xl`
    */
-  relaxed?: boolean | "" | "very"
+  spacing?: "lg" | "xl"
   /**
-   * `relaxed`, as the DOM element's property.
-   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
    */
-  "prop:relaxed"?: boolean | "" | "very"
+  relaxed?: boolean | ""
   /**
-   * No horizontal item padding;  a `selection` list's hover background reaches past its edges.
-   * - takes:  flag (present / absent)
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "lg" | "xl"
+  /**
+   * `none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name is `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -15543,6 +15723,15 @@ export interface UIListAttributes {
     | "glow"
     | "none"
   /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -15607,7 +15796,7 @@ export interface UILoaderAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the turning arc.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -15625,6 +15814,8 @@ export interface UILoaderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -15645,6 +15836,8 @@ export interface UILoaderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Spin `slow` or `fast`;  absent is normal.
    * - takes:  `slow` · `fast`
@@ -15686,15 +15879,19 @@ export interface UILoaderAttributes {
    */
   "prop:inline"?: boolean | ""
   /**
-   * With `inline`:  a block of its own, centred.
-   * - takes:  flag (present / absent)
+   * With `inline`:  `center`, a block of its own, centred.  Old name:  `centered`.
+   * - takes:  `center`
+   */
+  align?: "center"
+  /**
+   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
    */
   centered?: boolean | ""
   /**
-   * `centered`, as the DOM element's property.
-   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:centered"?: boolean | ""
+  "prop:align"?: "center"
   /**
    * Unsure how long it'll take:  turns backwards, slower.
    * - takes:  flag (present / absent)
@@ -16256,7 +16453,7 @@ export interface UIMenuAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -16274,6 +16471,8 @@ export interface UIMenuAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -16294,16 +16493,42 @@ export interface UIMenuAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance="pointing" secondary` ~== `secondary pointing`.
-   * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless`
    */
-  appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
+   */
+  tabular?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
+   */
+  pointing?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
+   */
+  text?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
+   */
+  link?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="borderless"`.  It still works until every page is rewritten.
+   */
+  borderless?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  "prop:appearance"?: string
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
@@ -16315,55 +16540,19 @@ export interface UIMenuAttributes {
    */
   "prop:position"?: "left" | "right" | "center"
   /**
-   * De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.
-   * - takes:  flag (present / absent)
+   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.
+   * - takes:  `horizontal` · `vertical`
    */
-  secondary?: boolean | ""
+  direction?: "horizontal" | "vertical"
   /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
-   */
-  "prop:secondary"?: boolean | ""
-  /**
-   * The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance="pointing"`.
-   * - takes:  flag (present / absent)
-   */
-  pointing?: boolean | ""
-  /**
-   * `pointing`, as the DOM element's property.
-   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
-   */
-  "prop:pointing"?: boolean | ""
-  /**
-   * Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance="tabular"`.
-   * - takes:  flag (present / absent)
-   */
-  tabular?: boolean | ""
-  /**
-   * `tabular`, as the DOM element's property.
-   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
-   */
-  "prop:tabular"?: boolean | ""
-  /**
-   * Plain text items, no box.  Alias of `appearance="text"`.
-   * - takes:  flag (present / absent)
-   */
-  text?: boolean | ""
-  /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
-   */
-  "prop:text"?: boolean | ""
-  /**
-   * Items stacked top to bottom.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:vertical"?: boolean | ""
+  "prop:direction"?: "horizontal" | "vertical"
   /**
    * Page links:  compact, centred items.
    * - takes:  flag (present / absent)
@@ -16395,16 +16584,6 @@ export interface UIMenuAttributes {
    */
   "prop:labeled"?: boolean | ""
   /**
-   * Every item is interactive:  a `<button>` with the link hover.
-   * - takes:  flag (present / absent)
-   */
-  link?: boolean | ""
-  /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
-   */
-  "prop:link"?: boolean | ""
-  /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
@@ -16435,26 +16614,6 @@ export interface UIMenuAttributes {
    */
   "prop:centered"?: boolean | ""
   /**
-   * No dividers between items.
-   * - takes:  flag (present / absent)
-   */
-  borderless?: boolean | ""
-  /**
-   * `borderless`, as the DOM element's property.
-   * @deprecated write `borderless` -- `prop:` stays only for compiled spell
-   */
-  "prop:borderless"?: boolean | ""
-  /**
-   * Only as wide as its items.
-   * - takes:  flag (present / absent)
-   */
-  compact?: boolean | ""
-  /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
-   */
-  "prop:compact"?: boolean | ""
-  /**
    * Items wrap onto more lines when they don't fit.
    * - takes:  flag (present / absent)
    */
@@ -16465,15 +16624,19 @@ export interface UIMenuAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `wrapping`:  square corners where the lines meet.
+   * With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.
    * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
    */
   wrapped?: boolean | ""
   /**
-   * `wrapped`, as the DOM element's property.
-   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
    */
-  "prop:wrapped"?: boolean | ""
+  "prop:wrap"?: boolean | ""
   /**
    * The dark scheme;  with `color`, filled with the colour.
    * - takes:  flag (present / absent)
@@ -16495,25 +16658,37 @@ export interface UIMenuAttributes {
    */
   "prop:floated"?: boolean | "" | "left" | "right"
   /**
-   * No item padding;  `horizontally` / `vertically` keep the other axis' padding.
-   * - takes:  flag, or `horizontally` · `vertically`
+   * `none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`.
+   * - takes:  `none` · `none-x` · `none-y` · `compact`
    */
-  fitted?: boolean | "" | "horizontally" | "vertically"
+  padding?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
-  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  fitted?: boolean | ""
   /**
-   * Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  compact?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
+  /**
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom`
+   */
+  attach?: "both" | "top" | "bottom"
+  /**
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
+   */
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
@@ -16525,17 +16700,21 @@ export interface UIMenuAttributes {
    */
   "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
-   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name is `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
+   */
+  align?: "fluid" | "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   alignment?: "fluid" | "left" | "center" | "right"
   /**
-   * `alignment`, as the DOM element's property.
-   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:alignment"?: "fluid" | "left" | "center" | "right"
+  "prop:align"?: "fluid" | "left" | "center" | "right"
   /**
-   * Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
+   * Every item the same width, from the items themselves (no count):  with `align="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
@@ -16709,6 +16888,15 @@ export interface UIMenuAttributes {
     | "glow"
     | "none"
   /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -16784,7 +16972,7 @@ export interface UIMessageAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a tinted surface, border and text.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -16802,6 +16990,8 @@ export interface UIMessageAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -16822,6 +17012,8 @@ export interface UIMessageAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Consequence, tinting it like a colour.
    * - takes:  `positive` · `negative` · `error` · `info` · `success` · `warning`
@@ -16843,15 +17035,19 @@ export interface UIMessageAttributes {
    */
   "prop:floating"?: boolean | ""
   /**
-   * Only as wide as its content.
-   * - takes:  flag (present / absent)
+   * `compact`:  only as wide as its content.  Old name:  `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
    * Centres its text (and its icon with the content).
    * - takes:  flag (present / absent)
@@ -16873,25 +17069,33 @@ export interface UIMessageAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Joined edge to edge with the segment or form below;  `bottom` joins the one above.
-   * - takes:  flag, or `top` · `bottom`
+   * Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`).
+   * - takes:  `both` · `top` · `bottom`
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * Aligns its text `center` or `right`.
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
+  /**
+   * Aligns its text `center` or `right`.  Old name:  `text-align`.
    * - takes:  `center` · `right`
+   */
+  align?: "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "center" | "right"
+  "prop:align"?: "center" | "right"
   /**
    * Icon name, shown large beside the content;  the root gets the `icon` class.
    * - takes:  icon name
@@ -17301,13 +17505,13 @@ export interface UIModalEventMap {
    */
   "ui-closed": CustomEvent<{ visible: false }>
   /**
-   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button color="positive">`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-approving": CustomEvent<{ action: Element; originalEvent?: Event }>
   /**
-   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button color="negative">`) was activated;  `preventDefault()` keeps the modal shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
@@ -17327,15 +17531,19 @@ export interface UIModalAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * No box:  light text straight on the dimmer.
-   * - takes:  flag (present / absent)
+   * The look:  `basic`, no box:  light text straight on the dimmer.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * The dark scheme.
    * - takes:  flag (present / absent)
@@ -17618,13 +17826,13 @@ export interface UIModalAttributes {
    */
   "on-ui-closed"?: (event: UIModalEventMap["ui-closed"]) => void
   /**
-   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button color="positive">`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-approving"?: (event: UIModalEventMap["ui-approving"]) => void
   /**
-   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button color="negative">`) was activated;  `preventDefault()` keeps the modal shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
@@ -17669,7 +17877,7 @@ export interface UINagAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a filled bar in that colour.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -17687,6 +17895,8 @@ export interface UINagAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -17707,6 +17917,8 @@ export interface UINagAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Light instead of dark;  a coloured one takes its tint.
    * - takes:  flag (present / absent)
@@ -17802,15 +18014,19 @@ export interface UINagAttributes {
    */
   "prop:expires"?: number | `${number}`
   /**
-   * Shows even when dismissed before (stores nothing new either).
+   * Shows even when dismissed before (stores nothing new either).  Old name:  `persist`.
    * - takes:  flag (present / absent)
+   */
+  persistent?: boolean | ""
+  /**
+   * @deprecated An old name:  write `persistent`.  It still works until every page is rewritten.
    */
   persist?: boolean | ""
   /**
-   * `persist`, as the DOM element's property.
-   * @deprecated write `persist` -- `prop:` stays only for compiled spell
+   * `persistent`, as the DOM element's property.
+   * @deprecated write `persistent` -- `prop:` stays only for compiled spell
    */
-  "prop:persist"?: boolean | ""
+  "prop:persistent"?: boolean | ""
   /**
    * Milliseconds before it hides itself (not a dismissal:  nothing is stored);  absent / `0`:  stays.
    * - takes:  number
@@ -18051,15 +18267,19 @@ export interface UINagJSXAttributes
 /** `<ui-or>`'s own attributes, from its vocabulary. */
 export interface UIOrAttributes {
   /**
-   * Badge text;  default the translated `or` text.  Keep it to a short word.
+   * Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`.
    * - takes:  text
+   */
+  label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
    */
   text?: string
   /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
-  "prop:text"?: string
+  "prop:label"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -18214,16 +18434,6 @@ export interface UIOrAttributes {
    * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
    */
   "prop:tooltip"?: string
-  /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
 }
 
 /** `<ui-or>` in JSX:  its own attributes, and HTML's global ones. */
@@ -18391,7 +18601,7 @@ export interface UIPanelAttributes {
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the whole panel:  the header band, the box, the border and the sub-head bands (sub-panels follow it).  None:  `primary`.  Any hue, including one a theme adds (`spell-brand`'s `accent`, Polished Ivory).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -18409,6 +18619,8 @@ export interface UIPanelAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -18429,6 +18641,8 @@ export interface UIPanelAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
@@ -18460,75 +18674,63 @@ export interface UIPanelAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * A box around the section, as a segment.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * Boxed as a styled accordion:  a tinted title bar over padded content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
    */
   styled?: boolean | ""
   /**
-   * `styled`, as the DOM element's property.
-   * @deprecated write `styled` -- `prop:` stays only for compiled spell
-   */
-  "prop:styled"?: boolean | ""
-  /**
-   * With a box:  lifted with a shadow.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
-   */
-  "prop:raised"?: boolean | ""
-  /**
-   * No box, rule or tint, whatever else is set.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
-   * Less padding and space around the title.
-   * - takes:  flag (present / absent)
+   * `compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded="very"` is `lg`).
+   * - takes:  `compact` · `md` · `lg`
+   */
+  padding?: "compact" | "md" | "lg"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | ""
+  padded?: boolean | ""
   /**
-   * More padding in the content;  `padded="very"` for even more.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  padded?: boolean | "" | "very"
+  "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * - takes:  `both` · `top` · `bottom`
    */
-  "prop:padded"?: boolean | "" | "very"
+  attach?: "both" | "top" | "bottom"
   /**
-   * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -18550,15 +18752,19 @@ export interface UIPanelAttributes {
    */
   "prop:height"?: string
   /**
-   * Aligns the TITLE `left`, `center` or `right`.
+   * Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -19741,7 +19947,7 @@ export interface UIPopupAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills the popup (and its arrow), with a readable text colour.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -19759,6 +19965,8 @@ export interface UIPopupAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -19779,16 +19987,22 @@ export interface UIPopupAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * No pointing arrow.
-   * - takes:  flag (present / absent)
+   * The look:  `basic`, no pointing arrow.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Always its maximum width (`wide` / `very wide` widen it).
    * - takes:  flag (present / absent)
@@ -19920,15 +20134,19 @@ export interface UIPopupAttributes {
    */
   "prop:heading"?: string
   /**
-   * Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.
+   * Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.  Old name:  `content`.
    * - takes:  text
+   */
+  label?: string
+  /**
+   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
    */
   content?: string
   /**
-   * `content`, as the DOM element's property.
-   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
-  "prop:content"?: string
+  "prop:label"?: string
   /**
    * `hover`:  the popup stays open while the pointer is over it, so it can be reached and its text read or selected -- on by default, as WCAG 1.4.13 (Content on Hover or Focus) asks for.  `hoverable="false"` is Fomantic's `hoverable: false` (its default):  it closes as the pointer leaves the target, after `hide-delay`.
    * - takes:  flag (present / absent)
@@ -20108,16 +20326,6 @@ export interface UIPopupAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
-  /**
    * `ui-opening`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
@@ -20163,7 +20371,7 @@ export interface UIProgressAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the bar.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -20181,6 +20389,8 @@ export interface UIProgressAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -20201,6 +20411,8 @@ export interface UIProgressAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Outcome, tinting bar and label;  stops the animations.  Without it a single bar turns `success` at 100%.
    * - takes:  `success` · `warning` · `error`
@@ -20232,15 +20444,19 @@ export interface UIProgressAttributes {
    */
   "prop:active"?: boolean | ""
   /**
-   * No background behind the bar.
-   * - takes:  flag (present / absent)
+   * `basic`:  no background behind the bar.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Dimmed, animations stopped.
    * - takes:  flag (present / absent)
@@ -20272,15 +20488,19 @@ export interface UIProgressAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * The bar grows from the right;  its text sits at its left end.
-   * - takes:  flag (present / absent)
+   * `right`:  the bar grows from the right;  its text sits at its left end.  Old name:  `right-aligned`.
+   * - takes:  `right`
+   */
+  align?: "right"
+  /**
+   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
    */
   "right-aligned"?: boolean | ""
   /**
-   * `right-aligned`, as the DOM element's property.
-   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:rightAligned"?: boolean | ""
+  "prop:align"?: "right"
   /**
    * Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one.
    * - takes:  flag, or `filling` · `sliding` · `swinging`
@@ -20292,15 +20512,19 @@ export interface UIProgressAttributes {
    */
   "prop:indeterminate"?: boolean | "" | "filling" | "sliding" | "swinging"
   /**
-   * A thin line joined to the edge of the content above (`bottom`, bare) or below (`top`).
-   * - takes:  flag, or `top` · `bottom`
+   * A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`.
+   * - takes:  `both` · `top` · `bottom`
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * Amount done:  a number, or a comma list for several bars.  A share of `total`, else a percentage.
    * - takes:  text
@@ -21342,7 +21566,7 @@ export interface UIPropertyEditorAttributes {
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -21360,6 +21584,8 @@ export interface UIPropertyEditorAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -21380,6 +21606,8 @@ export interface UIPropertyEditorAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
@@ -21401,75 +21629,63 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * A box around the section, as a segment.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * Boxed as a styled accordion:  a tinted title bar over padded content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
    */
   styled?: boolean | ""
   /**
-   * `styled`, as the DOM element's property.
-   * @deprecated write `styled` -- `prop:` stays only for compiled spell
-   */
-  "prop:styled"?: boolean | ""
-  /**
-   * With a box:  lifted with a shadow.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
-   */
-  "prop:raised"?: boolean | ""
-  /**
-   * No box, rule or tint, whatever else is set.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
-   * Less padding and space around the title.
-   * - takes:  flag (present / absent)
+   * `compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded="very"` is `lg`).
+   * - takes:  `compact` · `md` · `lg`
+   */
+  padding?: "compact" | "md" | "lg"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | ""
+  padded?: boolean | ""
   /**
-   * More padding in the content;  `padded="very"` for even more.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  padded?: boolean | "" | "very"
+  "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * - takes:  `both` · `top` · `bottom`
    */
-  "prop:padded"?: boolean | "" | "very"
+  attach?: "both" | "top" | "bottom"
   /**
-   * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -21491,15 +21707,19 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:height"?: string
   /**
-   * Aligns the TITLE `left`, `center` or `right`.
+   * Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -21949,7 +22169,7 @@ export interface UIPropertyGroupAttributes {
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -21967,6 +22187,8 @@ export interface UIPropertyGroupAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -21987,6 +22209,8 @@ export interface UIPropertyGroupAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
@@ -22018,75 +22242,63 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * A box around the section, as a segment.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * Boxed as a styled accordion:  a tinted title bar over padded content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
    */
   styled?: boolean | ""
   /**
-   * `styled`, as the DOM element's property.
-   * @deprecated write `styled` -- `prop:` stays only for compiled spell
-   */
-  "prop:styled"?: boolean | ""
-  /**
-   * With a box:  lifted with a shadow.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
-   */
-  "prop:raised"?: boolean | ""
-  /**
-   * No box, rule or tint, whatever else is set.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
-   * Less padding and space around the title.
-   * - takes:  flag (present / absent)
+   * `compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded="very"` is `lg`).
+   * - takes:  `compact` · `md` · `lg`
+   */
+  padding?: "compact" | "md" | "lg"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | ""
+  padded?: boolean | ""
   /**
-   * More padding in the content;  `padded="very"` for even more.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  padded?: boolean | "" | "very"
+  "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * - takes:  `both` · `top` · `bottom`
    */
-  "prop:padded"?: boolean | "" | "very"
+  attach?: "both" | "top" | "bottom"
   /**
-   * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -22108,15 +22320,19 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:height"?: string
   /**
-   * Aligns the TITLE `left`, `center` or `right`.
+   * Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -22699,7 +22915,7 @@ export interface UIRadioAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -22717,6 +22933,8 @@ export interface UIRadioAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -22737,26 +22955,36 @@ export interface UIRadioAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Look:  a `toggle` or `slider` radio;  default the round radio box.
+   * Look:  a `toggle` or `slider` radio;  default the round radio box.  Old name:  `type`.
    * - takes:  `slider` · `toggle`
+   */
+  appearance?: "slider" | "toggle"
+  /**
+   * @deprecated An old name:  write `appearance`.  It still works until every page is rewritten.
    */
   type?: "slider" | "toggle"
   /**
-   * `type`, as the DOM element's property.
-   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:type"?: "slider" | "toggle"
+  "prop:appearance"?: "slider" | "toggle"
   /**
-   * No room for a label:  just the box.
-   * - takes:  flag (present / absent)
+   * `none`:  no room for a label, just the box.  Old name:  `fitted`.
+   * - takes:  `none`
+   */
+  padding?: "none"
+  /**
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
   fitted?: boolean | ""
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:fitted"?: boolean | ""
+  "prop:padding"?: "none"
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
@@ -22768,15 +22996,19 @@ export interface UIRadioAttributes {
    */
   "prop:invisible"?: boolean | ""
   /**
-   * Box after the label, at the end of the line.
-   * - takes:  flag (present / absent)
+   * `right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`.
+   * - takes:  `right`
+   */
+  align?: "right"
+  /**
+   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
    */
   "right-aligned"?: boolean | ""
   /**
-   * `right-aligned`, as the DOM element's property.
-   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:rightAligned"?: boolean | ""
+  "prop:align"?: "right"
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
@@ -23055,15 +23287,19 @@ export interface UIRailAttributes {
    */
   "prop:dividing"?: boolean | ""
   /**
-   * Flush against its container:  no gap.
-   * - takes:  flag (present / absent)
+   * `both`:  flush against its container, no gap.  Its old name is `attached`.
+   * - takes:  `both`
+   */
+  attach?: "both"
+  /**
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
   attached?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | ""
+  "prop:attach"?: "both"
   /**
    * Closer to its container:  `close` (1em away), `close="very"` (0.5em away).
    * - takes:  flag, or `very`
@@ -23267,7 +23503,7 @@ export interface UIRatingAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled icons.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -23285,6 +23521,8 @@ export interface UIRatingAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -23305,6 +23543,8 @@ export interface UIRatingAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Can't be used:  left out of the form, not focusable.  Shows its value.
    * - takes:  flag (present / absent)
@@ -23808,15 +24048,19 @@ export interface UIRevealAttributes {
    */
   "prop:instant"?: boolean | ""
   /**
-   * Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Renamed because `visible` shows or hides every element.
-   * - takes:  flag (present / absent)
+   * `none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name is `unclipped`.
+   * - takes:  `none`
+   */
+  clip?: "none"
+  /**
+   * @deprecated An old name:  write `clip="none"`.  It still works until every page is rewritten.
    */
   unclipped?: boolean | ""
   /**
-   * `unclipped`, as the DOM element's property.
-   * @deprecated write `unclipped` -- `prop:` stays only for compiled spell
+   * `clip`, as the DOM element's property.
+   * @deprecated write `clip` -- `prop:` stays only for compiled spell
    */
-  "prop:unclipped"?: boolean | ""
+  "prop:clip"?: "none"
   /**
    * Revealed now, without hover or focus.
    * - takes:  flag (present / absent)
@@ -24332,7 +24576,7 @@ export interface UIRootJSXAttributes
 export interface UIRowAttributes {
   /**
    * Fills the row with a hue, contrast text on top.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -24350,6 +24594,8 @@ export interface UIRowAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -24370,6 +24616,8 @@ export interface UIRowAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Columns in this row, overriding the grid's;  `"equal"` shares the line equally.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -24435,15 +24683,19 @@ export interface UIRowAttributes {
    */
   "prop:divided"?: boolean | ""
   /**
-   * Wider gutters;  `relaxed="very"` wider still.
-   * - takes:  flag, or `very`
+   * Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`.
+   * - takes:  `lg` · `xl`
    */
-  relaxed?: boolean | "" | "very"
+  spacing?: "lg" | "xl"
   /**
-   * `relaxed`, as the DOM element's property.
-   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
    */
-  "prop:relaxed"?: boolean | "" | "very"
+  relaxed?: boolean | ""
+  /**
+   * `spacing`, as the DOM element's property.
+   * @deprecated write `spacing` -- `prop:` stays only for compiled spell
+   */
+  "prop:spacing"?: "lg" | "xl"
   /**
    * Centres its columns.
    * - takes:  flag (present / absent)
@@ -24505,15 +24757,19 @@ export interface UIRowAttributes {
    */
   "prop:reversed"?: string
   /**
-   * Aligns its columns' text.
+   * Aligns its columns' text.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns its columns to the `top`, `middle` or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
@@ -24754,15 +25010,19 @@ export interface UISearchAttributes {
    */
   "prop:category"?: boolean | ""
   /**
-   * `category`:  each group's name above its results, not beside them.
-   * - takes:  flag (present / absent)
+   * `horizontal`, with `category`:  each group's name above its results, not beside them.  Old name:  `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
    * Takes the full width of its container;  so do the results.
    * - takes:  flag (present / absent)
@@ -24794,55 +25054,45 @@ export interface UISearchAttributes {
    */
   "prop:resizable"?: boolean | ""
   /**
-   * The results scroll after a shorter height.
-   * - takes:  flag (present / absent)
+   * How far the results go before they scroll:  `very-short`, `short`, `long`, `very-long`.  Old names:  `short`, `very-short`, `long`, `very-long`.
+   * - takes:  `very-short` · `short` · `long` · `very-long`
+   */
+  length?: "very-short" | "short" | "long" | "very-long"
+  /**
+   * @deprecated An old name:  write `length="short"`.  It still works until every page is rewritten.
    */
   short?: boolean | ""
   /**
-   * `short`, as the DOM element's property.
-   * @deprecated write `short` -- `prop:` stays only for compiled spell
-   */
-  "prop:short"?: boolean | ""
-  /**
-   * The results scroll after a much shorter height.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="very-short"`.  It still works until every page is rewritten.
    */
   "very-short"?: boolean | ""
   /**
-   * `very-short`, as the DOM element's property.
-   * @deprecated write `very-short` -- `prop:` stays only for compiled spell
-   */
-  "prop:veryShort"?: boolean | ""
-  /**
-   * The results scroll after a longer height.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="long"`.  It still works until every page is rewritten.
    */
   long?: boolean | ""
   /**
-   * `long`, as the DOM element's property.
-   * @deprecated write `long` -- `prop:` stays only for compiled spell
-   */
-  "prop:long"?: boolean | ""
-  /**
-   * The results scroll after a much longer height.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `length="very-long"`.  It still works until every page is rewritten.
    */
   "very-long"?: boolean | ""
   /**
-   * `very-long`, as the DOM element's property.
-   * @deprecated write `very-long` -- `prop:` stays only for compiled spell
+   * `length`, as the DOM element's property.
+   * @deprecated write `length` -- `prop:` stays only for compiled spell
    */
-  "prop:veryLong"?: boolean | ""
+  "prop:length"?: "very-short" | "short" | "long" | "very-long"
   /**
-   * Which edge the results line up with:  `right` => `right aligned` (they extend to the left).
+   * Which edge the results line up with:  `right` => `right aligned` (they extend to the left).  Old name:  `aligned`.
    * - takes:  `left` · `right`
+   */
+  align?: "left" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   aligned?: "left" | "right"
   /**
-   * `aligned`, as the DOM element's property.
-   * @deprecated write `aligned` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:aligned"?: "left" | "right"
+  "prop:align"?: "left" | "right"
   /**
    * Busy:  the icon spins.  Also shown while a remote query runs.
    * - takes:  flag (present / absent)
@@ -25384,7 +25634,7 @@ export interface UISectionAttributes {
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -25402,6 +25652,8 @@ export interface UISectionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -25422,6 +25674,8 @@ export interface UISectionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
@@ -25453,75 +25707,63 @@ export interface UISectionAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * A box around the section, as a segment.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
    */
   bordered?: boolean | ""
   /**
-   * `bordered`, as the DOM element's property.
-   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
-   */
-  "prop:bordered"?: boolean | ""
-  /**
-   * Boxed as a styled accordion:  a tinted title bar over padded content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
    */
   styled?: boolean | ""
   /**
-   * `styled`, as the DOM element's property.
-   * @deprecated write `styled` -- `prop:` stays only for compiled spell
-   */
-  "prop:styled"?: boolean | ""
-  /**
-   * With a box:  lifted with a shadow.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
-   */
-  "prop:raised"?: boolean | ""
-  /**
-   * No box, rule or tint, whatever else is set.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
-   * Less padding and space around the title.
-   * - takes:  flag (present / absent)
+   * `compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded="very"` is `lg`).
+   * - takes:  `compact` · `md` · `lg`
+   */
+  padding?: "compact" | "md" | "lg"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | ""
+  padded?: boolean | ""
   /**
-   * More padding in the content;  `padded="very"` for even more.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  padded?: boolean | "" | "very"
+  "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * - takes:  `both` · `top` · `bottom`
    */
-  "prop:padded"?: boolean | "" | "very"
+  attach?: "both" | "top" | "bottom"
   /**
-   * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -25543,15 +25785,19 @@ export interface UISectionAttributes {
    */
   "prop:height"?: string
   /**
-   * Aligns the TITLE `left`, `center` or `right`.
+   * Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
@@ -25978,7 +26224,7 @@ export interface UISegmentAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the top edge;  with `inverted`, the fill.  `primary` / `secondary` don't colour a segment.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -25996,6 +26242,8 @@ export interface UISegmentAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -26016,46 +26264,50 @@ export interface UISegmentAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Lifted off the page with a shadow.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.
+   * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `vertical` · `circular` · `basic` · `secondary` · `tertiary`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="stacked"`.  It still works until every page is rewritten.
    */
-  "prop:raised"?: boolean | ""
+  stacked?: boolean | ""
   /**
-   * A page peeking out below;  `stacked="tall"` shows two.
-   * - takes:  flag, or `tall`
-   */
-  stacked?: boolean | "" | "tall"
-  /**
-   * `stacked`, as the DOM element's property.
-   * @deprecated write `stacked` -- `prop:` stays only for compiled spell
-   */
-  "prop:stacked"?: boolean | "" | "tall"
-  /**
-   * A pile of rotated sheets behind it.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="piled"`.  It still works until every page is rewritten.
    */
   piled?: boolean | ""
   /**
-   * `piled`, as the DOM element's property.
-   * @deprecated write `piled` -- `prop:` stays only for compiled spell
-   */
-  "prop:piled"?: boolean | ""
-  /**
-   * A band of a page:  no box, a rule above.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
-  "prop:vertical"?: boolean | ""
+  circular?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
+   */
+  basic?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
+   */
+  tertiary?: boolean | ""
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
   /**
    * A tinted, centred block reserving room for content.
    * - takes:  flag (present / absent)
@@ -26067,45 +26319,27 @@ export interface UISegmentAttributes {
    */
   "prop:placeholder"?: boolean | ""
   /**
-   * A round badge sized by its content.
-   * - takes:  flag (present / absent)
+   * Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`.
+   * - takes:  `none` · `none-x` · `none-y` · `compact` · `md` · `lg`
    */
-  circular?: boolean | ""
+  padding?: "none" | "none-x" | "none-y" | "compact" | "md" | "lg"
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
-  "prop:circular"?: boolean | ""
+  fitted?: boolean | ""
   /**
-   * Only as wide as its content.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  "prop:compact"?: boolean | ""
+  padded?: boolean | ""
   /**
-   * More padding;  `padded="very"` for even more.
-   * - takes:  flag, or `very`
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  padded?: boolean | "" | "very"
-  /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
-   */
-  "prop:padded"?: boolean | "" | "very"
-  /**
-   * No box:  no background, border or shadow.
-   * - takes:  flag (present / absent)
-   */
-  basic?: boolean | ""
-  /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
-   */
-  "prop:basic"?: boolean | ""
+  "prop:padding"?: "none" | "none-x" | "none-y" | "compact" | "md" | "lg"
   /**
    * Contains its floated children.
    * - takes:  flag (present / absent)
@@ -26127,47 +26361,35 @@ export interface UISegmentAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Aligns its text `left`, `center` or `right`.
+   * Aligns its text `left`, `center` or `right`.  Its old name is `text-align`.
    * - takes:  `left` · `center` · `right`
+   */
+  align?: "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right"
+  "prop:align"?: "left" | "center" | "right"
   /**
-   * Less emphasis:  a tinted surface, muted text.
-   * - takes:  flag (present / absent)
+   * Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  secondary?: boolean | ""
+  attach?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:secondary"?: boolean | ""
+  attached?: boolean | ""
   /**
-   * Least emphasis:  a darker tint, muted text.
-   * - takes:  flag (present / absent)
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  tertiary?: boolean | ""
+  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `tertiary`, as the DOM element's property.
-   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
-   */
-  "prop:tertiary"?: boolean | ""
-  /**
-   * Joined edge to edge with the elements above / below;  bare `attached` sits in the middle.
-   * - takes:  flag, or `top` · `bottom` · `left` · `right`
-   */
-  attached?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
-   */
-  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /**
-   * With `attached`:  no line where attached segments meet.
+   * With `attach`:  no line where attached segments meet.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
@@ -26206,16 +26428,6 @@ export interface UISegmentAttributes {
    * @deprecated write `disabled` -- `prop:` stays only for compiled spell
    */
   "prop:disabled"?: boolean | ""
-  /**
-   * No padding;  `horizontally` / `vertically` keep the other axis' padding.
-   * - takes:  flag, or `horizontally` · `vertically`
-   */
-  fitted?: boolean | "" | "horizontally" | "vertically"
-  /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
-   */
-  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -26399,17 +26611,21 @@ export interface UISegmentsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Side by side instead of stacked.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  side by side instead of stacked.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
-   * With `horizontal`:  every segment the same width.
+   * With `direction="horizontal"`:  every segment the same width.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
@@ -26419,7 +26635,7 @@ export interface UISegmentsAttributes {
    */
   "prop:equalWidth"?: boolean | ""
   /**
-   * With `horizontal`:  segments wrap onto more rows.
+   * With `direction="horizontal"`:  segments wrap onto more rows.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
@@ -26429,7 +26645,7 @@ export interface UISegmentsAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `horizontal`:  stacks on mobile.
+   * With `direction="horizontal"`:  stacks on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
@@ -26439,55 +26655,45 @@ export interface UISegmentsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Lifted off the page with a shadow.
-   * - takes:  flag (present / absent)
+   * The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`.
+   * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
    */
   raised?: boolean | ""
   /**
-   * `raised`, as the DOM element's property.
-   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `appearance="stacked"`.  It still works until every page is rewritten.
    */
-  "prop:raised"?: boolean | ""
+  stacked?: boolean | ""
   /**
-   * A page peeking out below.
-   * - takes:  flag, or `tall`
-   */
-  stacked?: boolean | "" | "tall"
-  /**
-   * `stacked`, as the DOM element's property.
-   * @deprecated write `stacked` -- `prop:` stays only for compiled spell
-   */
-  "prop:stacked"?: boolean | "" | "tall"
-  /**
-   * A pile of rotated sheets behind the group.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="piled"`.  It still works until every page is rewritten.
    */
   piled?: boolean | ""
   /**
-   * `piled`, as the DOM element's property.
-   * @deprecated write `piled` -- `prop:` stays only for compiled spell
-   */
-  "prop:piled"?: boolean | ""
-  /**
-   * Only as wide as its content.
-   * - takes:  flag (present / absent)
-   */
-  compact?: boolean | ""
-  /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
-   */
-  "prop:compact"?: boolean | ""
-  /**
-   * No box of its own.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
+  /**
+   * `compact`:  only as wide as its content.  Its old name is `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
+   */
+  compact?: boolean | ""
+  /**
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
+   */
+  "prop:padding"?: "compact"
   /**
    * The dark scheme, for every segment in the group.
    * - takes:  flag (present / absent)
@@ -26710,15 +26916,19 @@ export interface UISelectAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * No minimum width:  as wide as its longest option.
-   * - takes:  flag (present / absent)
+   * `compact`:  no minimum width, as wide as its longest option.  Old name:  `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
@@ -27741,7 +27951,7 @@ export interface UISliderAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled track (and of `basic` thumbs).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -27759,6 +27969,8 @@ export interface UISliderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -27779,16 +27991,22 @@ export interface UISliderAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Thumbs in the fill colour instead of white.
-   * - takes:  flag (present / absent)
+   * `basic`:  thumbs in the fill colour instead of white.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Can't be used:  dimmed, not focusable, left out of the form.
    * - takes:  flag (present / absent)
@@ -27850,16 +28068,6 @@ export interface UISliderAttributes {
    */
   "prop:range"?: boolean | ""
   /**
-   * Runs from the right (or, `vertical`, from the bottom).
-   * - takes:  flag (present / absent)
-   */
-  reversed?: boolean | ""
-  /**
-   * `reversed`, as the DOM element's property.
-   * @deprecated write `reversed` -- `prop:` stays only for compiled spell
-   */
-  "prop:reversed"?: boolean | ""
-  /**
    * Thumbs follow the pointer smoothly;  values still snap.
    * - takes:  flag (present / absent)
    */
@@ -27880,25 +28088,37 @@ export interface UISliderAttributes {
    */
   "prop:ticked"?: boolean | ""
   /**
-   * Upright, filling the host's height;  min at the top.
-   * - takes:  flag (present / absent)
+   * Which way it runs, several words at once:  `vertical` (upright, filling the host's height, min at the top), `reversed` (from the right, or upright from the bottom).  Old names:  `vertical`, `reversed`.
+   * - takes:  space-separated:  `vertical` · `reversed`
+   */
+  direction?: string
+  /**
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `direction="reversed"`.  It still works until every page is rewritten.
    */
-  "prop:vertical"?: boolean | ""
+  reversed?: boolean | ""
   /**
-   * With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: string
+  /**
+   * With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.  Old name:  `aligned`.
    * - takes:  `bottom` · `right`
+   */
+  align?: "bottom" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   aligned?: "bottom" | "right"
   /**
-   * `aligned`, as the DOM element's property.
-   * @deprecated write `aligned` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:aligned"?: "bottom" | "right"
+  "prop:align"?: "bottom" | "right"
   /**
    * Lowest value.
    * - takes:  number
@@ -28177,7 +28397,7 @@ export interface UIStatisticAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the value.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -28195,6 +28415,8 @@ export interface UIStatisticAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -28215,16 +28437,22 @@ export interface UIStatisticAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Value and label on one line.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  value and label on one line.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
    * For dark backgrounds:  the dark scheme, a white value.
    * - takes:  flag (present / absent)
@@ -28459,7 +28687,7 @@ export interface UIStatisticsAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every value in the group.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -28477,6 +28705,8 @@ export interface UIStatisticsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -28497,16 +28727,22 @@ export interface UIStatisticsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * Statistics stacked, each with its label beside its value.
-   * - takes:  flag (present / absent)
+   * `horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`.
+   * - takes:  `horizontal`
+   */
+  direction?: "horizontal"
+  /**
+   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
    */
   horizontal?: boolean | ""
   /**
-   * `horizontal`, as the DOM element's property.
-   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:horizontal"?: boolean | ""
+  "prop:direction"?: "horizontal"
   /**
    * Every statistic for dark backgrounds.
    * - takes:  flag (present / absent)
@@ -28731,7 +28967,7 @@ export interface UIStatisticsJSXAttributes
 export interface UIStepAttributes {
   /**
    * Circular steps:  hue of this step's ring and line, whatever its state.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -28749,6 +28985,8 @@ export interface UIStepAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -28769,6 +29007,8 @@ export interface UIStepAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * The CURRENT step (`aria-current="step"`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`.
    * - takes:  flag (present / absent)
@@ -28800,27 +29040,21 @@ export interface UIStepAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
-   * Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`.
-   * - takes:  flag (present / absent)
+   * Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`.
+   * - takes:  text
    */
-  link?: boolean | ""
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
    */
-  "prop:link"?: boolean | ""
+  "prop:link"?: string
   /**
-   * Renders a link (`<a>`) styled as a step.
-   * - takes:  text
-   */
-  href?: string
-  /**
-   * `href`, as the DOM element's property.
-   * @deprecated write `href` -- `prop:` stays only for compiled spell
-   */
-  "prop:href"?: string
-  /**
-   * Link target, with `href`.
+   * Link target, with `link`.
    * - takes:  text
    */
   target?: string
@@ -28829,6 +29063,16 @@ export interface UIStepAttributes {
    * @deprecated write `target` -- `prop:` stays only for compiled spell
    */
   "prop:target"?: string
+  /**
+   * The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name is the bare `link` switch.
+   * - takes:  space-separated:  `link`
+   */
+  appearance?: string
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
   /**
    * Icon name, before the content.
    * - takes:  icon name
@@ -29013,7 +29257,7 @@ export interface UIStepsAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Circular steps:  hue of the rings of the current and completed steps (default the positive colour).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -29031,6 +29275,8 @@ export interface UIStepsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -29051,6 +29297,8 @@ export interface UIStepsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Numbers each step;  a completed step shows a check instead.
    * - takes:  flag (present / absent)
@@ -29062,25 +29310,33 @@ export interface UIStepsAttributes {
    */
   "prop:ordered"?: boolean | ""
   /**
-   * Stacked top to bottom;  `vertical="right"` for a group on the right of its content (arrow at left).
-   * - takes:  flag, or `right`
+   * Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` (`vertical="right"`).
+   * - takes:  `horizontal` · `vertical` · `vertical-right`
    */
-  vertical?: boolean | "" | "right"
+  direction?: "horizontal" | "vertical" | "vertical-right"
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
-  "prop:vertical"?: boolean | "" | "right"
+  vertical?: boolean | ""
   /**
-   * Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.
-   * - takes:  flag (present / absent)
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "horizontal" | "vertical" | "vertical-right"
+  /**
+   * The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name is the bare `circular` switch.
+   * - takes:  space-separated:  `circular`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
    */
   circular?: boolean | ""
   /**
-   * `circular`, as the DOM element's property.
-   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:circular"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -29102,15 +29358,19 @@ export interface UIStepsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Joined to a segment below (`attached`, `"top"`) or above (`"bottom"`), overlapping its border.
-   * - takes:  flag, or `top` · `bottom`
+   * Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom`
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * Never stacks;  by default steps stack below 768px of the group's width (or the screen's:  `stack-with`).
    * - takes:  flag (present / absent)
@@ -29818,25 +30078,33 @@ export interface UITabAttributes {
    */
   "prop:lazy"?: boolean | ""
   /**
-   * Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide.
-   * - takes:  flag, or `top` · `bottom`
+   * Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom`
    */
-  attached?: boolean | "" | "top" | "bottom"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  attached?: boolean | ""
   /**
-   * No segment box;  inside `<ui-tabs>`, the tabs decide.
-   * - takes:  flag (present / absent)
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
+  /**
+   * The look:  `basic`, no segment box;  inside `<ui-tabs>`, the tabs decide.  Old name:  `basic`.
+   * - takes:  space-separated:  `basic`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
    */
   basic?: boolean | ""
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:basic"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * A dark pane;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)
@@ -30021,7 +30289,7 @@ export interface UITableAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Coloured top edge;  with `inverted`, a coloured fill.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -30039,6 +30307,8 @@ export interface UITableAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -30059,6 +30329,8 @@ export interface UITableAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Borders between cells.
    * - takes:  flag (present / absent)
@@ -30150,25 +30422,27 @@ export interface UITableAttributes {
    */
   "prop:sortable"?: boolean | ""
   /**
-   * Every other body row is tinted.
-   * - takes:  flag (present / absent)
+   * The look, several words at once:  `basic` (no header fill), `very-basic` (no outer border or edge padding either), `striped` (every other body row tinted), `structured` (collapsed borders, for `rowspan` / `colspan` headers).  Old names:  `basic` (`basic="very"`), `striped`, `structured`.
+   * - takes:  space-separated:  `basic` · `very-basic` · `striped` · `structured`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
+   */
+  basic?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="striped"`.  It still works until every page is rewritten.
    */
   striped?: boolean | ""
   /**
-   * `striped`, as the DOM element's property.
-   * @deprecated write `striped` -- `prop:` stays only for compiled spell
-   */
-  "prop:striped"?: boolean | ""
-  /**
-   * Collapsed borders, for `rowspan` / `colspan` headers.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `appearance="structured"`.  It still works until every page is rewritten.
    */
   structured?: boolean | ""
   /**
-   * `structured`, as the DOM element's property.
-   * @deprecated write `structured` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:structured"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Never stacks rows into blocks, even on a viewport below 768px.
    * - takes:  flag (present / absent)
@@ -30180,45 +30454,37 @@ export interface UITableAttributes {
    */
   "prop:unstackable"?: boolean | ""
   /**
-   * `basic`:  no header fill;  `basic="very"`:  no outer border or edge padding either.
-   * - takes:  flag, or `very`
+   * Cell padding:  `xs` and `compact` less, `md` and `lg` more.  Old names:  `compact` (`compact="very"` is `xs`), `padded` (`padded="very"` is `lg`).
+   * - takes:  `xs` · `compact` · `md` · `lg`
    */
-  basic?: boolean | "" | "very"
+  padding?: "xs" | "compact" | "md" | "lg"
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
-  "prop:basic"?: boolean | "" | "very"
+  compact?: boolean | ""
   /**
-   * `compact` / `compact="very"`:  less cell padding.
-   * - takes:  flag, or `very`
+   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
    */
-  compact?: boolean | "" | "very"
+  padded?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | "" | "very"
+  "prop:padding"?: "xs" | "compact" | "md" | "lg"
   /**
-   * `padded` / `padded="very"`:  more cell padding.
-   * - takes:  flag, or `very`
+   * Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`.
+   * - takes:  `both` · `top` · `bottom`
    */
-  padded?: boolean | "" | "very"
+  attach?: "both" | "top" | "bottom"
   /**
-   * `padded`, as the DOM element's property.
-   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
    */
-  "prop:padded"?: boolean | "" | "very"
+  attached?: boolean | ""
   /**
-   * Joins a segment or another table:  `attached` (middle), `top` or `bottom`.
-   * - takes:  flag, or `top` · `bottom`
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  attached?: boolean | "" | "top" | "bottom"
-  /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
-   */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable="tablet"` also below 992px.  `stack-by="container"` follows the table's OWN width instead.
    * - takes:  flag, or `tablet`
@@ -30314,15 +30580,19 @@ export interface UITableAttributes {
     | "16"
     | (string & {})
   /**
-   * Text alignment of every cell.
+   * Text alignment of every cell.  Old name:  `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   "text-align"?: "left" | "center" | "right" | "justified"
   /**
-   * `text-align`, as the DOM element's property.
-   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:textAlign"?: "left" | "center" | "right" | "justified"
+  "prop:align"?: "left" | "center" | "right" | "justified"
   /**
    * Vertical alignment of every cell.
    * - takes:  `top` · `middle` · `bottom`
@@ -30590,7 +30860,7 @@ export interface UITabsAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the selected tab (`segmented`:  its fill;  default the primary colour).
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -30608,6 +30878,8 @@ export interface UITabsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -30628,56 +30900,38 @@ export interface UITabsAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * The tab list's look, as `<ui-menu appearance>`:  `tabular` (file-folder tabs), `pointing`, `secondary`, `text`, `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control).  The booleans below are aliases.
-   * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
+   * The look, several words at once:  the tab list's, as `<ui-menu appearance>` -- `tabular` (file-folder tabs), `pointing` (the selected tab points at its pane;  an underline with `secondary`), `secondary` (no box), `text` (plain words), `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control);  and the panes' -- `basic` (no segment box:  no border, no shadow).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `basic`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `basic`
    */
-  appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
+   */
+  tabular?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
+   */
+  pointing?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
+   */
+  text?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
+   */
+  basic?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
-  /**
-   * Tabs drawn as file-folder tabs (Fomantic's classic tab look).  Alias of `appearance="tabular"`.
-   * - takes:  flag (present / absent)
-   */
-  tabular?: boolean | ""
-  /**
-   * `tabular`, as the DOM element's property.
-   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
-   */
-  "prop:tabular"?: boolean | ""
-  /**
-   * The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance="pointing"`.
-   * - takes:  flag (present / absent)
-   */
-  pointing?: boolean | ""
-  /**
-   * `pointing`, as the DOM element's property.
-   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
-   */
-  "prop:pointing"?: boolean | ""
-  /**
-   * De-emphasized tabs:  no box.  Alias of `appearance="secondary"`.
-   * - takes:  flag (present / absent)
-   */
-  secondary?: boolean | ""
-  /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
-   */
-  "prop:secondary"?: boolean | ""
-  /**
-   * Plain text tabs.  Alias of `appearance="text"`.
-   * - takes:  flag (present / absent)
-   */
-  text?: boolean | ""
-  /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
-   */
-  "prop:text"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * The dark scheme for the tabs and the panes.
    * - takes:  flag (present / absent)
@@ -30689,15 +30943,19 @@ export interface UITabsAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them.
-   * - takes:  flag (present / absent)
+   * Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch.
+   * - takes:  `horizontal` · `vertical`
+   */
+  direction?: "horizontal" | "vertical"
+  /**
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:vertical"?: boolean | ""
+  "prop:direction"?: "horizontal" | "vertical"
   /**
    * The tab menu takes the full width (or, vertical, its column's).
    * - takes:  flag (present / absent)
@@ -30709,27 +30967,35 @@ export interface UITabsAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * The tab menu is only as wide as its tabs (Fomantic's `compact` menu).
-   * - takes:  flag (present / absent)
+   * `compact`:  the tab menu is only as wide as its tabs (Fomantic's `compact` menu).  Old name:  `compact`.
+   * - takes:  `compact`
+   */
+  padding?: "compact"
+  /**
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
   compact?: boolean | ""
   /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:padding"?: "compact"
   /**
-   * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `vertical`.
+   * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name is `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
+   */
+  align?: "fluid" | "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   alignment?: "fluid" | "left" | "center" | "right"
   /**
-   * `alignment`, as the DOM element's property.
-   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:alignment"?: "fluid" | "left" | "center" | "right"
+  "prop:align"?: "fluid" | "left" | "center" | "right"
   /**
-   * Every tab the same width, from the tabs themselves (no count):  with `alignment="fluid"` an equal share of the row each;  otherwise each as wide as the widest.
+   * Every tab the same width, from the tabs themselves (no count):  with `align="fluid"` an equal share of the row each;  otherwise each as wide as the widest.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
@@ -30739,25 +31005,19 @@ export interface UITabsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow.
-   * - takes:  flag (present / absent)
+   * Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`).
+   * - takes:  `top` · `bottom`
    */
-  basic?: boolean | ""
+  attach?: "top" | "bottom"
   /**
-   * `basic`, as the DOM element's property.
-   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `attach="top"`.  It still works until every page is rewritten.
    */
-  "prop:basic"?: boolean | ""
+  attached?: boolean | ""
   /**
-   * Joins the tab menu and the panes edge to edge:  bare or `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `attached="bottom"` puts them below.
-   * - takes:  flag, or `top` · `bottom`
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
-  attached?: boolean | "" | "top" | "bottom"
-  /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
-   */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:attach"?: "top" | "bottom"
   /**
    * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
    * - takes:  text
@@ -30984,7 +31244,7 @@ export interface UITextAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -31002,6 +31262,8 @@ export interface UITextAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -31022,6 +31284,8 @@ export interface UITextAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * Semantic colour of a status message.
    * - takes:  `error` · `info` · `success` · `warning`
@@ -31249,15 +31513,19 @@ export interface UITextareaAttributes {
    */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
-   * No box:  text only.
-   * - takes:  flag (present / absent)
+   * `transparent`:  no box, text only.  Old name:  `transparent`.
+   * - takes:  space-separated:  `transparent`
+   */
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="transparent"`.  It still works until every page is rewritten.
    */
   transparent?: boolean | ""
   /**
-   * `transparent`, as the DOM element's property.
-   * @deprecated write `transparent` -- `prop:` stays only for compiled spell
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:transparent"?: boolean | ""
+  "prop:appearance"?: string
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
@@ -32008,7 +32276,7 @@ export interface UIToastAttributes {
   "prop:type"?: "info" | "success" | "warning" | "error" | "neutral"
   /**
    * Hue:  a filled toast in that colour.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -32026,6 +32294,8 @@ export interface UIToastAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -32046,6 +32316,8 @@ export interface UIToastAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * The dark scheme;  a coloured one takes its light variant.
    * - takes:  flag (present / absent)
@@ -32395,7 +32667,7 @@ export interface UIToolbarAttributes {
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -32413,6 +32685,8 @@ export interface UIToolbarAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -32433,16 +32707,42 @@ export interface UIToolbarAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
-   * The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance="pointing" secondary` ~== `secondary pointing`.
-   * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless`
    */
-  appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  appearance?: string
+  /**
+   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
+   */
+  tabular?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
+   */
+  pointing?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
+   */
+  secondary?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
+   */
+  text?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
+   */
+  link?: boolean | ""
+  /**
+   * @deprecated An old name:  write `appearance="borderless"`.  It still works until every page is rewritten.
+   */
+  borderless?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  "prop:appearance"?: string
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
@@ -32454,55 +32754,19 @@ export interface UIToolbarAttributes {
    */
   "prop:position"?: "left" | "right" | "center"
   /**
-   * De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.
-   * - takes:  flag (present / absent)
+   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.
+   * - takes:  `horizontal` · `vertical`
    */
-  secondary?: boolean | ""
+  direction?: "horizontal" | "vertical"
   /**
-   * `secondary`, as the DOM element's property.
-   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
-   */
-  "prop:secondary"?: boolean | ""
-  /**
-   * The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance="pointing"`.
-   * - takes:  flag (present / absent)
-   */
-  pointing?: boolean | ""
-  /**
-   * `pointing`, as the DOM element's property.
-   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
-   */
-  "prop:pointing"?: boolean | ""
-  /**
-   * Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance="tabular"`.
-   * - takes:  flag (present / absent)
-   */
-  tabular?: boolean | ""
-  /**
-   * `tabular`, as the DOM element's property.
-   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
-   */
-  "prop:tabular"?: boolean | ""
-  /**
-   * Plain text items, no box.  Alias of `appearance="text"`.
-   * - takes:  flag (present / absent)
-   */
-  text?: boolean | ""
-  /**
-   * `text`, as the DOM element's property.
-   * @deprecated write `text` -- `prop:` stays only for compiled spell
-   */
-  "prop:text"?: boolean | ""
-  /**
-   * Items stacked top to bottom.
-   * - takes:  flag (present / absent)
+   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
    */
   vertical?: boolean | ""
   /**
-   * `vertical`, as the DOM element's property.
-   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
-  "prop:vertical"?: boolean | ""
+  "prop:direction"?: "horizontal" | "vertical"
   /**
    * Page links:  compact, centred items.
    * - takes:  flag (present / absent)
@@ -32534,16 +32798,6 @@ export interface UIToolbarAttributes {
    */
   "prop:labeled"?: boolean | ""
   /**
-   * Every item is interactive:  a `<button>` with the link hover.
-   * - takes:  flag (present / absent)
-   */
-  link?: boolean | ""
-  /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
-   */
-  "prop:link"?: boolean | ""
-  /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
@@ -32574,26 +32828,6 @@ export interface UIToolbarAttributes {
    */
   "prop:centered"?: boolean | ""
   /**
-   * No dividers between items.
-   * - takes:  flag (present / absent)
-   */
-  borderless?: boolean | ""
-  /**
-   * `borderless`, as the DOM element's property.
-   * @deprecated write `borderless` -- `prop:` stays only for compiled spell
-   */
-  "prop:borderless"?: boolean | ""
-  /**
-   * Only as wide as its items.
-   * - takes:  flag (present / absent)
-   */
-  compact?: boolean | ""
-  /**
-   * `compact`, as the DOM element's property.
-   * @deprecated write `compact` -- `prop:` stays only for compiled spell
-   */
-  "prop:compact"?: boolean | ""
-  /**
    * Items wrap onto more lines when they don't fit.
    * - takes:  flag (present / absent)
    */
@@ -32604,15 +32838,19 @@ export interface UIToolbarAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `wrapping`:  square corners where the lines meet.
+   * With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.
    * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
    */
   wrapped?: boolean | ""
   /**
-   * `wrapped`, as the DOM element's property.
-   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
    */
-  "prop:wrapped"?: boolean | ""
+  "prop:wrap"?: boolean | ""
   /**
    * The dark scheme;  with `color`, filled with the colour.
    * - takes:  flag (present / absent)
@@ -32634,25 +32872,37 @@ export interface UIToolbarAttributes {
    */
   "prop:floated"?: boolean | "" | "left" | "right"
   /**
-   * No item padding;  `horizontally` / `vertically` keep the other axis' padding.
-   * - takes:  flag, or `horizontally` · `vertically`
+   * `none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`.
+   * - takes:  `none` · `none-x` · `none-y` · `compact`
    */
-  fitted?: boolean | "" | "horizontally" | "vertically"
+  padding?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * `fitted`, as the DOM element's property.
-   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
    */
-  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  fitted?: boolean | ""
   /**
-   * Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.
-   * - takes:  flag, or `top` · `bottom`
+   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
    */
-  attached?: boolean | "" | "top" | "bottom"
+  compact?: boolean | ""
   /**
-   * `attached`, as the DOM element's property.
-   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
-  "prop:attached"?: boolean | "" | "top" | "bottom"
+  "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
+  /**
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.
+   * - takes:  `both` · `top` · `bottom`
+   */
+  attach?: "both" | "top" | "bottom"
+  /**
+   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
+   */
+  attached?: boolean | ""
+  /**
+   * `attach`, as the DOM element's property.
+   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   */
+  "prop:attach"?: "both" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
@@ -32664,17 +32914,21 @@ export interface UIToolbarAttributes {
    */
   "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
-   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name is `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
+   */
+  align?: "fluid" | "left" | "center" | "right"
+  /**
+   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
    */
   alignment?: "fluid" | "left" | "center" | "right"
   /**
-   * `alignment`, as the DOM element's property.
-   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
-  "prop:alignment"?: "fluid" | "left" | "center" | "right"
+  "prop:align"?: "fluid" | "left" | "center" | "right"
   /**
-   * Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
+   * Every item the same width, from the items themselves (no count):  with `align="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
@@ -32848,6 +33102,15 @@ export interface UIToolbarAttributes {
     | "glow"
     | "none"
   /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
    * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
    * - takes:  text
    */
@@ -32954,7 +33217,7 @@ export interface UITransitionAttributes {
   "prop:allowRepeats"?: boolean | ""
   /**
    * Hue of a `pulsating` ring.
-   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
     | "primary"
@@ -32972,6 +33235,8 @@ export interface UITransitionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -32992,6 +33257,8 @@ export interface UITransitionAttributes {
     | "brown"
     | "grey"
     | "black"
+    | "positive"
+    | "negative"
   /**
    * An inline block around inline content (an image, a button).
    * - takes:  flag (present / absent)
@@ -33960,9 +34227,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-button>`:  A button indicates a possible action.
        * - also known as:  btn, action, submit, link button
        * - slots:
-       *   - default:  Content, usually text;  instead of the `content` attribute.
-       *   - `icon`:  Icon, instead of the `icon` attribute;  the hidden content of `animated`.
-       *   - `label`:  Label content, instead of the `label` attribute.
+       *   - default:  Content, usually text;  instead of the `label` attribute.
+       *   - `icon`:  Icon, instead of the `icon` attribute;  the hidden content of `reveal`.
+       *   - `label`:  The joined badge's content, instead of the `badge` attribute.
        * - events:  `ui-selected`, `ui-deselected`
        */
       "ui-button": UIButtonJSXAttributes

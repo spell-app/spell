@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Visibility">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-visibility%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-visibility%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/behaviors/visibility.html"
+              link="https://fomantic-ui.com/behaviors/visibility.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -53,7 +53,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
@@ -101,7 +101,7 @@
                     </ui-column>
                     <ui-column>
                       <ui-sticky offset="64">
-                        <ui-table basic celled compact unstackable>
+                        <ui-table appearance="basic" celled padding="compact" unstackable>
                           <table>
                             <thead>
                               <tr>
@@ -193,7 +193,7 @@
                     Events occur at the first check where their conditions turn true, each Fomantic's callback as a
                     <code>ui-*</code> event. The log below shows the demo's events as you scroll past it.
                   </p>
-                  <ui-table slot="description" celled definition compact>
+                  <ui-table slot="description" celled definition padding="compact">
                     <table>
                       <thead>
                         <tr>
@@ -248,7 +248,7 @@
                       <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     </ui-segment>
                   </ui-visibility>
-                  <ui-segment secondary>
+                  <ui-segment appearance="secondary">
                     <ui-list id="visibility-log" divided size="small">
                       <ui-item>Scroll the page: events appear here, newest first.</ui-item>
                     </ui-list>
@@ -273,7 +273,7 @@
                   <ui-segment id="visibility-reversed">
                     <ui-image src="images/wireframe/media-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-segment secondary>
+                  <ui-segment appearance="secondary">
                     <ui-list id="visibility-reverse-log" divided size="small">
                       <ui-item>Scroll past, then back up: reverse callbacks appear here.</ui-item>
                     </ui-list>
@@ -310,7 +310,7 @@
                         <ui-content>
                           <ui-header>Elliot Fu</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -323,7 +323,7 @@
                         <ui-content>
                           <ui-header>Helen Troy</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -336,7 +336,7 @@
                         <ui-content>
                           <ui-header>Jenny Hess</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -349,7 +349,7 @@
                         <ui-content>
                           <ui-header>Veronika Ossi</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -362,7 +362,7 @@
                         <ui-content>
                           <ui-header>Stevie</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -375,7 +375,7 @@
                         <ui-content>
                           <ui-header>Steve Jobes</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -388,7 +388,7 @@
                         <ui-content>
                           <ui-header>Ade</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -401,7 +401,7 @@
                         <ui-content>
                           <ui-header>Chris</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -414,7 +414,7 @@
                         <ui-content>
                           <ui-header>Joe Henderson</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -427,7 +427,7 @@
                         <ui-content>
                           <ui-header>Laura</ui-header>
                           <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
-                          <ui-button primary>Add Friend</ui-button>
+                          <ui-button color="primary">Add Friend</ui-button>
                           <ui-button floated="right" labeled="right" icon="chevron right">View</ui-button>
                         </ui-content>
                       </ui-item>
@@ -457,13 +457,13 @@
                   </p>
                   <ui-visibility id="visibility-infinite" once="false">
                     <ui-segment>
-                      <ui-header level="3" text-align="center">Infinite Scroll Example</ui-header>
-                      <ui-list id="visibility-infinite-list" divided relaxed>
+                      <ui-header level="3" align="center">Infinite Scroll Example</ui-header>
+                      <ui-list id="visibility-infinite-list" divided spacing="lg">
                         <ui-item>Item 1</ui-item>
                         <ui-item>Item 2</ui-item>
                         <ui-item>Item 3</ui-item>
                       </ui-list>
-                      <ui-loader id="visibility-infinite-loader" inline centered size="small"></ui-loader>
+                      <ui-loader id="visibility-infinite-loader" inline align="center" size="small"></ui-loader>
                     </ui-segment>
                   </ui-visibility>
                 </ui-docs-example>

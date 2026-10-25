@@ -11,7 +11,7 @@ export const toolbarEs = {
   tag: "ui-toolbar",
   name: "barra-herramientas",
   aka: ["barra de herramientas", "pestañas desplazables", "menú desplazable"],
-  attributes: { pagination: "paginacion", borderless: "sin-borde", interactive: "interactivo" },
+  attributes: { pagination: "paginacion", interactive: "interactivo" },
   slots: { title: "titulo", center: "centro", right: "derecha" },
   parts: { center: "centro", right: "derecha" },
   texts: { scrollStart: "Desplazar atrás", scrollEnd: "Desplazar adelante" }

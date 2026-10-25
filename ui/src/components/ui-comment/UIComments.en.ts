@@ -32,10 +32,16 @@ export const commentsVocabulary = {
       description: "A line down the left of each thread of replies."
     },
     {
-      name: "minimal",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Each comment's actions hidden until the comment is hovered (and shown to keyboard focus)."
+      kind: "multiple",
+      values: ["minimal"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "minimal", value: "minimal" }],
+      description:
+        "The look:  `minimal`, each comment's actions hidden until the comment is hovered (and shown to keyboard " +
+        "focus).  Old name:  `minimal`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     { name: "collapsed", group: "states", kind: "keyOnly", description: "Hidden:  a thread of replies folded away." },

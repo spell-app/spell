@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Sidebar">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-sidebar%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-sidebar%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/sidebar.html"
+              link="https://fomantic-ui.com/modules/sidebar.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's sidebar page, its Definition tab section by section (Types, States, Variations), then its
@@ -71,14 +71,14 @@
                   >
                   <ui-pushable>
                     <ui-sidebar id="sidebar-simple" inverted aria-label="Site">
-                      <ui-menu vertical inverted fluid aria-label="Site">
-                        <ui-item href="#one">1</ui-item>
-                        <ui-item href="#two">2</ui-item>
-                        <ui-item href="#three">3</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Site">
+                        <ui-item link="#one">1</ui-item>
+                        <ui-item link="#two">2</ui-item>
+                        <ui-item link="#three">3</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-button commandfor="sidebar-simple" command="--toggle" icon="sidebar">Toggle</ui-button>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -93,14 +93,14 @@
                 >
                   <ui-pushable>
                     <ui-sidebar id="sidebar-labeled" width="thin" inverted aria-label="Sections">
-                      <ui-menu vertical inverted fluid labeled icon aria-label="Sections">
-                        <ui-item href="#home" icon="home">Home</ui-item>
-                        <ui-item href="#topics" icon="block layout">Topics</ui-item>
-                        <ui-item href="#friends" icon="smile">Friends</ui-item>
+                      <ui-menu direction="vertical" inverted fluid labeled icon aria-label="Sections">
+                        <ui-item link="#home" icon="home">Home</ui-item>
+                        <ui-item link="#topics" icon="block layout">Topics</ui-item>
+                        <ui-item link="#friends" icon="smile">Friends</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-button commandfor="sidebar-labeled" command="--toggle" icon="sidebar">Toggle</ui-button>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -121,14 +121,14 @@
                   >
                   <ui-pushable>
                     <ui-sidebar width="thin" transition="push" persistent visible aria-label="Sections">
-                      <ui-menu vertical fluid aria-label="Sections">
-                        <ui-item href="#alpha">Alpha</ui-item>
-                        <ui-item href="#beta">Beta</ui-item>
-                        <ui-item href="#gamma">Gamma</ui-item>
+                      <ui-menu direction="vertical" fluid aria-label="Sections">
+                        <ui-item link="#alpha">Alpha</ui-item>
+                        <ui-item link="#beta">Beta</ui-item>
+                        <ui-item link="#gamma">Gamma</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-pusher>
@@ -148,13 +148,13 @@
                   >
                   <ui-pushable>
                     <ui-sidebar id="sidebar-dimmed" transition="overlay" inverted aria-label="Dimmed">
-                      <ui-menu vertical inverted fluid aria-label="Dimmed">
-                        <ui-item href="#one">1</ui-item>
-                        <ui-item href="#two">2</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Dimmed">
+                        <ui-item link="#one">1</ui-item>
+                        <ui-item link="#two">2</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-button commandfor="sidebar-dimmed" command="--show" icon="sidebar">Show</ui-button>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -177,31 +177,31 @@
                   </ui-buttons>
                   <ui-pushable>
                     <ui-sidebar id="sidebar-position-left" inverted aria-label="Left">
-                      <ui-menu vertical inverted fluid aria-label="Left">
-                        <ui-item href="#one">One</ui-item>
-                        <ui-item href="#two">Two</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Left">
+                        <ui-item link="#one">One</ui-item>
+                        <ui-item link="#two">Two</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-position-right" position="right" inverted aria-label="Right">
-                      <ui-menu vertical inverted fluid aria-label="Right">
-                        <ui-item href="#one">One</ui-item>
-                        <ui-item href="#two">Two</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Right">
+                        <ui-item link="#one">One</ui-item>
+                        <ui-item link="#two">Two</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-position-top" position="top" inverted aria-label="Top">
                       <ui-menu inverted fluid aria-label="Top">
-                        <ui-item href="#one">One</ui-item>
-                        <ui-item href="#two">Two</ui-item>
+                        <ui-item link="#one">One</ui-item>
+                        <ui-item link="#two">Two</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-position-bottom" position="bottom" inverted aria-label="Bottom">
                       <ui-menu inverted fluid aria-label="Bottom">
-                        <ui-item href="#one">One</ui-item>
-                        <ui-item href="#two">Two</ui-item>
+                        <ui-item link="#one">One</ui-item>
+                        <ui-item link="#two">Two</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -236,21 +236,21 @@
                       inverted
                       aria-label="Very thin"
                     >
-                      <ui-menu vertical inverted fluid icon aria-label="Very thin">
-                        <ui-item href="#home" icon="home" aria-label="Home"></ui-item>
-                        <ui-item href="#topics" icon="block layout" aria-label="Topics"></ui-item>
+                      <ui-menu direction="vertical" inverted fluid icon aria-label="Very thin">
+                        <ui-item link="#home" icon="home" aria-label="Home"></ui-item>
+                        <ui-item link="#topics" icon="block layout" aria-label="Topics"></ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-width-thin" width="thin" transition="overlay" inverted aria-label="Thin">
-                      <ui-menu vertical inverted fluid aria-label="Thin"><ui-item href="#thin">Thin</ui-item></ui-menu>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Thin"><ui-item link="#thin">Thin</ui-item></ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-width-default" transition="overlay" inverted aria-label="Default">
-                      <ui-menu vertical inverted fluid aria-label="Default"
-                        ><ui-item href="#default">Default</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Default"
+                        ><ui-item link="#default">Default</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-width-wide" width="wide" transition="overlay" inverted aria-label="Wide">
-                      <ui-menu vertical inverted fluid aria-label="Wide"><ui-item href="#wide">Wide</ui-item></ui-menu>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Wide"><ui-item link="#wide">Wide</ui-item></ui-menu>
                     </ui-sidebar>
                     <ui-sidebar
                       id="sidebar-width-very-wide"
@@ -259,8 +259,8 @@
                       inverted
                       aria-label="Very wide"
                     >
-                      <ui-menu vertical inverted fluid aria-label="Very wide"
-                        ><ui-item href="#very-wide">Very wide</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Very wide"
+                        ><ui-item link="#very-wide">Very wide</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar
@@ -270,12 +270,12 @@
                       inverted
                       aria-label="A quarter"
                     >
-                      <ui-menu vertical inverted fluid aria-label="A quarter"
-                        ><ui-item href="#quarter">A quarter</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="A quarter"
+                        ><ui-item link="#quarter">A quarter</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-pusher>
@@ -289,10 +289,10 @@
                 >
                   <ui-pushable>
                     <ui-sidebar id="sidebar-blurring" blurring transition="overlay" aria-label="Blurring">
-                      <ui-menu vertical fluid aria-label="Blurring"><ui-item href="#one">One</ui-item></ui-menu>
+                      <ui-menu direction="vertical" fluid aria-label="Blurring"><ui-item link="#one">One</ui-item></ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-button commandfor="sidebar-blurring" command="--toggle" icon="sidebar">Toggle</ui-button>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -324,21 +324,21 @@
                   </ui-buttons>
                   <ui-pushable>
                     <ui-sidebar id="sidebar-transition-overlay" transition="overlay" inverted aria-label="Overlay">
-                      <ui-menu vertical inverted fluid aria-label="Overlay"
-                        ><ui-item href="#overlay">Overlay</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Overlay"
+                        ><ui-item link="#overlay">Overlay</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-transition-push" transition="push" inverted aria-label="Push">
-                      <ui-menu vertical inverted fluid aria-label="Push"><ui-item href="#push">Push</ui-item></ui-menu>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Push"><ui-item link="#push">Push</ui-item></ui-menu>
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-transition-scale" transition="scale down" inverted aria-label="Scale down">
-                      <ui-menu vertical inverted fluid aria-label="Scale down"
-                        ><ui-item href="#scale">Scale Down</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Scale down"
+                        ><ui-item link="#scale">Scale Down</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-transition-uncover" transition="uncover" inverted aria-label="Uncover">
-                      <ui-menu vertical inverted fluid aria-label="Uncover"
-                        ><ui-item href="#uncover">Uncover</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Uncover"
+                        ><ui-item link="#uncover">Uncover</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar
@@ -347,17 +347,17 @@
                       inverted
                       aria-label="Slide along"
                     >
-                      <ui-menu vertical inverted fluid aria-label="Slide along"
-                        ><ui-item href="#along">Slide Along</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Slide along"
+                        ><ui-item link="#along">Slide Along</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-sidebar id="sidebar-transition-out" transition="slide out" inverted aria-label="Slide out">
-                      <ui-menu vertical inverted fluid aria-label="Slide out"
-                        ><ui-item href="#out">Slide Out</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Slide out"
+                        ><ui-item link="#out">Slide Out</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -391,7 +391,7 @@
                       inverted
                       aria-label="Left"
                     >
-                      <ui-menu vertical inverted fluid aria-label="Left"><ui-item href="#left">Left</ui-item></ui-menu>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Left"><ui-item link="#left">Left</ui-item></ui-menu>
                     </ui-sidebar>
                     <ui-sidebar
                       id="sidebar-multiple-right"
@@ -402,12 +402,12 @@
                       inverted
                       aria-label="Right"
                     >
-                      <ui-menu vertical inverted fluid aria-label="Right"
-                        ><ui-item href="#right">Right</ui-item></ui-menu
+                      <ui-menu direction="vertical" inverted fluid aria-label="Right"
+                        ><ui-item link="#right">Right</ui-item></ui-menu
                       >
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-pusher>
@@ -431,24 +431,23 @@
                   <ui-message slot="description" state="info" size="small"
                     >A sidebar's context can't have any padding: pad its pusher's content instead.</ui-message
                   >
-                  <ui-menu attached="top" aria-label="Demo">
+                  <ui-menu attach="top" aria-label="Demo">
                     <ui-item>
-                      <ui-button commandfor="sidebar-context" command="--toggle" basic compact icon="sidebar"
-                        >Menu</ui-button
+                      <ui-button commandfor="sidebar-context" command="--toggle" icon="sidebar" appearance="basic" padding="compact">Menu</ui-button
                       >
                     </ui-item>
                   </ui-menu>
                   <ui-pushable>
                     <ui-sidebar id="sidebar-context" width="thin" inverted aria-label="Application">
-                      <ui-menu vertical inverted fluid labeled icon aria-label="Application">
-                        <ui-item href="#home" icon="home">Home</ui-item>
-                        <ui-item href="#topics" icon="block layout">Topics</ui-item>
-                        <ui-item href="#friends" icon="smile">Friends</ui-item>
-                        <ui-item href="#history" icon="calendar">History</ui-item>
+                      <ui-menu direction="vertical" inverted fluid labeled icon aria-label="Application">
+                        <ui-item link="#home" icon="home">Home</ui-item>
+                        <ui-item link="#topics" icon="block layout">Topics</ui-item>
+                        <ui-item link="#friends" icon="smile">Friends</ui-item>
+                        <ui-item link="#history" icon="calendar">History</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-header level="3">Application Content</ui-header>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -470,13 +469,13 @@
                   <ui-button commandfor="sidebar-trigger" command="--toggle">Trigger Sidebar</ui-button>
                   <ui-pushable>
                     <ui-sidebar id="sidebar-trigger" inverted aria-label="Triggered">
-                      <ui-menu vertical inverted fluid aria-label="Triggered">
-                        <ui-item href="#one">1</ui-item>
-                        <ui-item href="#two">2</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Triggered">
+                        <ui-item link="#one">1</ui-item>
+                        <ui-item link="#two">2</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-pusher>
@@ -497,13 +496,13 @@
                   <ui-button commandfor="sidebar-open" command="--show">Open Sidebar</ui-button>
                   <ui-pushable>
                     <ui-sidebar id="sidebar-open" inverted aria-label="Opened">
-                      <ui-menu vertical inverted fluid aria-label="Opened">
-                        <ui-item href="#one">1</ui-item>
-                        <ui-item href="#two">2</ui-item>
+                      <ui-menu direction="vertical" inverted fluid aria-label="Opened">
+                        <ui-item link="#one">1</ui-item>
+                        <ui-item link="#two">2</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-pusher>
@@ -527,15 +526,15 @@
                   >
                   <ui-pushable>
                     <ui-sidebar width="thin" transition="push" persistent visible inverted aria-label="Application">
-                      <ui-menu vertical inverted fluid labeled icon aria-label="Application">
-                        <ui-item href="#home" icon="home">Home</ui-item>
-                        <ui-item href="#topics" icon="block layout">Topics</ui-item>
-                        <ui-item href="#friends" icon="smile">Friends</ui-item>
-                        <ui-item href="#history" icon="calendar">History</ui-item>
+                      <ui-menu direction="vertical" inverted fluid labeled icon aria-label="Application">
+                        <ui-item link="#home" icon="home">Home</ui-item>
+                        <ui-item link="#topics" icon="block layout">Topics</ui-item>
+                        <ui-item link="#friends" icon="smile">Friends</ui-item>
+                        <ui-item link="#history" icon="calendar">History</ui-item>
                       </ui-menu>
                     </ui-sidebar>
                     <ui-pusher>
-                      <ui-segment basic>
+                      <ui-segment appearance="basic">
                         <ui-header level="3">Application Content</ui-header>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
@@ -578,9 +577,9 @@
                   <body>
                     <ui-pushable style="height: 100dvh">
                       <ui-sidebar id="site-menu" inverted aria-label="Site">
-                        <ui-menu vertical inverted fluid aria-label="Site">
-                          <ui-item href="/">Home</ui-item>
-                          <ui-item href="/topics">Topics</ui-item>
+                        <ui-menu direction="vertical" inverted fluid aria-label="Site">
+                          <ui-item link="/">Home</ui-item>
+                          <ui-item link="/topics">Topics</ui-item>
                         </ui-menu>
                       </ui-sidebar>
                       <ui-pusher>

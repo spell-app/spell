@@ -39,25 +39,33 @@ export const accordionVocabulary = {
   description: "An accordion lets people show and hide sections of content.",
   attributes: [
     {
-      name: "styled",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "A boxed accordion:  bordered, bold titles, padded content."
+      kind: "multiple",
+      values: ["styled", "basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [
+        { from: "styled", value: "styled" },
+        { from: "basic", value: "basic" }
+      ],
+      description:
+        "The look, several words at once:  `styled` (a boxed accordion:  bordered, bold titles, padded content), " +
+        "`basic` (with `styled`:  no box, no rules between titles -- only the styled spacing and title colours).  " +
+        "Old names:  `styled`, `basic`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme, for a dark background." },
     {
-      name: "basic",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "With `styled`:  no box, no rules between titles -- only the styled spacing and title colours."
-    },
-    {
-      name: "compact",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'Less padding around titles and content;  `compact="very"` less still (`very compact`).'
+      kind: "valueOnly",
+      values: ["compact", "xs"],
+      classes: { xs: "very compact" },
+      replaces: [{ from: "compact", value: "compact", values: { very: "xs" } }],
+      description:
+        "Less padding around titles and content:  `compact`, or `xs` for less still.  Old name:  `compact` " +
+        '(`compact="very"` is `xs`).'
     },
     {
       name: "tree",

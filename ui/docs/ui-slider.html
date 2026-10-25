@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Slider">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-slider%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-slider%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/slider.html"
+              link="https://fomantic-ui.com/modules/slider.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's slider page, its Definition tab section by section (Types, Variations), then its Examples tab
@@ -101,7 +101,7 @@
                 dividing
               >
                 <ui-docs-example description='A slider can display the labels below the track:  `aligned="bottom"`.'>
-                  <ui-slider labeled aligned="bottom" aria-label="Bottom aligned"></ui-slider>
+                  <ui-slider labeled align="bottom" aria-label="Bottom aligned"></ui-slider>
                 </ui-docs-example>
               </ui-section>
 
@@ -241,7 +241,7 @@
 
               <ui-section id="examples-variations-reversed" label="Reversed" sticky collapsible dividing>
                 <ui-docs-example description="A slider can be reversed:  it runs from the right.">
-                  <ui-slider reversed aria-label="Reversed"></ui-slider>
+                  <ui-slider direction="reversed" aria-label="Reversed"></ui-slider>
                 </ui-docs-example>
               </ui-section>
 
@@ -262,7 +262,7 @@
               <!-- GAP I83:  a vertical slider fills its host's height:  only an inline style sets it (as in Fomantic's own markup). -->
               <ui-section id="examples-variations-vertical" label="Vertical" sticky collapsible dividing>
                 <ui-docs-example description="A slider can be vertical, filling the host's height;  min at the top.">
-                  <ui-slider vertical style="height: 200px" aria-label="Vertical"></ui-slider>
+                  <ui-slider direction="vertical" style="height: 200px" aria-label="Vertical"></ui-slider>
                 </ui-docs-example>
               </ui-section>
 
@@ -275,13 +275,13 @@
                 dividing
               >
                 <ui-docs-example
-                  description='A vertical slider can have its ticks and labels right aligned:  `aligned="right"`.'
+                  description='A vertical slider can have its ticks and labels right aligned:  `align="right"`.'
                 >
                   <ui-slider
-                    vertical
+                    direction="vertical"
                     labeled
                     ticked
-                    aligned="right"
+                    align="right"
                     style="height: 200px"
                     aria-label="Right aligned"
                   ></ui-slider>
@@ -334,7 +334,7 @@
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A `basic` slider's thumbs take the fill colour instead of white.">
-                  <ui-slider basic color="blue" value="10" aria-label="Basic"></ui-slider>
+                  <ui-slider appearance="basic" color="blue" value="10" aria-label="Basic"></ui-slider>
                 </ui-docs-example>
               </ui-section>
 
@@ -437,8 +437,8 @@
                   - `min` / `max` / `step` default to Fomantic's 0, 20 and 1; `step="0"` allows any value.
                   - `value` is Fomantic's `start`; a `range` adds `end`. The attributes are the starting (and reset) values; the
                     `value` / `end` properties are the live ones.
-                  - `labeled` shows a label per step (thinned out on a short track), `ticked` adds ticks, `aligned` moves them
-                    (`bottom`; `right` on a `vertical` slider).
+                  - `labeled` shows a label per step (thinned out on a short track), `ticked` adds ticks, `align` moves them
+                    (`bottom`; `right` on a `direction="vertical"` slider).
                   - `step-labels` replaces the numbers: one label per step, from `min` (Fomantic's `labelType: 'letter'`,
                     `letters` and `interpretLabel`, written out). It's also what the thumb speaks.
                   - `smooth` lets the thumb glide under the pointer while the value still snaps.
@@ -491,7 +491,7 @@
                         value="20"
                         end="60"
                       ></ui-slider>
-                      <ui-button type="reset" basic icon="undo">Reset</ui-button>
+                      <ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
                     </form>
                   </ui-form>
                 </ui-docs-example>
@@ -508,7 +508,7 @@
                   | Home / End          | Move to the thumb's lowest / highest position        |
                   | Tab                 | Move to the next thumb (a `range` has two), then out |
 
-                  On a `vertical` slider the minimum is at the top, so Arrow Down increases; on a `reversed` one Arrow Left does.
+                  On a `direction="vertical"` slider the minimum is at the top, so Arrow Down increases; on a `reversed` one Arrow Left does.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -517,7 +517,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Each thumb is an ARIA `slider` (the APG pattern) with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`, and
-                  `aria-orientation` when `vertical`.
+                  `aria-orientation` when `direction="vertical"`.
 
                   - A single slider's thumb is named by the host's `aria-label` or a `<label for>`. A `range` is a group named
                     that way, with two thumbs, "Minimum" and "Maximum" (translatable); each stops at the other.

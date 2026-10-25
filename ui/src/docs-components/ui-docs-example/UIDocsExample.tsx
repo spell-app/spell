@@ -143,8 +143,6 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
         <div class={FRAME_CLASS}>
           <ui-button
             part={this.partForName("toggle")}
-            circular=""
-            basic=""
             icon={CODE_ICON}
             size={this.variation ? "mini" : "tiny"}
             aria-label={this.toggleLabel}
@@ -152,11 +150,12 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             aria-expanded={this.isCodeOpen ? "true" : "false"}
             aria-controls={CODE_PANE_ID}
             ref={(button: HTMLElement) => button.addEventListener("click", (event) => this.toggle(event))}
+            appearance="circular basic"
           />
           <ui-segment
             part={this.partForName("demo")}
-            basic={this.demoIsFramed ? undefined : ""}
-            attached={this.demoIsFramed ? UIT.TOP : undefined}
+            appearance={this.demoIsFramed ? undefined : "basic"}
+            attach={this.demoIsFramed ? UIT.TOP : undefined}
           >
             <slot />
           </ui-segment>
@@ -164,8 +163,8 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             <ui-segment
               id={CODE_PANE_ID}
               part={this.partForName("code")}
-              secondary=""
-              attached={this.bare ? undefined : UIT.BOTTOM}
+              attach={this.bare ? undefined : UIT.BOTTOM}
+              appearance="secondary"
             >
               <ui-code
                 part={this.partForName("source")}

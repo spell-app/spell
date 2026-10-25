@@ -1,8 +1,27 @@
 /**
- * What the `ui-button` family's component and its native fallback share:  `DOMElementClick`.
- * - No element code, so every file of the family may import it.
+ * What the `ui-button` family's files share:  `DOMElementClick`, and the vocabularies' renamed values.
+ * - No element code, so every file of the family may import it, its vocabularies included.
  * - A constant only `UIButton` reads sits below that class instead.
  */
+
+////////////////
+// ## Renamed attributes (epic `ui-gaps` P4, Owen's request r1)
+////////////////
+
+/** The old colour switches `color` replaces:  `<ui-button color="primary">` ~== `<ui-button color="primary">`. */
+export const COLOR_SWITCHES = ["primary", "secondary", "positive", "negative"].map((value) => ({
+  from: value,
+  value
+}))
+
+/** `attach`'s class words:  `both` was the bare `attached`;  a side is `<side> attached`. */
+export const ATTACH_CLASSES = {
+  both: "attached",
+  top: "top attached",
+  bottom: "bottom attached",
+  left: "left attached",
+  right: "right attached"
+} as const
 
 ////////////////
 // ## Clicking the DOM element

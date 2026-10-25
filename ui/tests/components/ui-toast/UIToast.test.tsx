@@ -681,8 +681,9 @@ describe("UI.toast()", () => {
     await element.ready
     const [keep, yes] = element.querySelectorAll<HTMLElement>("ui-button[slot=actions]")
     expect(keep!.getAttribute("color")).toBe("green")
-    expect(keep!.hasAttribute("basic")).toBe(true)
-    expect(yes!.hasAttribute("positive")).toBe(true)
+    // the old switches, as the button's new attributes (epic `ui-gaps` P4)
+    expect(keep!.getAttribute("appearance")).toBe("basic")
+    expect(yes!.getAttribute("color")).toBe("positive")
     expect(yes!.className).toBe("positive")
     await ElementFixture.settle(element)
     await userEvent.click(keep!)

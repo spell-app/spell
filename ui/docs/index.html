@@ -35,11 +35,11 @@
         home page's philosophy (`index.astro`, deleted in P7) folded in.  Fomantic's twitter / GitHub buttons,
         version label and jQuery debugging stripe are left out:  nothing here for them to say yet.
       -->
-      <ui-segment vertical inverted padded="very" class="site-masthead">
-        <ui-container text-align="center">
+      <ui-segment inverted padding="lg" class="site-masthead" appearance="vertical">
+        <ui-container align="center">
           <ui-menu icon inverted floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=Spell%20UI%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Spell%20UI%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -51,15 +51,15 @@
           </ui-header>
           <ui-divider spacer></ui-divider>
           <ui-button size="huge" inverted link="getting-started.html">Get Started</ui-button>
-          <ui-button size="huge" inverted basic link="components.html">Browse Components</ui-button>
+          <ui-button size="huge" inverted link="components.html" appearance="basic">Browse Components</ui-button>
         </ui-container>
       </ui-segment>
 
       <ui-container class="site-body">
         <article class="site-article">
-          <ui-segment vertical basic padded="very" text-align="center">
-            <ui-image src="images/devices.png" alt="" size="large" centered></ui-image>
-            <ui-header level="2" id="design" text-align="center">Design Beautiful Pages Quickly</ui-header>
+          <ui-segment padding="lg" align="center" appearance="vertical basic">
+            <ui-image src="images/devices.png" alt="" size="large" align="center"></ui-image>
+            <ui-header level="2" id="design" align="center">Design Beautiful Pages Quickly</ui-header>
             <ui-markdown>
               <script type="text/markdown">
                 Fomantic UI has the best vocabulary of any widget set: `ui small primary basic icon button` reads
@@ -75,14 +75,14 @@
             Fomantic's `very relaxed` gutters are left out:  they overflow the page's 1em phone margin (Fomantic's
             grids are `container`s).
           -->
-          <ui-segment vertical basic padded="very">
+          <ui-segment padding="lg" appearance="vertical basic">
             <ui-grid stackable vertical-align="middle">
               <ui-column width="7">
                 <ui-header level="2" id="concise-html">Concise HTML</ui-header>
                 <ui-markdown>
                   <script type="text/markdown">
                     Fomantic UI treats words and classes as exchangeable concepts. Spell UI makes the words
-                    attributes: `<ui-button size="small" primary basic>` renders `ui small basic primary button`
+                    attributes: `<ui-button size="small" color="primary" appearance="basic">` renders `ui small basic primary button`
                     on a real `<button>` inside its shadow root.
 
                     Noun-first grammar, and the Types / Content / States / Variations taxonomy on every page. If
@@ -93,7 +93,7 @@
               <ui-column width="9">
                 <ui-docs-example code>
                   <ui-buttons width="3">
-                    <ui-button active>One</ui-button>
+                    <ui-button selected>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
@@ -149,17 +149,17 @@
                 <ui-docs-example>
                   <ui-checkbox label="I enjoy having fun"></ui-checkbox>
                   <ui-divider spacer></ui-divider>
-                  <ui-checkbox type="slider" label="Receive weekly poodle newsletter"></ui-checkbox>
+                  <ui-checkbox appearance="slider" label="Receive weekly poodle newsletter"></ui-checkbox>
                   <ui-divider spacer></ui-divider>
-                  <ui-checkbox type="toggle" label="Make my dog's profile public"></ui-checkbox>
+                  <ui-checkbox appearance="toggle" label="Make my dog's profile public"></ui-checkbox>
                 </ui-docs-example>
               </ui-column>
             </ui-grid>
           </ui-segment>
 
-          <ui-segment vertical basic padded="very">
+          <ui-segment padding="lg" appearance="vertical basic">
             <ui-grid stackable columns="2" vertical-align="middle">
-              <ui-column text-align="center">
+              <ui-column align="center">
                 <ui-header level="2" icon id="theming">
                   <img src="images/icons/theming.png" alt="" />
                   Unbelievable Theming
@@ -177,11 +177,11 @@
                 <ui-docs-themes size="large"></ui-docs-themes>
                 <ui-divider></ui-divider>
                 <ui-button>View</ui-button>
-                <ui-button primary icon="shop">Add to Cart</ui-button>
-                <ui-button secondary icon="save">Save for Later</ui-button>
+                <ui-button icon="shop" color="primary">Add to Cart</ui-button>
+                <ui-button icon="save" color="secondary">Save for Later</ui-button>
                 <ui-button labeled icon="star">Rate</ui-button>
                 <ui-buttons>
-                  <ui-button active>1</ui-button>
+                  <ui-button selected>1</ui-button>
                   <ui-button>2</ui-button>
                   <ui-button>3</ui-button>
                 </ui-buttons>
@@ -189,8 +189,8 @@
             </ui-grid>
           </ui-segment>
 
-          <ui-segment vertical secondary padded="very">
-            <ui-grid stackable columns="3" divided text-align="center">
+          <ui-segment padding="lg" appearance="vertical secondary">
+            <ui-grid stackable columns="3" divided align="center">
               <ui-column>
                 <ui-header level="2" icon id="tokens">
                   <img src="images/icons/paint.png" alt="" />
@@ -210,7 +210,7 @@
                   Build a whole site with one UI stack, including the functional side: calendar, slider, toast,
                   flyout, form validation.
                 </p>
-                <ui-button size="large" primary link="components.html">Browse UI</ui-button>
+                <ui-button size="large" link="components.html" color="primary">Browse UI</ui-button>
               </ui-column>
               <ui-column>
                 <ui-header level="2" icon id="tested">
@@ -229,8 +229,8 @@
             </ui-grid>
           </ui-segment>
 
-          <ui-segment vertical basic padded="very">
-            <ui-header level="2" icon text-align="center" id="breadth">
+          <ui-segment padding="lg" appearance="vertical basic">
+            <ui-header level="2" icon align="center" id="breadth">
               <img src="images/icons/toolbox.png" alt="" />
               Unbelievable Breadth
             </ui-header>
@@ -243,30 +243,30 @@
             <ui-grid stackable columns="3">
               <ui-column>
                 <ui-header size="small" link="ui-menu.html">Menu</ui-header>
-                <ui-menu vertical>
+                <ui-menu direction="vertical">
                   <ui-item selected>Inbox <ui-label color="green">1</ui-label></ui-item>
                   <ui-item>Trash <ui-label>1</ui-label></ui-item>
                   <ui-item>
                     <ui-input
-                      transparent
+                      appearance="transparent"
                       icon="search"
                       placeholder="Search mail..."
                       aria-label="Search mail"
                     ></ui-input>
                   </ui-item>
                 </ui-menu>
-                <ui-menu secondary pointing vertical>
+                <ui-menu appearance="secondary pointing" direction="vertical">
                   <ui-item selected>Inbox</ui-item>
                   <ui-item>Starred</ui-item>
                   <ui-item>Trash</ui-item>
                 </ui-menu>
                 <ui-header size="small" link="ui-divider.html">Divider</ui-header>
                 <ui-segment>
-                  <ui-grid columns="2" text-align="center">
+                  <ui-grid columns="2" align="center">
                     <ui-column><ui-button>A</ui-button></ui-column>
                     <ui-column><ui-button color="teal">B</ui-button></ui-column>
                   </ui-grid>
-                  <ui-divider vertical>or</ui-divider>
+                  <ui-divider direction="vertical">or</ui-divider>
                 </ui-segment>
               </ui-column>
               <ui-column>
@@ -275,7 +275,7 @@
                   <ui-extra>22 Friends &middot; Joined in 2014</ui-extra>
                 </ui-card>
                 <ui-header size="small" link="ui-step.html">Step</ui-header>
-                <ui-steps vertical>
+                <ui-steps direction="vertical">
                   <ui-step
                     completed
                     icon="truck"
@@ -292,21 +292,21 @@
                 </ui-steps>
                 <ui-header size="small" link="ui-label.html">Label</ui-header>
                 <ui-list>
-                  <ui-item><ui-label color="red" circular empty></ui-label> Bug</ui-item>
-                  <ui-item><ui-label color="blue" circular empty></ui-label> Enhancement</ui-item>
-                  <ui-item><ui-label circular empty></ui-label> Change Declined</ui-item>
-                  <ui-item><ui-label color="yellow" circular empty></ui-label> Off Topic</ui-item>
-                  <ui-item><ui-label color="pink" circular empty></ui-label> Interesting</ui-item>
-                  <ui-item><ui-label color="green" circular empty></ui-label> Discussion</ui-item>
+                  <ui-item><ui-label color="red" empty appearance="circular"></ui-label> Bug</ui-item>
+                  <ui-item><ui-label color="blue" empty appearance="circular"></ui-label> Enhancement</ui-item>
+                  <ui-item><ui-label empty appearance="circular"></ui-label> Change Declined</ui-item>
+                  <ui-item><ui-label color="yellow" empty appearance="circular"></ui-label> Off Topic</ui-item>
+                  <ui-item><ui-label color="pink" empty appearance="circular"></ui-label> Interesting</ui-item>
+                  <ui-item><ui-label color="green" empty appearance="circular"></ui-label> Discussion</ui-item>
                 </ui-list>
                 <ui-header size="small" link="ui-segment.html">Segment</ui-header>
-                <ui-segment stacked></ui-segment>
-                <ui-segment raised></ui-segment>
-                <ui-segment secondary></ui-segment>
-                <ui-segment tertiary></ui-segment>
-                <ui-segment attached="top"></ui-segment>
-                <ui-segment attached></ui-segment>
-                <ui-segment attached="bottom"></ui-segment>
+                <ui-segment appearance="stacked"></ui-segment>
+                <ui-segment appearance="raised"></ui-segment>
+                <ui-segment appearance="secondary"></ui-segment>
+                <ui-segment appearance="tertiary"></ui-segment>
+                <ui-segment attach="top"></ui-segment>
+                <ui-segment attach="both"></ui-segment>
+                <ui-segment attach="bottom"></ui-segment>
               </ui-column>
               <ui-column>
                 <ui-header size="small" link="ui-input.html">Input</ui-header>
@@ -336,15 +336,15 @@
                 <ui-header size="small" link="ui-checkbox.html">Checkbox</ui-header>
                 <ui-checkbox label="I enjoy having fun"></ui-checkbox>
                 <ui-divider spacer></ui-divider>
-                <ui-checkbox type="slider" label="Receive weekly poodle newsletter"></ui-checkbox>
+                <ui-checkbox appearance="slider" label="Receive weekly poodle newsletter"></ui-checkbox>
                 <ui-divider spacer></ui-divider>
-                <ui-checkbox type="toggle" label="Make my dog's profile public"></ui-checkbox>
+                <ui-checkbox appearance="toggle" label="Make my dog's profile public"></ui-checkbox>
               </ui-column>
             </ui-grid>
           </ui-segment>
 
-          <ui-segment vertical basic padded="very">
-            <ui-grid stackable columns="2" divided text-align="center">
+          <ui-segment padding="lg" appearance="vertical basic">
+            <ui-grid stackable columns="2" divided align="center">
               <ui-column>
                 <ui-header level="2" icon id="responsive">
                   <img src="images/icons/mobile.png" alt="" />
@@ -370,7 +370,7 @@
             </ui-grid>
           </ui-segment>
 
-          <ui-segment vertical basic padded="very" text-align="center">
+          <ui-segment padding="lg" align="center" appearance="vertical basic">
             <ui-header level="2" icon id="get-started">
               <img src="images/icons/rocket.png" alt="" />
               Liberate Your Development
@@ -379,16 +379,15 @@
               Install it and learn the framework contract, see how attributes become classes, set tokens and themes,
               find an icon by name, or go straight to the components.
             </p>
-            <ui-list horizontal relaxed link>
-              <ui-item href="getting-started.html" icon="flag">Getting started</ui-item>
-              <ui-item href="grammar.html" icon="language">Grammar</ui-item>
-              <ui-item href="theming.html" icon="palette">Theming</ui-item>
-              <ui-item href="icons.html" icon="icons">Icons</ui-item>
-              <ui-item href="components.html" icon="cubes">Components</ui-item>
+            <ui-list direction="horizontal" spacing="lg" appearance="link">
+              <ui-item link="getting-started.html" icon="flag">Getting started</ui-item>
+              <ui-item link="grammar.html" icon="language">Grammar</ui-item>
+              <ui-item link="theming.html" icon="palette">Theming</ui-item>
+              <ui-item link="icons.html" icon="icons">Icons</ui-item>
+              <ui-item link="components.html" icon="cubes">Components</ui-item>
             </ui-list>
             <ui-divider spacer></ui-divider>
-            <ui-button size="large" primary labeled="right" icon="chevron right" link="getting-started.html"
-              >Get Started Now</ui-button
+            <ui-button size="large" labeled="right" icon="chevron right" link="getting-started.html" color="primary">Get Started Now</ui-button
             >
           </ui-segment>
         </article>

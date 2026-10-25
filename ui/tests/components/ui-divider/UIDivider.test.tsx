@@ -34,7 +34,11 @@ describe("<ui-divider> classes and markup", () => {
     ["horizontal", "ui horizontal divider"],
     ['horizontal="no"', "ui divider"],
     ['vertical="yes"', "ui vertical divider"],
-    ["fitted clearing section inverted", "ui clearing fitted inverted section divider"],
+    // the old names (epic ui-gaps P4), and the new
+    ["fitted clearing section inverted", "ui fitted clearing inverted section divider"],
+    ['padding="none" clearing section inverted', "ui fitted clearing inverted section divider"],
+    ["vertical", "ui vertical divider"],
+    ['direction="vertical"', "ui vertical divider"],
     ['horizontal text-align="left"', "ui horizontal left aligned divider"]
   ])("<ui-divider %s>", async (attributes, classes) => {
     const { root } = await divider(`<ui-divider ${attributes}>Or</ui-divider>`)

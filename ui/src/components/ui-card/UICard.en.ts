@@ -16,7 +16,7 @@ import type { E } from "spell-ui/core"
 /****************
  * ### `cardVocabulary`
  * The names of `<ui-card>`, a card of content parts, with shorthands:
- * an `<article class="ui ... card">` (an `<a>` with `href`).
+ * an `<article class="ui ... card">` (an `<a>` with `link`).
  ****************/
 export const cardVocabulary = {
   tag: "ui-card",
@@ -40,43 +40,61 @@ export const cardVocabulary = {
       description: "A coloured line along the bottom edge (a tinted fill when `basic`)."
     },
     {
-      name: "horizontal",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "Image and content side by side;  the extra content spans the bottom."
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description:
+        "`horizontal`:  image and content side by side;  the extra content spans the bottom.  " +
+        "Its old name is `horizontal`."
     },
     {
-      name: "raised",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Lifted off the page with a stronger shadow."
-    },
-    {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link."
+      kind: "multiple",
+      values: ["raised", "link", "basic", "dashed"],
+      classes: {},
+      replaces: [
+        { from: "raised", value: "raised" },
+        // `link` written bare, the old look, is read by the card itself:  `link` is the card's link now
+        { from: "basic", value: "basic" },
+        { from: "dashed", value: "dashed" }
+      ],
+      description:
+        "The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises " +
+        "on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), " +
+        "`dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  " +
+        "not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the width of its container." },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container." },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No border or shadow." },
     {
-      name: "dashed",
-      group: "appearance",
-      kind: "keyOnly",
-      description:
-        "A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's."
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  centred in its container.  Its old name is `centered`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {
       name: "disabled",
       group: "states",
       kind: "keyOnly",
-      description: "Faded and inert;  a link card loses its `href`."
+      description: "Faded and inert;  a link card loses its `link`."
     },
     { name: "loading", group: "states", kind: "keyOnly", description: "Dimmed under a spinner, announced as busy." },
-    { name: "href", group: "link", kind: "string", description: "Makes the whole card a link (`<a>`)." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description:
+        "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, " +
+        '`appearance="link"`.  Its old name is `href`.'
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {
       name: "heading",
       replaces: ["header"],
@@ -120,7 +138,7 @@ export const cardVocabulary = {
     }
   ],
   parts: [
-    { name: "card", description: "The card box (`<article>`, or `<a>` with `href`)." },
+    { name: "card", description: "The card box (`<article>`, or `<a>` with `link`)." },
     { name: "image", description: "The `image` shorthand's box." },
     { name: "content", description: "The content block the `header` / `meta` / `description` shorthands render." },
     { name: "header", description: "The `header` shorthand." },

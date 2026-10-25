@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Reveal">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-reveal%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-reveal%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/reveal.html"
+              link="https://fomantic-ui.com/elements/reveal.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -53,7 +53,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's reveal page, section by section, in its order (Types, Content, States, Variations), plus our
@@ -118,41 +118,17 @@
                 >
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's <code>circular reveal image</code> coupling -- the reveal has no image look
-                    of its own, so put a <code>&lt;ui-image circular&gt;</code> in each content.</ui-message
+                    of its own, so put a <code>&lt;ui-image appearance="circular"&gt;</code> in each content.</ui-message
                   >
                   <ui-reveal rotate aria-label="Rotate demo">
-                    <ui-image
-                      slot="visible"
-                      size="small"
-                      circular
-                      src="images/wireframe/square-image.png"
-                      alt=""
-                    ></ui-image>
-                    <ui-image
-                      slot="hidden"
-                      size="small"
-                      circular
-                      src="images/avatar/large/stevie.jpg"
-                      alt="Stevie"
-                    ></ui-image>
+                    <ui-image slot="visible" size="small" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
+                    <ui-image slot="hidden" size="small" src="images/avatar/large/stevie.jpg" alt="Stevie" appearance="circular"></ui-image>
                   </ui-reveal>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-reveal rotate="left" aria-label="Rotate left demo">
-                    <ui-image
-                      slot="visible"
-                      size="small"
-                      circular
-                      src="images/wireframe/square-image.png"
-                      alt=""
-                    ></ui-image>
-                    <ui-image
-                      slot="hidden"
-                      size="small"
-                      circular
-                      src="images/avatar/large/veronika.jpg"
-                      alt="Veronika"
-                    ></ui-image>
+                    <ui-image slot="visible" size="small" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
+                    <ui-image slot="hidden" size="small" src="images/avatar/large/veronika.jpg" alt="Veronika" appearance="circular"></ui-image>
                   </ui-reveal>
                 </ui-docs-example>
               </ui-section>
@@ -260,21 +236,9 @@
                 <ui-docs-example
                   description="A reveal can keep its overflowing content visible instead of clipping it (Fomantic calls it a visible reveal), as the rotating corner here."
                 >
-                  <ui-reveal unclipped rotate aria-label="Unclipped demo">
-                    <ui-image
-                      slot="visible"
-                      size="small"
-                      circular
-                      src="images/wireframe/square-image.png"
-                      alt=""
-                    ></ui-image>
-                    <ui-image
-                      slot="hidden"
-                      size="small"
-                      circular
-                      src="images/avatar/large/tom.jpg"
-                      alt="Tom"
-                    ></ui-image>
+                  <ui-reveal clip="none" rotate aria-label="Unclipped demo">
+                    <ui-image slot="visible" size="small" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
+                    <ui-image slot="hidden" size="small" src="images/avatar/large/tom.jpg" alt="Tom" appearance="circular"></ui-image>
                   </ui-reveal>
                 </ui-docs-example>
               </ui-section>

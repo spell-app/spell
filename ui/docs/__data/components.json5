@@ -174,9 +174,23 @@
       "noun": "accordion",
       "attributes": [
         {
-          "name": "styled",
-          "kind": "keyOnly",
-          "description": "A boxed accordion:  bordered, bold titles, padded content."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "styled",
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "styled",
+              "value": "styled"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  `styled` (a boxed accordion:  bordered, bold titles, padded content), `basic` (with `styled`:  no box, no rules between titles -- only the styled spacing and title colours).  Old names:  `styled`, `basic`."
         },
         {
           "name": "fluid",
@@ -189,17 +203,19 @@
           "description": "The dark scheme, for a dark background."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "With `styled`:  no box, no rules between titles -- only the styled spacing and title colours."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "compact",
+            "xs"
           ],
-          "description": "Less padding around titles and content;  `compact=\"very\"` less still (`very compact`)."
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "Less padding around titles and content:  `compact`, or `xs` for less still.  Old name:  `compact` (`compact=\"very\"` is `xs`)."
         },
         {
           "name": "tree",
@@ -525,7 +541,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Menu:  hue of the item while selected (`red active item`)."
@@ -542,12 +560,17 @@
         {
           "name": "value",
           "kind": "string",
-          "description": "Value;  defaults to `text`.  Ordered list:  shown as the marker."
+          "description": "Value;  defaults to `label`.  Ordered list:  shown as the marker."
         },
         {
-          "name": "text",
+          "name": "label",
           "kind": "string",
-          "description": "Dropdown:  text;  defaults to the text content."
+          "replaces": [
+            {
+              "name": "text"
+            }
+          ],
+          "description": "Dropdown:  its words;  defaults to the text content.  Its old name is `text`."
         },
         {
           "name": "description",
@@ -570,19 +593,33 @@
           "description": "Dropdown:  country code, shown as a flag before the text."
         },
         {
-          "name": "href",
+          "name": "link",
           "kind": "string",
-          "description": "List / menu:  renders a link (`<a>`)."
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`."
         },
         {
           "name": "target",
           "kind": "string",
-          "description": "Link target, with `href`."
+          "description": "Link target, with `link`."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "replaces": [
+            {
+              "name": "link",
+              "value": "link"
+            }
+          ],
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -595,16 +632,23 @@
           "description": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted."
         },
         {
-          "name": "fitted",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "horizontally",
-            "vertically"
+            "none",
+            "none-x",
+            "none-y"
           ],
-          "description": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding."
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`)."
         },
         {
-          "name": "type",
+          "name": "kind",
           "kind": "enum",
           "values": [
             "item",
@@ -612,7 +656,12 @@
             "divider"
           ],
           "default": "item",
-          "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown)."
+          "replaces": [
+            {
+              "name": "type"
+            }
+          ],
+          "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`."
         },
         {
           "name": "action",
@@ -701,12 +750,6 @@
           "kind": "string",
           "shared": true,
           "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
       "slots": [
@@ -1056,9 +1099,18 @@
           "description": "IAB unit, e.g. `medium rectangle` (300 x 250), `leaderboard` (728 x 90).  Mobile units (`mobile leaderboard`, `large mobile banner`) show only on phone-sized viewports."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Centred in its container."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  centred in its container.  Its old name is `centered`."
         },
         {
           "name": "test",
@@ -1867,9 +1919,14 @@
       "noun": "section",
       "attributes": [
         {
-          "name": "active",
+          "name": "selected",
           "kind": "keyOnly",
-          "description": "The current page:  bold, not a link, `aria-current=\"page\"`."
+          "replaces": [
+            {
+              "name": "active"
+            }
+          ],
+          "description": "The current page:  bold, not a link, `aria-current=\"page\"`.  Its old name is `active`."
         },
         {
           "name": "link",
@@ -1995,8 +2052,8 @@
       ],
       "states": [
         {
-          "name": "active",
-          "description": "The current page."
+          "name": "selected",
+          "description": "The current page (`selected`)."
         },
         {
           "name": "disabled",
@@ -2096,40 +2153,54 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
-          "description": "Hue;  fills the button (or its ring and text when `basic`)."
+          "replaces": [
+            {
+              "name": "primary",
+              "value": "primary"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "positive",
+              "value": "positive"
+            },
+            {
+              "name": "negative",
+              "value": "negative"
+            }
+          ],
+          "description": "Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, `positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone."
         },
         {
-          "name": "primary",
-          "kind": "keyOnly",
-          "description": "Primary emphasis:  the `primary` brand colour."
-        },
-        {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "Secondary emphasis:  the `secondary` brand colour."
-        },
-        {
-          "name": "positive",
-          "kind": "keyOnly",
-          "description": "Positive consequence:  the `positive` colour."
-        },
-        {
-          "name": "negative",
-          "kind": "keyOnly",
-          "description": "Negative consequence:  the `negative` colour."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Less pronounced:  transparent with a hairline ring."
-        },
-        {
-          "name": "tertiary",
-          "kind": "keyOnly",
-          "description": "Least pronounced:  text only, underlined on hover."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic",
+            "tertiary",
+            "circular"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "tertiary",
+              "value": "tertiary"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            }
+          ],
+          "description": "The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), `tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone."
         },
         {
           "name": "inverted",
@@ -2139,22 +2210,27 @@
         {
           "name": "toggle",
           "kind": "keyOnly",
-          "description": "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
+          "description": "Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
         },
         {
-          "name": "active",
+          "name": "selected",
           "kind": "keyOnly",
-          "description": "Pressed / on;  with `toggle`, in the positive colour."
+          "replaces": [
+            {
+              "name": "active"
+            }
+          ],
+          "description": "Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`."
         },
         {
           "name": "active-text",
           "kind": "string",
-          "description": "Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
+          "description": "Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
         },
         {
           "name": "inactive-text",
           "kind": "string",
-          "description": "Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content."
+          "description": "Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content."
         },
         {
           "name": "disabled",
@@ -2172,24 +2248,33 @@
           "description": "Takes the full width of its container."
         },
         {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Pill shaped;  round when it holds only an icon."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none",
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "unpadded",
+              "value": "none"
+            }
+          ],
+          "description": "Room inside it:  `compact` (reduced) or `none` (hugs its content).  Old names:  `compact`, `unpadded`."
         },
         {
-          "name": "compact",
+          "name": "wrap",
           "kind": "keyOnly",
-          "description": "Reduced padding."
-        },
-        {
-          "name": "unpadded",
-          "kind": "keyOnly",
-          "description": "No padding at all, as `compact` taken to none:  hugs its content."
-        },
-        {
-          "name": "wrapped",
-          "kind": "keyOnly",
-          "description": "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line."
+          "replaces": [
+            {
+              "name": "wrapped"
+            }
+          ],
+          "description": "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name is `wrapped`."
         },
         {
           "name": "ellipsis",
@@ -2203,27 +2288,41 @@
             "left",
             "right"
           ],
-          "description": "With `icon`:  the icon in its own block, `labeled` (start) or `labeled=\"right\"`.  With `label`:  which side the label goes, `labeled` (end) or `labeled=\"left\"`."
+          "description": "With `icon`:  the icon in its own block, `labeled` (start) or `labeled=\"right\"`.  With `badge`:  which side the badge goes, `labeled` (end) or `labeled=\"left\"`."
         },
         {
-          "name": "animated",
-          "kind": "keyOrValueAndKey",
+          "name": "reveal",
+          "kind": "valueOnly",
           "values": [
+            "slide",
             "fade",
             "vertical"
           ],
-          "description": "Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`."
+          "replaces": [
+            {
+              "name": "animated",
+              "value": "slide"
+            }
+          ],
+          "description": "Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  Its old name is `animated`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom",
             "left",
             "right"
           ],
-          "description": "Joined to the edge of a segment or another element:  `top`, `bottom`, `left` or `right`."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`."
         },
         {
           "name": "floated",
@@ -2250,14 +2349,19 @@
           "description": "Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`."
         },
         {
-          "name": "content",
-          "kind": "string",
-          "description": "Shorthand for the button's text, instead of the default slot;  slotted children win."
-        },
-        {
           "name": "label",
           "kind": "string",
-          "description": "Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button."
+          "replaces": [
+            {
+              "name": "content"
+            }
+          ],
+          "description": "Shorthand for the button's text, instead of the default slot;  slotted children win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`."
+        },
+        {
+          "name": "badge",
+          "kind": "string",
+          "description": "Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  It was `label` (no old name:  `label` is the text now)."
         },
         {
           "name": "type",
@@ -2386,27 +2490,27 @@
       "slots": [
         {
           "name": "",
-          "description": "Content, usually text;  instead of the `content` attribute."
+          "description": "Content, usually text;  instead of the `label` attribute."
         },
         {
           "name": "icon",
-          "description": "Icon, instead of the `icon` attribute;  the hidden content of `animated`."
+          "description": "Icon, instead of the `icon` attribute;  the hidden content of `reveal`."
         },
         {
           "name": "label",
-          "description": "Label content, instead of the `label` attribute."
+          "description": "The joined badge's content, instead of the `badge` attribute."
         }
       ],
       "events": [
         {
           "name": "ui-selected",
           "detail": "{ active: true, originalEvent?: Event }",
-          "description": "A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`."
+          "description": "A `toggle` button turned `selected` on.  NOTE: plain clicks are the native `click`."
         },
         {
           "name": "ui-deselected",
           "detail": "{ active: false, originalEvent?: Event }",
-          "description": "A `toggle` button turned `active` off."
+          "description": "A `toggle` button turned `selected` off."
         }
       ],
       "parts": [
@@ -2420,13 +2524,13 @@
         },
         {
           "name": "label",
-          "description": "The joined label of a `label` button."
+          "description": "The joined badge of a `badge` button."
         }
       ],
       "states": [
         {
           "name": "active",
-          "description": "Pressed / on."
+          "description": "Pressed / on (`selected`)."
         },
         {
           "name": "disabled",
@@ -2438,7 +2542,7 @@
         },
         {
           "name": "fluid",
-          "description": "The host is block-level:  `fluid`, or attached `top` / `bottom` / bare."
+          "description": "The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`."
         },
         {
           "name": "left-floated",
@@ -2545,40 +2649,54 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
-          "description": "Hue of every button in the group."
+          "replaces": [
+            {
+              "name": "primary",
+              "value": "primary"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "positive",
+              "value": "positive"
+            },
+            {
+              "name": "negative",
+              "value": "negative"
+            }
+          ],
+          "description": "Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone."
         },
         {
-          "name": "primary",
-          "kind": "keyOnly",
-          "description": "Every button in the primary colour."
-        },
-        {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "Every button in the secondary colour."
-        },
-        {
-          "name": "positive",
-          "kind": "keyOnly",
-          "description": "Every button in the positive colour."
-        },
-        {
-          "name": "negative",
-          "kind": "keyOnly",
-          "description": "Every button in the negative colour."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Basic buttons inside one outer border."
-        },
-        {
-          "name": "tertiary",
-          "kind": "keyOnly",
-          "description": "Tertiary (text only) buttons."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic",
+            "tertiary",
+            "circular"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "tertiary",
+              "value": "tertiary"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            }
+          ],
+          "description": "The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` (text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`."
         },
         {
           "name": "inverted",
@@ -2600,24 +2718,37 @@
           "description": "With `icon`:  `labeled icon` buttons;  `labeled=\"right\"` puts the icons at the end."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Reduced padding."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Separate pill-shaped buttons."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "Room inside every button:  `compact` (reduced).  Its old name is `compact`."
         },
         {
           "name": "toggle",
           "kind": "keyOnly",
-          "description": "`active` buttons show in the positive colour."
+          "description": "`selected` buttons show in the positive colour."
         },
         {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "Stacks the buttons vertically."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "vertical"
+          ],
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "Which way the buttons run:  `vertical` stacks them.  Its old name is `vertical`."
         },
         {
           "name": "fluid",
@@ -2635,9 +2766,18 @@
           "description": "Buttons wrap onto more rows."
         },
         {
-          "name": "spaced",
-          "kind": "keyOnly",
-          "description": "Separate buttons with gaps between them."
+          "name": "spacing",
+          "kind": "valueOnly",
+          "values": [
+            "md"
+          ],
+          "replaces": [
+            {
+              "name": "spaced",
+              "value": "md"
+            }
+          ],
+          "description": "Room between the buttons:  `md` separates them with gaps.  Its old name is `spaced`."
         },
         {
           "name": "stackable",
@@ -2645,15 +2785,22 @@
           "description": "Stacks vertically on mobile."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom",
             "left",
             "right"
           ],
-          "description": "Joined to the edge of a segment:  `top`, `bottom`, `left` or `right`."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`."
         },
         {
           "name": "floated",
@@ -2812,7 +2959,7 @@
       "states": [
         {
           "name": "fluid",
-          "description": "The host is block-level:  `fluid`, `width`, or attached `top` / `bottom`."
+          "description": "The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`."
         },
         {
           "name": "left-floated",
@@ -2920,7 +3067,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the chosen cell, the range and the focus ring (a remap of `--ui-color`)."
@@ -2931,9 +3080,18 @@
           "description": "For dark backgrounds:  the dark scheme's colours."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Tighter cells."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  tighter cells.  Old name:  `compact`."
         },
         {
           "name": "fluid",
@@ -3444,25 +3602,51 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "A coloured line along the bottom edge (a tinted fill when `basic`)."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Image and content side by side;  the extra content spans the bottom."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name is `horizontal`."
         },
         {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "Lifted off the page with a stronger shadow."
-        },
-        {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "raised",
+            "link",
+            "basic",
+            "dashed"
+          ],
+          "replaces": [
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "dashed",
+              "value": "dashed"
+            }
+          ],
+          "description": "The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`."
         },
         {
           "name": "fluid",
@@ -3470,19 +3654,18 @@
           "description": "Takes the width of its container."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Centred in its container."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No border or shadow."
-        },
-        {
-          "name": "dashed",
-          "kind": "keyOnly",
-          "description": "A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  centred in its container.  Its old name is `centered`."
         },
         {
           "name": "inverted",
@@ -3492,7 +3675,7 @@
         {
           "name": "disabled",
           "kind": "keyOnly",
-          "description": "Faded and inert;  a link card loses its `href`."
+          "description": "Faded and inert;  a link card loses its `link`."
         },
         {
           "name": "loading",
@@ -3500,14 +3683,19 @@
           "description": "Dimmed under a spinner, announced as busy."
         },
         {
-          "name": "href",
+          "name": "link",
           "kind": "string",
-          "description": "Makes the whole card a link (`<a>`)."
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name is `href`."
         },
         {
           "name": "target",
           "kind": "string",
-          "description": "Link target, with `href`."
+          "description": "Link target, with `link`."
         },
         {
           "name": "heading",
@@ -3632,7 +3820,7 @@
       "parts": [
         {
           "name": "card",
-          "description": "The card box (`<article>`, or `<a>` with `href`)."
+          "description": "The card box (`<article>`, or `<a>` with `link`)."
         },
         {
           "name": "image",
@@ -3765,7 +3953,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Colour of every card in the group."
@@ -3807,29 +3997,52 @@
           "description": "What `stackable` and `doubling` measure:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`)."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Centres each row of cards."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  centres each row of cards.  Its old name is `centered`."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Every card horizontal."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  every card horizontal.  Its old name is `horizontal`."
         },
         {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "Every card raised."
-        },
-        {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Every card rises on hover (a look;  links need `href`)."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Every card without border or shadow."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "raised",
+            "link",
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`."
         },
         {
           "name": "inverted",
@@ -3896,6 +4109,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -4048,19 +4272,26 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line."
         },
         {
-          "name": "type",
+          "name": "appearance",
           "kind": "valueOnly",
           "values": [
             "slider",
             "toggle"
           ],
-          "description": "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`."
+          "replaces": [
+            {
+              "name": "type"
+            }
+          ],
+          "description": "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`.  Old name:  `type`."
         },
         {
           "name": "indeterminate",
@@ -4068,9 +4299,18 @@
           "description": "Neither on nor off (a dash);  a click clears it, as natively."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No room for a label:  just the box."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no room for a label, just the box.  Old name:  `fitted`."
         },
         {
           "name": "invisible",
@@ -4078,9 +4318,18 @@
           "description": "No box:  the LABEL is the control, bordered while unchosen and tinted when chosen."
         },
         {
-          "name": "right-aligned",
-          "kind": "keyOnly",
-          "description": "Box after the label, at the end of the line."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "right"
+          ],
+          "replaces": [
+            {
+              "name": "right-aligned",
+              "value": "right"
+            }
+          ],
+          "description": "`right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`."
         },
         {
           "name": "disabled",
@@ -4683,7 +4932,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Fills the column with a hue, contrast text on top."
@@ -4843,13 +5094,18 @@
           "description": "Pushed to the `left` or `right` end."
         },
         {
-          "name": "attached",
-          "kind": "valueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
             "left",
             "right"
           ],
-          "description": "No gutter on the `left` / `right` side."
+          "replaces": [
+            {
+              "name": "attached"
+            }
+          ],
+          "description": "No gutter on the `left` / `right` side.  Its old name is `attached`."
         },
         {
           "name": "centered",
@@ -4874,7 +5130,7 @@
           "description": "Shown only on these devices (by the viewport)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -4883,7 +5139,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns its text `left`, `center`, `right` or `justified`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
         },
         {
           "name": "vertical-align",
@@ -5301,9 +5562,18 @@
           "description": "A line down the left of each thread of replies."
         },
         {
-          "name": "minimal",
-          "kind": "keyOnly",
-          "description": "Each comment's actions hidden until the comment is hovered (and shown to keyboard focus)."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "minimal"
+          ],
+          "replaces": [
+            {
+              "name": "minimal",
+              "value": "minimal"
+            }
+          ],
+          "description": "The look:  `minimal`, each comment's actions hidden until the comment is hovered (and shown to keyboard focus).  Old name:  `minimal`."
         },
         {
           "name": "inverted",
@@ -5711,15 +5981,22 @@
           "description": "Holds a grid:  widened by the grid's gutters so its columns line up with other containers."
         },
         {
-          "name": "relaxed",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "lg",
+            "xl"
           ],
-          "description": "With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters."
+          "replaces": [
+            {
+              "name": "relaxed",
+              "value": "lg"
+            }
+          ],
+          "description": "With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name is `relaxed`."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -5728,7 +6005,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation)."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`."
         },
         {
           "name": "scrolling",
@@ -5948,7 +6230,7 @@
           "description": "Floats `left` or `right`."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -5957,7 +6239,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`)."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`."
         },
         {
           "name": "vertical-align",
@@ -6821,9 +7108,18 @@
           "description": "Blurs and greys what's behind it (`backdrop-filter`)."
         },
         {
-          "name": "simple",
-          "kind": "keyOnly",
-          "description": "Fomantic's CSS-only dimmer;  the element's look is the same."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "simple"
+          ],
+          "replaces": [
+            {
+              "name": "simple",
+              "value": "simple"
+            }
+          ],
+          "description": "The look:  `simple`, Fomantic's CSS-only dimmer;  the element's look is the same.  Old name:  `simple`."
         },
         {
           "name": "disabled",
@@ -7117,20 +7413,31 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the rule and the text."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Text (or an icon) between two horizontal rules."
-        },
-        {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "A vertical rule with optional text, centred in a `position: relative` owner (segment, grid)."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            },
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "`horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`."
         },
         {
           "name": "spacer",
@@ -7138,9 +7445,18 @@
           "description": "The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  Renamed because `hidden` hides every element, as the platform's does."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No space above or below."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no space above or below.  Its old name is `fitted`."
         },
         {
           "name": "clearing",
@@ -7158,14 +7474,19 @@
           "description": "For dark backgrounds."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "With `direction=\"horizontal\"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`."
         },
         {
           "name": "icon",
@@ -7398,7 +7719,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue:  fills a `button` dropdown;  accents a selection's focus border and labels."
@@ -7450,9 +7773,18 @@
           "description": "A labeled icon button:  the `icon` in its own block, no caret.  Use with `button`."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "No minimum width;  the menu sizes to its items."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  no minimum width;  the menu sizes to its items.  Old name:  `compact`."
         },
         {
           "name": "fluid",
@@ -7465,14 +7797,18 @@
           "description": "The menu scrolls after a fixed height."
         },
         {
-          "name": "upward",
-          "kind": "keyOnly",
-          "description": "Opens above (the menu still flips when there's no room)."
-        },
-        {
-          "name": "simple",
-          "kind": "keyOnly",
-          "description": "Opens on hover / focus, with no script and no popover."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "simple"
+          ],
+          "replaces": [
+            {
+              "name": "simple",
+              "value": "simple"
+            }
+          ],
+          "description": "`simple`:  opens on hover / focus, with no script and no popover.  Old name:  `simple`."
         },
         {
           "name": "clearable",
@@ -7501,9 +7837,18 @@
           "description": "For dark backgrounds:  the dark scheme's colours."
         },
         {
-          "name": "unlimited",
-          "kind": "keyOnly",
-          "description": "A selection menu that never scrolls."
+          "name": "limit",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "unlimited",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  a selection menu that never scrolls.  Old name:  `unlimited`."
         },
         {
           "name": "resizable",
@@ -7511,24 +7856,33 @@
           "description": "A `scrolling` menu people can resize vertically."
         },
         {
-          "name": "short",
-          "kind": "keyOnly",
-          "description": "A shorter selection menu (3/4 height)."
-        },
-        {
-          "name": "very-short",
-          "kind": "keyOnly",
-          "description": "A much shorter selection menu (1/2 height)."
-        },
-        {
-          "name": "long",
-          "kind": "keyOnly",
-          "description": "A longer selection menu (2x height)."
-        },
-        {
-          "name": "very-long",
-          "kind": "keyOnly",
-          "description": "A much longer selection menu (3x height)."
+          "name": "length",
+          "kind": "valueOnly",
+          "values": [
+            "very-short",
+            "short",
+            "long",
+            "very-long"
+          ],
+          "replaces": [
+            {
+              "name": "short",
+              "value": "short"
+            },
+            {
+              "name": "very-short",
+              "value": "very-short"
+            },
+            {
+              "name": "long",
+              "value": "long"
+            },
+            {
+              "name": "very-long",
+              "value": "very-long"
+            }
+          ],
+          "description": "A selection menu's height:  `very-short` (1/2), `short` (3/4), `long` (2x), `very-long` (3x).  Old names:  `short`, `very-short`, `long`, `very-long`."
         },
         {
           "name": "open",
@@ -7563,13 +7917,19 @@
         },
         {
           "name": "direction",
-          "kind": "enum",
+          "kind": "multiple",
           "values": [
+            "up",
             "left",
             "right"
           ],
-          "default": "right",
-          "description": "Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`)."
+          "replaces": [
+            {
+              "name": "upward",
+              "value": "up"
+            }
+          ],
+          "description": "Which way the menu opens:  `up` above the dropdown (it still flips when there's no room);  `left` extends it leftward from the dropdown's edge, `right` (the default) rightward;  `up left` both.  Old name:  `upward`."
         },
         {
           "name": "icon",
@@ -7587,10 +7947,15 @@
           "description": "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
         },
         {
-          "name": "text",
+          "name": "label",
           "kind": "string",
+          "replaces": [
+            {
+              "name": "text"
+            }
+          ],
           "reflect": false,
-          "description": "Text shown for the current value, e.g. before `options` arrive.  Property only by default."
+          "description": "Text shown for the current value, e.g. before `options` arrive.  Property only by default.  Old name:  `text`."
         },
         {
           "name": "name",
@@ -7721,12 +8086,6 @@
           "kind": "string",
           "shared": true,
           "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
       "slots": [
@@ -7967,12 +8326,6 @@
           "kind": "boolean",
           "default": true,
           "description": "The video plays as soon as the frame loads:  the click on the placeholder already asked for it."
-        },
-        {
-          "name": "branded-ui",
-          "kind": "boolean",
-          "property": "brandedUI",
-          "description": "Keep the player's own branding (Fomantic's `brandedUI`)."
         },
         {
           "name": "parameters",
@@ -8230,9 +8583,12 @@
           "description": "Accessible name (`role=img`), when the emoji stands for something else;  bare `label` hides it (decorative).  Default:  the character's own Unicode name, read by assistive tech."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Clickable look:  a pointer cursor.  The page adds the control."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "description": "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
         },
         {
           "name": "disabled",
@@ -8292,6 +8648,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -8409,7 +8776,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of its number circle and of the line to the next event (`connected`)."
@@ -8430,9 +8799,18 @@
           "description": "Short text in a circle as the label, e.g. an initial (Fomantic's `data-text`)."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Its number / text circle outlined instead of filled."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look:  `basic`, its number / text circle outlined instead of filled.  Old name:  `basic`."
         },
         {
           "name": "disabled",
@@ -8861,7 +9239,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the events' number circles (`ordered`) and connecting line (`connected`)."
@@ -8882,9 +9262,18 @@
           "description": "A rule between events."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Ordered:  outlined number circles instead of filled ones."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look:  `basic`, ordered with outlined number circles instead of filled ones.  Old name:  `basic`."
         },
         {
           "name": "inverted",
@@ -10650,29 +11039,41 @@
           "description": "A table-like box with hairlines between every cell;  `\"internally\"` drops the outer box."
         },
         {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "horizontally",
-            "vertically"
+            "md",
+            "md-x",
+            "md-y"
           ],
-          "description": "Keeps its outer gutters inside its box;  `horizontally` / `vertically` for one axis."
+          "replaces": [
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`."
         },
         {
-          "name": "relaxed",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "xs",
+            "compact",
+            "lg",
+            "xl"
           ],
-          "description": "Wider gutters;  `relaxed=\"very\"` wider still."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOrValueAndKey",
-          "values": [
-            "very"
+          "replaces": [
+            {
+              "name": "relaxed",
+              "value": "lg"
+            },
+            {
+              "name": "compact",
+              "value": "compact"
+            }
           ],
-          "description": "Narrower gutters and row spacing;  `compact=\"very\"` narrower still."
+          "description": "The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names are `compact` and `relaxed`."
         },
         {
           "name": "centered",
@@ -10734,7 +11135,7 @@
           "description": "What `stackable`, `doubling`, `reversed` and per-device widths measure:  `container` (the default) -- the grid's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).  Rows and columns follow their grid."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -10743,7 +11144,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns every column's text `left`, `center`, `right` or `justified`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
         },
         {
           "name": "vertical-align",
@@ -10991,7 +11397,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the text (and of a `dividing` rule)."
@@ -11017,13 +11425,20 @@
           "description": "In a tinted box."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`."
         },
         {
           "name": "seamless",
@@ -11041,7 +11456,7 @@
           "description": "Floats `left` or `right`."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -11050,12 +11465,26 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns its text `left`, `center`, `right` or `justified`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No padding."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no padding.  Its old name is `fitted`."
         },
         {
           "name": "disabled",
@@ -11317,7 +11746,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the glyph;  with `inverted` `circular` / `bordered`, the disc."
@@ -11326,11 +11757,6 @@
           "name": "name",
           "kind": "string",
           "description": "Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  Dashes ~== spaces, so Font Awesome's `circle-check` works too.  See `notes/icons.md`."
-        },
-        {
-          "name": "outline",
-          "kind": "boolean",
-          "description": "Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own."
         },
         {
           "name": "label",
@@ -11353,24 +11779,43 @@
           "description": "Spins, e.g. a `spinner` or `circle-notch` glyph."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No gap after the glyph and no extra width."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no gap after the glyph and no extra width.  Its old name is `fitted`."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Clickable look:  dimmed until hovered, pointer cursor."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Inside a circular ring."
-        },
-        {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "Inside a square ring."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "outline",
+            "link",
+            "circular",
+            "bordered"
+          ],
+          "replaces": [
+            {
+              "name": "outline",
+              "value": "outline"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            },
+            {
+              "name": "bordered",
+              "value": "bordered"
+            }
+          ],
+          "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes."
         },
         {
           "name": "flipped",
@@ -11450,6 +11895,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -11871,19 +12327,37 @@
           "description": "The whole group spins."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No gap after the group."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no gap after the group.  Its old name is `fitted`."
         },
         {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Inside a circular ring, the first icon centred."
-        },
-        {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "Inside a square ring, the first icon centred."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "circular",
+            "bordered"
+          ],
+          "replaces": [
+            {
+              "name": "circular",
+              "value": "circular"
+            },
+            {
+              "name": "bordered",
+              "value": "bordered"
+            }
+          ],
+          "description": "The look, several words at once:  `circular` (inside a circular ring), `bordered` (inside a square ring), the first icon centred.  Old names:  `circular`, `bordered` written alone."
         },
         {
           "name": "inverted",
@@ -12078,19 +12552,42 @@
           "description": "A small circle sitting in a line of text."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "A hairline border, for images with white edges."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "bordered",
+            "circular",
+            "rounded"
+          ],
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            },
+            {
+              "name": "rounded",
+              "value": "rounded"
+            }
+          ],
+          "description": "The look, several words at once:  `bordered` (a hairline border, for images with white edges), `circular` (cropped to a circle;  a pill when not square), `rounded` (softly rounded corners).  Old names:  `bordered`, `circular`, `rounded` written alone."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "A block centred in its container."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Cropped to a circle (a pill when not square)."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  a block centred in its container.  Its old name is `centered`."
         },
         {
           "name": "disabled",
@@ -12108,11 +12605,6 @@
           "description": "Sits inline in running text instead of as a block."
         },
         {
-          "name": "rounded",
-          "kind": "keyOnly",
-          "description": "Softly rounded corners."
-        },
-        {
           "name": "floated",
           "kind": "valueAndKey",
           "values": [
@@ -12123,13 +12615,20 @@
           "description": "Floats `left` or `right` of the text."
         },
         {
-          "name": "spaced",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
+            "md",
             "left",
             "right"
           ],
-          "description": "Room from the text around it:  both sides, or `spaced=\"left\"` / `\"right\"` only."
+          "replaces": [
+            {
+              "name": "spaced",
+              "value": "md"
+            }
+          ],
+          "description": "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`."
         },
         {
           "name": "vertical-align",
@@ -12361,19 +12860,42 @@
           "description": "Every image a small circle."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "Every image with a hairline border."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "bordered",
+            "circular",
+            "rounded"
+          ],
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            },
+            {
+              "name": "rounded",
+              "value": "rounded"
+            }
+          ],
+          "description": "Every image's look, several words at once:  `bordered` (a hairline border), `circular` (cropped to a circle), `rounded` (softly rounded corners).  Old names:  `bordered`, `circular`, `rounded` written alone."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Rows centred in the container."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Every image cropped to a circle."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  rows centred in the container.  Its old name is `centered`."
         },
         {
           "name": "disabled",
@@ -12384,11 +12906,6 @@
           "name": "fluid",
           "kind": "keyOnly",
           "description": "Every image fills the group's width, one per row."
-        },
-        {
-          "name": "rounded",
-          "kind": "keyOnly",
-          "description": "Every image with softly rounded corners."
         },
         {
           "name": "floated",
@@ -12915,7 +13432,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of a `file` input's choose-file button (Fomantic colours only file inputs)."
@@ -12932,9 +13451,18 @@
           "description": "Form state, tinting the box, text and placeholder."
         },
         {
-          "name": "transparent",
-          "kind": "keyOnly",
-          "description": "No box:  text only, e.g. inside a menu or header."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "transparent"
+          ],
+          "replaces": [
+            {
+              "name": "transparent",
+              "value": "transparent"
+            }
+          ],
+          "description": "`transparent`:  no box, text only, e.g. inside a menu or header.  Old name:  `transparent`."
         },
         {
           "name": "fluid",
@@ -13331,7 +13859,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Menu:  hue of the item while selected (`red active item`)."
@@ -13348,12 +13878,17 @@
         {
           "name": "value",
           "kind": "string",
-          "description": "Value;  defaults to `text`.  Ordered list:  shown as the marker."
+          "description": "Value;  defaults to `label`.  Ordered list:  shown as the marker."
         },
         {
-          "name": "text",
+          "name": "label",
           "kind": "string",
-          "description": "Dropdown:  text;  defaults to the text content."
+          "replaces": [
+            {
+              "name": "text"
+            }
+          ],
+          "description": "Dropdown:  its words;  defaults to the text content.  Its old name is `text`."
         },
         {
           "name": "description",
@@ -13376,19 +13911,33 @@
           "description": "Dropdown:  country code, shown as a flag before the text."
         },
         {
-          "name": "href",
+          "name": "link",
           "kind": "string",
-          "description": "List / menu:  renders a link (`<a>`)."
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`."
         },
         {
           "name": "target",
           "kind": "string",
-          "description": "Link target, with `href`."
+          "description": "Link target, with `link`."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "replaces": [
+            {
+              "name": "link",
+              "value": "link"
+            }
+          ],
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -13401,16 +13950,23 @@
           "description": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted."
         },
         {
-          "name": "fitted",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "horizontally",
-            "vertically"
+            "none",
+            "none-x",
+            "none-y"
           ],
-          "description": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding."
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`)."
         },
         {
-          "name": "type",
+          "name": "kind",
           "kind": "enum",
           "values": [
             "item",
@@ -13418,7 +13974,12 @@
             "divider"
           ],
           "default": "item",
-          "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown)."
+          "replaces": [
+            {
+              "name": "type"
+            }
+          ],
+          "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`."
         },
         {
           "name": "loading",
@@ -13496,12 +14057,6 @@
           "kind": "string",
           "shared": true,
           "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
       "slots": [
@@ -13617,17 +14172,33 @@
           "description": "A rule between items."
         },
         {
-          "name": "relaxed",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "lg",
+            "xl"
           ],
-          "description": "More space between items;  `relaxed=\"very\"` even more."
+          "replaces": [
+            {
+              "name": "relaxed",
+              "value": "lg"
+            }
+          ],
+          "description": "Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed=\"very\"`)."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "replaces": [
+            {
+              "name": "link",
+              "value": "link"
+            }
+          ],
+          "description": "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name is the bare `link` switch."
         },
         {
           "name": "unstackable",
@@ -13707,6 +14278,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -13859,7 +14441,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue;  fills the label (its ring and text when `basic`)."
@@ -13913,18 +14497,32 @@
           "description": "Floats over the owner's top end corner, e.g. a count on a menu item;  `left` / `bottom` move it."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Less pronounced:  an outline on the surface colour."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic",
+            "tinted",
+            "circular"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "tinted",
+              "value": "tinted"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            }
+          ],
+          "description": "The look, several words at once:  `basic` (less pronounced:  an outline on the surface colour), `tinted` (soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge;  not Fomantic's), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
         },
         {
-          "name": "tinted",
-          "kind": "keyOnly",
-          "description": "Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's."
-        },
-        {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
             "top",
             "bottom",
@@ -13933,17 +14531,27 @@
             "bottom left",
             "bottom right"
           ],
-          "description": "Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "top"
+            }
+          ],
+          "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` (bare:  `top`)."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "A fixed-width tag before a line of text, e.g. in a list."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "A round badge."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`."
         },
         {
           "name": "empty",
@@ -13956,9 +14564,18 @@
           "description": "Takes the full width of its container."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Centres its content."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center` centres its content.  Its old name is `centered`."
         },
         {
           "name": "prompt",
@@ -13966,9 +14583,14 @@
           "description": "A form field's validation message:  the negative colour on the surface, wins over `color`."
         },
         {
-          "name": "active",
+          "name": "selected",
           "kind": "keyOnly",
-          "description": "Selected / on."
+          "replaces": [
+            {
+              "name": "active"
+            }
+          ],
+          "description": "Selected / on.  Its old name is `active`."
         },
         {
           "name": "disabled",
@@ -14137,7 +14759,7 @@
       "states": [
         {
           "name": "active",
-          "description": "Selected / on."
+          "description": "Selected / on (`selected`)."
         },
         {
           "name": "disabled",
@@ -14240,7 +14862,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of every label in the group."
@@ -14251,24 +14875,42 @@
           "description": "Every label shaped like a price tag."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Every label basic (outlined)."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic",
+            "tinted",
+            "circular"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "tinted",
+              "value": "tinted"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            }
+          ],
+          "description": "Every label's look, several words at once:  `basic` (outlined), `tinted` (the colour's soft fill and text), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
         },
         {
-          "name": "tinted",
-          "kind": "keyOnly",
-          "description": "Every label tinted (the colour's soft fill and text)."
-        },
-        {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Every label a round badge."
-        },
-        {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Every label a fixed-width tag."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`."
         },
         {
           "name": "image",
@@ -14281,9 +14923,18 @@
           "description": "Every label full width."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "Every label centred."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "`center`:  every label centred.  Its old name is `centered`."
         },
         {
           "name": "inverted",
@@ -14505,9 +15156,18 @@
           "description": "Ordered:  a dot follows each number (`1.`)."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Items are links:  muted until hovered, the selected one strongest."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "replaces": [
+            {
+              "name": "link",
+              "value": "link"
+            }
+          ],
+          "description": "The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name is the bare `link` switch."
         },
         {
           "name": "selection",
@@ -14515,14 +15175,33 @@
           "description": "Items are choices:  `<button>`s with a hover background, `ui-select` on activation."
         },
         {
-          "name": "animated",
-          "kind": "keyOnly",
-          "description": "Items indent when hovered."
+          "name": "hover",
+          "kind": "valueOnly",
+          "values": [
+            "indent"
+          ],
+          "replaces": [
+            {
+              "name": "animated",
+              "value": "indent"
+            }
+          ],
+          "description": "What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Items sit in a row."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "vertical",
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name is the bare `horizontal` switch."
         },
         {
           "name": "divided",
@@ -14535,17 +15214,33 @@
           "description": "A rule around every item."
         },
         {
-          "name": "relaxed",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "lg",
+            "xl"
           ],
-          "description": "More space between items;  `relaxed=\"very\"` even more."
+          "replaces": [
+            {
+              "name": "relaxed",
+              "value": "lg"
+            }
+          ],
+          "description": "Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed=\"very\"`)."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No horizontal item padding;  a `selection` list's hover background reaches past its edges."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name is `fitted`."
         },
         {
           "name": "inverted",
@@ -14633,6 +15328,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -14790,7 +15496,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the turning arc."
@@ -14820,9 +15528,18 @@
           "description": "Sits in the text flow instead of centred over its positioned container."
         },
         {
-          "name": "centered",
-          "kind": "keyOnly",
-          "description": "With `inline`:  a block of its own, centred."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "center"
+          ],
+          "replaces": [
+            {
+              "name": "centered",
+              "value": "center"
+            }
+          ],
+          "description": "With `inline`:  `center`, a block of its own, centred.  Old name:  `centered`."
         },
         {
           "name": "indeterminate",
@@ -15407,22 +16124,52 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill."
         },
         {
           "name": "appearance",
-          "kind": "valueOnly",
+          "kind": "multiple",
           "values": [
             "tabular",
             "pointing",
             "secondary",
             "text",
-            "segmented"
+            "segmented",
+            "link",
+            "borderless"
           ],
-          "description": "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance=\"pointing\" secondary` ~== `secondary pointing`."
+          "replaces": [
+            {
+              "name": "tabular",
+              "value": "tabular"
+            },
+            {
+              "name": "pointing",
+              "value": "pointing"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "text",
+              "value": "text"
+            },
+            {
+              "name": "link",
+              "value": "link"
+            },
+            {
+              "name": "borderless",
+              "value": "borderless"
+            }
+          ],
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
         },
         {
           "name": "position",
@@ -15435,29 +16182,19 @@
           "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`)."
         },
         {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "De-emphasized:  no box, rounded items.  Alias of `appearance=\"secondary\"`."
-        },
-        {
-          "name": "pointing",
-          "kind": "keyOnly",
-          "description": "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance=\"pointing\"`."
-        },
-        {
-          "name": "tabular",
-          "kind": "keyOnly",
-          "description": "Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance=\"tabular\"`."
-        },
-        {
-          "name": "text",
-          "kind": "keyOnly",
-          "description": "Plain text items, no box.  Alias of `appearance=\"text\"`."
-        },
-        {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "Items stacked top to bottom."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch."
         },
         {
           "name": "pagination",
@@ -15475,11 +16212,6 @@
           "description": "Labeled icon items:  a large icon above each item's text."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Every item is interactive:  a `<button>` with the link hover."
-        },
-        {
           "name": "fluid",
           "kind": "keyOnly",
           "description": "Takes the full width of its container."
@@ -15495,24 +16227,19 @@
           "description": "Centred in its container, items centred."
         },
         {
-          "name": "borderless",
-          "kind": "keyOnly",
-          "description": "No dividers between items."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Only as wide as its items."
-        },
-        {
           "name": "wrapping",
           "kind": "keyOnly",
           "description": "Items wrap onto more lines when they don't fit."
         },
         {
-          "name": "wrapped",
+          "name": "wrap",
           "kind": "keyOnly",
-          "description": "With `wrapping`:  square corners where the lines meet."
+          "replaces": [
+            {
+              "name": "wrapped"
+            }
+          ],
+          "description": "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`."
         },
         {
           "name": "inverted",
@@ -15529,22 +16256,41 @@
           "description": "Floats beside the content;  `right` floats right."
         },
         {
-          "name": "fitted",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "horizontally",
-            "vertically"
+            "none",
+            "none-x",
+            "none-y",
+            "compact"
           ],
-          "description": "No item padding;  `horizontally` / `vertically` keep the other axis' padding."
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            },
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`."
         },
         {
           "name": "fixed",
@@ -15558,7 +16304,7 @@
           "description": "Fixed to an edge of the viewport."
         },
         {
-          "name": "alignment",
+          "name": "align",
           "kind": "valueAndKey",
           "values": [
             "fluid",
@@ -15566,12 +16312,17 @@
             "center",
             "right"
           ],
-          "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment=\"center\"` => `center aligned`."
+          "replaces": [
+            {
+              "name": "alignment"
+            }
+          ],
+          "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name is `alignment`."
         },
         {
           "name": "equal",
           "kind": "keyOnly",
-          "description": "Every item the same width, from the items themselves (no count):  with `alignment=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed."
+          "description": "Every item the same width, from the items themselves (no count):  with `align=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed."
         },
         {
           "name": "items",
@@ -15664,6 +16415,17 @@
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
         },
         {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
           "name": "target",
           "kind": "string",
           "shared": true,
@@ -15725,7 +16487,7 @@
         },
         {
           "name": "vertical",
-          "description": "Items stacked (`vertical`)."
+          "description": "Items stacked (`direction=\"vertical\"`)."
         },
         {
           "name": "disabled",
@@ -15826,7 +16588,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue:  a tinted surface, border and text."
@@ -15850,9 +16614,18 @@
           "description": "Lifted off the page with a shadow."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Only as wide as its content."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  only as wide as its content.  Old name:  `compact`."
         },
         {
           "name": "centered",
@@ -15865,22 +16638,34 @@
           "description": "The dark scheme;  a coloured one keeps its hue in the text."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with the segment or form below;  `bottom` joins the one above."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "center",
             "right"
           ],
-          "description": "Aligns its text `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `center` or `right`.  Old name:  `text-align`."
         },
         {
           "name": "icon",
@@ -16337,9 +17122,18 @@
           "description": "Width, `mini` ... `massive` (Fomantic's ratios of the default width);  `medium` is the default."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box:  light text straight on the dimmer."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look:  `basic`, no box:  light text straight on the dimmer.  Old name:  `basic`."
         },
         {
           "name": "inverted",
@@ -16542,13 +17336,13 @@
           "name": "ui-approving",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`)."
+          "description": "An approve button (`.approve` / `.ok` / `.positive`, `<ui-button color=\"positive\">`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`)."
         },
         {
           "name": "ui-denying",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown."
+          "description": "A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button color=\"negative\">`) was activated;  `preventDefault()` keeps the modal shown."
         }
       ],
       "parts": [
@@ -16682,7 +17476,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue:  a filled bar in that colour."
@@ -16742,9 +17538,14 @@
           "description": "Days a dismissal lasts (`local` and `cookie`);  `0` never expires."
         },
         {
-          "name": "persist",
+          "name": "persistent",
           "kind": "boolean",
-          "description": "Shows even when dismissed before (stores nothing new either)."
+          "replaces": [
+            {
+              "name": "persist"
+            }
+          ],
+          "description": "Shows even when dismissed before (stores nothing new either).  Old name:  `persist`."
         },
         {
           "name": "display-time",
@@ -16990,9 +17791,14 @@
       "noun": "or",
       "attributes": [
         {
-          "name": "text",
+          "name": "label",
           "kind": "string",
-          "description": "Badge text;  default the translated `or` text.  Keep it to a short word."
+          "replaces": [
+            {
+              "name": "text"
+            }
+          ],
+          "description": "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`."
         },
         {
           "name": "disabled",
@@ -17093,12 +17899,6 @@
           "kind": "string",
           "shared": true,
           "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
       "slots": [],
@@ -17268,7 +18068,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the whole panel:  the header band, the box, the border and the sub-head bands (sub-panels follow it).  None:  `primary`.  Any hue, including one a theme adds (`spell-brand`'s `accent`, Polished Ivory)."
@@ -17300,46 +18102,69 @@
           "description": "The title bar in a tinted box."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "A box around the section, as a segment."
-        },
-        {
-          "name": "styled",
-          "kind": "keyOnly",
-          "description": "Boxed as a styled accordion:  a tinted title bar over padded content."
-        },
-        {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "With a box:  lifted with a shadow."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box, rule or tint, whatever else is set."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Less padding and space around the title."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "very"
+            "bordered",
+            "styled",
+            "raised",
+            "basic"
           ],
-          "description": "More padding in the content;  `padded=\"very\"` for even more."
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "styled",
+              "value": "styled"
+            },
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
+            "compact",
+            "md",
+            "lg"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
+        },
+        {
+          "name": "attach",
+          "kind": "valueOnly",
+          "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -17358,14 +18183,19 @@
           "description": "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "Aligns the TITLE `left`, `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`."
         },
         {
           "name": "inverted",
@@ -18712,15 +19542,26 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue:  fills the popup (and its arrow), with a readable text colour."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No pointing arrow."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look:  `basic`, no pointing arrow.  Old name:  `basic`."
         },
         {
           "name": "fixed",
@@ -18805,9 +19646,14 @@
           "description": "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
         },
         {
-          "name": "content",
+          "name": "label",
           "kind": "string",
-          "description": "Shorthand for the text (Fomantic's `content`);  slotted content is the rich version."
+          "replaces": [
+            {
+              "name": "content"
+            }
+          ],
+          "description": "Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.  Old name:  `content`."
         },
         {
           "name": "hoverable",
@@ -18920,12 +19766,6 @@
           "kind": "string",
           "shared": true,
           "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
       "slots": [
@@ -19064,7 +19904,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the bar."
@@ -19094,9 +19936,18 @@
           "description": "Shows activity:  a pulse runs along the bar."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No background behind the bar."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "`basic`:  no background behind the bar.  Old name:  `basic`."
         },
         {
           "name": "disabled",
@@ -19114,9 +19965,18 @@
           "description": "For dark backgrounds."
         },
         {
-          "name": "right-aligned",
-          "kind": "keyOnly",
-          "description": "The bar grows from the right;  its text sits at its left end."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "right"
+          ],
+          "replaces": [
+            {
+              "name": "right-aligned",
+              "value": "right"
+            }
+          ],
+          "description": "`right`:  the bar grows from the right;  its text sits at its left end.  Old name:  `right-aligned`."
         },
         {
           "name": "indeterminate",
@@ -19129,13 +19989,20 @@
           "description": "Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "A thin line joined to the edge of the content above (`bottom`, bare) or below (`top`)."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`."
         },
         {
           "name": "value",
@@ -20017,7 +20884,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the title (and of the rule or box edge)."
@@ -20033,46 +20902,69 @@
           "description": "The title bar in a tinted box."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "A box around the section, as a segment."
-        },
-        {
-          "name": "styled",
-          "kind": "keyOnly",
-          "description": "Boxed as a styled accordion:  a tinted title bar over padded content."
-        },
-        {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "With a box:  lifted with a shadow."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box, rule or tint, whatever else is set."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Less padding and space around the title."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "very"
+            "bordered",
+            "styled",
+            "raised",
+            "basic"
           ],
-          "description": "More padding in the content;  `padded=\"very\"` for even more."
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "styled",
+              "value": "styled"
+            },
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
+            "compact",
+            "md",
+            "lg"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
+        },
+        {
+          "name": "attach",
+          "kind": "valueOnly",
+          "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -20091,14 +20983,19 @@
           "description": "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "Aligns the TITLE `left`, `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`."
         },
         {
           "name": "visible",
@@ -20692,7 +21589,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the title (and of the rule or box edge)."
@@ -20724,46 +21623,69 @@
           "description": "The title bar in a tinted box."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "A box around the section, as a segment."
-        },
-        {
-          "name": "styled",
-          "kind": "keyOnly",
-          "description": "Boxed as a styled accordion:  a tinted title bar over padded content."
-        },
-        {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "With a box:  lifted with a shadow."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box, rule or tint, whatever else is set."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Less padding and space around the title."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "very"
+            "bordered",
+            "styled",
+            "raised",
+            "basic"
           ],
-          "description": "More padding in the content;  `padded=\"very\"` for even more."
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "styled",
+              "value": "styled"
+            },
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
+            "compact",
+            "md",
+            "lg"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
+        },
+        {
+          "name": "attach",
+          "kind": "valueOnly",
+          "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -20782,14 +21704,19 @@
           "description": "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "Aligns the TITLE `left`, `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`."
         },
         {
           "name": "inverted",
@@ -21561,24 +22488,40 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line."
         },
         {
-          "name": "type",
+          "name": "appearance",
           "kind": "valueOnly",
           "values": [
             "slider",
             "toggle"
           ],
-          "description": "Look:  a `toggle` or `slider` radio;  default the round radio box."
+          "replaces": [
+            {
+              "name": "type"
+            }
+          ],
+          "description": "Look:  a `toggle` or `slider` radio;  default the round radio box.  Old name:  `type`."
         },
         {
-          "name": "fitted",
-          "kind": "keyOnly",
-          "description": "No room for a label:  just the box."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  no room for a label, just the box.  Old name:  `fitted`."
         },
         {
           "name": "invisible",
@@ -21586,9 +22529,18 @@
           "description": "No box:  the LABEL is the control, bordered while unchosen and tinted when chosen."
         },
         {
-          "name": "right-aligned",
-          "kind": "keyOnly",
-          "description": "Box after the label, at the end of the line."
+          "name": "align",
+          "kind": "valueOnly",
+          "values": [
+            "right"
+          ],
+          "replaces": [
+            {
+              "name": "right-aligned",
+              "value": "right"
+            }
+          ],
+          "description": "`right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`."
         },
         {
           "name": "disabled",
@@ -21859,9 +22811,18 @@
           "description": "A vertical rule between the rail and its container."
         },
         {
-          "name": "attached",
-          "kind": "keyOnly",
-          "description": "Flush against its container:  no gap."
+          "name": "attach",
+          "kind": "valueOnly",
+          "values": [
+            "both"
+          ],
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "`both`:  flush against its container, no gap.  Its old name is `attached`."
         },
         {
           "name": "close",
@@ -22090,7 +23051,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the filled icons."
@@ -22585,9 +23548,18 @@
           "description": "No delay before the transition starts."
         },
         {
-          "name": "unclipped",
-          "kind": "keyOnly",
-          "description": "Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Renamed because `visible` shows or hides every element."
+          "name": "clip",
+          "kind": "valueOnly",
+          "values": [
+            "none"
+          ],
+          "replaces": [
+            {
+              "name": "unclipped",
+              "value": "none"
+            }
+          ],
+          "description": "`none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name is `unclipped`."
         },
         {
           "name": "active",
@@ -23130,7 +24102,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Fills the row with a hue, contrast text on top."
@@ -23170,12 +24144,19 @@
           "description": "Hairlines between its columns."
         },
         {
-          "name": "relaxed",
-          "kind": "keyOrValueAndKey",
+          "name": "spacing",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "lg",
+            "xl"
           ],
-          "description": "Wider gutters;  `relaxed=\"very\"` wider still."
+          "replaces": [
+            {
+              "name": "relaxed",
+              "value": "lg"
+            }
+          ],
+          "description": "Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`."
         },
         {
           "name": "centered",
@@ -23220,7 +24201,7 @@
           "description": "Reverses its columns at these grid widths."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -23229,7 +24210,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Aligns its columns' text."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its columns' text.  Its old name is `text-align`."
         },
         {
           "name": "vertical-align",
@@ -23449,9 +24435,18 @@
           "description": "Results in named groups (`category` of each result)."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "`category`:  each group's name above its results, not beside them."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`, with `category`:  each group's name above its results, not beside them.  Old name:  `horizontal`."
         },
         {
           "name": "fluid",
@@ -23469,33 +24464,47 @@
           "description": "`scrolling`:  people can resize the results vertically."
         },
         {
-          "name": "short",
-          "kind": "keyOnly",
-          "description": "The results scroll after a shorter height."
+          "name": "length",
+          "kind": "valueOnly",
+          "values": [
+            "very-short",
+            "short",
+            "long",
+            "very-long"
+          ],
+          "replaces": [
+            {
+              "name": "short",
+              "value": "short"
+            },
+            {
+              "name": "very-short",
+              "value": "very-short"
+            },
+            {
+              "name": "long",
+              "value": "long"
+            },
+            {
+              "name": "very-long",
+              "value": "very-long"
+            }
+          ],
+          "description": "How far the results go before they scroll:  `very-short`, `short`, `long`, `very-long`.  Old names:  `short`, `very-short`, `long`, `very-long`."
         },
         {
-          "name": "very-short",
-          "kind": "keyOnly",
-          "description": "The results scroll after a much shorter height."
-        },
-        {
-          "name": "long",
-          "kind": "keyOnly",
-          "description": "The results scroll after a longer height."
-        },
-        {
-          "name": "very-long",
-          "kind": "keyOnly",
-          "description": "The results scroll after a much longer height."
-        },
-        {
-          "name": "aligned",
+          "name": "align",
           "kind": "valueAndKey",
           "values": [
             "left",
             "right"
           ],
-          "description": "Which edge the results line up with:  `right` => `right aligned` (they extend to the left)."
+          "replaces": [
+            {
+              "name": "aligned"
+            }
+          ],
+          "description": "Which edge the results line up with:  `right` => `right aligned` (they extend to the left).  Old name:  `aligned`."
         },
         {
           "name": "loading",
@@ -23977,7 +24986,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the title (and of the rule or box edge)."
@@ -24009,46 +25020,69 @@
           "description": "The title bar in a tinted box."
         },
         {
-          "name": "bordered",
-          "kind": "keyOnly",
-          "description": "A box around the section, as a segment."
-        },
-        {
-          "name": "styled",
-          "kind": "keyOnly",
-          "description": "Boxed as a styled accordion:  a tinted title bar over padded content."
-        },
-        {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "With a box:  lifted with a shadow."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box, rule or tint, whatever else is set."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Less padding and space around the title."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "very"
+            "bordered",
+            "styled",
+            "raised",
+            "basic"
           ],
-          "description": "More padding in the content;  `padded=\"very\"` for even more."
+          "replaces": [
+            {
+              "name": "bordered",
+              "value": "bordered"
+            },
+            {
+              "name": "styled",
+              "value": "styled"
+            },
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
+            "compact",
+            "md",
+            "lg"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
+        },
+        {
+          "name": "attach",
+          "kind": "valueOnly",
+          "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -24067,14 +25101,19 @@
           "description": "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "Aligns the TITLE `left`, `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`."
         },
         {
           "name": "inverted",
@@ -24683,33 +25722,62 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the top edge;  with `inverted`, the fill.  `primary` / `secondary` don't colour a segment."
         },
         {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "Lifted off the page with a shadow."
-        },
-        {
-          "name": "stacked",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "tall"
+            "raised",
+            "stacked",
+            "tall-stacked",
+            "piled",
+            "vertical",
+            "circular",
+            "basic",
+            "secondary",
+            "tertiary"
           ],
-          "description": "A page peeking out below;  `stacked=\"tall\"` shows two."
-        },
-        {
-          "name": "piled",
-          "kind": "keyOnly",
-          "description": "A pile of rotated sheets behind it."
-        },
-        {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "A band of a page:  no box, a rule above."
+          "replaces": [
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "stacked",
+              "value": "stacked"
+            },
+            {
+              "name": "piled",
+              "value": "piled"
+            },
+            {
+              "name": "vertical",
+              "value": "vertical"
+            },
+            {
+              "name": "circular",
+              "value": "circular"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "tertiary",
+              "value": "tertiary"
+            }
+          ],
+          "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`."
         },
         {
           "name": "placeholder",
@@ -24717,27 +25785,31 @@
           "description": "A tinted, centred block reserving room for content."
         },
         {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "A round badge sized by its content."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Only as wide as its content."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "none",
+            "none-x",
+            "none-y",
+            "compact",
+            "md",
+            "lg"
           ],
-          "description": "More padding;  `padded=\"very\"` for even more."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box:  no background, border or shadow."
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            },
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`."
         },
         {
           "name": "clearing",
@@ -24755,40 +25827,42 @@
           "description": "Floats `left` or `right`."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
             "center",
             "right"
           ],
-          "description": "Aligns its text `left`, `center` or `right`."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Aligns its text `left`, `center` or `right`.  Its old name is `text-align`."
         },
         {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "Less emphasis:  a tinted surface, muted text."
-        },
-        {
-          "name": "tertiary",
-          "kind": "keyOnly",
-          "description": "Least emphasis:  a darker tint, muted text."
-        },
-        {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom",
             "left",
             "right"
           ],
-          "description": "Joined edge to edge with the elements above / below;  bare `attached` sits in the middle."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name is `attached`."
         },
         {
           "name": "seamless",
           "kind": "keyOnly",
-          "description": "With `attached`:  no line where attached segments meet."
+          "description": "With `attach`:  no line where attached segments meet."
         },
         {
           "name": "inverted",
@@ -24804,15 +25878,6 @@
           "name": "disabled",
           "kind": "keyOnly",
           "description": "Dimmed and inert."
-        },
-        {
-          "name": "fitted",
-          "kind": "keyOrValueAndKey",
-          "values": [
-            "horizontally",
-            "vertically"
-          ],
-          "description": "No padding;  `horizontally` / `vertically` keep the other axis' padding."
         },
         {
           "name": "scrolling",
@@ -25029,52 +26094,77 @@
           "description": "Text size of every segment in the group."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Side by side instead of stacked."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  side by side instead of stacked.  Its old name is `horizontal`."
         },
         {
           "name": "equal-width",
           "kind": "keyOnly",
-          "description": "With `horizontal`:  every segment the same width."
+          "description": "With `direction=\"horizontal\"`:  every segment the same width."
         },
         {
           "name": "wrapping",
           "kind": "keyOnly",
-          "description": "With `horizontal`:  segments wrap onto more rows."
+          "description": "With `direction=\"horizontal\"`:  segments wrap onto more rows."
         },
         {
           "name": "stackable",
           "kind": "keyOnly",
-          "description": "With `horizontal`:  stacks on mobile."
+          "description": "With `direction=\"horizontal\"`:  stacks on mobile."
         },
         {
-          "name": "raised",
-          "kind": "keyOnly",
-          "description": "Lifted off the page with a shadow."
-        },
-        {
-          "name": "stacked",
-          "kind": "keyOrValueAndKey",
+          "name": "appearance",
+          "kind": "multiple",
           "values": [
-            "tall"
+            "raised",
+            "stacked",
+            "tall-stacked",
+            "piled",
+            "basic"
           ],
-          "description": "A page peeking out below."
+          "replaces": [
+            {
+              "name": "raised",
+              "value": "raised"
+            },
+            {
+              "name": "stacked",
+              "value": "stacked"
+            },
+            {
+              "name": "piled",
+              "value": "piled"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`."
         },
         {
-          "name": "piled",
-          "kind": "keyOnly",
-          "description": "A pile of rotated sheets behind the group."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Only as wide as its content."
-        },
-        {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No box of its own."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  only as wide as its content.  Its old name is `compact`."
         },
         {
           "name": "inverted",
@@ -25300,9 +26390,18 @@
           "description": "Takes the full width of its container."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "No minimum width:  as wide as its longest option."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  no minimum width, as wide as its longest option.  Old name:  `compact`."
         },
         {
           "name": "inverted",
@@ -26326,15 +27425,26 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the filled track (and of `basic` thumbs)."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Thumbs in the fill colour instead of white."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "`basic`:  thumbs in the fill colour instead of white.  Old name:  `basic`."
         },
         {
           "name": "disabled",
@@ -26368,11 +27478,6 @@
           "description": "Two thumbs:  `value` .. `end`.  The form gets two entries under `name`."
         },
         {
-          "name": "reversed",
-          "kind": "keyOnly",
-          "description": "Runs from the right (or, `vertical`, from the bottom)."
-        },
-        {
           "name": "smooth",
           "kind": "keyOnly",
           "description": "Thumbs follow the pointer smoothly;  values still snap."
@@ -26383,18 +27488,37 @@
           "description": "A tick at every step (or `tick-step`):  through the track with `labeled`;  alone, a short tick under the track, no numbers (as a native range's tick marks)."
         },
         {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "Upright, filling the host's height;  min at the top."
+          "name": "direction",
+          "kind": "multiple",
+          "values": [
+            "vertical",
+            "reversed"
+          ],
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            },
+            {
+              "name": "reversed",
+              "value": "reversed"
+            }
+          ],
+          "description": "Which way it runs, several words at once:  `vertical` (upright, filling the host's height, min at the top), `reversed` (from the right, or upright from the bottom).  Old names:  `vertical`, `reversed`."
         },
         {
-          "name": "aligned",
+          "name": "align",
           "kind": "valueAndKey",
           "values": [
             "bottom",
             "right"
           ],
-          "description": "With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it."
+          "replaces": [
+            {
+              "name": "aligned"
+            }
+          ],
+          "description": "With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.  Old name:  `aligned`."
         },
         {
           "name": "min",
@@ -26702,15 +27826,26 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the value."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Value and label on one line."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  value and label on one line.  Its old name is `horizontal`."
         },
         {
           "name": "inverted",
@@ -26973,15 +28108,26 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of every value in the group."
         },
         {
-          "name": "horizontal",
-          "kind": "keyOnly",
-          "description": "Statistics stacked, each with its label beside its value."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal"
+          ],
+          "replaces": [
+            {
+              "name": "horizontal",
+              "value": "horizontal"
+            }
+          ],
+          "description": "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`."
         },
         {
           "name": "inverted",
@@ -27231,7 +28377,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Circular steps:  hue of this step's ring and line, whatever its state."
@@ -27253,18 +28401,32 @@
         },
         {
           "name": "link",
-          "kind": "keyOnly",
-          "description": "Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`."
-        },
-        {
-          "name": "href",
           "kind": "string",
-          "description": "Renders a link (`<a>`) styled as a step."
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "description": "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`."
         },
         {
           "name": "target",
           "kind": "string",
-          "description": "Link target, with `href`."
+          "description": "Link target, with `link`."
+        },
+        {
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "link"
+          ],
+          "replaces": [
+            {
+              "name": "link",
+              "value": "link"
+            }
+          ],
+          "description": "The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name is the bare `link` switch."
         },
         {
           "name": "icon",
@@ -27518,7 +28680,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Circular steps:  hue of the rings of the current and completed steps (default the positive colour)."
@@ -27529,17 +28693,34 @@
           "description": "Numbers each step;  a completed step shows a check instead."
         },
         {
-          "name": "vertical",
-          "kind": "keyOrValueAndKey",
+          "name": "direction",
+          "kind": "valueOnly",
           "values": [
-            "right"
+            "horizontal",
+            "vertical",
+            "vertical-right"
           ],
-          "description": "Stacked top to bottom;  `vertical=\"right\"` for a group on the right of its content (arrow at left)."
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` (`vertical=\"right\"`)."
         },
         {
-          "name": "circular",
-          "kind": "keyOnly",
-          "description": "Fomantic's circular steps:  a ring per step on a connecting line, the content beside it."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "circular"
+          ],
+          "replaces": [
+            {
+              "name": "circular",
+              "value": "circular"
+            }
+          ],
+          "description": "The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name is the bare `circular` switch."
         },
         {
           "name": "fluid",
@@ -27552,13 +28733,20 @@
           "description": "Every step the same width, from the steps themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike)."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a segment below (`attached`, `\"top\"`) or above (`\"bottom\"`), overlapping its border."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name is `attached`."
         },
         {
           "name": "unstackable",
@@ -27733,7 +28921,7 @@
         },
         {
           "name": "circular",
-          "description": "Set while `circular`:  with `block`, the host keeps both margins, even first or last."
+          "description": "Set while `appearance=\"circular\"`:  with `block`, the host keeps both margins, even first or last."
         },
         {
           "name": "disabled",
@@ -28235,18 +29423,34 @@
           "description": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself)."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name is `attached`."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "No segment box;  inside `<ui-tabs>`, the tabs decide."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look:  `basic`, no segment box;  inside `<ui-tabs>`, the tabs decide.  Old name:  `basic`."
         },
         {
           "name": "inverted",
@@ -28470,7 +29674,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Coloured top edge;  with `inverted`, a coloured fill."
@@ -28521,14 +29727,29 @@
           "description": "Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable=\"false\"` (or Fomantic's `class=\"disabled\"`)."
         },
         {
-          "name": "striped",
-          "kind": "keyOnly",
-          "description": "Every other body row is tinted."
-        },
-        {
-          "name": "structured",
-          "kind": "keyOnly",
-          "description": "Collapsed borders, for `rowspan` / `colspan` headers."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "basic",
+            "very-basic",
+            "striped",
+            "structured"
+          ],
+          "replaces": [
+            {
+              "name": "basic",
+              "value": "basic"
+            },
+            {
+              "name": "striped",
+              "value": "striped"
+            },
+            {
+              "name": "structured",
+              "value": "structured"
+            }
+          ],
+          "description": "The look, several words at once:  `basic` (no header fill), `very-basic` (no outer border or edge padding either), `striped` (every other body row tinted), `structured` (collapsed borders, for `rowspan` / `colspan` headers).  Old names:  `basic` (`basic=\"very\"`), `striped`, `structured`."
         },
         {
           "name": "unstackable",
@@ -28536,37 +29757,41 @@
           "description": "Never stacks rows into blocks, even on a viewport below 768px."
         },
         {
-          "name": "basic",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "very"
+            "xs",
+            "compact",
+            "md",
+            "lg"
           ],
-          "description": "`basic`:  no header fill;  `basic=\"very\"`:  no outer border or edge padding either."
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            },
+            {
+              "name": "padded",
+              "value": "md"
+            }
+          ],
+          "description": "Cell padding:  `xs` and `compact` less, `md` and `lg` more.  Old names:  `compact` (`compact=\"very\"` is `xs`), `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "compact",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
-            "very"
-          ],
-          "description": "`compact` / `compact=\"very\"`:  less cell padding."
-        },
-        {
-          "name": "padded",
-          "kind": "keyOrValueAndKey",
-          "values": [
-            "very"
-          ],
-          "description": "`padded` / `padded=\"very\"`:  more cell padding."
-        },
-        {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
-          "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joins a segment or another table:  `attached` (middle), `top` or `bottom`."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`."
         },
         {
           "name": "stackable",
@@ -28644,7 +29869,7 @@
           "description": "Equal-width column count, `1` ... `16` (or `1/4`, `25%`):  `four column`."
         },
         {
-          "name": "text-align",
+          "name": "align",
           "kind": "textAlign",
           "values": [
             "left",
@@ -28653,7 +29878,12 @@
             "justified"
           ],
           "valueSet": "alignments",
-          "description": "Text alignment of every cell."
+          "replaces": [
+            {
+              "name": "text-align"
+            }
+          ],
+          "description": "Text alignment of every cell.  Old name:  `text-align`."
         },
         {
           "name": "vertical-align",
@@ -28827,15 +30057,15 @@
       "states": [
         {
           "name": "attached",
-          "description": "Set while `attached` (any edge):  the host drops the outer margin it carries."
+          "description": "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
         },
         {
           "name": "attached-top",
-          "description": "Set while `attached` is `top`:  the host keeps only its top margin."
+          "description": "Set while `attach` is `top`:  the host keeps only its top margin."
         },
         {
           "name": "attached-bottom",
-          "description": "Set while `attached` is `bottom`:  the host keeps only its bottom margin."
+          "description": "Set while `attach` is `bottom`:  the host keeps only its bottom margin."
         },
         {
           "name": "disabled",
@@ -28939,42 +30169,47 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the selected tab (`segmented`:  its fill;  default the primary colour)."
         },
         {
           "name": "appearance",
-          "kind": "valueOnly",
+          "kind": "multiple",
           "values": [
             "tabular",
             "pointing",
             "secondary",
             "text",
-            "segmented"
+            "segmented",
+            "basic"
           ],
-          "description": "The tab list's look, as `<ui-menu appearance>`:  `tabular` (file-folder tabs), `pointing`, `secondary`, `text`, `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control).  The booleans below are aliases."
-        },
-        {
-          "name": "tabular",
-          "kind": "keyOnly",
-          "description": "Tabs drawn as file-folder tabs (Fomantic's classic tab look).  Alias of `appearance=\"tabular\"`."
-        },
-        {
-          "name": "pointing",
-          "kind": "keyOnly",
-          "description": "The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance=\"pointing\"`."
-        },
-        {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "De-emphasized tabs:  no box.  Alias of `appearance=\"secondary\"`."
-        },
-        {
-          "name": "text",
-          "kind": "keyOnly",
-          "description": "Plain text tabs.  Alias of `appearance=\"text\"`."
+          "replaces": [
+            {
+              "name": "tabular",
+              "value": "tabular"
+            },
+            {
+              "name": "pointing",
+              "value": "pointing"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "text",
+              "value": "text"
+            },
+            {
+              "name": "basic",
+              "value": "basic"
+            }
+          ],
+          "description": "The look, several words at once:  the tab list's, as `<ui-menu appearance>` -- `tabular` (file-folder tabs), `pointing` (the selected tab points at its pane;  an underline with `secondary`), `secondary` (no box), `text` (plain words), `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control);  and the panes' -- `basic` (no segment box:  no border, no shadow).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `basic`."
         },
         {
           "name": "inverted",
@@ -28982,9 +30217,19 @@
           "description": "The dark scheme for the tabs and the panes."
         },
         {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch."
         },
         {
           "name": "fluid",
@@ -28992,12 +30237,21 @@
           "description": "The tab menu takes the full width (or, vertical, its column's)."
         },
         {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "The tab menu is only as wide as its tabs (Fomantic's `compact` menu)."
+          "name": "padding",
+          "kind": "valueOnly",
+          "values": [
+            "compact"
+          ],
+          "replaces": [
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`compact`:  the tab menu is only as wide as its tabs (Fomantic's `compact` menu).  Old name:  `compact`."
         },
         {
-          "name": "alignment",
+          "name": "align",
           "kind": "valueAndKey",
           "values": [
             "fluid",
@@ -29005,26 +30259,32 @@
             "center",
             "right"
           ],
-          "description": "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `vertical`."
+          "replaces": [
+            {
+              "name": "alignment"
+            }
+          ],
+          "description": "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction=\"vertical\"`.  Its old name is `alignment`."
         },
         {
           "name": "equal",
           "kind": "keyOnly",
-          "description": "Every tab the same width, from the tabs themselves (no count):  with `alignment=\"fluid\"` an equal share of the row each;  otherwise each as wide as the widest."
+          "description": "Every tab the same width, from the tabs themselves (no count):  with `align=\"fluid\"` an equal share of the row each;  otherwise each as wide as the widest."
         },
         {
-          "name": "basic",
-          "kind": "keyOnly",
-          "description": "Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow."
-        },
-        {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
             "top",
             "bottom"
           ],
-          "description": "Joins the tab menu and the panes edge to edge:  bare or `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `attached=\"bottom\"` puts them below."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "top"
+            }
+          ],
+          "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`)."
         },
         {
           "name": "value",
@@ -29193,7 +30453,7 @@
       "states": [
         {
           "name": "vertical",
-          "description": "Tabs in a column (`vertical`)."
+          "description": "Tabs in a column (`direction=\"vertical\"`)."
         },
         {
           "name": "disabled",
@@ -29291,7 +30551,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the text."
@@ -29522,9 +30784,18 @@
           "description": "Form state, tinting the box, text and placeholder."
         },
         {
-          "name": "transparent",
-          "kind": "keyOnly",
-          "description": "No box:  text only."
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "transparent"
+          ],
+          "replaces": [
+            {
+              "name": "transparent",
+              "value": "transparent"
+            }
+          ],
+          "description": "`transparent`:  no box, text only.  Old name:  `transparent`."
         },
         {
           "name": "fluid",
@@ -30693,7 +31964,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue:  a filled toast in that colour."
@@ -31084,22 +32357,52 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill."
         },
         {
           "name": "appearance",
-          "kind": "valueOnly",
+          "kind": "multiple",
           "values": [
             "tabular",
             "pointing",
             "secondary",
             "text",
-            "segmented"
+            "segmented",
+            "link",
+            "borderless"
           ],
-          "description": "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance=\"pointing\" secondary` ~== `secondary pointing`."
+          "replaces": [
+            {
+              "name": "tabular",
+              "value": "tabular"
+            },
+            {
+              "name": "pointing",
+              "value": "pointing"
+            },
+            {
+              "name": "secondary",
+              "value": "secondary"
+            },
+            {
+              "name": "text",
+              "value": "text"
+            },
+            {
+              "name": "link",
+              "value": "link"
+            },
+            {
+              "name": "borderless",
+              "value": "borderless"
+            }
+          ],
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
         },
         {
           "name": "position",
@@ -31112,29 +32415,19 @@
           "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`)."
         },
         {
-          "name": "secondary",
-          "kind": "keyOnly",
-          "description": "De-emphasized:  no box, rounded items.  Alias of `appearance=\"secondary\"`."
-        },
-        {
-          "name": "pointing",
-          "kind": "keyOnly",
-          "description": "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance=\"pointing\"`."
-        },
-        {
-          "name": "tabular",
-          "kind": "keyOnly",
-          "description": "Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance=\"tabular\"`."
-        },
-        {
-          "name": "text",
-          "kind": "keyOnly",
-          "description": "Plain text items, no box.  Alias of `appearance=\"text\"`."
-        },
-        {
-          "name": "vertical",
-          "kind": "keyOnly",
-          "description": "Items stacked top to bottom."
+          "name": "direction",
+          "kind": "valueOnly",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "replaces": [
+            {
+              "name": "vertical",
+              "value": "vertical"
+            }
+          ],
+          "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch."
         },
         {
           "name": "pagination",
@@ -31152,11 +32445,6 @@
           "description": "Labeled icon items:  a large icon above each item's text."
         },
         {
-          "name": "link",
-          "kind": "keyOnly",
-          "description": "Every item is interactive:  a `<button>` with the link hover."
-        },
-        {
           "name": "fluid",
           "kind": "keyOnly",
           "description": "Takes the full width of its container."
@@ -31172,24 +32460,19 @@
           "description": "Centred in its container, items centred."
         },
         {
-          "name": "borderless",
-          "kind": "keyOnly",
-          "description": "No dividers between items."
-        },
-        {
-          "name": "compact",
-          "kind": "keyOnly",
-          "description": "Only as wide as its items."
-        },
-        {
           "name": "wrapping",
           "kind": "keyOnly",
           "description": "Items wrap onto more lines when they don't fit."
         },
         {
-          "name": "wrapped",
+          "name": "wrap",
           "kind": "keyOnly",
-          "description": "With `wrapping`:  square corners where the lines meet."
+          "replaces": [
+            {
+              "name": "wrapped"
+            }
+          ],
+          "description": "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`."
         },
         {
           "name": "inverted",
@@ -31206,22 +32489,41 @@
           "description": "Floats beside the content;  `right` floats right."
         },
         {
-          "name": "fitted",
-          "kind": "keyOrValueAndKey",
+          "name": "padding",
+          "kind": "valueOnly",
           "values": [
-            "horizontally",
-            "vertically"
+            "none",
+            "none-x",
+            "none-y",
+            "compact"
           ],
-          "description": "No item padding;  `horizontally` / `vertically` keep the other axis' padding."
+          "replaces": [
+            {
+              "name": "fitted",
+              "value": "none"
+            },
+            {
+              "name": "compact",
+              "value": "compact"
+            }
+          ],
+          "description": "`none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
         },
         {
-          "name": "attached",
-          "kind": "keyOrValueAndKey",
+          "name": "attach",
+          "kind": "valueOnly",
           "values": [
+            "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle."
+          "replaces": [
+            {
+              "name": "attached",
+              "value": "both"
+            }
+          ],
+          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`."
         },
         {
           "name": "fixed",
@@ -31235,7 +32537,7 @@
           "description": "Fixed to an edge of the viewport."
         },
         {
-          "name": "alignment",
+          "name": "align",
           "kind": "valueAndKey",
           "values": [
             "fluid",
@@ -31243,12 +32545,17 @@
             "center",
             "right"
           ],
-          "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment=\"center\"` => `center aligned`."
+          "replaces": [
+            {
+              "name": "alignment"
+            }
+          ],
+          "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name is `alignment`."
         },
         {
           "name": "equal",
           "kind": "keyOnly",
-          "description": "Every item the same width, from the items themselves (no count):  with `alignment=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed."
+          "description": "Every item the same width, from the items themselves (no count):  with `align=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed."
         },
         {
           "name": "items",
@@ -31339,6 +32646,17 @@
           ],
           "shared": true,
           "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
         },
         {
           "name": "target",
@@ -31446,7 +32764,7 @@
         },
         {
           "name": "vertical",
-          "description": "Items stacked (`vertical`)."
+          "description": "Items stacked (`direction=\"vertical\"`)."
         },
         {
           "name": "overflowing",
@@ -31557,7 +32875,9 @@
             "pink",
             "brown",
             "grey",
-            "black"
+            "black",
+            "positive",
+            "negative"
           ],
           "valueSet": "hues",
           "description": "Hue of a `pulsating` ring."

@@ -5,7 +5,7 @@ import { tableVocabulary } from "./UITable.en"
  * ### `TableGrammar`
  * Class strings a table needs besides its own root's:  the shadow `.scroller`'s, and a data-mode cell's.
  * - Scroller:  `ClassBuilder` over the table vocabulary's scroller-shaped attributes
- *   (`resizable`, `attached`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
+ *   (`resizable`, `attach`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
  *   e.g. `resizable top attached short scrolling scroller`.
  *   Same grammar as the table, so `UITable.css` keys the scroller on the same phrases (`[class*="very short"]`).
  * - Cell:  a `TableColumn`'s `textAlign` / `width` as Fomantic's cell classes (`right aligned four wide`).
@@ -56,6 +56,9 @@ export class TableGrammar {
   }
 }
 
+/** Scroller attribute that joins it to what's above or below:  `both`, `top`, `bottom`. */
+export const ATTACH = "attach"
+
 /** Scroller attribute that caps the height and scrolls, head and foot stuck. */
 const SCROLLING = "scrolling"
 
@@ -63,7 +66,7 @@ const SCROLLING = "scrolling"
 const OVERFLOWING = "overflowing"
 
 /** Canonical names of the table attributes that shape the scroller, in vocabulary order. */
-const SCROLLER_ATTRIBUTES: readonly string[] = ["resizable", "attached", SCROLLING, OVERFLOWING]
+const SCROLLER_ATTRIBUTES: readonly string[] = ["resizable", ATTACH, SCROLLING, OVERFLOWING]
 
 /** The scroller's noun:  its last class word. */
 const SCROLLER_NOUN = "scroller"

@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Card">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-card%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-card%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/views/card.html"
+              link="https://fomantic-ui.com/views/card.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
@@ -95,7 +95,7 @@
                     <ui-extra>
                       <ui-input
                         size="large"
-                        transparent
+                        appearance="transparent"
                         icon="heart"
                         icon-position="left"
                         placeholder="Add Comment..."
@@ -123,8 +123,8 @@
                       </ui-content>
                       <ui-extra>
                         <ui-buttons width="2">
-                          <ui-button basic color="green">Approve</ui-button>
-                          <ui-button basic color="red">Decline</ui-button>
+                          <ui-button color="green" appearance="basic">Approve</ui-button>
+                          <ui-button color="red" appearance="basic">Decline</ui-button>
                         </ui-buttons>
                       </ui-extra>
                     </ui-card>
@@ -137,8 +137,8 @@
                       </ui-content>
                       <ui-extra>
                         <ui-buttons width="2">
-                          <ui-button basic color="green">Approve</ui-button>
-                          <ui-button basic color="red">Decline</ui-button>
+                          <ui-button color="green" appearance="basic">Approve</ui-button>
+                          <ui-button color="red" appearance="basic">Decline</ui-button>
                         </ui-buttons>
                       </ui-extra>
                     </ui-card>
@@ -146,7 +146,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example description="A group hands its variations to every card in it:  here `link`.">
-                  <ui-cards link>
+                  <ui-cards appearance="link">
                     <ui-card>
                       <img src="images/avatar2/large/matthew.png" alt="Matt Giampietro" />
                       <ui-content>
@@ -372,8 +372,8 @@
                       </ui-description>
                     </ui-content>
                     <ui-extra>
-                      <ui-button size="mini" basic icon="heart">Like</ui-button>
-                      <ui-button size="mini" basic icon="star" floated="right">Favorite</ui-button>
+                      <ui-button size="mini" icon="heart" appearance="basic">Like</ui-button>
+                      <ui-button size="mini" icon="star" floated="right" appearance="basic">Favorite</ui-button>
                     </ui-extra>
                   </ui-card>
                 </ui-docs-example>
@@ -514,7 +514,7 @@
 
               <ui-section id="examples-variations-centered-card" label="Centered Card" sticky collapsible dividing>
                 <ui-docs-example description="A card can center itself inside its container.">
-                  <ui-card centered>
+                  <ui-card align="center">
                     <img src="images/avatar2/large/elyse.png" alt="Elyse" />
                     <ui-content>
                       <ui-header link="#card-elyse">Elyse</ui-header>
@@ -531,7 +531,7 @@
                 dividing
               >
                 <ui-docs-example description="A card can display horizontally.">
-                  <ui-card horizontal>
+                  <ui-card direction="horizontal">
                     <img src="images/avatar2/large/elyse.png" alt="Elyse" />
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
@@ -545,7 +545,7 @@
 
                 <!-- GAP I129:  the horizontal cards sit one per row, not two side by side (each is 400px wide). -->
                 <ui-docs-example>
-                  <ui-cards horizontal>
+                  <ui-cards direction="horizontal">
                     <ui-card>
                       <img src="images/avatar2/large/matthew.png" alt="Matt Giampietro" />
                       <ui-content>
@@ -568,7 +568,7 @@
 
               <ui-section id="examples-variations-raised-card" label="Raised Card" sticky collapsible dividing>
                 <ui-docs-example description="A card may be formatted to raise above the page.">
-                  <ui-card raised>
+                  <ui-card appearance="raised">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
                       <ui-meta>Animals</ui-meta>
@@ -581,7 +581,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-card raised link>
+                  <ui-card appearance="raised link">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
                       <ui-meta>Animals</ui-meta>
@@ -596,9 +596,9 @@
 
               <ui-section id="examples-variations-link-card" label="Link Card" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A card can be formatted so that the entire contents link to another page:  `href`."
+                  description="A card can be formatted so that the entire contents link to another page:  `link`."
                 >
-                  <ui-card href="#card-dog">
+                  <ui-card link="#card-dog">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
                       <ui-meta>Animals</ui-meta>
@@ -611,7 +611,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example description="`link` alone only adds the hover lift:  it's a look, not a link.">
-                  <ui-card link>
+                  <ui-card appearance="link">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
                       <ui-meta>Animals</ui-meta>
@@ -642,10 +642,10 @@
 
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example
-                  description="Any element inside a card can have its text alignment specified:  `text-align`."
+                  description="Any element inside a card can have its text alignment specified:  `align`."
                 >
                   <ui-card>
-                    <ui-content text-align="center">
+                    <ui-content align="center">
                       <ui-header>Jenny Hess</ui-header>
                       <ui-description>
                         <p>Jenny is a student studying Media Management at the New School</p>
@@ -695,49 +695,49 @@
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
                 <ui-docs-example description="A card can specify a color:  a line along its bottom edge.">
                   <ui-cards columns="4">
-                    <ui-card color="primary" href="#card-primary"
+                    <ui-card color="primary" link="#card-primary"
                       ><img src="images/wireframe/white-image.png" alt="Primary"
                     /></ui-card>
-                    <ui-card color="secondary" href="#card-secondary"
+                    <ui-card color="secondary" link="#card-secondary"
                       ><img src="images/wireframe/white-image.png" alt="Secondary"
                     /></ui-card>
-                    <ui-card color="red" href="#card-red"
+                    <ui-card color="red" link="#card-red"
                       ><img src="images/wireframe/white-image.png" alt="Red"
                     /></ui-card>
-                    <ui-card color="orange" href="#card-orange"
+                    <ui-card color="orange" link="#card-orange"
                       ><img src="images/wireframe/white-image.png" alt="Orange"
                     /></ui-card>
-                    <ui-card color="yellow" href="#card-yellow"
+                    <ui-card color="yellow" link="#card-yellow"
                       ><img src="images/wireframe/white-image.png" alt="Yellow"
                     /></ui-card>
-                    <ui-card color="olive" href="#card-olive"
+                    <ui-card color="olive" link="#card-olive"
                       ><img src="images/wireframe/white-image.png" alt="Olive"
                     /></ui-card>
-                    <ui-card color="green" href="#card-green"
+                    <ui-card color="green" link="#card-green"
                       ><img src="images/wireframe/white-image.png" alt="Green"
                     /></ui-card>
-                    <ui-card color="teal" href="#card-teal"
+                    <ui-card color="teal" link="#card-teal"
                       ><img src="images/wireframe/white-image.png" alt="Teal"
                     /></ui-card>
-                    <ui-card color="blue" href="#card-blue"
+                    <ui-card color="blue" link="#card-blue"
                       ><img src="images/wireframe/white-image.png" alt="Blue"
                     /></ui-card>
-                    <ui-card color="violet" href="#card-violet"
+                    <ui-card color="violet" link="#card-violet"
                       ><img src="images/wireframe/white-image.png" alt="Violet"
                     /></ui-card>
-                    <ui-card color="purple" href="#card-purple"
+                    <ui-card color="purple" link="#card-purple"
                       ><img src="images/wireframe/white-image.png" alt="Purple"
                     /></ui-card>
-                    <ui-card color="pink" href="#card-pink"
+                    <ui-card color="pink" link="#card-pink"
                       ><img src="images/wireframe/white-image.png" alt="Pink"
                     /></ui-card>
-                    <ui-card color="brown" href="#card-brown"
+                    <ui-card color="brown" link="#card-brown"
                       ><img src="images/wireframe/white-image.png" alt="Brown"
                     /></ui-card>
-                    <ui-card color="grey" href="#card-grey"
+                    <ui-card color="grey" link="#card-grey"
                       ><img src="images/wireframe/white-image.png" alt="Grey"
                     /></ui-card>
-                    <ui-card color="black" href="#card-black"
+                    <ui-card color="black" link="#card-black"
                       ><img src="images/wireframe/white-image.png" alt="Black"
                     /></ui-card>
                   </ui-cards>
@@ -748,50 +748,50 @@
                 <ui-docs-example
                   description="A basic card does not have a border, and a coloured one gets a full colour background."
                 >
-                  <ui-cards columns="4" basic>
-                    <ui-card color="primary" href="#card-primary"
+                  <ui-cards columns="4" appearance="basic">
+                    <ui-card color="primary" link="#card-primary"
                       ><img src="images/wireframe/white-image.png" alt="Primary"
                     /></ui-card>
-                    <ui-card color="secondary" href="#card-secondary"
+                    <ui-card color="secondary" link="#card-secondary"
                       ><img src="images/wireframe/white-image.png" alt="Secondary"
                     /></ui-card>
-                    <ui-card color="red" href="#card-red"
+                    <ui-card color="red" link="#card-red"
                       ><img src="images/wireframe/white-image.png" alt="Red"
                     /></ui-card>
-                    <ui-card color="orange" href="#card-orange"
+                    <ui-card color="orange" link="#card-orange"
                       ><img src="images/wireframe/white-image.png" alt="Orange"
                     /></ui-card>
-                    <ui-card color="yellow" href="#card-yellow"
+                    <ui-card color="yellow" link="#card-yellow"
                       ><img src="images/wireframe/white-image.png" alt="Yellow"
                     /></ui-card>
-                    <ui-card color="olive" href="#card-olive"
+                    <ui-card color="olive" link="#card-olive"
                       ><img src="images/wireframe/white-image.png" alt="Olive"
                     /></ui-card>
-                    <ui-card color="green" href="#card-green"
+                    <ui-card color="green" link="#card-green"
                       ><img src="images/wireframe/white-image.png" alt="Green"
                     /></ui-card>
-                    <ui-card color="teal" href="#card-teal"
+                    <ui-card color="teal" link="#card-teal"
                       ><img src="images/wireframe/white-image.png" alt="Teal"
                     /></ui-card>
-                    <ui-card color="blue" href="#card-blue"
+                    <ui-card color="blue" link="#card-blue"
                       ><img src="images/wireframe/white-image.png" alt="Blue"
                     /></ui-card>
-                    <ui-card color="violet" href="#card-violet"
+                    <ui-card color="violet" link="#card-violet"
                       ><img src="images/wireframe/white-image.png" alt="Violet"
                     /></ui-card>
-                    <ui-card color="purple" href="#card-purple"
+                    <ui-card color="purple" link="#card-purple"
                       ><img src="images/wireframe/white-image.png" alt="Purple"
                     /></ui-card>
-                    <ui-card color="pink" href="#card-pink"
+                    <ui-card color="pink" link="#card-pink"
                       ><img src="images/wireframe/white-image.png" alt="Pink"
                     /></ui-card>
-                    <ui-card color="brown" href="#card-brown"
+                    <ui-card color="brown" link="#card-brown"
                       ><img src="images/wireframe/white-image.png" alt="Brown"
                     /></ui-card>
-                    <ui-card color="grey" href="#card-grey"
+                    <ui-card color="grey" link="#card-grey"
                       ><img src="images/wireframe/white-image.png" alt="Grey"
                     /></ui-card>
-                    <ui-card color="black" href="#card-black"
+                    <ui-card color="black" link="#card-black"
                       ><img src="images/wireframe/white-image.png" alt="Black"
                     /></ui-card>
                   </ui-cards>
@@ -802,7 +802,7 @@
                 <ui-docs-example
                   description="Ours, not Fomantic's:  a dashed card is a flat placeholder, its border dashed in `--ui-card-border-color`."
                 >
-                  <ui-card dashed heading="Current, for comparison" description="Where the next one will go."></ui-card>
+                  <ui-card heading="Current, for comparison" description="Where the next one will go." appearance="dashed"></ui-card>
                 </ui-docs-example>
               </ui-section>
 
@@ -952,8 +952,8 @@
               <ui-markdown>
                 <script type="text/markdown">
                   A card is an `<article>`: a self-contained piece of the page, such as a person, a product or a post.
-                  With `href` the whole card becomes ONE link (an `<a>`), named by its text. `link` alone is only the
-                  hover lift, so a card that goes somewhere needs `href`.
+                  With `link="..."` the whole card becomes ONE link (an `<a>`), named by its text. `appearance="link"` is only the
+                  hover lift, so a card that goes somewhere needs `link`.
 
                   - Its content is the generic [content parts](ui-header.html): `<ui-content>`, `<ui-header>`,
                     `<ui-meta>`, `<ui-description>`, `<ui-extra>` and `<ui-avatar>` inside a card take the card's
@@ -969,7 +969,7 @@
               </ui-markdown>
               <ui-code language="html">
                 <script type="text/plain">
-                  <ui-card href="/people/kristy">
+                  <ui-card link="/people/kristy">
                     <img src="kristy.png" alt="Kristy" />
                     <ui-content>
                       <ui-header>Kristy</ui-header>
@@ -985,8 +985,8 @@
             <ui-section id="usage-groups" label="Groups" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A `<ui-cards>` group hands its variations to its cards: `size`, `color`, `horizontal`, `raised`,
-                  `link`, `basic` and `inverted` on the group apply to every card that doesn't set its own.
+                  A `<ui-cards>` group hands its variations to its cards: `size`, `color`, `direction`, `appearance`
+                  and `inverted` on the group apply to every card that doesn't set its own (a card's looks join the group's).
 
                   - `columns` sets how many cards share a row; without it each card keeps a fixed width and the row
                     wraps.
@@ -1001,7 +1001,7 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A card takes no focus of its own; a link card (`href`) is one Tab stop, and **Enter** follows it.
+                  A card takes no focus of its own; a link card (`link`) is one Tab stop, and **Enter** follows it.
                   Links, buttons and inputs inside a plain card are Tab stops as usual.
                 </script>
               </ui-markdown>
@@ -1014,8 +1014,8 @@
                     a `level` when the card's title should also be a heading in the page outline.
                   - A link card is one link whose name is all of its text. Keep other links and buttons out of it:
                     nested interactive content can't be reached or named properly. A card with its own links (a
-                    linked header, an extra link) should not have `href`.
-                  - `disabled` sets `aria-disabled`, and a link card loses its `href`, so it is no longer a Tab stop.
+                    linked header, an extra link) should not have `link`.
+                  - `disabled` sets `aria-disabled`, and a link card loses its `link`, so it is no longer a Tab stop.
                   - `loading` sets `aria-busy` and announces "Loading…" (translatable) through a hidden status
                     message.
                   - A `<ui-cards>` group is a `role="list"` and each card in it a `listitem`, so a reader hears how

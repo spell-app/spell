@@ -36,17 +36,30 @@ export const imageVocabulary = {
     },
     { name: "avatar", group: "content", kind: "keyOnly", description: "A small circle sitting in a line of text." },
     {
-      name: "bordered",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "A hairline border, for images with white edges."
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["bordered", "circular", "rounded"],
+      replaces: [
+        { from: "bordered", value: "bordered" },
+        { from: "circular", value: "circular" },
+        { from: "rounded", value: "rounded" }
+      ],
+      description:
+        "The look, several words at once:  `bordered` (a hairline border, for images with white edges), " +
+        "`circular` (cropped to a circle;  a pill when not square), `rounded` (softly rounded corners).  " +
+        "Old names:  `bordered`, `circular`, `rounded` written alone."
     },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "A block centred in its container." },
     {
-      name: "circular",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Cropped to a circle (a pill when not square)."
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  a block centred in its container.  Its old name is `centered`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Faded:  shown as unavailable." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Fills its container's width." },
@@ -56,7 +69,6 @@ export const imageVocabulary = {
       kind: "keyOnly",
       description: "Sits inline in running text instead of as a block."
     },
-    { name: "rounded", group: "appearance", kind: "keyOnly", description: "Softly rounded corners." },
     {
       name: "floated",
       group: "layout",
@@ -65,11 +77,14 @@ export const imageVocabulary = {
       description: "Floats `left` or `right` of the text."
     },
     {
-      name: "spaced",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["left", "right"],
-      description: 'Room from the text around it:  both sides, or `spaced="left"` / `"right"` only.'
+      kind: "valueOnly",
+      values: ["md", "left", "right"],
+      classes: { md: "spaced", left: "left spaced", right: "right spaced" },
+      replaces: [{ from: "spaced", value: "md" }],
+      description:
+        "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`."
     },
     {
       name: "vertical-align",

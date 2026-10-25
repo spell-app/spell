@@ -48,17 +48,28 @@ export const stepsVocabulary = {
       description: "Numbers each step;  a completed step shows a check instead."
     },
     {
-      name: "vertical",
+      name: "direction",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["right"],
-      description: 'Stacked top to bottom;  `vertical="right"` for a group on the right of its content (arrow at left).'
+      kind: "valueOnly",
+      values: ["horizontal", "vertical", "vertical-right"],
+      classes: { horizontal: "", "vertical-right": "right vertical" },
+      replaces: [{ from: "vertical", value: "vertical", values: { right: "vertical-right" } }],
+      description:
+        "Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or " +
+        "`vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` " +
+        '(`vertical="right"`).'
     },
     {
-      name: "circular",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Fomantic's circular steps:  a ring per step on a connecting line, the content beside it."
+      kind: "multiple",
+      values: ["circular"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "circular", value: "circular" }],
+      description:
+        "The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content " +
+        "beside it.  Its old name is the bare `circular` switch."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
@@ -70,11 +81,15 @@ export const stepsVocabulary = {
         "`fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike)."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: 'Joined to a segment below (`attached`, `"top"`) or above (`"bottom"`), overlapping its border.'
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  " +
+        "Its old name is `attached`."
     },
     {
       name: "unstackable",
@@ -125,7 +140,7 @@ export const stepsVocabulary = {
     },
     {
       name: "circular",
-      description: "Set while `circular`:  with `block`, the host keeps both margins, even first or last."
+      description: 'Set while `appearance="circular"`:  with `block`, the host keeps both margins, even first or last.'
     }
   ],
   texts: []

@@ -286,21 +286,21 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         </ui-property-editor>
         <div class="actions">
           <ui-button
-            primary=""
             size="small"
             icon={this.isSaved ? CHECK_ICON : undefined}
             title={t("useTip")}
             disabled={this.isSaved ? "" : undefined}
             onClick={() => this.use()}
+            color="primary"
           >
             {this.isSaved ? t("inUse") : t("use")}
           </ui-button>
           <Show when={this.savedCss !== undefined}>
-            <ui-button basic="" size="small" onClick={() => this.forget()}>
+            <ui-button size="small" onClick={() => this.forget()} appearance="basic">
               {t("forget")}
             </ui-button>
           </Show>
-          <ui-button basic="" size="small" icon={UNDO_ICON} onClick={() => this.startOver()}>
+          <ui-button size="small" icon={UNDO_ICON} onClick={() => this.startOver()} appearance="basic">
             {t("startOver")}
           </ui-button>
         </div>
@@ -405,12 +405,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           <ui-button
             slot="actions"
             size="mini"
-            circular=""
-            basic=""
             icon={UNDO_ICON}
             aria-label={t("reset")}
             title={t("reset")}
             onClick={() => this.choose({ textSize: undefined })}
+            appearance="circular basic"
           ></ui-button>
         </Show>
         <ui-slider
@@ -443,19 +442,17 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           <ui-button
             slot="actions"
             size="mini"
-            circular=""
-            basic=""
             icon={UNDO_ICON}
             aria-label={t("reset")}
             title={t("reset")}
             onClick={() => this.choose({ [key]: undefined })}
+            appearance="circular basic"
           ></ui-button>
         </Show>
         <ui-menu
-          appearance="segmented"
-          alignment="fluid"
+          appearance="segmented link"
+          align="fluid"
           equal=""
-          link=""
           size="small"
           aria-label={t(key)}
           on-ui-choosing={(event: CustomEvent<{ value: string }>) => this.choose({ [key]: event.detail.value })}
@@ -476,11 +473,16 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   private preview(): JSX.Element {
     const t = this.text
     return (
-      <ui-section class="tool" part={this.partForName("preview")} label={t("preview")} collapsible="" basic="">
+      <ui-section
+        class="tool"
+        part={this.partForName("preview")}
+        label={t("preview")}
+        collapsible=""
+        appearance="basic"
+      >
         <ui-menu
           slot="actions"
-          appearance="segmented"
-          link=""
+          appearance="segmented link"
           size="mini"
           aria-label={t("previewMode")}
           on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
@@ -527,23 +529,23 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             </div>
             <div class="add">
               <ui-input placeholder={t("newHabit")} aria-label={t("newHabit")}></ui-input>
-              <ui-button primary="" icon="plus">
+              <ui-button icon="plus" color="primary">
                 {t("add")}
               </ui-button>
             </div>
           </ui-content>
         </ui-card>
         <div class="sample-row">
-          <ui-button secondary="" size="small">
+          <ui-button size="small" color="secondary">
             {t("secondary")}
           </ui-button>
-          <ui-button basic="" size="small">
+          <ui-button size="small" appearance="basic">
             {t("basicButton")}
           </ui-button>
           <ui-label size="small" color="primary">
             {t("live")}
           </ui-label>
-          <ui-checkbox type="toggle" selected="">
+          <ui-checkbox appearance="toggle" selected="">
             {t("remind")}
           </ui-checkbox>
         </div>
@@ -560,16 +562,16 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   private stylesheet(): JSX.Element {
     const t = this.text
     return (
-      <ui-section class="tool" part={this.partForName("sheet")} label={t("css")} collapsible="" basic="">
+      <ui-section class="tool" part={this.partForName("sheet")} label={t("css")} collapsible="" appearance="basic">
         <span slot="actions" class="file">
           {this.sheet.fileName}
         </span>
         <ui-button
           slot="actions"
           size="mini"
-          basic=""
           icon={this.isCopied ? CHECK_ICON : COPY_ICON}
           onClick={() => void this.copy()}
+          appearance="basic"
         >
           {this.isCopied ? t("copied") : t("copy")}
         </ui-button>

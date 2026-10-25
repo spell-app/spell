@@ -69,7 +69,9 @@ describe("<ui-accordion> classes", () => {
     ["styled fluid inverted", "ui fluid inverted styled accordion"],
     ["basic styled", "ui basic styled accordion"],
     ["compact", "ui compact accordion"],
-    ['compact="very" styled', "ui styled very compact accordion"],
+    // old names and new draw the same words (epic `ui-gaps` P4)
+    ['compact="very" styled', "ui very compact styled accordion"],
+    ['padding="xs" appearance="styled"', "ui very compact styled accordion"],
     ["tree", "ui tree accordion"],
     ['exclusive="no" collapsible="no" open="1"', "ui accordion"]
   ])("<ui-accordion %s>", async (attributes, classes) => {

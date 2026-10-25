@@ -26,8 +26,8 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
  * (`UIMenu.css` has the markup of each).
  *
  * - DEFAULT, a navigation landmark:  `<nav class="ui ... menu" part="menu" aria-label>` around the slot.
- *   - Items with `href` are links, the selected one `aria-current="page"`;
- *     `link` and `pagination` menus make every other item a `<button>`.
+ *   - Items with a `link` are links, the selected one `aria-current="page"`;
+ *     `appearance="link"` and `pagination` menus make every other item a `<button>`.
  *   - The DOM element's `aria-label` names the landmark (two navs on a page need distinct names).
  *
  * - `interactive`, an application MENUBAR (WAI-ARIA APG):  `<div role="menubar" aria-orientation>`.
@@ -60,7 +60,6 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   // `Partial`:  `<ui-toolbar>` extends the menu, stating other keys
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { menu: menuCSS },
-    cssStates: ["vertical"],
     // a sub-menu is a part of its menu:  an item's header looks past it to the menu
     isAPart: true,
     // nothing to delegate to:  the items are the focus targets
@@ -85,8 +84,26 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   readonly context = new E.PartContext({
     domElement: this.domElement,
     noun: this.vocabulary.noun,
-    barrier: (element) => this.appearance === SEGMENTED || E.PartContext.isBarrier(element)
+    barrier: (element) => this.isSegmented || E.PartContext.isBarrier(element)
   })
+
+  /** `appearance` holds `word` (`segmented`, `link` ...):  it takes several at once. */
+  hasLook(word: string): boolean {
+    return String(this.appearance ?? "")
+      .split(" ")
+      .includes(word)
+  }
+
+  /** A segmented control (`appearance` holds `segmented`):  it moves `selected` itself, and draws a thumb. */
+  get isSegmented(): boolean {
+    return this.hasLook(SEGMENTED)
+  }
+
+  /** Its items run top to bottom (`direction="vertical"`):  `:state(vertical)`. */
+  @E.cssState("vertical")
+  get isVertical(): boolean {
+    return this.direction === VERTICAL
+  }
 
   /** The owning menu's component, when this is a sub-menu:  only menus own `menu` parts. */
   get parentMenu(): UIMenu | undefined {
@@ -120,7 +137,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return {
       domElementRole: isInteractive ? "none" : undefined,
       role: isInteractive ? "menuitem" : undefined,
-      interactive: isInteractive || this.link || this.pagination,
+      interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination,
       current: "page"
     }
   }
@@ -153,7 +170,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     const component = (item as E.DOMElement).component as ItemComponent | undefined
     const value = component?.value ?? item.textContent?.trim() ?? ""
     const isChosen = this.send("ui-choosing", { value, item, originalEvent: event })
-    if (isChosen && this.appearance === SEGMENTED) this.choose(item)
+    if (isChosen && this.isSegmented) this.choose(item)
   }
 
   /**
@@ -181,7 +198,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** A top-level `segmented` menu, rendered:  it draws a sliding thumb. */
   get hasThumb(): boolean {
-    return !this.parentMenu && this.appearance === SEGMENTED && this.isReady
+    return !this.parentMenu && this.isSegmented && this.isReady
   }
 
   /** SIDE EFFECT:  the thumb, drawn on the menu's box while `hasThumb`;  its cleanup takes it down. */
@@ -231,7 +248,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** The menubar's arrow-key axis:  `vertical` menus go up and down. */
   private get orientation(): E.RovingOrientation {
-    return this.vertical ? "vertical" : "horizontal"
+    return this.isVertical ? "vertical" : "horizontal"
   }
 
   /** Live roving tabindex while `interactive`. */
@@ -297,7 +314,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       if (!this.itemsThatAsked.has(element) || element.hidden) continue
       const item = (element as E.DOMElement).component as ItemComponent | undefined
       const box = item?.focusTarget
-      if (box && item.type === UIT.ITEM) boxes.push(box)
+      if (box && item.kind === UIT.ITEM) boxes.push(box)
     }
     return boxes
   }
@@ -324,7 +341,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             class={this.rootClass}
             part={this.partForName("menu")}
             role="menubar"
-            aria-orientation={this.vertical ? "vertical" : undefined}
+            aria-orientation={this.isVertical ? "vertical" : undefined}
             aria-label={this.attributes["aria-label"] ?? undefined}
           >
             <slot />
@@ -380,14 +397,20 @@ const ITEM_BOX = `.${UIT.ITEM}`
 /** The `appearance` of a single-choice menu:  it moves `selected` itself. */
 const SEGMENTED: UIT.MenuAppearance = "segmented"
 
+/** The `appearance` word that makes every item interactive, with the link hover. */
+const LINK_LOOK = "link"
+
+/** The `direction` of a menu whose items run top to bottom. */
+const VERTICAL = "vertical"
+
 ////////////////
 // ## Item types
 ////////////////
 
 /** What the menu reads from an item's component (`UIItem`, not imported:  another family). */
 type ItemComponent = {
-  /** `type` (its vocabulary getter):  `item`, `header` or `divider`;  only `item`s join the roving set */
-  readonly type?: string
+  /** `kind` (its vocabulary getter):  `item`, `header` or `divider`;  only `item`s join the roving set */
+  readonly kind?: string
   /** `value` (its vocabulary getter):  what `ui-select` reports for the item (default its text) */
   readonly value?: string
   /** the item's box that takes focus (its link or button), once rendered */

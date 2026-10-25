@@ -124,9 +124,14 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Root element:  a link, a button (`link`), or a box. */
+  /** Root element:  a link (`link`), a button (`appearance="link"`), or a box. */
   get rootTag(): string {
-    return this.href ? "a" : this.link ? "button" : "div"
+    if (this.link) return "a"
+    return String(this.appearance ?? "")
+      .split(" ")
+      .includes(LINK_LOOK)
+      ? "button"
+      : "div"
   }
 
   render(): JSX.Element {
@@ -135,7 +140,7 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("step")}
-        href={this.rootTag === "a" && !this.disabled ? this.href : undefined}
+        href={this.rootTag === "a" && !this.disabled ? this.link : undefined}
         target={this.rootTag === "a" ? this.target : undefined}
         type={this.rootTag === "button" ? "button" : undefined}
         disabled={this.rootTag === "button" && this.disabled ? true : undefined}
@@ -189,3 +194,6 @@ const TITLE_PART = "title"
 
 /** Glyph of a completed step's icon. */
 const CHECK = "check"
+
+/** The `appearance` word for a step that's clickable without a `link`:  a `<button>`, with the link hover. */
+const LINK_LOOK = "link"

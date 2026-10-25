@@ -68,7 +68,7 @@ export class ModalDialogs implements E.ModalProvider {
     const actions = this.document.createElement(ModalDialogs.tagFor(ACTIONS))
     if (canDeny) actions.append(this.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = this.button(options.okText ?? UI.i18n.t(OK), APPROVE_CLASS)
-    approve.setAttribute(PRIMARY, "")
+    approve.setAttribute(COLOR, PRIMARY)
     actions.append(approve)
     modal.append(content, actions)
     field?.addEventListener("keydown", (event) => {
@@ -158,8 +158,11 @@ const TINY = "tiny"
 /** Class noun of the actions part (`<ui-actions>`). */
 const ACTIONS = "actions"
 
-/** `<ui-button>` attribute of the approve button. */
+/** `<ui-button>` colour of the approve button. */
 const PRIMARY = "primary"
+
+/** `<ui-button>`'s `color`, which `PRIMARY` is a value of (epic `ui-gaps` P4). */
+const COLOR = "color"
 
 /** Fomantic's approve class of a button. */
 const APPROVE_CLASS = "approve"

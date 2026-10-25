@@ -42,7 +42,7 @@ describe("<ui-image> classes", () => {
     ["spaced", "ui spaced image"],
     ['spaced="left"', "ui left spaced image"],
     ['vertical-align="middle"', "ui middle aligned image"],
-    ['size="tiny" circular floated="left" vertical-align="top"', "ui tiny circular left floated top aligned image"]
+    ['size="tiny" circular floated="left" vertical-align="top"', "ui tiny left floated circular top aligned image"]
   ])("<ui-image %s>", async (attributes, classes) => {
     const { root } = await image(`<ui-image src="${SRC}" alt="x" ${attributes}></ui-image>`)
     expect(root.localName).toBe("img")
@@ -232,5 +232,30 @@ describe("<ui-image> link", () => {
       `<ui-image NAME="#there" src="${SRC}" alt="There"></ui-image>`.replace("NAME", name)
     )
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+////////////////
+// ## Old names
+//
+// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
+////////////////
+
+describe("<ui-image> old names", () => {
+  /** The class string of the element's first classed box. */
+  async function classesOf(html: string) {
+    const host = await ElementFixture.render<DOMElement>(html)
+    return host.shadowRoot!.querySelector("[class]")!.className
+  }
+
+  it("<ui-image>:  each old spelling draws as its new one", async () => {
+    expect(await classesOf(`<ui-image src="a.png" rounded bordered centered spaced="left">A</ui-image>`)).toBe(
+      await classesOf(`<ui-image src="a.png" appearance="rounded bordered" align="center" spacing="left">A</ui-image>`)
+    )
+  })
+  it("<ui-images>:  each old spelling draws as its new one", async () => {
+    expect(await classesOf(`<ui-images rounded circular centered>A</ui-images>`)).toBe(
+      await classesOf(`<ui-images appearance="rounded circular" align="center">A</ui-images>`)
+    )
   })
 })

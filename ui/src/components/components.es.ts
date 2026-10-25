@@ -216,13 +216,11 @@ export const sharedEs = {
     pointing: "apuntando",
     direction: "direccion",
     // epic `ui-gaps` P4 (Owen's request r1):  the renamed attributes
-    appearance: "apariencia",
     padding: "relleno",
     spacing: "separacion",
     align: "alinear",
     attach: "unir",
     length: "longitud",
-    badge: "insignia",
     wrap: "envolver",
     clip: "recorte",
     limit: "limite",
@@ -404,7 +402,9 @@ export const sharedEs = {
       pink: "rosa",
       brown: "marrón",
       grey: "gris",
-      black: "negro"
+      black: "negro",
+      positive: "positivo",
+      negative: "negativo"
     },
     sizes: {
       mini: "mini",

@@ -52,11 +52,13 @@ export const rowVocabulary = {
     },
     { name: "divided", group: "layout", kind: "keyOnly", description: "Hairlines between its columns." },
     {
-      name: "relaxed",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'Wider gutters;  `relaxed="very"` wider still.'
+      kind: "valueOnly",
+      values: ["lg", "xl"],
+      classes: { lg: "relaxed", xl: "very relaxed" },
+      replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
+      description: "Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its columns." },
     { name: "stretched", group: "layout", kind: "keyOnly", description: "Columns fill the row's height." },
@@ -82,11 +84,12 @@ export const rowVocabulary = {
       description: "Reverses its columns at these grid widths."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns its columns' text."
+      replaces: ["text-align"],
+      description: "Aligns its columns' text.  Its old name is `text-align`."
     },
     {
       name: "vertical-align",

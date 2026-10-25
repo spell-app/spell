@@ -104,7 +104,7 @@ describe("<ui-breadcrumb-section>", () => {
     expect(c!.localName).toBe("span")
     expect(c!.className).toBe("active section")
     expect(c!.getAttribute("aria-current")).toBe("page")
-    expect(sections[2]!.matches(":state(active)")).toBe(true)
+    expect(sections[2]!.matches(":state(selected)")).toBe(true)
   })
 
   it("moves aria-current with `active`", async () => {
@@ -266,5 +266,16 @@ describe("<ui-breadcrumb-section> link", () => {
       `<ui-breadcrumb-section NAME="#there">Go</ui-breadcrumb-section>`.replace("NAME", name)
     )
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+describe("<ui-breadcrumb-section> old names", () => {
+  it("`active` reads as `selected`:  the current page", async () => {
+    const [old, spelled] = [
+      await breadcrumb("", `<ui-breadcrumb-section active>Here</ui-breadcrumb-section>`),
+      await breadcrumb("", `<ui-breadcrumb-section selected>Here</ui-breadcrumb-section>`)
+    ]
+    expect(sectionOf(old.sections[0]!).outerHTML).toBe(sectionOf(spelled.sections[0]!).outerHTML)
+    expect(old.sections[0]!.matches(":state(selected)")).toBe(true)
   })
 })

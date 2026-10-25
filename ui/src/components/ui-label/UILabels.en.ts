@@ -21,18 +21,41 @@ export const labelsVocabulary = {
     { name: "size", group: "appearance", kind: "size", description: "Size of every label in the group." },
     { name: "color", group: "appearance", kind: "color", description: "Hue of every label in the group." },
     { name: "tag", group: "appearance", kind: "keyOnly", description: "Every label shaped like a price tag." },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "Every label basic (outlined)." },
     {
-      name: "tinted",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Every label tinted (the colour's soft fill and text)."
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["basic", "tinted", "circular"],
+      replaces: [
+        { from: "basic", value: "basic" },
+        { from: "tinted", value: "tinted" },
+        { from: "circular", value: "circular" }
+      ],
+      description:
+        "Every label's look, several words at once:  `basic` (outlined), `tinted` (the colour's soft fill and text), " +
+        "`circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
     },
-    { name: "circular", group: "appearance", kind: "keyOnly", description: "Every label a round badge." },
-    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Every label a fixed-width tag." },
+    {
+      name: "direction",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description: "`horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`."
+    },
     { name: "image", group: "content", kind: "keyOnly", description: "Every label an image label." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Every label full width." },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Every label centred." },
+    {
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  every label centred.  Its old name is `centered`."
+    },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every label for dark backgrounds." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Every label dimmed and inert." }
   ],

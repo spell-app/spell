@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Statistic">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-statistic%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-statistic%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/views/statistic.html"
+              link="https://fomantic-ui.com/views/statistic.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's statistic page, section by section, in its order (Types, Content, Variations).
@@ -101,7 +101,7 @@
                     </ui-statistic>
                     <ui-statistic label="Team Members">
                       <ui-value
-                        ><ui-image circular inline src="images/avatar/small/joe.jpg" alt=""></ui-image> 42</ui-value
+                        ><ui-image inline src="images/avatar/small/joe.jpg" alt="" appearance="circular"></ui-image> 42</ui-value
                       >
                     </ui-statistic>
                   </ui-statistics>
@@ -126,11 +126,11 @@
                 dividing
               >
                 <ui-docs-example description="A statistic can present its measurement horizontally.">
-                  <ui-statistic horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic direction="horizontal" value="2,204" label="Views"></ui-statistic>
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-statistics horizontal>
+                  <ui-statistics direction="horizontal">
                     <ui-statistic value="2,204" label="Views"></ui-statistic>
                     <ui-statistic value="3,322" label="Downloads"></ui-statistic>
                     <ui-statistic value="22" label="Tasks"></ui-statistic>
@@ -218,7 +218,7 @@
                     </ui-statistic>
                     <ui-statistic label="Team Members">
                       <ui-value
-                        ><ui-image circular inline src="images/avatar/small/joe.jpg" alt=""></ui-image> 42</ui-value
+                        ><ui-image inline src="images/avatar/small/joe.jpg" alt="" appearance="circular"></ui-image> 42</ui-value
                       >
                     </ui-statistic>
                   </ui-statistics>
@@ -288,17 +288,17 @@
 
                 <!-- GAP I90:  a statistic after a (hidden) divider still takes the sibling margin (Fomantic's is adjacent-only). -->
                 <ui-docs-example>
-                  <ui-statistic size="mini" horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic size="mini" direction="horizontal" value="2,204" label="Views"></ui-statistic>
                   <ui-divider spacer></ui-divider>
-                  <ui-statistic size="tiny" horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic size="tiny" direction="horizontal" value="2,204" label="Views"></ui-statistic>
                   <ui-divider spacer></ui-divider>
-                  <ui-statistic size="small" horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic size="small" direction="horizontal" value="2,204" label="Views"></ui-statistic>
                   <ui-divider spacer></ui-divider>
-                  <ui-statistic horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic direction="horizontal" value="2,204" label="Views"></ui-statistic>
                   <ui-divider spacer></ui-divider>
-                  <ui-statistic size="large" horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic size="large" direction="horizontal" value="2,204" label="Views"></ui-statistic>
                   <ui-divider spacer></ui-divider>
-                  <ui-statistic size="huge" horizontal value="2,204" label="Views"></ui-statistic>
+                  <ui-statistic size="huge" direction="horizontal" value="2,204" label="Views"></ui-statistic>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -317,7 +317,7 @@
                   - The `value` shorthand always comes before the slotted parts and the `label` shorthand after, so either shorthand
                     pairs with a slotted part.
                   - A word value is `<ui-value text>` (or `text` with the `value` shorthand): smaller, bold, at least two lines tall.
-                  - A `<ui-statistics>` group shares its `size`, `color`, `horizontal` and `inverted` with every statistic in it; a
+                  - A `<ui-statistics>` group shares its `size`, `color`, `direction` and `inverted` with every statistic in it; a
                     statistic's own attribute still wins.
                   - `widths="N"` divides each row of a group evenly (Fomantic's `four statistics`).
                   - `stackable` answers to the group's own width, not the window's, so a group in a narrow sidebar stacks even on a
@@ -391,7 +391,7 @@
                   the shadow root, where the sheet reads each through a private alias, so nothing inside blocks them.
 
                   - `--ui-statistic-value-size` and `--ui-statistic-text-value-size` replace the size ladder's value sizes;
-                    `horizontal` swaps in its own ladder.
+                    `direction="horizontal"` swaps in its own ladder.
                   - The `value` and `label` parts style the shorthands.
                 </script>
               </ui-markdown>

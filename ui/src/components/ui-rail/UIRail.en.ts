@@ -41,7 +41,15 @@ export const railVocabulary = {
       kind: "keyOnly",
       description: "A vertical rule between the rail and its container."
     },
-    { name: "attached", group: "layout", kind: "keyOnly", description: "Flush against its container:  no gap." },
+    {
+      name: "attach",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["both"],
+      classes: { both: "attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description: "`both`:  flush against its container, no gap.  Its old name is `attached`."
+    },
     {
       name: "close",
       group: "appearance",

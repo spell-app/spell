@@ -129,7 +129,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
 
   /** Text of `value`:  its option's, else `text` (single), else the value itself. */
   private textFor(value: string): string {
-    return this.optionsByValue.get(value)?.text ?? (this.multiple ? undefined : this.text) ?? value
+    return this.optionsByValue.get(value)?.text ?? (this.multiple ? undefined : this.label) ?? value
   }
 
   /** Room for another value (`max-selections`)? */
@@ -380,7 +380,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
    * `label`, else what names the DOM element (`labels`:  `<label for>`, `aria-label` ...).
    */
   private get accessibleName(): string | undefined {
-    return this.label || this.labels.accessibleName
+    return this.fallbackName || this.labels.accessibleName
   }
 
   protected classValue(name: E.AttributeName<typeof dropdownVocabulary>): unknown {
@@ -448,21 +448,35 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     )
   }
 
-  /** Label for the combobox and listbox:  `placeholder`, else `text`, else `name`. */
-  private get label(): string {
-    return this.placeholder ?? this.text ?? this.name ?? ""
+  /** Name for the combobox and listbox when nothing else names it:  `placeholder`, else `label`, else `name`. */
+  private get fallbackName(): string {
+    return this.placeholder ?? this.label ?? this.name ?? ""
   }
 
-  /** Text shown in `.text`:  chosen text (single), else `text` (a menu's fixed label), else the placeholder. */
+  /** Text shown in `.text`:  chosen text (single), else `label` (a menu's fixed label), else the placeholder. */
   private get displayText(): string {
     const [first] = this.chosenValues
     if (first !== undefined && !this.multiple) return this.textFor(first)
-    return this.text ?? this.placeholder ?? ""
+    return this.label ?? this.placeholder ?? ""
   }
 
   /** Showing the placeholder (grey `default` text)? */
   private get placeholderIsShowing(): boolean {
-    return !this.chosenValues.length && this.text === undefined
+    return !this.chosenValues.length && this.label === undefined
+  }
+
+  /** `direction` holds `left`:  the menu extends leftward (`.left.menu`). */
+  private get opensLeft(): boolean {
+    return String(this.direction ?? "")
+      .split(E.WHITESPACE)
+      .includes(UIT.LEFT)
+  }
+
+  /** `appearance="simple"`:  opens on hover / focus, with no script and no popover. */
+  private get isSimple(): boolean {
+    return String(this.appearance ?? "")
+      .split(E.WHITESPACE)
+      .includes(SIMPLE)
   }
 
   /** Combobox role and ARIA, shared by the trigger and the search input;  the static render's control mark. */
@@ -573,10 +587,10 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       <div
         ref={(element) => (this.menu = element)}
         id={this.ids.menu}
-        class={[MENU, { [UIT.LEFT]: this.direction === UIT.LEFT }]}
+        class={[MENU, { [UIT.LEFT]: this.opensLeft }]}
         role="listbox"
         // a server render can't show a popover:  an open menu is a plain one, shown by the root's `active`
-        popover={this.simple || (isServer && this.isOpen) ? undefined : "manual"}
+        popover={this.isSimple || (isServer && this.isOpen) ? undefined : "manual"}
         part={this.partForName("menu")}
         aria-label={this.accessibleName}
         aria-multiselectable={this.multiple ? "true" : undefined}
@@ -584,7 +598,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
       >
         <slot name={this.slotForName("header")} />
         {/* a server render's rows:  the text is in the page, the menu stays closed */}
-        <Show when={this.isOpen || this.simple || isServer}>
+        <Show when={this.isOpen || this.isSimple || isServer}>
           <For each={this.menuRows}>{(row) => this.row(row)}</For>
           <Show when={!this.visibleOptions.length}>
             {/* an option (disabled) rather than a bare div:  a listbox must own options (axe `aria-required-children`) */}
@@ -900,7 +914,7 @@ const MENU = "menu"
 /** Class word of the "Add …" row. */
 const ADDITION = "addition"
 
-/** Class words of a divider row;  also `<ui-item type="divider">`. */
+/** Class words of a divider row;  also `<ui-item kind="divider">`. */
 const DIVIDER = "divider"
 
 /** Class word of the covering trigger button. */
@@ -911,6 +925,9 @@ const SEARCH = "search"
 
 /** Class word of the hidden span that sizes a `multiple` search input to its query. */
 const SIZER = "sizer"
+
+/** The `appearance` word of a dropdown that opens on hover, with no popover. */
+const SIMPLE = "simple"
 
 /** Class words of the clear button. */
 const CLEAR_ICON = "remove icon"

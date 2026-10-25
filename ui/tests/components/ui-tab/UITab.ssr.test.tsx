@@ -23,9 +23,9 @@ describe("<ui-tabs> static render", () => {
         `<ui-tab label="Second" selected>Two</ui-tab><ui-tab label="Third" disabled>Three</ui-tab></ui-tabs>`
     )
     const root = fragment(html).firstElementChild!
-    expect(root.getAttribute("class")).toBe("ui tabular top attached tabs")
+    expect(root.getAttribute("class")).toBe("ui top attached tabular tabs")
     const list = root.querySelector(":scope > [role=tablist]")!
-    expect(list.getAttribute("class")).toBe("ui tabular top attached menu")
+    expect(list.getAttribute("class")).toBe("ui top attached tabular menu")
     expect(list.getAttribute("aria-label")).toBe("Demo")
     const tabs = [...list.querySelectorAll("button[role=tab]")]
     expect(tabs.map((tab) => tab.textContent)).toEqual(["First", "Second", "Third"])
@@ -36,7 +36,7 @@ describe("<ui-tabs> static render", () => {
     expect(panes.map((pane) => pane.textContent)).toEqual(["One", "Two", "Three"])
     expect(panes.map((pane) => pane.getAttribute("aria-label"))).toEqual(["First", "Second", "Third"])
     expect(panes.map((pane) => pane.classList.contains("active"))).toEqual([false, true, false])
-    expect(panes[1]!.getAttribute("class")).toBe("ui active bottom attached tab segment in-tabs")
+    expect(panes[1]!.getAttribute("class")).toBe("ui bottom attached active tab segment in-tabs")
     expect(panes[1]!.getAttribute("data-state")).toBe("in-tabs pane selected")
     // each tab controls its pane, by id
     expect(tabs.map((tab) => tab.getAttribute("aria-controls"))).toEqual(panes.map((pane) => pane.id))

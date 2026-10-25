@@ -5,15 +5,15 @@
  *   the tabs you click are the items of a `tabular` (or `pointing` / `secondary` / `text`) MENU.
  *   So `<ui-tab>` is the pane, and `<ui-tabs>` draws the menu from its panes' `label`s, with `UIMenu.css`.
  * - Class words come out through `ClassBuilder`:
- *   - `<ui-tabs tabular attached size="small">` => the root `ui small tabular top attached tabs` and its tab list
- *     `ui small tabular top attached menu` (the same words, Fomantic's noun `menu`)
+ *   - `<ui-tabs appearance="tabular" attach="top" size="small">` => the root `ui small tabular top attached tabs`
+ *     and its tab list `ui small tabular top attached menu` (the same words, Fomantic's noun `menu`)
  *   - `<ui-tab>` in those tabs => `ui active bottom attached tab segment`
  *     (the menu's opposite edge;  `active` while selected)
  * - `selected` is the canonical chosen state (`active`, Fomantic's word, is an alias);
  *   the chosen pane is the tabs' `value`.
- * - The tab list's look is the menu's ONE word, `appearance` (`UIT.MenuAppearances`:  `tabular`, `pointing`,
- *   `secondary`, `text`, `segmented`);  the older booleans stay as aliases.  `alignment` and `equal` place and size
- *   the tabs, as on `<ui-menu>`.
+ * - The tab list's look is the menu's `appearance` (`UIT.MenuAppearances`:  `tabular`, `pointing`, `secondary`,
+ *   `text`, `segmented`), several words at once;  the older booleans are its old names (epic `ui-gaps` P4).
+ *   Its `basic` word is the PANES' look.  `align` and `equal` place and size the tabs, as on `<ui-menu>`.
  */
 
 import type { E } from "spell-ui/core"
@@ -47,33 +47,18 @@ export const tabsVocabulary = {
     {
       name: "appearance",
       group: "appearance",
-      kind: "valueOnly",
-      values: UIT.MenuAppearances,
+      kind: "multiple",
+      values: [...UIT.MenuAppearances, "basic"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: ["tabular", "pointing", "secondary", "text", "basic"].map((word) => ({ from: word, value: word })),
       description:
-        "The tab list's look, as `<ui-menu appearance>`:  `tabular` (file-folder tabs), `pointing`, `secondary`, " +
-        "`text`, `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control).  The " +
-        "booleans below are aliases."
+        "The look, several words at once:  the tab list's, as `<ui-menu appearance>` -- `tabular` (file-folder " +
+        "tabs), `pointing` (the selected tab points at its pane;  an underline with `secondary`), `secondary` " +
+        "(no box), `text` (plain words), `segmented` (a bordered group of joined tabs, the selected one filled:  a " +
+        "segmented control);  and the panes' -- `basic` (no segment box:  no border, no shadow).  Old names:  the " +
+        "bare switches `tabular`, `pointing`, `secondary`, `text`, `basic`."
     },
-    {
-      name: "tabular",
-      group: "layout",
-      kind: "keyOnly",
-      description: 'Tabs drawn as file-folder tabs (Fomantic\'s classic tab look).  Alias of `appearance="tabular"`.'
-    },
-    {
-      name: "pointing",
-      group: "layout",
-      kind: "keyOnly",
-      description:
-        'The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance="pointing"`.'
-    },
-    {
-      name: "secondary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: 'De-emphasized tabs:  no box.  Alias of `appearance="secondary"`.'
-    },
-    { name: "text", group: "name", kind: "keyOnly", description: 'Plain text tabs.  Alias of `appearance="text"`.' },
     {
       name: "inverted",
       group: "appearance",
@@ -81,10 +66,15 @@ export const tabsVocabulary = {
       description: "The dark scheme for the tabs and the panes."
     },
     {
-      name: "vertical",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them."
+      kind: "valueOnly",
+      values: ["horizontal", "vertical"],
+      classes: { horizontal: "" },
+      replaces: [{ from: "vertical", value: "vertical" }],
+      description:
+        "Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes " +
+        "(ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch."
     },
     {
       name: "fluid",
@@ -93,43 +83,43 @@ export const tabsVocabulary = {
       description: "The tab menu takes the full width (or, vertical, its column's)."
     },
     {
-      name: "compact",
+      name: "padding",
       group: "layout",
-      kind: "keyOnly",
-      description: "The tab menu is only as wide as its tabs (Fomantic's `compact` menu)."
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description:
+        "`compact`:  the tab menu is only as wide as its tabs (Fomantic's `compact` menu).  Old name:  `compact`."
     },
     {
-      name: "alignment",
+      name: "align",
       group: "layout",
       kind: "valueAndKey",
       key: "aligned",
       values: UIT.ItemAlignments,
+      replaces: ["alignment"],
       description:
         "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a " +
-        "`segmented` tab list moves as a whole).  Ignored when `vertical`."
+        '`segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name is `alignment`.'
     },
     {
       name: "equal",
       group: "layout",
       kind: "keyOnly",
       description:
-        'Every tab the same width, from the tabs themselves (no count):  with `alignment="fluid"` an equal share ' +
+        'Every tab the same width, from the tabs themselves (no count):  with `align="fluid"` an equal share ' +
         "of the row each;  otherwise each as wide as the widest."
     },
     {
-      name: "basic",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow."
-    },
-    {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
+      kind: "valueOnly",
       values: ["top", "bottom"],
+      classes: { top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "top" }],
       description:
-        "Joins the tab menu and the panes edge to edge:  bare or `top` puts the tabs above (`top attached` menu, " +
-        '`bottom attached` panes);  `attached="bottom"` puts them below.'
+        "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, " +
+        "`bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`)."
     },
     {
       name: "value",
@@ -180,7 +170,7 @@ export const tabsVocabulary = {
     { name: "tab", description: 'One tab (`<button role=tab class="item">`).' },
     { name: "icon", description: "A tab's icon, from its pane's `icon`." }
   ],
-  states: [{ name: "vertical", description: "Tabs in a column (`vertical`)." }],
+  states: [{ name: "vertical", description: 'Tabs in a column (`direction="vertical"`).' }],
   texts: [],
   ownsParts: ["tab"]
 } as const satisfies E.ComponentVocabulary

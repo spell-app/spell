@@ -15,7 +15,6 @@ export const embedEs = {
     "video-id": "id-video",
     "aspect-ratio": "proporcion",
     autoplay: "reproduccion-automatica",
-    "branded-ui": "interfaz-marca",
     parameters: "parametros"
   },
   events: { "ui-loading": "cargando", "ui-reset": "restablecer" },

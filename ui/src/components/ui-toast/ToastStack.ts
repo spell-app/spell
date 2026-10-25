@@ -127,7 +127,8 @@ export class ToastStack implements E.ToastProvider {
   /**
    * One action as a `<ui-button>`:
    * - `class` kept on the DOM element (approve / deny classes)
-   * - its words that are button attributes (`positive`, `basic` ...) or hues (`color`) set as attributes
+   * - its words that are button attributes, or an old switch a button attribute replaces (`positive` => `color`,
+   *   `basic` => `appearance`), or hues (`color`), set as attributes
    * - `click` wired, `false` keeping the toast open
    */
   private buttonFor(action: E.ToastAction): HTMLElement {
@@ -138,9 +139,14 @@ export class ToastStack implements E.ToastProvider {
     const known = new Set(
       definition?.vocabulary.attributes.filter(({ kind }) => kind === KEY_ONLY).map(({ name }) => name)
     )
+    const switches = ToastStack.oldSwitchesOf(definition?.vocabulary)
     for (const word of words) {
+      const old = switches.get(word)
       if (known.has(word)) button.setAttribute(word, "")
-      else if (E.ValueSets.has(HUES, word)) button.setAttribute(COLOR, word)
+      else if (old) {
+        const before = old.isMultiple ? button.getAttribute(old.name) : null
+        button.setAttribute(old.name, before ? `${before} ${old.value}` : old.value)
+      } else if (E.ValueSets.has(HUES, word)) button.setAttribute(COLOR, word)
     }
     if (action.icon && definition) button.setAttribute(UIT.ICON, action.icon)
     if (action.text) button.textContent = action.text
@@ -152,6 +158,22 @@ export class ToastStack implements E.ToastProvider {
       })
     }
     return button
+  }
+
+  /**
+   * The old switches `vocabulary`'s attributes replace (`AttributeSpec.replaces`), by old name:
+   * `positive` => `color="positive"`, `basic` => a word of `appearance`.
+   * - Static:  pure, of the vocabulary alone.
+   */
+  private static oldSwitchesOf(vocabulary: E.ComponentVocabulary | undefined): Map<string, OldSwitch> {
+    const switches = new Map<string, OldSwitch>()
+    for (const spec of vocabulary?.attributes ?? []) {
+      for (const old of spec.replaces ?? []) {
+        if (typeof old === "string" || old.value === undefined) continue
+        switches.set(old.from, { name: spec.name, value: old.value, isMultiple: spec.kind === MULTIPLE })
+      }
+    }
+    return switches
   }
 
   /**
@@ -267,6 +289,12 @@ const HUES = "hues"
 
 /** Attribute kind of a button's words (`positive`, `basic` ...):  a `class` word of that kind becomes an attribute. */
 const KEY_ONLY = "keyOnly"
+
+/** Attribute kind that takes several words at once:  an old switch adds its word (`appearance="basic circular"`). */
+const MULTIPLE = "multiple"
+
+/** An old switch a button attribute replaces:  the attribute, the value it sets, and whether it adds a word. */
+type OldSwitch = { name: string; value: string; isMultiple: boolean }
 
 /** `<ui-button>`'s hue attribute (canonical). */
 const COLOR = "color"

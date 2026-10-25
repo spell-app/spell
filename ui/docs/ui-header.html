@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Content parts">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-header%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-header%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/header.html"
+              link="https://fomantic-ui.com/elements/header.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -71,7 +71,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's header page, section by section, in its order (Types, Content, States, Variations), plus our
@@ -116,7 +116,7 @@
                     >Content headings are sized with <code>em</code> and are based on the font-size of their
                     container.</ui-message
                   >
-                  <ui-segment vertical>
+                  <ui-segment appearance="vertical">
                     <ui-header size="huge">Huge Header</ui-header>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-header size="large">Large Header</ui-header>
@@ -146,11 +146,11 @@
                   </ui-header>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-header level="2" text-align="center" icon>
-                    <ui-icon name="users" circular></ui-icon>
+                  <ui-header level="2" align="center" icon>
+                    <ui-icon name="users" appearance="circular"></ui-icon>
                     Friends
                   </ui-header>
-                  <ui-image centered src="images/wireframe/centered-paragraph.png" alt=""></ui-image>
+                  <ui-image align="center" src="images/wireframe/centered-paragraph.png" alt=""></ui-image>
                 </ui-docs-example>
               </ui-section>
 
@@ -162,7 +162,7 @@
                   <span>$10.99</span>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-list horizontal>
+                  <ui-list direction="horizontal">
                     <ui-item image="../images/avatar2/small/molly.png">
                       <ui-content>
                         <ui-header sub>Molly</ui-header>
@@ -195,7 +195,7 @@
                   </ui-header>
                   <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                 </ui-docs-example>
-                <!-- GAP I115:  a slotted `<ui-image circular>` isn't sized by the header:  a plain (square) `<img>` instead. -->
+                <!-- GAP I115:  a slotted `<ui-image appearance="circular">` isn't sized by the header:  a plain (square) `<img>` instead. -->
                 <ui-docs-example>
                   <ui-header level="2">
                     <img src="images/avatar2/large/patrick.png" alt="" />
@@ -295,15 +295,15 @@
 
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example description="A header can be attached to other content, like a segment.">
-                  <ui-header level="3" attached="top">Top Attached</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="3" attach="top">Top Attached</ui-header>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-header level="3" attached>Attached</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="3" attach="both">Attached</ui-header>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-header level="3" attached="bottom">Bottom Attached</ui-header>
+                  <ui-header level="3" attach="bottom">Bottom Attached</ui-header>
                 </ui-docs-example>
               </ui-section>
 
@@ -315,11 +315,11 @@
                 dividing
               >
                 <ui-docs-example description="A top header can be seamless attached without related attached border.">
-                  <ui-header level="3" seamless attached="top">Seamless Top Attached</ui-header>
-                  <ui-segment attached>
+                  <ui-header level="3" seamless attach="top">Seamless Top Attached</ui-header>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-segment attached>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-docs-example>
@@ -328,13 +328,13 @@
                     >This variant is not available for the bottom header, which doesn't have the attached border. To get
                     a seamless bottom header, make the previous attached element seamless.</ui-message
                   >
-                  <ui-segment attached>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-segment seamless attached>
+                  <ui-segment seamless attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-header level="3" attached="bottom">Seamless Bottom Attached</ui-header>
+                  <ui-header level="3" attach="bottom">Seamless Bottom Attached</ui-header>
                 </ui-docs-example>
               </ui-section>
 
@@ -350,12 +350,12 @@
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example description="A header can have its text aligned to a side.">
                   <ui-segment>
-                    <ui-header level="3" text-align="right">Right</ui-header>
-                    <ui-header level="3" text-align="left">Left</ui-header>
-                    <ui-header level="3" text-align="justified"
+                    <ui-header level="3" align="right">Right</ui-header>
+                    <ui-header level="3" align="left">Left</ui-header>
+                    <ui-header level="3" align="justified"
                       >This should take up the full width even if only one line</ui-header
                     >
-                    <ui-header level="3" text-align="center">Center</ui-header>
+                    <ui-header level="3" align="center">Center</ui-header>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -405,7 +405,7 @@
 
               <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
                 <ui-docs-example description="A header can drop its padding.">
-                  <ui-header level="3" fitted block>Fitted block header</ui-header>
+                  <ui-header level="3" padding="none" block>Fitted block header</ui-header>
                   <ui-header level="3" block>Block header</ui-header>
                 </ui-docs-example>
               </ui-section>
@@ -444,7 +444,7 @@
                   description="In a card, `text-align` aligns one content block:  Fomantic's `center aligned content`."
                 >
                   <ui-card>
-                    <ui-content text-align="center">
+                    <ui-content align="center">
                       <ui-header>Centered</ui-header>
                       <ui-description>A center aligned content block.</ui-description>
                     </ui-content>

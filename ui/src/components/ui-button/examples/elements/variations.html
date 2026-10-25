@@ -39,24 +39,24 @@
 
   <section>
     <h4>Basic colored</h4>
-    <ui-button color="red" basic>Red</ui-button>
-    <ui-button color="yellow" basic>Yellow</ui-button>
-    <ui-button color="green" basic>Green</ui-button>
-    <ui-button color="blue" basic>Blue</ui-button>
-    <ui-button color="black" basic>Black</ui-button>
+    <ui-button color="red" appearance="basic">Red</ui-button>
+    <ui-button color="yellow" appearance="basic">Yellow</ui-button>
+    <ui-button color="green" appearance="basic">Green</ui-button>
+    <ui-button color="blue" appearance="basic">Blue</ui-button>
+    <ui-button color="black" appearance="basic">Black</ui-button>
   </section>
 
   <section>
     <h4>Compact</h4>
-    <ui-button compact>Hold</ui-button>
-    <ui-button compact icon="pause" aria-label="Pause"></ui-button>
-    <ui-button compact labeled icon="pause">Pause</ui-button>
+    <ui-button padding="compact">Hold</ui-button>
+    <ui-button icon="pause" aria-label="Pause" padding="compact"></ui-button>
+    <ui-button labeled icon="pause" padding="compact">Pause</ui-button>
   </section>
 
   <section>
     <h4>Positive / negative</h4>
-    <ui-button positive>Positive Button</ui-button>
-    <ui-button negative>Negative Button</ui-button>
+    <ui-button color="positive">Positive Button</ui-button>
+    <ui-button color="negative">Negative Button</ui-button>
   </section>
 
   <section>
@@ -66,22 +66,22 @@
 
   <section>
     <h4>Circular</h4>
-    <ui-button circular icon="gear" aria-label="Settings"></ui-button>
-    <ui-button circular color="blue" icon="heart" aria-label="Like"></ui-button>
-    <ui-button circular>Circular text</ui-button>
+    <ui-button icon="gear" aria-label="Settings" appearance="circular"></ui-button>
+    <ui-button color="blue" icon="heart" aria-label="Like" appearance="circular"></ui-button>
+    <ui-button appearance="circular">Circular text</ui-button>
   </section>
 
   <section>
     <h4>Vertically attached</h4>
     <div>
-      <ui-button attached="top">Top</ui-button>
+      <ui-button attach="top">Top</ui-button>
       <p class="ui-p-m" style="margin: 0; border-inline: 1px solid var(--ui-border-color)">Segment</p>
-      <ui-button attached="bottom">Bottom</ui-button>
+      <ui-button attach="bottom">Bottom</ui-button>
     </div>
   </section>
 
   <section>
     <h4>Horizontally attached</h4>
-    <ui-button attached="left">Left</ui-button><ui-button attached="right">Right</ui-button>
+    <ui-button attach="left">Left</ui-button><ui-button attach="right">Right</ui-button>
   </section>
 </div>

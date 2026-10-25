@@ -236,7 +236,7 @@ export class Vocabulary {
   /**
    * Name every component in the page's language, e.g. Spanish:
    * `defineComponents({ prefix: "es", dictionary: es })`
-   * makes `<es-boton primario color="rojo">` a `<ui-button primary color="red">`.
+   * makes `<es-boton primario color="rojo">` a `<ui-button color="red">`.
    * - Every component the dictionary names a tag for (`dictionary.tags`), and no other:
    *   one defined already, now;  one defined later (a family loaded on demand), as it's defined.
    * - Its texts go to the runtime's texts separately (`UI.i18n.registerDictionary()`):  this is names only.

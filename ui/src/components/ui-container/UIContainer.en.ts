@@ -30,18 +30,24 @@ export const containerVocabulary = {
       description: "Holds a grid:  widened by the grid's gutters so its columns line up with other containers."
     },
     {
-      name: "relaxed",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: "With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters."
+      kind: "valueOnly",
+      values: ["lg", "xl"],
+      classes: { lg: "relaxed", xl: "very relaxed" },
+      replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
+      description:
+        'With `grid`:  room for a grid\'s wider gutters (`spacing="lg"`, `xl` wider still).  ' +
+        "Its old name is `relaxed`."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation)."
+      replaces: ["text-align"],
+      description:
+        "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`."
     },
     {
       name: "scrolling",

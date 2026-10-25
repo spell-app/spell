@@ -16,8 +16,7 @@ export const revealEs = {
     move: "mover",
     rotate: "girar",
     slide: "deslizar",
-    instant: "instantaneo",
-    unclipped: "sin-recorte"
+    instant: "instantaneo"
   },
   slots: { visible: "visible", hidden: "oculto" },
   parts: { reveal: "revelar", visible: "visible", hidden: "oculto" }

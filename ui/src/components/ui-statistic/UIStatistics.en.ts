@@ -32,10 +32,13 @@ export const statisticsVocabulary = {
     { name: "size", group: "appearance", kind: "size", description: "Size of every statistic in the group." },
     { name: "color", group: "appearance", kind: "color", description: "Hue of every value in the group." },
     {
-      name: "horizontal",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "Statistics stacked, each with its label beside its value."
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description:
+        "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every statistic for dark backgrounds." },
     {

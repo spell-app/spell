@@ -21,21 +21,21 @@ export class EmbedSources {
     youtube: {
       domains: ["youtube.com", "youtu.be", "youtube-nocookie.com"],
       url: "https://www.youtube-nocookie.com/embed/{id}",
-      parameters: ({ autoplay, brandedUI }) => ({
-        autohide: !brandedUI,
+      parameters: ({ autoplay }) => ({
+        autohide: true,
         autoplay,
         hq: true,
-        modestbranding: !brandedUI
+        modestbranding: true
       })
     },
     vimeo: {
       domains: ["vimeo.com"],
       url: "https://player.vimeo.com/video/{id}",
-      parameters: ({ autoplay, brandedUI }) => ({
+      parameters: ({ autoplay }) => ({
         autoplay,
-        byline: brandedUI,
-        portrait: brandedUI,
-        title: brandedUI
+        byline: false,
+        portrait: false,
+        title: false
       })
     }
   }
@@ -61,7 +61,7 @@ export class EmbedSources {
       return undefined
     }
     const parameters = {
-      ...(spec?.parameters({ autoplay: options.autoplay, brandedUI: options.brandedUI }) ?? {}),
+      ...(spec?.parameters({ autoplay: options.autoplay }) ?? {}),
       ...options.parameters
     }
     for (const [name, value] of Object.entries(parameters)) {

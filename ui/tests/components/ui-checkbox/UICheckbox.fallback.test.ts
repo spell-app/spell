@@ -17,7 +17,7 @@ const AXE = { rules: { "color-contrast": { enabled: false } } }
 
 describe("CheckboxFallback", () => {
   it("renders Fomantic's markup:  the root, a native checkbox and its label around the slot", async () => {
-    const host = Fixture.render<StubHost>(`<x-fb-checkbox type="toggle" checked>Wifi</x-fb-checkbox>`)
+    const host = Fixture.render<StubHost>(`<x-fb-checkbox appearance="toggle" checked>Wifi</x-fb-checkbox>`)
     const root = FallbackStub.shadow(host).firstElementChild!
     expect(root.className).toBe("ui toggle checkbox")
     const input = root.querySelector<HTMLInputElement>("input[part=control]")!

@@ -93,8 +93,10 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
   private choices(domElement: DropdownDOMElement): Choice[] {
     const choices: Choice[] = []
     for (const item of domElement.querySelectorAll(`:scope > ${itemVocabulary.tag}`)) {
-      const text = DropdownFallback.itemAttribute(item, "text") ?? item.textContent?.trim() ?? ""
-      const type = DropdownFallback.itemAttribute(item, "type")
+      // `label` and `kind`, or their old names `text` and `type` (epic `ui-gaps` P4)
+      const text =
+        DropdownFallback.itemAttribute(item, "label") ?? item.getAttribute(OLD_LABEL) ?? item.textContent?.trim() ?? ""
+      const type = DropdownFallback.itemAttribute(item, "kind") ?? item.getAttribute(OLD_KIND) ?? undefined
       choices.push({
         type: type === UIT.HEADER || type === DIVIDER ? type : UIT.ITEM,
         text,
@@ -145,6 +147,10 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
   }
 }
 
+/** An item's `label`'s and `kind`'s old names. */
+const OLD_LABEL = "text"
+const OLD_KIND = "type"
+
 /** One option, header or divider, from either source. */
 type Choice = {
   /** an option, a group header or a divider */
@@ -170,7 +176,7 @@ type DropdownDOMElement = HTMLElement & {
 /** The select's second part name, beside the vocabulary's `trigger`:  `::part(select)` styles the native one. */
 const SELECT_PART = "select"
 
-/** The `<ui-item type>` of a divider, which the select skips. */
+/** The `<ui-item kind>` of a divider, which the select skips. */
 const DIVIDER = "divider"
 
 /** The event the select's `change` becomes. */

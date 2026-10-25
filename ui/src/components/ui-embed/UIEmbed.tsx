@@ -47,7 +47,8 @@ export class DOMEmbedElement extends E.DOMElement<UIEmbed> {
  *   - Writing `active` loads / unloads without an event;  `domElement.reset()` unloads, with `ui-reset`.
  *
  * - Its URL comes from `EmbedSources`:  `source` + `video-id`, or `url`;  `http(s)` only.
- *   `autoplay` (on by default:  the click asked for it), `branded-ui` and `parameters` become player parameters.
+ *   `autoplay` (on by default:  the click asked for it) and `parameters` become player parameters;
+ *   the player's own branding stays hidden (`parameters` turns it back on:  `{ "modestbranding": 0 }`).
  *
  * - Names:  the button is `Play {label}`, the frame's `title` is `label`
  *   (`label`, else `alt`, else `video` / `embedded content`), all translated texts.
@@ -105,7 +106,6 @@ export class UIEmbed extends E.UIComponent<Vocabulary> {
       id: this.videoId ?? undefined,
       url: this.url ?? undefined,
       autoplay: this.autoplay !== false,
-      brandedUI: !!this.brandedUi,
       parameters: (this.parameters ?? undefined) as EmbedParameters | undefined
     })
   }

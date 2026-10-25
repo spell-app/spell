@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Progress">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-progress%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-progress%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/progress.html"
+              link="https://fomantic-ui.com/modules/progress.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's progress page, section by section, in its order (Types, Content, States, Variations), plus
@@ -223,7 +223,7 @@
               <ui-section id="examples-variations-right-aligned" label="Right aligned" sticky collapsible dividing>
                 <ui-docs-example description="A progress bar can be right aligned growing to the left.">
                   <ui-progress
-                    right-aligned
+                    align="right"
                     active
                     value="35"
                     bar-text="percent"
@@ -245,7 +245,7 @@
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A basic progress has its remaining background bar removed.">
-                  <ui-progress basic value="45" bar-text="percent" aria-label="Basic"></ui-progress>
+                  <ui-progress appearance="basic" value="45" bar-text="percent" aria-label="Basic"></ui-progress>
                 </ui-docs-example>
               </ui-section>
 
@@ -257,9 +257,9 @@
                     <code>bottom</code> edge.
                   </p>
                   <ui-segment>
-                    <ui-progress attached="top" value="30" aria-label="Top"></ui-progress>
+                    <ui-progress attach="top" value="30" aria-label="Top"></ui-progress>
                     <p>La la la la</p>
-                    <ui-progress attached="bottom" value="70" aria-label="Bottom"></ui-progress>
+                    <ui-progress attach="bottom" value="70" aria-label="Bottom"></ui-progress>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -272,7 +272,7 @@
                     <ui-extra
                       ><a href="#project-friends"><ui-icon name="user"></ui-icon> 22 Friends</a></ui-extra
                     >
-                    <ui-progress attached="bottom" value="40" aria-label="Project progress"></ui-progress>
+                    <ui-progress attach="bottom" value="40" aria-label="Project progress"></ui-progress>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>

@@ -34,7 +34,7 @@ export class UIDivider extends E.UIComponent<typeof dividerVocabulary> {
       <div
         class={this.rootClass}
         role={this.spacer ? "none" : "separator"}
-        aria-orientation={this.vertical && !this.spacer ? "vertical" : undefined}
+        aria-orientation={this.direction === VERTICAL && !this.spacer ? VERTICAL : undefined}
         part={this.partForName("divider")}
       >
         <Show when={this.icon}>
@@ -50,3 +50,6 @@ export class UIDivider extends E.UIComponent<typeof dividerVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIDivider extends E.AttributeValues<typeof dividerVocabulary> {}
+
+/** `direction`'s vertical rule, and the ARIA orientation it gives the separator. */
+const VERTICAL = "vertical"

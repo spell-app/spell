@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Image">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-image%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-image%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/image.html"
+              link="https://fomantic-ui.com/elements/image.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's image page, in its order (Types, States, Variations, Groups), plus our own extras (Inline,
@@ -114,7 +114,7 @@
                 <ui-docs-example
                   description="An image may include a border to emphasize the edges of white or transparent content."
                 >
-                  <ui-image size="large" bordered src="images/wireframe/white-image.png" alt=""></ui-image>
+                  <ui-image size="large" src="images/wireframe/white-image.png" alt="" appearance="bordered"></ui-image>
                 </ui-docs-example>
               </ui-section>
 
@@ -126,13 +126,13 @@
 
               <ui-section id="examples-variations-rounded" label="Rounded" sticky collapsible dividing>
                 <ui-docs-example description="An image may appear rounded.">
-                  <ui-image size="large" rounded src="images/wireframe/square-image.png" alt=""></ui-image>
+                  <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="rounded"></ui-image>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
                 <ui-docs-example description="An image may appear circular.">
-                  <ui-image size="large" circular src="images/wireframe/square-image.png" alt=""></ui-image>
+                  <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
                 </ui-docs-example>
               </ui-section>
 
@@ -175,7 +175,7 @@
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
                 <ui-docs-example description="An image can appear centered in a content block.">
                   <ui-segment>
-                    <ui-image centered size="large" src="images/wireframe/image.png" alt=""></ui-image>
+                    <ui-image align="center" size="large" src="images/wireframe/image.png" alt=""></ui-image>
                     <p>
                       Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est
                       autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea
@@ -187,7 +187,7 @@
                       ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas
                       oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.
                     </p>
-                    <ui-image centered size="small" src="images/wireframe/text-image.png" alt=""></ui-image>
+                    <ui-image align="center" size="small" src="images/wireframe/text-image.png" alt=""></ui-image>
                     <p>
                       Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores
                       adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque
@@ -205,7 +205,7 @@
                   <ui-segment>
                     <p>
                       Te eum doming eirmod, nominati pertinacia
-                      <ui-image size="mini" spaced src="images/wireframe/image.png" alt=""></ui-image>
+                      <ui-image size="mini" spacing="md" src="images/wireframe/image.png" alt=""></ui-image>
                       argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret
                       referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum
                       definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.
@@ -214,18 +214,13 @@
                 </ui-docs-example>
                 <ui-docs-example description='`spaced="left"` or `spaced="right"` adds the room on one side only.'>
                   <p>
-                    <ui-image size="mini" spaced="right" src="images/wireframe/image.png" alt=""></ui-image>Audiam
+                    <ui-image size="mini" spacing="right" src="images/wireframe/image.png" alt=""></ui-image>Audiam
                     quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo.
                     Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer.
                   </p>
                   <p>
                     Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens,
-                    no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo.<ui-image
-                      size="mini"
-                      spaced="left"
-                      src="images/wireframe/image.png"
-                      alt=""
-                    ></ui-image>
+                    no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo.<ui-image size="mini" spacing="left" src="images/wireframe/image.png" alt=""></ui-image>
                   </p>
                 </ui-docs-example>
               </ui-section>
@@ -267,7 +262,7 @@
                     >Fomantic's default widths for <code>mini</code> ... <code>massive</code> are arbitrary. Set the
                     ones your project uses in the <code>--ui-image-width-*</code> tokens (Theming tab).</ui-message
                   >
-                  <ui-table slot="description" definition compact unstackable>
+                  <ui-table slot="description" definition padding="compact" unstackable>
                     <table>
                       <thead>
                         <tr>
@@ -354,7 +349,7 @@
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>
                   </ui-images>
                   <ui-divider spacer></ui-divider>
-                  <ui-images size="tiny" circular centered>
+                  <ui-images size="tiny" align="center" appearance="circular">
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>

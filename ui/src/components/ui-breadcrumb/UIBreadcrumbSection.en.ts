@@ -21,10 +21,12 @@ export const breadcrumbSectionVocabulary = {
   description: "A section of a breadcrumb:  a link to a level of the hierarchy, or the current page.",
   attributes: [
     {
-      name: "active",
+      name: "selected",
       group: "states",
       kind: "keyOnly",
-      description: 'The current page:  bold, not a link, `aria-current="page"`.'
+      key: "active",
+      replaces: ["active"],
+      description: 'The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.'
     },
     {
       name: "link",
@@ -41,6 +43,6 @@ export const breadcrumbSectionVocabulary = {
     { name: "section", description: "The section (`<a>`, or `<span>` when active or without `link`)." },
     { name: "divider", description: "The divider before it, drawn from the breadcrumb's tokens;  hidden on the first." }
   ],
-  states: [{ name: "active", description: "The current page." }],
+  states: [{ name: "selected", description: "The current page (`selected`)." }],
   texts: []
 } as const satisfies E.ComponentVocabulary

@@ -45,10 +45,12 @@ export const selectVocabulary = {
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
-      name: "compact",
+      name: "padding",
       group: "layout",
-      kind: "keyOnly",
-      description: "No minimum width:  as wide as its longest option."
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  no minimum width, as wide as its longest option.  Old name:  `compact`."
     },
     {
       name: "inverted",

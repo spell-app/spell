@@ -29,7 +29,15 @@ export const sliderVocabulary = {
       kind: "color",
       description: "Hue of the filled track (and of `basic` thumbs)."
     },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "Thumbs in the fill colour instead of white." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic"],
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "`basic`:  thumbs in the fill colour instead of white.  Old name:  `basic`."
+    },
     {
       name: "disabled",
       group: "states",
@@ -59,12 +67,6 @@ export const sliderVocabulary = {
       description: "Two thumbs:  `value` .. `end`.  The form gets two entries under `name`."
     },
     {
-      name: "reversed",
-      group: "layout",
-      kind: "keyOnly",
-      description: "Runs from the right (or, `vertical`, from the bottom)."
-    },
-    {
       name: "smooth",
       group: "appearance",
       kind: "keyOnly",
@@ -79,17 +81,28 @@ export const sliderVocabulary = {
         "track, no numbers (as a native range's tick marks)."
     },
     {
-      name: "vertical",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "Upright, filling the host's height;  min at the top."
+      kind: "multiple",
+      values: ["vertical", "reversed"],
+      classes: {},
+      replaces: [
+        { from: "vertical", value: "vertical" },
+        { from: "reversed", value: "reversed" }
+      ],
+      description:
+        "Which way it runs, several words at once:  `vertical` (upright, filling the host's height, min at the " +
+        "top), `reversed` (from the right, or upright from the bottom).  Old names:  `vertical`, `reversed`."
     },
     {
-      name: "aligned",
+      name: "align",
       group: "layout",
       kind: "valueAndKey",
+      key: "aligned",
       values: ["bottom", "right"],
-      description: "With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it."
+      replaces: ["aligned"],
+      description:
+        "With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.  Old name:  `aligned`."
     },
     { name: "min", group: "form", kind: "number", default: 0, description: "Lowest value." },
     {

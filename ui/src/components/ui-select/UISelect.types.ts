@@ -33,5 +33,5 @@ export type SelectBlock = E.MenuOption | OptionGroup | E.MenuSeparator
 /** The class word of the empty first option (the `placeholder` text). */
 export const PLACEHOLDER = "placeholder"
 
-/** The class word of a divider (`<hr>`);  also `<ui-item type="divider">`. */
+/** The class word of a divider (`<hr>`);  also `<ui-item kind="divider">`. */
 export const DIVIDER = "divider"

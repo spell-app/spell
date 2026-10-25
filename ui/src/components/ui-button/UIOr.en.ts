@@ -19,10 +19,11 @@ export const orVocabulary = {
   description: "A conditional between two buttons of a group.",
   attributes: [
     {
-      name: "text",
-      group: "name",
+      name: "label",
+      group: "content",
       kind: "string",
-      description: "Badge text;  default the translated `or` text.  Keep it to a short word."
+      replaces: ["text"],
+      description: "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`."
     }
   ],
   events: [],

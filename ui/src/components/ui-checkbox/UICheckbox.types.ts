@@ -13,7 +13,7 @@ import type { radioVocabulary } from "./UIRadio.en"
 // ## Vocabulary pieces
 ////////////////
 
-/** Attributes both elements start with:  `type` comes after them, so its word follows the colour. */
+/** Attributes both elements start with:  `appearance` comes after them, so its word follows the colour. */
 export const LEADING_ATTRIBUTES = [
   { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
   {
@@ -23,19 +23,28 @@ export const LEADING_ATTRIBUTES = [
   }
 ] as const
 
-/** Attributes both elements share, after their own `type`. */
+/** Attributes both elements share, after their own `appearance`. */
 export const SHARED_ATTRIBUTES = [
-  { name: "fitted", kind: "keyOnly", description: "No room for a label:  just the box." },
+  {
+    name: "padding",
+    kind: "valueOnly",
+    values: ["none"],
+    classes: { none: "fitted" },
+    replaces: [{ from: "fitted", value: "none" }],
+    description: "`none`:  no room for a label, just the box.  Old name:  `fitted`."
+  },
   {
     name: "invisible",
     kind: "keyOnly",
     description: "No box:  the LABEL is the control, bordered while unchosen and tinted when chosen."
   },
   {
-    name: "right-aligned",
-    kind: "keyOnly",
-    key: "right aligned",
-    description: "Box after the label, at the end of the line."
+    name: "align",
+    kind: "valueOnly",
+    values: ["right"],
+    classes: { right: "right aligned" },
+    replaces: [{ from: "right-aligned", value: "right" }],
+    description: "`right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`."
   },
   { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, left out of the form." },
   {

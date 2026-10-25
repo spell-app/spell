@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Container">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-container%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-container%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/container.html"
+              link="https://fomantic-ui.com/elements/container.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's container page, in its order (Types, Variations, then its Examples tab as "In layouts"),
@@ -104,12 +104,12 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A container can specify its text alignment:  `text-align` is `left`, `center`, `right` or `justified`."
+                  description="A container can specify its text alignment:  `align` is `left`, `center`, `right` or `justified`."
                 >
-                  <ui-container text-align="left">Left Aligned</ui-container>
-                  <ui-container text-align="center">Center Aligned</ui-container>
-                  <ui-container text-align="right">Right Aligned</ui-container>
-                  <ui-container text-align="justified">
+                  <ui-container align="left">Left Aligned</ui-container>
+                  <ui-container align="center">Center Aligned</ui-container>
+                  <ui-container align="right">Right Aligned</ui-container>
+                  <ui-container align="justified">
                     <b>Justified</b>
                     <ui-divider></ui-divider>
                     <p>
@@ -239,7 +239,7 @@
 
               <ui-section id="examples-variations-grid" label="Grid" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `relaxed` (or `relaxed=&quot;very&quot;`) makes room for a relaxed grid's wider gutters."
+                  description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `spacing=&quot;lg&quot;` (or `xl`) makes room for a grid's wider gutters."
                 >
                   <ui-container grid>
                     <ui-grid columns="2">
@@ -247,8 +247,8 @@
                       <ui-column><ui-image src="images/wireframe/paragraph.png" alt=""></ui-image></ui-column>
                     </ui-grid>
                   </ui-container>
-                  <ui-container grid relaxed="very">
-                    <ui-grid columns="2" relaxed="very">
+                  <ui-container grid spacing="xl">
+                    <ui-grid columns="2" spacing="xl">
                       <ui-column><ui-image src="images/wireframe/paragraph.png" alt=""></ui-image></ui-column>
                       <ui-column><ui-image src="images/wireframe/paragraph.png" alt=""></ui-image></ui-column>
                     </ui-grid>
@@ -308,13 +308,13 @@
                 <ui-docs-example
                   description="A container can be used inside of a menu to make sure menu items appear inline with page contents.  A `stackable` menu adjusts to small screens."
                 >
-                  <ui-menu attached stackable aria-label="Centered menu">
+                  <ui-menu attach="both" stackable aria-label="Centered menu">
                     <ui-container>
-                      <ui-item href="#centered-menu" icon="home">Home</ui-item>
-                      <ui-item href="#centered-menu" icon="grip">Browse</ui-item>
-                      <ui-item href="#centered-menu" icon="envelope">Messages</ui-item>
+                      <ui-item link="#centered-menu" icon="home">Home</ui-item>
+                      <ui-item link="#centered-menu" icon="grip">Browse</ui-item>
+                      <ui-item link="#centered-menu" icon="envelope">Messages</ui-item>
                       <ui-item>
-                        <ui-dropdown simple text="More" aria-label="More">
+                        <ui-dropdown appearance="simple" label="More" aria-label="More">
                           <ui-item value="edit" icon="pen to square">Edit Profile</ui-item>
                           <ui-item value="language" icon="globe">Choose Language</ui-item>
                           <ui-item value="settings" icon="gear">Account Settings</ui-item>
@@ -342,7 +342,7 @@
                     <code>text</code> container around a <code>raised</code> segment.</ui-message
                   >
                   <ui-container text>
-                    <ui-segment raised padded="very">
+                    <ui-segment padding="lg" appearance="raised">
                       <ui-header level="2">Dogs Roles with Humans</ui-header>
                       <p>
                         Domestic dogs inherited complex behaviors, such as bite inhibition, from their wolf ancestors,
@@ -371,9 +371,9 @@
                   screens. Combine it with a grid or a menu to line their contents up with the page.
 
                   - `text` narrows it to a reading column with slightly larger type; `wide` makes it a fifth wider; `fluid` drops the
-                    maximum width (useful only for `text-align` on unstyled content).
+                    maximum width (useful only for `align` on unstyled content).
                   - `grid` is for a container that holds a `<ui-grid>`: it adds the grid's gutters so the columns line up with other
-                    containers; add `relaxed` (or `relaxed="very"`) to match a relaxed grid.
+                    containers; add `spacing="lg"` (or `xl`) to match a grid with wider gutters.
                   - `scrolling` caps the height (per breakpoint) and scrolls; `short`, `very short`, `long`, `very long` scale the cap,
                     and `resizable` lets the reader drag it.
                   - The host is a block; the look lives on the `container` part inside, around one slot.
@@ -389,7 +389,7 @@
                   breakpoint with its minimum gutters and a 17px scrollbar, e.g. tablet: `768px - (14px * 2) - 17px` = `723px`.
                 </script>
               </ui-markdown>
-              <ui-table celled definition compact unstackable>
+              <ui-table celled definition padding="compact" unstackable>
                 <table>
                   <thead>
                     <tr>

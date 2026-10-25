@@ -21,12 +21,12 @@ describe("ElementSnapshot()", () => {
   })
 
   it("reads a Spell UI element's set properties, converted, and its states A-Z", async () => {
-    const button = await ElementFixture.render(`<ui-button active size="large" toggle>A</ui-button>`)
+    const button = await ElementFixture.render(`<ui-button selected size="large" toggle>A</ui-button>`)
     const snapshot = new ElementSnapshot(button)
     expect(snapshot.properties).toEqual([
       { name: "size", value: '"large"' },
       { name: "toggle", value: "true" },
-      { name: "active", value: "true" },
+      { name: "selected", value: "true" },
       { name: "type", value: '"button"' }
     ])
     // `ready`:  every element shows it once it has drawn with its styles (`DOMElement.markReady()`)
@@ -37,7 +37,7 @@ describe("ElementSnapshot()", () => {
     const button = await ElementFixture.render(`<ui-button>A</ui-button>`)
     const { properties } = new ElementSnapshot(button, { all: true })
     expect(properties.length).toBeGreaterThan(10)
-    expect(properties).toContainEqual({ name: "primary", value: "false" })
+    expect(properties).toContainEqual({ name: "inverted", value: "false" })
   })
 })
 

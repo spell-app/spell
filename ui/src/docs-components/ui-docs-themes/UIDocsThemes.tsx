@@ -237,7 +237,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
           <For each={ShownSchemes}>
             {(scheme) => (
               <span class={[scheme, GLYPH_CLASS]} aria-hidden="true">
-                <ui-icon name={SCHEME_ICONS[scheme]} fitted="" />
+                <ui-icon name={SCHEME_ICONS[scheme]} padding="none" />
               </span>
             )}
           </For>
@@ -266,14 +266,14 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
           aria-label={label()}
         >
           <span class={GLYPH_CLASS} aria-hidden="true">
-            <ui-icon name={PALETTE_ICON} fitted="" />
+            <ui-icon name={PALETTE_ICON} padding="none" />
           </span>
         </button>
         <ui-popup
           part={this.partForName("overlay")}
           class={OVERLAY_CLASS}
           open-on="click"
-          basic=""
+          appearance="basic"
           position="bottom right"
           aria-label={this.translationForKey("overlayName")}
           ref={(popup: HTMLElement) => this.wireOverlay(popup)}
@@ -333,7 +333,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
                 tabindex={isChosen() ? 0 : -1}
                 onClick={(event) => this.chooseScheme(scheme, event)}
               >
-                <ui-icon name={SCHEME_CHOICE_ICONS[scheme]} fitted="" aria-hidden="true" />
+                <ui-icon name={SCHEME_CHOICE_ICONS[scheme]} aria-hidden="true" padding="none" />
                 <span class={NAME_CLASS}>{this.translationForKey(SCHEME_TEXTS[scheme])}</span>
               </button>
             )
@@ -378,7 +378,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         onClick={(event) => this.onOptionClick(entry.value, event)}
       >
         <span class={CHECK_CLASS} aria-hidden="true">
-          <ui-icon name={CHECK_ICON} fitted="" />
+          <ui-icon name={CHECK_ICON} padding="none" />
         </span>
         <span class={NAME_CLASS}>{entry.text}</span>
         <Show when={entry.description}>
@@ -421,7 +421,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         <For each={this.themeMenu.entries}>
           {(entry) =>
             "type" in entry ? (
-              <ui-item type={entry.type}>{entry.text}</ui-item>
+              <ui-item kind={entry.type}>{entry.text}</ui-item>
             ) : (
               <ui-item value={entry.value} description={entry.description}>
                 {entry.text}

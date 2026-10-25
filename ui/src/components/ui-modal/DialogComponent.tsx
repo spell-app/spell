@@ -47,7 +47,8 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  *
  * - Buttons:  a click on an approve / deny element fires the cancelable `ui-approving` / `ui-denying`, then closes.
  *   - Those elements (`ModalActionSelectors`):
- *     Fomantic's `.approve` / `.deny` classes, `<ui-button positive / negative>`.
+ *     Fomantic's `.approve` / `.deny` classes, `<ui-button color="positive">` / `"negative"` (and the old
+ *     `<ui-button color="negative">`).
  *   - The `closable` icon closes (reason `close`).
  *
  * - `closable="false"` is Fomantic's `closable: false` AND `closeIcon: false`:

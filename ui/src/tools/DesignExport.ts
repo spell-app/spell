@@ -398,15 +398,15 @@ const CONSUMING = [
   "1. **Load ONE classic script, `components/bundle.js`.**  It defines every `<ui-*>` element (the brand's " +
     "`<brand-*>` too) and applies the Spell brand theme (`spell-brand`) to the page:  nothing to import, no other file.  In a Design, load it once, before the markup:  " +
     "`<script src=\"ds/<this system's folder>/components/bundle.js\"></script>`.  This system's own previews already have it.",
-  '2. **Write markup:**  `<ui-button primary icon="check">Save</ui-button>`.  Never `x-import`, never ' +
+  '2. **Write markup:**  `<ui-button icon="check" color="primary">Save</ui-button>`.  Never `x-import`, never ' +
     "`window.SpellUI.Button`, never a React wrapper:  there are none.  (`window.SpellUI` exists for scripting only:  " +
     "`SpellUI.UI` is the runtime.)",
   "3. **Wrap a page or an artboard in `<ui-root>`.**  It waits until every element inside is ready, then shows the " +
     'content.  `theme="dark"` or `theme="light"` forces a colour scheme;  without it, the viewer\'s applies.',
   "4. **Attributes are lowercase HTML attributes**, as each card's README and `components/index.d.ts` list them.  " +
-    "A flag is present or absent:  `<ui-button primary basic>`.",
+    "A flag is present or absent:  `<ui-button disabled>`.",
   "   - In a Design's React artboard, BRANCH with `<sc-if>` rather than binding a flag to a hole " +
-    '(`primary="{{x}}"` can write a string that still reads as on):  one branch with `<ui-button primary>`, one without.',
+    '(`disabled="{{x}}"` can write a string that still reads as on):  one branch with `<ui-button disabled>`, one without.',
   "5. **Rich data is a JS property** (a dropdown's `options`, a form's `rules`):  in markup, write child elements " +
     "instead (`<ui-dropdown>` with `<ui-item>`s).",
   "6. **Restyle with `--ui-*` custom properties** (live, and right in both schemes):  " +

@@ -38,28 +38,10 @@
         - Under it, the page header's title line sticks for the whole page (`SiteSections.splitSubtitle()`).
       -->
       <ui-toolbar class="site-topbar" aria-label="Site">
-        <ui-button
-          slot="icon"
-          class="site-menu-button"
-          icon="bars"
-          basic
-          circular
-          aria-label="Components"
-          title="Components"
-          commandfor="site-nav-flyout"
-          command="--show"
-        ></ui-button>
+        <ui-button slot="icon" class="site-menu-button" icon="bars" aria-label="Components" title="Components" commandfor="site-nav-flyout" command="--show" appearance="basic circular"></ui-button>
         <a slot="title" class="site-topbar-brand site-wordmark" href="../index.html"><span class="site-hat" aria-hidden="true"></span>Spell UI</a>
         <spell-site-header class="site-topbar-links" docked no-tools root="../../.."></spell-site-header>
-        <ui-button
-          slot="right"
-          class="site-search-button"
-          icon="search"
-          basic
-          circular
-          aria-label="Search"
-          title="Search (⌘K)"
-        ></ui-button>
+        <ui-button slot="right" class="site-search-button" icon="search" aria-label="Search" title="Search (⌘K)" appearance="basic circular"></ui-button>
         <ui-docs-themes slot="right" size="small" class="site-topbar-themes"></ui-docs-themes>
       </ui-toolbar>
 

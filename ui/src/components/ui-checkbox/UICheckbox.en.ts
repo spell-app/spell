@@ -29,11 +29,13 @@ export const checkboxVocabulary = {
   attributes: [
     ...LEADING_ATTRIBUTES,
     {
-      name: "type",
+      name: "appearance",
       group: "appearance",
       kind: "valueOnly",
       values: ["slider", "toggle"],
-      description: "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`."
+      replaces: ["type"],
+      description:
+        "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`.  Old name:  `type`."
     },
     {
       name: "indeterminate",

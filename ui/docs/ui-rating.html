@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Rating">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-rating%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-rating%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/rating.html"
+              link="https://fomantic-ui.com/modules/rating.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's rating page, its Definition tab section by section (Types, States, Variations), then its
@@ -199,7 +199,7 @@
                     <code>max-rating</code> is the number of icons;  Fomantic's are data-icon, data-rating and
                     data-max-rating, or its icon, initialRating and maxRating settings.
                   </p>
-                  <ui-list relaxed="very" celled>
+                  <ui-list spacing="xl" celled>
                     <ui-item>
                       <ui-image src="images/wireframe/square-image.png" alt="" size="mini"></ui-image>
                       <ui-content>
@@ -337,7 +337,7 @@
                         max-rating="5"
                         required
                       ></ui-rating>
-                      <ui-button type="reset" basic icon="undo">Reset</ui-button>
+                      <ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
                     </form>
                   </ui-form>
                 </ui-docs-example>

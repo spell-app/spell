@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-segment raised padded="very" attached="top">` => `ui raised very padded top attached segment`.
+ *   `<ui-segment appearance="raised" padding="lg" attach="top">` => `ui very padded top attached raised segment`.
  * - No `ownsParts`:  Fomantic's segment styles no content parts of its own.
  *   What it hands its content is inherited (`--ui-inverted`, `color-scheme`, label owner tokens):
  *   see `UISegment.css`.
@@ -37,32 +37,57 @@ export const segmentVocabulary = {
       kind: "color",
       description: "Hue of the top edge;  with `inverted`, the fill.  `primary` / `secondary` don't colour a segment."
     },
-    { name: "raised", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
     {
-      name: "stacked",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOrValueAndKey",
-      values: ["tall"],
-      description: 'A page peeking out below;  `stacked="tall"` shows two.'
+      kind: "multiple",
+      values: ["raised", "stacked", "tall-stacked", "piled", "vertical", "circular", "basic", "secondary", "tertiary"],
+      classes: { "tall-stacked": "tall stacked" },
+      replaces: [
+        { from: "raised", value: "raised" },
+        { from: "stacked", value: "stacked", values: { tall: "tall-stacked" } },
+        { from: "piled", value: "piled" },
+        { from: "vertical", value: "vertical" },
+        { from: "circular", value: "circular" },
+        { from: "basic", value: "basic" },
+        { from: "secondary", value: "secondary" },
+        { from: "tertiary", value: "tertiary" }
+      ],
+      description:
+        "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page " +
+        "peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` " +
+        "(a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no " +
+        "box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), " +
+        "`tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, " +
+        "`vertical`, `circular`, `basic`, `secondary`, `tertiary`."
     },
-    { name: "piled", group: "appearance", kind: "keyOnly", description: "A pile of rotated sheets behind it." },
-    { name: "vertical", group: "layout", kind: "keyOnly", description: "A band of a page:  no box, a rule above." },
     {
       name: "placeholder",
       group: "form",
       kind: "keyOnly",
       description: "A tinted, centred block reserving room for content."
     },
-    { name: "circular", group: "appearance", kind: "keyOnly", description: "A round badge sized by its content." },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its content." },
     {
-      name: "padded",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'More padding;  `padded="very"` for even more.'
+      kind: "valueOnly",
+      values: ["none", "none-x", "none-y", "compact", "md", "lg"],
+      classes: {
+        none: "fitted",
+        "none-x": "horizontally fitted",
+        "none-y": "vertically fitted",
+        md: "padded",
+        lg: "very padded"
+      },
+      replaces: [
+        { from: "fitted", value: "none", values: { horizontally: "none-x", vertically: "none-y" } },
+        { from: "compact", value: "compact" },
+        { from: "padded", value: "md", values: { very: "lg" } }
+      ],
+      description:
+        "Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its " +
+        "content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`."
     },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box:  no background, border or shadow." },
     { name: "clearing", group: "appearance", kind: "keyOnly", description: "Contains its floated children." },
     {
       name: "floated",
@@ -72,36 +97,35 @@ export const segmentVocabulary = {
       description: "Floats `left` or `right`."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: ["left", "center", "right"],
-      description: "Aligns its text `left`, `center` or `right`."
+      replaces: ["text-align"],
+      description: "Aligns its text `left`, `center` or `right`.  Its old name is `text-align`."
     },
     {
-      name: "secondary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Less emphasis:  a tinted surface, muted text."
-    },
-    {
-      name: "tertiary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Least emphasis:  a darker tint, muted text."
-    },
-    {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom", "left", "right"],
-      description: "Joined edge to edge with the elements above / below;  bare `attached` sits in the middle."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom", "left", "right"],
+      classes: {
+        both: "attached",
+        top: "top attached",
+        bottom: "bottom attached",
+        left: "left attached",
+        right: "right attached"
+      },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits " +
+        "in the middle.  Its old name is `attached`."
     },
     {
       name: "seamless",
       group: "appearance",
       kind: "keyOnly",
-      description: "With `attached`:  no line where attached segments meet."
+      description: "With `attach`:  no line where attached segments meet."
     },
     {
       name: "inverted",
@@ -116,13 +140,6 @@ export const segmentVocabulary = {
       description: "Dims its content under a spinner;  `aria-busy`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
-    {
-      name: "fitted",
-      group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["horizontally", "vertically"],
-      description: "No padding;  `horizontally` / `vertically` keep the other axis' padding."
-    },
     {
       name: "scrolling",
       group: "layout",

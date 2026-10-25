@@ -14,11 +14,13 @@ UIDropdown.define("ie-desplegable", es)
 
 describe("UIComponent.define(tag, dictionary)", () => {
   it("maps Spanish attribute names and values onto the canonical grammar", async () => {
-    const host = await ElementFixture.render<DOMElement>(
-      `<ie-boton primario color="rojo" tamano="pequeno">Guardar</ie-boton>`
-    )
-    expect(host.shadowRoot!.querySelector("button")!.className).toBe("ui small red primary button")
-    expect("primario" in host).toBe(true)
+    const host = await ElementFixture.render<DOMElement>(`<ie-boton color="rojo" tamano="pequeno">Guardar</ie-boton>`)
+    expect(host.shadowRoot!.querySelector("button")!.className).toBe("ui small red button")
+  })
+
+  it('reads an old name in Spanish too:  `primario` is `color="primary"` (epic `ui-gaps` P4)', async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ie-boton primario tamano="pequeno">Guardar</ie-boton>`)
+    expect(host.shadowRoot!.querySelector("button")!.className).toBe("ui small primary button")
   })
 
   it("reflects canonical values back in Spanish", async () => {

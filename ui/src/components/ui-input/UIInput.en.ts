@@ -69,10 +69,13 @@ export const inputVocabulary = {
       description: "Form state, tinting the box, text and placeholder."
     },
     {
-      name: "transparent",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "No box:  text only, e.g. inside a menu or header."
+      kind: "multiple",
+      values: ["transparent"],
+      classes: {},
+      replaces: [{ from: "transparent", value: "transparent" }],
+      description: "`transparent`:  no box, text only, e.g. inside a menu or header.  Old name:  `transparent`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {

@@ -24,7 +24,8 @@ import itemsCSS from "./UIItems.css?inline"
  *   it's a block and the size container `ui-items` (`:state(items)`, always on).
  *   With `stack-with="page"` (a private class), it answers to the screen's.
  *
- * - Not interactive:  `link` is Fomantic's hover look;  an item that goes somewhere takes `href` (one link).
+ * - Not interactive:  `appearance="link"` is Fomantic's hover look;
+ *   an item that goes somewhere takes a `link` (one link).
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, its items inert, `aria-disabled`.
  ****************/

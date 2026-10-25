@@ -34,7 +34,16 @@ export const modalVocabulary = {
       kind: "size",
       description: "Width, `mini` ... `massive` (Fomantic's ratios of the default width);  `medium` is the default."
     },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box:  light text straight on the dimmer." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "The look:  `basic`, no box:  light text straight on the dimmer.  Old name:  `basic`."
+    },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme." },
     { name: "fullscreen", group: "appearance", kind: "keyOnly", description: "Nearly the whole viewport wide." },
     {
@@ -121,7 +130,7 @@ export const modalVocabulary = {
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:
-        "An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  " +
+        'An approve button (`.approve` / `.ok` / `.positive`, `<ui-button color="positive">`) was activated;  ' +
         "`preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`)."
     },
     {
@@ -129,7 +138,7 @@ export const modalVocabulary = {
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:
-        "A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  " +
+        'A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button color="negative">`) was activated;  ' +
         "`preventDefault()` keeps the modal shown."
     }
   ],

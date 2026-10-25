@@ -103,7 +103,13 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     ["sortable celled striped", "ui celled sortable striped table"],
     ["single-line", "ui single line table"],
     ['basic="very"', "ui very basic table"],
-    ['compact="very" padded', "ui very compact padded table"],
+    ['compact="very"', "ui very compact table"],
+    ['padded="very"', "ui very padded table"],
+    // the new words (epic `ui-gaps` P4):  the old names above draw the same
+    ['appearance="very-basic striped"', "ui very basic striped table"],
+    ['padding="xs"', "ui very compact table"],
+    ['attach="top"', "ui top attached table"],
+    ['align="center"', "ui center aligned table"],
     ['attached="top"', "ui top attached table"],
     ['stackable="tablet"', "ui tablet stackable table"],
     ["unstackable", "ui unstackable table"],
@@ -179,7 +185,7 @@ describe("<ui-table> shadow markup", () => {
       `<caption>People</caption>${HEAD}${BODY}`
     )
     const box = scroller(host)
-    expect(box.className).toBe("resizable top attached short scrolling scroller")
+    expect(box.className).toBe("top attached resizable short scrolling scroller")
     expect(box.getAttribute("role")).toBe("region")
     expect(box.getAttribute("tabindex")).toBe("0")
     expect(box.getAttribute("aria-label")).toBe("People")

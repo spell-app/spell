@@ -13,7 +13,7 @@ import { UIButton } from "spell-ui/components/ui-button/UIButton"
 import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
 
 /**
- * SSR probe:  can `<ui-button primary>Save</ui-button>` be rendered to a Declarative Shadow DOM string?
+ * SSR probe:  can `<ui-button color="primary">Save</ui-button>` be rendered to a Declarative Shadow DOM string?
  * - The element class needs a live `HTMLElement`, so
  *   this drives the COMPONENT directly under `@solidjs/web`'s server `renderToString`,
  *   with a stub DOM element standing in for the element (no internals, no observers)
@@ -22,13 +22,13 @@ import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
  * - SIDE EFFECT:  writes the string to `.cache/ssr-button.html` for the browser check (`dsd.test.ts`).
  */
 describe("<ui-button> server render to Declarative Shadow DOM", () => {
-  it("renders <ui-button primary>Save</ui-button> to a DSD string", async () => {
+  it('renders <ui-button color="primary">Save</ui-button> to a DSD string', async () => {
     const definition = new ElementDefinition(buttonVocabulary)
     const host = stubHost()
     const html = renderToString(() => new UIButton(host, definition).onMount())
     const css = [...foundationCSS, buttonCSS].join("\n")
     const dsd =
-      `<ui-button primary><template shadowrootmode="open" shadowrootdelegatesfocus>` +
+      `<ui-button color="primary"><template shadowrootmode="open" shadowrootdelegatesfocus>` +
       `<style>${css}</style>${html}</template>Save</ui-button>`
     const cache = resolve(import.meta.dirname, "../../.cache")
     await mkdir(cache, { recursive: true })
@@ -43,7 +43,7 @@ describe("<ui-button> server render to Declarative Shadow DOM", () => {
 function stubHost(): DOMElement {
   return {
     childNodes: [],
-    attributeValues: { primary: true },
+    attributeValues: { color: "primary" },
     shadowRoot: null,
     getAttribute: () => null,
     addPropertyChangedCallback() {},

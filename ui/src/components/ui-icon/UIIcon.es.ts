@@ -11,5 +11,5 @@ export const iconEs = {
   tag: "ui-icon",
   name: "icono",
   aka: ["icono", "ícono", "símbolo", "glifo", "icono svg"],
-  attributes: { outline: "contorno", flipped: "volteado", rotated: "girado" }
+  attributes: { flipped: "volteado", rotated: "girado" }
 } as const satisfies E.TagDictionary

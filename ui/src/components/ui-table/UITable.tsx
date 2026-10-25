@@ -5,7 +5,7 @@ import { Portal, isServer, type JSX } from "@solidjs/web"
 import { E, UI, UIT } from "spell-ui/core"
 import { tableVocabulary } from "./UITable.en"
 import { TableClassMirror } from "./TableClassMirror"
-import { TableGrammar } from "./TableGrammar"
+import { ATTACH, TableGrammar } from "./TableGrammar"
 import { TableSort } from "./TableSort"
 
 import tableCSS from "./UITable.css?inline"
@@ -13,7 +13,7 @@ import tableCSS from "./UITable.css?inline"
 /****************
  * ### `UITable`
  * The component behind `<ui-table>`:
- * a native `<table>` in Fomantic's table look, `<ui-table celled striped><table>...</table></ui-table>`.
+ * a native `<table>` in Fomantic's table look, `<ui-table celled appearance="striped"><table>...</table></ui-table>`.
  *
  * - The table stays NATIVE and in the LIGHT DOM (table semantics, find-in-page, copy, the page's CSS);
  *   the shadow root is only `<div class="... scroller" part="scroller"><slot></slot></div>`.
@@ -466,26 +466,26 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return this.attributes["aria-label"] ?? (caption || this.translationForKey("label"))
   }
 
-  // `attached` (any edge), `attached-top`, `attached-bottom`:
+  // `attached` (any edge), `attached-top`, `attached-bottom`, from `attach`:
   // the DOM element carries the table's outer margin, so it mirrors the attached scroller's
   // (`UITable.css`:  inside a size container a margin never collapses with the content above).
 
   /** Attached on any edge:  `:state(attached)`. */
   @E.cssState("attached")
   get isAttached(): boolean {
-    return !!this.scrollerValue("attached")
+    return !!this.scrollerValue(ATTACH)
   }
 
   /** Attached at the top:  `:state(attached-top)`. */
   @E.cssState("attached-top")
   get isAttachedTop(): boolean {
-    return this.scrollerValue("attached") === UIT.TOP
+    return this.scrollerValue(ATTACH) === UIT.TOP
   }
 
   /** Attached at the bottom:  `:state(attached-bottom)`. */
   @E.cssState("attached-bottom")
   get isAttachedBottom(): boolean {
-    return this.scrollerValue("attached") === UIT.BOTTOM
+    return this.scrollerValue(ATTACH) === UIT.BOTTOM
   }
 
   /** Converted value of scroller attribute `name` (`TableGrammar.scroller()`'s). */
