@@ -230,9 +230,18 @@
     position-anchor: var(--_ui-dropdown-anchor, --ui-dropdown);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
+    /* below or above, whichever has more room:  capped to it (`max-height`), the menu always fits */
+    position-try-order: most-block-size;
     inset: auto;
     min-width: anchor-size(width);
     margin: var(--_ui-dropdown-menu-offset) 0;
+    /*
+     * Never taller than the room beside its root:  `100%` is that room (its `position-area`), less its offset from
+     * the root and as much again from the window's edge;  a longer list scrolls.  No sub-menus to clip (above).
+     */
+    max-height: calc(100% - 2 * var(--_ui-dropdown-menu-offset));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     opacity: 0;
     transition-property: opacity, display, overlay;
     transition-duration: var(--_ui-dropdown-duration);
