@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 import type { UIMenuAttributes } from "spell-ui/jsx"
+import { TOC_SHADOW_HOSTS } from "spell-ui/docs-components/docs-components.types"
 import { docsTocVocabulary } from "./UIDocsToc.en"
 import { TocIndex } from "./TocIndex"
 import {
@@ -29,14 +30,16 @@ import tocCSS from "./UIDocsToc.css?inline"
  *     examples with a `header`, and level 3 headings, are their entries
  *   - what a `<ui-section>` nests (sections, examples, headings) are ITS entries, as deep as it goes,
  *     each level opening on the way to the entry in view
- *   - light DOM only.
+ *   - light DOM only, but for `<ui-docs-api only>`'s rows and tag headers, which its shadow root marks
+ *     (`TOC_SHADOW_HOSTS`, `TocIndex.shadowEntries()`):  every attribute, event ... under its section
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
  *   and its section opens;  `ui-scrolled-to { value }` when that changes.
  * - Links are plain `#id` links:  the browser scrolls (below the document's `scroll-padding-top`).
  *   - A hash naming an element in a HIDDEN pane of the followed tabs (a link from elsewhere, or a page opened on it)
  *     shows that pane first, then scrolls to it:  `<ui-tabs history>` ignores hashes that aren't pane values.
  * - It scans again when the tabs show another pane (`ui-opened`),
- *   and when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`).
+ *   when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`),
+ *   and when a `TOC_SHADOW_HOSTS` element in it has drawn (`ui-drawn`):  the observer can't see into its shadow root.
  * - It re-follows when that content resizes
  *   (a `ResizeObserver`:  components drawing late move the headings without any scroll).
  * - SIDE EFFECTS:
@@ -181,9 +184,12 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const resized = new ResizeObserver(() => this.schedule("follow"))
     const onScroll = () => this.schedule("follow")
     const onShow = () => this.schedule("rescan")
+    const onDrawn = (event: Event) => {
+      if ((event.target as Element).matches?.(TOC_SHADOW_HOSTS)) this.schedule("rescan")
+    }
     const onHash = () => this.reveal("hash change")
     let followed: FollowedContent | undefined
-    const start = () => (followed = this.observe({ observer, resized, onShow }))
+    const start = () => (followed = this.observe({ observer, resized, onShow, onDrawn }))
     view.addEventListener("scroll", onScroll, { passive: true })
     view.addEventListener("resize", onScroll, { passive: true })
     view.addEventListener("hashchange", onHash)
@@ -194,6 +200,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
       observer.disconnect()
       resized.disconnect()
       followed?.tabs?.removeEventListener(UI_SHOW, onShow)
+      followed?.root.removeEventListener(UI_DRAWN, onDrawn)
       document.removeEventListener("DOMContentLoaded", start)
       view.removeEventListener("scroll", onScroll)
       view.removeEventListener("resize", onScroll)
@@ -207,7 +214,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
    * Follow what `for` names, once it exists:  observe it, hear its tabs show a pane, scan it, land on the hash.
    * - Returns what it follows (`watch()` undoes the tabs' listener), or `undefined` while it doesn't exist.
    */
-  private observe({ observer, resized, onShow }: Observers): FollowedContent | undefined {
+  private observe({ observer, resized, onShow, onDrawn }: Observers): FollowedContent | undefined {
     const followed = this.followedContent()
     if (!followed) return undefined
     observer.observe(followed.root, {
@@ -218,6 +225,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     })
     resized.observe(followed.root)
     followed.tabs?.addEventListener(UI_SHOW, onShow)
+    followed.root.addEventListener(UI_DRAWN, onDrawn)
     this.rescan()
     this.reveal("page load")
     return followed
@@ -268,10 +276,10 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const document = this.domElement.ownerDocument
     const hash = document.defaultView!.location.hash.slice(1)
     if (!hash) return
-    const target = document.getElementById(TocIndex.decode(hash))
+    const target = TocIndex.elementById(document, TocIndex.decode(hash))
     if (!target) return
     const tabs = this.followedContent()?.tabs
-    const pane = tabs && TocIndex.paneOf(tabs, target)
+    const pane = tabs && TocIndex.paneOf(tabs, TocIndex.lightElementOf(target))
     const scroll = () => target.scrollIntoView({ block: "start" })
     const isPageLoad = moment === "page load"
     if (tabs && pane && TocIndex.shownPane(tabs) !== pane) {
@@ -310,6 +318,8 @@ type Observers = {
   resized: ResizeObserver
   /** rescans when the tabs show another pane */
   onShow: () => void
+  /** rescans when a `TOC_SHADOW_HOSTS` element has drawn its entries */
+  onDrawn: (event: Event) => void
 }
 
 /** The attributes whose changes rescan:  a section's title, a heading's level, an id. */
@@ -317,6 +327,9 @@ const OBSERVED_ATTRIBUTES = ["header", "level", "id"]
 
 /** `<ui-tabs>`' event as it shows another pane. */
 const UI_SHOW = "ui-opened"
+
+/** A docs element's event once it has drawn:  a `TOC_SHADOW_HOSTS` element's entries are in. */
+const UI_DRAWN = "ui-drawn"
 
 /** Class word of a section's link item. */
 const SECTION = "section"

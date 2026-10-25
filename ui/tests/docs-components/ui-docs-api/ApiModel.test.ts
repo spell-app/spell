@@ -55,6 +55,49 @@ describe("ApiModel.sectionsFor()", () => {
   })
 })
 
+describe("ApiModel.sectionIdsFor()", () => {
+  test("lists the tables ANY of the tags has, in table order:  a page's API sections", () => {
+    expect(ApiModel.sectionIdsFor([OR, BUTTON])).toEqual(["attributes", "properties", "parts"])
+    expect(ApiModel.sectionIdsFor([])).toEqual([])
+  })
+})
+
+describe("ApiModel.onlyFor() / sectionIdFor()", () => {
+  test("write a table's id as `only` does, and read it back;  nothing for an unknown value", () => {
+    expect(ApiModel.onlyFor("usedIn")).toBe("used-in")
+    expect(ApiModel.onlyFor("attributes")).toBe("attributes")
+    expect(ApiModel.sectionIdFor("used-in")).toBe("usedIn")
+    expect(ApiModel.sectionIdFor("events")).toBe("events")
+    expect(ApiModel.sectionIdFor("usedIn")).toBeUndefined()
+    expect(ApiModel.sectionIdFor(undefined)).toBeUndefined()
+  })
+})
+
+describe("ApiModel rows' names", () => {
+  test('name each row as the "On this page" list shows it:  a property camelCased, a bare state, `default`', () => {
+    const tag = tagOf("x-tag", {
+      attributes: [
+        { name: "basic", kind: "keyOnly", description: "" },
+        { name: "column-defs", kind: "json", description: "" }
+      ],
+      slots: [
+        { name: "", description: "" },
+        { name: "icon", description: "" }
+      ],
+      states: [{ name: "open", description: "" }]
+    })
+    const names = Object.fromEntries(
+      ApiModel.sectionsFor(tag).map((section) => [section.id, section.rows.map((row) => row.name)])
+    )
+    expect(names).toEqual({
+      attributes: ["basic"],
+      properties: ["columnDefs"],
+      slots: ["default", "icon"],
+      states: ["open"]
+    })
+  })
+})
+
 describe("ApiModel.propertyFor()", () => {
   test("camelCases the name, unless the attribute names its property", () => {
     expect(ApiModel.propertyFor({ name: "column-defs", kind: "json", description: "" })).toBe("columnDefs")

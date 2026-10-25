@@ -367,7 +367,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
         { shape: "paragraph", lines: 5 }
       ]
     },
-    attributes: ["tag", "family", "level"]
+    attributes: ["tag", "family", "only", "level"]
   },
   "ui-docs-example": {
     folder: "ui-docs-example",

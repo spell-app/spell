@@ -285,8 +285,14 @@ and the example a section of its own inside it, `#examples-types-button`, holdin
 
 The other three panes:
 - Usage:  what to write, the events with their `detail`, keyboard and accessibility, in sections like Examples'.
-- API:  five lines, done already.
-  `<ui-docs-api family="ui-button">` draws every table from the vocabularies.
+- API:  done already.
+  `<ui-docs-api family="ui-button">` draws every table from the vocabularies,
+  and `yarn site:sections` splits it into one section per kind the family has (Attributes, Events ...),
+  each holding `<ui-docs-api family="ui-button" only="attributes">`.
+  - So the API tab gets the same row of section buttons as Examples.
+  - Its "On this page" list names every attribute, event, slot ... under its section;
+    a click lands on the row (`#api-attributes-size`), which flashes.
+  - Rerun `yarn site:sections` after `yarn site:data`:  a tag's first event adds an Events section.
 - Theming:  keep `<ui-docs-tokens family="ui-button" playground>`, and explain the family's tokens around it.
 
 <details>
@@ -335,7 +341,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 | `yarn site:build` | the four above, in turn |
 | `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) serves `/components/ui/` while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |
 | `yarn site:new <tag\|page>` | a page, from the template (above) |
-| `yarn site:sections [--check] [page...]` | nests every page's flat headers into `<ui-section>`s and writes their ids;  no page named:  every page |
+| `yarn site:sections [--check] [page...]` | nests every page's flat headers into `<ui-section>`s and writes their ids, and splits each API tab into a section per kind of table;  no page named:  every page |
 | `yarn site:check <page...> \| --all` | loads pages in a headless browser, and fails on what's broken (below) |
 | `yarn readme:components [--check]` | the catalogue in [README-components.md](README-components.md), from the site's data;  `--shoot <url> [family ...]` retakes its thumbnails from the served site |
 | `yarn design:build [--out <dir>]` | the claude.ai design system's files, from the site's data, the element examples and the Spell theme, into `<dir>/project/` (by default `build/design-system/`, git-ignored);  also `spell design build` |

@@ -12204,7 +12204,11 @@
         },
         {
           "name": "grid",
-          "description": "The grid of glyphs (`role=listbox`)."
+          "description": "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
+        },
+        {
+          "name": "heading",
+          "description": "A group's heading in the grid;  the one at the grid's top stays there as it scrolls."
         },
         {
           "name": "cell",
@@ -12272,6 +12276,11 @@
           "key": "noIconsMatch",
           "text": "No icons match",
           "description": "The grid's message when the search finds nothing."
+        },
+        {
+          "key": "otherIcons",
+          "text": "Other",
+          "description": "The heading of the grid's last group:  the icons in none of Font Awesome's categories."
         }
       ],
       "mainTag": "ui-icon-picker",
@@ -33791,6 +33800,22 @@
           "description": "Document EVERY tag of a family instead, e.g. `ui-button` (`<ui-button>`, `<ui-buttons>`, `<ui-or>`):  each under its own header, whose id is the tag, so `#ui-or` links to it.  A folder or any of its tags."
         },
         {
+          "name": "only",
+          "kind": "enum",
+          "values": [
+            "props",
+            "attributes",
+            "properties",
+            "events",
+            "slots",
+            "parts",
+            "states",
+            "texts",
+            "used-in"
+          ],
+          "description": "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  Each row is an entry of the page's \"On this page\" list, its id `<section id>-<name>` (`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
+        },
+        {
           "name": "level",
           "kind": "number",
           "default": 3,
@@ -33939,6 +33964,10 @@
         {
           "name": "table",
           "description": "Each `<ui-table>`."
+        },
+        {
+          "name": "member",
+          "description": "A row's name cell (`<th>`), with `only`:  its id is the row's anchor."
         },
         {
           "name": "message",
@@ -35672,7 +35701,12 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
+      "slots": [
+        {
+          "name": "end",
+          "description": "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+        }
+      ],
       "events": [
         {
           "name": "ui-changed",
@@ -38007,6 +38041,12 @@
           "type": "length"
         },
         {
+          "name": "--ui-docs-api-landed-background",
+          "default": "var(--ui-highlight)",
+          "description": "Colour a landed row flashes, fading back to its own.",
+          "type": "color"
+        },
+        {
           "name": "--ui-docs-api-code-background",
           "default": "var(--ui-surface-strong)",
           "description": "Background of inline code.",
@@ -39730,6 +39770,16 @@
           "name": "--ui-icon-picker-none-color",
           "default": "var(--ui-text-light)",
           "type": "color"
+        },
+        {
+          "name": "--ui-icon-picker-heading-color",
+          "default": "var(--ui-text-light)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-icon-picker-heading-size",
+          "default": "0.8125em",
+          "type": "length"
         }
       ]
     },

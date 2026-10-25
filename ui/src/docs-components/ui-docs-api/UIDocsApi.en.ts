@@ -9,6 +9,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import { ApiOnlyValues } from "./UIDocsApi.types"
 
 /****************
  * ### `docsApiVocabulary`
@@ -38,6 +39,15 @@ export const docsApiVocabulary = {
         "each under its own header, whose id is the tag, so `#ui-or` links to it.  A folder or any of its tags."
     },
     {
+      name: "only",
+      kind: "enum",
+      values: ApiOnlyValues,
+      description:
+        "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  " +
+        'Each row is an entry of the page\'s "On this page" list, its id `<section id>-<name>` ' +
+        "(`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
+    },
+    {
       name: "level",
       kind: "number",
       default: 3,
@@ -65,6 +75,10 @@ export const docsApiVocabulary = {
     { name: "title", description: "A table's `<ui-header>` title, e.g. `Attributes`." },
     { name: "note", description: "The line under a table's title, e.g. how events travel." },
     { name: "table", description: "Each `<ui-table>`." },
+    {
+      name: "member",
+      description: "A row's name cell (`<th>`), with `only`:  its id is the row's anchor."
+    },
     { name: "message", description: "The `<ui-message>` shown when the data can't be loaded or has no such tag." }
   ],
   states: [
