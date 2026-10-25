@@ -695,7 +695,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             </Show>
             {/* ONE pill (Owen, 2026-10-25:  "pencil and P36 should be pills -- can we combine them"):  the changes to
                 accept, while any wait, on its left;  the step label on its right */}
-            <span class={STEP_PILL}>
+            <span class={STEP_PILL} part={this.partForName("step-pill")}>
               <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
               <Show when={this.step()}>
                 {(step) => (

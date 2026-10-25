@@ -216,7 +216,9 @@ describe("<epic-page>", () => {
     expect(["header", "bar"].map(position)).toEqual(["sticky", "sticky"])
     expect(
       Array.from(shadow.querySelector('[part~="status"]')!.children, (child) => child.getAttribute("part"))
-    ).toEqual(["state", "git"])
+    ).toEqual(["step-pill", "git"])
+    // the step label (the state in it) inside the one pill, after the changes to accept (I108)
+    expect(shadow.querySelector('[part~="step-pill"] > [part~="state"]')).not.toBeNull()
   })
 
   // Owen, 2026-10-13:  "Just go with a single set of breadcrumbs"
@@ -534,9 +536,9 @@ describe("<epic-page> Send and its countdown", () => {
     expect(host.shadowRoot!.querySelector('[part~="send-bar"]')).toBeNull()
     expect(
       Array.from(host.shadowRoot!.querySelector('header [part~="status"]')!.children, (child) =>
-        child.localName === "ui-label" ? "step" : child.getAttribute("part")
+        child.getAttribute("part")
       )
-    ).toEqual(["send", "step"])
+    ).toEqual(["send", "step-pill"])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
     // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle

@@ -197,6 +197,11 @@ export const epicPageVocabulary = {
         "the step label, the git toggle."
     },
     {
+      name: "step-pill",
+      description:
+        "One pill (epic `epic-engine` I108):  the changes to accept on its left while any wait, the step label on its right."
+    },
+    {
       name: "changes",
       description:
         "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange " +
