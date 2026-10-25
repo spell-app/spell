@@ -17434,7 +17434,7 @@
           "name": "show-delay",
           "description": {
             "kind": "markdown",
-            "value": "`hover`:  ms before it shows.\n\nTakes:  number\nDefault:  `50`"
+            "value": "`hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).\n\nTakes:  number\nDefault:  `50`"
           }
         },
         {

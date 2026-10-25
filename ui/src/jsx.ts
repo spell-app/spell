@@ -16231,7 +16231,7 @@ export interface UIPopupAttributes {
    */
   "prop:hoverable"?: boolean | ""
   /**
-   * `hover`:  ms before it shows.
+   * `hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).
    * - takes:  number
    * - default:  `50`
    */

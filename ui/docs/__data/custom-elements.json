@@ -10919,11 +10919,12 @@
             },
             {
               "name": "--ui-input-placeholder-color",
-              "default": "var(--ui-text-light)"
+              "default": "color-mix(in oklab, var(--ui-text-light) 55%, transparent)",
+              "description": "a placeholder well lighter than typed text, so it never reads as typed (Owen)"
             },
             {
               "name": "--ui-input-placeholder-focus-color",
-              "default": "var(--ui-text-muted)"
+              "default": "color-mix(in oklab, var(--ui-text-light) 70%, transparent)"
             },
             {
               "name": "--ui-input-disabled-opacity",
@@ -19037,7 +19038,7 @@
             },
             {
               "name": "show-delay",
-              "description": "`hover`:  ms before it shows.",
+              "description": "`hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).",
               "type": {
                 "text": "number"
               },
@@ -24584,7 +24585,8 @@
             },
             {
               "name": "--ui-select-placeholder-color",
-              "default": "var(--ui-text-light)"
+              "default": "color-mix(in oklab, var(--ui-text-light) 55%, transparent)",
+              "description": "as an input's: well lighter than a chosen value"
             },
             {
               "name": "--ui-select-placeholder-style",
