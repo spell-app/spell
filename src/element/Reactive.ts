@@ -277,6 +277,11 @@ export class Reactive {
   // ## `@controlled`
   ////////////////
 
+  /** Is `member` a `@controlled` member of `component` (`isOpen`, from `@controlled("open")`)? */
+  static isControlled(component: object, member: string): boolean {
+    return !!Reactive.recordOf(component).controlled?.[member]
+  }
+
   /** Is the DOM element controlling `@controlled` member `member` right now (its property set)?  Untracked. */
   static isControlledByPage(component: ComponentShape, member: string): boolean {
     const { key } = Reactive.controlledAttribute(component, member)

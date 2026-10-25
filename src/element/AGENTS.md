@@ -48,6 +48,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `@cssState`, `@aria`
     - `@onChange`, `@whileConnected`, `@watches`, `@on`, `@untracked`
   - [Cell](Cell.ts), [SlotContent](SlotContent.ts)
+  - [Disclosure](Disclosure.ts):  one open / closed state for anything that shows and hides a box (a fold, a section,
+    a popover, an overlay):  a guarded request with `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed`,
+    `aria-expanded`, find-in-page opening it (epic `coherence` P8)
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots

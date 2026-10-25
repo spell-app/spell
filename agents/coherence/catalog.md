@@ -314,7 +314,8 @@ What a component, or a page built on Spell UI, reaches for first.
 
 - **It is:**  `UIComponent.onVisibleChange()` (`src/element/UIComponent.tsx`):  animates as an element shows or hides
 - **Use it when:**  an overlay or a toast comes and goes.
-- **Copies:**  six overlays write their own (sweep 1, ui-components #4):  "Wanted:  A disclosure"
+- **Copies:**  `--`:  the six overlays animate here, and open and close through their `Disclosure`
+  ("A disclosure:  open and closed", below;  epic `coherence` P8)
 
 ### The next frame
 
@@ -388,33 +389,38 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 
 ## Showing and hiding
 
-### A fold:  open and closed
+### A disclosure:  open and closed
 
-- **It is:**  not ONE yet.  The parts that exist:
-  - `<ui-section>` (Spell UI):  a titled fold, `collapsed`, `ui-opening` / `ui-opened`, find-in-page opens it
-  - `Fold` (`spell-epic/src/components/epic-item/Fold.tsx`):  a box an epic element folds by itself, `hidden="until-found"`,
-    fold-all and open-all
+- **It is:**  `Disclosure` (the kit's `spell/element`, `src/element/Disclosure.ts`;  epic `coherence` P8):
+  one open state, a guarded request (`request()`, `toggle()`, `open()`, `close()`), the component's cancelable
+  `ui-opening` / `ui-closing` and then `ui-opened` / `ui-closed` (`sendAfter()`), `aria-expanded` (`ariaExpanded`),
+  `hidden="until-found"` (`hidden`) and find-in-page opening it (`revealOnMatch`, `adopt()`)
+  - a component holds one as a field, handed what differs:  where the state lives (a member, `kept`, its own),
+    the event detail, what opening resets;  its public names stay its own (`collapsed`, `visible`, `open`)
+  - on it:  Spell UI's `PopoverPanel` (`spell-ui/src/elements/PopoverPanel.ts`):  the popover, its `UI.overlays`
+    entry and its anchor, written inline, for the dropdown, calendar, search and icon picker
+  - on it:  spell-epic's `Fold` (`spell-epic/src/components/epic-item/Fold.tsx`):  a box an epic element folds by
+    itself, and THE fold button (`fold.button()`):  every card's band and every panel's title;
+    fold-all and open-all (`foldAllUnder()`, `expandAllUnder()`) close and open each block's
 - **Use it when:**  anything that opens and closes.  The words:  [words.md](words.md), "open / close".
-- **Flag:**  `collapsed|isCollapsed|setCollapsed|setFolded|foldAllUnder`
-- **Copies:**  about six, each its own state, event names and `aria-expanded`:
-  - `spell-ui/src/components/ui-accordion/UIAccordion.tsx` (a `<details>`)
-  - `spell-ui/src/components/ui-section/UISection.tsx` (`collapsed`, the opposite of `open`)
-  - `spell-ui/src/docs-components/ui-docs-example/UIDocsExample.tsx`
-  - `spell-epic/src/components/epic-section/EpicFold.tsx`, `spell-epic/src/components/epic-item/EpicItem.tsx`,
-    `spell-epic/src/components/epic-item/Fold.tsx`
-  - `spell-epic/src/tools/_assets/spell-doc-runtime.js`:  `setCollapsed()`, `setFolded()`, `addFoldAll()`
-  - `spell-ui/site/_src/SiteSections.ts`:  remembers folds
-  - "Wanted", below.
+- **Flag:**  `requestChange\("is(Open|Visible|Collapsed)|"ui-opening"|beforematch|aria-expanded=\{this\.is`
+- **Copies:**  taking it today:  the four popovers, the six overlays (the dialog's two, dimmer, popup, sidebar,
+  nag, toast), `<ui-section>`, `<ui-docs-example>`, spell-epic's `EpicFold`, `EpicItem` and `Fold`.  Left:
+  - `spell-ui/src/components/ui-accordion/UIAccordion.tsx`:  many panels in one `open` (`"0 2"`), on `<details>`,
+    which keeps its own `aria-expanded` and find-in-page;  an exclusive open closes another in the same change
+  - `<ui-nag>`'s `ui-opening`:  sent as it has slid in, not as a request
+  - spell-epic's `EpicChange`, `EpicThread`, `EpicNewItem`, `EpicPageNoteHead`:  buttons that open more than a fold
+    (a chip, a thread's head, the new-item form, a note's head);  their tooltips wait on elemental-spell's Q74
+  - `spell-epic/src/tools/_assets/spell-doc-runtime.js`:  `setCollapsed()` (silent restores, by the elements' own
+    `collapsed` / `open`, which their `Disclosure` follows), `setFolded()` (the saga pages' plain headings:  no
+    element to hold one), `addFoldAll()`
+  - `spell-ui/site/_src/SiteSections.ts`:  remembers folds (`PrefStore`), as it does
 
 ## Wanted
 
 Mechanisms with several copies and no shared one yet:  each a fix for a later phase, or for the epic that owns the
 code (epic `coherence`, Q4 and Q5).
 
-- **A disclosure:**  one open / closed state, its event pair (`opening` / `opened`, `closing` / `closed`),
-  `aria-expanded`, and find-in-page opening it;  each fold above takes it, and fold-all / open-all are built on it.
-  - sweep 1 added:  four popover panels in Spell UI (dropdown, calendar, search, icon picker), six overlays'
-    animations, ten fold buttons in the epic pages
 - **A draft that saves itself:**  seven in the epic pages.
 - **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
