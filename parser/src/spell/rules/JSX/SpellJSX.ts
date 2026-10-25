@@ -2,6 +2,7 @@ import { elementTagFor, proto } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -184,7 +185,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const below: Array<P.Match | P.Token | undefined> = [...match.matched]
-      if (match.is(SpellJSX)) {
+      if (match.is(SpellJSX) || match.is(ExampleBlock)) {
         if (match.data.error) errors.push(match.data.error)
         below.push(...(match.data.attributes ?? []), ...(match.data.children ?? []))
       }

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from spell_core.console import SpellConsole
 
 # The types every spell project starts with, as the parser names them:  spell's classes, and `Object`.
-BASE_TYPES = ["Object", "Thing", "List", "App", "View", "Page", "TwoSidedView", "ViewableList"]
+BASE_TYPES = ["Object", "Thing", "List", "App", "View", "Page", "TwoSidedView", "Notebook", "ViewableList"]
 
 
 class ThingMethods:

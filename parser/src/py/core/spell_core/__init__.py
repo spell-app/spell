@@ -18,6 +18,7 @@ from spell_core.positions import end_position, position, spell_position, with_sp
 from spell_core.saving import Loader, Saved, SavedRef, Saver, parse_ref, ref_text
 from spell_core.state import StateMirror, StateWriter
 from spell_core.things import Thing, prop
+from spell_core.notebook import Notebook
 from spell_core.two_sided_view import TwoSidedView
 
 __all__ = [
@@ -25,6 +26,7 @@ __all__ = [
     "Core",
     "List",
     "Loader",
+    "Notebook",
     "Page",
     "Saved",
     "SavedRef",

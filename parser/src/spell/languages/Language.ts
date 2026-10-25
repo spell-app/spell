@@ -388,6 +388,12 @@ export type LanguageWords = {
    */
   appActions: Record<string, string>
   /**
+   * A notebook's example tag, in a drawing (epic `elemental-spell` P16):  English's `<example "one counter">`,
+   * Spanish's `<ejemplo "un contador">` -- see `example_block`.
+   * - Its tokenizer reads a quoted name after it (`P.Tokenizer.quotedNameTags`).
+   */
+  exampleTag: string
+  /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
    * - See `Language.propertyKindName()`.
@@ -546,6 +552,15 @@ export type SpellxTwinWords = {
   menuAnd: string
   /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
   menuBar: string
+  /**
+   * A notebook's body, a drawing of prose, markup and examples (epic `elemental-spell` P16):
+   * its part's drawing, `to draw its content :`.
+   */
+  notebookContent: string
+  /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
+  notebookLocked: string
+  /** What starts a notebook, after it:  `start {words}`, as an app's file says `start the game`. */
+  start: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
   handlers: Record<string, string>
   /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
@@ -553,7 +568,7 @@ export type SpellxTwinWords = {
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template"
+export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook"
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu"

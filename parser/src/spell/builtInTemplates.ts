@@ -21,7 +21,8 @@ import { BUILT_IN_TEMPLATE_DECLARATIONS } from "./builtInTemplates.generated"
  *   `P.BUILT_IN_CLASS_NAMES`, then `yarn core:gen:templates`.
  */
 export const BUILT_IN_TEMPLATES: Record<string, string> = {
-  "two sided view": "TwoSidedView"
+  "two sided view": "TwoSidedView",
+  notebook: "Notebook"
 }
 
 /** Is `datatype` a built-in template written in spell, e.g. `two sided view`? */

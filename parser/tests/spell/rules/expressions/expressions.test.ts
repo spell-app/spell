@@ -63,6 +63,7 @@ describe("priority and precedence", () => {
         "drawn_markup:  Priority.specific",
         "else_if:  Priority.preferred",
         "ends_with:  Precedence.comparison",
+        "example_block:  Priority.preferred",
         "exists:  Precedence.comparison",
         "gt_lt:  Precedence.comparison",
         "has_parts:  Priority.declaration",

@@ -9,6 +9,7 @@ import { Wording } from "spell-parser/spell/rules/expressions"
 
 import { JSX } from "./JSX.parser"
 import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
 import { SpellJSXAttribute } from "./SpellJSXAttribute"
@@ -100,6 +101,27 @@ JSX.addRule(MarkdownBlock, {
             '  {`Hi ${null /* PARSE ERROR: Don\'t understand "{foo bar baz}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace */}`}',
             "</ui-markdown>"
           ]
+        ]
+      ]
+    }
+  ]
+})
+
+JSX.addRule(ExampleBlock, {
+  tests: [
+    {
+      title: "A notebook's example:  its name quoted after its word, its result inside",
+      compileAs: "expression",
+      tests: [
+        [
+          ['<example "one counter">', "\t<ui-button>Count</ui-button>", "</example>"],
+          'h("spell-example", { name: "one counter" }, h("ui-button", "Count"))',
+          ['<spell-example name="one counter">', "  <ui-button>Count</ui-button>", "</spell-example>"]
+        ],
+        [
+          ['<example name="two">', "\t<ui-text>A</ui-text>", "\t<ui-text>B</ui-text>", "</example>"],
+          ['h("spell-example", { name: "two" },', '  h("ui-text", "A"),', '  h("ui-text", "B")', ")"],
+          ['<spell-example name="two">', "  <ui-text>A</ui-text>", "  <ui-text>B</ui-text>", "</spell-example>"]
         ]
       ]
     }

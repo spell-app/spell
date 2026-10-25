@@ -26,6 +26,8 @@ export class SpellxView {
     const language = options.language ?? SP.Language.forFile(options.path)
     const parser = language.parser.clone({ module: "spellx view", form: "spellx" } as P.ParserProps) as SP.SpellParser
     const { tokenizer } = parser
+    // a notebook's templates stay where they're written:  its cells, in order (P16)
+    if (tokenizer instanceof SP.SpellxTokenizer) tokenizer.liftsNotebooks = false
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const view = new SpellxView(text)
     const nodes = view.nodesOf(root?.tokens ?? [], "file")
@@ -130,7 +132,7 @@ export class SpellxView {
         nodes.push(...this.holeAt(start, this.closingOf(start, item.tokens.at(-1)!.end) + 1))
         continue
       }
-      if (where === "drawing" && this.isMarkup(item)) {
+      if ((where === "drawing" || where === "notebook") && this.isMarkup(item)) {
         code = undefined
         nodes.push(...this.markupOf(item.tokens))
         continue
@@ -163,7 +165,7 @@ export class SpellxView {
           name: tag.name?.text,
           nameSpan: this.textSpan(tag.name),
           attributes: tag.attributes.map((attribute) => this.attribute(attribute)),
-          children: body ? this.nodesOf(body.tokens, "template") : [],
+          children: body ? this.nodesOf(body.tokens, tag.kind === "notebook" ? "notebook" : "template") : [],
           headSpan,
           span
         }
@@ -307,7 +309,7 @@ export class SpellxView {
 
   /** A prose line inside a template that's a heading or a comment:  `## Rank`, a markdown heading (Q12). */
   private isHeading(token: P.Token, where: Where) {
-    return (where === "template" || where === "file") && token instanceof P.CommentToken
+    return (where === "template" || where === "file" || where === "notebook") && token instanceof P.CommentToken
   }
 
   /** `span`'s text, each line without the indent the first one has. */
@@ -465,6 +467,20 @@ export class SpellxView {
     const raw = this.text.slice(token.start, token.end)
     const equals = raw.indexOf("=")
     const span = { start: token.start, end: token.end }
+    // a bare quoted name, `<example "one counter">` (`P.Tokenizer.quotedNameTags`)
+    if (raw.startsWith('"')) {
+      const close = this.closingOf(token.start, token.end)
+      const valueSpan = { start: token.start + 1, end: Math.max(token.start + 1, close) }
+      const value = this.text.slice(valueSpan.start, valueSpan.end)
+      return {
+        name: token.name,
+        word: token.name,
+        value,
+        quote: '"',
+        span: { start: token.start, end: close + 1 },
+        valueSpan
+      }
+    }
     if (equals < 0)
       return { name: token.name, word: token.name, value: undefined, quote: undefined, span, valueSpan: undefined }
     const opener = raw[equals + 1]
@@ -489,8 +505,11 @@ export class SpellxView {
   }
 }
 
-/** What holds a block's items:  the file, a template, a member's body of spell, a drawing's markup. */
-type Where = "file" | "template" | "body" | "drawing"
+/**
+ * What holds a block's items:  the file, a template, a member's body of spell, a drawing's markup;
+ * or a notebook's body, its prose and markup side by side with its members and templates (P16).
+ */
+type Where = "file" | "template" | "body" | "drawing" | "notebook"
 
 /** Options for `SpellxView.read()`. */
 export type SpellxReadOptions = {

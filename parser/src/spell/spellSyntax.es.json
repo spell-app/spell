@@ -5791,11 +5791,36 @@
           "aliases": ["jsxChild", "expression"]
         },
         {
+          "className": "ExampleBlock",
+          "ruleNames": ["example_block"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ExampleBlock.ts",
+          "line": 26,
+          "purpose": "A notebook's EXAMPLE, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
+          "syntaxes": [
+            {
+              "example": "<ejemplo \"un contador\">\n\t<ui-button>Contar</ui-button>\n</ejemplo>",
+              "outputs": {
+                "js": {
+                  "code": "h(\"spell-example\", { name: \"un contador\" }, h(\"ui-button\", \"Contar\"))"
+                },
+                "ts": {
+                  "code": "<spell-example name=\"un contador\">\n  <ui-button>Contar</ui-button>\n</spell-example>"
+                },
+                "py": {
+                  "code": "h(\"spell-example\", {\"name\": \"un contador\"}, h(\"ui-button\", \"Contar\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
           "className": "SpellJSX",
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 36,
+          "line": 37,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

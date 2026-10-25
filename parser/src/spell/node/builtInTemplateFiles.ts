@@ -112,6 +112,8 @@ function classFile(className: string, typescript: string): string {
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
+  // what it extends:  `View` for a two sided view, `Page` for a notebook
+  const superClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
   const end = lines.findIndex((line, index) => index > start && line === "}")
   const types = lines.slice(0, start).filter((line) => line.startsWith("export type "))
   const body = lines
@@ -130,16 +132,16 @@ function classFile(className: string, typescript: string): string {
     'import type { Drawing } from "spell-parser/core/drawing"',
     "",
     "// Import directly to avoid circular import",
-    'import { View } from "./View"',
+    `import { ${superClass} } from "./${superClass}"`,
     "",
     ...types,
     "",
     "/**",
     ` * \`${className}\`:  spell's built-in template \`${templateWords(className)}\`, compiled from \`templates/${className}.spell\`.`,
-    " * - What a view made from it extends, e.g. `a card is a two sided view`:  its members are here, once.",
+    ` * - What a ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
     " * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.",
     " */",
-    `export class ${className} extends View {`,
+    `export class ${className} extends ${superClass} {`,
     ...body,
     ...partMethods,
     "}",
@@ -161,6 +163,8 @@ function pythonClassFile(className: string, python: string): string {
   const lines = SP.SpellDeclarations.stripComments(python).split("\n")
   const start = lines.findIndex((line) => line.startsWith(`class ${className}(`))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled Python`)
+  // what it extends:  `View` for a two sided view, `Page` for a notebook
+  const superClass = /^class \w+\((\w+)\)/.exec(lines[start]!)?.[1] ?? "View"
   const end = lines.findIndex((line, index) => index > start && /^\S/.test(line))
   const body = lines
     .slice(start + 1, end < 0 ? undefined : end)
@@ -180,11 +184,11 @@ function pythonClassFile(className: string, python: string): string {
     "",
     "from typing import Any",
     "",
-    "from spell_core.apps import View",
+    `from spell_core.apps import ${superClass}`,
     "from spell_core.things import prop",
     "",
     "",
-    `class ${className}(View):`,
+    `class ${className}(${superClass}):`,
     ...body,
     ...partNames.flatMap((part) => [
       "",
@@ -205,6 +209,11 @@ function partMethod(part: string): string {
     "    return undefined",
     "  }"
   ].join("\n")
+}
+
+/** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
+function exampleOf(className: string): string {
+  return className === "Notebook" ? "counter notebook is a notebook" : `a card is a ${templateWords(className)}`
 }
 
 /** The words template `className` is written as, e.g. `two sided view`. */

@@ -160,5 +160,71 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       ],
       codeLines: [8, 11, 14, 20, 24, 28, 32]
     }
+  },
+  notebook: {
+    en: {
+      spellVersion: "0.8.0",
+      provides: ["Notebook"],
+      statements: [
+        {
+          type: "Notebook",
+          superType: "Page",
+          defined: "/Notebook.spell:335-668"
+        },
+        {
+          of: "Notebook",
+          parts: ["content"],
+          defined: "/Notebook.spell:368-390"
+        },
+        {
+          property: "lock",
+          classVariable: "Locks",
+          of: "Notebook",
+          enumeration: ["unlocked", "locked"],
+          defined: "/Notebook.spell:505-537"
+        },
+        {
+          syntax: "draw {thisArg:expression}",
+          output: "draw",
+          rule: "method_call",
+          of: "Notebook",
+          alias: ["statement", "expression"],
+          kind: "method",
+          name: "draw it",
+          defined: "/Notebook.spell:638-668"
+        }
+      ],
+      codeLines: [9, 12, 15, 22]
+    },
+    es: {
+      spellVersion: "0.8.0",
+      languages: ["es"],
+      provides: ["Notebook"],
+      statements: [
+        {
+          type: "Notebook",
+          superType: "Page",
+          gender: "masculine",
+          defined: "/Notebook.es.spell:367-744"
+        },
+        {
+          of: "Notebook",
+          parts: ["contenido"],
+          defined: "/Notebook.es.spell:405-433",
+          partOutputs: {
+            contenido: "content"
+          }
+        },
+        {
+          property: "candado",
+          classVariable: "Candados",
+          of: "Notebook",
+          enumeration: ["desbloqueado", "bloqueado"],
+          defined: "/Notebook.es.spell:554-594",
+          output: "lock"
+        }
+      ],
+      codeLines: [9, 12, 15]
+    }
   }
 }
