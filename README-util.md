@@ -18,17 +18,17 @@ Plain node loads Solid's server build instead, and `count()` reads 1 there._
 
 Four lines, and the reason this folder has a reactive engine of its own.
 Spell is imperative:  a line writes, and the next line reads what it wrote.
-Take the Solitaire example's own test of a card, which it made face up a few lines earlier:
+Take the Solitaire example's own test of a card, which it made face down a few lines earlier:
 
 ```spell
-turn it face down
-its direction should be down
+turn it over
+it is face up should be yes
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell):
-the test passes, all 30 checks._
+_Two lines of `test card setup`, in Solitaire's [Card.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx):
+the test passes, all 19 checks._
 
-On signals that hold a write back, the second line would still read `up`, and the language would fail its own test.
+On signals that hold a write back, the second line would still read the card face down, and the language would fail its own test.
 It stands on Spell cells instead, and so does the editor.
 
 `spell/util` is the floor of every Spell repo:  the small things more than one package needs,
@@ -400,7 +400,7 @@ Each class has a schema:  its props' types, defaults and legal values.
 and an accessor pair;  `@prop` writes the same runtime shape by hand:
 
 ```js
-// compiled from Card.spell
+// compiled from Card.spellx
 static { this.declareProp("suit", { oneOf: Card.Suits }) }
 get suit() { return this.getProp("suit") }
 set suit(value) { this.setProp("suit", value) }

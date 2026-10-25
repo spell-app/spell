@@ -75,7 +75,7 @@ Most of them work on Spell projects, and you name a project the way the editor d
 | `Card.spell`, `./path/to/Project`, `.` | a Spell file, or the project in a folder;  a lone `.spell` file counts as a one-file project |
 | `@here` | the project in the current folder |
 | `@spell/examples/Solitaire`, `owen@spell/x` | one project, by its address |
-| `@spell/examples/Solitaire/Card.spell` | one file in a project:  its name has a dot |
+| `@spell/examples/Solitaire/Card.spellx` | one file in a project:  its name has a dot |
 | `@spell/examples`, `owen@spell`, `@spell` | a group, or every group of a space:  pick from their projects, or pass `--all` |
 | nothing | the project here;  outside one, `spell` asks, completing as you type |
 
@@ -431,14 +431,12 @@ spell test @spell/examples/Solitaire 2>/dev/null
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (25 checks)
-✓ test jokers  (15 checks)
-✓ test deck creation  (10 checks)
-✓ test deck with jokers  (5 checks)
-✓ test piles  (9 checks)
+✓ test card setup  (19 checks)
+✓ test a new deck  (5 checks)
+✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-6 passed
+4 passed
 ```
 
 </details>
@@ -516,11 +514,11 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-spell-app/spaces/@spell/examples/Solitaire/Card.spell:16
+spell-app/spaces/@spell/examples/Solitaire/Card.spellx:15
 
 Spell
-    - its "color" is:
-      red if its suit is diamonds or hearts
+    <property "color" one-of="red, black">
+      red if it is a diamond or it is a heart
       black otherwise
 ```
 

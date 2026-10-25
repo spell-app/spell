@@ -252,8 +252,8 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
    - Or `yarn vscode:package` at spell-epic's root, then the same `code --install-extension`.
    - No script installs it for you:  install it again after a change you want in every window.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
-5. Open the kit, `code ~/www/spell`, and any `.spell` file in it:
-   `spell-app/spaces/@spell/examples/Solitaire/Solitaire.spell`, say.
+5. Open the kit, `code ~/www/spell`, and any `.spell` or `.spellx` file in it:
+   `spell-app/spaces/@spell/examples/Solitaire/Solitaire.spellx`, say.
    With epics, every window opens from a window file instead ([below](#windows-and-worktrees)).
 
 Neither of Spell's two is on the Marketplace:  like the rest of Spell today, they run from a checkout of the kit.

@@ -629,7 +629,7 @@ When the page server is already running, its line ends "(already running)".
 
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-This game's [Solitaire.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell) is written in outlines,
+This game's [Solitaire.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx) is written in spellx, Spell in tags,
 and its cards, deck and piles are files of its own beside it.
 A tableau says what it can take:
 `return its color is not the color of the card and its value is the value of the card + 1`.
@@ -659,12 +659,12 @@ spell test @spell/examples/Solitaire
 ✗ test the moves  (11 checks)
     ❌ Unexpected: `the column can take the queen` should be `yes` but is actually `false`
 
-5 passed, 1 failed
+3 passed, 1 failed
 ```
 
 </details>
 
-- Before your change it says `6 passed`, and `spell test` exits 1 on a failure, so a script can tell.
+- Before your change it says `4 passed`, and `spell test` exits 1 on a failure, so a script can tell.
 - The `...` at the top stands for the tests of its card, deck and piles, which pass either way.
 
 </details>
@@ -839,7 +839,7 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [spell-epic/README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it</li><li>setting it up, in three steps and an extension</li><li>the content folder, the config file, the worktrees</li><li>your own AGENTS.md;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [spell-app/README.md](https://github.com/spell-app/spell-app/blob/main/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
 | [spell-app/README-app.md](https://github.com/spell-app/spell-app/blob/main/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
-| [spell-app/README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in outline and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
+| [spell-app/README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
 | [spell-app/README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs;  🌱 sign-in and permissions</li></ul> |
 | [spell-app/README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>the compiler's parse, through one queue</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 moving to spell-parser, and `spell lsp`</li></ul> |
 | [spell-app/README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md) | <ul><li>spell-app's part of the kit's page server:  three settings</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
