@@ -96,6 +96,15 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
+   * It can be DRAGGED to another place by its title row (epic `epic-engine` P34, the Phases section's `PhaseDrag`):
+   * still to do, on a page being reviewed;  its title row shows the grab cursor and says so in its tooltip.
+   */
+  @E.cssState("movable")
+  get isMovable(): boolean {
+    return this.shownStatus === "todo" && this.reviewState.reviewing()
+  }
+
+  /**
    * Claude's build plan for it waits for Owen (`plan="waiting"`, epic `epic-engine` P33), and it isn't done:  its
    * review pills are Accept plan and Revisit.
    */

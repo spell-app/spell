@@ -3,10 +3,15 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { AgentsClient, ageOf, clockOf, sentence, type RunningAgent } from "spell-epic/review"
-// the fold every `<epic-*>` fold shares:  its file, not `epic-item`'s barrel
-import { Fold } from "spell-epic/components/epic-item/Fold"
-import { STACK_PROPERTY } from "spell-epic/components/epic-page/EpicPage.types"
+import {
+  AgentsClient,
+  ReviewClient,
+  ageOf,
+  clockOf,
+  sentence,
+  type InboxDoing,
+  type RunningAgent
+} from "spell-epic/review"
 
 import { epicAgentsVocabulary } from "./EpicAgents.en"
 
@@ -15,38 +20,44 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAgents`
- * The component behind `<epic-agents>`:  the epic's RUNNING AGENTS (epic `skillz` P3),
- * drawn by `<epic-page>` right before its blocks.
- * - its title:  "Agents running", a robot, and the count when more than one
- * - then a row per agent, each with a note box that REDIRECTS it
- * - it FOLDS from its title, like every titled box (Owen, 2026-10-08);  open to start with:  it's live news
- * - shown ONLY while an agent runs and the page's `AgentsClient` is `listed`
- *   (an epic page served with a token, the list answering)
- * - in the page's shadow root, NOT a section:
- *   the contents, the rail and the counts never see it (they read the light DOM)
- * - one row per agent, KEYED by name (`row()`):
- *   a poll updates it in place, never touching what's typed in its box, nor its focus
- * - keeps the reader's place:  read below it, the page scrolls by what it grew or shrank as it comes,
- *   changes or goes (`follow()`)
- * - SIDE EFFECT:  follows the page's agents client while connected (kept alive:  a page that's gone stops listening)
+ * The component behind `<epic-agents>`:  WHAT CLAUDE IS DOING, at the right of the epic page's toolbar (epic
+ * `epic-engine` P35), drawn by `<epic-page>` in its shadow root.
+ * - the session's LINE:  what it's doing now, a word or two ("Responding", "Building P35"), a quiet spinner before it;
+ *   nothing when idle, or nobody listens (`epic inbox status`, the inbox's `doing`:  `ReviewClient.doing`)
+ *   - hovered or focused, a STYLED tooltip (Owen, 2026-10-24:  "pretty tooltip for what you are responding to"):
+ *     what it's answering, each item's id and title, linked (`<ui-popup open-on="hover">`)
+ * - the RUNNING AGENTS (epic `skillz` P3):  "2 agents running", a button, only while any runs;  a click opens them in
+ *   a popover from the toolbar (Owen, 2026-10-24:  "click to see the agents which are running, rather than section at
+ *   the top"):  a row per agent, each with a note box that REDIRECTS it (`<ui-popup open-on="click">`)
+ *   - the "Agents running" panel above the page's blocks went (P35)
+ * - one row per agent, KEYED by name (`row()`):  a poll updates it in place, never touching what's typed in its box,
+ *   nor its focus
+ * - in the page's shadow root:  the contents, the rail and the counts never see it (they read the light DOM)
+ * - SIDE EFFECT:  follows the page's agents and review clients while connected
  ****************/
 export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   @E.proto static vocabulary = epicAgentsVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { "epic-tooltip": tooltipCSS, "epic-agents": agentsCSS },
-    // a panel:  a click on its words must not jump to its first button
+    // a toolbar's tools:  a click on its words must not jump to its first button
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
-  // ## The agents
+  // ## The agents, and what the session is doing
   ////////////////
 
   /** The epic's running agents, one client per page;  none in a server render (nothing drawn). */
   readonly client = isServer ? undefined : AgentsClient.forPage()
 
-  /** The client's `version`, as last heard:  `agents` reads it, so the panel redraws on every change. */
+  /** The page's review client:  what the listening session is doing (`doing`);  none in a server render. */
+  readonly review = isServer ? undefined : ReviewClient.forPage()
+
+  /** The agents client's `version`, as last heard:  `agents` reads it, so the button redraws on every change. */
   @E.state accessor version = 0
+
+  /** The review client's `version`, as last heard:  `doing` reads it. */
+  @E.state accessor reviewVersion = 0
 
   /** The agents shown:  every one running while listed;  none otherwise. */
   get agents(): RunningAgent[] {
@@ -54,81 +65,120 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
     return this.client?.listed ? this.client.agents : []
   }
 
-  /** Follow the client while connected. */
+  /** What the listening session is doing now;  `null` for nothing. */
+  get doing(): InboxDoing | null {
+    void this.reviewVersion
+    return this.review?.doing ?? null
+  }
+
+  /** Follow both clients while connected. */
   @E.whileConnected
-  protected followAgents() {
-    const client = this.client
-    if (!client) return undefined
-    this.version = client.version
-    return client.subscribe(() => this.follow())
-  }
-
-  /**
-   * The client changed:  show it.  While the reader is below the panel (its bottom edge above the reading line),
-   * scroll by what it grew or shrank once it's drawn, so what they read stays put.
-   * - the reading line:  where top-level titles stick, the page's `--epic-stack`
-   * - after Solid's own flush (a microtask queued after the write runs after it), before the next paint
-   * - measured, not assumed:  a browser that anchors the scroll itself leaves nothing to make up
-   */
-  private follow() {
-    const edge = this.box?.getBoundingClientRect().bottom
-    this.version = this.client!.version
-    if (edge === undefined || edge >= this.readingLine()) return
-    E.afterSolidUpdate(() => {
-      const moved = this.box!.getBoundingClientRect().bottom - edge
-      if (Math.abs(moved) >= 1) window.scrollBy({ top: moved, behavior: "instant" })
-    })
-  }
-
-  /** Where top-level titles stick, px from the viewport top:  the page's `--epic-stack`;  0 outside a page. */
-  private readingLine(): number {
-    const stack = parseFloat(getComputedStyle(this.domElement).getPropertyValue(STACK_PROPERTY))
-    return Number.isNaN(stack) ? 0 : stack
+  protected followClients() {
+    const undo: (() => void)[] = []
+    const { client, review } = this
+    if (client) {
+      this.version = client.version
+      undo.push(client.subscribe(() => (this.version = client.version)))
+    }
+    if (review) {
+      this.reviewVersion = review.version
+      undo.push(review.subscribe(() => (this.reviewVersion = review.version)))
+    }
+    return () => undo.forEach((each) => each())
   }
 
   ////////////////
   // ## Drawing
   ////////////////
 
-  /** Open or folded:  open, until the reader folds it. */
-  readonly fold = new Fold(() => true)
-
-  /** Its box, as drawn:  its bottom edge is how `follow()` keeps the reader's place. */
-  private box: HTMLDivElement | undefined
+  /** `:state(running)`:  agents are running, its button shows (the header's pill joins it:  `EpicPage.css`). */
+  protected cssStates() {
+    return { running: this.agents.length > 0 }
+  }
 
   render(): JSX.Element {
     return (
-      // ALWAYS here, empty without agents:  its bottom edge is how `follow()` keeps the reader's place
-      <div ref={(element) => (this.box = element)} class={AGENTS_BOX} part={this.partForName("base")}>
-        <Show when={this.agents.length}>
-          <div class={AGENTS} role="region" aria-label={this.translationForKey("agents")}>
-            <button
-              type="button"
-              class={AGENTS_TITLE}
-              aria-expanded={this.fold.isOpen() ? "true" : "false"}
-              aria-controls={AGENTS_LIST}
-              title={this.translationForKey(this.fold.isOpen() ? "foldTip" : "unfoldTip")}
-              onClick={this.fold.toggle}
-            >
-              {Fold.chevron()}
-              {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
-              <span>
-                <ui-icon name="robot" />
+      <span class={TOOLS} part={this.partForName("base")}>
+        <Show when={this.draws !== "agents" && this.doing}>
+          {(doing) => (
+            <>
+              <span
+                class={DOING}
+                part={this.partForName("doing")}
+                tabindex={doing().items?.length ? "0" : undefined}
+                aria-label={this.doingLabel(doing())}
+              >
+                <span class={SPINNER} aria-hidden="true" />
+                <span class={WORDS}>{doing().text}</span>
               </span>
-              <b>{this.translationForKey("agents")}</b>
-              <Show when={this.agents.length > 1}>
-                <span class={AGENTS_COUNT}>{this.agents.length}</span>
+              <Show when={doing().items?.length}>
+                <ui-popup
+                  open-on="hover"
+                  position="bottom right"
+                  class={DOING_TIP}
+                  part={this.partForName("doing-tip")}
+                >
+                  <b class={TIP_HEAD}>{this.translationForKey("doingTip", { doing: doing().text })}</b>
+                  <ul class={TIP_ITEMS}>
+                    <For each={doing().items ?? []} keyed={false}>
+                      {(item) => (
+                        <li>
+                          <a href={`#${item().id}`}>
+                            <span class={TIP_CHIP}>{item().id.toUpperCase()}</span> {item().title}
+                          </a>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </ui-popup>
               </Show>
-            </button>
-            <div ref={this.fold.watch} id={AGENTS_LIST} class="agents-list" hidden={this.fold.hidden()}>
+            </>
+          )}
+        </Show>
+        <Show when={this.draws !== "doing" && this.agents.length}>
+          <button
+            type="button"
+            class={AGENTS_BUTTON}
+            part={this.partForName("agents-button")}
+            aria-label={this.agentsWords()}
+          >
+            {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
+            <span>
+              <ui-icon name="robot" />
+            </span>
+            <span class={WORDS}>{this.agentsWords()}</span>
+            <span class={COUNT} aria-hidden="true">
+              {this.agents.length}
+            </span>
+          </button>
+          <ui-popup
+            open-on="click"
+            position="bottom right"
+            class={AGENTS_POP}
+            part={this.partForName("agents")}
+            aria-label={this.translationForKey("agents")}
+          >
+            <div class={AGENTS_LIST}>
               <For each={this.agents} keyed={(agent) => agent.name}>
                 {(agent) => this.row(agent, this.redirectFor(agent))}
               </For>
             </div>
-          </div>
+          </ui-popup>
         </Show>
-      </div>
+      </span>
     )
+  }
+
+  /** The agents' button, in words:  `2 agents running`. */
+  private agentsWords(): string {
+    const count = this.agents.length
+    return this.translationForKey(count === 1 ? "agentRunning" : "agentsRunning", { count })
+  }
+
+  /** The line, spoken:  what it's doing, and what it's answering (the tooltip's ids). */
+  private doingLabel(doing: InboxDoing): string {
+    const ids = (doing.items ?? []).map((item) => item.id.toUpperCase()).join(", ")
+    return ids ? `${doing.text}:  ${ids}` : doing.text
   }
 
   /**
@@ -305,11 +355,19 @@ function statusColorOf(status: string): "blue" | "orange" | "grey" {
   return status === "active" ? "blue" : /^blocked\b/.test(status) ? "orange" : "grey"
 }
 
-/** Classes of the shadow markup:  its box, title and count, and each agent's row. */
-const AGENTS_BOX = "agents-box"
-const AGENTS = "agents"
-const AGENTS_TITLE = "agents-title"
-const AGENTS_COUNT = "agents-count"
+/** Classes of the shadow markup:  its tools, the session's line and its tooltip, the agents' button and popover, each agent's row. */
+const TOOLS = "tools"
+const DOING = "doing"
+const SPINNER = "spinner"
+const DOING_TIP = "doing-tip"
+const TIP_HEAD = "tip-head"
+const TIP_ITEMS = "tip-items"
+const TIP_CHIP = "tip-chip"
+const WORDS = "words"
+const COUNT = "count"
+const AGENTS_BUTTON = "agents-button"
+const AGENTS_POP = "agents-pop"
+const AGENTS_LIST = "agents-list"
 const AGENT = "agent"
 const AGENT_LINE = "agent-line"
 const AGENT_NAME = "agent-name"
@@ -322,6 +380,3 @@ const AGENT_REDIRECT = "agent-redirect"
 const AGENT_NOTE = "agent-note"
 const AGENT_SEND = "agent-send"
 const AGENT_ERROR = "agent-error"
-
-/** `id` of the rows' box, which the title controls. */
-const AGENTS_LIST = "agents-list"

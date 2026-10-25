@@ -35,8 +35,8 @@ export const epicNewItemVocabulary = {
       kind: "enum",
       values: NEW_ITEM_KINDS,
       description:
-        "A section's own kind:  the form starts on it, and the button says it (`New todo`, `New question`).  " +
-        "Without it:  the form starts on a todo."
+        "A section's own kind:  the form starts on it, and the button says it (`New caveat`, `New question`, `Add phase`).  " +
+        "Without it:  the form starts on a caveat."
     },
     { name: "near", kind: "string", description: "What the form's About starts with:  an id (`p3`)." },
     {

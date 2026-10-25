@@ -9,6 +9,7 @@ import { EpicAddress, PageTargets } from "spell-epic/links"
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 
 import { epicChangeVocabulary } from "./EpicChange.en"
+import { CHANGE_ANSWERED } from "./EpicChange.types"
 
 import changeCSS from "./EpicChange.css?inline"
 import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
@@ -55,15 +56,23 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     return this.unfolded
   }
 
-  /** Owen accepted it (`accepted`):  no orange. */
+  /**
+   * Owen accepted it:  no orange.  `accepted` written, or his Accept pressed and not applied yet (Owen, 2026-10-25:
+   * "When I accept a mark, change highlight right away").
+   */
   @E.cssState("accepted")
   get isAccepted(): boolean {
+    return this.isWrittenAccepted || this.review.mark()?.action === "accept"
+  }
+
+  /** `accepted` written:  the session applied his Accept. */
+  get isWrittenAccepted(): boolean {
     return this.accepted !== undefined && this.accepted !== null
   }
 
-  /** Accept and Reopen show:  reviewed, stamped (an id) and still waiting. */
+  /** Accept and Reopen show:  reviewed, stamped (an id) and not accepted in the file (his Accept still undoable). */
   get showsButtons(): boolean {
-    return !this.isAccepted && !!this.id && this.review.reviewing()
+    return !this.isWrittenAccepted && !!this.id && this.review.reviewing()
   }
 
   /** The question's id as people see it:  `Q16`. */
@@ -84,7 +93,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   /** The words' tooltip:  which answer changed them, when, and whether Owen has accepted it. */
   get wordsTip(): string {
     const when = this.at ? ` on ${PlanDates.format(this.at)}` : ""
-    if (!this.isAccepted) return this.translationForKey("waitingTip", { item: this.itemLabel, when })
+    if (!this.isWrittenAccepted) return this.translationForKey("waitingTip", { item: this.itemLabel, when })
     const accepted = PlanDates.format(this.accepted)
     return this.translationForKey("acceptedTip", { item: this.itemLabel, when, accepted })
   }
@@ -108,7 +117,12 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
             {this.itemLabel}
           </button>
           <Show when={this.showsButtons}>
-            <span class={BUTTONS} part={this.partForName("buttons")}>
+            <span
+              class={BUTTONS}
+              part={this.partForName("buttons")}
+              // a native listener, capturing:  the press comes from inside `<epic-review>`, which stops it going further
+              ref={(element: HTMLElement) => this.wireAnswered(element)}
+            >
               <epic-review
                 of={this.id}
                 shows="buttons"
@@ -133,6 +147,33 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     )
   }
 
+  /**
+   * Accept or Reopen pressed:  `epic-change-answered` (bubbling, composed), so the page lands on the NEXT change
+   * waiting (Owen, 2026-10-25:  "Clicking 'accept or revisit' on one should jump to next one to revisit").
+   */
+  /** Listen on `buttons` for a press, once however often it's handed over. */
+  private wireAnswered(buttons: HTMLElement) {
+    if (this.wired === buttons) return
+    this.wired = buttons
+    buttons.addEventListener("click", () => this.answered(), true)
+  }
+
+  /** When a press was last told (`answered()`). */
+  private lastAnswered = -Infinity
+
+  /** The buttons' box listened on (`wireAnswered()`). */
+  private wired: HTMLElement | undefined
+
+  @E.untracked
+  private answered() {
+    // one press is two clicks (the button's host and the button in it):  told once
+    if (performance.now() - this.lastAnswered < ONE_PRESS_MS) return
+    this.lastAnswered = performance.now()
+    this.domElement.dispatchEvent(
+      new CustomEvent(CHANGE_ANSWERED, { bubbles: true, composed: true, detail: { id: this.id } })
+    )
+  }
+
   /** The chip clicked:  its question and answer unfold, or fold;  the click goes no further (an item would fold). */
   @E.untracked
   private toggle(event: MouseEvent) {
@@ -141,6 +182,9 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     this.unfolded = !this.unfolded
   }
 }
+
+/** Clicks closer together than this are one press (`answered()`). */
+const ONE_PRESS_MS = 300
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicChange extends E.AttributeValues<typeof epicChangeVocabulary> {}

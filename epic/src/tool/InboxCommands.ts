@@ -18,6 +18,7 @@ import {
   LISTEN_HEARTBEAT_MS,
   LISTEN_STALE_MS,
   ReviewInbox,
+  type DoingItem,
   type ListedMark,
   type ListedUrgency,
   type TakenWork
@@ -68,6 +69,8 @@ export class InboxCommands {
       case "ignore":
         ReviewInbox.update(path, (box) => box.setListening(null))
         return this.owner.print("listening:  nobody")
+      case "status":
+        return this.status(file, args, flags)
       case "wait":
         return this.waitForWork(name, file, flags)
       case "apply":
@@ -85,7 +88,9 @@ export class InboxCommands {
       case "clear":
         return this.finish(file, what, args, flags)
       default:
-        throw new PlanDocError(`inbox what?  watch | ignore | wait | apply | working | done | clear (not '${what}')`)
+        throw new PlanDocError(
+          `inbox what?  watch | ignore | wait | apply | status | working | done | clear (not '${what}')`
+        )
     }
   }
 
@@ -96,6 +101,36 @@ export class InboxCommands {
    *   (`CommentList.setWorking()`);  `done` turns it off too.  Throws when there's no such comment.
    * - SIDE EFFECT:  writes the inbox, under its lock
    */
+  /**
+   * `inbox status <name> "<text>" [--items q6,m3]`:  what the session is doing now, the page's toolbar line (epic
+   * `epic-engine` P35);  `--clear`:  nothing.
+   * - `--items`:  what it's answering, each with its title from the doc (an item, a phase, a change mark) or the inbox
+   *   (a comment's first words);  an id that's neither is refused
+   */
+  private status(file: string, args: string[], flags: Flags): void {
+    const path = ReviewInbox.pathFor(file)
+    if (flags.clear) {
+      ReviewInbox.update(path, (box) => box.setDoing(null))
+      return this.owner.print("doing:  nothing")
+    }
+    const text = this.owner.need(args[0], 'what it\'s doing ("Responding", "Building P35")')
+    const ids = typeof flags.items === "string" ? flags.items.split(/[\s,]+/).filter(Boolean) : []
+    const plan = ids.length ? this.owner.read(file) : undefined
+    const comments = ReviewInbox.read(path).comments
+    const items = ids.map((given): DoingItem => {
+      const id = ReviewInbox.toItemId(given)
+      const comment = CommentList.isCommentId(id) ? comments[id] : undefined
+      if (comment) return { id, title: firstWords(comment.text) }
+      const facts = plan!.describeItem(id)
+      if (!facts) throw new PlanDocError(`status --items:  no item ${given.toUpperCase()}`)
+      return { id, title: facts.title }
+    })
+    ReviewInbox.update(path, (box) => box.setDoing({ text, items }))
+    this.owner.print(
+      `doing:  ${text}${items.length ? ` (${items.map((item) => item.id.toUpperCase()).join(", ")})` : ""}`
+    )
+  }
+
   setWorking(file: string, id: string, on: boolean): void {
     const key = ReviewInbox.toItemId(id)
     ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
@@ -754,3 +789,12 @@ function upper(ids: string[]): string {
 function shown(id: string): string {
   return CommentList.isCommentId(id) ? CommentList.label(id) : id.toUpperCase()
 }
+
+/** A comment's first words, for a line:  at most `FIRST_WORDS` characters, its white space as one space. */
+function firstWords(text: string): string {
+  const words = text.replace(/\s+/g, " ").trim()
+  return words.length > FIRST_WORDS ? `${words.slice(0, FIRST_WORDS - 1).trimEnd()}…` : words
+}
+
+/** How long a comment's first words run (`firstWords()`). */
+const FIRST_WORDS = 60

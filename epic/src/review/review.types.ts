@@ -9,6 +9,7 @@
 
 import { PlanDates } from "spell-epic/dates"
 import type {
+  InboxDoing,
   InboxDraft,
   InboxListener,
   InboxMark,
@@ -134,7 +135,9 @@ export const REVIEW_ACTIONS = [
   "drop",
   "defer",
   "accept",
-  "reopen"
+  "reopen",
+  // a phase dragged to another place (epic `epic-engine` P34):  `{ action: "move", to }`
+  "move"
 ] as const
 
 /** One of `REVIEW_ACTIONS`. */
@@ -159,7 +162,7 @@ export const STAGE_ID = "stage"
 export const CHANGE_ID = /^ch\d+$/
 
 /** What a new item from the page may be:  as `ReviewInbox`'s `NEW_KINDS` (a copy:  that module is node-only). */
-export const NEW_KINDS = ["todo", "question", "issue", "test"] as const
+export const NEW_KINDS = ["todo", "question", "issue", "test", "phase"] as const
 
 /** The longest title a new item may have:  as `ReviewInbox`'s `MAX_TITLE` (a copy:  that module is node-only). */
 export const NEW_TITLE_MAX = 300
@@ -202,11 +205,16 @@ export const AGENTS_FILE = "agents.json5"
  *   (`ReviewInbox.forPage()`);  `[]` from a server started before Send took comments
  * - `woken`:  the page server's wake of the epic (epic `epic-workflow` P16), while it counts and nobody listens;
  *   `null` otherwise, or from a server started before it woke epics
+ * - `doing`:  what the listening session is doing now (epic `epic-engine` P35), the toolbar's line;  `null` for
+ *   nothing, nobody listening, or a server started before it
  */
 export type Inbox = Pick<
   PageInbox,
-  "marks" | "drafts" | "urgency" | "sent" | "now" | "working" | "listening" | "unsentComments" | "woken"
+  "marks" | "drafts" | "urgency" | "sent" | "now" | "working" | "listening" | "unsentComments" | "woken" | "doing"
 >
+
+/** What the session is doing, as the page reads it (`Inbox.doing`). */
+export type { InboxDoing }
 
 /**
  * What the page server's wake did, in a Send's or Do Now's answer (`wake`, epic `epic-workflow` P16):
@@ -341,6 +349,10 @@ export function inboxOf(reply: unknown): Inbox {
     woken:
       isObject(record.woken) && typeof (record.woken as InboxWoken).message === "string"
         ? (record.woken as InboxWoken)
+        : null,
+    doing:
+      isObject(record.doing) && typeof (record.doing as InboxDoing).text === "string"
+        ? (record.doing as InboxDoing)
         : null
   }
 }

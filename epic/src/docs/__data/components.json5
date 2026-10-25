@@ -708,7 +708,13 @@
           "description": "The changed or new words:  running text, links and code included."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "epic-change-answered",
+          "detail": "{ id }",
+          "description": "Accept or Reopen pressed (bubbles, composed;  `detail.id`):  the page lands on the next change waiting."
+        }
+      ],
       "parts": [
         {
           "name": "base",
@@ -3464,6 +3470,14 @@
           "description": "The header's right side:  the changes to accept, Send and its countdown (while reviewed), the bedtime label, the step label, the git toggle."
         },
         {
+          "name": "step-pill",
+          "description": "One pill (epic `epic-engine` I108):  the changes to accept on its left while any wait, the step label on its right."
+        },
+        {
+          "name": "agents-pill",
+          "description": "The agents running, in the header's pill after the step label (`<epic-agents draws=agents>`)."
+        },
+        {
           "name": "changes",
           "description": "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange label with how many, before Send;  a click lands on the first."
         },
@@ -3497,7 +3511,7 @@
         },
         {
           "name": "agents",
-          "description": "The running agents (an `<epic-agents>`, epic `skillz` P3), right before its blocks:  only while an agent runs."
+          "description": "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
         },
         {
           "name": "test-run",
@@ -4171,6 +4185,10 @@
         {
           "name": "error",
           "description": "Its `source` part couldn't be loaded."
+        },
+        {
+          "name": "movable",
+          "description": "Still to do, on a page being reviewed:  dragged by its title row to another place (epic `epic-engine` P34)."
         }
       ],
       "texts": [
@@ -5169,6 +5187,11 @@
           "key": "newTest",
           "text": "Test",
           "description": "Kind:  a test, for Owen to try by hand."
+        },
+        {
+          "key": "newPhase",
+          "text": "Phase",
+          "description": "Kind:  a phase, which Claude drafts from its name and Owen's note."
         },
         {
           "key": "newUnsent",

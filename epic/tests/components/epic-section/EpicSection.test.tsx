@@ -473,8 +473,12 @@ function roundedEnds(host: Element): Record<string, string> {
   for (const item of host.querySelectorAll("epic-item")) {
     if (getComputedStyle(item).display === "none") continue
     const line = getComputedStyle(item.shadowRoot!.querySelector("[part~='line']")!)
+    // an open item's bottom is its drawer's (I105), its line rounded all round too
+    const end = item.hasAttribute("open")
+      ? getComputedStyle(item.shadowRoot!.querySelector("[part~='details']")!)
+      : line
     const top = parseFloat(line.borderTopLeftRadius) > 0 && parseFloat(line.borderTopRightRadius) > 0
-    const bottom = parseFloat(line.borderBottomLeftRadius) > 0 && parseFloat(line.borderBottomRightRadius) > 0
+    const bottom = parseFloat(end.borderBottomLeftRadius) > 0 && parseFloat(end.borderBottomRightRadius) > 0
     ends[item.id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
   }
   return ends
@@ -496,12 +500,13 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     return `<epic-section id="decisions" kind="questions" open>${items.join("")}</epic-section>`
   }
 
-  test("Owen's example, Q3 and Q4 unfolded:  Q1 top, Q3 bottom, Q4 both, Q5 top, Q7 bottom", async () => {
+  // an unfolded item is a run of its own since I104 (Owen, 2026-10-25:  "item header is rounded when it's open")
+  test("Owen's example, Q3 and Q4 unfolded:  Q1 top, Q2 bottom, Q3 and Q4 both, Q5 top, Q7 bottom", async () => {
     const host = await render(seven([3, 4]))
     expect(roundedEnds(host)).toEqual({
       q1: "top",
-      q2: "",
-      q3: "bottom",
+      q2: "bottom",
+      q3: "top bottom",
       q4: "top bottom",
       q5: "top",
       q6: "",
@@ -511,7 +516,7 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     const ruled = Array.from(host.querySelectorAll("epic-item"))
       .filter((item) => getComputedStyle(item).borderTopStyle !== "none")
       .map((item) => item.id)
-    expect(ruled).toEqual(["q2", "q3", "q6", "q7"])
+    expect(ruled).toEqual(["q2", "q6", "q7"])
   })
 
   test("follows folding:  all folded is one run;  a click on a line splits it there", async () => {
@@ -521,7 +526,15 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(host.querySelector("#q5")!.hasAttribute("open")).toBe(true)
-    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "", q4: "", q5: "bottom", q6: "top", q7: "bottom" })
+    expect(roundedEnds(host)).toEqual({
+      q1: "top",
+      q2: "",
+      q3: "",
+      q4: "bottom",
+      q5: "top bottom",
+      q6: "top",
+      q7: "bottom"
+    })
   })
 
   test("only the lines showing count:  a run ends at the last one the filter leaves", async () => {
@@ -530,7 +543,7 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
     chip(host, "open").click()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "", q3: "bottom", q4: "top", q5: "bottom" })
+    expect(roundedEnds(host)).toEqual({ q1: "top", q2: "bottom", q3: "top bottom", q4: "top", q5: "bottom" })
   })
 })
 

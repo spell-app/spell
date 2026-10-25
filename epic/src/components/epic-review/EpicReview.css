@@ -61,6 +61,9 @@
   }
   .review-group {
     flex: none;
+    /* a pill, round at both ends (Owen, 2026-10-25:  "take these back to pills") */
+    --ui-button-radius: 999px;
+    --ui-buttons-radius: 999px;
   }
   .review-controls ui-button::part(button) {
     display: inline-grid;
@@ -180,9 +183,14 @@
     gap: 6px;
     margin: 8px 0 2px;
     padding: 6px;
-    border: 1px solid color-mix(in oklab, var(--_epic-act-ivory-ink) 30%, transparent);
+    /*
+     * the page's violet, faint, its frame a touch darker (Owen, 2026-10-25, the answer-look page's Q2:  "B ... frame is a
+     * little darker ... 1px shadow rather than 2";  tan before)
+     */
+    border: 1px solid var(--epic-note-frame, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
     border-radius: 12px;
-    background: var(--_epic-act-ivory);
+    background: var(--epic-note-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--_epic-act-paper)));
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--ui-violet, #6550ca) 12%, transparent);
     font-size: 15px;
   }
   /* the note, its Saved mark (a floppy, its tooltip the time) in the lower right corner */

@@ -25,6 +25,8 @@
     /* where the details start:  under the id chip (the chevron's 18px, the line's 2px padding, a 6px gap) */
     --_epic-item-indent: var(--epic-item-indent, 26px);
     --_epic-item-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
+    /* an open item's drawer (I104):  in from the line's edges, its bottom corners */
+    --_epic-drawer-inset: var(--epic-drawer-inset, 4px);
     /* opaque:  the open line sticks, and the text scrolls under it */
     --_epic-item-band: var(
       --epic-band-row,
@@ -44,6 +46,10 @@
   }
   :host([hidden]) {
     display: none;
+  }
+  /* open:  free of its neighbours, room above and below its drawer (I105;  Owen, 2026-10-25), its corners round there */
+  :host([open]) {
+    margin-block: 10px;
   }
 
   .item {
@@ -82,6 +88,44 @@
     /* over its own note box, which sticks too (`z-index: 1`) and comes later:  it scrolls UNDER the line (Owen, 2026-10-24) */
     z-index: 2;
     top: var(--epic-stack, calc(var(--spell-site-header-height, 0px) + var(--spell-stack, 0px)));
+  }
+  /*
+   * OPEN, a DRAWER pulled out under its line (epic `epic-engine` I104;  Owen, 2026-10-25:  "item header is rounded when
+   * it's open, with 1px shadow ... lines extending down ... making it look like a drawer that was opened"):
+   * - the line rounded all round (a run of its own:  `EpicSection.runEnds`), the bars' one line of shadow under it
+   * - its details:  half-white, thin side rules running down from under the line, closed at the bottom with rounded
+   *   corners;  the note box, when there, IS that bottom (below)
+   */
+  .item.unfolded > .line {
+    /* rounded all round:  its drawer hangs 4px in from its edges, so its bottom corners are free (Owen, 2026-10-25) */
+    box-shadow: var(--epic-bar-shadow, 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45)));
+  }
+  .item.unfolded > .details {
+    margin: 0 var(--_epic-drawer-inset);
+    padding-inline-start: calc(var(--_epic-item-indent) - var(--_epic-drawer-inset) - 1px);
+    border: 1px solid var(--_epic-item-rule);
+    border-top: none;
+    border-end-start-radius: var(--_epic-item-bottom-radius);
+    border-end-end-radius: var(--_epic-item-bottom-radius);
+    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
+  }
+  /*
+   * the note box, last:  the drawer's bottom, side to side, its rounded corners the drawer's;  one thin rule above it,
+   * a lighter shadow than its own ring (its ivory says it's Owen's)
+   */
+  .item.unfolded > .details > [part~="note-box"]:last-child {
+    bottom: 0;
+    margin-inline: calc(var(--_epic-drawer-inset) + 1px - var(--_epic-item-indent)) -6px;
+    /* over the drawer's bottom padding:  the box IS its bottom */
+    margin-block-end: -10px;
+  }
+  .item.unfolded > .details > [part~="note-box"]:last-child::part(base) {
+    margin: 8px 0 0;
+    /* its frame all round, light (the answer-look page's Q2:  "lose heavy border on top") */
+    /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
+    border-radius: 10px 10px max(0px, calc(var(--_epic-item-bottom-radius) - 1px))
+      max(0px, calc(var(--_epic-item-bottom-radius) - 1px));
+    /* one line of shadow, its own (EpicReview.css) */
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
   .item.under-title > .line {
@@ -127,7 +171,7 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: rotate 0.12s;
+    transition: rotate var(--epic-turn-duration, 0.12s);
   }
   /* unfolded;  or, without details, its note box open under the line (`note-open`:  folding closes it) */
   .item:is(.unfolded, .note-open) .toggle svg {

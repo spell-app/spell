@@ -129,8 +129,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
-      - `<epic-page>` draws them as its "Agents running" panel:
-        `<epic-agents>`, in its shadow root, before its blocks (not a section).
+      - `<epic-page>` draws them in its toolbar (epic `epic-engine` P35):  `<epic-agents>`, in its shadow root,
+        "2 agents running", a button whose popover holds their rows;  beside the session's line ("Responding",
+        `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:file`.
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
@@ -1124,8 +1125,11 @@ In `tools/`:
         - `EPIC_WAIT_MS`, 5s at most:  a pack that won't load doesn't hold up the page
       - remembers their folds
       - lands links inside them (a link to an `<epic-item>` opens it)
-    - Running agents (epic `skillz` P3):  `<epic-page>` draws the "Agents running" panel above its first section.
+    - Running agents (epic `skillz` P3):  `<epic-page>`'s toolbar has "2 agents running", a button opening their
+      rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs.
+      - Beside it, the session's line (P35):  "Responding", "Building P35" (`epic inbox status`), gone when idle or
+        nobody listens;  hovered, a styled tooltip of what it's answering.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.
@@ -1415,6 +1419,13 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
     - else Revisit, Make Caveat, Do Now:  notes on the plan, no Approve
+  - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
+    by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
+    - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
+      phase between is still to do;  Escape calls it off
+    - the page moves it at once, and keeps it there (`ReviewClient.pendingMoves`) over live patches until applied
+    - it waits for Send, as Defer does;  `epic inbox apply` moves it in the file (`PlanDoc.movePhase()`):  numbers,
+      links and "P5 · Name" text follow;  dragged again, the newer mark replaces it
   - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.
@@ -2164,7 +2175,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - An entry leaves when its agent finishes (`done`).
     Empty, the file goes.
   - Every write is under the file's lock (`SRV.FileLock`) and atomic, as the review inbox's.
-  - REDIRECTS (P3):  an epic page's "Agents running" panel (`<epic-page>`, spell-epic) shows an epic's list,
+  - REDIRECTS (P3):  an epic page's agents popover (`<epic-page>`'s toolbar, spell-epic) shows an epic's list,
     with a note box per agent.
     - Owen's note goes through [agentRoutes.ts](tools/agentRoutes.ts), guarded as the review routes are:
       - `GET /api/epics/agents?page=`

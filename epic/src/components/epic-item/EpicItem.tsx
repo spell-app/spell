@@ -814,6 +814,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const top = base.getBoundingClientRect().top
     if (top >= stuckAt - 1) return
     window.scrollTo({ top: window.scrollY + top - stuckAt, behavior: "instant" })
+    // the room an open item keeps above it (I105) goes once it's folded:  the line put back where it was, again
+    E.beforeNextPaint(() => {
+      const moved = line.getBoundingClientRect().top - stuckAt
+      if (Math.abs(moved) >= 1) window.scrollBy({ top: moved, behavior: "instant" })
+    })
   }
 
   /** Unfold for a link or find-in-page:  `ui-open` after the fact (not cancelable). */

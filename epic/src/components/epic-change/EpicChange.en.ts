@@ -64,7 +64,14 @@ export const epicChangeVocabulary = {
         "stays.  None:  waiting for his Accept."
     }
   ],
-  events: [],
+  events: [
+    {
+      name: "epic-change-answered",
+      detail: "{ id }",
+      description:
+        "Accept or Reopen pressed (bubbles, composed;  `detail.id`):  the page lands on the next change waiting."
+    }
+  ],
   slots: [{ name: "", description: "The changed or new words:  running text, links and code included." }],
   parts: [
     { name: "base", description: "The whole mark:  the words, the chip, its question and answer." },

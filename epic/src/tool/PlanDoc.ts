@@ -253,6 +253,8 @@ export class PlanDoc extends PlanReader {
     }
     // the room first:  a refused --before changes nothing
     const n = before === undefined ? this.phases.length + 1 : this.makeRoomForPhase(before)
+    // the text naming a moved phase by its number and name follows it (r21), once it's in (below)
+    const relabel = before !== undefined
     const section = this.section("phases")
     if (this.future) Markup.set(this.page, { future: false })
     const framed = values.symptom !== undefined || values.changes !== undefined
@@ -266,6 +268,7 @@ export class PlanDoc extends PlanReader {
     const phase = this.make("epic-phase", { id, title: name, status: "todo", estimate }, fields)
     if (before === undefined) section.append(phase)
     else this.phase(n).before(phase)
+    if (relabel) this.relabelPhaseNames()
     this.updateEstimate()
     return n
   }
@@ -1805,10 +1808,111 @@ export class PlanDoc extends PlanReader {
    * - returns its new number
    */
   deferPhase(n: number): number {
-    const phase = this.phase(n)
-    const last = this.phaseElements.at(-1)!
-    if (last !== phase) last.after(phase)
-    return this.phaseElements.length
+    return this.movePhase(n, this.phaseElements.length)
+  }
+
+  /**
+   * Move phase `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);  returns `to`.
+   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
+   *   active one keeps its number:  its commits and log say it)
+   * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, the
+   *   `P5` in links' words, and every `P5 · <its name>` in the page's words and attributes (`relabelPhaseNames()`)
+   * - SIDE EFFECT:  logs it
+   * - throws for a place out of range, or a started phase in the way
+   */
+  movePhase(from: number, to: number): number {
+    const phases = this.phases
+    for (const n of [from, to])
+      if (!Number.isInteger(n) || n < 1 || n > phases.length)
+        throw new PlanDocError(`move P${from} to P${to}:  no place P${n} (1-${phases.length})`)
+    if (from === to) return to
+    const [low, high] = from < to ? [from, to] : [to, from]
+    const started = phases.find((phase) => phase.n >= low && phase.n <= high && phase.status !== "todo")
+    if (started) throw new PlanDocError(`move P${from} to P${to}:  P${started.n} has started;  only to-do phases move`)
+    const before = new Map(this.phaseElements.map((element, at) => [element.id, at + 1]))
+    const moving = this.phase(from)
+    const name = PlanItem.titleOf(moving)
+    if (from < to) this.phase(to).after(moving)
+    else this.phase(to).before(moving)
+    this.renumberAll(before)
+    this.log(`P${from} ${name}:  moved to P${to}`)
+    return to
+  }
+
+  /**
+   * After phases moved:  everything that names one by NUMBER follows, from `before` (each phase's id => its number
+   * then), ALL AT ONCE, so a number another phase takes is never renamed twice.
+   * - items' and updates' `phase`, Updated lines' `of`, the `P5` in the words of links to a phase (`href="#id"`)
+   * - then the `P5 · <name>` text everywhere (`relabelPhaseNames()`)
+   */
+  private renumberAll(before: Map<string, number>): void {
+    const now = new Map(this.phaseElements.map((element, at) => [element.id, at + 1]))
+    const numbers = new Map<number, number>()
+    for (const [id, was] of before) if (now.has(id) && now.get(id) !== was) numbers.set(was, now.get(id)!)
+    if (!numbers.size) return
+    const pointers = Array.from(this.document.querySelectorAll(PHASE_POINTERS.map((tag) => `${tag}[phase]`).join()))
+    const lines = Array.from(this.document.querySelectorAll("epic-updated[of]"))
+    for (const element of pointers) {
+      const to = numbers.get(Number(element.getAttribute("phase")))
+      if (to) element.setAttribute("phase", String(to))
+    }
+    for (const line of lines) {
+      const to = numbers.get(Number(line.getAttribute("of")))
+      if (to) line.setAttribute("of", String(to))
+    }
+    for (const [id, was] of before) {
+      const to = now.get(id)
+      if (!to || to === was) continue
+      for (const link of this.document.querySelectorAll(`a[href="#${id}"]`))
+        link.innerHTML = link.innerHTML.replace(new RegExp(`\\bP${was}\\b`), `P${to}`)
+    }
+    this.relabelPhaseNames()
+  }
+
+  /**
+   * Every `P8 · <name>` naming a phase by its number AND its name, in the page's words and attributes (a queued
+   * item's `work`, a Noted card's "Queued for P8 · ...", an Update block's `summary` or prose), said with the phase's
+   * number NOW (epic `epic-engine` r21;  Owen, 2026-10-24:  keep renumbering, and fix the text that names numbers).
+   * - by name, so it's idempotent, and mends text left stale before
+   * - a bare `P8` with no name is left:  it may mean anything
+   * - history keeps its numbers:  the log, an Original Discussion
+   * - returns how many it changed
+   */
+  relabelPhaseNames(): number {
+    const labels = this.phaseElements.map((element, at) => ({ name: PlanItem.titleOf(element), n: at + 1 }))
+    // the longest first:  `Event Model` before `Event`
+    const named = labels.filter((label) => label.name).sort((a, b) => b.name.length - a.name.length)
+    if (!named.length) return 0
+    const pattern = new RegExp(
+      `\\bP\\d+( · (?:${named.map((label) => escapeRegExp(label.name)).join("|")}))(?![\\w-])`,
+      "g"
+    )
+    const byName = new Map(named.map((label) => [label.name, label.n]))
+    const relabel = (text: string) =>
+      text.replace(pattern, (whole: string, rest: string) => `P${byName.get(rest.slice(3))}${rest}`)
+    let changed = 0
+    const walker = this.document.createTreeWalker(this.page, 4 /* NodeFilter.SHOW_TEXT */)
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (node.parentElement?.closest(HISTORY)) continue
+      const text = node.nodeValue ?? ""
+      const next = relabel(text)
+      if (next !== text) {
+        node.nodeValue = next
+        changed++
+      }
+    }
+    for (const element of this.page.querySelectorAll("[work], [summary]")) {
+      if (element.closest(HISTORY)) continue
+      for (const name of ["work", "summary"]) {
+        const value = element.getAttribute(name)
+        if (!value) continue
+        const next = relabel(value)
+        if (next === value) continue
+        element.setAttribute(name, next)
+        changed++
+      }
+    }
+    return changed
   }
 
   /**
@@ -2047,7 +2151,7 @@ export class PlanDoc extends PlanReader {
    * - pick isn't for them
    * - revisit and details are Claude's, as for an item
    */
-  private applyToPart(part: ReviewPart, { action, pick, when, note, at }: PlanMark): MarkResult {
+  private applyToPart(part: ReviewPart, { action, pick, when, note, at, to }: PlanMark): MarkResult {
     switch (action) {
       case "approve":
         // a phase whose build plan waits:  Accept plan (P33)
@@ -2066,6 +2170,18 @@ export class PlanDoc extends PlanReader {
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
+      case "move": {
+        if (part.kind !== "phase" || !to)
+          return { applied: false, left: `${part.label} (${part.what}):  only a phase moves` }
+        const from = this.phaseElements.indexOf(part.element) + 1
+        try {
+          this.movePhase(from, Math.min(to, this.phaseElements.length))
+        } catch (error) {
+          if (!(error instanceof PlanDocError)) throw error
+          return { applied: false, gone: true, left: `${part.label}:  ${error.message}:  dropped` }
+        }
+        return { applied: true, did: `moved:  now P${this.phaseElements.indexOf(part.element) + 1}` }
+      }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }
         const n = this.deferPhase(this.phaseElements.indexOf(part.element) + 1)
@@ -2281,6 +2397,12 @@ export class PlanDoc extends PlanReader {
    */
   private addFromPage({ id: key, kind, title, note, near, at }: PlanMark): MarkResult {
     if (!kind || !title) return { applied: false, gone: true, left: "a new item with no kind or title:  dropped" }
+    // a new PHASE (Add phase, epic `epic-engine` P34):  Claude drafts it, as `/epic phase` does, with Owen's words
+    if (kind === "phase")
+      return {
+        applied: false,
+        left: `${String(key).toUpperCase()}:  a new phase from the page, "${title}"${note ? `:  ${note}` : ""}:  draft it (add-phase), then inbox clear`
+      }
     const about = near ? `<p>About ${this.aboutLink(near)}.</p>` : ""
     const details = `${promptHTML(note)}${about}`
     const id = this.addItem(kind, title, { details: details || undefined })
@@ -2464,4 +2586,12 @@ function changeTitle(change: Element): string {
   const words = PlanMarkup.squeeze(change.textContent ?? "")
   const short = words.length > 50 ? `${words.slice(0, 49).trimEnd()}…` : words
   return `"${short}" (${(change.getAttribute("item") ?? "?").toUpperCase()})`
+}
+
+/** What keeps the numbers it said:  the log, an Original Discussion (`relabelPhaseNames()`). */
+const HISTORY = 'epic-section[kind="log"], epic-original'
+
+/** `text`, safe inside a regular expression. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }

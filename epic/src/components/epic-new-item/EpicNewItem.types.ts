@@ -11,7 +11,7 @@ import type { epicNewItemVocabulary } from "./EpicNewItem.en"
 export type EpicNewItemVocabulary = typeof epicNewItemVocabulary
 
 /** The kinds of new item, as its `adds` attribute takes them. */
-export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test"] as const satisfies readonly NewKind[]
+export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test", "phase"] as const satisfies readonly NewKind[]
 
 /**
  * Each kind of new item Owen may ask for from the page:
@@ -32,7 +32,9 @@ export const NEW_KIND_LOOKS = {
     section: "questions"
   },
   issue: { icon: "bug", label: "newIssue", add: "addIssue", tip: "newIssueTip", section: "issues" },
-  test: { icon: "flask", label: "newTest", add: "addTest", tip: "newTestTip", section: "tests" }
+  test: { icon: "flask", label: "newTest", add: "addTest", tip: "newTestTip", section: "tests" },
+  // a phase (epic `epic-engine` P34):  its name and what it's for go to the session, which drafts it
+  phase: { icon: "layer group", label: "newPhase", add: "addPhase", tip: "newPhaseTip", section: "phases" }
 } as const satisfies Record<
   NewKind,
   {
@@ -70,7 +72,8 @@ export const NEW_KIND_TEXTS = [
   },
   { key: "newQuestion", text: "Question", description: "Kind:  a question." },
   { key: "newIssue", text: "Issue", description: "Kind:  an issue." },
-  { key: "newTest", text: "Test", description: "Kind:  a test, for Owen to try by hand." }
+  { key: "newTest", text: "Test", description: "Kind:  a test, for Owen to try by hand." },
+  { key: "newPhase", text: "Phase", description: "Kind:  a phase, which Claude drafts from its name and Owen's note." }
 ] as const
 
 /** The rest of `<epic-new-item>`'s texts. */
@@ -80,6 +83,11 @@ export const NEW_ITEM_TEXTS = [
   { key: "addQuestion", text: "New question", description: "The Questions section's button, at its end." },
   { key: "addIssue", text: "New issue", description: "The Issues section's button, at its end." },
   { key: "addTest", text: "New test", description: "The Tests section's button, at its end." },
+  {
+    key: "addPhase",
+    text: "Add phase",
+    description: "The Phases section's button, at its end (epic `epic-engine` P34)."
+  },
   { key: "newForm", text: "A new item, for Claude to add", description: "The form, for a screen reader." },
   { key: "newKind", text: "What it is", description: "The form's kind buttons, for a screen reader." },
   { key: "newTitle", text: "Title:  what to do, or what to ask", description: "The title field's placeholder." },
@@ -100,6 +108,11 @@ export const NEW_ITEM_TEXTS = [
   { key: "newQuestionTip", text: "Make it a question", description: "Kind button:  its tooltip." },
   { key: "newIssueTip", text: "Make it an issue", description: "Kind button:  its tooltip." },
   { key: "newTestTip", text: "Make it a test", description: "Kind button:  its tooltip." },
+  {
+    key: "newPhaseTip",
+    text: "Make it a phase:  Claude drafts it from its name and your note, for you to review",
+    description: "Kind button:  its tooltip."
+  },
   { key: "newAddTip", text: "Add:  Claude puts it in the epic page", description: "The form's Add:  its tooltip." },
   { key: "newSaveTip", text: "Save your changes", description: "The form's Save:  its tooltip." },
   { key: "newCancelTip", text: "Cancel:  close it, nothing saved", description: "The form's Cancel:  its tooltip." },

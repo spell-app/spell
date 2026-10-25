@@ -25,6 +25,7 @@ import {
   TEST_START
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
+import { CHANGE_ANSWERED } from "spell-epic/components/epic-change/EpicChange.types"
 
 import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
@@ -166,7 +167,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     page in the epic's folder changes (`spell-server:file`):  a page made or linked a moment ago shows
  *   - none, or not served (`file://`):  no box
  *   - open, folding (a `<details>`):  short, and it's how to get to them
- * - RUNNING AGENTS (epic `skillz` P3), right before its blocks:  the "Agents running" panel (`<epic-agents>`).
+ * - WHAT CLAUDE IS DOING (epic `epic-engine` P35), in its toolbar:  the session's line and the running agents (epic
+ *   `skillz` P3) in a popover (`<epic-agents>`);  no "Agents running" panel above its blocks any more.
  *   - only while the page is served with a token, the epic's list answers (`AgentsClient`) and an agent runs
  *   - each row a note box that redirects that agent
  *   - in the shadow root:  not a section, so the rail and counts never see it
@@ -682,7 +684,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             </button>
           </h1>
           <span class={STATUS} part={this.partForName("status")}>
-            <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
             <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
             <Show when={this.bedtime}>
               {(phases) => (
@@ -697,21 +698,34 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 </ui-label>
               )}
             </Show>
-            <Show when={this.step()}>
-              {(step) => (
-                <ui-label
-                  part={this.state() ? this.partForName("state") : undefined}
-                  data-state={this.state()?.name}
-                  basic={step().color === "green" ? undefined : ""}
-                  color={step().color}
-                  icon={step().icon}
-                  href={step().href}
-                  title={step().tip}
-                >
-                  {step().words}
-                </ui-label>
-              )}
-            </Show>
+            {/* ONE pill (Owen, 2026-10-25:  "pencil and P36 should be pills -- can we combine them"):  the changes to
+                accept, while any wait, on its left;  the step label on its right */}
+            <span
+              class={STEP_PILL}
+              part={this.partForName("step-pill")}
+              style={{
+                "--epic-pill-color": `var(--ui-${this.changesToAccept().length ? "orange" : (this.step()?.color ?? "grey")})`
+              }}
+            >
+              <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
+              <Show when={this.step()}>
+                {(step) => (
+                  <ui-label
+                    part={this.state() ? this.partForName("state") : undefined}
+                    data-state={this.state()?.name}
+                    basic={step().color === "green" ? undefined : ""}
+                    color={step().color}
+                    icon={step().icon}
+                    href={step().href}
+                    title={step().tip}
+                  >
+                    {step().words}
+                  </ui-label>
+                )}
+              </Show>
+              {/* the agents running, its third part (Owen, 2026-10-25:  "belongs in the top bar with pencil | P36") */}
+              {this.isSaga ? undefined : <epic-agents draws="agents" part={this.partForName("agents-pill")} />}
+            </span>
             <Show when={this.hasCommits()}>{this.gitToggle()}</Show>
           </span>
         </header>
@@ -724,8 +738,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.future}>{this.futureNotice()}</Show>
         <Show when={this.planning()}>{this.hungNotice()}</Show>
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
-        {/* a saga has no agents of its own:  no list to ask for */}
-        {this.isSaga ? undefined : <epic-agents part={this.partForName("agents")} />}
         <Show when={this.testRun}>
           <epic-test-run part={this.partForName("test-run")} all={this.testRun === TEST_ALL ? "" : undefined} />
         </Show>
@@ -877,7 +889,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The sticky bar's last row, the TOOLBAR (epic `airplane` P8), in its order:
    * - the docs runtime's section buttons (`slot="toolbar"`)
-   * - at the right, the page's state filter (`pageFilter()`), then expand-all and collapse-all
+   * - at the right:
+   *   - what Claude is doing and the agents running (`<epic-agents>`, epic `epic-engine` P35)
+   *   - the page's state filter (`pageFilter()`), then expand-all and collapse-all
    * - no new item button:  each item section has its own, on its title
    *   (Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers")
    */
@@ -886,6 +900,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       <div class={TOOLBAR} part={this.partForName("toolbar")}>
         <slot name={this.slotForName("toolbar")} />
         <span class={TOOLBAR_TOOLS}>
+          {/* what Claude is doing, and the agents running (P35);  a saga has no session or agents of its own */}
+          {this.isSaga ? undefined : <epic-agents draws="doing" part={this.partForName("agents")} />}
           {this.pageFilter()}
           {Fold.expandAllButton({
             label: this.translationForKey("expandAll"),
@@ -952,14 +968,57 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("changes")}
         basic=""
         color="orange"
-        icon="pen"
+        icon="highlighter"
         href={`#${ids()[0]}`}
+        onClick={(event: MouseEvent) => {
+          event.preventDefault()
+          this.showChanges()
+        }}
         title={this.translationForKey("changesTip", { changes: words(), next: ids()[0]!.toUpperCase() })}
         aria-label={words()}
       >
         {ids().length}
       </ui-label>
     )
+  }
+
+  /**
+   * Show every change waiting (Owen, 2026-10-25:  "Clicking that should expand everything that I have to look at"):
+   * each block holding one unfolds (its part loads), and its parents with it;  then the page lands on the first.
+   */
+  @E.untracked
+  private showChanges() {
+    for (const host of this.domElement.querySelectorAll("[to-accept]")) {
+      for (let at: Element | null = host; at && at !== this.domElement; at = at.parentElement)
+        if (FOLDING_HOSTS.has(at.localName)) at.toggleAttribute("open", true)
+    }
+    this.goToChange(this.changesToAccept()[0])
+  }
+
+  /** Accept or Reopen pressed on a change (`epic-change-answered`):  on to the next one waiting, after it in the page. */
+  @E.on(CHANGE_ANSWERED)
+  protected onChangeAnswered(event: CustomEvent<{ id: string }>) {
+    const was = event.detail.id
+    // after its mark lands:  the list leaves an accepted one out
+    E.beforeNextPaint(() => {
+      const ids = this.changesToAccept().filter((id) => id !== was)
+      const order = Array.from(this.domElement.querySelectorAll(`[to-accept], ${CHANGE_TAG}[id]`))
+      const at = order.findIndex(
+        (element) => element.id === was || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(was)
+      )
+      const after = ids.find(
+        (id) =>
+          order.findIndex(
+            (element) => element.id === id || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(id)
+          ) > at
+      )
+      this.goToChange(after ?? ids[0])
+    })
+  }
+
+  /** Land on change `id` as a link to it does:  the runtime unfolds what hides it and loads its part. */
+  private goToChange(id: string | undefined) {
+    if (id) location.hash = `#${id}`
   }
 
   /**
@@ -1446,12 +1505,18 @@ const STAGE_TEXTS = {
 } as const
 
 /** The open questions:  what the stage button's tooltip counts (epic `epic-engine` P29). */
+/** The pill holding the changes to accept and the step label, joined (`EpicPage.css`). */
+const STEP_PILL = "step-pill"
+
 const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
 
 /** A change mark's tag (epic `epic-engine` P30). */
 const CHANGE_TAG = "epic-change"
 
 /** What says a change waits for Accept:  a body host's list (`to-accept`), or a mark in the page not accepted. */
+/** The blocks that fold:  what `showChanges()` opens. */
+const FOLDING_HOSTS = new Set(["epic-section", "epic-phase", "epic-item", "epic-overview"])
+
 const CHANGES_WAITING = `[to-accept], ${CHANGE_TAG}[id]:not([accepted])`
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */

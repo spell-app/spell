@@ -13,6 +13,17 @@
   :host(:not([kind="overview-part"])) ui-section {
     --ui-section-stuck-shadow: var(--epic-bar-shadow, none);
   }
+  /*
+   * open, stuck or not:  its title band rounded at the bottom, the bars' one line of shadow under it (I104;  Owen,
+   * 2026-10-25:  "open section header is rounded bottom with 1px shadow");  the corners fall over the section's inset,
+   * where nothing scrolls under
+   */
+  :host(:state(open):not([kind="overview-part"])) ui-section::part(title) {
+    /* rounder, and a darker line than the bars' (I105;  Owen, 2026-10-25), still 1px */
+    border-end-start-radius: var(--epic-section-radius, 14px);
+    border-end-end-radius: var(--epic-section-radius, 14px);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.18), rgb(0 0 0 / 0.65));
+  }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);
@@ -223,5 +234,11 @@
     flex: none;
     color: var(--ui-link, LinkText);
     font-size: 12px;
+  }
+
+  /* a phase being dragged (`PhaseDrag`, epic `epic-engine` P34):  no text selected on the way, the grabbing cursor */
+  :host([data-dragging]) {
+    cursor: grabbing;
+    user-select: none;
   }
 }

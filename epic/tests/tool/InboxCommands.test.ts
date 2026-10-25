@@ -13,7 +13,7 @@ import { GuideInbox } from "spell-epic/tool/GuideInbox"
 import { PlanDoc } from "spell-epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { LISTEN_STALE_MS, ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 import { PageInboxes } from "spell-epic/tools/PageInboxes"
 
@@ -794,4 +794,83 @@ test("one question, one choice set:  two open sets are said by choiceSetProblems
   const q = plan.addItem("question", "Which?", { details: `<p>pick</p>${set}${set}` })
   expect(plan.choiceSetProblems()).toEqual([`${q.toUpperCase()} asks 2 choice sets at once:  one question, one set`])
   expect(plan.check().some((problem) => problem.includes("choice sets"))).toBe(false)
+})
+
+////////////////
+// ## Add and order phases (epic `epic-engine` P34)
+////////////////
+
+test("move:  a to-do phase to another place;  numbers, links and 'P3 · Name' text follow, history keeps its own", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two", "Event", "Event Model"]) plan.addPhase(name)
+  plan.setPhase(1, "done")
+  const q = plan.addItem("caveat", "Later")
+  plan.document.getElementById(q)!.setAttribute("work", "P4 · Event Model")
+  plan.document.getElementById(q)!.setAttribute("phase", "4")
+  plan.findSection("log")!.insertAdjacentHTML("beforeend", "<epic-event>queued for P4 · Event Model</epic-event>")
+  plan.document.querySelector("#o1 > p")!.innerHTML =
+    `See <a href="#p-event-model">P4 · Event Model</a> and P3 · Event.`
+  expect(plan.movePhase(4, 2)).toBe(2)
+  expect(plan.phases.map((phase) => phase.name)).toEqual(["One", "Event Model", "Two", "Event"])
+  const item = plan.document.getElementById(q)!
+  expect([item.getAttribute("work"), item.getAttribute("phase")]).toEqual(["P2 · Event Model", "2"])
+  expect(plan.document.querySelector("#o1 > p")!.textContent).toBe("See P2 · Event Model and P4 · Event.")
+  expect(plan.findSection("log")!.textContent).toContain("queued for P4 · Event Model")
+  // a done phase never moves, nor does a phase move past one
+  expect(() => plan.movePhase(2, 1)).toThrow("P1 has started")
+})
+
+test("add-phase --before:  the 'P8 · Name' text naming the later phases follows their numbers (r21)", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Event Model"]) plan.addPhase(name)
+  plan.document.querySelector("#o1 > p")!.innerHTML = "Waits for P2 · Event Model."
+  plan.addPhase("Declarations", { before: 2 })
+  expect(plan.document.querySelector("#o1 > p")!.textContent).toBe("Waits for P3 · Event Model.")
+})
+
+////////////////
+// ## What Claude is doing (epic `epic-engine` P35)
+////////////////
+
+test("status:  the session's line, with what it answers (titles from the doc, a comment's first words);  --clear", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const q = plan.addItem("question", "Which way?")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setListening("s1")
+    inbox.comments.m3 = {
+      anchor: "o1",
+      kind: "section",
+      label: "",
+      excerpt: "",
+      text: "This   reads oddly, and goes on",
+      at: T1,
+      status: "new"
+    } as never
+  })
+  await commands().inbox.run("x", file, ["status", "Responding"], { items: `${q},m3` })
+  const doing = ReviewInbox.read(inboxFile).doing!
+  expect([doing.text, doing.items]).toEqual([
+    "Responding",
+    [
+      { id: q, title: "Which way?" },
+      { id: "m3", title: "This reads oddly, and goes on" }
+    ]
+  ])
+  expect(printed.join("\n")).toContain(`doing:  Responding (${q.toUpperCase()}, M3)`)
+  await commands().inbox.run("x", file, ["status"], { clear: true })
+  expect(ReviewInbox.read(inboxFile).doing).toBeNull()
+  await expect(commands().inbox.run("x", file, ["status", "Responding"], { items: "q99" })).rejects.toThrow(
+    "no item Q99"
+  )
+})
+
+test("a stale line never lingers:  ignore clears it;  the page reads none once the listener's heartbeat is old", () => {
+  const inbox = ReviewInbox.read(inboxFile)
+  inbox.setListening("s1", T1)
+  inbox.setDoing({ text: "Building P35" }, T1)
+  expect(inbox.forPage(Date.parse(T1) + 1000).doing?.text).toBe("Building P35")
+  expect(inbox.forPage(Date.parse(T1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  inbox.setListening(null)
+  expect(inbox.doing).toBeNull()
 })

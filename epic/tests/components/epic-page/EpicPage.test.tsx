@@ -216,7 +216,9 @@ describe("<epic-page>", () => {
     expect(["header", "bar"].map(position)).toEqual(["sticky", "sticky"])
     expect(
       Array.from(shadow.querySelector('[part~="status"]')!.children, (child) => child.getAttribute("part"))
-    ).toEqual(["state", "git"])
+    ).toEqual(["step-pill", "git"])
+    // the step label (the state in it) inside the one pill, after the changes to accept (I108)
+    expect(shadow.querySelector('[part~="step-pill"] > [part~="state"]')).not.toBeNull()
   })
 
   // Owen, 2026-10-13:  "Just go with a single set of breadcrumbs"
@@ -445,7 +447,8 @@ class FakeRoutes {
     working: {},
     listening: null,
     unsentComments: [],
-    woken: null
+    woken: null,
+    doing: null
   }
   posts: [string, Record<string, unknown>][] = []
 
@@ -533,9 +536,9 @@ describe("<epic-page> Send and its countdown", () => {
     expect(host.shadowRoot!.querySelector('[part~="send-bar"]')).toBeNull()
     expect(
       Array.from(host.shadowRoot!.querySelector('header [part~="status"]')!.children, (child) =>
-        child.localName === "ui-label" ? "step" : child.getAttribute("part")
+        child.getAttribute("part")
       )
-    ).toEqual(["send", "step"])
+    ).toEqual(["send", "step-pill"])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
     // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
@@ -870,9 +873,12 @@ async function adoptAgents(routes: FakeAgents, { served = true } = {}) {
   return client
 }
 
-/** The shadow root of `host`'s `<epic-agents>`, where the panel is drawn. */
-function agentsRoot(host: Element): ShadowRoot {
-  return host.shadowRoot!.querySelector("epic-agents")!.shadowRoot!
+/**
+ * The shadow root of `host`'s `<epic-agents>` drawing `draws`:  the agents' button in the header's pill, or the
+ * session's line in the toolbar (Owen, 2026-10-25).
+ */
+function agentsRoot(host: Element, draws: "agents" | "doing" = "agents"): ShadowRoot {
+  return host.shadowRoot!.querySelector(`epic-agents[draws="${draws}"]`)!.shadowRoot!
 }
 
 /** `host`'s agent rows, as drawn:  `[name, status, colour, age, task, redirects]` each. */
@@ -902,7 +908,7 @@ function type(note: HTMLTextAreaElement, text: string) {
 /** Render a page with the panel, once it shows. */
 async function renderWithAgents(): Promise<E.DOMElement> {
   const host = await render(page("", ["active"]))
-  await vi.waitFor(() => expect(agentsRoot(host).querySelector(".agents")).not.toBeNull())
+  await vi.waitFor(() => expect(agentsRoot(host).querySelector(".agents-button")).not.toBeNull())
   return host
 }
 
@@ -911,13 +917,17 @@ describe("<epic-page> Agents running", () => {
     AgentsClient.adopt(undefined)
   })
 
-  test("a row per running agent, right before the blocks:  name, status, age, task, redirects;  passes axe", async () => {
+  test("in the toolbar (P35):  '2 agents running', its popover a row per agent:  name, status, age, task, redirects;  axe", async () => {
     await adoptAgents(new FakeAgents())
     const host = await renderWithAgents()
-    const panel = agentsRoot(host).querySelector(".agents")!
-    expect(panel.getAttribute("aria-label")).toBe("Agents running")
-    expect(panel.querySelector(".agents-title")!.textContent).toBe("Agents running2")
-    expect(host.shadowRoot!.querySelector("epic-agents")!.nextElementSibling!.localName).toBe("slot")
+    const button = agentsRoot(host).querySelector(".agents-button")!
+    expect([button.querySelector(".words")!.textContent, button.getAttribute("aria-label")]).toEqual([
+      "2 agents running",
+      "2 agents running"
+    ])
+    expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
+    // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
+    expect(host.shadowRoot!.querySelector('epic-agents[draws="agents"]')!.closest('[part~="step-pill"]')).not.toBeNull()
     expect(agentRows(host)).toEqual([
       ["demo-aaa", "active", "blue", "2h 5m", "Port the parser", []],
       [
@@ -954,7 +964,7 @@ describe("<epic-page> Agents running", () => {
     expect(noteBox(host, "demo-aaa").note).toBe(note)
     expect(note.value).toBe("Half typed")
     expect(agentsRoot(host).activeElement).toBe(note)
-    expect(agentsRoot(host).querySelector(".agents-count")!.textContent).toBe("3")
+    expect(agentsRoot(host).querySelector(".agents-button")!.getAttribute("aria-label")).toBe("3 agents running")
   })
 
   test("Send (and Cmd + Enter) redirects the agent:  the note posted, the box emptied, the redirect waiting", async () => {
@@ -994,40 +1004,16 @@ describe("<epic-page> Agents running", () => {
     expect(note.value).toBe("Go on")
   })
 
-  test("keeps the reader's place:  read below it, the page scrolls by what the panel grew or shrank", async () => {
-    const routes = new FakeAgents()
-    const client = await adoptAgents(routes)
-    const host = await render(page("", ["active"], `<div id="tall" style="height: 3000px"></div>`))
-    await vi.waitFor(() => expect(agentsRoot(host).querySelector(".agents")).not.toBeNull())
-    const tall = host.querySelector("#tall")!
-    window.scrollTo({ top: tall.getBoundingClientRect().top + window.scrollY + 400, behavior: "instant" })
-    const was = tall.getBoundingClientRect().top
-    // within a pixel:  scrolling goes by whole pixels, the panel's height doesn't
-    const kept = () => Math.abs(tall.getBoundingClientRect().top - was)
-    const panelHeight = agentsRoot(host).querySelector(".agents-box")!.getBoundingClientRect().height
-    routes.agents.push({ name: "demo-ccc", task: "One more", status: "active", started: new Date().toISOString() })
-    await client.refresh()
-    await ElementFixture.tick()
-    expect(agentsRoot(host).querySelector(".agents-box")!.getBoundingClientRect().height).toBeGreaterThan(panelHeight)
-    expect(kept()).toBeLessThan(1.5)
-    routes.agents = []
-    await client.refresh()
-    await ElementFixture.tick()
-    expect(agentsRoot(host).querySelector(".agents")).toBeNull()
-    expect(kept()).toBeLessThan(1.5)
-    window.scrollTo({ top: 0, behavior: "instant" })
-  })
-
   test("hidden with no agent running, or the page not served with a token;  gone when the last one finishes", async () => {
     const empty = new FakeAgents()
     empty.agents = []
     await adoptAgents(empty)
     const none = await render(page("", ["active"]))
-    expect(agentsRoot(none).querySelector(".agents")).toBeNull()
+    expect(agentsRoot(none).querySelector(".agents-button")).toBeNull()
     none.remove()
     await adoptAgents(new FakeAgents(), { served: false })
     const unserved = await render(page("", ["active"]))
-    expect(agentsRoot(unserved).querySelector(".agents")).toBeNull()
+    expect(agentsRoot(unserved).querySelector(".agents-button")).toBeNull()
     unserved.remove()
     const routes = new FakeAgents()
     const client = await adoptAgents(routes)
@@ -1035,7 +1021,42 @@ describe("<epic-page> Agents running", () => {
     routes.agents = []
     await client.refresh()
     await ElementFixture.tick()
-    expect(agentsRoot(host).querySelector(".agents")).toBeNull()
+    expect(agentsRoot(host).querySelector(".agents-button")).toBeNull()
+  })
+})
+
+// epic `epic-engine` P35:  "Would be nice to have indicator in epic page toolbar that you are e.g. 'Formulating responses.'"
+describe("<epic-page> what Claude is doing", () => {
+  afterEach(() => {
+    ReviewClient.adopt(undefined)
+  })
+
+  test("the session's line in the toolbar, its styled tooltip listing what it answers, linked;  none while idle", async () => {
+    const routes = new FakeRoutes()
+    routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
+    routes.inbox.doing = {
+      text: "Responding",
+      items: [
+        { id: "q1", title: "Which?" },
+        { id: "m3", title: "This reads oddly" }
+      ],
+      at: new Date().toISOString()
+    }
+    const client = await adoptClient(routes)
+    const host = await render(page("", ["active"]))
+    const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
+    await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
+    expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, M3")
+    const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
+    expect(tip.getAttribute("open-on")).toBe("hover")
+    expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
+      ["#q1", "Q1 Which?"],
+      ["#m3", "M3 This reads oddly"]
+    ])
+    routes.inbox.doing = null
+    await client.refresh()
+    await ElementFixture.tick()
+    expect(line()).toBeNull()
   })
 })
 

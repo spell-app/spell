@@ -21,6 +21,7 @@ import { TEST_START } from "spell-epic/components/epic-test-run/EpicTestRun.type
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
+import { PhaseDrag } from "./PhaseDrag"
 import { StateFilter } from "./StateFilter"
 import {
   CLOSED_STATUSES,
@@ -274,14 +275,19 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
    * - the Phases section's phases the same (Owen, 2026-10-24, epic `epic-engine` I96:  "showed the white corners at
    *   the bottom above P29"):  their title rows, the open ones' bodies between them
+   * - an OPEN item stands free, with room above and below it (I105;  Owen, 2026-10-25:  "touching items are square,
+   *   round when free", "more padding above / below open question drawer"):  a run of its own, so the line before it
+   *   rounds its bottom, the one after it its top;  its own line rounds all round, its drawer hanging 4px in from its edges
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
     const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
     const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
+    // an open item stands free, room above and below (I105);  an open phase's body ends its run
+    const alone = this.holdsItems() ? isUnfolded : () => false
     return {
-      tops: shown.filter((_item, index) => index === 0 || isUnfolded(shown[index - 1])),
-      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item))
+      tops: shown.filter((item, index) => index === 0 || isUnfolded(shown[index - 1]) || alone(item)),
+      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item) || alone(shown[index + 1]))
     }
   })
 
@@ -319,6 +325,23 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   protected followReviews() {
     const follows = this.kind === "overview-part" || !!this.newKind()
     return follows ? this.reviewState.connect() : undefined
+  }
+
+  /**
+   * The Phases section, while connected:  its to-do phases DRAG to another place by their title rows (epic
+   * `epic-engine` P34, `PhaseDrag`), while the page is reviewed;  each drop a move mark, the page keeping the
+   * moves not applied yet.
+   */
+  @E.whileConnected
+  protected dragPhases() {
+    if (this.kind !== "phases" || isServer) return undefined
+    const client = () => this.reviewState.client
+    return PhaseDrag.wire(this.domElement, {
+      enabled: () => this.reviewState.reviewing(),
+      move: (id, to) => void client()?.move(id, to),
+      pending: () => client()?.pendingMoves ?? [],
+      subscribe: (listener) => client()?.subscribe(listener) ?? (() => undefined)
+    })
   }
 
   render(): JSX.Element {

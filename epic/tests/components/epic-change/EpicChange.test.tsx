@@ -32,7 +32,8 @@ class FakeRoutes {
     working: {},
     listening: null,
     unsentComments: [],
-    woken: null
+    woken: null,
+    doing: null
   }
 
   readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
@@ -141,8 +142,15 @@ describe("<epic-change>", () => {
     const host = await render(WAITING)
     const accept = button(host, "accept")!
     expect([accept.dataset.color, button(host, "reopen")!.dataset.color]).toEqual(["green", "blue"])
+    const answered: string[] = []
+    host.addEventListener("epic-change-answered", (event) =>
+      answered.push((event as CustomEvent<{ id: string }>).detail.id)
+    )
     accept.click()
     await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("accept"))
+    // the orange goes at once, before the session applies it (Owen, 2026-10-25);  the page is told, to go on
+    await vi.waitFor(() => expect(host.matches(":state(accepted)")).toBe(true))
+    expect(answered).toEqual(["ch3"])
     button(host, "reopen")!.click()
     await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("reopen"))
   })

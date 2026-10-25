@@ -288,6 +288,21 @@ describe("ReviewClient.press()", () => {
   })
 })
 
+describe("ReviewClient.move() (a phase dragged, epic `epic-engine` P34)", () => {
+  test("a move mark with its new place, waiting for Send;  a second drag replaces it;  pendingMoves lists them, oldest first", async () => {
+    const { client, server } = await started()
+    await client.move("p-two", 1)
+    expect(server.inbox.marks["p-two"]).toMatchObject({ action: "move", to: 1 })
+    await client.move("p-two", 3)
+    await client.move("p-four", 2)
+    expect(server.inbox.marks["p-two"]).toMatchObject({ action: "move", to: 3 })
+    expect(client.pendingMoves).toEqual([
+      { id: "p-two", to: 3 },
+      { id: "p-four", to: 2 }
+    ])
+  })
+})
+
 describe("ReviewClient writes", () => {
   test("a stale token is refreshed from the page as served now, and the write tried again", async () => {
     const { client, server } = await started()

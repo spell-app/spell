@@ -197,6 +197,15 @@ export const epicPageVocabulary = {
         "the step label, the git toggle."
     },
     {
+      name: "step-pill",
+      description:
+        "One pill (epic `epic-engine` I108):  the changes to accept on its left while any wait, the step label on its right."
+    },
+    {
+      name: "agents-pill",
+      description: "The agents running, in the header's pill after the step label (`<epic-agents draws=agents>`)."
+    },
+    {
       name: "changes",
       description:
         "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange " +
@@ -231,7 +240,7 @@ export const epicPageVocabulary = {
     {
       name: "agents",
       description:
-        "The running agents (an `<epic-agents>`, epic `skillz` P3), right before its blocks:  only while an agent runs."
+        "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
     },
     {
       name: "test-run",

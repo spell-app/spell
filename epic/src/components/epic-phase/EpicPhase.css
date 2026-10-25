@@ -14,7 +14,9 @@
   :host {
     --_epic-fold-band: var(--epic-band-row, transparent);
     --_epic-fold-gap: var(--epic-phase-gap, 12px);
-    --_epic-fold-bleed: var(--epic-inset, 16px);
+    /* inside its section's inset, not edge to edge:  rounded cards with room at their sides, as items are (Owen,
+       2026-10-25:  "P1...P2 should have some horizontal margin.  NOT drawer appearance") */
+    --_epic-fold-bleed: 0px;
   }
   :host([status="done"]) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
@@ -91,5 +93,23 @@
     width: auto;
     height: 0.95em;
     fill: currentColor;
+  }
+
+  /*
+   * ## Dragged to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`)
+   * - a to-do phase on a reviewed page:  its title row the grab cursor
+   * - while dragged:  faded;  the phase it would land beside:  an accent line on that side, over its edge (no room taken)
+   */
+  :host(:state(movable)) ui-section::part(toggle) {
+    cursor: grab;
+  }
+  :host([data-dragged]) {
+    opacity: 0.45;
+  }
+  :host([data-drop="before"]) {
+    box-shadow: 0 -2px 0 var(--epic-accent, var(--ui-link));
+  }
+  :host([data-drop="after"]) {
+    box-shadow: 0 2px 0 var(--epic-accent, var(--ui-link));
   }
 }
