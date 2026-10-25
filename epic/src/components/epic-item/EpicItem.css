@@ -79,7 +79,8 @@
     /* the band over the paper:  dark's band is see-through (5%), and the text scrolls under the stuck line */
     background: linear-gradient(var(--_epic-item-band), var(--_epic-item-band)), var(--ui-background, Canvas);
     position: sticky;
-    z-index: 1;
+    /* over its own note box, which sticks too (`z-index: 1`) and comes later:  it scrolls UNDER the line (Owen, 2026-10-24) */
+    z-index: 2;
     top: var(--epic-stack, calc(var(--spell-site-header-height, 0px) + var(--spell-stack, 0px)));
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
