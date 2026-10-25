@@ -1,8 +1,8 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
+import { Git } from "spell/server/Git"
 
 import { KINDS, type ItemKind } from "./planDoc.types"
 
@@ -524,8 +524,7 @@ function walk(dir: string): string[] {
     .filter((file) => isFile(file))
 }
 
-/** `git <args>` in folder `cwd`, stdout ("" on failure);  big output welcome (`maxBuffer`). */
+/** `git <args>` in folder `cwd`, stdout untrimmed (`""` on failure);  no time limit:  a whole history's log. */
 function gitOutput(cwd: string, args: string[]): string {
-  const run = spawnSync("git", args, { cwd, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
-  return run.status === 0 ? run.stdout : ""
+  return Git.out(args, cwd, { trim: false, timeout: 0 }) ?? ""
 }

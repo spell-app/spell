@@ -18,7 +18,7 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell-epic/tool/
  * ```js
  * const demo = await DemoServer.start({ content: join(HERE, "shots") })
  * await page.goto(`${demo.base}/epics/review-sample/review-sample.plan.html`)
- * demo.wakes   // => ["review-sample"]:  a Do Now nobody listened to
+ * demo.wakes   // => ["review-sample"]:  a Send nobody listened to
  * await demo.stop()
  * ```
  *
@@ -31,7 +31,7 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell-epic/tool/
  *       linter to walk
  *   - the route modules are this checkout's, set up for it (`EpicServer`'s `ROUTE_MODULES`)
  * - NOTHING outside the check is touched:
- *   - a wake (Send, Review Now or Do Now with nobody listening) never types into a window, opens a session or
+ *   - a wake (Send or its countdown with nobody listening) never types into a window, opens a session or
  *     launches one:  `ReviewStart`'s `wake()` is stubbed, recording the epic in `wakes`, and answering what a
  *     machine with no VS Code window would (`no-vscode`);  the review pill's `start()` likewise (`starts`)
  *   - a DOCS page's wake (`wakeFor()`) too, before it claims the wake in the epic's inbox:  the comments routes find

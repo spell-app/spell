@@ -33,6 +33,7 @@ import {
   type TestResult,
   type TestsEntry,
   sentence,
+  storageNow,
   wakeOf,
   type WriteOptions
 } from "./review.types"
@@ -158,18 +159,10 @@ export class ReviewClient {
   private static pageOptions(): ReviewClientOptions {
     return {
       ...ServerLink.pageOptions(),
-      storage: ReviewClient.storageOf(window),
+      // a browser that blocks it throws here:  `StoragePlace` keeps the backups in memory then
+      storage: () => window.localStorage,
       // the summary has no id of its own:  it's there when the page has one
       hasItem: (id) => !!document.getElementById(id) || (id === SUMMARY_ID && !!document.querySelector(SUMMARY_TAG))
-    }
-  }
-
-  /** `window`'s localStorage, or `null` where reading it throws (blocked site data). */
-  private static storageOf(window: Window): Storage | null {
-    try {
-      return window.localStorage
-    } catch {
-      return null
     }
   }
 
@@ -209,7 +202,7 @@ export class ReviewClient {
    */
   watch(window: Window): () => void {
     const inboxFile = this.link.file.replace(/(?:\.plan|\.saga)?\.html$/, ".inbox.json5")
-    return this.link.watch(window, inboxFile, () => void this.refresh())
+    return ServerLink.watch(window, inboxFile, () => void this.refresh())
   }
 
   ////////////////
@@ -478,9 +471,7 @@ export class ReviewClient {
    */
   async openTests(): Promise<TestsEntry[]> {
     try {
-      const response = await this.options.fetch(TESTS_API, { cache: "no-store" })
-      if (!response.ok) return []
-      const entries = (await response.json()) as unknown
+      const entries = await this.link.get<unknown>(TESTS_API)
       return Array.isArray(entries)
         ? (entries as Partial<TestsEntry>[]).filter(
             (entry): entry is TestsEntry =>
@@ -799,7 +790,7 @@ export class ReviewClient {
 
   /** Where the backups are kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
   private backupsKept = new StoragePlace({
-    storage: () => this.options.storage ?? undefined,
+    storage: () => storageNow(this.options.storage),
     description: "this browser"
   })
 
@@ -861,10 +852,9 @@ export class ReviewClient {
   /** Read the inbox;  true when it answered (a write in flight wins:  its answer is newer). */
   private async load(): Promise<boolean> {
     try {
-      const url = `${REVIEW_API}/inbox?page=${encodeURIComponent(this.options.page)}`
-      const response = await this.options.fetch(url, { cache: "no-store" })
-      if (!response.ok) return false
-      const read = inboxOf(await response.json())
+      const reply = await this.link.getForPage<unknown>(`${REVIEW_API}/inbox`)
+      if (reply === undefined) return false
+      const read = inboxOf(reply)
       if (!this.writing) this.replaceInbox(read)
       return true
     } catch {

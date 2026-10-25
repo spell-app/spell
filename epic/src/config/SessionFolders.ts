@@ -17,6 +17,8 @@ import {
 import { homedir } from "node:os"
 import { join } from "node:path"
 
+import { RealPath } from "spell/server/RealPath"
+
 /****************
  * ### `SessionFolders`
  * Claude Code's saved-session folders, one per folder a session started in:  `~/.claude/projects/<slug>/`.
@@ -122,9 +124,9 @@ export class SessionFolders {
       const path = join(projects, entry.name)
       if (entry.isDirectory()) {
         names.push(entry.name)
-        seen.add(realOrSelf(path))
-      } else if (entry.isSymbolicLink() && existsSync(path) && lstatSync(realOrSelf(path)).isDirectory())
-        links.push({ name: entry.name, real: realOrSelf(path) })
+        seen.add(RealPath.of(path))
+      } else if (entry.isSymbolicLink() && existsSync(path) && lstatSync(RealPath.of(path)).isDirectory())
+        links.push({ name: entry.name, real: RealPath.of(path) })
     }
     for (const { name, real } of links) {
       if (seen.has(real)) continue
@@ -306,14 +308,5 @@ function sameFolder(a: string, b: string): boolean {
     return realpathSync(a) === realpathSync(b)
   } catch {
     return false
-  }
-}
-
-/** `path` with every link resolved, or `path` itself when it doesn't exist. */
-function realOrSelf(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
   }
 }

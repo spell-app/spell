@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
@@ -7,8 +6,8 @@ import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 //   plain `node` loads this file (the hooks, the window script), and finds the server package in `node_modules`
 //   (the kit's install)
 import { checkoutOf } from "spell/server/checkout"
-
-import { RealPath } from "./RealPath.ts"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 
 /****************
  * ### `EpicConfig`
@@ -320,7 +319,7 @@ export class EpicConfig {
    * (epic `epic-engine` I81):  a repo renamed (`spell-lang` => `spell-parser`, epic `repo-split` P17) is in one
    * place under its old name while the other has its new one.
    * - both under the expected names (`main`, `worktree`):  as they are
-   * - only the worktree's:  its main checkout is the one its git folder belongs to (`--git-common-dir`'s parent)
+   * - only the worktree's:  its main checkout is the one its git folder belongs to (`checkoutOf()`'s `main`)
    * - only the main checkout's:  its worktree is whichever of its git worktrees is inside `folder` (else `worktree`,
    *   where a new one goes)
    * - neither:  `undefined`, a child repo this machine doesn't have
@@ -328,21 +327,17 @@ export class EpicConfig {
    */
   static childCheckout(main: string, worktree: string, folder: string): { main: string; worktree: string } | undefined {
     const hasGit = (path: string) => existsSync(join(path, ".git"))
-    const git = (cwd: string, args: string[]) => {
-      const run = spawnSync("git", args, { cwd, encoding: "utf8" })
-      return run.status === 0 ? run.stdout.trim() : ""
-    }
     if (hasGit(main)) {
       if (hasGit(worktree)) return { main, worktree }
-      const listed = git(main, ["worktree", "list", "--porcelain"])
-        .split("\n")
+      const listed = Git.lines(["worktree", "list", "--porcelain"], main)
         .filter((line) => line.startsWith("worktree "))
         .map((line) => line.slice("worktree ".length))
       return { main, worktree: listed.find((path) => RealPath.isIn(path, folder)) ?? worktree }
     }
     if (!hasGit(worktree)) return undefined
-    const common = git(worktree, ["rev-parse", "--path-format=absolute", "--git-common-dir"])
-    return common ? { main: dirname(common), worktree } : undefined
+    // a broken worktree (its git folder gone) git doesn't know:  no pair, as when this asked git
+    const found = checkoutOf(worktree)
+    return found && !found.missingGitDir ? { main: found.main, worktree } : undefined
   }
 
   /** what makes a new worktree ready to run, from its root;  `""`:  nothing to run (a repo with no packages) */

@@ -74,8 +74,9 @@ if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes } = await import("./demoPages.mjs")
 const { GuideInbox } = await import("spell-epic/tool/GuideInbox.ts")
 const { RepoList } = await import("spell-epic/server/RepoList.ts")
 const { packageDir } = await import("spell-epic/tools/packageDir.ts")
@@ -169,7 +170,7 @@ const served = await DemoServer.start(
       }
 )
 const problems = []
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 
 // the pages load the checkout's bundle
 const bundleServed = await fetch(`${served.base}${PREFIX}/_assets/site.js`).then((answer) => answer.text())
@@ -191,24 +192,23 @@ function check(what, ok, extra = "") {
   if (!ok) problems.push(what)
 }
 
-/** A new page at `width`, its errors kept. */
-async function newPage(width) {
-  const page = await browser.newPage({ viewport: { width, height: width > 600 ? 900 : 844 }, colorScheme: scheme })
-  page.errors = []
-  page.on("pageerror", (error) => page.errors.push(String(error)))
+/** A new page at `width`, its errors kept;  `--bundle`'s Spell UI served on it when `withBundle`. */
+async function newPage(width, { withBundle } = {}) {
+  const errors = []
   // the stubbed pack (`set.stub`) registers none:  its root says so, which isn't this check's to fail on
   const stubbed = set.stub?.split("/").at(-1)
-  page.on(
-    "console",
-    (message) =>
-      message.type() === "error" &&
-      !(stubbed && message.text().includes(stubbed)) &&
-      page.errors.push(message.text())
-  )
-  if (commentsScript) {
-    const code = readFileSync(resolve(commentsScript))
-    await page.route("**/spell-comments.js", (route) => route.fulfill({ body: code, contentType: "text/javascript" }))
-  }
+  const page = await BrowserPage.newPage(browser, {
+    viewport: { width, height: width > 600 ? 900 : 844 },
+    colorScheme: scheme,
+    onProblem: (text, kind) => {
+      if (kind === "page error" || !stubbed || !text.includes(stubbed)) errors.push(text)
+    },
+    routes: [
+      ...(commentsScript ? [{ url: "**/spell-comments.js", fileFor: () => resolve(commentsScript) }] : []),
+      ...(withBundle ? bundleRoutes(bundle) : [])
+    ]
+  })
+  page.errors = errors
   if (set.stub)
     await page.route(`**${set.stub}`, (route) => route.fulfill({ body: "", contentType: "text/javascript" }))
   return page
@@ -648,13 +648,7 @@ async function checkExamples() {
 
 /** A guide:  the docs runtime still draws the bullhorns, and a thread has the comments' look. */
 async function checkGuide() {
-  const page = await newPage(1200)
-  if (bundle) {
-    const code = readFileSync(resolve(bundle))
-    await page.route("**/_epic/assets/spell-ui.js", (route) =>
-      route.fulfill({ body: code, contentType: "text/javascript" })
-    )
-  }
+  const page = await newPage(1200, { withBundle: true })
   await page.route("**/api/**", (route) => (route.request().method() === "POST" ? route.abort() : route.fallback()))
   await page.route("**/api/docs/comments?*", async (route) => {
     const anchor = await page.evaluate(() => document.querySelector("main ui-section[id]")?.id)

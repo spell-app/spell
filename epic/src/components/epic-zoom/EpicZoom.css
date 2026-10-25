@@ -1,0 +1,59 @@
+/*
+ * `<epic-zoom>` (`EpicZoom.tsx`):  one image full size, over the whole window.
+ * - The modal is `basic`:  no box, the image straight on the backdrop (`<ui-modal>`'s dimmer, dark).
+ * - The image:  as large as fits the window, less a margin and the caption's line;  never cropped, never enlarged
+ *   past its natural size (`max-*` only, `object-fit: contain`).
+ * - The close button:  the window's top right corner, out of the image's way.
+ * - Public tokens (`--epic-zoom-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-zoom.types;
+
+@layer ui.components.epic-zoom.types {
+  :host {
+    --_epic-zoom-margin: var(--epic-zoom-margin, 24px);
+    --_epic-zoom-caption: var(--epic-zoom-caption, 2.5em);
+    display: contents;
+  }
+  ui-modal {
+    /* dark whatever the page's theme:  a screenshot is judged on black, not on the page's dimmer */
+    --ui-modal-dimmer-background: var(--epic-zoom-backdrop, oklch(0 0 0 / 0.9));
+  }
+  ui-modal::part(modal) {
+    width: auto;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+  }
+  ui-modal::part(close) {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    color: #fff;
+  }
+  .figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: zoom-out;
+  }
+  .image {
+    display: block;
+    max-width: calc(100vw - 2 * var(--_epic-zoom-margin));
+    max-height: calc(100vh - 2 * var(--_epic-zoom-margin) - var(--_epic-zoom-caption));
+    object-fit: contain;
+    border-radius: 4px;
+  }
+  .caption {
+    max-width: calc(100vw - 2 * var(--_epic-zoom-margin));
+    color: #fff;
+    text-align: center;
+    line-height: 1.4;
+  }
+}

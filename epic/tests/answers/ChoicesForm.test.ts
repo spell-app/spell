@@ -34,7 +34,8 @@ class FakeServer {
     if (this.isDown) throw new TypeError("Failed to fetch")
     if (url === PAGE) return new Response("<html><head></head></html>", { status: 200 })
     const what = /\/api\/docs\/choices\/(draft|answer)/.exec(url)![1] as "draft" | "answer"
-    if (!init?.method) return json({ [what]: this[what] })
+    // a read:  `ServerLink.get()` says GET
+    if (!init?.method || init.method === "GET") return json({ [what]: this[what] })
     if ((init.headers as Record<string, string>)["x-server-token"] !== this.token)
       return json({ error: "bad token:  reload the page" }, 403)
     const body = JSON.parse(init.body as string) as Record<string, unknown>
@@ -256,7 +257,7 @@ describe("ChoicesForm", () => {
     await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
     expect([form.isSaveError, form.savedText]).toEqual([
       true,
-      "Can't save:  couldn't reach the page server (Failed to fetch).  Kept in this browser;  trying again every 3s."
+      "Kept in this browser only:  couldn't reach the page server (Failed to fetch);  trying again every 3s."
     ])
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
     expect(form.isSaveError).toBe(true)

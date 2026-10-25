@@ -260,6 +260,11 @@
       "types": "./dist-types/src/components/epic-change/index.d.ts",
       "default": "./src/components/epic-change/index.ts"
     },
+    "./components/epic-zoom": {
+      "spell-epic-source": "./src/components/epic-zoom/index.ts",
+      "types": "./dist-types/src/components/epic-zoom/index.d.ts",
+      "default": "./src/components/epic-zoom/index.ts"
+    },
     "./*": {
       "spell-epic-source": [
         "./src/*.ts",

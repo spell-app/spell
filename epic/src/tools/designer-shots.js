@@ -21,7 +21,7 @@ import { mkdirSync, mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { chromium } from "playwright"
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 
 import { openPage } from "./browserPage.js"
 import { browserUrlFor, pageFile } from "./pages.js"
@@ -73,7 +73,7 @@ try {
 
 const problems = []
 const shots = []
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 try {
   for (const [name, viewport] of Object.entries(VIEWPORTS))
     for (const colorScheme of SCHEMES) {

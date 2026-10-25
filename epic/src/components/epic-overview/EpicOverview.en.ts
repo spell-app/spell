@@ -33,7 +33,7 @@ export const epicOverviewVocabulary = {
   description:
     "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then " +
     "the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row " +
-    "(Revisit, Make Todo, Do Now), keyed `summary` in the review inbox.",
+    "(Make Todo, Revisit), keyed `summary` in the review inbox.",
   attributes: [
     {
       name: "id",

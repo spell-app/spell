@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process"
 import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
+import { Git } from "spell/server/Git"
+
 // By package path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
@@ -104,15 +106,12 @@ export class PromptAck {
    */
   static log(input: AckInput, state: string, did: string, now = Date.now()): void {
     try {
-      const run = spawnSync("git", ["-C", input.cwd ?? ".", "rev-parse", "--absolute-git-dir"], {
-        encoding: "utf8",
-        timeout: 2000
-      })
-      if (run.status !== 0) return
+      const gitDir = Git.out(["rev-parse", "--absolute-git-dir"], input.cwd ?? ".", { timeout: 2000 })
+      if (!gitDir) return
       const session = (input.session_id ?? "?").slice(0, 8)
       const length = (input.prompt ?? "").length
       const line = `${new Date(now).toISOString()}  ${session}  ${state}  ${length} chars  ${did}\n`
-      appendFileSync(join(run.stdout.trim(), LOG_FILE), line)
+      appendFileSync(join(gitDir, LOG_FILE), line)
     } catch {
       // best effort
     }

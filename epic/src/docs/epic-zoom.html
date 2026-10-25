@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-zoom</title>
+    <meta
+      name="description"
+      content="The &lt;epic-zoom&gt; element: a screenshot shown full size over the page, Escape to close."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-zoom&gt;">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-zoom&gt;
+            <ui-header>The &lt;epic-zoom&gt; element: a screenshot shown full size over the page, Escape to close.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-zoom&gt;</code> shows one image full size, over the whole window: as large as fits, never
+            cropped, on a dark backdrop, its alt text under it. Click a screenshot on an epic page, a details page or a
+            guide, and it opens here. Escape, a click anywhere or its close button close it.
+          </p>
+          <p class="meta">
+            For anyone putting pictures in a page, or changing how they open.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> I129), its own
+            <a href="../../spell-epic/src/components/epic-zoom/" target="src-spell-epic-src-components-epic-zoom"><code title="spell-epic/src/components/epic-zoom/">epic-zoom</code></a> family.<br />
+            Its vocabulary: <a href="../../spell-epic/src/components/epic-zoom/EpicZoom.en.ts" target="src-spell-epic-src-components-epic-zoom-epiczoom-en-ts"><code title="spell-epic/src/components/epic-zoom/EpicZoom.en.ts">EpicZoom.en.ts</code></a><br />
+            Its component: <a href="../../spell-epic/src/components/epic-zoom/EpicZoom.tsx" target="src-spell-epic-src-components-epic-zoom-epiczoom-tsx"><code title="spell-epic/src/components/epic-zoom/EpicZoom.tsx">EpicZoom.tsx</code></a>;
+            which images open in it: <a href="../../spell-epic/src/components/epic-zoom/ImageZoom.ts" target="src-spell-epic-src-components-epic-zoom-imagezoom-ts"><code title="spell-epic/src/components/epic-zoom/ImageZoom.ts">ImageZoom</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>A request's screenshot, a thumbnail: open the request, then click it.</p>
+            <epic-field name="requests"
+              ><epic-field label="r31 · a screenshot"
+                ><p>Sent 2026-10-25 14:05-04:00</p>
+                <p><img src="../ui/images/hello-light.png" alt="r31, screenshot 1" style="max-width: 100%" /></p></epic-field
+              ></epic-field
+            >
+            <ui-accordion class="spell-code" styled>
+              <ui-title>The example above · 6 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-field name="requests">
+                      <epic-field label="r31 · a screenshot">
+                        <p>Sent 2026-10-25 14:05-04:00</p>
+                        <p><img src="../ui/images/hello-light.png" alt="r31, screenshot 1" style="max-width: 100%" /></p>
+                      </epic-field>
+                    </epic-field>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Nobody writes it in a page: write the image, and a click makes the page's one
+              <code>&lt;epic-zoom&gt;</code>, at the end of <code>&lt;body&gt;</code>.
+            </p>
+            <ul>
+              <li>
+                Every docs page: the docs runtime listens for clicks on the whole page
+                (<a href="../../spell-epic/src/tools/_assets/spell-doc-runtime.js" target="src-spell-epic-src-tools-assets-spell-doc-runtime-js"><code title="spell-epic/src/tools/_assets/spell-doc-runtime.js">wireImageZoom()</code></a>).
+              </li>
+              <li>
+                A request's thumbnails take their own clicks
+                (<a href="epic-field.html" target="src-spell-epic-src-docs-epic-field-html"><code>&lt;epic-field&gt;</code></a>), so they open on a page without the runtime too, like this one.
+              </li>
+            </ul>
+            <ui-section id="epic-zoom-which" label="Which images open" sticky collapsible dividing collapsed>
+              <p>An image in the page itself, shown at least 64px on its longer side, and one of:</p>
+              <ul>
+                <li>shown smaller than its own size: a screenshot scaled into the column, a thumbnail</li>
+                <li>in a <code>&lt;figure&gt;</code></li>
+                <li>in a link to an image: its own file, or <code>&lt;a href="shot.png" target="_blank"&gt;</code></li>
+              </ul>
+              <p>
+                Never one in a link to anything else (it goes there), in a button, or under
+                <code>data-no-zoom</code>. Under the pointer it shows the zoom-in cursor. A click with a modifier key
+                is the link's, as usual.
+              </p>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>src</code></td><td>The image's address: shown while it's set, removed as it closes.</td></tr>
+                  <tr><td><code>alt</code></td><td>The image's alt text: the caption.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-zoom-parts" label="Parts" sticky collapsible dividing collapsed>
+              <p>Pieces of what it draws.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The <code>&lt;ui-modal&gt;</code>, over the whole window.</td></tr>
+                  <tr><td><code>image</code></td><td>The image, as large as fits.</td></tr>
+                  <tr><td><code>caption</code></td><td>Its alt text, under it.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="4-how-it-looks" label="4. How it looks" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>A dark backdrop whatever the page's theme (<code>--epic-zoom-backdrop</code>).</li>
+              <li>
+                The image as large as fits the window, less a 24px margin (<code>--epic-zoom-margin</code>) and the
+                caption's line: never cropped, never enlarged past its own size.
+              </li>
+              <li>The close button in the window's top right corner.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-25 against branch <code>epic-engine</code> (I129).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -5,6 +5,8 @@
  *   "Lose the dotted outline around both").
  * - The STAGE BUTTON (`accept`, epic `epic-engine` P29):  in the plane's place, a check and its words, green;  the
  *   pill outlined green once pressed (`accepted`).
+ * - WAITING ON YOU (`asks`, Owen, 2026-10-25):  the pill's own border 2px #666, solid, dotted once pressed (`taken`);
+ *   the same ring as a waiting plan's buttons on its phase (`EpicReview.css`, `data-asks`).
  * - Countdown off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
  * - The wand FILLED light blue, its icon white, while countdown mode is on (`:state(countdown)`);  grey while off.
  * - While it counts, a very light grey ring round the wand turns blue, clockwise from the top, as the 2 minutes run
@@ -41,6 +43,16 @@
   }
   .group[data-state="sent"] {
     border: 1.5px solid var(--_tint);
+  }
+  /* waiting on Owen:  the pill's OWN border 2px #666 (Owen, 2026-10-25:  "try 2px border, #666"), dotted once pressed;
+     1px out on every side, so neither the round ends inside nor what's beside it move */
+  .group[data-asks] {
+    margin: -1px;
+    height: calc(var(--_size) + 2px);
+    border: 2px solid #666;
+  }
+  .group[data-asks="taken"] {
+    border-style: dotted;
   }
   button {
     position: relative;

@@ -1,7 +1,15 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { StoragePlace } from "spell/util/persist/StoragePlace"
-import { ACTIVITY_EVENTS, COUNTDOWN_KEY, COUNTDOWN_MS, COUNTDOWN_TICK_MS, OLD_COUNTDOWN_KEY } from "./review.types"
+import {
+  ACTIVITY_EVENTS,
+  COUNTDOWN_KEY,
+  COUNTDOWN_MS,
+  COUNTDOWN_TICK_MS,
+  OLD_COUNTDOWN_KEY,
+  storageNow,
+  type StorageFinder
+} from "./review.types"
 
 /****************
  * ### `SendCountdown`
@@ -47,7 +55,8 @@ export class SendCountdown {
    */
   static forPage(): SendCountdown {
     if (SendCountdown.current) return SendCountdown.current
-    const countdown = new SendCountdown({ storage: storageOf(window) })
+    // a browser that blocks it throws here:  `StoragePlace` keeps the mode in memory then
+    const countdown = new SendCountdown({ storage: () => window.localStorage })
     SendCountdown.current = countdown
     countdown.watch(window)
     return countdown
@@ -70,7 +79,7 @@ export class SendCountdown {
   }
 
   /** Where the mode is kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
-  private modes = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
+  private modes = new StoragePlace({ storage: () => storageNow(this.options.storage), description: "this browser" })
 
   /**
    * Turn countdown mode on or off, and remember it for every page in this browser.
@@ -247,19 +256,13 @@ export class SendCountdown {
 
 /** What a `SendCountdown` runs on;  the page's own by default. */
 export type SendCountdownOptions = {
-  /** where the mode is remembered (`localStorage`);  `null` / none:  nowhere, so it's on */
-  storage?: Storage | null
+  /**
+   * where the mode is remembered (`localStorage`, or what finds it);  `null` / none:  nowhere, so it's on
+   * - a finder that throws (blocked site data):  this page's memory (`StoragePlace`)
+   */
+  storage?: StorageFinder
   /** the clock, ms.  Default:  `Date.now` (which fake timers move) */
   now?: () => number
   /** how long a quiet page waits, ms.  Default:  `COUNTDOWN_MS`, 2 minutes */
   delay?: number
-}
-
-/** `window`'s localStorage, or `null` where reading it throws (blocked site data). */
-function storageOf(window: Window): Storage | null {
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
 }

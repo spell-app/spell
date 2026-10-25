@@ -182,26 +182,24 @@ describe("<epic-item> review controls", () => {
     expect(deep(host).querySelector("textarea")).toBeNull()
   })
 
-  test("Make Todo, Revisit, Approve in a group, then Do Now apart (Q20);  Approve marks it, dashed green, and saves", async () => {
+  test("Make Todo, Revisit, Approve in ONE group, no Do Now (Owen, 2026-10-25);  Approve marks it, dashed green, and saves", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="q1" title="A question" status="open"><p>Text</p></epic-item>`)
-    expect(actions(host)).toEqual(["todo", "revisit", "approve", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "approve"])
     expect(
       Array.from(deep(host).querySelectorAll("ui-buttons > ui-button"), (it) => (it as HTMLElement).dataset.action)
     ).toEqual(["todo", "revisit", "approve"])
-    // the wand, as the page header's Review Now (Owen, 2026-10-09:  the plane is a todo's "next phase" now)
-    expect([button(host, "details").getAttribute("icon"), button(host, "details").dataset.color]).toEqual([
-      "wand magic sparkles",
-      "blue"
-    ])
-    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none", "none"])
+    // the wand's gone:  nothing outside the group, no wand icon anywhere on the line
+    expect(deep(host).querySelector(".review-controls > ui-button")).toBeNull()
+    expect(deep(host).querySelector('ui-button[icon="wand magic sparkles"]')).toBeNull()
+    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
     button(host, "approve").click()
     await settle()
     expect(routes.inbox.marks.q1?.action).toBe("approve")
     expect([button(host, "approve").dataset.fill, button(host, "approve").dataset.color]).toEqual(["dashed", "green"])
   })
 
-  test("a todo:  the plane (next phase), Revisit, the x (drop), one group;  no Approve, Make Todo or Do Now", async () => {
+  test("a todo:  the plane (next phase), Revisit, the x (drop), one group;  no Approve or Make Todo", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="c4" title="A todo" status="open"><p>Text</p></epic-item>`)
     expect(actions(host)).toEqual(["next", "revisit", "drop"])
@@ -248,7 +246,7 @@ describe("<epic-item> review controls", () => {
     expect(routes.inbox.marks.c4).toBeUndefined()
     // other kinds keep theirs
     const call = await render(`<epic-item id="j4" title="A call" status="open"></epic-item>`)
-    expect(actions(call)).toEqual(["todo", "revisit", "approve", "details"])
+    expect(actions(call)).toEqual(["todo", "revisit", "approve"])
   })
 
   test("a todo's note box:  the plane, Revisit Later, the x;  the plane takes the note along, as does the line's x", async () => {
@@ -299,9 +297,9 @@ describe("<epic-item> review controls", () => {
     ])
     // Claude's agent at work:  the chip is blue at once, before the script rewrites `state`
     expect(deep(host).querySelector("[part~='base']")!.classList.contains("progress")).toBe(true)
-    // a Do Now Claude did (`inbox done`):  its mark gone, every button a grey outline again;  the chip says the rest
+    // a request for now Claude did (`inbox done`):  its mark gone, every button a grey outline again;  the chip says the rest
     const done = await render(`<epic-item id="j4" title="Done" status="open" review-as="now"></epic-item>`)
-    expect(actions(done).map((action) => button(done, action).dataset.fill)).toEqual(["none", "none", "none", "none"])
+    expect(actions(done).map((action) => button(done, action).dataset.fill)).toEqual(["none", "none", "none"])
   })
 
   test("a mark in flight:  the id chip keeps its STATE's colour, with the mark's fill;  no mark, solid;  light and dark", async () => {
@@ -350,34 +348,16 @@ describe("<epic-item> review controls", () => {
     }
   })
 
-  test("Do Now queued with nobody listening:  dashed, its icon still;  its tooltip says why", async () => {
-    await adoptClient()
-    const host = await render(`<epic-item id="j1" title="A call" status="open"></epic-item>`)
-    button(host, "details").click()
-    await settle()
-    const doNow = button(host, "details")
-    expect([doNow.dataset.fill, doNow.hasAttribute("data-busy"), doNow.hasAttribute("loading")]).toEqual([
-      "dashed",
-      false,
-      false
-    ])
-    // epic `epic-workflow` P16:  "waiting for a session", then why (what the wake did, or nobody reviewing)
-    expect(doNow.getAttribute("aria-label")).toMatch(/waiting for a session:  No Claude session/)
-  })
-
-  test("Do Now takes the note in the box along:  a revisit NOW with it;  the note box keeps Revisit Later and the x", async () => {
+  test("an old Do Now (`details`) queued:  no button for it;  the note box keeps Revisit Later and the x", async () => {
+    // the inbox still holds an older page's request for now:  nothing on the line draws it (Owen, 2026-10-25)
+    routes.inbox.now.push({ id: "q5", action: "details", at: new Date().toISOString() })
     await adoptClient()
     const host = await render(`<epic-item id="q5" title="A question" status="open" open><p>Text</p></epic-item>`)
+    expect(actions(host)).toEqual(["todo", "revisit", "approve"])
+    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
     expect(
       Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => it.dataset.how)
     ).toEqual(["soon", "skip"])
-    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
-    note.value = "do it this way"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
-    button(host, "details").click()
-    await settle()
-    expect(routes.posts.at(-1)).toEqual(["now", { page: PAGE, id: "q5", action: "revisit", note: "do it this way" }])
-    expect([button(host, "details").dataset.fill, button(host, "revisit").dataset.fill]).toEqual(["dashed", "none"])
   })
 
   test("the note box's x, Skip This (Owen, 2026-10-09):  in place of Make Todo;  a skip mark, the chip dashed in its state's colour", async () => {
@@ -391,7 +371,7 @@ describe("<epic-item> review controls", () => {
     ])
     expect(x.querySelector("ui-icon")!.getAttribute("name")).toBe("xmark")
     // the line keeps its Make Todo
-    expect(actions(host)).toEqual(["todo", "revisit", "approve", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit", "approve"])
     const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
     note.value = "covered by P3"
     note.dispatchEvent(new InputEvent("input", { bubbles: true }))
@@ -403,7 +383,7 @@ describe("<epic-item> review controls", () => {
     expect([chip.dataset.color, chip.dataset.fill]).toEqual([undefined, "dashed"])
     expect(chip.title).toMatch(/you chose Skip this · not sent yet/)
     // none of the line's buttons wears it
-    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none", "none"])
+    expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
   })
 
   test("Revisit on an item without details:  a box under its line;  Later makes the note a mark, shown with Edit", async () => {
@@ -547,7 +527,7 @@ describe("<epic-item> review controls", () => {
       `<epic-item id="j10" title="Talked over" status="open" state="open" review-as="revisit"></epic-item>`
     )
     for (const host of [approved, answered]) {
-      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none", "none"])
+      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
       for (const action of actions(host)) expect(button(host, action).getAttribute("aria-label")).not.toMatch(/done/)
     }
     const look = (host: Element) => {
@@ -649,13 +629,13 @@ describe("<epic-item> review controls", () => {
     for (const host of [question, reviewed]) expect(deep(host).querySelector("[part~='id']")!.localName).toBe("a")
   })
 
-  test("an action CHOSEN folds the item (Owen, 2026-10-10):  Approve, Do Now, the x, a note box button, a pick", async () => {
+  test("an action CHOSEN folds the item (Owen, 2026-10-10):  Approve, Make Todo, the x, a note box button, a pick", async () => {
     await adoptClient()
     const item = (html: string) => render(`<epic-item status="open" open ${html}><p>Text</p></epic-item>`)
     const approved = await item(`id="q1" title="A question"`)
     button(approved, "approve").click()
     const asked = await item(`id="j2" title="A call"`)
-    button(asked, "details").click()
+    button(asked, "todo").click()
     const dropped = await item(`id="c1" title="A todo"`)
     button(dropped, "drop").click()
     const noted = await item(`id="j3" title="Another call"`)
@@ -673,6 +653,9 @@ describe("<epic-item> review controls", () => {
   })
 
   test("NOT folded by Revisit (the box opens), typing, a mark cleared, or a request called off", async () => {
+    // q6:  a revisit now Claude is on
+    routes.inbox.working.q6 = { action: "revisit", since: new Date().toISOString() }
+    routes.inbox.marks.q6 = { action: "revisit", when: "now", note: "now please", at: new Date().toISOString() }
     await adoptClient()
     const host = await render(`<epic-item id="q1" title="A question" status="open" open><p>Text</p></epic-item>`)
     button(host, "revisit").click()
@@ -689,14 +672,11 @@ describe("<epic-item> review controls", () => {
     button(host, "todo").click()
     await settle()
     expect([routes.inbox.marks.q1, host.open]).toEqual([undefined, true])
-    // Do Now pressed again while it runs:  called off
-    button(host, "details").click()
+    // a revisit now Claude is on, pressed:  called off
+    const busy = await render(`<epic-item id="q6" title="Busy" status="open" open><p>Text</p></epic-item>`)
+    button(busy, "revisit").click()
     await settle()
-    host.open = true
-    await ElementFixture.tick()
-    button(host, "details").click()
-    await settle()
-    expect(host.open).toBe(true)
+    expect(busy.open).toBe(true)
   })
 
   test("folding keeps its STUCK line where it is on screen;  the details fold away below it", async () => {
@@ -719,12 +699,12 @@ describe("<epic-item> review controls", () => {
 })
 
 describe("<epic-section kind=overview-part> review controls (Q14)", () => {
-  test("Revisit, Make Todo, Do Now in its title;  no Approve;  a note box at its body's end", async () => {
+  test("Make Todo, Revisit in its title;  no Approve;  a note box at its body's end", async () => {
     await adoptClient()
     const host = await render(
       `<epic-section id="o1" kind="overview-part" title="What changes" open><p>Prose</p></epic-section>`
     )
-    expect(actions(host)).toEqual(["todo", "revisit", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit"])
     expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -745,10 +725,10 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 
 // epic `airplane` P2:  notes on the phases and the summary
 describe("<epic-phase> and <epic-overview> review controls", () => {
-  test("a phase:  Revisit, Make Todo, Do Now in its title;  a note box at its body's end;  Make Todo marks it", async () => {
+  test("a phase:  Make Todo, Revisit in its title;  a note box at its body's end;  Make Todo marks it", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
-    expect(actions(host)).toEqual(["todo", "revisit", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit"])
     expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -771,7 +751,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
         `<epic-section id="o1" kind="overview-part" title="Structure"><p>Hello</p></epic-section></epic-overview>`
     )
     // in the title row (`tools`), before the toggle-all and the fold;  folded or open
-    expect(actions(host)).toEqual(["todo", "revisit", "details"])
+    expect(actions(host)).toEqual(["todo", "revisit"])
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
     const [review, expand] = ['[part~="review-buttons"]', '[part~="toggle-all"]'].map((selector) =>
       tools.querySelector(selector)!
@@ -792,9 +772,6 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
       host.querySelector("epic-summary")!.getBoundingClientRect().top + 0.5
     )
     expect(noteButtons(host)).toEqual(["soon", "skip"])
-    button(host, "details").click()
-    await settle()
-    expect(routes.posts.at(-1)).toEqual(["now", { page: PAGE, id: "summary", action: "details" }])
     await expectAccessible(host)
   })
 

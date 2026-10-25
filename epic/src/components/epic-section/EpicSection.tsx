@@ -123,7 +123,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - titled its own (`title`), never numbered, so the sections after it keep theirs
  * - An Overview sub-section is reviewed as an item is, only while the page is reviewed
  *   (decision Q14;  `<epic-review buttons="part">`):
- *   - Revisit, Make Todo, Do Now in `tools` (no Approve:  Q14 asks for notes, not sign-off)
+ *   - Make Todo, Revisit in `tools` (no Approve:  Q14 asks for notes, not sign-off)
  *   - its note box at the end of its body, a marked note at its top
  *   - Claude's status cards (`slot="status"`, P13) just above the note box
  *   - Revisit and Edit unfold it (`epic-note-showing`)
@@ -609,7 +609,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Review (an Overview sub-section)
   ////////////////
 
-  /** The review buttons at the title's end:  Revisit, Make Todo, Do Now. */
+  /** The review buttons at the title's end:  Make Todo, Revisit. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
   }

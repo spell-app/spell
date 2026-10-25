@@ -28,12 +28,13 @@
  *   the epic it belongs to, so the epic page and its guides share one wake record.
  */
 import { spawn, spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, openSync, readdirSync, readFileSync, realpathSync } from "node:fs"
+import { existsSync, mkdirSync, openSync, readdirSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { join, resolve, sep } from "node:path"
+import { join, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { clockTime } from "spell/util/time"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
@@ -314,12 +315,12 @@ export class ReviewStart {
    * (`<windowsFolder>/ongoing/<epic>.code-workspace`, `epic window open`), else one showing its folder.
    */
   worktreeWindowOf(epic: string): WindowEntry | undefined {
-    const file = real(this.config.worktreeWindowFile(epic))
-    const folder = real(this.worktreeOf(epic))
+    const file = RealPath.of(this.config.worktreeWindowFile(epic))
+    const folder = RealPath.of(this.worktreeOf(epic))
     const entries = [...ReviewStart.windows().values()]
     return (
-      entries.find((entry) => entry.workspaceFile && real(entry.workspaceFile) === file) ??
-      entries.find((entry) => entry.folders?.some((each) => real(each) === folder))
+      entries.find((entry) => entry.workspaceFile && RealPath.of(entry.workspaceFile) === file) ??
+      entries.find((entry) => entry.folders?.some((each) => RealPath.of(each) === folder))
     )
   }
 
@@ -329,11 +330,13 @@ export class ReviewStart {
    * - NOTE:  the page server can't tell which window shows the page:  any main window will do
    */
   mainWindow(): WindowEntry | undefined {
-    const main = real(this.mainRoot)
-    const worktrees = this.config.worktreesFolders.map((folder) => `${real(folder)}${sep}`)
+    const main = RealPath.of(this.mainRoot)
+    const worktrees = this.config.worktreesFolders.map((folder) => `${RealPath.of(folder)}${sep}`)
     return [...ReviewStart.windows().values()]
-      .filter((entry) => entry.folders?.length && real(entry.folders[0]!) === main)
-      .filter((entry) => !entry.folders!.some((folder) => worktrees.some((each) => real(folder).startsWith(each))))
+      .filter((entry) => entry.folders?.length && RealPath.of(entry.folders[0]!) === main)
+      .filter(
+        (entry) => !entry.folders!.some((folder) => worktrees.some((each) => RealPath.of(folder).startsWith(each)))
+      )
       .sort((a, b) => a.pid - b.pid)[0]
   }
 
@@ -479,13 +482,4 @@ function sentence(words: string): string {
 /** ISO time `iso` as this machine's clock time, 24-hour:  `17:32`. */
 function clockOf(iso: string): string {
   return clockTime(new Date(iso))
-}
-
-/** `path` with its links resolved, else as given (it may not exist). */
-function real(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return resolve(path)
-  }
 }

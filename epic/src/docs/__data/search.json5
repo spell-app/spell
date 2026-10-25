@@ -1287,6 +1287,11 @@
           "parent": 0
         },
         {
+          "id": "epic-phase-took",
+          "title": "Done, and what it took",
+          "parent": 0
+        },
+        {
           "id": "2-markup",
           "title": "2. Markup"
         },
@@ -1297,12 +1302,12 @@
         {
           "id": "epic-phase-parents",
           "title": "Its parents",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "epic-phase-children",
           "title": "Its children",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "4-attributes",
@@ -1311,22 +1316,22 @@
         {
           "id": "epic-phase-slots",
           "title": "Slots",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-parts",
           "title": "Parts",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-states",
           "title": "States",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-events",
           "title": "Events",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "5-how-it-looks",
@@ -1618,7 +1623,7 @@
     {
       "path": "epic-send-buttons.html",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.",
+      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
       "tag": "epic-send-buttons",
       "sections": [
         {
@@ -2177,6 +2182,40 @@
         {
           "id": "6-written-by",
           "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-zoom.html",
+      "title": "<epic-zoom>",
+      "summary": "The <epic-zoom> element: a screenshot shown full size over the page, Escape to close.",
+      "tag": "epic-zoom",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "epic-zoom-which",
+          "title": "Which images open",
+          "parent": 1
+        },
+        {
+          "id": "3-attributes",
+          "title": "3. Attributes"
+        },
+        {
+          "id": "epic-zoom-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
         }
       ]
     }

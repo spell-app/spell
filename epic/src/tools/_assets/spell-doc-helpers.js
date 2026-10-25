@@ -1,5 +1,7 @@
 /*
  * Small helpers the docs pages' scripts share:
+ * - the data pages (`commands.entry.js`, `core-reference.entry.js`, `spell-syntax.entry.js`), bundled since epic
+ *   `coherence` C12:  their start (`drawThenBoot()`), notice, section numbers and page path
  * - the page runtime (`spell-doc-runtime.js`)
  * - the comments (`spell-doc-comments.js`) and the toolbar (`spell-doc-toolbar.js`),
  *   which Epic UI's pages load by themselves too (`spell-comments.js`)
@@ -8,6 +10,7 @@
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { $fetch } from "spell/util/spell/$fetch"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -222,30 +225,72 @@ const TOAST_ACTIONS = "basic vertical"
 /** Each toast button's look:  an outline on the toast's own colour, as short as the toast's line. */
 const TOAST_ACTION_CLASS = "basic inverted compact"
 
+////////////////
+// ## Data pages
+////////////////
+
 /**
- * POST `body` as JSON to page-server route `url`, with the page server's token;  returns its answer.
- * - a 403 on the token (the server restarted since the page loaded):  takes the new token from the page as served
- *   now, and tries once more
- * - `keepalive`:  the request outlives the page (sent as it goes:  a small body only, under 64 KB)
- * - throws an `Error` saying why (the route's `error`)
+ * A DATA PAGE's start (the commands page, the core reference, the syntax page;  epic `coherence` C12):
+ * `load()` its data, `draw(data)` it into the page, then boot the docs bundle, `spell-ui.js` beside this script,
+ * whatever happened;  resolves to the data, or `undefined` (none, or it failed).
+ * - why this order:  the runtime builds the toolbar and the sticky titles from `main`'s sections once, at start,
+ *   so the drawn sections must be in the page before it runs
+ * - `failed(error)`:  shows why it couldn't draw (`dataNotice()`)
+ * - MUST be called as the script runs:  it finds the bundle beside `document.currentScript`
  */
-export async function postJSON(url, body, { keepalive = false, retried = false } = {}) {
-  const server = window.SPELL_SERVER
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-server-token": server.token },
-    body: JSON.stringify(body),
-    keepalive
-  })
-  const answer = await response.json().catch(() => ({}))
-  if (response.ok) return answer
-  if (response.status === 403 && /token/i.test(answer.error ?? "") && !retried && server.readPage) {
-    const { html } = await server.readPage()
-    const fresh = /window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec(html)
-    if (fresh) {
-      server.token = JSON.parse(fresh[1]).token
-      return postJSON(url, body, { keepalive, retried: true })
+export function drawThenBoot(load, draw, failed) {
+  const bundle = new URL("spell-ui.js", document.currentScript?.src ?? location.href).href
+  return (async () => {
+    let data
+    try {
+      data = await load()
+      if (data) draw(data)
+    } catch (error) {
+      failed(error)
+      data = undefined
     }
+    document.body.append(el("script", { src: bundle }))
+    return data
+  })()
+}
+
+/**
+ * A data page's file at `url` (relative to the page), from the checkout serving it, never the browser's cache
+ * (the kit's `$fetch()`):  its text, or as JSON (`format: "json"`);  `undefined` when there's none (404).
+ * - throws any other failure, its message starting with the file's name
+ */
+export async function fetchFile(url, { format = "text" } = {}) {
+  try {
+    return (await $fetch({ url, format, cache: "no-store", defaultContents: null })) ?? undefined
+  } catch (error) {
+    throw new Error(`${url.split("/").pop()}:  ${error.message}`, { cause: error })
   }
-  throw new Error(answer.error ?? `${response.status} ${response.statusText}`)
+}
+
+/** Show `message` (its `` `code` `` as code) in a warning headed `header`, first in `holder` (else `main`). */
+export function dataNotice(holder, header, message) {
+  ;(holder ?? document.querySelector("main"))?.prepend(
+    el("ui-message", { state: "warning", header }, el("p", {}, ...withCode(message)))
+  )
+}
+
+/**
+ * `value` as nodes:  its `` `code` `` spans as `<code>`, the rest as text, never markup;  each text part through
+ * `plain()` (default:  as it is), which may make nodes of it (a link).
+ */
+export function withCode(value, plain = (part) => [part]) {
+  return String(value)
+    .split("`")
+    .flatMap((part, i) => (i % 2 ? [el("code", {}, part)] : plain(part)))
+    .filter((part) => part !== "")
+}
+
+/** The leading number of `section`'s label (`2` for "2. Operations", `3.1` for "3.1 Files"), or `""`. */
+export function sectionNumber(section) {
+  return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("label") ?? "")?.[1] ?? ""
+}
+
+/** This page's path from the content folder's root (`guides/...`):  what `epic pages open` takes. */
+export function pagePath() {
+  return decodeURIComponent(location.pathname).replace(/^.*\/(?=(?:guides|epics|templates|pages)\/)/, "")
 }

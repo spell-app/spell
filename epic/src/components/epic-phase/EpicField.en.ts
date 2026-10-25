@@ -22,7 +22,7 @@ export const epicFieldVocabulary = {
     'prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label="Where">` draws `Where:` ' +
     "before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE " +
     "REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, " +
-    "a click shows one full size in a modal.",
+    "a click shows one full size, over the page (`<epic-zoom>`).",
   attributes: [
     {
       name: "name",
@@ -63,8 +63,7 @@ export const epicFieldVocabulary = {
     { name: "icon", description: "Its icon, centred on its first line:  none on a labelled block." },
     { name: "label", description: "Its label:  `Symptom:`, `Where:` ..." },
     { name: "toggle", description: "A request's fold button, before its label." },
-    { name: "body", description: 'A request\'s prose, under its label:  folded, `hidden="until-found"`.' },
-    { name: "zoom", description: "A request's modal, a screenshot full size." }
+    { name: "body", description: 'A request\'s prose, under its label:  folded, `hidden="until-found"`.' }
   ],
   states: [
     { name: "request", description: "One request in a Requests field:  it folds." },
@@ -83,8 +82,7 @@ export const epicFieldVocabulary = {
     { key: "toReview", text: "To review:" },
     { key: "labelled", text: "{label}:", description: "A labelled block's label (`label`)." },
     { key: "foldTip", text: "Fold this request", description: "A request's fold button, while open." },
-    { key: "unfoldTip", text: "Open this request", description: "A request's fold button, while folded." },
-    { key: "zoomed", text: "{alt}, full size", description: "The zoomed screenshot's alt text (its own `alt`)." }
+    { key: "unfoldTip", text: "Open this request", description: "A request's fold button, while folded." }
   ],
   children: [{ tag: "flow", description: "The field's prose." }],
   flow: true

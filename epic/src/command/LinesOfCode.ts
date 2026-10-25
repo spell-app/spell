@@ -1,9 +1,9 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, extname, join, posix } from "node:path"
 
 import { localDate } from "spell/util/time"
 import { DataFile } from "spell/server/DataFile"
+import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
@@ -20,8 +20,8 @@ import {
   type LocSettingsFile,
   type LocSkipped
 } from "./command.types"
+import { EpicCheckout } from "./EpicCheckout"
 import { EpicTools } from "./EpicTools"
-import { Git } from "./Git"
 import { LocPage } from "./LocPage"
 
 /****************
@@ -97,7 +97,7 @@ export class LinesOfCode {
    * - a child repo of a multi-repo top (`spell-epic` in the kit, or in an epic's worktree of it):  the folder above
    */
   get root(): string {
-    const nearest = Git.nearestCheckout({ marker: ".git", from: this.cwd })
+    const nearest = EpicCheckout.nearest({ marker: ".git", from: this.cwd })
     const config = EpicConfig.of(nearest)
     const top = config.top
     if (top && top !== config && existsSync(join(dirname(nearest), ".git"))) return dirname(nearest)
@@ -271,21 +271,20 @@ export class LinesOfCode {
 
   /** Every file git tracks in checkout `folder`, from its root.  Throws `EpicCommandError` when git can't say. */
   static trackedFiles(folder: string): string[] {
-    const run = spawnSync("git", ["-C", folder, "ls-files", "-z"], { encoding: "utf8", maxBuffer: GIT_BUFFER })
-    if (run.status !== 0) throw new EpicCommandError(`epic loc:  git can't list ${folder}'s files:  ${run.stderr}`, 1)
-    return run.stdout.split("\0").filter(Boolean)
+    const run = Git.run(["ls-files", "-z"], folder, { trim: false })
+    if (!run.ok) throw new EpicCommandError(`epic loc:  git can't list ${folder}'s files:  ${run.err}`, 1)
+    return run.out.split("\0").filter(Boolean)
   }
 
   /** Which of `files` git's `linguist-generated` attribute marks (`.gitattributes`). */
   static generatedFiles(folder: string, files: string[]): Set<string> {
-    const run = spawnSync("git", ["-C", folder, "check-attr", "-z", "--stdin", "linguist-generated"], {
+    const run = Git.run(["check-attr", "-z", "--stdin", "linguist-generated"], folder, {
       input: files.join("\0"),
-      encoding: "utf8",
-      maxBuffer: GIT_BUFFER
+      trim: false
     })
     const found = new Set<string>()
     // `-z`:  path, attribute, value, each ended by a NUL
-    const parts = (run.stdout ?? "").split("\0")
+    const parts = run.out.split("\0")
     for (let at = 0; at + 2 < parts.length; at += 3) {
       if (parts[at + 2] === "set" || parts[at + 2] === "true") found.add(parts[at]!)
     }
@@ -367,9 +366,6 @@ export class LinesOfCode {
 
 /** Lines longer than this on average:  a bundle, left out. */
 const BUNDLE_LINE_LENGTH = 400
-
-/** `git`'s output can be big:  every file of spell-ui. */
-const GIT_BUFFER = 1 << 28
 
 /** A new settings file's comments;  its values are `LOC_DEFAULTS`, laid over it (`DataFile.textFor()`). */
 const SETTINGS_SOURCE = `// epic loc's settings:  what counts, and what's a row of the LOC guide (guides/loc/loc.html).

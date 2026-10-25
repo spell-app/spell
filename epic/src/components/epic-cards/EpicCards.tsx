@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 import { epicStateFor } from "spell-epic/list/EpicState"
+import { ServerLink } from "spell-epic/review"
 
 import { epicCardsVocabulary } from "./EpicCards.en"
 import { EPIC_FILE, SAGA_EPICS_API, type CardsProblem, type SagaEpic, type SagaEpicsAnswer } from "./EpicCards.types"
@@ -69,17 +70,17 @@ export class EpicCards extends E.UIComponent<typeof epicCardsVocabulary> {
   @E.whileConnected
   protected followEpics() {
     if (isServer) return undefined
-    if (location.protocol === "file:") {
+    if (!ServerLink.canRead()) {
       this.problem = "file"
       return undefined
     }
     void this.load()
-    const onFile = (event: Event) => {
-      const path = (event as CustomEvent<{ path: string }>).detail?.path ?? ""
-      if (EPIC_FILE.test(path)) void this.load()
-    }
-    addEventListener("spell-server:changed", onFile)
-    return () => removeEventListener("spell-server:changed", onFile)
+    return ServerLink.watch(
+      window,
+      (path) => EPIC_FILE.test(path),
+      () => void this.load(),
+      { every: 0 }
+    )
   }
 
   /**
@@ -94,9 +95,11 @@ export class EpicCards extends E.UIComponent<typeof epicCardsVocabulary> {
     }
     this.isAsking = true
     try {
-      const answer = await fetch(`${SAGA_EPICS_API}?saga=${encodeURIComponent(this.saga ?? "")}`)
-      if (!answer.ok) throw new Error(`${answer.status}`)
-      const { epics } = (await answer.json()) as SagaEpicsAnswer
+      const answer = await ServerLink.forPage().get<SagaEpicsAnswer>(SAGA_EPICS_API, {
+        query: { saga: this.saga ?? "" }
+      })
+      if (!answer) throw new Error("no such route")
+      const { epics } = answer
       this.epics = Array.isArray(epics) ? epics : []
       this.problem = undefined
     } catch {

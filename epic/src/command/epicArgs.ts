@@ -419,7 +419,7 @@ const ITEM_EXAMPLES: Record<string, string> = {
 
 /** What follows the phase in an example:  `epic phase seo#P3 done`. */
 const PHASE_EXAMPLES: Record<string, string> = {
-  phase: " todo | active | done",
+  phase: " todo | active | done | took",
   updated: ' "<html>"',
   file: " <request id>"
 }

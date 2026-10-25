@@ -10,6 +10,9 @@
  *
  * - `add <name> "<task>"`:  prints the full name (`skillz-aaa`);  exits 1 if it's running already
  * - `set <name> [--status active | "blocked on <name>"] [--task-id <id>]`, `done <name>`:  exit 1 if it isn't running
+ * - `done <name>` also says how long the agent WORKED, from its transcript (`WorkTime.ofAgent()`, epic `epic-engine`
+ *   P41):  `skillz-aaa done:  took 21m`, and an epic's list logs it on the epic page;  best effort:  nothing found,
+ *   nothing said
  * - `list [--json]` (default):  one line each, oldest first (`--json`:  the entries)
  * - `wait [--every <s>] [--max <s>] [--json]`:  run in the BACKGROUND (Bash `run_in_background`) while agents run;
  *   exits when Owen has sent one a note from the epic page's Agents box (`agentRoutes.ts`), which wakes the session:
@@ -22,6 +25,10 @@
  * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
 import { setTimeout as sleep } from "node:timers/promises"
+
+import { WorkTime } from "spell-epic/command/WorkTime"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { PlanTime } from "spell-epic/tool/PlanTime"
 
 import { AgentList, AgentListError, type RunningAgent, type Untold } from "./AgentList"
 import { ROOT, parseArgs } from "./pages.js"
@@ -46,7 +53,7 @@ async function run([verb = "list", name, task]: string[], flags: Record<string, 
     if (!name || (verb === "add" && !task)) return usage()
     if (verb === "add") console.log(list.add(name, task!, { status, taskId }).name)
     else if (verb === "set") list.set(name, { status, taskId })
-    else if (verb === "done") list.done(name)
+    else if (verb === "done") await recordTook(list, list.done(name))
     else if (verb === "told") list.told(name)
     else return usage()
     return 0
@@ -76,6 +83,25 @@ async function waitForRedirects(list: AgentList, flags: Record<string, string | 
     }
     if (Date.now() > deadline) return 2
     await sleep(every)
+  }
+}
+
+/**
+ * Say how long finished agent `agent` worked (its transcript, `WorkTime.ofAgent()`):  printed, and logged on its
+ * epic's page when the list is an epic's (`Agent skillz-aaa done:  took 21m`).
+ * - best effort, NEVER throws:  no transcript found, nothing said;  a page that won't take the line, a warning
+ */
+async function recordTook(list: AgentList, agent: RunningAgent): Promise<void> {
+  try {
+    const minutes = new WorkTime().ofAgent(agent.name, { epic: list.epic })
+    if (!minutes) return
+    const line = `${agent.name} done:  took ${PlanTime.formatMinutes(minutes)}`
+    console.log(line)
+    if (!list.epic) return
+    const files = new PlanDocFiles({ root: ROOT })
+    await files.edit(files.findDoc(list.epic), (plan) => plan.log(`Agent ${line}`))
+  } catch (error) {
+    console.error(`epic agents done:  no time recorded:  ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 

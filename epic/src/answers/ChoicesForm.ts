@@ -1,12 +1,10 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { StoragePlace } from "spell/util/persist/StoragePlace"
-import { PlanDates } from "spell-epic/dates"
-import { ServerLink, sentence } from "spell-epic/review"
+import { ServerLink, clockOf, sentence, type ServerInfo } from "spell-epic/review"
 
-import { AnswerForm, type AnswerFormOptions } from "./AnswerForm"
+import type { AnswerFormOptions } from "./AnswerForm"
+import { DraftSaver } from "./DraftSaver"
 import {
-  ANSWER_RETRY_MS,
   CHOICES_API,
   CHOICES_KEY_PREFIX,
   CHOICES_SAVE_MS,
@@ -32,8 +30,9 @@ import {
  *   - and to the page server as he types (`src/tools/choicesRoutes.ts`, `POST /api/docs/choices/draft`):
  *     `CHOICES_SAVE_MS` (half a second) after the last change, one save at a time
  *   - and as the page goes away (`watch()`:  `pagehide`, the page hidden), a request that outlives the page
- *   - a save that fails says so in red (`isSaveError`), and tries again every `ANSWER_RETRY_MS` (3s) until one goes
- *     through:  a page server back on its address takes it, with its new token (`ServerLink`), no keystroke, no reload
+ *   - a save that fails says so in red (`isSaveError`), and tries again every 3s until one goes through:
+ *     a page server back on its address takes it, with its new token (`ServerLink`), no keystroke, no reload
+ *   - all of it the page's `DraftSaver`'s (epic `coherence` C10), as every form's
  *   - the draft never wakes anyone:  only "Do it" does;  "Do it" drops the browser's copy
  *   - Copy my answers (`copyText()`):  what's typed, as the draft, for a page whose server is gone for good
  * - "Do it" (`send()`):  `POST /api/docs/choices/answer`, which `epic choices wait` exits with.
@@ -54,12 +53,6 @@ import {
 export class ChoicesForm {
   /** The feedback box's text, as typed. */
   feedback = ""
-
-  /** The save status:  `saved 12:04`, `saving…`, or why it can't save (`isSaveError`). */
-  savedText = ""
-
-  /** The last save failed:  `savedText` says why. */
-  isSaveError = false
 
   /** The answer last sent, if any. */
   sent: ChoicesAnswer | undefined
@@ -88,23 +81,25 @@ export class ChoicesForm {
   /** Called on every change. */
   private readonly listeners = new Set<() => void>()
 
-  /** Something changed since the last save. */
-  private isUnsaved = false
-
-  /** The draft save waiting for typing to stop. */
-  private timer: ReturnType<typeof setTimeout> | undefined
-
-  /** The next try after a save failed (`ANSWER_RETRY_MS`). */
-  private retryTimer: ReturnType<typeof setTimeout> | undefined
-
-  /** The saves queued, one at a time:  a later save never lands before an earlier one. */
-  private saving: Promise<void> = Promise.resolve()
-
   /** The page server, as drafts and answers are sent to it. */
   private readonly link: ServerLink
 
+  /** The draft's saves, its browser copy (`CHOICES_KEY_PREFIX` + the page's path) and where it stands. */
+  private readonly drafts: DraftSaver
+
+  /** A word of the page's own where the save status goes ("a template:  nothing here is saved");  `""` for none. */
+  private note = ""
+
   constructor(private readonly options: AnswerFormOptions) {
     this.link = new ServerLink(options)
+    this.drafts = new DraftSaver({
+      save: async ({ keepalive }) => ((await this.post("draft", keepalive)) as { draft: ChoicesDraft }).draft.saved,
+      wait: CHOICES_SAVE_MS,
+      key: `${CHOICES_KEY_PREFIX}${options.page}`,
+      storage: options.storage,
+      link: this.link,
+      onChange: () => this.notify()
+    })
   }
 
   ////////////////
@@ -116,7 +111,8 @@ export class ChoicesForm {
 
   /** The page's form, made on the first call (browser only). */
   static forPage(): ChoicesForm {
-    ChoicesForm.current ??= new ChoicesForm({ ...ServerLink.pageOptions(), storage: AnswerForm.storageOf(window) })
+    // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
+    ChoicesForm.current ??= new ChoicesForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
     return ChoicesForm.current
   }
 
@@ -203,18 +199,7 @@ export class ChoicesForm {
    * - SIDE EFFECT:  listens on `window` and its document until undone
    */
   watch(window: Window): () => void {
-    const leaving = () => void this.save({ keepalive: true })
-    const hidden = () => {
-      if (window.document.visibilityState === "hidden") leaving()
-    }
-    window.addEventListener("pagehide", leaving)
-    window.document.addEventListener("visibilitychange", hidden)
-    return () => {
-      window.removeEventListener("pagehide", leaving)
-      window.document.removeEventListener("visibilitychange", hidden)
-      if (this.timer) clearTimeout(this.timer)
-      if (this.retryTimer) clearTimeout(this.retryTimer)
-    }
+    return this.drafts.watch(window)
   }
 
   ////////////////
@@ -225,45 +210,26 @@ export class ChoicesForm {
    * Save the draft to the page server now, if anything changed since the last save;  after any save on its way.
    * - `keepalive`:  the page is going away;  the request outlives it
    * - NEVER throws:  a failure shows in `savedText`, in red (the browser's copy still has it),
-   *   and it tries again in `ANSWER_RETRY_MS`
+   *   and it tries again in 3s (`DraftSaver`)
    */
-  save({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
-    if (this.timer) clearTimeout(this.timer)
-    this.saving = this.saving.then(() => this.saveNow(keepalive))
-    return this.saving
+  async save({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    await this.drafts.save({ keepalive })
   }
 
-  /** `save()`'s work, one at a time. */
-  private async saveNow(keepalive: boolean): Promise<void> {
-    if (this.retryTimer) clearTimeout(this.retryTimer)
-    if (!this.isUnsaved || !this.keepsDrafts) return
-    if (!this.options.server?.token || this.options.protocol === "file:") {
-      this.setSaved(OFF_SERVER, { isError: true })
-      return this.notify()
-    }
-    this.isUnsaved = false
-    if (!this.isSaveError) this.setSaved("saving…")
-    this.notify()
-    try {
-      const { draft } = (await this.post("draft", keepalive)) as { draft: ChoicesDraft }
-      this.setSaved(`saved ${clockOf(draft.saved)}`)
-    } catch (failure) {
-      this.isUnsaved = true
-      const why = (failure as Error).message.replace(/[.!]$/, "")
-      this.setSaved(`can't save:  ${why}.  Kept in this browser;  trying again every ${ANSWER_RETRY_MS / 1000}s`, {
-        isError: true
-      })
-      this.retryTimer = setTimeout(() => void this.save(), ANSWER_RETRY_MS)
-    }
-    this.notify()
+  /** The save status:  `saved 12:04`, `saving…`, or why it can't save (`isSaveError`):  `DraftSaver.text`. */
+  get savedText(): string {
+    if (this.note) return this.note
+    return this.isSaveError ? sentence(this.drafts.text) : this.drafts.text
+  }
+
+  /** The last save failed, or can't be made (off the page server):  `savedText` says why. */
+  get isSaveError(): boolean {
+    return this.drafts.isError
   }
 
   /** Save the draft `CHOICES_SAVE_MS` after the last change;  a failure keeps showing until a save goes through. */
   private saveSoon() {
-    this.isUnsaved = true
-    if (this.timer) clearTimeout(this.timer)
-    this.timer = setTimeout(() => void this.save(), CHOICES_SAVE_MS)
-    if (!this.isSaveError) this.setSaved("not saved yet")
+    this.drafts.changed()
   }
 
   /**
@@ -272,18 +238,16 @@ export class ChoicesForm {
    */
   async send(): Promise<void> {
     if (this.isSending) return
-    if (this.timer) clearTimeout(this.timer)
     this.error = ""
     this.isSending = true
     this.notify()
     try {
       const { answer } = (await this.post("answer")) as { answer: ChoicesAnswer }
-      this.isUnsaved = false
       this.sent = answer
       this.isStale = false
-      this.setSaved(`saved ${clockOf(answer.answered)}`)
-      if (this.retryTimer) clearTimeout(this.retryTimer)
-      this.dropLocal()
+      // sent:  the draft is done with, its browser copy too
+      this.drafts.done()
+      this.drafts.tell(`saved ${clockOf(answer.answered)}`)
     } catch (failure) {
       this.error = `Not sent:  ${(failure as Error).message}`
     } finally {
@@ -317,10 +281,10 @@ export class ChoicesForm {
    * - NEVER throws:  a failure shows in `savedText`, and the browser's copy still comes back
    */
   async restore(): Promise<void> {
-    const isServed = !!this.options.server && this.options.protocol !== "file:"
+    const isServed = this.link.isServed
     if (!this.keepsDrafts) {
       if (!isServed) return
-      this.setSaved("a template:  nothing here is saved")
+      this.note = "a template:  nothing here is saved"
       return this.notify()
     }
     let draft: ChoicesDraft | undefined
@@ -332,7 +296,7 @@ export class ChoicesForm {
           ChoicesAnswer | undefined
         ]
     } catch (failure) {
-      this.setSaved(`can't load what you typed:  ${(failure as Error).message}`, { isError: true })
+      this.drafts.tell(`can't load what you typed:  ${(failure as Error).message}`, { isError: true })
     }
     const local = this.readLocal()
     const last = newestOf(draft, local, answer)
@@ -342,7 +306,7 @@ export class ChoicesForm {
       this.feedback = last.feedback ?? ""
       this.restoredOrder = last.order ?? {}
     }
-    if (draft && !this.isSaveError) this.setSaved(`saved ${clockOf(draft.saved)}`)
+    if (draft && !this.isSaveError) this.drafts.tell(`saved ${clockOf(draft.saved)}`)
     if (answer) this.sent = answer
     if (last && last === local) this.saveSoon()
     this.notify()
@@ -380,6 +344,27 @@ export class ChoicesForm {
     const worktree = /^\/worktrees\/([^/]+)\//.exec(pathname)?.[1]
     const checkout = worktree && worktrees ? `${worktrees}/${worktree}` : root
     return `vscode://file${encodeURI(`${checkout}/${file}`)}:${line}`
+  }
+
+  /** `fileUrl()` on this page (browser only):  the checkout the page server serves (`window.SPELL_SERVER`). */
+  static fileUrlHere(file: string, line: number): string {
+    const server = (window as { SPELL_SERVER?: ServerInfo }).SPELL_SERVER
+    return ChoicesForm.fileUrl(file, line, {
+      root: server?.root,
+      worktrees: server?.worktrees,
+      pathname: location.pathname
+    })
+  }
+
+  /**
+   * Open `url` (a `vscode://` link) for `event`'s click, in VS Code's side bar:  its frame can't follow the link, so
+   * the view opens it (`DocView.open()`);  in a browser the link opens it by itself.
+   * - the ONE place a page asks the side bar to open a file:  a choice row's, the syntax page's class names
+   */
+  static openFile(event: Event, url: string, window: Window = globalThis.window) {
+    if (window.parent === window) return
+    event.preventDefault()
+    window.parent.postMessage({ spell: "open", url, kind: "external" }, "*")
   }
 
   ////////////////
@@ -430,33 +415,17 @@ export class ChoicesForm {
     return { page: this.options.page, saved: new Date().toISOString(), ...this.body() }
   }
 
-  /** The browser's copy's key:  `CHOICES_KEY_PREFIX` + the page's path. */
-  private get localKey(): string {
-    return `${CHOICES_KEY_PREFIX}${this.options.page}`
-  }
-
-  /**
-   * Where the browser's copy is kept:  `options.storage`, through `PrefStore`.
-   * - None, or storage that throws (blocked, full):  this page's memory;  the page server's copy still is.
-   */
-  private copies = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
-
-  /** Write the draft to the browser's copy, as JSON. */
+  /** Write the draft to the browser's copy, at once. */
   private writeLocal() {
-    PrefStore.setAt(this.localKey, this.draftNow(), this.copies)
+    this.drafts.keep(this.draftNow())
   }
 
   /** The browser's copy of the draft, or `undefined` (none, or not a draft). */
   private readLocal(): ChoicesDraft | undefined {
-    const draft = PrefStore.getAt(this.localKey, this.copies) as ChoicesDraft | undefined
+    const draft = this.drafts.kept<ChoicesDraft>()
     return draft && typeof draft.saved === "string" && draft.values && typeof draft.values === "object"
       ? draft
       : undefined
-  }
-
-  /** Sent:  the browser's copy is done with. */
-  private dropLocal() {
-    PrefStore.setAt(this.localKey, undefined, this.copies)
   }
 
   ////////////////
@@ -478,26 +447,21 @@ export class ChoicesForm {
    * - throws an `Error` saying, in Owen's words, what to do:  reload, restart the server, open it from the server
    */
   private async post(what: "draft" | "answer", keepalive = false): Promise<unknown> {
-    if (!this.options.server?.token)
-      throw new Error("this page isn't on the page server:  open it with `epic choices show`")
+    if (!this.link.isServed) throw new Error("this page isn't on the page server:  open it with `epic choices show`")
     const body: ChoicesValues & { page: string } = { page: this.options.page, ...this.body() }
     return this.link.post(`${CHOICES_API}/${what}`, body, { keepalive })
   }
 
-  /** `GET /api/docs/choices/<what>` for this page:  the draft or answer, or `undefined`. */
+  /**
+   * `GET /api/docs/choices/<what>` for this page:  the draft or answer, or `undefined`.
+   * - throws when the route isn't there (404):  a page server from before it;  any other failure answers nothing
+   */
   private async fetchJson(what: "draft" | "answer"): Promise<unknown> {
-    const response = await this.options.fetch(`${CHOICES_API}/${what}?page=${encodeURIComponent(this.options.page)}`, {
-      cache: "no-store"
-    })
-    if (response.status === 404) throw new Error("page server too old, restart it")
-    if (!response.ok) return undefined
-    return ((await response.json()) as Record<string, unknown>)[what] ?? undefined
-  }
-
-  /** The save status;  `isError`:  in red. */
-  private setSaved(text: string, { isError = false }: { isError?: boolean } = {}) {
-    this.savedText = isError ? sentence(text) : text
-    this.isSaveError = isError
+    const reply = await this.link
+      .getForPage<Record<string, unknown> | null>(`${CHOICES_API}/${what}`, { missing: null })
+      .catch(() => undefined)
+    if (reply === null) throw new Error("page server too old, restart it")
+    return reply?.[what] ?? undefined
   }
 
   /** Everyone listening hears of a change. */
@@ -505,14 +469,6 @@ export class ChoicesForm {
     this.version++
     for (const listener of this.listeners) listener()
   }
-}
-
-/** What a failed save says off the page server (from `file://`):  the browser's copy is all there is. */
-const OFF_SERVER = "kept in this browser only:  this page isn't on the page server (open it with `epic choices show`)"
-
-/** `iso`'s local time of day, `14:04`. */
-function clockOf(iso: string): string {
-  return PlanDates.clock(new Date(iso))
 }
 
 /**

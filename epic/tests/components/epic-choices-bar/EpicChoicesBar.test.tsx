@@ -15,7 +15,7 @@ import "spell-epic/components/epic-choice-rows"
 /** The choices routes, as `fetch`:  a draft to bring back;  "Do it" answered as sent. */
 function fakeRoutes() {
   return vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-    if (!init?.method)
+    if (!init?.method || init.method === "GET")
       return Response.json(
         url.includes("/draft")
           ? { draft: { values: { r1: "mine" }, feedback: "so far", saved: "2026-10-14T04:00:00.000Z" } }
@@ -70,7 +70,8 @@ describe("<epic-choices-bar>", () => {
 
   test("a save that failed says so in red, bold;  Copy my answers puts what's typed on the clipboard (P15)", async () => {
     const route = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-      if (!init?.method) return Response.json(url.includes("/draft") ? { draft: null } : { answer: null })
+      if (!init?.method || init.method === "GET")
+        return Response.json(url.includes("/draft") ? { draft: null } : { answer: null })
       return Response.json({ error: "disk full" }, { status: 500 })
     })
     const { form } = adoptForm(route)
@@ -82,7 +83,7 @@ describe("<epic-choices-bar>", () => {
     await form.save()
     await ElementFixture.settle()
     const failed = bar.shadowRoot!.querySelector<HTMLElement>(".failed")!
-    expect(failed.textContent).toBe("Can't save:  disk full.  Kept in this browser;  trying again every 3s.")
+    expect(failed.textContent).toBe("Kept in this browser only:  disk full;  trying again every 3s.")
     expect(getComputedStyle(failed).fontWeight).toBe("600")
     const copied = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     part(bar, "copy")!.click()

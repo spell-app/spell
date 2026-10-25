@@ -1,15 +1,11 @@
-import { spawnSync } from "node:child_process"
 import {
-  closeSync,
   cpSync,
   existsSync,
   lstatSync,
   mkdirSync,
-  openSync,
   readdirSync,
   readFileSync,
   readlinkSync,
-  realpathSync,
   rmSync,
   statSync,
   symlinkSync,
@@ -17,6 +13,10 @@ import {
 } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
+import { FileLock } from "spell/server/FileLock"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
+import type { SRV } from "spell/server"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
@@ -28,7 +28,7 @@ import {
   type SharedConfig,
   type SharedStatus
 } from "./command.types"
-import { Git } from "./Git"
+import { EpicCheckout } from "./EpicCheckout"
 import { SharedMigration } from "./SharedMigration"
 
 /****************
@@ -75,7 +75,7 @@ export class Shared {
    * - `checkout`:  default the nearest checkout from the current folder of a repo set up for epics
    * - `config`:  default `checkout`'s manifest (`configOf()`)
    */
-  constructor({ checkout = Git.nearestCheckout(), config }: SharedProps = {}) {
+  constructor({ checkout = EpicCheckout.nearest(), config }: SharedProps = {}) {
     this.checkout = checkout
     this.config = config ?? Shared.configOf(checkout)
   }
@@ -191,7 +191,7 @@ export class Shared {
     if (!stat) return "missing"
     if (!stat.isSymbolicLink()) return "real"
     if (!existsSync(at)) return "dangling"
-    return realOrSelf(at) === realOrSelf(join(this.config.dir, path)) ? "ok" : "elsewhere"
+    return RealPath.of(at) === RealPath.of(join(this.config.dir, path)) ? "ok" : "elsewhere"
   }
 
   /**
@@ -263,13 +263,13 @@ export class Shared {
    */
   unlinkDropped(checkout: string, links = this.config.links): LinkReport[] {
     const named = new Set(links)
-    const content = realOrSelf(this.config.dir)
+    const content = RealPath.of(this.config.dir)
     const dropped: LinkReport[] = []
     for (const entry of readdirSync(checkout, { withFileTypes: true })) {
       if (!entry.isSymbolicLink() || named.has(entry.name)) continue
       const at = join(checkout, entry.name)
       const target = resolve(checkout, readlinkSync(at))
-      if (basename(target) !== entry.name || realOrSelf(dirname(target)) !== content) continue
+      if (basename(target) !== entry.name || RealPath.of(dirname(target)) !== content) continue
       rmSync(at, { force: true })
       dropped.push({ path: entry.name, state: "dropped", action: "unlinked" })
     }
@@ -297,7 +297,7 @@ export class Shared {
     const stat = lstatSync(at, { throwIfNoEntry: false })
     const path = ENGINE_LINK
     if (stat && !stat.isSymbolicLink()) return { path, state: "real", action: "diverged" }
-    if (stat && existsSync(at) && realOrSelf(at) === realOrSelf(engine)) return { path, state: "ok", action: "ok" }
+    if (stat && existsSync(at) && RealPath.of(at) === RealPath.of(engine)) return { path, state: "ok", action: "ok" }
     const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
     if (stat) rmSync(at, { force: true })
     symlinkSync(relative(checkout, engine), at)
@@ -331,7 +331,7 @@ export class Shared {
     const path = relative(main, at)
     const stat = lstatSync(at, { throwIfNoEntry: false })
     if (stat && !stat.isSymbolicLink()) return { path, state: "real", action: "diverged" }
-    if (stat && existsSync(at) && realOrSelf(at) === realOrSelf(content)) return { path, state: "ok", action: "ok" }
+    if (stat && existsSync(at) && RealPath.of(at) === RealPath.of(content)) return { path, state: "ok", action: "ok" }
     const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
     if (stat) rmSync(at, { force: true })
     symlinkSync(relative(trees, content), at)
@@ -359,7 +359,7 @@ export class Shared {
     for (const path of config.links) {
       const from = importFrom && join(importFrom, path)
       if (from && existsSync(from)) {
-        cpSync(realOrSelf(from), join(config.dir, path), {
+        cpSync(RealPath.of(from), join(config.dir, path), {
           recursive: true,
           filter: (source) => !LITTER.has(basename(source))
         })
@@ -395,26 +395,32 @@ export class Shared {
   commit({ session, checkout }: { session?: string; checkout?: string } = {}): string[] {
     const { config } = this
     if (!existsSync(join(config.dir, ".git"))) return []
-    return withLock(join(config.dir, ".git", "spell-shared-commit.lock"), () => {
-      const indexLock = join(config.dir, ".git", "index.lock")
-      if (existsSync(indexLock) && Date.now() - statSync(indexLock).mtimeMs > STALE) rmSync(indexLock, { force: true })
-      gitOrThrow(["reset", "-q"], config.dir)
-      // `Object.groupBy()` needs lib `es2024`;  ours is older
-      const groups: Record<string, string[]> = {}
-      for (const path of pendingPaths(config.dir)) (groups[Shared.group(path)] ??= []).push(path)
-      const trailers = [checkout && `Turn-end: ${checkoutName(config, checkout)}`, session && `Session: ${session}`]
-      const footer = trailers.filter(Boolean).join("\n")
-      return Object.keys(groups)
-        .sort()
-        .map((group) => {
-          gitOrThrow(["--literal-pathspecs", "add", "--pathspec-from-file=-", "--pathspec-file-nul"], config.dir, {
-            input: groups[group]!.join("\0")
+    const lock = join(config.dir, ".git", "spell-shared-commit")
+    return FileLock.run(
+      lock,
+      () => {
+        const indexLock = join(config.dir, ".git", "index.lock")
+        if (existsSync(indexLock) && Date.now() - statSync(indexLock).mtimeMs > STALE)
+          rmSync(indexLock, { force: true })
+        gitOrThrow(["reset", "-q"], config.dir)
+        // `Object.groupBy()` needs lib `es2024`;  ours is older
+        const groups: Record<string, string[]> = {}
+        for (const path of pendingPaths(config.dir)) (groups[Shared.group(path)] ??= []).push(path)
+        const trailers = [checkout && `Turn-end: ${checkoutName(config, checkout)}`, session && `Session: ${session}`]
+        const footer = trailers.filter(Boolean).join("\n")
+        return Object.keys(groups)
+          .sort()
+          .map((group) => {
+            gitOrThrow(["--literal-pathspecs", "add", "--pathspec-from-file=-", "--pathspec-file-nul"], config.dir, {
+              input: groups[group]!.join("\0")
+            })
+            const message = `auto: ${group}${footer ? `\n\n${footer}` : ""}`
+            gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message], config.dir)
+            return Git.run(["rev-parse", "--short", "HEAD"], config.dir).out
           })
-          const message = `auto: ${group}${footer ? `\n\n${footer}` : ""}`
-          gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message], config.dir)
-          return Git.run(["rev-parse", "--short", "HEAD"], config.dir).out
-        })
-    })
+      },
+      { wait: LOCK_WAIT, stale: STALE }
+    )
   }
 
   ////////////////
@@ -565,7 +571,9 @@ function statusLines(status: SharedStatus): string[] {
  * - a rename or copy (`R` / `C`, staged only) gives both paths
  */
 function pendingPaths(dir: string): string[] {
-  const entries = gitOrThrow(["status", "--porcelain", "-z", "--untracked-files=all"], dir).split("\0").filter(Boolean)
+  const entries = gitOrThrow(["status", "--porcelain", "-z", "--untracked-files=all"], dir, { trim: false })
+    .split("\0")
+    .filter(Boolean)
   const paths: string[] = []
   for (let i = 0; i < entries.length; i++) {
     const [code, path] = [entries[i]!.slice(0, 2), entries[i]!.slice(3)]
@@ -597,15 +605,6 @@ Shared content for \`${repo}\`:  its epic pages, sagas, guides and pages, one co
 `
 }
 
-/** `path` with every link resolved, or `path` itself when it doesn't exist. */
-function realOrSelf(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
-}
-
 /** Whether folders `a` and `b` hold the same files with the same bytes (OS litter aside). */
 function sameTree(a: string, b: string): boolean {
   const left = files(a)
@@ -626,37 +625,7 @@ function files(dir: string, prefix = ""): string[] {
   return found.sort()
 }
 
-/**
- * `git <args>` in `cwd`, `input` on its stdin;  its output UNTRIMMED (`git status --porcelain` starts with a space).
- * - throws an `EpicCommandError` with git's message when it fails
- */
-function gitOrThrow(args: string[], cwd: string, { input }: { input?: string } = {}): string {
-  const run = spawnSync("git", args, { cwd, input, encoding: "utf8", timeout: GIT_WAIT })
-  if (run.status !== 0) {
-    const why = (run.stderr || run.stdout || String(run.error ?? "")).trim()
-    throw new EpicCommandError(`git ${args.join(" ")} failed in ${cwd}:  ${why}`)
-  }
-  return run.stdout
-}
-
-/** Run `fn` holding lock file `lockFile` (`open(wx)`), waiting up to `LOCK_WAIT`;  a stale lock is taken over. */
-function withLock<T>(lockFile: string, fn: () => T): T {
-  const deadline = Date.now() + LOCK_WAIT
-  for (;;) {
-    try {
-      closeSync(openSync(lockFile, "wx"))
-      break
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
-      const age = Date.now() - (statSync(lockFile, { throwIfNoEntry: false })?.mtimeMs ?? Date.now())
-      if (age > STALE) rmSync(lockFile, { force: true })
-      else if (Date.now() > deadline) throw new EpicCommandError(`${lockFile} held for ${LOCK_WAIT / 1000}s:  stuck?`)
-      else Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100)
-    }
-  }
-  try {
-    return fn()
-  } finally {
-    rmSync(lockFile, { force: true })
-  }
+/** `git <args>` in the shared repo (`cwd`), `GIT_WAIT` at most;  its failure an `EpicCommandError`. */
+function gitOrThrow(args: string[], cwd: string, options: SRV.GitOptions = {}): string {
+  return EpicCheckout.mustGit(args, cwd, { timeout: GIT_WAIT, ...options })
 }
