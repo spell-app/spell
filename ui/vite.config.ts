@@ -114,13 +114,15 @@ export const SHARED_ENTRIES = { core: `${SRC}/core.ts`, forms: `${SRC}/forms.ts`
  * - one per family
  * - `index` -- every family, for pages that want them all
  * - `api` -- the `E` / `V` namespaces, for apps only (`src/api.ts`)
+ * - `hot` -- `PackHotSwap`, for pages that swap a rebuilt component pack in place (`src/hot.ts`)
  */
 export const ENTRIES: Record<string, string> = {
   ...SHARED_ENTRIES,
   ...Object.fromEntries(COMPONENTS.map((name) => [name, `${COMPONENTS_DIR}/${name}/index.ts`])),
   styles: `${SRC}/styles/index.ts`,
   index: `${SRC}/index.ts`,
-  api: `${SRC}/api.ts`
+  api: `${SRC}/api.ts`,
+  hot: `${SRC}/hot.ts`
 }
 
 /**
