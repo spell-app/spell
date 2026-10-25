@@ -296,15 +296,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }))
   })
 
-  /** The step label by the phases alone:  the active one, else the next, DONE (STANDING) or FUTURE;  `undefined` for none. */
+  /** The step label by the phases alone:  the active one (every one, when several are), else the next, DONE (STANDING) or FUTURE;  `undefined` for none. */
   private readonly phaseStep = createMemo((): StepLabel | undefined => {
     if (this.isSaga) return undefined
     const phases = this.phases()
     if (!phases.length) {
       return this.future ? { color: "grey", icon: "seedling", words: this.translationForKey("future") } : undefined
     }
-    const active = phases.find((phase) => phase.status === ACTIVE)
-    if (active) return this.phaseLabel(active, "blue", "circle half stroke", "")
+    // every phase under way, two at once too (Owen, 2026-10-24:  P26 and P28 side by side, the header said only P26)
+    const active = phases.filter((phase) => phase.status === ACTIVE)
+    if (active.length > 1) {
+      const words = active.map((phase) => phase.label).join(" · ")
+      const tip = active.map((phase) => `${phase.label} · ${phase.title}`).join(";  ")
+      return { color: "blue", icon: "circle half stroke", words, tip, href: `#${active[0]!.id}` }
+    }
+    if (active.length) return this.phaseLabel(active[0]!, "blue", "circle half stroke", "")
     const next = phases.find((phase) => phase.status !== DONE)
     // a standing epic is never done:  it waits for the next request (epic `epic-workflow`)
     if (!next && this.standing)
