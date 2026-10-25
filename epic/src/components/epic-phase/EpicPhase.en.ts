@@ -134,8 +134,9 @@ export const epicPhaseVocabulary = {
       name: "tools",
       description:
         "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page " +
-        "is reviewed."
+        "is reviewed, then its estimate."
     },
+    { name: "estimate", description: "Its `estimate`, a small pill after its review buttons (`2-3h`)." },
     ...REVIEW_PARTS
   ],
   states: [

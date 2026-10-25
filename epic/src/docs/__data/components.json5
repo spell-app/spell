@@ -2333,8 +2333,8 @@
         },
         {
           "key": "acceptPlan",
-          "text": "Accept Phase",
-          "description": "A phase's review button while Claude's build plan waits (Owen, 2026-10-25:  \"In the phase, the button should be Accept Phase\";  the header's says Accept plan)."
+          "text": "Accept",
+          "description": "A phase's review button while Claude's build plan waits, the left of its Accept | Defer pill (Owen, 2026-10-25:  \"make this single segmented pill, with just Accept Defer\";  the header's says Accept plan)."
         },
         {
           "key": "acceptPlanTip",
@@ -2343,8 +2343,8 @@
         },
         {
           "key": "deferPhase",
-          "text": "Defer Phase",
-          "description": "A phase's worded button while its build plan waits, beside Accept Phase:  build it after the others."
+          "text": "Defer",
+          "description": "The right of a waiting plan's Accept | Defer pill:  build this phase after the others."
         },
         {
           "key": "defer",
@@ -4141,7 +4141,11 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page is reviewed."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page is reviewed, then its estimate."
+        },
+        {
+          "name": "estimate",
+          "description": "Its `estimate`, a small pill after its review buttons (`2-3h`)."
         },
         {
           "name": "review-buttons",

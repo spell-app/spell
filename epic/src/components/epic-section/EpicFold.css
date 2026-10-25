@@ -195,13 +195,16 @@
    * - NOT a top-level section:  those stay as they are
    */
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) {
-    margin-block: 10px;
+    /* room below it, none above:  its title stays where it was as it opens (Owen, 2026-10-25) */
+    margin-block: 0 10px;
   }
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section::part(title) {
     box-shadow: var(--epic-bar-shadow, 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45)));
   }
+  /* its title's bottom round over its drawer;  its top, its run's (the row above it touches it) */
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:not(:state(stuck))::part(title) {
-    border-radius: var(--epic-drawer-radius, 8px);
+    border-end-start-radius: var(--epic-drawer-radius, 8px);
+    border-end-end-radius: var(--epic-drawer-radius, 8px);
   }
   /* stuck:  square on top, flush under the titles above it, its bottom still round (Owen, 2026-10-25:  "bottom of P1
      should be round when sticky") */

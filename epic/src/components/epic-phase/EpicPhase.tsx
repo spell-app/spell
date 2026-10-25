@@ -164,8 +164,18 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           {this.glyph.svg}
         </span>
       ),
-      badge: () => this.estimate,
-      tools: () => this.reviewButtons(),
+      // the estimate AFTER the review controls (Owen, 2026-10-25:  "Put time estimate to the right of it"), in the
+      // tools, so the toggle-all after it keeps its column
+      tools: () => (
+        <>
+          {this.reviewButtons()}
+          <Show when={this.estimate}>
+            <span class={ESTIMATE} part={this.partForName("estimate")}>
+              {this.estimate}
+            </span>
+          </Show>
+        </>
+      ),
       before: () => this.saidNote(),
       after: () => (
         <>
@@ -280,3 +290,6 @@ const STATUS_COLORS = {
 
 /** The doc pass's title:  its build plan never waits for an Accept (`isPlanWaiting`). */
 const DOC_REVIEW = /^doc review$/i
+
+/** Class of its estimate pill, after its review controls. */
+const ESTIMATE = "estimate"
