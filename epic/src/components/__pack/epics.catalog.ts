@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  5946fbdb1ed36e83
+// sources:  867f5d619d18f466
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -34,7 +34,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","source","part-ids","commits","to-accept","plan","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","plan","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
@@ -43,7 +43,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
   "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
-  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","manual"]},
+  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","manual"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},

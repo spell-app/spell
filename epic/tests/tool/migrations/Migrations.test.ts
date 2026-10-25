@@ -25,7 +25,8 @@ describe("Migrations", () => {
       "links-agree",
       "more-requests-first",
       "caveats-and-tests",
-      "decimal-phases-agree"
+      "decimal-phases-agree",
+      "took-as-minutes"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
@@ -36,7 +37,11 @@ describe("Migrations", () => {
       expect(step.kind).toBe("epic")
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
     }
-    expect(Migrations.everyEdit.map((step) => step.name)).toEqual(["more-requests-first", "decimal-phases-agree"])
+    expect(Migrations.everyEdit.map((step) => step.name)).toEqual([
+      "more-requests-first",
+      "decimal-phases-agree",
+      "took-as-minutes"
+    ])
   })
 
   test("`run()` names the steps that changed something:  none on a page that's up to date;  `only` picks steps", () => {

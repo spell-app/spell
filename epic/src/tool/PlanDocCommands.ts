@@ -2,10 +2,19 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
+import { WorkTime } from "spell-epic/command/WorkTime"
 import { Markup } from "spell-epic/markup"
 import { PageStages } from "spell-epic/phases"
 import { atDepth } from "spell-epic/tools/pages.js"
-import { OPEN_KINDS, PlanDocError, REVIEW_SECTIONS, TITLE_PREFIX, type Phase, type PlanSummary } from "./planDoc.types"
+import {
+  OPEN_KINDS,
+  PlanDocError,
+  REVIEW_SECTIONS,
+  TITLE_PREFIX,
+  type Phase,
+  type PhaseTimer,
+  type PlanSummary
+} from "./planDoc.types"
 
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
 import { EpicOwners, type PathOwners } from "./EpicOwners"
@@ -83,12 +92,24 @@ export class PlanDocCommands {
   readonly tests: TestCommands
 
   /**
+   * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
+   * `epic-engine` P41):  STATIC for the object's life
+   */
+  readonly phaseTimer: PhaseTimer
+
+  /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
    *   - the `spell` CLI gives it (`epicSessions()`)
+   * - `phaseTimer`:  default the transcripts' (`WorkTime.ofPhase()`);  a test's gives its own
    */
-  constructor({ files = new PlanDocFiles(), sessionsOf }: { files?: PlanDocFiles; sessionsOf?: SessionFinder } = {}) {
+  constructor({
+    files = new PlanDocFiles(),
+    sessionsOf,
+    phaseTimer = (request) => new WorkTime().ofPhase(request).minutes
+  }: { files?: PlanDocFiles; sessionsOf?: SessionFinder; phaseTimer?: PhaseTimer } = {}) {
     this.files = files
+    this.phaseTimer = phaseTimer
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -154,11 +175,14 @@ export class PlanDocCommands {
         // the phases after it moved down a number:  links' words follow them (`links-agree`)
         return flags.before === undefined ? undefined : this.agree(file)
       }
-      case "phase":
+      case "phase": {
+        const phase = need(rest[0], "a phase")
+        const status = need(rest[1], "a status")
+        // `phase seo 3 took`:  its time worked out again, for a phase done before (epic `epic-engine` P41)
+        if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
+        const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
         await this.edit(file, (plan) =>
-          plan.setPhase(plan.phasePlace(need(rest[0], "a phase")), need(rest[1], "a status"), {
-            done: flags.done as string | undefined
-          })
+          plan.setPhase(plan.phasePlace(phase), status, { done: flags.done as string | undefined, minutes })
         )
         this.files.reindex()
         // a new stage:  bring the doc forward, unless told not to.
@@ -166,6 +190,7 @@ export class PlanDocCommands {
         // (it updates itself in place, `spell-doc-runtime.js` `wireLiveUpdate()`),
         // and showing the page the view already has only reveals it (`packages/vscode/src/DocView.ts`)
         return flags.noOpen ? undefined : this.openInVSCode(file)
+      }
       case "move":
         // epic `epic-engine` P34:  a to-do phase to another place among the to-do phases;  numbers and text follow
         return this.edit(file, (plan) => {
@@ -341,6 +366,48 @@ export class PlanDocCommands {
   ////////////////
 
   /** Print `text` and a newline on stdout:  what `console.log()` printed, which the `spell` CLI silences. */
+  ////////////////
+  // ## Time worked (epic `epic-engine` P41)
+  ////////////////
+
+  /**
+   * How long Claude has worked on phase `phase` of epic `name` (doc `file`), from its last `active` to now:  for
+   * `phase ... done`.
+   * - `undefined` when the log never says it went active, or nothing was found
+   * - best effort, NEVER throws:  a transcript that won't read leaves the phase without a time, and says why
+   */
+  private minutesFor(name: string, file: string, phase: string): number | undefined {
+    try {
+      const plan = this.files.read(file)
+      const n = plan.phasePlace(phase)
+      if (plan.phase(n).getAttribute("status") === "done") return undefined
+      const window = plan.activeWindow(n)
+      return window && (this.phaseTimer({ epic: name, phase: plan.phaseLabel(n), window }) || undefined)
+    } catch (error) {
+      this.warn(`epic:  no time for ${phase}:  ${error instanceof Error ? error.message : String(error)}`)
+      return undefined
+    }
+  }
+
+  /**
+   * `phase <name> <N> took [--dry-run]`:  phase `N`'s time worked out again from the transcripts, for a phase done
+   * before (its log's last `active` to its `done`);  written as `took` unless `dryRun`, and printed (`P38 took
+   * 58m`).
+   * - throws when it isn't done, or the log doesn't say when it was active
+   */
+  private async tookAgain(name: string, file: string, phase: string, dryRun: boolean): Promise<void> {
+    const plan = this.files.read(file)
+    const n = plan.phasePlace(phase)
+    const label = plan.phaseLabel(n)
+    if (plan.phase(n).getAttribute("status") !== "done") throw new PlanDocError(`took:  ${label} isn't done yet`)
+    const window = plan.activeWindow(n)
+    if (!window) throw new PlanDocError(`took:  the log doesn't say when ${label} was active, and done`)
+    const minutes = this.phaseTimer({ epic: name, phase: label, window })
+    if (!minutes) throw new PlanDocError(`took:  no work found for ${label} in the transcripts`)
+    if (!dryRun) await this.edit(file, (edited) => edited.setTook(edited.phasePlace(phase), minutes))
+    this.print(`${label} took ${PlanTime.formatMinutes(minutes)}${dryRun ? "  (dry run:  not written)" : ""}`)
+  }
+
   print(text: string): void {
     process.stdout.write(`${text}\n`)
   }
@@ -888,7 +955,9 @@ export class PlanDocCommands {
     const lines = [`${summary.title}`]
     for (const phase of summary.phases) {
       const mark = PHASE_MARKS[phase.status as keyof typeof PHASE_MARKS] ?? "[?]"
-      lines.push(`  ${mark} P${phase.number} · ${phase.name}${phase.estimate ? `  (${phase.estimate})` : ""}`)
+      // done and timed:  what it took, against its estimate (epic `epic-engine` P41)
+      const time = phase.took ? `took ${phase.took}${phase.estimate ? `, ~${phase.estimate}` : ""}` : phase.estimate
+      lines.push(`  ${mark} P${phase.number} · ${phase.name}${time ? `  (${time})` : ""}`)
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
     if (summary.next) lines.push(`next:  P${summary.next.number} · ${summary.next.name}`)
@@ -1104,7 +1173,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    set a phase's status;  done drops its UPDATE markers
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
+                                                   done also writes the time Claude took (took, from the
+                                                   transcripts:  epic epic-engine P41);
                                                    brings the doc forward in VS Code (it updates itself)
+  phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34)
   add <name> question|judgement|caveat|issue|todo|test|decision "title" [--details html] [--calm]

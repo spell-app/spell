@@ -33,6 +33,7 @@ import {
   type BackfillOptions,
   type CommitOptions,
   type CommitTarget,
+  type Duration,
   type ParsedCommit,
   type ChooseOptions,
   type DecideOptions,
@@ -48,6 +49,7 @@ import {
   type OriginalResult,
   type Phase,
   type PhaseFieldValues,
+  type PhaseWindow,
   type PlanMark,
   type RenameResult,
   type ReviewAs,
@@ -176,7 +178,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Every phase, in order:  `{ n, number, id, name, status, estimate }`, from each `<epic-phase>`.
+   * Every phase, in order:  `{ n, number, id, name, status, estimate, took }`, from each `<epic-phase>`.
    * - `n`:  its place in the list, from 1:  what this class's methods take (`phase(n)`)
    * - `number`:  the number people see and say (`7`, `11.1`;  `PhaseIds.numberOf()`), not its id
    */
@@ -189,7 +191,8 @@ export class PlanDoc extends PlanReader {
         id: phase.id,
         name: PlanItem.titleOf(phase),
         status: phase.getAttribute("status") ?? "todo",
-        estimate: estimate && estimate !== "TBD" ? estimate : undefined
+        estimate: estimate && estimate !== "TBD" ? estimate : undefined,
+        took: phase.getAttribute("took") ?? undefined
       }
     })
   }
@@ -421,6 +424,8 @@ export class PlanDoc extends PlanReader {
    * The Overview's total, `<epic-overview estimate>`:  every phase's estimate added up, and what's left (phases not
    * done):  `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
    * - an estimate that won't parse (`TBD`, "a day") is named as not counted;  no phase estimated:  no total
+   * - then, once done phases have a measured time (`took`, epic `epic-engine` P41), what they took against their
+   *   estimate:  `;  3 done took 1h 9m, estimated 4h-6h`
    */
   updateEstimate(): void {
     const counted = this.phases.map((phase) => ({ ...phase, range: PlanTime.parseDuration(phase.estimate) }))
@@ -434,7 +439,24 @@ export class PlanDoc extends PlanReader {
     const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.number}`)
     let text = `${PlanTime.formatRange(total)} in all, ${PlanTime.formatRange(left)} left`
     if (missing.length) text += ` (${missing.join(", ")} not estimated)`
+    text += PlanDoc.tookSummary(counted)
     Markup.set(this.overview, { estimate: text })
+  }
+
+  /**
+   * What the done phases with a measured time took, against their estimates:  `;  3 done took 1h 9m, estimated
+   * 4h-6h`;  `""` when none has one.
+   * - only the phases with BOTH, so the two numbers are about the same work
+   */
+  private static tookSummary(phases: (Phase & { range?: Duration })[]): string {
+    const timed = phases.flatMap((phase) => {
+      const took = PlanTime.parseDuration(phase.took)
+      return phase.status === "done" && took && phase.range ? [{ took: took.min, range: phase.range }] : []
+    })
+    if (!timed.length) return ""
+    const took = timed.reduce((total, phase) => total + phase.took, 0)
+    const estimate = PlanTime.formatRange(PlanTime.sumRanges(timed.map((phase) => phase.range)))
+    return `;  ${timed.length} done took ${PlanTime.formatMinutes(took)}, estimated ${estimate}`
   }
 
   /**
@@ -444,20 +466,56 @@ export class PlanDoc extends PlanReader {
    *   A phase's own plan changes stay.
    * - `done` with `{ done }` (HTML:  a `<ul>` of what was built, what Owen will ask about first):  its Done field
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
+   * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
+   *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
-  setPhase(n: number, status: string, { done }: { done?: string } = {}): void {
+  setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
     Markup.set<"epic-phase">(this.phase(n), { status })
+    const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
     if (status === "done") {
       this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept never leaves a done phase "waiting"
       if (this.phase(n).getAttribute("plan") === "waiting") this.acceptPlan(this.phase(n))
+      if (took) Markup.set<"epic-phase">(this.phase(n), { took })
     }
     this.updateEstimate()
-    this.log(`${this.phaseLabel(n)} ${status}`)
+    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : ""}`)
+  }
+
+  /**
+   * Phase `n` took `minutes` of Claude's time (`epic phase seo#P3 took`, worked out again for a phase done before):
+   * `<epic-phase took>`, then the Overview's total;  logged.
+   */
+  setTook(n: number, minutes: number): void {
+    const took = PlanTime.formatMinutes(minutes)
+    Markup.set<"epic-phase">(this.phase(n), { took })
+    this.updateEstimate()
+    this.log(`${this.phaseLabel(n)} took:  ${took}`)
+  }
+
+  /**
+   * When phase `n` was at work, as the log says (`P3 active`, `P3 done`):  from its last `active` before the done,
+   * to its last `done` (a phase not done yet:  to now);  `undefined` when the log never says it went active.
+   * - the log names a phase by its number at the time:  a phase renumbered since (a move, an insert before
+   *   decimal numbers) finds no lines, or another's
+   */
+  activeWindow(n: number): PhaseWindow | undefined {
+    const label = this.phaseLabel(n)
+    const said = new RegExp(`^${escapeRegExp(label)} (active|done)\\b`)
+    const events = Array.from(this.section("log").querySelectorAll("epic-event")).flatMap((event) => {
+      const status = said.exec(event.textContent?.trim() ?? "")?.[1]
+      const at = Date.parse(event.getAttribute("at") ?? "")
+      return status && !Number.isNaN(at) ? [{ status, at }] : []
+    })
+    const done = this.phase(n).getAttribute("status") === "done"
+    const to = done ? events.findLast((event) => event.status === "done")?.at : this.now.getTime()
+    if (to === undefined) return undefined
+    const from = events.findLast((event) => event.status === "active" && event.at <= to)?.at
+    return from === undefined ? undefined : { from, to }
   }
 
   /** Phase `n`'s Done field (`<epic-field name="done">`):  what was built, as HTML;  replaces an earlier one. */

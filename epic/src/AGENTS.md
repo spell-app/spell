@@ -309,6 +309,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:
         the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
       - keyed by each file's size and modified time;  best effort, never throws
+    - `ActiveTime`, `WorkTime`:  how long Claude WORKED, from the transcripts (epic `epic-engine` P41)
+      - `ActiveTime`:  one transcript's working stretches, never the waits for Owen (his next prompt, an answer, a
+        permission, a background wait for his notes);  side by side counted once
+      - `WorkTime`:  a phase's (its own agents, else the epic's sessions while it was active) and an agent's, found in
+        Claude's folder (`<session>/subagents/`, each agent named by its meta file's `description`)
+      - used by `epic phase … done | took` (`<epic-phase took>`) and `epic agents done`
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path

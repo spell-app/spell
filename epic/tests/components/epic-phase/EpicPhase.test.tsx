@@ -52,7 +52,7 @@ describe("<epic-phase>", () => {
     const section = inner(host)
     const header = section.shadowRoot!.querySelector('[part~="header"]')!
     expect(flatText(header).replace(/\s+/g, " ").trim()).toBe("P5 · Drawing Elements")
-    // the estimate after the review buttons (Owen, 2026-10-25), not the section's badge
+    // the estimate just before the review buttons (Owen, 2026-10-25), not the section's badge
     expect(host.shadowRoot!.querySelector('[part~="estimate"]')?.textContent).toBe("4-6h")
     const status = host.shadowRoot!.querySelector('[part~="status"]')!
     expect({ classes: status.className, label: status.getAttribute("aria-label") }).toEqual({
@@ -63,6 +63,28 @@ describe("<epic-phase>", () => {
     // folded, a rule below;  but the last phase, its run's rounded bottom, has none (I96)
     expect(getComputedStyle(host.previousElementSibling!).borderBottomWidth).toBe("1px")
     expect(getComputedStyle(host).borderBottomWidth).toBe("0px")
+  })
+
+  // epic `epic-engine` P41, Owen's M1 and M3:  a done phase shows only what it took, `~<estimate>` its tooltip
+  test("done and timed:  the pill says what it took, the estimate its tooltip;  not done, the estimate", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-done" title="Done" status="done" estimate="3-4h" took="21m"></epic-phase>` +
+        `<epic-phase id="p-untimed" title="Untimed" status="done" estimate="2h"></epic-phase>` +
+        `<epic-phase id="p-open" title="Open" status="active" estimate="1h" took="5m"></epic-phase>` +
+        `</epic-section>`,
+      "#p-done"
+    )
+    const pill = (phase: Element) => phase.shadowRoot!.querySelector('[part~="estimate"]')!
+    const done = pill(host)
+    expect({ text: done.textContent, tip: done.getAttribute("title"), took: done.classList.contains("took") }).toEqual({
+      text: "21m",
+      tip: "~3-4h",
+      took: true
+    })
+    const [, untimed, open] = Array.from(host.parentElement!.children)
+    expect([pill(untimed!).textContent, pill(untimed!).getAttribute("title")]).toEqual(["2h", null])
+    expect([pill(open!).textContent, pill(open!).classList.contains("took")]).toEqual(["1h", false])
   })
 
   // r32 (Owen, 2026-10-25):  "Clicking accept or Revisit should collapse like it does for questions"

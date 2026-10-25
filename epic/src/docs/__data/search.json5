@@ -1287,6 +1287,11 @@
           "parent": 0
         },
         {
+          "id": "epic-phase-took",
+          "title": "Done, and what it took",
+          "parent": 0
+        },
+        {
           "id": "2-markup",
           "title": "2. Markup"
         },
@@ -1297,12 +1302,12 @@
         {
           "id": "epic-phase-parents",
           "title": "Its parents",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "epic-phase-children",
           "title": "Its children",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "4-attributes",
@@ -1311,22 +1316,22 @@
         {
           "id": "epic-phase-slots",
           "title": "Slots",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-parts",
           "title": "Parts",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-states",
           "title": "States",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-phase-events",
           "title": "Events",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "5-how-it-looks",

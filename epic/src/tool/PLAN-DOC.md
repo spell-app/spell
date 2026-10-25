@@ -248,6 +248,18 @@ As `plan-doc.md`, "Ids":
   - E.g. `30m`, `2h`, `1h30m`, `1-2h`.
   - The Overview's `estimate` is the total, rewritten on every change:
     `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
+    - then, once done phases are timed:  `;  3 done took 1h 9m, estimated 4h-6h` (only phases with both)
+- `took`:  how long Claude REALLY worked on it, written when it's done (epic `epic-engine` P41):  `21m`, `1h 30m`.
+  - `epic phase seo#P3 done` writes it (`WorkTime`, `ActiveTime`, in `command/`), and the log says it:
+    `P3 done:  took 21m`.
+  - `epic phase seo#P3 took [--dry-run]` works it out again for a phase done before:  its log's last `active` to its
+    `done`.
+  - From Claude Code's transcripts:
+    - the phase's own agents, named `<epic>-p3` (`-p3-docs`) or saying `P3`, that ran while it was active
+    - else the epic's sessions' turns while it was active
+    - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
+  - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
+  - Older phases have none, until asked.
 - `to-review`:  written by the tool on every edit, LAST.
   - It lists items added while this phase was active (`phase="N"`),
     still open, not reviewed, not under way.
@@ -819,6 +831,11 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - the log says what each became, `Caveats hold the todos now, tests are T:  T1 → C12, V1 → T1`, so "T4" in old
       chat and commits can be looked up
     - then the links on OTHER pages follow, in the same run (`ContentRelink`):  URLs to the page with an id, a link's
+  - `took-as-minutes` (2026-10-25, every edit;  epic `epic-engine` P41):  every phase's `took` in the tool's form
+    (`21m`, `1h 30m`:  `TookAsMinutes`)
+    - fixes one written by hand (`21 min`, `1.5h`, `took 45m`);  one that won't read is reported, left;  an empty one
+      goes
+    - a page without one is left as it is:  older phases get a time only when asked (`epic phase … took`)
       words that only say the old id, `<epic-link epic item>`, short addresses;  never the page itself or its parts
     - idempotent:  a migrated page has no Todos section and no `v` test;  the content pass only follows THIS run's
       renames

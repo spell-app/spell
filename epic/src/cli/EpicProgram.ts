@@ -263,9 +263,10 @@ export class EpicProgram {
     ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."]')
     this.page(
       epic.command("phase"),
-      "set a phase's status;  done:  --done writes what was built",
+      "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +
+        "transcripts);  took:  that time worked out again, for a phase done before",
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
-    ).usage("<epic>#P3 todo | active | done [--done <html>] [--no-open]")
+    ).usage("<epic>#P3 todo | active | done [--done <html>] [--no-open]  |  <epic>#P3 took [--dry-run]")
     this.page(
       epic.command("move"),
       "move a to-do phase to another place among the to-do phases:  the numbers, links and text naming them follow",

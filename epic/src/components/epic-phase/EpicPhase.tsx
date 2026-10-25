@@ -32,7 +32,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
  *   - while it isn't done and its plan changed (`changes`, written by the tool):  an orange pen and how many times,
  *     so a folded phase says so too (its body, a part, isn't loaded until it opens)
- *   - the estimate as a badge
+ *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
+ *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
  * - Its children, in order (the vocabulary's):
  *   - `<epic-field>`s (Symptom, Changes, Requests, Goal), Owen's kept notes (`<epic-reply>`)
  *   - its PLAN CHANGES, `<epic-update at summary>` blocks, at the end of its description, after Goal
@@ -83,6 +84,25 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** How many plan changes its title says it has:  `changes`, while it isn't done;  0 for none. */
   get changedCount(): number {
     return this.shownStatus === "done" ? 0 : (this.changes ?? 0)
+  }
+
+  /** What it took (`took`), shown once it's done;  `undefined` before, or never measured. */
+  get tookShown(): string | undefined {
+    return this.shownStatus === "done" ? this.took || undefined : undefined
+  }
+
+  /** Its time pill's words:  what it took, once done and timed;  else its estimate;  none:  no pill. */
+  get timeShown(): string | undefined {
+    return this.tookShown ?? (this.estimate || undefined)
+  }
+
+  /**
+   * Its time pill's tooltip while it says what it took:  the estimate it had, `~3-4h` (Owen, M3 on P41);
+   * none without one, or while the pill is the estimate itself.
+   */
+  get tookTip(): string | undefined {
+    const estimate = this.estimate?.replace(/^~\s*/, "")
+    return this.tookShown && estimate ? this.translationForKey("tookTip", { estimate }) : undefined
   }
 
   /**
@@ -165,16 +185,23 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           {this.glyph.svg}
         </span>
       ),
-      // the estimate AFTER the review controls (Owen, 2026-10-25:  "Put time estimate to the right of it"), in the
-      // tools, so the toggle-all after it keeps its column
+      // its time pill (the estimate, or what a done phase took) just BEFORE the review controls (Owen, 2026-10-25:
+      // "time moved to the right, I preferred it to the left so the buttons lined up row to row";  I123 had it after
+      // them), in the tools:  the review buttons end at one right edge on every row, the toggle-all after them
       tools: () => (
         <>
-          {this.reviewButtons()}
-          <Show when={this.estimate}>
-            <span class={ESTIMATE} part={this.partForName("estimate")}>
-              {this.estimate}
-            </span>
+          <Show when={this.timeShown}>
+            {(shown) => (
+              <span
+                class={[ESTIMATE, { [TOOK]: !!this.tookShown }]}
+                part={this.partForName("estimate")}
+                title={this.tookTip}
+              >
+                {shown()}
+              </span>
+            )}
           </Show>
+          {this.reviewButtons()}
         </>
       ),
       before: () => this.saidNote(),
@@ -305,5 +332,8 @@ const STATUS_COLORS = {
 /** The doc pass's title:  its build plan never waits for an Accept (`isPlanWaiting`). */
 const DOC_REVIEW = /^doc review$/i
 
-/** Class of its estimate pill, after its review controls. */
+/** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"
+
+/** Class of that pill while it says what the phase took. */
+const TOOK = "took"
