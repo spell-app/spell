@@ -122,7 +122,8 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     }
     return [
       ruleFor(tops, `${PART_TOP_RADIUS}: var(--_epic-run-radius, 8px);`),
-      ruleFor(bottoms, `${PART_BOTTOM_RADIUS}: var(--_epic-run-radius, 8px);`)
+      // a run's last drops its rule below:  a straight line under rounded corners
+      ruleFor(bottoms, `${PART_BOTTOM_RADIUS}: var(--_epic-run-radius, 8px); border-bottom: none;`)
     ].join("\n")
   }
 
