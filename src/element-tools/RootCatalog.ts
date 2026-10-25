@@ -8,7 +8,7 @@ import { VocabularyFiles } from "./VocabularyFiles.ts"
  * What `<ui-root>` needs of each tag BEFORE that tag's family loads, read from the vocabulary FILES:
  * - its folder:  which family to import
  * - its skeleton (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`)
- * - its attribute names, aliases too, and whether it's a form control (`formControl`):
+ * - its attribute names, aliases and old names (`replaces`) too, and whether it's a form control (`formControl`):
  *   the root defines the tag up front with them (`DOMElement.defineEarly()`, epic `solid-17` P7)
  * - Every `<Name>.en.ts` of every family folder (`VocabularyFiles`), every export with a `tag` and `attributes`:
  *   the way `ComponentDefinitions` reads them, without Vite's `import.meta.glob`.  A vocabulary without a skeleton
@@ -29,7 +29,11 @@ export class RootCatalog {
     const entries: Record<string, RootCatalogEntry> = {}
     for (const root of roots) {
       for (const { folder, vocabulary } of await VocabularyFiles.read(root)) {
-        const attributes = vocabulary.attributes.flatMap(({ name, aliases = [] }) => [name, ...aliases])
+        const attributes = vocabulary.attributes.flatMap(({ name, aliases = [], replaces = [] }) => [
+          name,
+          ...aliases,
+          ...replaces.map((old) => (typeof old === "string" ? old : old.from))
+        ])
         entries[vocabulary.tag] = {
           folder,
           ...(vocabulary.skeleton === undefined ? {} : { skeleton: SkeletonText.parse(vocabulary.skeleton) }),
