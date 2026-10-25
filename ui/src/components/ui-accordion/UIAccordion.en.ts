@@ -38,27 +38,36 @@ export const accordionVocabulary = {
   noun: "accordion",
   description: "An accordion lets people show and hide sections of content.",
   attributes: [
-    { name: "styled", kind: "keyOnly", description: "A boxed accordion:  bordered, bold titles, padded content." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme, for a dark background." },
+    {
+      name: "styled",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A boxed accordion:  bordered, bold titles, padded content."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme, for a dark background." },
     {
       name: "basic",
+      group: "appearance",
       kind: "keyOnly",
       description: "With `styled`:  no box, no rules between titles -- only the styled spacing and title colours."
     },
     {
       name: "compact",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'Less padding around titles and content;  `compact="very"` less still (`very compact`).'
     },
     {
       name: "tree",
+      group: "content",
       kind: "keyOnly",
       description: "Indents each panel's content under its title, like a file tree (nested accordions line up)."
     },
     {
       name: "exclusive",
+      group: "states",
       kind: "boolean",
       default: true,
       description:
@@ -67,12 +76,14 @@ export const accordionVocabulary = {
     },
     {
       name: "collapsible",
+      group: "behaviour",
       kind: "boolean",
       default: true,
       description: 'The open panel closes when its title is activated;  `collapsible="no"` keeps one open.'
     },
     {
       name: "open",
+      group: "states",
       kind: "string",
       description:
         'Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to ' +

@@ -21,33 +21,51 @@ export const dividerVocabulary = {
   noun: "divider",
   description: "A divider visually segments content into groups.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of the text, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue of the rule and the text." },
-    { name: "horizontal", kind: "keyOnly", description: "Text (or an icon) between two horizontal rules." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size of the text, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the rule and the text." },
+    {
+      name: "horizontal",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Text (or an icon) between two horizontal rules."
+    },
     {
       name: "vertical",
+      group: "layout",
       kind: "keyOnly",
       description: "A vertical rule with optional text, centred in a `position: relative` owner (segment, grid)."
     },
     {
       name: "spacer",
+      group: "appearance",
       kind: "keyOnly",
       key: "hidden",
       description:
         "The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  " +
         "Renamed because `hidden` hides every element, as the platform's does."
     },
-    { name: "fitted", kind: "keyOnly", description: "No space above or below." },
-    { name: "clearing", kind: "keyOnly", description: "Clears floated content above it." },
-    { name: "section", kind: "keyOnly", description: "More space, to divide sections of content." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
+    { name: "fitted", group: "layout", kind: "keyOnly", description: "No space above or below." },
+    { name: "clearing", group: "appearance", kind: "keyOnly", description: "Clears floated content above it." },
+    {
+      name: "section",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "More space, to divide sections of content."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: ["left", "center", "right"],
       description: "With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side."
     },
-    { name: "icon", kind: "icon", description: "Icon name, shown before the text." }
+    { name: "icon", group: "content", kind: "icon", description: "Icon name, shown before the text." }
   ],
   events: [],
   slots: [{ name: "", description: "Text between the rules of a `horizontal` or `vertical` divider." }],

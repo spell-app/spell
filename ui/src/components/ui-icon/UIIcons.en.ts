@@ -21,18 +21,39 @@ export const iconsVocabulary = {
   noun: "icons",
   description: "Several icons can be used together as a group.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of the whole group, relative to the surrounding text." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size of the whole group, relative to the surrounding text."
+    },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description: "Accessible name for the combined glyph (`role=img`);  without it the group is decorative."
     },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and inert." },
-    { name: "loading", kind: "keyOnly", description: "The whole group spins." },
-    { name: "fitted", kind: "keyOnly", description: "No gap after the group." },
-    { name: "circular", kind: "keyOnly", description: "Inside a circular ring, the first icon centred." },
-    { name: "bordered", kind: "keyOnly", description: "Inside a square ring, the first icon centred." },
-    { name: "inverted", kind: "keyOnly", description: "A filled `circular` / `bordered` ring, for dark backgrounds." }
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
+    { name: "loading", group: "states", kind: "keyOnly", description: "The whole group spins." },
+    { name: "fitted", group: "layout", kind: "keyOnly", description: "No gap after the group." },
+    {
+      name: "circular",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Inside a circular ring, the first icon centred."
+    },
+    {
+      name: "bordered",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Inside a square ring, the first icon centred."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A filled `circular` / `bordered` ring, for dark backgrounds."
+    }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-icon>`s:  the first is the base glyph, the rest stack on it (`corner`)." }],

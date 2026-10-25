@@ -25,14 +25,21 @@ export const markdownVocabulary = {
     "Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.",
   attributes: [
     ...UIT.SourceAttributes,
-    { name: "size", kind: "size", description: "Text size, as Fomantic's sizes;  default `medium`." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, as Fomantic's sizes;  default `medium`."
+    },
     {
       name: "breaks",
+      group: "appearance",
       kind: "boolean",
       description: "A single newline is a line break, as in GitHub comments;  default off, as in GitHub files."
     },
     {
       name: "heading-offset",
+      group: "appearance",
       kind: "number",
       property: "headingLevelOffset",
       default: 0,
@@ -42,6 +49,7 @@ export const markdownVocabulary = {
     },
     {
       name: "skip-title",
+      group: "behaviour",
       kind: "boolean",
       description:
         "Drop the text's leading `#` title (an `h1` first thing in the text), e.g. when the page shows its own " +
@@ -49,6 +57,7 @@ export const markdownVocabulary = {
     },
     {
       name: "editable",
+      group: "behaviour",
       kind: "boolean",
       description:
         "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` " +
@@ -56,6 +65,7 @@ export const markdownVocabulary = {
     },
     {
       name: "sanitized",
+      group: "advanced",
       kind: "boolean",
       description:
         "Sanitize the rendered markup with DOMPurify (its own lazy chunk, loaded only then):  no scripts, event " +

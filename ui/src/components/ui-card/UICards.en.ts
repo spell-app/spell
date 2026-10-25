@@ -19,10 +19,11 @@ export const cardsVocabulary = {
   noun: "cards",
   description: "A group of cards, laid out in a wrapping row.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size of every card in the group." },
-    { name: "color", kind: "color", description: "Colour of every card in the group." },
+    { name: "size", group: "appearance", kind: "size", description: "Text size of every card in the group." },
+    { name: "color", group: "appearance", kind: "color", description: "Colour of every card in the group." },
     {
       name: "columns",
+      group: "layout",
       kind: "width",
       widthClass: "",
       values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
@@ -30,12 +31,19 @@ export const cardsVocabulary = {
     },
     {
       name: "doubling",
+      group: "layout",
       kind: "keyOnly",
       description: "With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths)."
     },
-    { name: "stackable", kind: "keyOnly", description: "One card per row in a narrow group (mobile widths)." },
+    {
+      name: "stackable",
+      group: "layout",
+      kind: "keyOnly",
+      description: "One card per row in a narrow group (mobile widths)."
+    },
     {
       name: "stack-with",
+      group: "layout",
       kind: "enum",
       values: UIT.StackWithValues,
       description:
@@ -43,12 +51,17 @@ export const cardsVocabulary = {
         "`page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides " +
         "(`<ui-root stack-with>`)."
     },
-    { name: "centered", kind: "keyOnly", description: "Centres each row of cards." },
-    { name: "horizontal", kind: "keyOnly", description: "Every card horizontal." },
-    { name: "raised", kind: "keyOnly", description: "Every card raised." },
-    { name: "link", kind: "keyOnly", description: "Every card rises on hover (a look;  links need `href`)." },
-    { name: "basic", kind: "keyOnly", description: "Every card without border or shadow." },
-    { name: "inverted", kind: "keyOnly", description: "Every card in the dark scheme." }
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centres each row of cards." },
+    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Every card horizontal." },
+    { name: "raised", group: "appearance", kind: "keyOnly", description: "Every card raised." },
+    {
+      name: "link",
+      group: "link",
+      kind: "keyOnly",
+      description: "Every card rises on hover (a look;  links need `href`)."
+    },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "Every card without border or shadow." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every card in the dark scheme." }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-card>`s." }],

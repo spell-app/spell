@@ -26,25 +26,38 @@ export const transitionVocabulary = {
   attributes: [
     {
       name: "duration",
+      group: "behaviour",
       kind: "string",
       description: "Length of each animation:  ms (`300`) or a CSS time (`0.3s`);  default the animation's own."
     },
     {
       name: "interrupt",
+      group: "advanced",
       kind: "boolean",
       description: "A new animation stops the running one instead of waiting for it (Fomantic's `queue: false`)."
     },
     {
       name: "allow-repeats",
+      group: "advanced",
       kind: "boolean",
       description: "Queue the same animation twice in a row (Fomantic's `allowRepeats`);  by default it's dropped."
     },
-    { name: "color", kind: "color", description: "Hue of a `pulsating` ring." },
-    { name: "inline", kind: "keyOnly", description: "An inline block around inline content (an image, a button)." },
-    { name: "inverted", kind: "keyOnly", description: "A `pulsating` ring for dark backgrounds." },
-    { name: "looping", kind: "keyOnly", description: "Repeats every animation until removed." },
-    { name: "pulsating", kind: "keyOnly", description: "A ring pulsing out of the box (with `looping`, forever)." },
-    { name: "disabled", kind: "keyOnly", description: "Pauses the running animation." }
+    { name: "color", group: "appearance", kind: "color", description: "Hue of a `pulsating` ring." },
+    {
+      name: "inline",
+      group: "layout",
+      kind: "keyOnly",
+      description: "An inline block around inline content (an image, a button)."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "A `pulsating` ring for dark backgrounds." },
+    { name: "looping", group: "appearance", kind: "keyOnly", description: "Repeats every animation until removed." },
+    {
+      name: "pulsating",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "A ring pulsing out of the box (with `looping`, forever)."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Pauses the running animation." }
   ],
   events: [
     {

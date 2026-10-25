@@ -25,6 +25,7 @@ export const radioVocabulary = {
     ...LEADING_ATTRIBUTES,
     {
       name: "type",
+      group: "appearance",
       kind: "valueOnly",
       values: ["slider", "toggle"],
       description: "Look:  a `toggle` or `slider` radio;  default the round radio box."

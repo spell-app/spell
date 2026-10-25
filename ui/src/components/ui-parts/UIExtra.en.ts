@@ -22,7 +22,7 @@ export const extraVocabulary = {
   noun: "extra",
   ui: false,
   description: "Extra content, set apart from the main content, e.g. a card's footer.",
-  attributes: [{ name: "text", kind: "keyOnly", description: "In a feed:  a block of extra text." }],
+  attributes: [{ name: "text", group: "name", kind: "keyOnly", description: "In a feed:  a block of extra text." }],
   events: [],
   slots: [{ name: "", description: "Content." }],
   parts: [{ name: "extra", description: "The extra box." }],

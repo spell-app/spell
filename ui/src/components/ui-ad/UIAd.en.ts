@@ -27,6 +27,7 @@ export const adVocabulary = {
   attributes: [
     {
       name: "unit",
+      group: "appearance",
       kind: "valueOnly",
       values: [
         "medium rectangle",
@@ -57,9 +58,10 @@ export const adVocabulary = {
         "IAB unit, e.g. `medium rectangle` (300 x 250), `leaderboard` (728 x 90).  Mobile units (`mobile leaderboard`, " +
         "`large mobile banner`) show only on phone-sized viewports."
     },
-    { name: "centered", kind: "keyOnly", description: "Centred in its container." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container." },
     {
       name: "test",
+      group: "appearance",
       kind: "string",
       description: 'A placeholder:  a grey box saying "Ad" (bare `test`), or the given text (`test="Your ad here"`).'
     }

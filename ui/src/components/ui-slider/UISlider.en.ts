@@ -22,46 +22,93 @@ export const sliderVocabulary = {
   noun: "slider",
   description: "A slider lets people select values within a range.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of track and thumbs, `mini` ... `massive`." },
-    { name: "color", kind: "color", description: "Hue of the filled track (and of `basic` thumbs)." },
-    { name: "basic", kind: "keyOnly", description: "Thumbs in the fill colour instead of white." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used:  dimmed, not focusable, left out of the form." },
+    { name: "size", group: "appearance", kind: "size", description: "Size of track and thumbs, `mini` ... `massive`." },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      description: "Hue of the filled track (and of `basic` thumbs)."
+    },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "Thumbs in the fill colour instead of white." },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used:  dimmed, not focusable, left out of the form."
+    },
     {
       name: "readonly",
+      group: "form",
       kind: "keyOnly",
       property: "readOnly",
       key: "read-only",
       description: "Shows its value but can't be changed;  still focusable and submitted."
     },
-    { name: "hover", kind: "keyOnly", description: "Thumbs show only while the slider is hovered or focused." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
-    { name: "labeled", kind: "keyOnly", description: "Labels along the track, at the steps." },
+    {
+      name: "hover",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Thumbs show only while the slider is hovered or focused."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
+    { name: "labeled", group: "appearance", kind: "keyOnly", description: "Labels along the track, at the steps." },
     {
       name: "range",
+      group: "appearance",
       kind: "keyOnly",
       description: "Two thumbs:  `value` .. `end`.  The form gets two entries under `name`."
     },
-    { name: "reversed", kind: "keyOnly", description: "Runs from the right (or, `vertical`, from the bottom)." },
-    { name: "smooth", kind: "keyOnly", description: "Thumbs follow the pointer smoothly;  values still snap." },
+    {
+      name: "reversed",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Runs from the right (or, `vertical`, from the bottom)."
+    },
+    {
+      name: "smooth",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Thumbs follow the pointer smoothly;  values still snap."
+    },
     {
       name: "ticked",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "A tick at every step (or `tick-step`):  through the track with `labeled`;  alone, a short tick under the " +
         "track, no numbers (as a native range's tick marks)."
     },
-    { name: "vertical", kind: "keyOnly", description: "Upright, filling the host's height;  min at the top." },
+    {
+      name: "vertical",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Upright, filling the host's height;  min at the top."
+    },
     {
       name: "aligned",
+      group: "layout",
       kind: "valueAndKey",
       values: ["bottom", "right"],
       description: "With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it."
     },
-    { name: "min", kind: "number", default: 0, description: "Lowest value." },
-    { name: "max", kind: "number", default: 20, description: "Highest value (Fomantic's default:  20)." },
-    { name: "step", kind: "number", default: 1, description: "Values snap to multiples of it from `min`;  `0`:  any." },
+    { name: "min", group: "form", kind: "number", default: 0, description: "Lowest value." },
+    {
+      name: "max",
+      group: "form",
+      kind: "number",
+      default: 20,
+      description: "Highest value (Fomantic's default:  20)."
+    },
+    {
+      name: "step",
+      group: "form",
+      kind: "number",
+      default: 1,
+      description: "Values snap to multiples of it from `min`;  `0`:  any."
+    },
     {
       name: "tick-step",
+      group: "appearance",
       kind: "number",
       description:
         "Labels and ticks every this much from `min` (e.g. `20` on `0` ... `200`), instead of every `step`;  " +
@@ -69,6 +116,7 @@ export const sliderVocabulary = {
     },
     {
       name: "value",
+      group: "form",
       kind: "number",
       reflect: false,
       description:
@@ -76,18 +124,21 @@ export const sliderVocabulary = {
     },
     {
       name: "end",
+      group: "appearance",
       kind: "number",
       reflect: false,
       description: "`range`:  the second thumb's value, default `max`.  Attribute / property as `value`."
     },
     {
       name: "step-labels",
+      group: "appearance",
       kind: "json",
       description: 'Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.'
     },
-    { name: "name", kind: "string", description: "Form field name." },
+    { name: "name", group: "name", kind: "string", description: "Form field name." },
     {
       name: "required",
+      group: "form",
       kind: "boolean",
       description:
         "Form validation:  a value must be chosen, by the page (`value`, a range's `end`) or by moving a thumb.  " +

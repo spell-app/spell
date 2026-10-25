@@ -22,7 +22,9 @@ export const detailVocabulary = {
   noun: "detail",
   ui: false,
   description: "A label's dimmer second value, e.g. a count.",
-  attributes: [{ name: "href", kind: "string", description: 'Renders a link (`<a class="detail" href>`).' }],
+  attributes: [
+    { name: "href", group: "link", kind: "string", description: 'Renders a link (`<a class="detail" href>`).' }
+  ],
   events: [],
   slots: [{ name: "", description: "Text, an icon." }],
   parts: [{ name: "detail", description: "The detail box." }],

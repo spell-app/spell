@@ -30,24 +30,41 @@ export const statisticVocabulary = {
   plural: "statistics",
   description: "A statistic emphasizes the current value of an attribute.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of the value, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue of the value." },
-    { name: "horizontal", kind: "keyOnly", description: "Value and label on one line." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme, a white value." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size of the value, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the value." },
+    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Value and label on one line." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  the dark scheme, a white value."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
       name: "floated",
+      group: "layout",
       kind: "valueAndKey",
       values: "floats",
       description: "Floats to the `left` / `right` of the content after it."
     },
-    { name: "value", kind: "string", description: "Shorthand for a `<ui-value>`:  the number (or word) shown." },
+    {
+      name: "value",
+      group: "form",
+      kind: "string",
+      description: "Shorthand for a `<ui-value>`:  the number (or word) shown."
+    },
     {
       name: "text",
+      group: "name",
       kind: "boolean",
       description: "The `value` shorthand is a WORD (`text value`):  smaller, bold, at least two lines tall."
     },
-    { name: "label", kind: "string", description: "Shorthand for the label below the value." }
+    { name: "label", group: "name", kind: "string", description: "Shorthand for the label below the value." }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-value>` and `<ui-label>` parts, in display order." }],

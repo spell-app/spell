@@ -29,26 +29,49 @@ export const popupVocabulary = {
   noun: "popup",
   description: "A popup displays additional information on top of a page.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue:  fills the popup (and its arrow), with a readable text colour."
     },
-    { name: "basic", kind: "keyOnly", description: "No pointing arrow." },
-    { name: "fixed", kind: "keyOnly", description: "Always its maximum width (`wide` / `very wide` widen it)." },
-    { name: "flowing", kind: "keyOnly", description: "No maximum width:  as wide as its content, e.g. a grid." },
-    { name: "fluid", kind: "keyOnly", description: "As wide as its target." },
-    { name: "inverted", kind: "keyOnly", description: "The opposite scheme:  dark on a light page." },
-    { name: "loading", kind: "keyOnly", description: "Busy:  a spinner over faded content." },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "No pointing arrow." },
+    {
+      name: "fixed",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Always its maximum width (`wide` / `very wide` widen it)."
+    },
+    {
+      name: "flowing",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "No maximum width:  as wide as its content, e.g. a grid."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "As wide as its target." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The opposite scheme:  dark on a light page."
+    },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Busy:  a spinner over faded content." },
     {
       name: "wide",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'A wider maximum width;  `wide="very"` wider still (`very wide`).'
     },
     {
       name: "position",
+      group: "layout",
       kind: "enum",
       values: "positions",
       default: "top left",
@@ -59,6 +82,7 @@ export const popupVocabulary = {
     },
     {
       name: "open-on",
+      group: "appearance",
       kind: "enum",
       values: UIT.PopupTriggers,
       default: UIT.PopupTrigger.hover,
@@ -68,22 +92,26 @@ export const popupVocabulary = {
     },
     {
       name: "for",
+      group: "appearance",
       kind: "string",
       property: "htmlFor",
       description: "Id of the target, in the popup's own tree;  without it, the previous element sibling."
     },
     {
       name: "header",
+      group: "name",
       kind: "string",
       description: "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version."
     },
     {
       name: "content",
+      group: "content",
       kind: "string",
       description: "Shorthand for the text (Fomantic's `content`);  slotted content is the rich version."
     },
     {
       name: "hoverable",
+      group: "behaviour",
       kind: "boolean",
       default: true,
       description:
@@ -92,10 +120,23 @@ export const popupVocabulary = {
         '`hoverable="false"` is Fomantic\'s `hoverable: false` (its default):  it closes as the pointer leaves ' +
         "the target, after `hide-delay`."
     },
-    { name: "show-delay", kind: "number", default: 50, description: "`hover`:  ms before it shows." },
-    { name: "hide-delay", kind: "number", default: 70, description: "`hover`:  ms before it hides." },
+    {
+      name: "show-delay",
+      group: "behaviour",
+      kind: "number",
+      default: 50,
+      description: "`hover`:  ms before it shows."
+    },
+    {
+      name: "hide-delay",
+      group: "appearance",
+      kind: "number",
+      default: 70,
+      description: "`hover`:  ms before it hides."
+    },
     {
       name: "target",
+      group: "behaviour",
       kind: "json",
       reflect: false,
       description: "The target as a PROPERTY (an `Element`);  wins over `for`."

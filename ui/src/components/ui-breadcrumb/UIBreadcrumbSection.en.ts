@@ -22,11 +22,12 @@ export const breadcrumbSectionVocabulary = {
   attributes: [
     {
       name: "active",
+      group: "states",
       kind: "keyOnly",
       description: 'The current page:  bold, not a link, `aria-current="page"`.'
     },
-    { name: "href", kind: "string", description: "Renders a link (`<a>`) to this level." },
-    { name: "target", kind: "string", description: "Link target, with `href`." }
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) to this level." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
   ],
   events: [],
   slots: [{ name: "", description: "The section's text (and an optional `<ui-icon>`)." }],

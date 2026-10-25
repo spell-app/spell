@@ -25,24 +25,47 @@ export const calendarVocabulary = {
   noun: "calendar",
   description: "A calendar lets a person pick a date, a time, or both.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of the chosen cell, the range and the focus ring (a remap of `--ui-color`)."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme's colours." },
-    { name: "compact", kind: "keyOnly", description: "Tighter cells." },
-    { name: "fluid", kind: "keyOnly", description: "The field takes the full width of its container." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed and inert, left out of the form." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  the dark scheme's colours."
+    },
+    { name: "compact", group: "layout", kind: "keyOnly", description: "Tighter cells." },
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "keyOnly",
+      description: "The field takes the full width of its container."
+    },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used;  dimmed and inert, left out of the form."
+    },
     {
       name: "open",
+      group: "states",
       kind: "keyOnly",
       key: "active",
       description: "The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
     },
     {
       name: "type",
+      group: "appearance",
       kind: "enum",
       values: ["date", "time", "datetime", "month", "year"],
       default: "datetime",
@@ -50,11 +73,13 @@ export const calendarVocabulary = {
     },
     {
       name: "inline",
+      group: "layout",
       kind: "boolean",
       description: "The grid sits in the page (no field, no popup);  still a form control."
     },
     {
       name: "position",
+      group: "layout",
       kind: "enum",
       values: ["bottom left", "bottom right", "top left", "top right"],
       default: "bottom left",
@@ -62,70 +87,106 @@ export const calendarVocabulary = {
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       reflect: false,
       description:
         "Chosen value, ISO by `type`.  The ATTRIBUTE is the starting value (form reset restores it);  the " +
         "property is current."
     },
-    { name: "name", kind: "string", description: "Form field name;  submits the ISO value." },
-    { name: "required", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    { name: "name", group: "name", kind: "string", description: "Form field name;  submits the ISO value." },
+    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       property: "readOnly",
       description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
     },
-    { name: "placeholder", kind: "string", description: "Text shown in the empty field;  its accessible name too." },
-    { name: "min", kind: "string", description: "Earliest value that can be chosen, ISO by `type`." },
-    { name: "max", kind: "string", description: "Latest value that can be chosen, ISO by `type`." },
+    {
+      name: "placeholder",
+      group: "form",
+      kind: "string",
+      description: "Text shown in the empty field;  its accessible name too."
+    },
+    { name: "min", group: "form", kind: "string", description: "Earliest value that can be chosen, ISO by `type`." },
+    { name: "max", group: "form", kind: "string", description: "Latest value that can be chosen, ISO by `type`." },
     {
       name: "initial-date",
+      group: "appearance",
       kind: "string",
       description: "Where the grid starts while there's no value (ISO);  default today."
     },
     {
       name: "first-day-of-week",
+      group: "appearance",
       kind: "number",
       description: "First column of the day grid, `0` = Sunday ... `6`;  default from the locale's week info."
     },
     {
       name: "locale",
+      group: "appearance",
       kind: "string",
       description: "BCP 47 locale for names, formats and the 12 / 24 hour clock;  default `UI.i18n.locale`."
     },
-    { name: "today", kind: "boolean", description: "Shows a Today (or Now) button under the grid." },
-    { name: "disable-minute", kind: "boolean", description: "Times stop at the hour:  no minute grid." },
-    { name: "disable-month", kind: "boolean", description: "No month grid:  the day grid's title goes to years." },
-    { name: "disable-year", kind: "boolean", description: "No year grid:  the month grid's title goes to days." },
+    {
+      name: "today",
+      group: "appearance",
+      kind: "boolean",
+      description: "Shows a Today (or Now) button under the grid."
+    },
+    {
+      name: "disable-minute",
+      group: "behaviour",
+      kind: "boolean",
+      description: "Times stop at the hour:  no minute grid."
+    },
+    {
+      name: "disable-month",
+      group: "behaviour",
+      kind: "boolean",
+      description: "No month grid:  the day grid's title goes to years."
+    },
+    {
+      name: "disable-year",
+      group: "behaviour",
+      kind: "boolean",
+      description: "No year grid:  the month grid's title goes to days."
+    },
     {
       name: "select-adjacent-days",
+      group: "appearance",
       kind: "boolean",
       description: "Days of the previous / next month in the day grid can be chosen (else they're disabled)."
     },
     {
       name: "start-calendar",
+      group: "appearance",
       kind: "string",
       description: "Id of the calendar holding the START of a range:  this one is the end (min = its value)."
     },
     {
       name: "end-calendar",
+      group: "appearance",
       kind: "string",
       description: "Id of the calendar holding the END of a range:  this one is the start (max = its value)."
     },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       description: "Icon of the popup button;  default (or bare `icon`) `calendar`, `clock` for `time`."
     },
     {
       name: "disabled-dates",
+      group: "behaviour",
       kind: "json",
       reflect: false,
       description: 'PROPERTY:  days that can\'t be chosen, as ISO date strings (`["2026-12-25"]`).'
     },
     {
       name: "disabled-days-of-week",
+      group: "behaviour",
       kind: "json",
       reflect: false,
       description: "PROPERTY:  weekdays that can't be chosen, `0` = Sunday ... `6` (`[0, 6]` for weekends)."

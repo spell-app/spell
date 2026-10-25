@@ -21,18 +21,21 @@ export const stickyVocabulary = {
   attributes: [
     {
       name: "offset",
+      group: "layout",
       kind: "number",
       default: 0,
       description: "Pixels between the top edge of the viewport (or scroll container) and the stuck content."
     },
     {
       name: "bottom-offset",
+      group: "appearance",
       kind: "number",
       default: 0,
       description: "Pixels between the bottom edge and the content stuck there (with `pushing`)."
     },
     {
       name: "pushing",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "Also sticks to the BOTTOM edge:  content below the fold stays in view there until the page reaches it."
