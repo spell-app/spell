@@ -42658,8 +42658,9 @@
         },
         {
           "name": "--ui-popup-arrow-edge",
-          "default": "var(--ui-border-color-strong)",
-          "type": "color"
+          "default": "var(--ui-popup-border-color)",
+          "description": "the box's own rim by default, so a themed rim (a glass theme's white one) runs on round the arrow",
+          "type": "other"
         },
         {
           "name": "--ui-popup-distance",

@@ -6655,7 +6655,7 @@
       "name": "--ui-popup-arrow-edge",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-popup>`'s token.  Default:  `var(--ui-border-color-strong)`"
+        "value": "the box's own rim by default, so a themed rim (a glass theme's white one) runs on round the arrow\n\n`<ui-popup>`'s token.  Default:  `var(--ui-popup-border-color)`"
       }
     },
     {
