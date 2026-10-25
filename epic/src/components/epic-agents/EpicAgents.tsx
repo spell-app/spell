@@ -12,6 +12,7 @@ import {
   type InboxDoing,
   type RunningAgent
 } from "spell-epic/review"
+import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
 
 import { epicAgentsVocabulary } from "./EpicAgents.en"
 
@@ -235,12 +236,13 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           </ul>
         </Show>
         <div class={AGENT_REDIRECT}>
-          <textarea
-            ref={(element) => (redirect.note = element)}
+          <epic-text-box
+            ref={(element: HTMLElement) => (redirect.note = element as DOMTextBoxElement)}
             class={AGENT_NOTE}
-            rows="1"
+            type="note"
+            max-height="40vh"
             placeholder={this.translationForKey("agentNote", { name })}
-            aria-label={this.translationForKey("agentNoteLabel", { name })}
+            label={this.translationForKey("agentNoteLabel", { name })}
             onInput={() => redirect.typed()}
             onKeyDown={(event: KeyboardEvent) => redirect.onKey(event)}
           />
@@ -299,8 +301,8 @@ class Redirect {
   /** Why the last one failed, as a sentence;  `""` for none. */
   @E.state accessor error = ""
 
-  /** The note box, as drawn. */
-  note: HTMLTextAreaElement | undefined
+  /** The note box (an `<epic-text-box>`), as drawn. */
+  note: DOMTextBoxElement | undefined
 
   /** A redirect on its way:  a second Send waits for it (a plain flag:  read right after it's set). */
   private busy = false

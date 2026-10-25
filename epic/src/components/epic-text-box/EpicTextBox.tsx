@@ -48,7 +48,7 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
  * ### `EpicTextBox`
  * The component behind `<epic-text-box>`:  a box Owen types in, on a page he answers on (epic `epic-workflow` P12).
  * - A `<textarea>`, one line to start, growing with its text to a third of the window (Owen, 2026-10-06:  every
- *   "tell me more" field grows).
+ *   "tell me more" field grows);  `max-height` sets another cap.
  * - What's typed is part of the page's answer, by `type`:
  *   - `notes`:  the page's notes;  `comment`:  the comment on what `for` names (a section, an option `q1-B`);
  *     `other`:  question `for`'s Other
@@ -126,6 +126,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
           rows="1"
           placeholder={this.hint}
           aria-label={this.label ?? this.hint}
+          style={this.maxHeight ? { "max-height": this.maxHeight } : undefined}
           value={this.text}
           onInput={this.onInput}
         />

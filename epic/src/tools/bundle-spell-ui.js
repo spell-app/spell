@@ -104,6 +104,11 @@ const COMMENTS_OUT = join(ASSETS, "spell-comments.js")
 const DATA_PAGES_ONLY = args.includes("--data-pages")
 /** The data pages' scripts, by name:  `_assets/<name>.entry.js` into `_assets/<name>.js`. */
 const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
+/**
+ * What the runtime takes from UI's SOURCE, never `dist/` (`spellUiResolver()`):  the doc-only families' leaves (no lib
+ * entry holds them) and the pure types file they read.
+ */
+const UI_SOURCE_ONLY = /^spell-ui\/(docs-components\/.+|components\/components\.types)$/
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
@@ -417,6 +422,9 @@ async function bundleShared(entry, outfile) {
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
  * - the page runtime:  an empty module until its file exists
+ * - the doc-only families' plain-DOM leaves the runtime lands links with (`TocIndex`, `HashLanding`;  epic `coherence`
+ *   P11), and the pure types they read:  from UI's SOURCE (`UI_SOURCE_ONLY`), as UI's lib build never holds
+ *   `src/docs-components/`;  what they import of `spell-ui/util` is `dist/core.js`'s, the page's one copy
  */
 function spellUiResolver() {
   return {
@@ -439,6 +447,9 @@ function spellUiResolver() {
         if (loaded.path === "lazy-chunk") return { contents: "export {}", loader: "js" }
         return { contents: "", loader: "js" }
       })
+      pluginBuild.onResolve({ filter: UI_SOURCE_ONLY }, ({ path }) => ({
+        path: join(UI_DIR, "src", `${path.slice("spell-ui/".length)}.ts`)
+      }))
       // every file of UI's `dist/` HAS side effects (each family defines its tags as it's imported):  its
       // `package.json`'s `sideEffects` names only its `src/` files, so esbuild dropped the families `dist/` files import
       // by relative path, and their tags stayed pending (epic `epic-engine` P29)
@@ -477,6 +488,8 @@ function uiDistPath(specifier) {
     .slice("spell-ui".length)
     .replace(/^\//, "")
     .replace(/^components\/(ui-[a-z-]+)$/, "$1")
+    // `spell-ui/util` is all in `core` (`src/core.ts` re-exports it), and has no file of its own
+    .replace(/^util$/, "core")
   if (!sub) return join(UI_DIR, "dist/index.js")
   return join(UI_DIR, "dist", `${sub}.js`)
 }

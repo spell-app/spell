@@ -78,6 +78,7 @@
  * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-opening` / `ui-closing` mean the person).
  */
 
+import { nextFrame } from "spell/util/dom"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { PagePatch } from "spell/server/site"
 import { wireComments } from "./spell-doc-comments.js"
@@ -90,7 +91,6 @@ import {
   dropBlockAction,
   el,
   growField,
-  nextFrames,
   noteToast,
   readJSON,
   titleInside,
@@ -113,6 +113,10 @@ import { ServerLink } from "spell-epic/review"
 // plain DOM, no Solid:  the element it opens, `<epic-zoom>`, is the epics pack's
 import { ImageZoom } from "spell-epic/components/epic-zoom/ImageZoom"
 import { ComponentPacks } from "spell-ui/components/ui-components"
+// the doc-only families' plain-DOM leaves, bundled from source (`bundle-spell-ui.js`):  Spell UI's docs land links and
+// follow the scroll the same way (epic `coherence` P11)
+import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
+import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -284,7 +288,7 @@ async function start() {
     if (location.hash && !isTestRun()) history.replaceState(history.state, "", `${location.pathname}${location.search}`)
   }
   // an old phase address (`#p7`) shows the phase's stable id it landed on (`addressedId()`)
-  else if (landing.hash && landing.hash !== decodeHash(location.hash.slice(1)))
+  else if (landing.hash && landing.hash !== TocIndex.decode(location.hash.slice(1)))
     history.replaceState(null, "", `#${landing.hash}`)
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
@@ -321,7 +325,7 @@ async function start() {
   wireTableHeads(main)
   wireStuckTrail(main)
   // UI renders its shadow content a little after the definitions:  land once it has
-  await nextFrames(2)
+  await nextFrame(2)
   sticky.measure()
   land(landing, jump, follow)
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
@@ -861,13 +865,10 @@ function land({ hash, scroll }, jump, follow) {
     holdScroll(scroll)
     follow?.update()
   } else if (hash) {
+    // `HashLanding` lands once more as the page settles, unless the reader has moved meanwhile:  the browser's own
+    // jump to the `#hash` can come AFTER ours and land the target under the stuck titles (an item has no box of its
+    // own:  `display: contents`)
     const landed = jump(hash, { unfoldTarget: document.getElementById(hash)?.localName === "epic-item" })
-    // the browser's own jump to the `#hash` can come AFTER ours and land the target under the stuck titles (an
-    // item has no box of its own:  `display: contents`), so land once more when the page has settled, unless the
-    // reader has moved meanwhile
-    let moved = false
-    for (const type of READER_INPUT) addEventListener(type, () => (moved = true), { once: true, passive: true })
-    setTimeout(() => !moved && jump(hash, { unfoldTarget: false }), SETTLE_MS * 2)
     void landed.then(() => follow?.followAddress())
     return
   } else follow?.update()
@@ -1165,9 +1166,9 @@ function wireSourceBodies(main, live, enqueue) {
     PagePatch.keepAnchor(anchor)
     if (!active) return
     await loaded
-    for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrames(1)
+    for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrame(1)
     // the host draws what it hid while loading (a frame):  hidden, the box can't take the focus
-    await nextFrames(1)
+    await nextFrame(1)
     if (!active.isConnected || deepActiveElement() === active) return
     active.focus({ preventScroll: true })
     if (caret) active.setSelectionRange(...caret)
@@ -1299,7 +1300,7 @@ async function rewire(page, changed) {
   const { main } = page
   quietFor(QUIET_PATCH_MS)
   // an epic page's blocks take the change in a microtask (Solid batches):  each `contentsEntry` reads it after
-  if (main.querySelector("epic-page")) await nextFrames(1)
+  if (main.querySelector("epic-page")) await nextFrame(1)
   const outline = outlineOf(main)
   const counts = countItems(outline)
   wireItemFilters(main)
@@ -1310,7 +1311,7 @@ async function rewire(page, changed) {
   if (changed.some((node) => PagePatch.withSelf(node, "ui-section").length))
     page.sticky = trackStickyHeights(main, outline)
   page.follow.rescan(page.rail)
-  await nextFrames(UNFOLD_FRAMES)
+  await nextFrame(UNFOLD_FRAMES)
   page.sticky.measure()
   page.follow?.update()
   dispatchEvent(new CustomEvent("spell-doc:updated", { detail: { changed } }))
@@ -2169,7 +2170,7 @@ function wireFolds(main, outline, kept) {
         setCollapsed(section, false)
         unfolded = true
       }
-      if (unfolded) void nextFrames(UNFOLD_FRAMES + 1).then(() => main.style.removeProperty("--ui-section-duration"))
+      if (unfolded) void nextFrame(UNFOLD_FRAMES + 1).then(() => main.style.removeProperty("--ui-section-duration"))
     } else {
       for (
         let section = element.closest("section.spell-folded");
@@ -2420,9 +2421,11 @@ function h2HeightAbove(sticky) {
  *   the stuck titles' scroll padding (they reserve it) on top
  * - HEADINGS:  a STICKY heading's jump goes to its section:  a stuck heading already "is" at the top, so the
  *   browser's own jump to it does nothing -- e.g. the toolbar's entry of the section you're reading
- * - folded sections around the target unfold first, and a target that is a folded item opens (`folds.reveal()`);
- *   an unfolded `<ui-section>` draws on the next frames, so the jump lands once it has, and once more after a fold's
- *   transition (`SETTLE_MS`) unless the reader scrolled meanwhile
+ * - every jump lands through Spell UI's `HashLanding`, by this page's rules (its `use()`, here):
+ *   folded sections around the target unfold first, and a target that is a folded item opens (`folds.reveal()`);
+ *   an unfolded `<ui-section>` draws on the next frames, so the jump lands once it has, and once more as the page
+ *   settles (`SETTLE_MS` twice) unless the reader moved meanwhile
+ *   - the page lands its hashes itself:  a `<ui-docs-toc>` or `<ui-docs-api>` on it leaves them to it
  * - the target's entry becomes the current one even when the page can't scroll it up to its line (the last
  *   short sections), until the user scrolls on (`follow.pin()`)
  * - `hashchange` / `popstate` (back, forward, a typed hash) jump the same way
@@ -2436,6 +2439,20 @@ function h2HeightAbove(sticky) {
  *     `canGo(id)`:  is there one to land on
  */
 function wireAnchors(main, outline, sticky, follow, folds) {
+  const landing = HashLanding.forDocument(document).use({
+    // the page has drawn already (`start()`)
+    whenReady: () => Promise.resolve(),
+    reveal: (target, { opensTarget }) => folds.reveal(target, { self: opensTarget }),
+    revealFrames: UNFOLD_FRAMES,
+    lineFor: (target) => sticky.offsetFor(target),
+    topOf: (target) => topOf(boxOf(target)),
+    // the target's entry is the current one, even where the page can't scroll it up to its line
+    onLanded: (target) => {
+      const entry = outline.entryOf(target)
+      if (entry) follow?.pin(entry)
+    },
+    settleSeconds: (SETTLE_MS * 2) / 1000
+  })
   document.addEventListener("click", (event) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
     const id = targetIdOf(event)
@@ -2464,7 +2481,7 @@ function wireAnchors(main, outline, sticky, follow, folds) {
   function onMessage(event) {
     const data = event.data
     if (event.source !== window.parent || data?.spell !== "go" || typeof data.hash !== "string") return
-    const id = addressedId(decodeHash(data.hash.replace(/^#/, "")))
+    const id = addressedId(TocIndex.decode(data.hash.replace(/^#/, "")))
     if (targetIn(id) || hostHolding(main, id)) go(id)
   }
 
@@ -2484,25 +2501,12 @@ function wireAnchors(main, outline, sticky, follow, folds) {
         () => undefined
       )
     }
-    let landed = NaN
     // what a jump unfolds opens at once, without the fold animation, so the page gets there quickly (Owen,
     // 2026-10-04):  `spell-doc.css` zeroes `--ui-section-duration` under `data-spell-jumping`
     const root = document.documentElement
     root.setAttribute("data-spell-jumping", "")
-    const done = folds.reveal(target, { self: unfoldTarget })
-      ? nextFrames(UNFOLD_FRAMES).then(land)
-      : (land(), undefined)
     setTimeout(() => root.removeAttribute("data-spell-jumping"), SETTLE_MS)
-    if (outline.sections) setTimeout(() => Math.abs(scrollY - landed) < 2 && land(), SETTLE_MS)
-    return done ?? Promise.resolve()
-
-    /** Scroll to the target, pin its entry. */
-    function land() {
-      scrollToId(id, sticky)
-      const entry = outline.entryOf(target)
-      if (entry) follow?.pin(entry)
-      landed = scrollY
-    }
+    return landing.land(target, { opensTarget: unfoldTarget }).then(() => undefined)
   }
 
   /** The `id` a click goes to:  a same-page `#hash` link's. */
@@ -2524,17 +2528,11 @@ function wireAnchors(main, outline, sticky, follow, folds) {
 }
 
 /**
- * Scroll so `id` sits where its anchor should:  by its own box, the site header and its `scroll-margin-top`
- * (`offsetFor()`);  a HEADINGS sticky heading by its SECTION's box (it can't be measured where it is while stuck).
- * Instant, as the browser's own jump.
+ * The box a jump to `target` measures:  its own;  a HEADINGS sticky heading's SECTION (it can't be measured where it is
+ * while stuck).  Where it lands is `offsetFor()`'s:  the site header and its `scroll-margin-top`.
  */
-function scrollToId(id, sticky) {
-  const element = document.getElementById(id)
-  if (!element) return
-  const stuck = element.parentElement?.localName === "ui-sticky"
-  const box = stuck ? element.parentElement.parentElement : element
-  const top = topOf(box) + scrollY - sticky.offsetFor(element)
-  scrollTo({ top: Math.max(0, top), behavior: "instant" })
+function boxOf(target) {
+  return target.parentElement?.localName === "ui-sticky" ? target.parentElement.parentElement : target
 }
 
 /**
@@ -2700,7 +2698,7 @@ function stuckBottom(main) {
 
 /** The URL's `#hash` as an id, or "";  an old phase address as the phase's id (`addressedId()`). */
 function hashId() {
-  return addressedId(decodeHash(location.hash.slice(1)))
+  return addressedId(TocIndex.decode(location.hash.slice(1)))
 }
 
 /**
@@ -2717,15 +2715,6 @@ function addressedId(id) {
     document.querySelectorAll('epic-page > epic-section[kind="phases"] > epic-phase')[Number(n) - 1]?.id ??
     id.toLowerCase()
   )
-}
-
-/** A `#hash` (without its `#`) as an id:  percent-decoded, or as it is when that fails. */
-function decodeHash(hash) {
-  try {
-    return decodeURIComponent(hash)
-  } catch {
-    return hash
-  }
 }
 
 ////////////////
@@ -2789,17 +2778,15 @@ function followScroll(main, outline, rail) {
   function update() {
     if (pinned && Math.abs(scrollY - pinned.scrollY) < 2) return setActive(pinned.heading)
     pinned = null
-    let current = headings[0]
-    let reached = null
-    for (const heading of headings) {
-      if (!heading.isConnected) continue // replaced by an in-place update, until `rescan()`
-      if (heading.offsetParent === null && !heading.getClientRects().length) continue // hidden by the filter
-      if (outline.folded(heading)) continue // laid out in a folded box, but not shown
-      const line = landingLine(heading) + 4
-      if (heading.getBoundingClientRect().top > line) break // document order:  the first below its line ends it
-      current = reached = heading
-    }
-    setActive(current)
+    // Spell UI's rule for the section being read (`TocIndex.reached()`), each heading's line its landing line:
+    // a heading without a box is hidden by the filter;  one replaced by an in-place update waits for `rescan()`;
+    // one laid out in a folded box isn't shown
+    const reached = TocIndex.reached(
+      headings,
+      (heading) => landingLine(heading) + 4,
+      (heading) => heading.isConnected && !outline.folded(heading)
+    )
+    setActive(reached ?? headings[0])
     writeAddress(reached?.id ?? "")
   }
 

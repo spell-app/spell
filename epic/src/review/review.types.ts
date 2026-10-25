@@ -7,7 +7,7 @@
  *   erased, so the node-only files never reach the pack, and a reply can't drift from what the server writes.
  */
 
-import { PlanDates } from "spell-epic/dates"
+import { clockTime } from "spell/util/time"
 import type {
   InboxDoing,
   InboxDraft,
@@ -416,14 +416,14 @@ export function picks(mark: PickFields | null | undefined, letter: string, choic
 }
 
 /**
- * ISO time `iso` as the reader's clock time, 24-hour, `14:42`;  `""` for none.
+ * ISO time `iso` as the viewer's clock time, 24-hour, `14:42`;  `""` for none.
  * - a time shown alone (`saved 14:42`, a redirect's `told 14:43`):
- *   `PlanDates`' time half, never the locale's `2:42 PM`
+ *   the kit's `clockTime()`, never the locale's `2:42 PM`
  */
 export function clockOf(iso: string | null | undefined): string {
   const date = iso ? new Date(iso) : null
   if (!date || isNaN(date.getTime())) return ""
-  return PlanDates.clock(date)
+  return clockTime(date)
 }
 
 /** A route's reply as the running agents, every field there (`AgentList.ts` has their shape);  `[]` for none. */
