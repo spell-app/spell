@@ -695,7 +695,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             </Show>
             {/* ONE pill (Owen, 2026-10-25:  "pencil and P36 should be pills -- can we combine them"):  the changes to
                 accept, while any wait, on its left;  the step label on its right */}
-            <span class={STEP_PILL} part={this.partForName("step-pill")}>
+            <span
+              class={STEP_PILL}
+              part={this.partForName("step-pill")}
+              style={{
+                "--epic-pill-color": `var(--ui-${this.changesToAccept().length ? "orange" : (this.step()?.color ?? "grey")})`
+              }}
+            >
               <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
               <Show when={this.step()}>
                 {(step) => (
@@ -712,6 +718,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   </ui-label>
                 )}
               </Show>
+              {/* the agents running, its third part (Owen, 2026-10-25:  "belongs in the top bar with pencil | P36") */}
+              {this.isSaga ? undefined : <epic-agents draws="agents" part={this.partForName("agents-pill")} />}
             </span>
             <Show when={this.hasCommits()}>{this.gitToggle()}</Show>
           </span>
@@ -887,7 +895,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <slot name={this.slotForName("toolbar")} />
         <span class={TOOLBAR_TOOLS}>
           {/* what Claude is doing, and the agents running (P35);  a saga has no session or agents of its own */}
-          {this.isSaga ? undefined : <epic-agents part={this.partForName("agents")} />}
+          {this.isSaga ? undefined : <epic-agents draws="doing" part={this.partForName("agents")} />}
           {this.pageFilter()}
           {Fold.expandAllButton({
             label: this.translationForKey("expandAll"),

@@ -91,10 +91,15 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   // ## Drawing
   ////////////////
 
+  /** `:state(running)`:  agents are running, its button shows (the header's pill joins it:  `EpicPage.css`). */
+  protected cssStates() {
+    return { running: this.agents.length > 0 }
+  }
+
   render(): JSX.Element {
     return (
       <span class={TOOLS} part={this.partForName("base")}>
-        <Show when={this.doing}>
+        <Show when={this.draws !== "agents" && this.doing}>
           {(doing) => (
             <>
               <span
@@ -130,7 +135,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
             </>
           )}
         </Show>
-        <Show when={this.agents.length}>
+        <Show when={this.draws !== "doing" && this.agents.length}>
           <button
             type="button"
             class={AGENTS_BUTTON}

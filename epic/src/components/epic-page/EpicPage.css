@@ -218,15 +218,38 @@
   .step-pill:empty {
     display: none;
   }
+  /* one rim, the left-most part's colour (Owen, 2026-10-25:  "use color of left-most pill item"), 1px between parts */
   .step-pill ui-label {
     --ui-label-radius: 999px;
   }
-  .step-pill ui-label:not(:last-child) {
+  .step-pill ui-label::part(label) {
+    border-color: var(--epic-pill-color);
+  }
+  /* a part after another:  no rule of its own on its left, the one before it draws the single line between */
+  .step-pill [part~="changes"] + ui-label::part(label) {
+    border-inline-start-width: 0;
+  }
+  .step-pill epic-agents {
+    --epic-agents-rule: var(--epic-pill-color);
+  }
+  /* the changes, first while any wait:  round on the left only */
+  .step-pill [part~="changes"] {
     --_label-radius: 999px 0 0 999px;
   }
-  .step-pill ui-label:not(:first-child) {
+  /* the step label:  square where a neighbour joins it */
+  .step-pill:has([part~="changes"]) [part~="changes"] + ui-label {
     --_label-radius: 0 999px 999px 0;
-    margin-inline-start: -1px;
+  }
+  .step-pill:has(epic-agents:state(running)) ui-label:not([part~="changes"]) {
+    --_label-radius: 999px 0 0 999px;
+  }
+  .step-pill:has([part~="changes"]):has(epic-agents:state(running)) ui-label:not([part~="changes"]) {
+    --_label-radius: 0;
+  }
+  /* the agents running, last:  round on the right only, one rule between */
+  .step-pill epic-agents:state(running) {
+    --epic-agents-radius: 0 999px 999px 0;
+    --epic-agents-border-start: 0;
   }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {

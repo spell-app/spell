@@ -202,6 +202,10 @@ export const epicPageVocabulary = {
         "One pill (epic `epic-engine` I108):  the changes to accept on its left while any wait, the step label on its right."
     },
     {
+      name: "agents-pill",
+      description: "The agents running, in the header's pill after the step label (`<epic-agents draws=agents>`)."
+    },
+    {
       name: "changes",
       description:
         "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange " +

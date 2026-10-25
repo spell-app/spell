@@ -99,8 +99,11 @@
     align-items: center;
     gap: 5px;
     padding: 2px 8px;
-    border: 1px solid var(--epic-rule, var(--ui-border-color));
-    border-radius: 999px;
+    border: 1px solid var(--epic-agents-rule, var(--epic-rule, var(--ui-border-color)));
+    /* in the header's pill, after the step label:  its left rule the label's (`EpicPage.css`) */
+    border-inline-start-width: var(--epic-agents-border-start, 1px);
+    /* a whole pill;  the header's pill sets its own corners (`--epic-agents-radius`) */
+    border-radius: var(--epic-agents-radius, 999px);
     background: transparent;
     color: var(--epic-heading-ink, var(--ui-text-color));
     font: inherit;

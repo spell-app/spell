@@ -1,11 +1,11 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  0bed9be16a3123c4
+// sources:  8b1897592456658a
 
 import type { RootCatalogEntry } from "spell-ui"
 
 /** Every tag of the `epics` pack => what `<ui-root>` needs before its family loads. */
 export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
-  "epic-agents": {"folder":"epic-agents","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":[]},
+  "epic-agents": {"folder":"epic-agents","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["draws"]},
   "epic-answer": {"folder":"epic-answer","attributes":["id","title"]},
   "epic-aside": {"folder":"epic-aside","attributes":["title"]},
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details"]},

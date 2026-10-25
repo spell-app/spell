@@ -14,7 +14,9 @@
   :host {
     --_epic-fold-band: var(--epic-band-row, transparent);
     --_epic-fold-gap: var(--epic-phase-gap, 12px);
-    --_epic-fold-bleed: var(--epic-inset, 16px);
+    /* inside its section's inset, not edge to edge:  rounded cards with room at their sides, as items are (Owen,
+       2026-10-25:  "P1...P2 should have some horizontal margin.  NOT drawer appearance") */
+    --_epic-fold-bleed: 0px;
   }
   :host([status="done"]) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));

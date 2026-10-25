@@ -873,9 +873,12 @@ async function adoptAgents(routes: FakeAgents, { served = true } = {}) {
   return client
 }
 
-/** The shadow root of `host`'s `<epic-agents>`, where the panel is drawn. */
-function agentsRoot(host: Element): ShadowRoot {
-  return host.shadowRoot!.querySelector("epic-agents")!.shadowRoot!
+/**
+ * The shadow root of `host`'s `<epic-agents>` drawing `draws`:  the agents' button in the header's pill, or the
+ * session's line in the toolbar (Owen, 2026-10-25).
+ */
+function agentsRoot(host: Element, draws: "agents" | "doing" = "agents"): ShadowRoot {
+  return host.shadowRoot!.querySelector(`epic-agents[draws="${draws}"]`)!.shadowRoot!
 }
 
 /** `host`'s agent rows, as drawn:  `[name, status, colour, age, task, redirects]` each. */
@@ -923,8 +926,8 @@ describe("<epic-page> Agents running", () => {
       "2 agents running"
     ])
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
-    // no panel above the blocks any more:  it sits at the right of the toolbar
-    expect(host.shadowRoot!.querySelector("epic-agents")!.closest(".toolbar-tools")).not.toBeNull()
+    // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
+    expect(host.shadowRoot!.querySelector('epic-agents[draws="agents"]')!.closest('[part~="step-pill"]')).not.toBeNull()
     expect(agentRows(host)).toEqual([
       ["demo-aaa", "active", "blue", "2h 5m", "Port the parser", []],
       [
@@ -1041,10 +1044,10 @@ describe("<epic-page> what Claude is doing", () => {
     }
     const client = await adoptClient(routes)
     const host = await render(page("", ["active"]))
-    const line = () => agentsRoot(host).querySelector<HTMLElement>("[part~='doing']")
+    const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
     expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, M3")
-    const tip = agentsRoot(host).querySelector("ui-popup.doing-tip")!
+    const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
       ["#q1", "Q1 Which?"],

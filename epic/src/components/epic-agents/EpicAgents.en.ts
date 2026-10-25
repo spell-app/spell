@@ -24,7 +24,16 @@ export const epicAgentsVocabulary = {
     "`epic inbox status`), its tooltip listing what it's answering;  and while agents run, `2 agents running`, a " +
     "button whose popover holds a row per agent (name, status, age, task, the redirects so far), each with a note box " +
     "that redirects it.  Only while the page is served with a token.",
-  attributes: [],
+  attributes: [
+    {
+      name: "draws",
+      kind: "enum",
+      values: ["doing", "agents"],
+      description:
+        "Which half it draws:  `doing` (the session's line, in the toolbar) or `agents` (the agents' button, in the " +
+        "header's pill:  Owen, 2026-10-25);  none:  both."
+    }
+  ],
   events: [],
   slots: [],
   parts: [
@@ -34,7 +43,7 @@ export const epicAgentsVocabulary = {
     { name: "agents-button", description: "`2 agents running`:  opens the agents' popover." },
     { name: "agents", description: "The agents' popover (`<ui-popup>`):  a row per agent." }
   ],
-  states: [],
+  states: [{ name: "running", description: "Agents are running:  its button shows." }],
   texts: [
     { key: "doingTip", text: "{doing}:", description: "The line's tooltip, its head:  what Claude is doing." },
     { key: "agentRunning", text: "1 agent running", description: "The agents' button, one running." },
