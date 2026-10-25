@@ -21,6 +21,7 @@
 import { spawn } from "node:child_process"
 import { sep } from "node:path"
 
+import { escapeHTML } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
@@ -91,10 +92,9 @@ export function pickWindow(pid: number, file: string, entries: Map<number, Windo
 
 /** A page that closes its own tab;  if the browser won't let it, it says where the page went (`where`). */
 function closingPage(path: string, where: string): string {
-  const text = path.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   return `<!doctype html><meta charset="utf-8"><title>Shown in VS Code</title>
 <body style="font:14px system-ui;margin:2em;color:#555">
-<p>Shown in ${where}:  <code>${text}</code>.</p><p>You can close this tab.</p>
+<p>Shown in ${where}:  <code>${escapeHTML(path)}</code>.</p><p>You can close this tab.</p>
 <script>window.close()</script>`
 }
 

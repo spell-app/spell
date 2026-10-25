@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, extname, join, posix } from "node:path"
 
+import { localDate } from "spell/util/time"
 import { DataFile } from "spell/server/DataFile"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
@@ -52,7 +53,7 @@ export class LinesOfCode {
    * - `cwd`:  default the current folder
    * - `today`:  default today, local time
    */
-  constructor({ cwd = process.cwd(), today = LinesOfCode.day(new Date()) }: { cwd?: string; today?: string } = {}) {
+  constructor({ cwd = process.cwd(), today = localDate() }: { cwd?: string; today?: string } = {}) {
     this.cwd = cwd
     this.today = today
   }
@@ -322,12 +323,6 @@ export class LinesOfCode {
   /** `n` short:  `999`, `12.3k`, `1.4M`. */
   static short(n: number): string {
     return n < 1000 ? String(n) : n < 1e6 ? `${(n / 1e3).toFixed(1)}k` : `${(n / 1e6).toFixed(1)}M`
-  }
-
-  /** `date` as `YYYY-MM-DD`, local time. */
-  static day(date: Date): string {
-    const pad = (n: number) => String(n).padStart(2, "0")
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
   }
 
   ////////////////

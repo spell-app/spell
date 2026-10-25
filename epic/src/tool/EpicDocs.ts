@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
+import { escapeRegExp } from "spell/util/string"
+
 import { KINDS, type ItemKind } from "./planDoc.types"
 
 import type { PlanDoc } from "./PlanDoc"
@@ -166,7 +168,7 @@ export class EpicDocs {
       "core.quotepath=off",
       "log",
       "-E",
-      `--grep=^Turn-end: ${escapeRegex(this.name)}(-agent-[0-9a-f]+)?$`,
+      `--grep=^Turn-end: ${escapeRegExp(this.name)}(-agent-[0-9a-f]+)?$`,
       "--format=",
       "--name-only"
     ])
@@ -199,7 +201,7 @@ export class EpicDocs {
   changelogEntry(): ChangelogEntry {
     const file = join(this.files.content, CHANGELOG)
     const html = existsSync(file) ? readFileSync(file, "utf8") : ""
-    const found = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegex(this.name)}"`).test(html)
+    const found = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegExp(this.name)}"`).test(html)
     return { path: CHANGELOG, anchor: this.name, found }
   }
 
@@ -278,7 +280,7 @@ export class EpicDocs {
    * - STATIC:  pure
    */
   static mentions(text: string, name: string): boolean {
-    const n = escapeRegex(name)
+    const n = escapeRegExp(name)
     const quote = "(?:<code>|</code>|[`'\"*])*"
     const patterns = [
       `\\b[Ee]pics?\\s+${quote}${n}(?![\\w-])`,
@@ -299,7 +301,7 @@ export class EpicDocs {
    * - STATIC:  pure
    */
   static groupOf({ path, reasons }: Pick<EpicDoc, "path" | "reasons">, name: string): DocGroup {
-    const named = new RegExp(`(^|/)${escapeRegex(name)}([./]|$)`).test(path)
+    const named = new RegExp(`(^|/)${escapeRegExp(name)}([./]|$)`).test(path)
     const turn = reasons.includes("shared-turn")
     if (reasons.some((reason) => WROTE.includes(reason)) || (named && turn)) return "wrote"
     if (reasons.includes("mention") || (turn && reasons.includes("link"))) return "related"
@@ -520,11 +522,6 @@ function walk(dir: string): string[] {
   return readdirSync(dir, { recursive: true, encoding: "utf8" })
     .map((entry) => join(dir, entry))
     .filter((file) => isFile(file))
-}
-
-/** `text` safe inside a `RegExp`. */
-function escapeRegex(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 /** `git <args>` in folder `cwd`, stdout ("" on failure);  big output welcome (`maxBuffer`). */

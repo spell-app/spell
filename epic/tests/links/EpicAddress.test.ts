@@ -93,6 +93,12 @@ describe("phases", () => {
     expect(EpicAddress.findPhase(phases, "nope")).toBeUndefined()
   })
 
+  test('by name, accents dropped as a phase id drops them:  `p-cafe` finds "Café"', () => {
+    const accented = [{ id: "p1", title: "Café Menu" }]
+    expect(EpicAddress.findPhase(accented, "p-cafe-menu")?.phase.id).toBe("p1")
+    expect(EpicAddress.findPhase(accented, "Café Menu")?.phase.id).toBe("p1")
+  })
+
   test("a decimal phase (P11.1, epic `epic-engine` P39) by its own number;  the whole ones keep theirs", () => {
     const numbered = [
       { id: "p-one", title: "One", number: "1" },

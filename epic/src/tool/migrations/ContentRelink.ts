@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join, relative, sep } from "node:path"
 
+import { escapeRegExp } from "spell/util/string"
+
 /****************
  * ### `ContentRelink`
  * Links on OTHER pages to items a migration renumbered (epic `epic-engine` P32, `caveats-and-tests`):  every file in
@@ -56,7 +58,7 @@ export class ContentRelink {
       links++
       return `${MARK[0]}${id === id.toUpperCase() ? to.toUpperCase() : to}${MARK[1]}`
     }
-    const name = escape(epic)
+    const name = escapeRegExp(epic)
     // a link whose words only say its old id (`<a href="...seo.plan.html#t8">T8</a>`):  the words follow too
     text = text.replace(
       new RegExp(`(<a\\b[^>]*${name}\\.plan\\.html#)([a-z]\\d+)("[^>]*>\\s*)([A-Z]\\d+)(\\s*</a>)`, "g"),
@@ -98,8 +100,3 @@ const MARKED = /\u0001([^\u0002]*)\u0002/g
 
 /** The files a link may be in. */
 const TEXT_FILE = /\.(html|md|json5)$/
-
-/** `text`, safe inside a regular expression. */
-function escape(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}

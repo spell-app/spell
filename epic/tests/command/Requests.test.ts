@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { type SendRequestProps } from "spell-epic/command/command.types"
 import { Requests } from "spell-epic/command/Requests"
@@ -202,6 +202,17 @@ describe("epicHome() and setEpicHome()", () => {
     expect(() => requestsIn(ROOT).setHome("nope")).toThrow(/no epic 'nope'/)
     requestsIn(ROOT).setHome("tooling")
     expect(requestsIn(ROOT).home()).toBe("tooling")
+  })
+
+  test("set:  the LOCAL day, never UTC's:  an evening's home is set today, not tomorrow", () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    try {
+      vi.setSystemTime(new Date(2026, 9, 25, 23, 30))
+      requestsIn(ROOT).setHome("tooling")
+      expect(readFileSync(join(ROOT, "epics", "home.json5"), "utf8")).toContain("2026-10-25")
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   test("epics/home.json5 (epic `epic-workflow` P21):  its old home.json read;  a comment added by hand kept", () => {
