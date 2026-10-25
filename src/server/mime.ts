@@ -28,6 +28,7 @@ export const TYPES: Record<string, string> = {
   ".jsx": "text/plain; charset=utf-8",
   ".json5": "text/plain; charset=utf-8",
   ".spell": "text/plain; charset=utf-8",
+  ".spellx": "text/plain; charset=utf-8",
   ".yml": "text/plain; charset=utf-8",
   ".yaml": "text/plain; charset=utf-8",
   ".py": "text/plain; charset=utf-8",
