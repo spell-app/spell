@@ -63,8 +63,8 @@ export { registerPack } from "spell-ui"
  *   the kit's `PACK_MODULES` (`spell/element-tools/packModules`) and spell-app's shared-Solid builds read them.
  * - `spell/element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
  *   (`spell-ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
- * - `spell-ui/components/ui-root` is for `<spell-app>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
- *   spell-app's `app/vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
+ * - `spell-ui/components/ui-root` is for `<spell-viewer>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
+ *   spell-app's `app/vite.solid.config.ts`), not for packs:  `<spell-viewer>` is a root, a subclass of `UIRoot`.
  * - `@solidjs/h` likewise:  what compiled spell draws with (`spell-runtime.js`, through `spell-solid-shared.js`),
  *   so a program on a docs page draws with the page's one Solid.
  * - `spell-ui/components/ui-code` and `spell-ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's

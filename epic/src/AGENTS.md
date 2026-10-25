@@ -517,7 +517,7 @@ Laid out as every set is since P18 of `people-and-orgs`
   ../../                             the checkout's root:  spell-app's, which serves the set
   x.html                             a sibling
   ../ui/ui-button.html               a Spell UI page
-  ../app/spell-app.html              an App UI page
+  ../app/spell-viewer.html              an App UI page
   ../../spell-epic/src/components/   this repo's files, through spell-app's `spell-epic` link
   ../../guides/x.html                a page of the content folder
   /_epic/pack/epics.pack.js          the epics pack, the epic server's engine route (the layout's `<ui-components>`)
