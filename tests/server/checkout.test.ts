@@ -24,6 +24,24 @@ describe("SRV.checkoutOf()", () => {
     expect(SRV.checkoutOf(BESIDE)).toEqual({ root: BESIDE, main: MAIN, worktree: "vite" })
   })
 
+  test("a BROKEN worktree (its git folder gone) is still its main checkout's, saying so;  a stray `.git` file isn't", () => {
+    // epic `epic-engine` P26, request r20:  solid-17's `.git` named `<main>/.git/worktrees/solid-17`, pruned
+    const broken = fakeWorktree(MAIN, join(TOP, "repo.worktrees", "solid-17"))
+    const gone = join(MAIN, ".git", "worktrees", "solid-17")
+    rmSync(gone, { recursive: true })
+    expect(SRV.checkoutOf(join(broken, "src"))).toEqual({
+      root: broken,
+      main: MAIN,
+      worktree: "solid-17",
+      missingGitDir: gone
+    })
+    // its main checkout gone too:  nothing to belong to, a checkout of its own
+    const stray = join(TOP, "stray")
+    mkdirSync(stray, { recursive: true })
+    writeFileSync(join(stray, ".git"), `gitdir: ${join(TOP, "gone", ".git", "worktrees", "stray")}\n`)
+    expect(SRV.checkoutOf(stray)).toEqual({ root: stray, main: stray })
+  })
+
   test("a `.git` file with no common dir (a submodule's) is a checkout of its own;  outside git:  `undefined`", () => {
     const submodule = join(MAIN, "vendor", "lib")
     mkdirSync(join(MAIN, ".git", "modules", "lib"), { recursive: true })

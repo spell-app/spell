@@ -16,6 +16,12 @@ import { basename, dirname, join, resolve } from "node:path"
  *   - a worktree's main checkout:  the folder holding git's common dir (that gitdir's `commondir`),
  *     the same answer as `git rev-parse --git-common-dir`
  *   - a `.git` file with no `commondir` (a submodule's):  a checkout of its own
+ *   - a BROKEN worktree, one git no longer knows (its `.git` file names `<main>/.git/worktrees/<id>`, which is gone):
+ *     still the worktree of that main checkout, when its `.git` folder is there;  `missingGitDir` says so
+ *     - e.g. a main `.git/worktrees/` pruned, or the main checkout moved:  `git worktree repair <root>`, run from the
+ *       main checkout, links it back
+ *     - before (epic `epic-engine` P26, request r20):  it counted as a checkout of its own, so the epic settings read
+ *       from inside it put the content, windows and worktrees folders inside it too
  * - `path` itself needn't exist:  the folders above it are looked at
  * - `worktree`:  the worktree folder's name, which is how the main page server serves it (`/worktrees/<name>/`)
  * - paths as found, links not resolved:  a `cwd` inside a shared-content link (`epics/`) is still this checkout's
@@ -40,6 +46,7 @@ function worktreeAt(root: string, git: string): Checkout | undefined {
     const gitdir = /^gitdir:\s*(.+)$/m.exec(readFileSync(git, "utf8"))?.[1]?.trim()
     if (!gitdir) return undefined
     const own = resolve(root, gitdir)
+    if (!existsSync(own)) return brokenWorktreeAt(root, own)
     const commondir = join(own, "commondir")
     if (!existsSync(commondir)) return undefined
     const common = resolve(own, readFileSync(commondir, "utf8").trim())
@@ -50,11 +57,25 @@ function worktreeAt(root: string, git: string): Checkout | undefined {
 }
 
 /**
+ * Checkout `root`, whose `.git` file names `own`, a git folder that's gone:  the worktree of the main checkout that
+ * folder was in (`<main>/.git/worktrees/<id>`), when `<main>/.git` is still a folder;  else `undefined`.
+ */
+function brokenWorktreeAt(root: string, own: string): Checkout | undefined {
+  const worktrees = dirname(own)
+  const gitFolder = dirname(worktrees)
+  if (basename(worktrees) !== "worktrees" || basename(gitFolder) !== ".git") return undefined
+  if (!statSync(gitFolder, { throwIfNoEntry: false })?.isDirectory()) return undefined
+  return { root, main: dirname(gitFolder), worktree: basename(root), missingGitDir: own }
+}
+
+/**
  * A git checkout, as `SRV.checkoutOf()` finds it.
  * - `root`:  the checkout's own folder
  * - `main`:  the MAIN checkout's folder:  `root` itself, unless `root` is a worktree
  * - `worktree`:  the worktree's folder name, in a worktree only
+ * - `missingGitDir`:  in a BROKEN worktree only, one git no longer knows:  the git folder its `.git` file names,
+ *   which is gone
  * - here, not in `server.types.ts`:  this file imports nothing of the package's, so a tsconfig without the alias table
  *   (app's `tsconfig.node.json`, through spaces' `environment.ts`) still compiles it
  */
-export type Checkout = { root: string; main: string; worktree?: string }
+export type Checkout = { root: string; main: string; worktree?: string; missingGitDir?: string }
