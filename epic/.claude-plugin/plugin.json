@@ -7,13 +7,6 @@
     "name": "Owen Williams"
   },
   "license": "MIT",
-  "keywords": [
-    "epics",
-    "planning",
-    "worktrees",
-    "review"
-  ],
-  "agents": [
-    "./designer/designer-agent.md"
-  ]
+  "keywords": ["epics", "planning", "worktrees", "review"],
+  "agents": ["./designer/designer-agent.md", "./coherence/coherence-agent.md"]
 }

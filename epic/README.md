@@ -369,6 +369,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | --- | --- |
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder);  Claude Code installs a copy of it, which the kit's install steps link back to this folder |
 | [skills/](skills/) | the nineteen skills, a `SKILL.md` each |
+| [coherence/](coherence/) | the coherence review's rules ([procedures](coherence/procedures.md)) and the `coherence` agent that reads them:  ONE way of doing each thing;  each repo's own catalog and word list are its `agents/coherence/` |
 | [designer/](designer/) | the design review's rules:  [the owner's taste](designer/designer.md), his own asks quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
 | [hooks/](hooks/) | `hooks.json` and the nine scripts it runs |
 | [monitors/](monitors/) | `monitors.json`:  the one monitor Claude Code runs beside each session, `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page;  a small poller that runs `epic session listen` for a moment as the page's inbox changes |
