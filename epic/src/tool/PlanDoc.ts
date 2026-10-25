@@ -2200,6 +2200,9 @@ export class PlanDoc extends PlanReader {
    * The page header's stage button, Accept Overview or Accept Phases (epic `epic-engine` P29):
    * the page moves on from the stage the mark ended (`stage`) to the next (`PageStages.next()`).
    * - the page in another stage by now (moved by hand, or the mark sent twice):  dropped (`gone`), nothing changed
+   * - Accept Phases accepts every build plan waiting too (epic `epic-engine` I125;  Owen, 2026-10-25:  "the mode where
+   *   I 'accept the phase' twice (once for symptom/goals, once for plan) is slowing things down.  Collapse them into
+   *   one"):  the plans are written with the phases, so ONE press starts the build
    * - logs it (`STAGE accepted overview:  stage phases, write the phases`):  what the session does next
    */
   private applyAccept({ stage }: PlanMark): MarkResult {
@@ -2209,7 +2212,13 @@ export class PlanDoc extends PlanReader {
     const next = PageStages.next(stage)
     // its own log line below, not `setStage()`'s
     Markup.set(this.page, { stage: next })
-    const then = next === "phases" ? "write the phases" : "start building"
+    const plans =
+      next === "phases" ? [] : this.phaseElements.filter((phase) => phase.getAttribute("plan") === "waiting")
+    for (const phase of plans) this.acceptPlan(phase)
+    const then =
+      next === "phases"
+        ? "write the phases and their build plans"
+        : `start building${plans.length ? ` (${plans.length} build plan${plans.length === 1 ? "" : "s"} accepted)` : ""}`
     const did = `accepted ${stage}:  stage ${next}, ${then}`
     this.log(`${STAGE_ID.toUpperCase()} ${did}`)
     return { applied: true, did }

@@ -277,9 +277,11 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
   only the Overview, Questions and Caveats until Owen presses Accept Overview.
 - Three stages, each ended by Owen's button in the page header (`epic stage <name>` prints and sets it):
   1. `overview`:  Claude writes the Overview and its questions;  each answer rewrites it.  Accept Overview ->
-  2. `phases`:  Claude writes the phases;  Owen marks each Looks good or Defer.  Accept Phases ->
-  3. `building`:  Claude's build plans for EVERY phase, written UP FRONT and accepted together, then the phases built
-     one after another with no stop between them ("4b. Build plans", "5. Each phase").
+  2. `phases`:  Claude writes the phases AND each one's build plan, in one pass ("4b. Build plans");  Owen Defers any,
+     then ONE Accept Phases accepts the phases and their plans together ->
+  3. `building`:  the phases built one after another with no stop between them ("5. Each phase").
+  - ONE accept, not two (epic `epic-engine` I125;  Owen, 2026-10-25:  "the mode where I 'accept the phase' twice
+    (once for symptom/goals, once for plan) is slowing things down.  Collapse them into one").
 
 1. Explore (read-only):  the code, the docs, the kickoff prompt.
    - Agents:  up to 5, don't ask.
@@ -360,12 +362,16 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
   - links to items and phases:  `<a href="#d2">D2</a>`
   - NEVER change an existing `id`.
 - `epic lint <name>`, then `epic open <name> --review` (new stage:  reload).
-- Owen reviews the phases on the page:  Looks good, or Defer (after the others, still to do;  `inbox apply` moves it).
-  Accept Phases moves the page to `building`.  Then "4b. Build plans".
+- Then, in the SAME pass, before the page is shown:  every phase's build plan ("4b. Build plans").
+- Owen reviews the phases and their plans on the page together:  Defer (after the others, still to do;  `inbox apply`
+  moves it), Revisit, a comment.
+  ONE press of Accept Phases accepts the phases AND every plan waiting (`inbox apply`), and moves the page to
+  `building`:  then "5. Each phase", straight on.
 
-## 4b. Build plans:  ALL of them, up front
+## 4b. Build plans:  ALL of them, up front, WITH the phases
 
-Claude's build plan for EVERY phase still to do, written at once, before any code (Owen, 2026-10-25:  "write the plans
+Claude's build plan for EVERY phase still to do, written in the same pass as the phases ("4. Fill the doc"), before
+Owen sees them and before any code (Owen, 2026-10-25:  "write the plans
 up front, then look into adjusting before starting.  Otherwise, you'll stop after each phase and make me approve rather
 than just being able to move on").
 - Before epic `epic-engine` I117 each plan was written right before its phase, and the session stopped after every
@@ -381,10 +387,12 @@ than just being able to move on").
     question, "(coherence)".
   - A plan that adds nothing new (a rename, docs, a test) is left out of it, in one line.
   - Again whenever a plan is written later:  a phase added, a request filed, a plan rewritten ("5. Each phase", step 1).
-- Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "Build plans are up for
-  P3-P9".
+- Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "The phases and their
+  build plans are up, P3-P9:  one Accept Phases takes both".
 - The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
-- Owen accepts them on the page (the header's Accept plan, or Accept Phase on each;  one Send), or says "go" in chat:  every waiting plan accepted.
+- Owen accepts them on the page:  the header's Accept Phases (in the `phases` stage:  the phases and every waiting plan,
+  ONE press, I125), Accept plan / Accept N plans (once building), or Accept Phase on each;  one Send.  Or he says "go"
+  in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
   - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
 - Then "5. Each phase", from the first, straight through.
