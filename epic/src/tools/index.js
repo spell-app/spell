@@ -722,10 +722,10 @@ export function skeleton(list) {
 <spell-site-header root=".."></spell-site-header>
 <div class="spell-doc">
 <main class="spell-doc-main">
-<ui-breadcrumb class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb-section href="../pages/index.html" target="_self">Docs</ui-breadcrumb-section>
-<ui-breadcrumb-section active>${text(list.title)}</ui-breadcrumb-section>
-</ui-breadcrumb>
+<ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb active>${text(list.title)}</ui-breadcrumb>
+</ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${text(list.title)}</h1></header></ui-sticky>
 <p class="lede">${list.lede}</p>
 ${START}

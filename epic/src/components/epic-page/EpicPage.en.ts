@@ -142,7 +142,7 @@ export const epicPageVocabulary = {
       name: "crumbs",
       description:
         "In the h1, before the epic's name:  `Docs / Epics /`, the docs' eyebrow.  None narrow, nor while the doc " +
-        "still holds its old `ui-breadcrumb.spell-crumbs` before the page."
+        "still holds its old `ui-breadcrumbs.spell-crumbs` before the page."
     },
     {
       name: "header",

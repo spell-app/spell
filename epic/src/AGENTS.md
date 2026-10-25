@@ -1207,7 +1207,7 @@ In `tools/`:
     - verdict cells:  `yes positive` / `no negative` / `meh warning`
   - small badges:  `<ui-label size="mini">`
     - a legend of them:  `<ui-labels class="spell-legend" size="mini">`
-  - page top:  `<ui-breadcrumb class="spell-crumbs">`, back to the index
+  - page top:  `<ui-breadcrumbs class="spell-crumbs">`, back to the index
     - meta lines (who it's for, status, how checked):  `<ui-list class="spell-meta">` of `<ui-item icon="...">`
   - headline numbers:  `<ui-statistics class="spell-stats" size="mini">` of `<ui-statistic value label>`
     - 2-4 of them, each also stated with its caveat in the body

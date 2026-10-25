@@ -362,13 +362,13 @@ function oneLineHead(main) {
   const h1 = main.querySelector(PAGE_TITLE)
   if (!h1) return
   document.body.classList.add("spell-one-line-head")
-  const crumbs = main.querySelector(":scope > ui-breadcrumb.spell-crumbs")
+  const crumbs = main.querySelector(":scope > ui-breadcrumbs.spell-crumbs")
   if (!crumbs || h1.querySelector(":scope > .spell-head-crumbs")) return
   const trail = crumbs.cloneNode(true)
   trail.classList.add("spell-head-crumbs")
   trail.dataset.spellAdded = ""
   trail.removeAttribute("id")
-  const page = trail.querySelector(":scope > ui-breadcrumb-section[active]")
+  const page = trail.querySelector(":scope > ui-breadcrumb[active]")
   if (page) {
     page.textContent = ""
     // the space before it too:  the divider sits as the old one did, `spell-doc.css` spacing it
