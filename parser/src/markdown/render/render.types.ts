@@ -60,15 +60,6 @@ export type MarkdownHeading = {
   id: string
 }
 
-/** GitHub's heading slug:  `Getting started!` => `getting-started` (lowercase, punctuation dropped, spaces to `-`). */
-export function slug(text: string) {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\p{M}\s_-]/gu, "")
-    .replace(/\s/g, "-")
-}
-
 /** `base`, numbered if `seen` has it already (`setup`, `setup-1` ...).  SIDE EFFECT:  records it in `seen`. */
 export function uniqueSlug(base: string, seen: Map<string, number>) {
   const count = seen.get(base) ?? 0
@@ -126,7 +117,11 @@ export function taskOf(item: Block): { checked: boolean; children: Block[] } | u
 
 // ## Text
 
-/** `text` with `&`, `<`, `>`, `"` escaped, for HTML text and attribute values. */
+/**
+ * `text` with `&`, `<`, `>`, `"` escaped, for HTML text and attribute values.
+ * - NOT `spell/util`'s `escapeHTML()`:  that one escapes `'` too, and CommonMark's output leaves it as is
+ *   (the GFM spec examples compare our HTML with theirs).
+ */
 export function escapeHTML(text: string) {
   return text.replace(/[&<>"]/g, (char) => ESCAPES[char]!)
 }

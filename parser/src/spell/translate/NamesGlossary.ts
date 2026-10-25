@@ -1,4 +1,4 @@
-import escapeRegExp from "lodash/escapeRegExp"
+import { escapeRegExp } from "spell/util"
 
 import { TranslationNames } from "./TranslationNames"
 import type { GlossaryData, GlossaryEntry, MissingName, NamesData, NamesKind } from "./translate.types"

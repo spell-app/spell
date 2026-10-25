@@ -258,10 +258,7 @@ function codeOf(written: unknown): string {
 
 /**
  * `code` without its comments, e.g. a class's docstring the TypeScript writer writes, or `/* spell: type unknown *\/`.
- * - `language`:  which comments and quotes it has
- *   - `js` (javascript and TypeScript):  `// ...` and `/* ... *\/`;  quotes `"`, `'` and `` ` ``
- *   - `py`:  `# ...`;  quotes `"""`, `'''`, `"` and `'`
- *   - `spell`:  `// ...` and `/* ... *\/`;  quotes `"` only, as `isn't` is no quote
+ * - `language`:  whose comments, read by that language's own reader -- see `commentSpans()`
  * - what's quoted is never a comment:  `"http://..."` stays
  * - a line left blank by it goes;  blank lines left in a row, one;  spaces at a line's end, none
  * - a comment that's ALL there is stays:  the comment rule's own example, `// foo`
@@ -279,37 +276,57 @@ export function withoutComments(code: string, language: CodeLanguage): string {
   return text || code
 }
 
-/** `code` with each comment removed, its line breaks kept:  line `i` of the result is line `i` of `code`. */
+/**
+ * `code` with each comment removed, its line breaks kept:  line `i` of the result is line `i` of `code`.
+ * - Each language's comments are found by its own reader -- see `commentSpans()`.
+ * - A comment between two words:  one space left between them, not two.
+ */
 function commentsBlanked(code: string, language: CodeLanguage): string {
-  const { line, block, quotes } = COMMENT_SYNTAX[language]
   let out = ""
-  for (let i = 0; i < code.length;) {
-    if (code.startsWith(line, i)) {
-      while (i < code.length && code[i] !== "\n") i++
-      continue
-    }
-    if (block && code.startsWith(block[0], i)) {
-      const end = code.indexOf(block[1], i + block[0].length)
-      let stop = end < 0 ? code.length : end + block[1].length
-      out += code.slice(i, stop).replace(/[^\n]/g, "")
-      // a comment between two words:  one space left between them, not two
-      if (out.endsWith(" ") && code[stop] === " ") stop++
-      i = stop
-      continue
-    }
-    const quote = quotes.find((each) => code.startsWith(each, i))
-    if (quote) {
-      let stop = i + quote.length
-      while (stop < code.length && !code.startsWith(quote, stop)) stop += code[stop] === "\\" ? 2 : 1
-      stop = Math.min(code.length, stop + quote.length)
-      out += code.slice(i, stop)
-      i = stop
-      continue
-    }
-    out += code[i]
-    i++
+  let at = 0
+  for (const { start, end } of commentSpans(code, language)) {
+    if (start < at) continue
+    out += code.slice(at, start) + code.slice(start, end).replace(/[^\n]/g, "")
+    at = out.endsWith(" ") && code[end] === " " ? end + 1 : end
   }
-  return out
+  return out + code.slice(at)
+}
+
+/**
+ * Where `code`'s comments are, in order, each by its own language's reader:
+ * - `js` (javascript and TypeScript):  oxc's parser, the one Vite+ ships, as `classSources()` reads the rule files
+ * - `spell`:  spell's own tokenizer, its comment tokens
+ * - `py`:  a small scanner, `pythonComments()`:  no Python parser in the repos
+ * - What's quoted is never a comment:  `"http://..."` stays.
+ */
+function commentSpans(code: string, language: CodeLanguage): Array<{ start: number; end: number }> {
+  if (language === "js") return parseSync("example.tsx", code, { lang: "tsx" }).comments as Comment[]
+  if (language === "spell")
+    return SP.spellParser.tokenizer.tokenize(code).filter((token) => token instanceof P.CommentToken)
+  return pythonComments(code)
+}
+
+/** Python's `# ...` comments in `code`, skipping what's quoted:  `"""`, `'''`, `"` and `'`. */
+function pythonComments(code: string): Array<{ start: number; end: number }> {
+  const spans: Array<{ start: number; end: number }> = []
+  for (let at = 0; at < code.length;) {
+    if (code[at] === "#") {
+      const lineEnd = code.indexOf("\n", at)
+      const end = lineEnd < 0 ? code.length : lineEnd
+      spans.push({ start: at, end })
+      at = end
+      continue
+    }
+    const quote = PYTHON_QUOTES.find((each) => code.startsWith(each, at))
+    if (!quote) {
+      at++
+      continue
+    }
+    let stop = at + quote.length
+    while (stop < code.length && !code.startsWith(quote, stop)) stop += code[stop] === "\\" ? 2 : 1
+    at = stop + quote.length
+  }
+  return spans
 }
 
 ////////////////
@@ -456,12 +473,8 @@ const PARSE_ERROR = /PARSE ERROR/
 /** Why a rule has no Python:  it writes itself, not through a writer. */
 const NO_PYTHON = "writes itself, in javascript:  no Python writer"
 
-/** Each language's comments and quotes (longest quote first), for `withoutComments()`. */
-const COMMENT_SYNTAX: Record<CodeLanguage, { line: string; block?: [string, string]; quotes: string[] }> = {
-  js: { line: "//", block: ["/*", "*/"], quotes: ["`", '"', "'"] },
-  py: { line: "#", quotes: ['"""', "'''", '"', "'"] },
-  spell: { line: "//", block: ["/*", "*/"], quotes: ['"'] }
-}
+/** Python's quotes, longest first, for `pythonComments()`. */
+const PYTHON_QUOTES = ['"""', "'''", '"', "'"]
 
 /** The file's own note, first in it. */
 const ABOUT =

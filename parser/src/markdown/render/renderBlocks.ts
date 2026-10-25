@@ -1,3 +1,4 @@
+import { clamp, slug } from "spell/util"
 import { MD } from "spell-parser/markdown"
 
 /**
@@ -56,13 +57,13 @@ export function renderBlocks(
 
   /** A heading:  its level shifted by `headingOffset` (1-6);  with `headingIds`, GitHub's slug as its id. */
   function drawHeading(block: MD.Block): MD.Markup {
-    const level = Math.min(6, Math.max(1, block.level! + headingOffset))
+    const level = clamp(block.level! + headingOffset, 1, 6)
     const text = MD.paragraphText(block.lines)
     const content = inline(text)
     let id: string | undefined
     if (headingIds || headings) {
       const plain = MD.toText(content)
-      id = headingIds ? MD.uniqueSlug(MD.slug(plain), ids) : undefined
+      id = headingIds ? MD.uniqueSlug(slug(plain, { as: "github" }), ids) : undefined
       headings?.push({ level, text: plain, id: id ?? "" })
     }
     return ui ? h("ui-header", { level, id }, content) : h(`h${level}`, { id }, content)

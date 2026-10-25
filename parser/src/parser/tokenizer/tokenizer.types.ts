@@ -73,6 +73,22 @@ export function positionForOffset(lineStarts: number[], offset: number): { line:
   return { line: low, ch: offset - lineStarts[low]! }
 }
 
+/**
+ * Offset of 0-based `{ line, ch }` in a text `textLength` long, given `lineStarts` from `getLineStarts()`:
+ * `positionForOffset()` the other way round.
+ * - A `ch` past its line's end:  the line's end, before its newline -- as an editor's position does.
+ * - A `line` past the last:  the text's end.
+ */
+export function offsetForPosition(
+  lineStarts: number[],
+  { line, ch }: { line: number; ch: number },
+  textLength: number
+) {
+  if (line >= lineStarts.length) return textLength
+  const lineEnd = line + 1 < lineStarts.length ? lineStarts[line + 1]! - 1 : textLength
+  return Math.min(lineStarts[line]! + ch, lineEnd)
+}
+
 // ## Formatting
 
 /**

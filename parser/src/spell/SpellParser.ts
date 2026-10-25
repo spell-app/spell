@@ -649,22 +649,21 @@ type CallsAhead = { callAhead?: (match: P.Match) => void }
 /** Most words a kind's name may have, as `create_one_of_a_kind` reads it:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4
 
-/** Add the fixed words `rule` may start with to `words`:  none for a subrule, which could start with anything. */
+/**
+ * Add the fixed words `rule` may start with to `words`, lower case -- see `P.leadingRules()`.
+ * - Not through a `{subrule}`, which could start with anything:  no parser passed.
+ */
 function addLeadingWords(rule: P.Rule, words: Set<string>): void {
-  if (rule instanceof P.Literal) {
-    const [word] = [rule.literal].flat()
-    if (word) words.add(word.toLowerCase())
-  } else if (rule instanceof P.Literals) {
-    for (const { literal } of rule.literals) {
+  for (const leading of P.leadingRules(rule)) {
+    const literals =
+      leading instanceof P.Literal
+        ? [leading.literal]
+        : leading instanceof P.Literals
+          ? leading.literals.map((it) => it.literal)
+          : []
+    for (const literal of literals) {
       const [word] = [literal].flat()
       if (word) words.add(word.toLowerCase())
-    }
-  } else if (rule instanceof P.Choice) {
-    for (const alternative of rule.rules) addLeadingWords(alternative, words)
-  } else if (rule instanceof P.Sequence) {
-    for (const child of rule.rules) {
-      addLeadingWords(child, words)
-      if (!child.optional) break
     }
   }
 }

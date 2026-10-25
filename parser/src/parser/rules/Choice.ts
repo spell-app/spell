@@ -31,6 +31,11 @@ export class Choice<
     this.rules = Array.isArray(rules) ? [...rules] : []
   }
 
+  /** Our alternatives. */
+  get childRules(): P.Rule[] {
+    return this.rules
+  }
+
   /**
    * Return a copy with its own `rules` list, so `addChoice()` on the copy leaves us alone.
    * - Only `Choice` / `Group` are ever cloned (by `Parser.mergeRule()`) -- other rules are immutable and shared.

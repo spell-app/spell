@@ -13,7 +13,7 @@
  * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
  */
 
-import { elementTagFor, schemaOf, type Schema } from "spell/util"
+import { dedent, elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core, programThings, recordingSettings } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -249,12 +249,7 @@ export { elementTagFor }
  * - Its name lets an editor colour the template as CSS, as Lit's `css` does:  spell's VS Code extension does.
  */
 export function css(strings: TemplateStringsArray, ...values: unknown[]): string {
-  const lines = String.raw({ raw: strings.raw }, ...values).split("\n")
-  if (lines.length > 1 && !lines[0]!.trim()) lines.shift()
-  if (lines.length > 1 && !lines.at(-1)!.trim()) lines.pop()
-  const indents = lines.filter((line) => line.trim()).map((line) => /^[ \t]*/.exec(line)![0].length)
-  const indent = indents.length ? Math.min(...indents) : 0
-  return lines.map((line) => line.slice(indent)).join("\n")
+  return dedent(String.raw({ raw: strings.raw }, ...values))
 }
 
 /**

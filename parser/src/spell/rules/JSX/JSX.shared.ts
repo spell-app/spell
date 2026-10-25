@@ -1,3 +1,4 @@
+import { dedent } from "spell/util"
 import { P } from "spell-parser/parser"
 import type { FillInParts } from "spell-parser/spell/rules/core"
 import { Wording } from "spell-parser/spell/rules/expressions"
@@ -102,15 +103,12 @@ export type JSXMatchData = {
  * - Raw text:  the tokenizer reads the element's whole contents as ONE text token (`P.Tokenizer.rawTextTags`).
  */
 export function rawTextOf(element: P.JSXElementToken): string {
-  const text = ((element.children ?? []) as P.Token[])
-    .filter((child): child is P.JSXTextToken => child instanceof P.JSXTextToken)
-    .map((child) => `${child.value}`)
-    .join("")
-  const lines = text.split("\n")
-  while (lines.length && !lines[0]!.trim()) lines.shift()
-  while (lines.length && !lines.at(-1)!.trim()) lines.pop()
-  const indent = Math.min(...lines.filter((line) => line.trim()).map((line) => /^\s*/.exec(line)![0].length))
-  return lines.map((line) => line.slice(Number.isFinite(indent) ? indent : 0)).join("\n")
+  return dedent(
+    ((element.children ?? []) as P.Token[])
+      .filter((child): child is P.JSXTextToken => child instanceof P.JSXTextToken)
+      .map((child) => `${child.value}`)
+      .join("")
+  )
 }
 
 /** The tag of a markdown block:  drawn in a drawing (`markdown_block`), a type's description in its outline. */

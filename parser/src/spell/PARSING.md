@@ -1934,7 +1934,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     ([barrel.test.ts](../../../spell-app/tests/lsp/barrel.test.ts)).
 - `SpellLanguageService` answers from each file's current `match`, never re-parsing:
   - diagnostics:  its parse errors, then its warnings (`SP.SpellWarnings.in()`) as `DiagnosticSeverity.Warning`
-  - positions from match / token OFFSETS, never `token.line` / `ch`
+  - positions from match / token OFFSETS, never `token.line` / `ch`:
+    `P.positionForOffset()` and `P.offsetForPosition()`, in [tokenizer.types.ts](../parser/tokenizer/tokenizer.types.ts)
+  - what a rule can start with (completion's words and kinds), and every rule inside one (the keyword list),
+    by the parser's two walks:  `P.leadingRules()` and `rule.childRules`, in [ruleWalks.ts](../parser/rules/ruleWalks.ts)
   - symbols from `rule.getDeclaration()`, colours from `rule.highlightAs`
   - definition / references from the scope record a word resolved to while parsing (`data.scopeVar` etc),
     and that record's `declaredBy`

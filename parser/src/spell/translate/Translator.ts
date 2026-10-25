@@ -1,3 +1,4 @@
+import { clamp, escapeRegExp, withoutAccents } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { BODY_KEYWORDS } from "spell-parser/spell/spell.types"
@@ -422,7 +423,7 @@ class FileWriting {
     const stem = (word: string) => word.replace(/(os|as|o|a|es|s)$/, "")
     const forms = theirs.filter((each) => stem(each) === stem(theirs[0]!))
     if (forms.length > 1) return { text: forms[0]!, agree: forms }
-    const at = Math.min(Math.max(ours.indexOf(raw), 0), theirs.length - 1)
+    const at = clamp(ours.indexOf(raw), 0, theirs.length - 1)
     return { text: theirs[at]! }
   }
 
@@ -1137,11 +1138,7 @@ function areForms(alternatives: string[], language: SP.Language): boolean {
   if (alternatives.length < 2 || alternatives.some((each) => /\s/.test(each))) return false
   if (alternatives.every((each) => articleKindOf(each, language))) return true
   // accents aside:  `vacío|vacio|vacía` are one word's forms, written with and without
-  const stem = (word: string) =>
-    word
-      .normalize("NFD")
-      .replace(/\p{M}/gu, "")
-      .replace(/(os|as|o|a|s)$/, "")
+  const stem = (word: string) => withoutAccents(word).replace(/(os|as|o|a|s)$/, "")
   return alternatives.every((each) => stem(each) === stem(alternatives[0]!))
 }
 
@@ -1186,8 +1183,7 @@ function alternativesOf(literal: string | string[]): string[] {
 
 /** `words` without each one that's another's twin but for an accent:  `sí, si` => `sí`. */
 function withoutAccentTwins(words: string[]): string[] {
-  const plain = (word: string) => word.normalize("NFD").replace(/\p{M}/gu, "")
-  return words.filter((word, at) => !words.slice(0, at).some((each) => plain(each) === plain(word)))
+  return words.filter((word, at) => !words.slice(0, at).some((each) => withoutAccents(each) === withoutAccents(word)))
 }
 
 /** The word a language says `not` with, before a verb:  Spanish's `no`. */
@@ -1327,25 +1323,18 @@ function literalAlternatives(rule: P.Rule): string[] {
 /** Every rule inside `rule`, itself too, into `into`. */
 function collectRules(rule: P.Rule, into: Set<P.Rule>): void {
   into.add(rule)
-  for (const child of childRules(rule)) collectRules(child, into)
-}
-
-/** `rule`'s rules, as its syntax built them. */
-function childRules(rule: P.Rule): P.Rule[] {
-  if (rule instanceof P.Repeat) return [rule.rule, rule.delimiter].filter(Boolean) as P.Rule[]
-  if (rule instanceof P.Sequence || rule instanceof P.Choice) return rule.rules ?? []
-  return []
+  for (const child of rule.childRules) collectRules(child, into)
 }
 
 /** Is `inner` `rule`, or inside it? */
 function contains(rule: P.Rule, inner: P.Rule): boolean {
-  return rule === inner || childRules(rule).some((child) => contains(child, inner))
+  return rule === inner || rule.childRules.some((child) => contains(child, inner))
 }
 
 /** The first rule in `rule`'s syntax (itself included) that passes `test`. */
 function findRule(rule: P.Rule, test: (rule: P.Rule) => boolean): P.Rule | undefined {
   if (test(rule)) return rule
-  for (const child of childRules(rule)) {
+  for (const child of rule.childRules) {
     const found = findRule(child, test)
     if (found) return found
   }
@@ -1359,7 +1348,7 @@ function hasSlot(rule: P.Rule): boolean {
 
 /** Does `rule` name any group inside it, by a name of its own (`name:`)? */
 function hasNamedGroups(rule: P.Rule): boolean {
-  return childRules(rule).some((child) => !!findRule(child, (each) => !!each.matchGroup))
+  return rule.childRules.some((child) => !!findRule(child, (each) => !!each.matchGroup))
 }
 
 /** The groups `rule` fills:  each named one inside it, and each subrule's (by its rule's name). */
@@ -1368,7 +1357,7 @@ function namedGroupsIn(rule: P.Rule): string[] {
   const visit = (each: P.Rule) => {
     if (each.matchGroup) names.push(each.matchGroup)
     else if (each instanceof P.Subrule && !each.zeroWidthRule) names.push(BODY_KEYWORDS[each.rule] ? "body" : each.rule)
-    if (!each.matchGroup) childRules(each).forEach(visit)
+    if (!each.matchGroup) each.childRules.forEach(visit)
   }
   visit(rule)
   return names
@@ -1387,13 +1376,11 @@ function saysWords(rule: P.Rule, text: string): boolean {
     if (each instanceof P.Literal) alternativesOf(each.literal).forEach((word) => words.add(word))
     else if (each instanceof P.Literals)
       each.literals.forEach((literal) => alternativesOf(literal.literal).forEach((word) => words.add(word)))
-    childRules(each).forEach(visit)
+    each.childRules.forEach(visit)
   }
   visit(rule)
   if (!words.size) return false
-  const escaped = [...words]
-    .sort((a, b) => b.length - a.length)
-    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  const escaped = [...words].sort((a, b) => b.length - a.length).map(escapeRegExp)
   return new RegExp(`^(?:${escaped.join("|")}|\\s)+$`, "u").test(text)
 }
 

@@ -148,6 +148,17 @@ describe("withoutComments()", () => {
     expect(withoutComments("it isn't red // yet", "spell")).toBe("it isn't red")
     expect(withoutComments("// foo", "spell")).toBe("// foo")
   })
+
+  test("javascript:  read by oxc's parser, so a comment's look-alike in a template or JSX text stays", () => {
+    expect(withoutComments("const url = `http://x/${page /* the page */}`", "js")).toBe(
+      "const url = `http://x/${page }`"
+    )
+    expect(withoutComments("const a = <a>see // here</a> // a link", "js")).toBe("const a = <a>see // here</a>")
+  })
+
+  test("spell:  read by spell's own tokenizer, so its `--` comments go too", () => {
+    expect(withoutComments("set x to 1 -- the first", "spell")).toBe("set x to 1")
+  })
 })
 
 describe("purposeOf()", () => {
