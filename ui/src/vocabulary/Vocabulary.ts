@@ -449,7 +449,7 @@ export class Vocabulary {
   /**
    * Event `name`'s name under `prefix`, `translated` when the dictionary names it.
    * - One of Spell UI's own (`ui-change`) takes the prefix:  `es-change`, or `es-cambio` translated.
-   * - Another package's (`spell-open`, of the `<spell-app>` component pack) keeps its name, unless translated:
+   * - Another package's (`spell-open`, of the `<spell-viewer>` component pack) keeps its name, unless translated:
    *   a tag outside Spell UI names its events as it likes, and the page listens for them by that name.
    */
   private static eventName(name: string, prefix: string, translated: string | undefined): string {

@@ -295,7 +295,7 @@ import "spell-ui/ui-root"
 Then the same `<ui-root>` markup, in your page or in your components' templates.
 
 Today that works inside the kit, under the name every Spell repo uses, `spell-ui/components/ui-root`:
-Vite reads Spell UI's source, as it does for the Spell app's own `<spell-app>` element and for Spell UI's docs site.
+Vite reads Spell UI's source, as it does for the Spell app's own `<spell-viewer>` element and for Spell UI's docs site.
 A program outside the kit can't do that yet:
 inside it, Spell UI's entries are its TypeScript source, which only the kit's one install resolves.
 
@@ -336,7 +336,7 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 - A promise:  `root.component.settled` resolves with the same failures, once it's ready.
   An outer root waits on an inner one.
 - Roots nest:  an inner root inherits the outer one's settings, and changes only what it names.
-- A subclass is a root too:  the Spell app's own `<spell-app>` element is one, loading its own tags the same way.
+- A subclass is a root too:  the Spell app's own `<spell-viewer>` element is one, loading its own tags the same way.
 - Solid's context can't cross into a custom element, so a root carries your app's data instead:
   `root.appContext = value` (`<ui-root appContext={value}>` in Solid), read by every component inside.
   Each reads it once, when it's built, so set it before the elements inside first connect.

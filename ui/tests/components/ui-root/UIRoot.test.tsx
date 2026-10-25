@@ -114,7 +114,7 @@ describe("<ui-root> loading on demand", () => {
 // ## A subclass
 ////////////////
 
-describe("a subclass of `UIRoot`, under its own tag (as `<spell-app>`)", () => {
+describe("a subclass of `UIRoot`, under its own tag (as `<spell-viewer>`)", () => {
   /** Defines `<x-own-*>` tags as they load:  what `OwnRoot.ownTagLoader()` was asked for. */
   const ownLoads: string[] = []
 
