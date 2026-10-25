@@ -2,6 +2,8 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
+  readlinkSync,
   realpathSync,
   rmSync,
   symlinkSync,
@@ -130,6 +132,48 @@ function top(): string {
 
 /** The two bundles' folders, as spell-app's root `package.json` names them. */
 const BUNDLES = ["../spell-ui/site/_assets", "../spell-brand/_assets/ui"]
+
+describe("a build script's steps", () => {
+  // Spell UI's packs in its own folder, `ui/`, and a bundle's output folder, `site/out/`
+  const root = mkdtempSync(join(tmpdir(), "assembler-bundle-steps-"))
+  install(root, { "spell-ui": "ui" })
+  put(root, "ui/src/icons/icon-packs/lucide/x.svg", "<svg/>")
+  const out = join(root, "site/out")
+  afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+  test("clearOutput() empties the folder but the icon packs' link;  linkIconPacks() links them, relative", () => {
+    put(root, "site/out/old-chunk.js", "old")
+    put(root, "site/out/.bundle.json", "{}")
+    SRV.Bundle.linkIconPacks(out)
+    SRV.Bundle.linkIconPacks(out)
+    SRV.Bundle.clearOutput(out)
+    expect(readdirSync(out)).toEqual(["icon-packs"])
+    expect(readlinkSync(join(out, "icon-packs"))).toBe("../../ui/src/icons/icon-packs")
+    expect(existsSync(join(out, "icon-packs/lucide/x.svg"))).toBe(true)
+  })
+
+  test("linkIconPacks() points a link from another layout again", () => {
+    rmSync(join(out, "icon-packs"))
+    symlinkSync("../../../ui/src/icons/icon-packs", join(out, "icon-packs"))
+    SRV.Bundle.linkIconPacks(out)
+    expect(readlinkSync(join(out, "icon-packs"))).toBe("../../ui/src/icons/icon-packs")
+  })
+
+  test("sizeReport():  the eager files (the entries and what they import statically), the totals, the lazy chunks", () => {
+    put(root, "site/out/site.js", 'import "./shared.js";const lazy = () => import("./lazy.js")')
+    put(root, "site/out/shared.js", "export const a = 1")
+    put(root, "site/out/lazy.js", "export const b = 2")
+    put(root, "site/out/site.css", "a{}")
+    put(root, "site/out/font.woff2", "font")
+    const lines = SRV.Bundle.sizeReport({ name: "site", folder: out, seconds: 1.23, entries: ["site.css", "site.js"] })
+    expect(lines[0]).toMatch(/^site bundle \(1\.2s\):  .*site\/out\/$/)
+    expect(lines.slice(1, -2).map((line) => line.trim().split(/\s+/)[0])).toEqual(["site.js", "shared.js", "site.css"])
+    expect(lines.at(-2)).toMatch(/all 5 files/)
+    expect(lines.at(-1)).toMatch(/^  biggest lazy:  (lazy\.js|font\.woff2) .*, (lazy\.js|font\.woff2) /)
+    const only = SRV.Bundle.sizeReport({ name: "b", folder: out, seconds: 0, entries: ["site.js"], only: /\.js$/ })
+    expect(only.at(-2)).toMatch(/all 3 files/)
+  })
+})
 
 describe("Bundle.all()", () => {
   const dir = top()

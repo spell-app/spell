@@ -54,11 +54,14 @@ export function isBrowser() {
 ////////////////
 
 /**
- * Resolve on the next animation frame, with its timestamp.
- * - Use to let layout / style settle, e.g. after inserting an element and before measuring it.
+ * Resolve on the next animation frame, with its timestamp;  `count`:  after that many frames, with the last one's.
+ * - Use to let layout / style settle, e.g. after inserting an element and before measuring it
+ *   (an element drawn on a microtask, then rendered on the next frame:  `nextFrame(2)`).
  */
-export function nextFrame(): Promise<number> {
-  return new Promise((resolve) => requestAnimationFrame(resolve))
+export async function nextFrame(count = 1): Promise<number> {
+  let time = performance.now()
+  for (let left = count; left > 0; left--) time = await new Promise<number>((resolve) => requestAnimationFrame(resolve))
+  return time
 }
 
 ////////////////

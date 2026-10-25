@@ -467,6 +467,7 @@ export const AriaNames = {
   role: "role", // role
   busy: "ariaBusy", // aria-busy
   checked: "ariaChecked", // aria-checked
+  colSpan: "ariaColSpan", // aria-colspan
   current: "ariaCurrent", // aria-current
   disabled: "ariaDisabled", // aria-disabled
   hidden: "ariaHidden", // aria-hidden
