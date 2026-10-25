@@ -362,6 +362,279 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-action/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIAction",
+          "tagName": "ui-action",
+          "customElement": true,
+          "summary": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.",
+          "description": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.",
+          "attributes": [
+            {
+              "name": "color",
+              "description": "Menu:  hue of the item while selected (`red active item`).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\""
+              },
+              "fieldName": "color"
+            },
+            {
+              "name": "position",
+              "description": "Menu:  `right` pushes the item (and what follows) to the far end.",
+              "type": {
+                "text": "\"left\" | \"right\""
+              },
+              "fieldName": "position"
+            },
+            {
+              "name": "value",
+              "description": "Value;  defaults to `text`.  Ordered list:  shown as the marker.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "text",
+              "description": "Dropdown:  text;  defaults to the text content.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "text"
+            },
+            {
+              "name": "description",
+              "description": "Dropdown:  secondary text, shown at the end.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "description"
+            },
+            {
+              "name": "icon",
+              "description": "Icon name, shown before the text.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "icon"
+            },
+            {
+              "name": "image",
+              "description": "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "image"
+            },
+            {
+              "name": "flag",
+              "description": "Dropdown:  country code, shown as a flag before the text.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "flag"
+            },
+            {
+              "name": "href",
+              "description": "List / menu:  renders a link (`<a>`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "href"
+            },
+            {
+              "name": "target",
+              "description": "Link target, with `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "link",
+              "description": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be chosen or followed.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "selected",
+              "description": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "selected"
+            },
+            {
+              "name": "fitted",
+              "description": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.",
+              "type": {
+                "text": "boolean | \"horizontally\" | \"vertically\""
+              },
+              "fieldName": "fitted"
+            },
+            {
+              "name": "type",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).",
+              "type": {
+                "text": "\"item\" | \"header\" | \"divider\""
+              },
+              "default": "\"item\"",
+              "fieldName": "type"
+            },
+            {
+              "name": "shortcut",
+              "description": "Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "shortcut"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "action",
+              "description": "PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu."
+            },
+            {
+              "name": "icon",
+              "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "item",
+              "description": "List / menu:  the item box (`<a>`, `<button>` or `<div>`)."
+            },
+            {
+              "name": "icon",
+              "description": "List / menu:  the icon box of the `icon` shorthand."
+            },
+            {
+              "name": "image",
+              "description": "List / menu:  the `<img>` of the `image` shorthand."
+            },
+            {
+              "name": "title",
+              "description": "The action's title, before its keys."
+            },
+            {
+              "name": "shortcut",
+              "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "selected",
+              "description": "Chosen (`selected` or `active`)."
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be chosen."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIAction",
+          "declaration": {
+            "name": "UIAction",
+            "module": "src/components/ui-action/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-action",
+          "declaration": {
+            "name": "UIAction",
+            "module": "src/components/ui-action/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-ad/index.ts",
       "declarations": [
         {

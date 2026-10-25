@@ -322,6 +322,11 @@
       "types": "./dist-types/src/components/ui-transition/index.d.ts",
       "default": "./src/components/ui-transition/index.ts"
     },
+    "./components/ui-action": {
+      "spell-ui-source": "./src/components/ui-action/index.ts",
+      "types": "./dist-types/src/components/ui-action/index.d.ts",
+      "default": "./src/components/ui-action/index.ts"
+    },
     "./components/ui-toolbar": {
       "spell-ui-source": "./src/components/ui-toolbar/index.ts",
       "types": "./dist-types/src/components/ui-toolbar/index.d.ts",

@@ -374,6 +374,316 @@ export interface UIAccordionJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIAccordionEventMap>>, keyof UIAccordionAttributes>,
     UIAccordionAttributes {}
 
+/** `<ui-action>`'s own attributes, from its vocabulary. */
+export interface UIActionAttributes {
+  /**
+   * Menu:  hue of the item while selected (`red active item`).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   */
+  color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+  /**
+   * Menu:  `right` pushes the item (and what follows) to the far end.
+   * - takes:  `left` · `right`
+   */
+  position?: "left" | "right"
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
+  "prop:position"?: "left" | "right"
+  /**
+   * Value;  defaults to `text`.  Ordered list:  shown as the marker.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
+  /**
+   * Dropdown:  text;  defaults to the text content.
+   * - takes:  text
+   */
+  text?: string
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
+  "prop:text"?: string
+  /**
+   * Dropdown:  secondary text, shown at the end.
+   * - takes:  text
+   */
+  description?: string
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
+  "prop:description"?: string
+  /**
+   * Icon name, shown before the text.
+   * - takes:  icon name
+   */
+  icon?: string
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
+  "prop:icon"?: string
+  /**
+   * Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.
+   * - takes:  text
+   */
+  image?: string
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
+  "prop:image"?: string
+  /**
+   * Dropdown:  country code, shown as a flag before the text.
+   * - takes:  text
+   */
+  flag?: string
+  /**
+   * `flag`, as the DOM element's property.
+   * @deprecated write `flag` -- `prop:` stays only for compiled spell
+   */
+  "prop:flag"?: string
+  /**
+   * List / menu:  renders a link (`<a>`).
+   * - takes:  text
+   */
+  href?: string
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
+  "prop:href"?: string
+  /**
+   * Link target, with `href`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.
+   * - takes:  flag (present / absent)
+   */
+  link?: boolean | ""
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: boolean | ""
+  /**
+   * Can't be chosen or followed.
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.
+   * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: boolean | ""
+  /**
+   * Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.
+   * - takes:  flag, or `horizontally` · `vertically`
+   */
+  fitted?: boolean | "" | "horizontally" | "vertically"
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
+  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  /**
+   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).
+   * - takes:  `item` · `header` · `divider`
+   * - default:  `item`
+   */
+  type?: "item" | "header" | "divider"
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
+  "prop:type"?: "item" | "header" | "divider"
+  /**
+   * PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  action?: unknown
+  /**
+   * PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `action` -- `prop:` stays only for compiled spell
+   */
+  "prop:action"?: unknown
+  /**
+   * Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+}
+
+/** `<ui-action>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIActionJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIActionAttributes>, UIActionAttributes {}
+
 /** `<ui-actions>`'s own attributes, from its vocabulary. */
 export interface UIActionsAttributes {
   /**
@@ -28025,6 +28335,14 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-accordion": UIAccordionJSXAttributes
       /**
+       * `<ui-action>`:  A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.
+       * - also known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut
+       * - slots:
+       *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
+       *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
+       */
+      "ui-action": UIActionJSXAttributes
+      /**
        * `<ui-actions>`:  Actions a person can take:  a modal's or toast's buttons, a comment's reply links.
        * - also known as:  footer buttons, button bar, dialog actions
        * - slots:
@@ -28891,6 +29209,7 @@ export interface UIEventMap {
 declare global {
   interface HTMLElementTagNameMap {
     "ui-accordion": UIHTMLElement<UIAccordionEventMap>
+    "ui-action": HTMLElement
     "ui-actions": HTMLElement
     "ui-ad": HTMLElement
     "ui-author": HTMLElement

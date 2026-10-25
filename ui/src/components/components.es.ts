@@ -27,6 +27,7 @@ import { adEs } from "spell-ui/components/ui-ad/UIAd.es"
 import { breadcrumbEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.es"
 import { breadcrumbSectionEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection.es"
 import { buttonEs } from "spell-ui/components/ui-button/UIButton.es"
+import { actionEs } from "spell-ui/components/ui-action/UIAction.es"
 import { buttonsEs } from "spell-ui/components/ui-button/UIButtons.es"
 import { orEs } from "spell-ui/components/ui-button/UIOr.es"
 import { calendarEs } from "spell-ui/components/ui-calendar/UICalendar.es"
@@ -669,6 +670,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   nagEs,
   panelEs,
   actionsEs,
+  actionEs,
   authorEs,
   avatarEs,
   contentEs,

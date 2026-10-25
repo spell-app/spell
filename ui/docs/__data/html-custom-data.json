@@ -228,6 +228,329 @@
       ]
     },
     {
+      "name": "ui-action",
+      "description": {
+        "kind": "markdown",
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  hue of the item while selected (`red active item`).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            }
+          ]
+        },
+        {
+          "name": "position",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  `right` pushes the item (and what follows) to the far end.\n\nTakes:  `left` · `right`"
+          },
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "Value;  defaults to `text`.  Ordered list:  shown as the marker.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "text",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  text;  defaults to the text content.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "description",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  secondary text, shown at the end.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "icon",
+          "description": {
+            "kind": "markdown",
+            "value": "Icon name, shown before the text.\n\nTakes:  icon name"
+          }
+        },
+        {
+          "name": "image",
+          "description": {
+            "kind": "markdown",
+            "value": "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "flag",
+          "description": {
+            "kind": "markdown",
+            "value": "Dropdown:  country code, shown as a flag before the text.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "List / menu:  renders a link (`<a>`).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Link target, with `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be chosen or followed.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "selected",
+          "description": {
+            "kind": "markdown",
+            "value": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "fitted",
+          "description": {
+            "kind": "markdown",
+            "value": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.\n\nTakes:  flag, or `horizontally` · `vertically`"
+          },
+          "values": [
+            {
+              "name": "horizontally"
+            },
+            {
+              "name": "vertically"
+            }
+          ]
+        },
+        {
+          "name": "type",
+          "description": {
+            "kind": "markdown",
+            "value": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).\n\nTakes:  `item` · `header` · `divider`\nDefault:  `item`"
+          },
+          "values": [
+            {
+              "name": "item"
+            },
+            {
+              "name": "header"
+            },
+            {
+              "name": "divider"
+            }
+          ]
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "ui-actions",
       "description": {
         "kind": "markdown",

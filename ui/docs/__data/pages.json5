@@ -6,6 +6,11 @@
       "summary": "An accordion allows users to toggle the display of sections of content.",
       "status": "done"
     },
+    "ui-action": {
+      "title": "Action",
+      "summary": "An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.",
+      "status": "done"
+    },
     "ui-ad": {
       "title": "Advertisement",
       "summary": "An ad displays third-party promotional content.",

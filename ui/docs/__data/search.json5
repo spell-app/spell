@@ -309,6 +309,25 @@
       ]
     },
     {
+      "path": "ui-action.html",
+      "title": "Action",
+      "summary": "An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.",
+      "tag": "ui-action",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-menu","title":"Menu","parent":0},
+        {"id":"examples-types-toolbar","title":"Toolbar","parent":0},
+        {"id":"examples-states","title":"States","tab":"examples"},
+        {"id":"examples-states-disabled-and-selected","title":"Disabled and selected","parent":3},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-actions.html",
       "title": "Actions",
       "summary": "Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.",

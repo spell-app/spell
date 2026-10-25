@@ -443,6 +443,302 @@
       "href": "ui-accordion.html"
     },
     {
+      "tag": "ui-action",
+      "name": "Action",
+      "folder": "ui-action",
+      "topics": [
+        "menus",
+        "buttons",
+        "controls"
+      ],
+      "aka": [
+        "action",
+        "command",
+        "menu item",
+        "toolbar button",
+        "context menu item",
+        "keyboard shortcut"
+      ],
+      "description": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.",
+      "noun": "item",
+      "attributes": [
+        {
+          "name": "color",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black"
+          ],
+          "valueSet": "hues",
+          "description": "Menu:  hue of the item while selected (`red active item`)."
+        },
+        {
+          "name": "position",
+          "kind": "valueOnly",
+          "values": [
+            "left",
+            "right"
+          ],
+          "description": "Menu:  `right` pushes the item (and what follows) to the far end."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "Value;  defaults to `text`.  Ordered list:  shown as the marker."
+        },
+        {
+          "name": "text",
+          "kind": "string",
+          "description": "Dropdown:  text;  defaults to the text content."
+        },
+        {
+          "name": "description",
+          "kind": "string",
+          "description": "Dropdown:  secondary text, shown at the end."
+        },
+        {
+          "name": "icon",
+          "kind": "icon",
+          "description": "Icon name, shown before the text."
+        },
+        {
+          "name": "image",
+          "kind": "string",
+          "description": "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view."
+        },
+        {
+          "name": "flag",
+          "kind": "string",
+          "description": "Dropdown:  country code, shown as a flag before the text."
+        },
+        {
+          "name": "href",
+          "kind": "string",
+          "description": "List / menu:  renders a link (`<a>`)."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "description": "Link target, with `href`."
+        },
+        {
+          "name": "link",
+          "kind": "keyOnly",
+          "description": "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover."
+        },
+        {
+          "name": "disabled",
+          "kind": "keyOnly",
+          "description": "Can't be chosen or followed."
+        },
+        {
+          "name": "selected",
+          "kind": "keyOnly",
+          "description": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted."
+        },
+        {
+          "name": "fitted",
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "horizontally",
+            "vertically"
+          ],
+          "description": "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding."
+        },
+        {
+          "name": "type",
+          "kind": "enum",
+          "values": [
+            "item",
+            "header",
+            "divider"
+          ],
+          "default": "item",
+          "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown)."
+        },
+        {
+          "name": "action",
+          "kind": "json",
+          "reflect": false,
+          "description": "PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu."
+        },
+        {
+          "name": "icon",
+          "description": "List / menu:  replaces the `icon` shorthand's glyph."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "item",
+          "description": "List / menu:  the item box (`<a>`, `<button>` or `<div>`)."
+        },
+        {
+          "name": "icon",
+          "description": "List / menu:  the icon box of the `icon` shorthand."
+        },
+        {
+          "name": "image",
+          "description": "List / menu:  the `<img>` of the `image` shorthand."
+        },
+        {
+          "name": "title",
+          "description": "The action's title, before its keys."
+        },
+        {
+          "name": "shortcut",
+          "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
+        }
+      ],
+      "states": [
+        {
+          "name": "selected",
+          "description": "Chosen (`selected` or `active`)."
+        },
+        {
+          "name": "disabled",
+          "description": "Can't be chosen."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "keyControl",
+          "text": "Ctrl",
+          "description": "The Control key's cap, away from a Mac."
+        },
+        {
+          "key": "keyShift",
+          "text": "Shift",
+          "description": "The Shift key's cap, away from a Mac."
+        },
+        {
+          "key": "keyAlt",
+          "text": "Alt",
+          "description": "The Alt key's cap, away from a Mac."
+        },
+        {
+          "key": "keySpace",
+          "text": "Space",
+          "description": "The space bar's cap."
+        }
+      ],
+      "mainTag": "ui-action",
+      "main": true,
+      "page": true,
+      "href": "ui-action.html"
+    },
+    {
       "tag": "ui-actions",
       "name": "Actions",
       "folder": "ui-parts",
@@ -29820,6 +30116,18 @@
           "type": "time"
         }
       ]
+    },
+    "ui-action": {
+      "folder": "ui-action",
+      "mainTag": "ui-action",
+      "title": "Action",
+      "summary": "An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-action"
+      ],
+      "tokens": []
     },
     "ui-ad": {
       "folder": "ui-ad",
