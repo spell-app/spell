@@ -262,6 +262,23 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - A property's aliases with no body are its `alias=`, as many as it has:
   `<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>`.
 
+**`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
+
+```html
+<text slot="right">
+	<if its active count is 0>All done<otherwise>{its active count} to do</>
+</text>
+```
+
+- A flip keeps the element, the same node with its state and focus;  only its `hidden` changes.
+  At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes.
+- Text and the web's own elements are `hidden="until-found"`, so find-in-page still reaches them;
+  each run of text and holes gets a `<span>` of its own to hide.
+- A Spell UI element takes its plain `hidden`:  its host has no box of its own, where the browser's until-found
+  would draw it all the same.
+- Code spell writes the same tags, in its markup:  the same program.  Spanish says `<si ...>`, `<si no>`.
+- A branch in no element is an error that says to write `if ...` on a line of its own.
+
 **`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
 or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
 
@@ -307,7 +324,6 @@ its body a drawing of markdown, markup and examples, with templates of its own.
   A one-of value read bare there can be taken for an alias of the same word (`is done`):
   the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.
 - A `<spellx>` block back inside a `<spell>` chunk.
-- A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - Completion in a tag's head offers types, not spellx's own words.
 
