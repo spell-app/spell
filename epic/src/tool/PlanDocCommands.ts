@@ -1,11 +1,11 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { WorkTime } from "spell-epic/command/WorkTime"
 import { Markup } from "spell-epic/markup"
 import { PageStages } from "spell-epic/phases"
-import { atDepth } from "spell-epic/tools/pages.js"
+import { fromTemplate } from "spell-epic/tools/pages.js"
 import {
   OPEN_KINDS,
   PlanDocError,
@@ -72,7 +72,7 @@ import { TestCommands } from "./TestCommands"
  * - Node only:  NOT in the `spell-epic` barrel, imported by path (`spell-epic/tool/PlanDocCommands`).
  *   - Runs the docs tools' scripts as children, as their command lines run them:
  *     the docs index, `check-spell.js`, `open.js`
- *   - Imports their helpers (`tools/pages.js` `atDepth()`).
+ *   - Imports their helpers (`tools/pages.js` `fromTemplate()`).
  * - From `src/tools/plan-doc.js`'s command line (epic `epic-components`, P7), which now forwards here.
  ****************/
 export class PlanDocCommands {
@@ -501,12 +501,8 @@ export class PlanDocCommands {
       branch: files.git("branch", "--show-current") || "(detached)",
       worktree: files.checkoutRoot
     }
-    // `atDepth()`:  the template's asset paths, pack and site header
-    // for the doc's own depth (`epics/<name>/`:  2)
-    const fixed: string = atDepth(
-      readFileSync(files.template, "utf8"),
-      relative(files.content, file).split(sep).length - 1
-    )
+    // `fromTemplate()`:  an older template's asset paths, pack and site header;  its links are root paths
+    const fixed: string = fromTemplate(readFileSync(files.template, "utf8"))
     const html = fixed
       .replace(/\{\{(\w+)\}\}/g, (whole: string, key: string) =>
         key in fill ? PlanMarkup.escapeAll(fill[key]) : whole
@@ -838,7 +834,8 @@ export class PlanDocCommands {
    * `lint`:  structural problems, then the browser check;  exit code 1 on any.
    * - a split doc is checked WHOLE (`read()` assembles it):  ids and `#id` links across skeleton and parts
    * - links:  `SRV.Linker.check()` on the whole doc, at the page's folder, so the parts' links are checked too
-   *   (a part's links are written relative to `parts/`, and rebased when assembled)
+   *   (a part's links are root paths since epic `epic-engine` P46;  an older part's, relative to `parts/`, are rebased
+   *   when assembled);  a relative one is refused (`relative:  ../x -- write /x`)
    *   - printed (`LINK:`), failing only with `--links`
    *   - and its short addresses and `<epic-link>`s:
    *     a saga, page or id that isn't there, an epic under a saga it doesn't name (`EpicTargets.problemsIn()`)

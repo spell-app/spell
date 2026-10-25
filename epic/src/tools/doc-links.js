@@ -6,13 +6,17 @@
  *   yarn tsx tools/doc-links.js <folder>/<doc>.html ...           -- add links (idempotent)
  *   yarn tsx tools/doc-links.js --check <folder>/<doc>.html ...   -- verify, exit 1 on problems
  *   ... --root <checkout> ...                                     -- links resolve in that checkout, not this one
+ *   yarn tsx tools/doc-links.js --root-links [--dry-run] <file> ...  -- ONLY the relative links as root paths
+ * - `--root-links` (epic `epic-engine` P46):  the `root-links` rewrite (`RootLinks.rewrite()`) on any page or Markdown
+ *   file, every other byte kept:  for the files `epic migrate` doesn't walk (the repos' own pages, the templates,
+ *   scratch copies);  prints each file it changed and every link it couldn't place
  * - This file is the command line, on files, of `spell/server`'s `Linker` (epic `epic-components`, P7).
  *   - the rules live there:  what becomes a link, how a link gets its target, what `--check` verifies
  *   - shared with the `epic` tool (`src/tool/`)
  * - `--root`:  for a copy of the pages beside a copy of the code (a dry run of `relocate.js relink`, say)
  *   - version control's ignores are that checkout's, so it should be a git repo with the repo's `.gitignore`
- * - A page in the CONTENT folder links as served under the checkout that serves it (`contentLinker`, epic
- *   `epic-engine` I22):  this one, or spell-app's for spell-epic's own epics
+ * - Every page links as served under the checkout that serves it (epic `epic-engine` I22, P46):  ROOT PATHS from
+ *   there (`/spell-ui/x.ts`), the same from any folder
  * - Runs under `tsx`:  `spell/server`'s files import each other without extensions, which plain `node` can't load.
  *   - the tools that run it (`update.js`, `pages.js` `tidy()`, goals' check) go through `pages.js` `docLinksRun()`
  * - A component set's pages link as from their SERVED address,
@@ -25,13 +29,14 @@
  * - NOTE:  ported from `doc-links.py` on 2026-10-03;  makes the same edits to every page.
  */
 import { readFileSync, writeFileSync } from "node:fs"
-import { basename, dirname, relative, resolve as resolvePath } from "node:path"
+import { basename, dirname, join, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { SRV } from "spell/server"
 import { RepoList } from "spell-epic/server/RepoList"
 import { EpicTargets } from "spell-epic/tool/EpicTargets"
 import { ServedFolders } from "spell-epic/tool/ServedFolders"
+import { RootLinks } from "spell-epic/tool/migrations/RootLinks"
 
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
 
@@ -45,35 +50,29 @@ function servedUnder(root) {
 }
 
 /**
- * One linker for this checkout (or the command line's `--root`):  its bare-name index is built once per process.
+ * ONE linker, under the checkout the page server serves (`RepoList.linkRootOf()`:  the kit, for a child repo's
+ * checkout;  or the command line's `--root`):  its bare-name index is built once per process.
+ * - every link is a ROOT PATH from there (epic `epic-engine` P46):  a content page's, and this repo's own pages'
+ *   (Epic UI's, the templates), `/spell-epic/src/...` alike
+ * - before P46, this repo's own pages linked from this checkout, and only the content folder's from the kit (I22)
  */
-let linker = new SRV.Linker(ROOT, { served: servedUnder(ROOT) })
+let linker = linkerUnder(new RepoList().linkRootOf(ROOT))
 
-/**
- * The linker for pages in the CONTENT folder (epic `epic-engine` I22):  `linker`, unless the content is served under
- * another checkout (`RepoList.linkRootOf()`).
- * - spell-epic's own epics:  their pages are spell-app's content, served by spell-app's page server under spell-app's
- *   checkout, so their links are written and checked from there (`../../../spell-epic/src/...`), never as this
- *   checkout's (`../../../src/...`, nothing there when served)
- */
-let contentLinker = linkerUnder(new RepoList().linkRootOf(ROOT))
-
-/** A linker under checkout `root`:  `linker` when it's `linker`'s. */
-function linkerUnder(root) {
-  return resolvePath(root) === linker.root ? linker : new SRV.Linker(root, { served: servedUnder(root) })
+/** A linker under checkout `root`, told its served folders:  a new one each call, so callers keep theirs. */
+export function linkerUnder(root) {
+  return new SRV.Linker(resolvePath(root), { served: servedUnder(root) })
 }
 
-/** The content folder, real:  a page in it takes `contentLinker`, whichever link it's reached through. */
+/** The content folder, real:  a page in it is taken by its real folder, whichever link it's reached through. */
 const REAL_CONTENT = SRV.RealPath.of(CONTENT)
 
 /**
- * The linker for a page in `docDir`, and that folder as it takes it:
- * a content page's (`contentLinker`), its folder real;  else `linker`, the folder as given.
+ * The linker for a page in `docDir`, and that folder as it takes it:  a content page's folder real, so it's laid
+ * under the checkout as served;  any other as given.
  */
-function linkerFor(docDir) {
-  if (contentLinker === linker) return { linker, dir: docDir }
+export function linkerFor(docDir) {
   const real = SRV.RealPath.of(resolvePath(docDir))
-  if (real === REAL_CONTENT || real.startsWith(`${REAL_CONTENT}/`)) return { linker: contentLinker, dir: real }
+  if (real === REAL_CONTENT || real.startsWith(`${REAL_CONTENT}/`)) return { linker, dir: real }
   return { linker, dir: docDir }
 }
 
@@ -106,6 +105,22 @@ export function linkify(path) {
 export function linkText(text, docDir) {
   const { linker, dir } = linkerFor(docDir)
   return linker.link(text, linker.servedDir(dir))
+}
+
+/**
+ * The `root-links` rewrite of the file at `path`, IN PLACE unless `dryRun`:  its relative links as root paths
+ * (`RootLinks.rewrite()`);  prints a line if it changed, then each link it couldn't place.  Returns how many links.
+ */
+export function rootLinkify(path, { dryRun = false } = {}) {
+  const { linker: owner, dir } = linkerFor(dirname(resolvePath(path)))
+  const before = readFileSync(path, "utf8")
+  const { text, changes } = RootLinks.rewrite(before, join(dir, basename(path)), owner)
+  if (!changes.length) return 0
+  if (!dryRun && text !== before) writeFileSync(path, text)
+  console.log(`${basename(path)}:  ${changes.length} links ${dryRun ? "would be " : ""}root paths`)
+  for (const change of changes.filter((each) => each.kind === "broken" || each.kind === "outside"))
+    console.log(`    ${change.kind === "broken" ? "BROKEN" : "above the root"}:  ${change.from} -> ${change.to}`)
+  return changes.length
 }
 
 ////////////////
@@ -144,7 +159,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const root = at >= 0 ? args[at + 1] : undefined
   if (root) {
     linker = new SRV.Linker(resolvePath(root), { served: servedUnder(ROOT) })
-    contentLinker = linker
     targets = new EpicTargets(resolvePath(root))
   }
   const files = args.filter((arg, i) => !arg.startsWith("--") && !(at >= 0 && i === at + 1))
@@ -160,5 +174,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     process.exit(1)
   }
   if (args.includes("--check")) process.exit(files.map(check).every(Boolean) ? 0 : 1)
+  if (args.includes("--root-links")) {
+    const dryRun = args.includes("--dry-run")
+    const links = files.reduce((sum, file) => sum + rootLinkify(file, { dryRun }), 0)
+    console.log(`root links:  ${links} in ${files.length} files${dryRun ? ", nothing written" : ""}`)
+    process.exit(0)
+  }
   for (const file of files) linkify(file)
 }

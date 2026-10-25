@@ -32,7 +32,7 @@ beforeAll(() => {
 
 afterAll(() => rmSync(docs, { recursive: true, force: true }))
 
-test("new:  scratch and epic pages from the tool's template, in the epics pack's elements, fixed for their depth", () => {
+test("new:  scratch and epic pages from the tool's template, in the epics pack's elements, the same at any depth", () => {
   const scratch = createPage(docs, "pick-layout", { title: "Pick a layout" })
   expect(scratch).toBe(join(docs, "pages/details/pick-layout.html"))
   const html = readFileSync(scratch, "utf8")
@@ -41,7 +41,9 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   expect(html).toContain('<script src="/_epic/assets/spell-ui.js">')
   expect(html).toContain('<ui-components source="/_epic/pack/epics.pack.js">')
   expect(html).not.toMatch(/details\.(css|js)"/)
-  expect(html).toContain('root="../.."')
+  // root paths, the same from any folder;  no site header `root` (epic `epic-engine` P46)
+  expect(html).toContain("<spell-site-header></spell-site-header>")
+  expect(html).toContain('link="/pages/index.html"')
   expect(html).not.toContain("TEMPLATE:")
   expect(html).toMatch(/<epic-field label="Asked" data-details-asked>\d{4}-\d\d-\d\d</)
   expect(html).toContain("<epic-send></epic-send>")
@@ -52,7 +54,8 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   const deep = readFileSync(epic, "utf8")
   expect(deep).toContain('href="/_epic/assets/spell-doc.css"')
   expect(deep).toContain('source="/_epic/pack/epics.pack.js"')
-  expect(deep).toContain('root="../../.."')
+  expect(deep).toContain("<spell-site-header></spell-site-header>")
+  expect(deep).toContain('link="/pages/index.html"')
 })
 
 test("new --from:  the whole page from a spec", () => {

@@ -29,7 +29,8 @@ describe("Migrations", () => {
       "taken-in-phase",
       "to-review-marks",
       "changes-after-goal",
-      "item-renames"
+      "item-renames",
+      "root-links"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()

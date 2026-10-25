@@ -350,10 +350,12 @@ export class EpicDocs {
   /**
    * Link `href`, written in the epic page's folder, as a checkout path;  `undefined` for a link out of the checkout,
    * to another site, or within the page.
+   * - a ROOT PATH (`/guides/x.html`, epic `epic-engine` P46) is that path, as the page server serves it
    */
   private pathOf(href: string): string | undefined {
     const bare = href.replace(/[?#].*$/, "")
-    if (!bare || /^[a-z][\w+.-]*:/i.test(bare) || bare.startsWith("/")) return undefined
+    if (!bare || /^[a-z][\w+.-]*:/i.test(bare) || bare.startsWith("//")) return undefined
+    if (bare.startsWith("/")) return decodedOrUndefined(bare.slice(1))
     const path = this.relative(resolve(dirname(this.file), decodeURI(bare)))
     return path.startsWith("..") ? undefined : path
   }
@@ -365,6 +367,15 @@ export class EpicDocs {
   private sharedRoot(): string | undefined {
     const { content, root } = this.files
     return content === resolve(root) ? undefined : content
+  }
+}
+
+/** `path`, URL-decoded;  `undefined` when it won't decode. */
+function decodedOrUndefined(path: string): string | undefined {
+  try {
+    return decodeURI(path)
+  } catch {
+    return undefined
   }
 }
 

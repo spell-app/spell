@@ -127,7 +127,7 @@ export const epicPageVocabulary = {
     {
       name: "durable",
       description:
-        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="../../guides/x.html">X</a>`.'
+        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
     },
     {
       name: "toolbar",

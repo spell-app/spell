@@ -1,10 +1,10 @@
 import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
-import { join, relative, resolve } from "node:path"
+import { dirname, join, relative, resolve } from "node:path"
 
 import { PlanDocError } from "./planDoc.types"
 
-import { ContentRelink, Migrations, PAGE_KINDS, type PageKind } from "./migrations"
+import { ContentRelink, Migrations, PAGE_KINDS, RootLinks, type PageKind } from "./migrations"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 import { PlanDocFiles, type MigrateResult } from "./PlanDocFiles"
 
@@ -25,6 +25,11 @@ import { PlanDocFiles, type MigrateResult } from "./PlanDocFiles"
  * - the epic page's steps:  `Migrations` (`PlanDocFiles.migrate()`)
  * - the other kinds':  the docs tools' `src/tools/migrate.js`
  *   - run as a child `node` as its command line runs it, its output passed on
+ * - and the CONTENT FOLDER's pass of `root-links` (`RootLinks.run()`, epic `epic-engine` P46), after the pages:
+ *   every HTML and Markdown file, parts and details pages included, as plain text;  its census printed
+ *   - on `migrate`, `migrate --all`, `migrate <epic>...` (their folders only), `--step root-links`;  never for one
+ *     `--file` or another kind alone (their own steps do those)
+ *   - an epic whose session runs (`--notify`) keeps its folder:  its session runs `epic migrate <epic>` itself
  * - it takes back the verb `migrate`, which only said "use `convert`" (J38):  `convert` stays the old-markup converter
  * - output through its owner's `print()` / `warn()`;  `run()` resolves to the exit code
  ****************/
@@ -37,6 +42,9 @@ export class MigrateCommands {
    * - given by the `spell` CLI (`epic send`'s `epicSessions()`);  none:  `--notify` refuses
    */
   readonly sessionsOf?: SessionFinder
+
+  /** the epics `--notify` left to their running sessions, on the last `migrateEpics()` */
+  private running: string[] = []
 
   constructor(owner: PlanDocCommands, sessionsOf?: SessionFinder) {
     this.owner = owner
@@ -71,6 +79,8 @@ export class MigrateCommands {
     const epicOnly = step !== undefined && epicStep
     if (kind !== "epic" && !(epicFile && kind === undefined) && !(epicOnly && kind === undefined))
       code = Math.max(code, this.migrateOthers(kind, { file, step, dryRun }))
+    if ((kind === undefined || kind === "epic") && file === undefined && (step === undefined || step === ROOT_LINKS))
+      this.rootContent(names, { dryRun })
     return code
   }
 
@@ -109,6 +119,7 @@ export class MigrateCommands {
     if (notify && !this.sessionsOf)
       throw new PlanDocError("--notify needs the running sessions, which only the `epic` command can see")
     const only = step ? [step] : undefined
+    this.running = []
     const counts = new Map<string, number>()
     const tell: { epic: string; sessions: string[]; steps: string[] }[] = []
     // what `item-renames` renumbered, by epic:  the links on other pages follow (`ContentRelink`)
@@ -123,6 +134,7 @@ export class MigrateCommands {
         ? (await this.sessionsOf!(name)).filter((session) => session.sessionId !== self).map((each) => each.name)
         : []
       const running = sessions.length > 0
+      if (running) this.running.push(name)
       let result: MigrateResult
       try {
         result = await this.files.migrate(file, { only, dryRun: dryRun || running })
@@ -188,6 +200,21 @@ export class MigrateCommands {
     )
   }
 
+  /**
+   * The content folder's `root-links` pass (`RootLinks.run()`):  `names`' epic folders, else every area;  an epic
+   * `--notify` left to its session skipped.  Prints its census (`RootLinks.report()`).
+   */
+  private rootContent(names: string[], { dryRun }: { dryRun: boolean }): void {
+    const { files } = this
+    const folders = names.length ? names.map((name) => relative(files.content, dirname(files.findDoc(name)))) : undefined
+    const census = RootLinks.run(files.content, files.linker, {
+      dryRun,
+      ...(folders && { folders }),
+      skip: this.running.map((name) => `epics/${name}`)
+    })
+    for (const line of RootLinks.report(census, { dryRun })) this.owner.print(line)
+  }
+
   ////////////////
   // ## Other kinds
   ////////////////
@@ -223,11 +250,16 @@ export class MigrateCommands {
   /** Run the docs tool with `args`, in the docs tools' package (`PlanDocFiles.docsPackage`);  its stdout printed, its stderr warned;  its exit code. */
   private runDocsTool(args: string[]): number {
     const { files } = this
-    const run = spawnSync(process.execPath, [join(files.docsTools, "migrate.js"), "--root", files.root, ...args], {
-      cwd: files.docsPackage,
-      encoding: "utf8",
-      env: files.toolEnv
-    })
+    // under `tsx`:  its `root-links` step links through `spell/server`, which plain `node` can't load (`docLinksRun()`)
+    const run = spawnSync(
+      process.execPath,
+      ["--import", "tsx", join(files.docsTools, "migrate.js"), "--root", files.root, ...args],
+      {
+        cwd: files.docsPackage,
+        encoding: "utf8",
+        env: { ...files.toolEnv, TSX_TSCONFIG_PATH: join(files.docsPackage, "tsconfig.json") }
+      }
+    )
     for (const line of (run.stdout ?? "").split("\n").filter(Boolean)) this.owner.print(line)
     for (const line of (run.stderr ?? "").split("\n").filter(Boolean)) this.owner.warn(line)
     return run.status ?? 1
@@ -254,6 +286,9 @@ export type SessionFinder = (epic: string) => Promise<{ name: string; sessionId:
 
 /** The step whose inbox-only fixes count as a change:  comments moved. */
 const LINKS = "links-agree"
+
+/** The step whose content folder's pass runs after the pages (`RootLinks.run()`). */
+const ROOT_LINKS = "root-links"
 
 /** The step that renumbers items:  the links on other pages follow it, and every inbox's comments (`ContentRelink`). */
 const RENUMBERS = "item-renames"

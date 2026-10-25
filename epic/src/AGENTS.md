@@ -609,23 +609,23 @@ Laid out as every set is since P18 of `people-and-orgs`
      ([the component set docs template](../templates/component-set-docs.html))
   2. `yarn site:data`
   - An element added to the pack shows in the side column by itself (under Other, `planned`) once the data is rebuilt.
-- Links are written as from the page's SERVED address (`/components/epics/x.html`):
+- Links are ROOT PATHS, as the kit's page server serves them (epic `epic-engine` P46;  "Links", below):
 
   ```text
-  ../../                             the checkout's root:  spell-app's, which serves the set
-  x.html                             a sibling
-  ../ui/ui-button.html               a Spell UI page
-  ../app/spell-viewer.html              an App UI page
-  ../../spell-epic/src/components/   this repo's files, through spell-app's `spell-epic` link
-  ../../guides/x.html                a page of the content folder
+  x.html                             a sibling:  the page's own folder stays relative
+  /components/ui/ui-button.html      a Spell UI page
+  /components/app/spell-viewer.html  an App UI page
+  /spell-epic/src/components/        this repo's files, from the kit's root
+  /guides/x.html                     a page of the content folder
   /_epic/pack/epics.pack.js          the epics pack, the epic server's engine route (the layout's `<ui-components>`)
+  _assets/site.js                    the site bundle a page loads, below its folder:  stays relative
   ```
 
-  - The layout and footer are served from `__parts/`:  one level deeper, `../../../` to the root.
-  - Before epic `epic-engine` I37 they linked this repo's files at spell-app's old `../../packages/epics/...`.
-  - `doc-links.js` checks them that way, from spell-app's checkout (`--root`), through its `spell-epic` link:
-    `yarn tsx src/tools/doc-links.js --root <spell-app> --check <spell-app>/spell-epic/src/docs/*.html`.
-    - From a worktree:  a `--root` folder shaped like spell-app's, its `spell-epic` the worktree.
+  - The same text in the layout and footer, served from `__parts/`.
+  - Before P46 they were written from the page's served address (`../../spell-epic/...`, `../../../` from `__parts/`);
+    before epic `epic-engine` I37 at spell-app's old `../../packages/epics/...`.
+  - `yarn tsx src/tools/doc-links.js --check src/docs/*.html` checks them, from the kit (its linker is the kit's, the
+    checkout the page server serves).
 - Check a page:  `node src/tools/check-spell.js src/docs/<tag>.html`, from spell-epic's root.
   It loads the page from the page server, at its address.
 - Comments (epic `epic-engine` P2, T3):  Owen comments on these pages as on a guide.
@@ -846,7 +846,7 @@ In `tools/`:
         `engine-asset-paths` (`migrate.js`) moves the saga pages, goal sets and brand page it missed (I63).
     - A page not migrated (a spell-app worktree from before P7) still loads THIS engine's files on the epic server:
       it serves the old paths from the routes (`legacyEnginePath()`).
-    - From `file://`, `check-spell.js` answers the routes from the engine's folders (`engineFileFor()`).
+    - A page from disk had the routes answered from the engine's folders (`engineFileFor()`);  none since P46.
   - `spell-doc.css`:  page layout, and what UI doesn't cover.
     It reaches into widgets via UI tokens and `::part()`.
   - `spell-doc-runtime.js`:  page behaviour.
@@ -969,19 +969,20 @@ In `tools/`:
 
   - It copies it into `guides/` (and for `commands`, its data as `<topic>.json5`).
   - It fixes the `_assets` paths for the page's depth, and lists it in the index.
-- Every page (templates too) starts its `<body>` with the site header, `<spell-site-header root="../..">`.
-  - `root` is the path from the page's folder to the REPO root.
-  - The template tools (`docs new`, `epic create`, `goals new`) set it.
+- Every page (templates too) starts its `<body>` with the site header, `<spell-site-header></spell-site-header>`.
+  - No `root` since epic `epic-engine` P46:  pages are served, never opened from disk, and its links are root paths.
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
   - The element itself is `spell/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
-  - Its tabs:  the content repo's `page-server.json5` `"siteTabs"` on a served page (epic `repo-split` P16);  from disk, the docs bundle's own
-    (`DOCS_TABS` in `spell-ui.entry.js`:  the docs' areas and Epic/UI), epic `repo-split` I4.
+  - Its tabs:  the content repo's `page-server.json5` `"siteTabs"` (epic `repo-split` P16);  the docs bundle gives none
+    of its own since P46 (`DOCS_TABS`, for a page opened from disk, went).
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
-- Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
-  - But the openers (`docs open`, `epic open`) show them from this checkout's PAGE SERVER
+- Pages are SERVED, never opened from disk (epic `epic-engine` P46;  Owen, 2026-10-25:  "Opening files is a no-go for
+  many reasons"):  their links are ROOT PATHS, which mean something only on the page server.
+  - The openers (`docs open`, `epic open`) and `check-spell.js` show them from this checkout's PAGE SERVER
     (`spell server`, see [server's AGENTS.md](../../src/server/AGENTS.md)).
     - It adds live reload, edit mode, and the server-only properties (Spell UI, Editor).
+  - Still one classic bundle, no ES modules:  what the pages load hasn't changed.
   - The exceptions fetch their JSON, so they draw their tables only from the page server:
     a `commands` page, the core reference page and the spell syntax guide.
     - From `file://` each says so, where they'd go.
@@ -1452,7 +1453,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `plan-parts.js`, `inbox.js`, `review-backfill.js`
   - the tool, in turn, uses the docs tools' own code rather than a copy:
     - `BlockAnchors.js`, in `PlanAnchors`
-    - `pages.js`'s `atDepth()` and `planDocIn()`, in `PlanDocCommands` and `PlanDocFiles`
+    - `pages.js`'s `fromTemplate()` and `planDocIn()`, in `PlanDocCommands` and `PlanDocFiles`
 
 ### Review inbox
 
@@ -2176,6 +2177,28 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Links
 
+- Every local link is a ROOT PATH, as the page server serves it (epic `epic-engine` P46;  Owen, 2026-10-25:  "links
+  should NEVER be `../`", and "Root paths.  Opening files is a no-go for many reasons."):
+
+  ```text
+  /spell-ui/src/x.ts                  a repo's file, from the kit's root
+  /guides/server.html                 a page of the content folder
+  /epics/seo/seo.plan.html#t3         an epic page and an id on it
+  /epics/seo/details/q.html           a page BELOW the page's folder:  a root path too
+  q.html                              a file in the page's OWN folder:  stays as written (Owen's Q1)
+  _assets/site.js, parts/p1.html      what a page LOADS from below its folder:  stays, so a worktree's page loads its own
+  ```
+
+  - The same text from any folder:  a part file, a template, an agent's pasted HTML all land where they point.
+  - Pages are served, never opened from disk ("Writing a page"):  nothing keeps a `file://` path working.
+  - On a page under a worktree's address (`/worktrees/<w>/`), a root link opens the WORKTREE's file:  the live client
+    lays it under that address as it's clicked (the kit's `worktreeHref()`;  the site header's tabs follow the same
+    rule).  A hover shows main's address until then, and a link copied by hand points at main.
+  - The tools write nothing else:  `SRV.Linker.link()` turns every relative link it meets into its root path (a
+    broken one at its ONE new home, when a move left one:  `spell-lang/` is `spell-parser/`), on every write.
+  - `doc-links.js --check` and `epic lint` refuse one:  `relative:  ../x.ts -- write /spell-ui/x.ts`.
+  - The pages written before P46:  the migration step `root-links` (`RootLinks`;  `epic migrate --step root-links`
+    for the content folder, `doc-links.js --root-links <file>...` for a repo's own pages).
 - Every reference to a file, folder or external page is a link that opens a NEW TAB.
   - Each destination gets its own named target, so re-clicks reuse that tab.
   - `yarn tsx src/tools/doc-links.js <page>` links `<code>path</code>` references, and targets existing links (idempotent).
@@ -2188,12 +2211,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - one target per destination
     - no nested links
   - The rules themselves live in `spell/server` (`SRV.Linker`):  how a path resolves, which target a link gets.
-  - A page in the CONTENT folder links as it's served:  laid under the checkout that serves it (epic `epic-engine` I22).
-    - spell-app's pages, and spell-epic's own epics too:  spell-app serves that content, so a code name in an
-      epic-engine reply links `../../../spell-epic/src/...` (spell-app's `spell-epic` link), never
-      `../../../src/...`, which leads nowhere there
-    - which checkout:  `RepoList.linkRootOf()`, the registered repo whose content folder it is
-      - for `PlanDocFiles`' linker and `doc-links.js`'s `contentLinker`
+  - Every page links as it's served:  from the checkout that serves it (epic `epic-engine` I22, P46), the kit.
+    - a code name in a spell-epic page links `/spell-epic/src/...`, never `/src/...` (the kit's own)
+    - which checkout:  `RepoList.linkRootOf()`:  the kit for a child repo's checkout
+      - for `PlanDocFiles`' linker and `doc-links.js`'s, one linker for content and repo pages alike
     - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):
       a link to `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
     - links to the engine's old places in spell-app (`packages/epics/...`):  fixed once by the migration step
@@ -2310,14 +2331,14 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - the areas:  `EPICS`, `GUIDES`, `PAGES`, `TEMPLATES`, `BRAND`, `GOALS`, `SAGAS`, `HOME`, `LIST_PAGES`
   - `findPages()`
   - `pageFile()`:  a page argument to its file
-  - `atDepth()`:  a template at a page's depth
+  - `fromTemplate()`:  a template as a new page holds it (its links root paths:  no rebasing by depth since P46)
   - `parseArgs()`:  a tool's command line, `--key value` flags and positionals
   - `tidy()` (link targets + oxfmt), `serialize()`
   - `openInChrome()`, `openInVSCode()`
     - epic pages:  the doc preview, through the spell extension's `DocPreview`
     - `{ view: "review" }`:  the "Review" tab
 - `tools/check-spell.js <page> [outDir] [--base <url>]`, with Playwright:  writes screenshots.
-  - It loads the page from `file://`, or from the page server when the page says `data-spell-needs-server`.
+  - It loads the page from the page server, always (epic `epic-engine` P46):  a page's root links mean nothing from disk.
   - `--base <url>`:  from that server, whatever the page
     - the epic server's `http://127.0.0.1:4848`:
       a page as the side bar shows it, with its comments and the toolbar's bullhorn
@@ -2415,6 +2436,9 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
       - only what the page LOADS:  `<link href>`, `<script src>`, `<ui-components source>`;  a plain link is kept
       - every kind but the epic page's:  the saga pages count as saga pages here (`goal`), since `epic migrate`
         lists only epics' pages;  the sagas', goal sets' and brand areas are walked too
+    - `root-links` (epic `epic-engine` P46):  every local link a root path ("Links");  a TEXT step (`rewrite(text)`,
+      not `run(document)`):  the page never parsed, every other byte kept;  the epic tool's `RootLinks` does the rewrite
+      - so `migrate.js` runs under `tsx` (`MigrateCommands`):  it links through `spell/server`
     - A step's `run(document, { file })` gets the page's path:  for what lies beside it.
     - A step runs on a page only when its `applies()` holds on the page as the steps before left it.
       Notes it returns with nothing changed (what it left, or skipped) are reported all the same.

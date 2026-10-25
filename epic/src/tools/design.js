@@ -5,7 +5,7 @@
  * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]`:
  *   a Claude Design artboard (read from a Design with the Artifact tool) as a page in the content folder
  *   - its `<ui-*>` markup kept, Claude Design's runtime dropped
- *   - the one-file bundle and the site header added for the page's depth
+ *   - the one-file bundle and the site header added
  *   - prints what it couldn't carry
  * - `changed [--json]`:  which files of the built system differ from what was last pushed, and which were removed
  *   - the built system, from `spell design build` + spell-brand's `yarn design:bundle`:
@@ -26,7 +26,7 @@ import { escapeHTML } from "spell/util/string.ts"
 import { localDate } from "spell/util/time.ts"
 import { ENGINE_ROUTES } from "spell-epic/server/server.types.ts"
 import { packageDir } from "./packageDir.ts"
-import { CONTENT, ROOT, pageFile, pagePath } from "./pages.js"
+import { CONTENT, ROOT, pageFile } from "./pages.js"
 
 /**
  * The built design system:  `spell design build` writes it, spell-brand's `yarn design:bundle` adds the bundle.
@@ -106,7 +106,7 @@ async function main(argv) {
  * - holes:  filled from the artboard's `data-props` defaults where it has one;  else left as written, and noted
  * - `onX="{{handler}}"`:  dropped (the page has no `renderVals()`), noted
  * - `<sc-if>` / `<sc-for>`:  unwrapped, their content kept once;  `<dc-import>`:  a comment naming the board
- * - the page:  the one-file bundle and `<spell-site-header>` for its depth, `class="ui-typography"` on body
+ * - the page:  the one-file bundle and `<spell-site-header>`, `class="ui-typography"` on body
  */
 export function pullBoard(source, file, { title, from, board } = {}) {
   const { document } = parseHTML(source)
@@ -144,9 +144,6 @@ export function pullBoard(source, file, { title, from, board } = {}) {
   }
   let body = root.innerHTML.trim()
   body = fillHoles(body, defaults, notes)
-  // the site header's `root`:  up from the page's folder to where the page server serves its page path from, `/`
-  const depth = pagePath(file).split("/").length - 1
-  const up = depth ? Array.from({ length: depth }, () => "..").join("/") : "."
   const name = title ?? document.querySelector("title")?.textContent.trim() ?? basename(file, ".html")
   const stamp = localDate()
   const origin = `pulled from Claude Design${from ? `, ${from}` : ""}${board ? `, board ${board}` : ""}, ${stamp}`
@@ -161,7 +158,8 @@ export function pullBoard(source, file, { title, from, board } = {}) {
     ...head.map((line) => `    ${line}`),
     "  </head>",
     '  <body class="ui-typography">',
-    `    <spell-site-header root="${up}"></spell-site-header>`,
+    // no `root`:  pages are served, never opened from disk (epic `epic-engine` P46)
+    "    <spell-site-header></spell-site-header>",
     `    <!-- ${origin} -->`,
     body,
     "  </body>",

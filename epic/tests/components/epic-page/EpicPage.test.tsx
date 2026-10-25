@@ -130,8 +130,8 @@ describe("<epic-page>", () => {
       crumb.getAttribute("link")
     ])
     expect(crumbs).toEqual([
-      ["Docs", "../../pages/index.html"],
-      ["Sagas", "../../sagas/index.html"]
+      ["Docs", "/pages/index.html"],
+      ["Sagas", "/sagas/index.html"]
     ])
     const lines = Array.from(shadow.querySelectorAll('[part~="meta"] > li'), (li) =>
       li.textContent!.replace(/\s+/g, " ").trim()
@@ -232,8 +232,8 @@ describe("<epic-page>", () => {
         crumb.hasAttribute("selected")
       ])
     ).toEqual([
-      ["Docs", "../../pages/index.html", false],
-      ["Epics", "../../epics/index.html", false]
+      ["Docs", "/pages/index.html", false],
+      ["Epics", "/epics/index.html", false]
     ])
     expect(crumbs.parentElement!.localName).toBe("h1")
     expect(crumbs.nextElementSibling!.textContent).toBe("demo")
@@ -341,8 +341,8 @@ describe("<epic-page>", () => {
       { href: "details/names.html", title: "Boolean names", kind: "choices", updated: "2026-10-12T21:00:00.000Z" },
       { href: "details/analysis.html", title: "Analysis", kind: "details", updated: "2026-10-11T09:00:00.000Z" },
       // epic `epic-workflow` P13:  its guide and the guides it links
-      { href: "../../guides/py.html", title: "The Python Target", kind: "durable", updated: "2026-10-12T09:00:00Z" },
-      { href: "../../guides/targets.html", title: "Targets", kind: "guide", updated: "2026-10-11T09:00:00Z" }
+      { href: "/guides/py.html", title: "The Python Target", kind: "durable", updated: "2026-10-12T09:00:00Z" },
+      { href: "/guides/targets.html", title: "Targets", kind: "guide", updated: "2026-10-11T09:00:00Z" }
     ]
     const fetched = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ pages })))
     const host = await render(page("", ["todo"]))
@@ -355,8 +355,8 @@ describe("<epic-page>", () => {
     expect(Array.from(box.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
       ["details/names.html", "Boolean names"],
       ["details/analysis.html", "Analysis"],
-      ["../../guides/py.html", "The Python Target"],
-      ["../../guides/targets.html", "Targets"]
+      ["/guides/py.html", "The Python Target"],
+      ["/guides/targets.html", "Targets"]
     ])
     expect(Array.from(box.querySelectorAll(".see-also-kind"), (kind) => kind.textContent)).toEqual([
       "choice",
@@ -383,12 +383,12 @@ describe("<epic-page>", () => {
 
   // epic `epic-workflow` P15
   test("its saga:  a meta line linking the saga page, by id until the page server gives its title and purpose", async () => {
-    const saga = { id: "epics", title: "Epic Tooling", purpose: "Epics", href: "../../sagas/epics/epics.saga.html" }
+    const saga = { id: "epics", title: "Epic Tooling", purpose: "Epics", href: "/sagas/epics/epics.saga.html" }
     let answer = (): Response => new Response(JSON.stringify({ pages: [] }))
     const fetched = vi.spyOn(globalThis, "fetch").mockImplementation(async () => answer())
     const host = await render(page(`saga="epics"`, ["todo"]))
     const link = () => host.shadowRoot!.querySelector<HTMLAnchorElement>('[part~="meta"] li.saga a')
-    expect(link()!.getAttribute("href")).toBe("../../sagas/epics/epics.saga.html")
+    expect(link()!.getAttribute("href")).toBe("/sagas/epics/epics.saga.html")
     expect(link()!.textContent).toBe("epics")
     answer = () => new Response(JSON.stringify({ pages: [], saga }))
     const named = await render(page(`saga="epics"`, ["todo"]))

@@ -187,9 +187,9 @@ export class GuideChanges {
     return files.docPath(this.epic)
   }
 
-  /** A link from the epic's epic page (`epics/<epic>/`) to `page` (a page path), with `hash`. */
+  /** A link to `page` (a page path), with `hash`:  its root path, from any folder (epic `epic-engine` P46). */
   private hrefTo(page: string, hash = ""): string {
-    return `../../${page}${hash ? `#${hash}` : ""}`
+    return `/${page}${hash ? `#${hash}` : ""}`
   }
 
   /**

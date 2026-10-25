@@ -115,7 +115,7 @@ export const SEE_ALSO = "see-also"
 
 /** One page in the See Also box, as the page server lists it (`GET /api/epics/pages`:  the tool's `SeeAlso`). */
 export type SeeAlsoLink = {
-  /** from the epic page's folder:  `details/analysis.html`, `../../guides/python-target.html` */
+  /** a root path:  `/epics/seo/details/analysis.html`, `/guides/python-target.html` (epic `epic-engine` P46) */
   href: string
   title: string
   /** its guide, a guide it links, one of its details pages or choice pages */
@@ -135,13 +135,13 @@ export type SagaLink = {
   title: string
   /** one line:  what it's for */
   purpose: string
-  /** its saga page, from the epic page's folder:  `../../sagas/<id>/<id>.saga.html` */
+  /** its saga page, a root path:  `/sagas/<id>/<id>.saga.html` */
   href: string
 }
 
-/** A saga's page from an epic page's folder (`epics/<name>/`), until the page server says:  `SagaLink.href`'s. */
+/** A saga's page, a root path (epic `epic-engine` P46), until the page server says:  `SagaLink.href`'s. */
 export function sagaHref(id: string): string {
-  return `../../sagas/${id}/${id}.saga.html`
+  return `/sagas/${id}/${id}.saga.html`
 }
 
 /** What a See Also page is to its epic. */
@@ -175,13 +175,13 @@ export const PILL = "pill"
 export const CRUMBS = "crumbs"
 
 /**
- * The crumbs' links, from the page's folder:  an epic page is always `epics/<name>/<name>.plan.html`.
+ * The crumbs' links:  root paths (epic `epic-engine` P46), the same from an epic page and a saga page.
  * - `target`s name the VS Code side bar's tab, as the old crumbs did
  */
 export const CRUMB_LINKS = {
-  docs: { href: "../../pages/index.html", target: "src-packages-docs-index-html" },
-  epics: { href: "../../epics/index.html", target: "src-epics-index-html" },
-  sagas: { href: "../../sagas/index.html", target: "src-sagas-index-html" }
+  docs: { href: "/pages/index.html", target: "src-packages-docs-index-html" },
+  epics: { href: "/epics/index.html", target: "src-epics-index-html" },
+  sagas: { href: "/sagas/index.html", target: "src-sagas-index-html" }
 } as const
 
 /** `<epic-page kind>` of a saga page (epic `epic-workflow` P15). */

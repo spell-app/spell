@@ -555,7 +555,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
 })
 
 // epic `epic-engine` I44:  a failure's screenshot in its new issue, in a split page's part, as the part reads it
-test("a failed test's issue on a split page:  its screenshot written into the part as `../tests/...`", async () => {
+test("a failed test's issue on a split page:  its screenshot written into the part as its root path", async () => {
   const files = new PlanDocFiles({ root })
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   plan.addItem("test", "one", { details: "<p>Do it.</p>" })
@@ -565,10 +565,13 @@ test("a failed test's issue on a split page:  its screenshot written into the pa
     inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
+  // a part holds the page's own folder's URLs as root paths (epic `epic-engine` P46):  from `parts/` they'd climb
   expect(readFileSync(join(root, "epics", "x", "parts", "i1.html"), "utf8")).toContain(
-    'src="../tests/m1-20261007-1000.png"'
+    'src="/epics/x/tests/m1-20261007-1000.png"'
   )
-  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/m1-20261007-1000.png")
+  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe(
+    "/epics/x/tests/m1-20261007-1000.png"
+  )
   rmSync(join(root, "epics", "x", "parts"), { recursive: true, force: true })
 })
 

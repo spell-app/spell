@@ -58,7 +58,7 @@ const ENGINE_ROUTES = { "/element/": "app/dist-element" }
 /** The site header's tabs a scratch repo's settings name (`"siteTabs"`), as spell-app's do. */
 const SITE_TABS: SiteTab[] = [
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
-  { name: "Spell/UI", path: "/components/ui/", serverOnly: true, sets: ["ui"] }
+  { name: "Spell/UI", path: "/components/ui/", sets: ["ui"] }
 ]
 
 /**

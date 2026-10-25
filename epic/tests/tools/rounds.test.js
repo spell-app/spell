@@ -230,6 +230,6 @@ test("fold:  near-copies made before `round` become rounds of their first page; 
   expect(readFileSync(part, "utf8")).toBe(
     '<a href="../details/event-names.html" target="src-epics-es-details-event-names-html">r3</a>'
   )
-  expect(new SeeAlso(docs).linksOf("es").map((link) => link.href)).toEqual(["details/event-names.html"])
+  expect(new SeeAlso(docs).linksOf("es").map((link) => link.href)).toEqual(["/epics/es/details/event-names.html"])
   expect(await foldCopies(docs)).toEqual([])
 })

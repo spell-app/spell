@@ -15,7 +15,8 @@ import {
   readFileSync,
   rmSync,
   statSync,
-  symlinkSync
+  symlinkSync,
+  writeFileSync
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, relative } from "node:path"
@@ -107,7 +108,8 @@ describe("migrate:  the runner", () => {
       "old:  would run links-agree",
       '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
       "new:  up to date",
-      "epic pages:  1 of 2 would change (links-agree 1)"
+      "epic pages:  1 of 2 would change (links-agree 1)",
+      "root links:  none to write in 13 files"
     ])
     expect(snapshot()).toEqual(before)
   })
@@ -119,7 +121,8 @@ describe("migrate:  the runner", () => {
       "old:  links-agree",
       '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
       "new:  up to date",
-      "epic pages:  1 of 2 changed (links-agree 1)"
+      "epic pages:  1 of 2 changed (links-agree 1)",
+      "root links:  none to write in 13 files"
     ])
     const plan = FILES.read(docOf("old"))
     expect(plan.item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
@@ -130,7 +133,7 @@ describe("migrate:  the runner", () => {
     const after = snapshot()
     printed = []
     expect(await commands().run(["migrate", "--all"])).toBe(0)
-    expect(printed.at(-1)).toBe("epic pages:  0 of 2 changed")
+    expect(printed.slice(-2)).toEqual(["epic pages:  0 of 2 changed", "root links:  none to write in 13 files"])
     expect(snapshot()).toEqual(after)
   })
 
@@ -196,8 +199,10 @@ describe("migrate:  the runner", () => {
       "epic 2026-10-25 to-review-marks",
       "epic 2026-10-25 changes-after-goal",
       "epic 2026-10-25 item-renames",
+      "epic 2026-10-25 root-links",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
-      expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/)
+      expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/),
+      expect.stringMatching(/goal-set 2026-10-25 root-links$/)
     ])
   })
 })
@@ -232,7 +237,8 @@ describe("migrate --notify", () => {
       "new:  up to date",
       "epic pages:  2 of 3 changed (links-agree 2)",
       expect.stringMatching(/^TELL:/),
-      `  to 🚧 busy:  ${MigrateCommands.message("busy", ["links-agree"])}`
+      `  to 🚧 busy:  ${MigrateCommands.message("busy", ["links-agree"])}`,
+      expect.stringMatching(/^root links:  none to write in \d+ files$/)
     ])
     expect(readFileSync(docOf("busy"), "utf8")).toBe(before)
     expect(FILES.read(docOf("old")).item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
@@ -293,4 +299,36 @@ describe("migrate --all over COPIES of the real epic pages", () => {
     },
     180_000
   )
+})
+
+// epic `epic-engine` P46:  every local link a root path, by the page's step and the content folder's pass
+describe("migrate --step root-links", () => {
+  test("the page, its parts, its details pages and Markdown:  root paths;  a second run writes nothing", async () => {
+    await writeEpic("links")
+    mkdirSync(join(root, "guides"), { recursive: true })
+    writeFileSync(join(root, "guides", "g.html"), "")
+    // a part and a details page written before P46:  their links climb from their own folders
+    const part = readdirSync(join(root, "epics", "links", "parts")).find((name) => name.startsWith("p-"))!
+    const partFile = join(root, "epics", "links", "parts", part)
+    writeFileSync(partFile, readFileSync(partFile, "utf8").replace("</ul>", '</ul><p><a href="../../../guides/g.html">g</a></p>'))
+    mkdirSync(join(root, "epics", "links", "details"), { recursive: true })
+    const details = join(root, "epics", "links", "details", "d.html")
+    writeFileSync(details, '<p><a href="../../../guides/g.html">g</a> <a href="../links.plan.html#p-one">one</a></p>\n')
+    const notes = join(root, "guides", "n.md")
+    writeFileSync(notes, "[the epic](../epics/links/links.plan.html) and [g](g.html)\n")
+    expect(await commands().run(["migrate", "--step", "root-links"])).toBe(0)
+    expect(printed).toContain("links:  root-links")
+    expect(printed.find((line) => line.startsWith("root links:"))).toMatch(/^root links:  3 in 2 of \d+ files wrote/)
+    expect(readFileSync(partFile, "utf8")).toContain('href="/guides/g.html"')
+    expect(readFileSync(details, "utf8")).toBe(
+      '<p><a href="/guides/g.html">g</a> <a href="/epics/links/links.plan.html#p-one">one</a></p>\n'
+    )
+    expect(readFileSync(notes, "utf8")).toBe("[the epic](/epics/links/links.plan.html) and [g](g.html)\n")
+    const after = snapshot()
+    printed = []
+    expect(await commands().run(["migrate", "--step", "root-links"])).toBe(0)
+    expect(printed).toContain("links:  up to date")
+    expect(printed.at(-1)).toMatch(/^root links:  none to write in \d+ files$/)
+    expect(snapshot()).toEqual(after)
+  })
 })

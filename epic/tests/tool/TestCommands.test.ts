@@ -82,17 +82,17 @@ describe("add <epic> test with its fields", () => {
     expect(readFileSync(join(root, "epics", "x", "tests", "m1.png"), "utf8")).toBe("png bytes")
   })
 
-  // epic `epic-engine` I44:  a part's URLs are read against `parts/`, so its images are written `../tests/...`
-  test("on a split page, the Example's image is written into the part as `../tests/<id>.png`, the page's path", async () => {
+  // epic `epic-engine` I44, P46:  a part's URLs are read against `parts/`, so its images are written as root paths
+  test("on a split page, the Example's image is written into the part as its root path, `/epics/x/tests/<id>.png`", async () => {
     await FILES.writeDoc(file, FILES.read(file), true)
     const shot = join(root, "shot.png")
     writeFileSync(shot, "png bytes")
     await commands().run(["add", "x", "test", "T", "--step", "Do", "--should", "Works", "--example", shot])
     const part = readFileSync(join(root, "epics", "x", "parts", "m1.html"), "utf8")
-    expect(part).toContain('src="../tests/m1.png"')
+    expect(part).toContain('src="/epics/x/tests/m1.png"')
     expect(existsSync(join(root, "epics", "x", "parts", "..", "tests", "m1.png"))).toBe(true)
-    // read whole, the page's own path again
-    expect(FILES.read(file).findItem("m1")!.querySelector("img")!.getAttribute("src")).toBe("tests/m1.png")
+    // read whole:  the same root path
+    expect(FILES.read(file).findItem("m1")!.querySelector("img")!.getAttribute("src")).toBe("/epics/x/tests/m1.png")
   })
 
   test("an example that isn't an image file is a line of text;  no example, no field", async () => {
@@ -222,7 +222,7 @@ describe("test --all, and GET /api/epics/tests' list", () => {
         saga: "later",
         open: 1,
         page: "/epics/later/later.plan.html",
-        href: "../later/later.plan.html"
+        href: "/epics/later/later.plan.html"
       },
       expect.objectContaining({ epic: "a-first", title: "Alpha", open: 2 }),
       expect.objectContaining({ epic: "b-first", title: "Beta", open: 1 }),

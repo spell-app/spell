@@ -88,7 +88,7 @@ export class SagaEpics {
       card: {
         name,
         title: page.getAttribute("title") ?? name,
-        href: `../../epics/${name}/${name}${planName ? ".plan" : ""}.html`,
+        href: `/epics/${name}/${name}${planName ? ".plan" : ""}.html`,
         summary: (document.querySelector("epic-summary")?.textContent ?? "").replace(/\s+/g, " ").trim(),
         facts: {
           phases: phases.map((phase) => phase.getAttribute("status") ?? "todo"),

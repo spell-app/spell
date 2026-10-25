@@ -2,6 +2,7 @@ import { ChangesAfterGoal } from "./ChangesAfterGoal"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
@@ -38,7 +39,8 @@ export class Migrations {
     new TakenInPhase(),
     new ToReviewMarks(),
     new ChangesAfterGoal(),
-    new ItemRenames()
+    new ItemRenames(),
+    new RootLinks()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

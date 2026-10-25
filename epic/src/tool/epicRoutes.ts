@@ -191,7 +191,7 @@ export function sagaLinkOf(root: string, name: string): SagaLink | null {
   const id = /\ssaga="([^"]+)"/.exec(page)?.[1]
   const saga = id ? new Sagas(root).find(id) : undefined
   if (!saga) return null
-  return { id: saga.id, title: saga.title, purpose: saga.purpose, href: `../../${Sagas.pageOf(saga.id)}` }
+  return { id: saga.id, title: saga.title, purpose: saga.purpose, href: `/${Sagas.pageOf(saga.id)}` }
 }
 
 /** The saga `<epic-page>` links in its meta lines:  `sagaLinkOf()`'s answer (the element's own `SagaLink`). */

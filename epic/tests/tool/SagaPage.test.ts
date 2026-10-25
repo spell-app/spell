@@ -114,7 +114,7 @@ describe("SagaEpics", () => {
     expect(epics[0]).toEqual({
       name: "airplane",
       title: "Airplane Mode",
-      href: "../../epics/airplane/airplane.plan.html",
+      href: "/epics/airplane/airplane.plan.html",
       summary: "What Airplane Mode does.",
       facts: {
         phases: ["done", "active"],

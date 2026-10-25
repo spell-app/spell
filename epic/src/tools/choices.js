@@ -54,7 +54,7 @@ import {
   shown,
   waitForAnswer
 } from "./details.js"
-import { CONTENT, ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
+import { CONTENT, ROOT, fromTemplate, openInVSCode, serialize } from "./pages.js"
 import { archiveAnswer, askedOf, dropSentDraft, foldRound, formatRound, refuseNearCopy } from "./rounds.js"
 
 /** How long `wait` waits by default:  8 hours, as `epic ask wait`. */
@@ -179,9 +179,8 @@ export function newRound(docs, target, { title, description, data } = {}) {
 /** Choice page `file` (in content folder `docs`), parsed, from the template:  its head, words and rows. */
 function pageDocument(docs, file, { title, description, checked }) {
   title ??= checked.title ?? "Syntax choices"
-  const depth = relative(docs, dirname(file)).split("/").length
   const template = readFileSync(join(TOOL_TEMPLATES, "syntax-choices.html"), "utf8")
-  const { document } = parseHTML(atDepth(template, depth))
+  const { document } = parseHTML(fromTemplate(template))
   fillHead(document, {
     title,
     description: description ?? `Syntax choices:  ${title}`,

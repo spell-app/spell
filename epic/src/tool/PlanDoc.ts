@@ -584,7 +584,8 @@ export class PlanDoc extends PlanReader {
    * words, the sender, the screenshots), under the label `r3 · <from>`.
    * - the field is made, after Symptom and its Updated lines (before Goal and Changes), when the phase has none
    * - a block already there for `id` is replaced:  filing a request again moves nothing
-   * - URLs in `html` are the page's (`requests/r3/image-1.png`):  a split doc's part file rebases them
+   * - URLs in `html` are the page's (`requests/r3/image-1.png`):  a split doc's part holds them as that folder's root
+   *   paths (`/epics/seo/requests/r3/image-1.png`, `PlanParts.toPartFrom()`)
    * - SIDE EFFECT:  logs it
    */
   addPhaseRequest(n: number, id: string, from: string, html: string): void {

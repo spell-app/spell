@@ -51,14 +51,15 @@ beforeAll(() => {
   write("guides/targets/targets.html", page("Targets and Writers"))
   write("guides/solid.html", page("Solid 2 · Spell docs"))
   write("guides/changelog.html", page("Changelog"))
-  // done, its guide the Python guide;  a part links the targets guide, from `parts/`
+  // done, its guide the Python guide;  a part links the changelog from `parts/`, another the targets guide by root path
   epic("python-target", {
     phases: ["done", "done"],
     updated: "2026-10-12",
     durable: "../../guides/python-target.html",
     links: ["../../guides/changelog.html#python-target"]
   })
-  write("epics/python-target/parts/p2.html", `<a href="../../../guides/targets/targets.html#writers">targets</a>`)
+  // a root path (epic `epic-engine` P46), the same from any folder
+  write("epics/python-target/parts/p2.html", `<a href="/guides/targets/targets.html#writers">targets</a>`)
   write("epics/python-target/details/bedtime.html", page("Bedtime:  python-target"))
   write("epics/python-target/details/names.html", page("Names"))
   write("epics/python-target/details/names.rows.json", "[]")
@@ -84,9 +85,9 @@ describe("linksOf():  an epic's See Also, gathered", () => {
   test("the guide, its own pages newest first, then the guides it links;  each with its kind", () => {
     const links = new SeeAlso(root).linksOf("python-target")
     expect(links.map(({ href, title, kind }) => [href, title, kind])).toEqual([
-      ["../../guides/python-target.html", "The Python Target", "durable"],
-      ["details/names.html", "Names", "choices"],
-      ["details/bedtime.html", "Bedtime:  python-target", "details"],
+      ["/guides/python-target.html", "The Python Target", "durable"],
+      ["/epics/python-target/details/names.html", "Names", "choices"],
+      ["/epics/python-target/details/bedtime.html", "Bedtime:  python-target", "details"],
       expect.arrayContaining(["guide"]),
       expect.arrayContaining(["guide"])
     ])
@@ -95,14 +96,14 @@ describe("linksOf():  an epic's See Also, gathered", () => {
         .slice(3)
         .map((link) => link.href)
         .sort()
-    ).toEqual(["../../guides/changelog.html", "../../guides/targets/targets.html"])
+    ).toEqual(["/guides/changelog.html", "/guides/targets/targets.html"])
     expect(links.every((link) => !Number.isNaN(Date.parse(link.updated)))).toBe(true)
   })
 
   test("a link to a page that isn't there is left out;  an epic with no folder has none", () => {
     const see = new SeeAlso(root)
     expect(see.linksOf("epic-workflow").map((link) => link.href)).toEqual(
-      expect.not.arrayContaining(["../../guides/missing.html"])
+      expect.not.arrayContaining(["/guides/missing.html"])
     )
     expect(see.linksOf("nothing-here")).toEqual([])
   })
@@ -174,7 +175,7 @@ describe("ownerOf():  which epic a page belongs to", () => {
     write("epics/quoter/parts/o1.html", `<a href="../../../guides/solid/quoted.html">quoted</a>`)
     write("guides/solid/quoted.html", page("Quoted"))
     const see = new SeeAlso(root)
-    expect(see.linksOf("quoter").map((link) => link.href)).not.toContain("../../guides/solid/quoted.html")
+    expect(see.linksOf("quoter").map((link) => link.href)).not.toContain("/guides/solid/quoted.html")
     expect(see.ownerOf("guides/solid/quoted.html")).toBeUndefined()
   })
 })

@@ -203,12 +203,13 @@ describe("PlanDocFiles links written as from a part", () => {
   }
 
   test("each lands as the part file holds it, from the main checkout and from a worktree alike", async () => {
+    // root paths (epic `epic-engine` P46), whichever way they were handed over
     const expected = [
-      "../../../spell-ui/src/x.ts",
-      "../../../spell-ui/src/x.ts",
-      // missing either way:  left as it was handed over, so `epic lint` names it
+      "/spell-ui/src/x.ts",
+      "/spell-ui/src/x.ts",
+      // missing either way, and above the root as the page reads it:  left as it was handed over, so `epic lint` names it
       "../../../../spell-ui/src/gone.ts",
-      "../../../spell-ui/src/x.ts#L3"
+      "/spell-ui/src/x.ts#L3"
     ]
     expect(await hrefsFrom(main)).toEqual(expected)
     expect(await hrefsFrom(worktree)).toEqual(expected)

@@ -322,7 +322,7 @@ describe("PlanDocCommands add --details:  a name and its path", () => {
     expect(await commands().run(["add", "x", "judgement", "Built it", "--details", details])).toBe(0)
     const part = readdirSync(parts).find((name) => /^j\d+\.html$/.test(name))!
     expect(readFileSync(join(parts, part), "utf8")).toMatch(
-      /<a href="(?:\.\.\/){3}packages\/x\/src\/buildTsx\.ts" target="src-packages-x-src-buildtsx-ts"\s*>\s*<code title="packages\/x\/src\/buildTsx\.ts:4">buildTsx\(\)<\/code\s*>\s*<\/a\s*>/
+      /<a href="\/packages\/x\/src\/buildTsx\.ts" target="src-packages-x-src-buildtsx-ts"\s*>\s*<code title="packages\/x\/src\/buildTsx\.ts:4">buildTsx\(\)<\/code\s*>\s*<\/a\s*>/
     )
   })
 })

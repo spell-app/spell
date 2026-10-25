@@ -12,19 +12,23 @@
  *   - `engine-asset-paths`:  a page still loading the engine's files by their old checkout paths
  *     (`../packages/epics/tools/_assets/spell-ui.js`) loads them from the epic server's routes (`/_epic/assets/...`);
  *     the saga pages, the parked goal sets and a brand page had them (epic `repo-split` I63)
+ *   - `root-links`:  every local link a ROOT PATH, as the page server serves it (`/spell-ui/x.ts`), broken ones mended
+ *     where a move left one home (epic `epic-engine` P46;  `RootLinks`, the epic tool's, whose content folder's pass
+ *     `epic migrate` runs too);  a TEXT step (`rewrite()`):  every other byte kept
  *   - The older steps went once every page had run them (epic `repo-split` Q45):  `ui-section`, `answer-elements`,
  *     `engine-asset-routes` (which `engine-asset-paths` brings back for the pages it missed), and the data files'
  *     renames (`json5-data-files`).
  *     Their code is in git history, for a page restored from an old backup.
  * - A new step:  an entry in `STEPS`, LAST, in the same commit as the markup change it follows.
  *   It must change nothing on a page it has migrated already, and keep every word.
- * - `node src/tools/migrate.js [--root <checkout>] [<kind>] [--file <page>] [--step <name>] [--dry-run] [--list]`:
+ * - runs under `tsx` (`root-links` links through `spell/server`):  `epic migrate` runs it so (`MigrateCommands`)
+ * - `node --import tsx src/tools/migrate.js [--root <checkout>] [<kind>] [--file <page>] [--step <name>] [--dry-run] [--list]`:
  *   - every kind with steps, or one kind
  *   - one page (`--file`, its kind found unless given)
  *   - `--list`:  the steps
  */
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
-import { isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
@@ -37,6 +41,9 @@ import { rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
 import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
 import { convertMarkup, hasMarkup } from "./to-components.js"
+import { linkerFor, linkerUnder } from "./doc-links.js"
+import { RootLinks } from "spell-epic/tool/migrations/RootLinks"
+import { RepoList } from "spell-epic/server/RepoList"
 
 /**
  * Every page kind, by its key:  `spell-epic/tool/migrations` `PAGE_KINDS`, kept the same.
@@ -85,6 +92,8 @@ function kindPages(kind) {
  * - `run(document, { file })`:  changes the page IN PLACE (`file`:  its path, for what lies beside it)
  *   - returns `{ changed, notes }`, `notes` one line each
  *   - notes with nothing `changed`:  what it left for a person, reported all the same
+ * - OR `rewrite(text, { file, root })`, a TEXT step:  the page's text, never parsed, every other byte kept;
+ *   returns `{ text, changed, notes }`;  `root`, the checkout it's in
  */
 export const STEPS = [
   {
@@ -117,8 +126,41 @@ export const STEPS = [
       const changes = rewriteEngineLinks(document)
       return { changed: changes.length > 0, notes: changes.map(({ from, to }) => `${from} -> ${to}`) }
     }
+  },
+  {
+    name: "root-links",
+    date: "2026-10-25",
+    kinds: KINDS.filter((kind) => kind !== "epic"),
+    description:
+      "every local link a root path (/spell-ui/x.ts), as the page server serves it;  broken ones mended where a move left one home (epic-engine P46)",
+    applies: (html) => RELATIVE_URL.test(html),
+    rewrite(text, { file, root }) {
+      const { linker, dir } = resolve(root) === resolve(ROOT) ? linkerFor(dirname(resolve(file))) : scratchLinker(root, file)
+      const { text: rooted, changes } = RootLinks.rewrite(text, join(dir, basename(file)), linker)
+      const notes = changes
+        .filter((change) => change.kind === "broken" || change.kind === "outside")
+        .map((change) => `${change.kind === "broken" ? "BROKEN" : "LEFT, above the root"}, for a person:  ${change.from} -> ${change.to}`)
+      const rewritten = changes.filter((change) => change.kind !== "outside").length
+      return { text: rooted, changed: rooted !== text, notes: [...(rewritten ? [`${rewritten} links as root paths`] : []), ...notes] }
+    }
   }
 ]
+
+/** Linkers for checkouts other than this one (`--root`, a test's scratch checkout), by root:  each built once. */
+const scratchLinkers = new Map()
+
+/** `root`'s linker (`linkerUnder()`, laid under the checkout that serves it), and `file`'s folder as it takes it. */
+function scratchLinker(root, file) {
+  const at = new RepoList().linkRootOf(resolve(root))
+  if (!scratchLinkers.has(at)) scratchLinkers.set(at, linkerUnder(at))
+  return { linker: scratchLinkers.get(at), dir: dirname(resolve(file)) }
+}
+
+/**
+ * A cheap test for `root-links`:  any relative URL or site header root in the page (the step reads it properly).
+ * - any double-quoted URL attribute that doesn't start `/`, `#` or a scheme, or a Markdown link
+ */
+const RELATIVE_URL = /\s(?:href|src|source|poster|link|title|data-[\w-]+)="\.?\.\/|\s(?:href|link)="(?![#/?]|[a-z][a-z0-9+.-]*:)[^"]+"|<spell-site-header\b[^>]*\sroot=/i
 
 /**
  * The elements that LOAD an engine file, and the attribute naming it:  a stylesheet (`<link href>`), a script
@@ -219,11 +261,12 @@ export function pagesFor(root, kind) {
  * Migrate `pages` (`{ file, kind }`):  each one's steps, oldest first (or just `step`), each page under its lock;
  * returns `{ results, written }`:  `results` one per page, `{ file, kind, ran, notes }`.
  * - `dryRun`:  the same results, nothing written
+ * - `root`:  the checkout the pages are in (default this one, `ROOT`), for a text step's links (`root-links`)
  * - `tidied`:  tidy what it wrote, as every tool that writes a page does (link targets, oxfmt;  `pages.js` `tidy()`)
  *   - oxfmt only on a page that was formatted BEFORE (`formattedAlready()`):  it folds runs of spaces in text, and a
  *     page that wasn't keeps them (`Bedtime:  epic-workflow` in an h1:  epic `epic-engine` I7)
  */
-export function migratePages(pages, { step, dryRun = false, tidied = true } = {}) {
+export function migratePages(pages, { step = /** @type {string | undefined} */ (undefined), dryRun = false, tidied = true, root = ROOT } = {}) {
   const results = []
   const written = []
   const due = new Set(
@@ -240,20 +283,32 @@ export function migratePages(pages, { step, dryRun = false, tidied = true } = {}
       continue
     }
     const result = withLocks(dryRun ? [] : [file], () => {
-      const { document } = parseHTML(readFileSync(file, "utf8"))
+      // the page as text, parsed only for a DOM step, and serialized only after one
+      let text = readFileSync(file, "utf8")
+      let document
+      const current = () => (document ? serialize(document) : text)
       const ran = []
       const notes = []
       for (const each of steps) {
         // only a step with something to do, on the page as the steps before left it:  a step's `run()` may change
         // a page it isn't for
-        if (!each.applies(serialize(document))) continue
-        const done = each.run(document, { file })
+        if (!each.applies(current())) continue
+        let done
+        if (each.rewrite) {
+          done = each.rewrite(current(), { file, root })
+          text = done.text
+          document = undefined
+        } else {
+          document ??= parseHTML(text).document
+          done = each.run(document, { file })
+          text = serialize(document)
+        }
         if (done.changed) ran.push(each.name)
         // one that changed nothing may still say what it left, or skipped
         notes.push(...done.notes.map((note) => `${each.name}:  ${note}`))
       }
       if (ran.length && !dryRun) {
-        writeFileSync(file, serialize(document))
+        writeFileSync(file, current())
         written.push(file)
       }
       return { file, kind, ran, notes }
@@ -365,7 +420,7 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
       say(`${kindPages(kind)}:  no steps${step ? ` called ${step}` : ""} for them yet`)
       return 0
     }
-    const { results } = migratePages(pages, { step, dryRun })
+    const { results } = migratePages(pages, { step, dryRun, root })
     for (const line of report(results, root, { dryRun, all: typeof flags.file === "string" })) say(line)
     return 0
   } catch (error) {

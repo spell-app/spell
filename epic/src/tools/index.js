@@ -41,7 +41,7 @@
  */
 import { execFileSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { join, relative } from "node:path"
+import { basename, dirname, join } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
@@ -75,7 +75,7 @@ import {
   ROOT,
   SAGAS,
   TEMPLATES,
-  atDepth,
+  fromTemplate,
   findPages,
   pageAt,
   pagePath,
@@ -124,8 +124,8 @@ const WRITING_DOCS = `<ui-section id="writing-docs" label="Writing docs" sticky 
 <ul>
 <li>Start from a template:  <code>epic pages create durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
 <li>An epic page:  run <code>/epic &lt;name&gt;</code> in Claude Code.  Never copy the plan template by hand.</li>
-<li>The rules:  spell-epic's <code>src/AGENTS.md</code>, where these templates live (<code>epic pages template</code>
-prints the folder).  How the pages work:  <a href="../guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
+<li>The rules:  spell-epic's <code title="spell-epic/src/AGENTS.md">src/AGENTS.md</code>, where these templates live (<code>epic pages template</code>
+prints the folder).  How the pages work:  <a href="/guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
 <li><code>pages create</code> lists the page on its area's page;  after renaming one or changing its title, run
 <code>epic pages index</code>.</li>
 </ul>
@@ -141,7 +141,7 @@ const sagaNotes =
 <ul>
 ${
   existsSync(GOALS)
-    ? `<li>The first sagas, by topic, with the questions still open:  <a href="../goals/index.html" target="_self">the parked
+    ? `<li>The first sagas, by topic, with the questions still open:  <a href="/goals/index.html" target="_self">the parked
 saga sets</a>, read only (epic <code>epic-goals</code> rebuilds them).</li>\n`
     : ""
 }<li>The list, its order and each epic's saga:  <code>epic saga list</code>, <code>new</code>, <code>move</code>,
@@ -229,7 +229,7 @@ export const LISTS = [
           has: (path) => path.startsWith(REPO_TEMPLATE_PATH),
           none: "No templates of its own yet.",
           description: `${REPO}'s own page templates, beside spell-epic's (the Templates page).`,
-          lede: `${REPO}'s own page templates, beside <a href="${"../".repeat(REPO_TEMPLATE_PATH.split("/").length - 1)}templates/index.html">spell-epic's</a>:  <code>epic pages create</code> finds these first.`
+          lede: `${REPO}'s own page templates, beside <a href="/templates/index.html">spell-epic's</a>:  <code>epic pages create</code> finds these first.`
         }
       ]
     : []),
@@ -264,7 +264,7 @@ function main() {
   for (const list of LISTS) {
     if (!existsSync(list.dir)) continue
     const file = join(list.dir, "index.html")
-    if (!existsSync(file)) writeFileSync(file, atDepth(skeleton(list), pagePath(file).split("/").length - 1))
+    if (!existsSync(file)) writeFileSync(file, fromTemplate(skeleton(list)))
     const mine = list.id === "sagas" ? pages : pages.filter((page) => list.has(page.path))
     const body = listSection(list, mine, undefined, sagas)
     // the engine's Templates page (spell-epic's `templates/`, a TRACKED file):  every repo's `epic` writes the same
@@ -525,7 +525,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       id: "guides",
       title: "Guides",
       icon: "book open",
-      href: "../guides/index.html",
+      href: "/guides/index.html",
       count: plural(of("guides").length, "guide"),
       description: `Design notes, references and how-tos:  how each part works, and why.`
     },
@@ -533,7 +533,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       id: "sagas",
       title: "Sagas",
       icon: "bullseye",
-      href: "../sagas/index.html",
+      href: "/sagas/index.html",
       count: plural(sagas.length, "saga"),
       description:
         "Each saga an epic of epics:  the larger aims the epics serve, in Owen's order, most exciting first.",
@@ -543,7 +543,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       id: "epics",
       title: "Epics",
       icon: "layer group",
-      href: "../epics/index.html",
+      href: "/epics/index.html",
       count: counts
         .filter(([, count]) => count)
         .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
@@ -593,7 +593,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       id: "brand",
       title: "Brand",
       icon: "palette",
-      href: "../brand/index.html",
+      href: "/brand/index.html",
       count: brandCount(pages, of("brand").length),
       description:
         "Spell's brand:  Claude Design's pages beside their Spell UI copies, the ui-brand-* elements, and the pony."
@@ -602,7 +602,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       id: "templates",
       title: "Templates",
       icon: "copy",
-      href: "../templates/index.html",
+      href: "/templates/index.html",
       count: plural(of("templates").length, "template"),
       description: "A starting point for every kind of page, and the notes on writing docs."
     }
@@ -629,9 +629,9 @@ function setPages(set, prefix = "") {
   return htmlFiles(join(ROOT, set.dir)).filter((name) => name !== "index.html" && name.startsWith(prefix)).length
 }
 
-/** A component set's home, from the home page's folder:  at its served address (`../components/epics/index.html`). */
+/** A component set's home:  its served address, a root path (`/components/epics/index.html`). */
 function setHome(set) {
-  return `..${set.prefix}/index.html`
+  return `${set.prefix}/index.html`
 }
 
 /**
@@ -651,7 +651,7 @@ export function homeSkeleton() {
 <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
-<spell-site-header root=".."></spell-site-header>
+<spell-site-header></spell-site-header>
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(title)}</h1></header></ui-sticky>
@@ -770,11 +770,11 @@ export function skeleton(list) {
 <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
-<spell-site-header root=".."></spell-site-header>
+<spell-site-header></spell-site-header>
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb link="/pages/index.html" target="_self">Docs</ui-breadcrumb>
 <ui-breadcrumb selected>${escapeHTML(list.title)}</ui-breadcrumb>
 </ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>
@@ -893,9 +893,12 @@ export function readFavorites() {
   }
 }
 
-/** Page path `path` as a link from folder `from` (a list page's):  `solid/solid-2.html`. */
+/**
+ * Page path `path` as a link from folder `from` (a list page's):  its root path, `/guides/solid/solid-2.html`;  one in
+ * the list page's own folder by its name (epic `epic-engine` P46, Q1)
+ */
 function href(path, from) {
-  return relative(from, path)
+  return dirname(path) === from ? basename(path) : `/${path}`
 }
 
 /** A page's card, on the list page in folder `from`:  linked title, description, path. */

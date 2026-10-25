@@ -49,9 +49,9 @@ describe("pullBoard()", () => {
     expect(html).not.toContain("data-dc-script")
   })
 
-  it("loads the one-file bundle and the site header for the page's depth", () => {
+  it("loads the one-file bundle and the site header, the same at any depth", () => {
     expect(html).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
-    expect(html).toContain('<spell-site-header root=".."></spell-site-header>')
+    expect(html).toContain("<spell-site-header></spell-site-header>")
   })
 
   it("moves helmet styles into the head, minus body margin", () => {

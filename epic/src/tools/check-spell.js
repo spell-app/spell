@@ -25,9 +25,9 @@
  *   - an epic page's open item (`<epic-item>`, epic `windows-and-review` Q6) whose line doesn't stick right under
  *     its section's stuck title while its details are read
  *     - at desktop and phone width (`checkItemLine()`)
- * - loads the page from `file://`, or from the page server when its `<body>` says `data-spell-needs-server`
- *   - from `file://`, the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic `epic-eject` P7) are answered
- *     from this engine's own folders (`engineFileFor()`), as the epic server would serve them
+ * - loads the page from the page server, always (epic `epic-engine` P46);  `file://` before, for a page that didn't need it
+ *   - a page from disk (none since P46) had the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic
+ *     `epic-eject` P7) answered from this engine's own folders (`engineFileFor()`), as the epic server would serve them
  * - a component set's page:  from the page server at its address (`/components/epics/...`),
  *   since it loads its site bundle from there
  *   - the sets:  `packages/ui/docs/` ..., the ones the checkout's settings name (its root `package.json`'s
@@ -144,11 +144,11 @@ console.log(JSON.stringify(summary, null, 2))
 process.exit(problems.length ? 1 : 0)
 
 /**
- * Where to load `file` from:  `file://`, or the page server for a page that needs one.
- * - a page whose `<body>` says `data-spell-needs-server` loads from this checkout's page server,
- *   started if need be (the `commands` template:  it fetches its JSON)
+ * Where to load `file` from:  the page server, always (`browserUrlFor()`;  epic `epic-engine` P46:  its links are root
+ * paths, which mean something only served)
+ * - this checkout's page server, started if need be
  * - `--base`:  every page from that server
- * - a server that won't start is a problem, and `file://` is used
+ * - a server that won't start ends the run
  */
 function pageUrl(file) {
   try {

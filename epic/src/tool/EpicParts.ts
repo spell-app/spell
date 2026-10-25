@@ -16,8 +16,10 @@ import { PART_COMMENT, PART_EXT, PART_SOURCE, PARTS_DIR, PlanParts, type PartRea
  * - in the skeleton a host carries `source="parts/<id>.html"`, `part-ids` (the ids inside, so a link to one loads the
  *   body first) and `commits` (its body lists commits):  set through `Markup`, never by hand.  No placeholder line:
  *   a `<p>` isn't allowed in a phase or the log, and the element loads its own body (Q12).
- * - a part file:  a one-line comment (`PART_COMMENT`), then the body;  relative URLs rebased to `parts/`
- *   (`PlanParts.rebase()`), as the page's `source` loader reads them back
+ * - a part file:  a one-line comment (`PART_COMMENT`), then the body
+ *   - its links ROOT PATHS (epic `epic-engine` P46), as the page's;  the page's own folder's few relative ones made
+ *     root paths too (`PlanParts.toPartFrom()`), and `parts/` siblings by name, as the page's `source` loader reads
+ *     them back
  * - an instance works on ONE parsed document, IN PLACE.  Reuses `PlanParts`' statics for files and URLs.
  * - used by every write of the tool (`PlanDocFiles.writeDoc()`) and by the one-time converter, which imports it from
  *   here:  the tool loads `spell-epic/convert` only for its `convert` command (I5)
@@ -33,9 +35,12 @@ export class EpicParts {
   /**
    * Take every host's body out, leaving the skeleton;  returns the parts, id => text, in page order.
    * - `docName`:  the skeleton's file name, for the parts' comment
+   * - `folder`:  the skeleton's folder as the page server serves it (`/epics/seo/`):  a relative URL the page holds
+   *   (`x.png`) is that folder's root path in a part;  none (a test's doc):  `../x.png`, as before epic `epic-engine` P46
    * - a host with no body stays as it is (no part);  `<body data-spell-needs-server>` once there's a part
    */
-  split({ docName = "" }: { docName?: string } = {}): Map<string, string> {
+  split({ docName = "", folder }: { docName?: string; folder?: string } = {}): Map<string, string> {
+    const toPart = PlanParts.toPartFrom(folder)
     const parts = new Map<string, string>()
     for (const host of this.hosts) {
       const id = host.id
@@ -44,7 +49,7 @@ export class EpicParts {
       const box = this.document.createElement("div")
       box.append(...body)
       PlanMarkup.trimWhitespace(box)
-      for (const element of box.children) PlanParts.rebase(element, PlanParts.toPart)
+      for (const element of box.children) PlanParts.rebase(element, toPart)
       const ids = Array.from(box.querySelectorAll("[id]"), (element) => element.id)
       parts.set(id, `${partComment(id, host.localName, docName)}\n${PlanMarkup.serializeHTML(box.innerHTML)}\n`)
       setMarks(host, {

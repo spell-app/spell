@@ -9,7 +9,8 @@
  *   `.json` name too, until `epic migrate` renames it:  `DataFile`, epic `epic-workflow` P21)
  * - `<page>`:  where it goes, a guide by default:  `parser/parser.html` is `guides/parser/parser.html`;  a path starting
  *   with an area (`guides/`, `pages/`) is from the checkout's root
- * - Fixes the `_assets` and `index.html` paths, and the site header's `root`, for the page's depth (`atDepth()`).
+ * - Brings an older template's asset and `index.html` paths up to date (`fromTemplate()`):  its links are root paths,
+ *   the same at any depth (epic `epic-engine` P46).
  * - Sets `<title>`, the `h1`, the breadcrumb's last section and the description;  drops the template's how-to
  *   comment;  refuses to overwrite.
  * - Then tidies the page and updates the home and list pages, so it's listed at once.
@@ -21,7 +22,7 @@ import { basename, dirname, join, relative } from "node:path"
 import { parseHTML } from "linkedom"
 
 import { DataFile } from "spell-epic/data/DataFile.ts"
-import { CONTENT, GUIDES, PACKAGE, TOOLS, atDepth, pagePath, serialize, templateFile, tidy } from "./pages.js"
+import { CONTENT, GUIDES, PACKAGE, TOOLS, fromTemplate, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
 const [templateArg, page] = positional
@@ -41,7 +42,7 @@ if (flags.dryRun) {
 }
 
 const title = flags.title ?? "Short Title"
-const html = atDepth(readFileSync(template, "utf8"), pagePath(file).split("/").length - 1)
+const html = fromTemplate(readFileSync(template, "utf8"))
 const { document } = parseHTML(html)
 document.querySelector("title").textContent = title
 document.querySelector("h1").textContent = title

@@ -347,6 +347,7 @@ export class PlanDocFiles {
         folder: dirname(file),
         root: this.content,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
+        rootLinks: (html) => this.linker.rootLinks(html, dirname(file), { mend: true }).changes,
         notes: [],
         moves: []
       }
@@ -407,12 +408,14 @@ export class PlanDocFiles {
    *     and the page re-fetches that part alone
    * - a part file the doc was read from and no longer writes goes (a phase's, once its id became stable)
    * - one file:  as is, plus the parts folder of a doc that was split gone (`join`)
-   * - links are made against the whole doc, at the page's folder:  a part's URLs are rebased to `parts/` after
-   * - a link handed over as a part holds it (`../../../x`, one `../` too many for the page) is the page's first
-   *   (`fixPartRelativeLinks()`)
+   * - links are made against the whole doc, at the page's folder (`SRV.Linker.link()`):  every relative URL a ROOT PATH
+   *   (epic `epic-engine` P46), so a part holds the same text as its page;  the few left (the page's own folder's)
+   *   are made root paths in a part as it's split
+   * - a link handed over as an older part held it (`../../../x`, one `../` too many for the page) is the part's
+   *   first (`rootPartLinks()`)
    */
   async writeDoc(file: string, plan: PlanDoc, split: boolean): Promise<void> {
-    if (split) this.fixPartRelativeLinks(plan, file)
+    if (split) this.rootPartLinks(plan, file)
     const linked = this.linker.link(plan.toString(), dirname(file)).text
     if (!split) {
       PlanParts.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
@@ -423,7 +426,8 @@ export class PlanDocFiles {
     // linkedom writes `&`, `<` and `>` in attribute values bare (I2, I126):  escaped in this throwaway copy,
     // since the parts are serialized inside `split()`
     PlanMarkup.escapeAttributes(document as unknown as Document)
-    const parts = new EpicParts(document as unknown as Document).split({ docName: basename(file) })
+    const folder = this.linker.rootPathFor("./", dirname(file))
+    const parts = new EpicParts(document as unknown as Document).split({ docName: basename(file), folder })
     const outputs = await Promise.all(
       [...parts].map(async ([id, html]): Promise<[string, string]> => {
         const part = PlanParts.partFile(file, id)
@@ -438,25 +442,25 @@ export class PlanDocFiles {
   }
 
   /**
-   * Make `plan`'s links that were written as from a PART FILE (`../../../spell-ui/x.ts`) the page's own
-   * (`../../spell-ui/x.ts`), so the split writes them back as they were (epic `epic-engine` I134).
-   * - why:  HTML a command is handed (`update --plan`, `details --file`) is read as the PAGE's,
-   *   one `../` less than a part's (`writeDoc()` adds it back with `PlanParts.toPart()`);
-   *   an agent copying from a part file hands over the part's, and every one landed one folder too high
+   * Make `plan`'s links that were written as from a PART FILE (`../../../spell-ui/x.ts`) the root paths of what they
+   * reach from there (`/spell-ui/x.ts`), so they land as the part held them (epic `epic-engine` I134, P46).
+   * - why:  HTML a command is handed (`update --plan`, `details --file`) is read as the PAGE's;
+   *   an agent copying from a part file written before P46 hands over the part's, one `../` too many for the page
    *   - debut wrote 50 so, and `epic lint` called each missing
    *   - NOT a worktree's doing:  main and a worktree wrote the same `../../../../`
-   * - only a link that's MISSING as the page's and THERE with one `../` less;  any other link stays as it is
+   * - only a link that's MISSING as the page's and THERE as the part's;  any other is left for the linker, which
+   *   writes it as the page's root path
    * - so it's idempotent, and an older page's links broken this way are mended at its next write
    * - SIDE EFFECT:  changes `plan`'s document
    */
-  private fixPartRelativeLinks(plan: PlanDoc, file: string): void {
+  private rootPartLinks(plan: PlanDoc, file: string): void {
     const pageDir = dirname(file)
-    const isThere = (url: string) => existsSync(this.linker.fileFor(decodedPath(url), pageDir))
+    const partsDir = join(pageDir, PARTS_DIR)
+    const isThere = (url: string, dir: string) => existsSync(this.linker.fileFor(decodedPath(url), dir))
     const root = plan.document.documentElement as unknown as Element
     PlanParts.rebase(root, (url) => {
-      if (!url.startsWith("../") || isThere(url)) return url
-      const page = PlanParts.toPage(url)
-      return isThere(page) ? page : url
+      if (!url.startsWith("../") || isThere(url, pageDir) || !isThere(url, partsDir)) return url
+      return this.linker.rootPathFor(url, partsDir) ?? url
     })
   }
 

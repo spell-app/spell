@@ -487,25 +487,23 @@ function ensureEpicServer() {
 const EPIC_BIN = join(PACKAGE, "bin", "epic")
 
 /**
- * A template's `html` fixed for a page `depth` folders below the checkout's root (`guides/glossary.html` is 1,
- * `epics/a/a.plan.html` 2).
- * - rewrites whatever depth the template assumed, `<up>` being the path up to the root:
- *   - the engine's assets:  its route, `/_epic/assets/` (the epic server's, epic `epic-eject` P7;  `ENGINE_ROUTES`)
- *     - from wherever the template had them:
- *       - `tools/_assets/`, `packages/epics/tools/_assets/`
- *       - the docs package's old `packages/docs/tools/_assets/` (before epic `people-and-orgs` P16)
- *   - the home page's paths:  `<up>pages/index.html`
- *   - the areas' list pages:  `<up>epics/index.html` ...
- *   - the site header's `root`:  `<up>`
- *   - the epics pack's script (`<ui-components source>`, on epic, details and choice pages):
- *     its route, `/_epic/pack/`
- *     - another pack's:  `<up>packages/<name>/components/__pack/` (a repo's own)
- *     - from its old folder, `packages/<name>/pack/`, too
+ * A template's `html` as a new page holds it, wherever the page goes:  its links are ROOT PATHS already (epic
+ * `epic-engine` P46), so nothing is rebased by depth;  only an older template's spellings are brought up to date.
+ * - the engine's assets:  its route, `/_epic/assets/` (the epic server's, epic `epic-eject` P7;  `ENGINE_ROUTES`)
+ *   - from wherever the template had them:
+ *     - `tools/_assets/`, `packages/epics/tools/_assets/`
+ *     - the docs package's old `packages/docs/tools/_assets/` (before epic `people-and-orgs` P16)
+ * - the home page:  `/pages/index.html`;  the areas' list pages:  `/epics/index.html` ...
+ * - the site header's `root`:  dropped (pages are served, never opened from disk:  P46, Q5)
+ * - the epics pack's script (`<ui-components source>`, on epic, details and choice pages):  its route, `/_epic/pack/`
+ *   - another pack's:  `/packages/<name>/components/__pack/` (a repo's own, at its engine route)
+ *   - from its old folder, `packages/<name>/pack/`, too
  * - drops the template's `TEMPLATE:` how-to comment
- * - `docs:new`, `details create`, and the plan-doc tool's `epic create` (`PlanDocCommands`)
+ * - `docs:new`, `details create`, `choices create`, the docs index's list pages, and the plan-doc tool's `epic create`
+ *   (`PlanDocCommands`);  `atDepth()` before P46, which wrote `../` for the page's depth
  */
-export function atDepth(html, depth) {
-  const up = "../".repeat(depth)
+export function fromTemplate(html) {
+  const up = "/"
   return (
     html
       // a component pack's script (`<ui-components source>`:  the epics pack, on epic, details and choice pages)
@@ -524,7 +522,7 @@ export function atDepth(html, depth) {
       )
       .replace(/((?:href|src)=")(?:\.\.\/)*(?:pages\/)?index\.html/g, `$1${up}pages/index.html`)
       .replace(/((?:href|src)=")(?:\.\.\/)*(epics|guides|templates|brand)\/index\.html/g, `$1${up}$2/index.html`)
-      .replace(/(<spell-site-header\b[^>]*?\broot=")[^"]*"/, `$1${up.replace(/\/$/, "") || "."}"`)
+      .replace(/(<spell-site-header\b[^>]*?)\s+root="[^"]*"/, "$1")
       .replace(/\n\s*<!--\s*TEMPLATE:[\s\S]*?-->/, "")
   )
 }
@@ -538,17 +536,16 @@ export function serverUrl(base, file) {
 }
 
 /**
- * Where a browser opens page `file`, for the tools that load pages headlessly (`check-spell.js`, `designer-shots.js`).
- * - `file://`, unless the page needs a server:  its `<body data-spell-needs-server>`, or a component set's page
- *   (its address, `/components/epics/x.html`:  it loads its site bundle from there)
+ * Where a browser opens page `file`, for the tools that load pages headlessly (`check-spell.js`, `designer-shots.js`):
+ * ALWAYS the page server, as Owen reads it (epic `epic-engine` P46, Q5:  a page's links are root paths, which only
+ * mean something served;  `file://` before, unless the page needed a server)
+ * - a component set's page at its address (`/components/epics/x.html`:  it loads its site bundle from there)
  * - `base`:  ANY page from that server, as it's shown there (`http://127.0.0.1:4848`)
  * - else this checkout's page server, started if it's down (`ensurePageServer()`)
- * - throws if it needs a server and none started, or the page is outside the content folder (no server has it)
+ * - throws if none started, or the page is outside the content folder (no server has it)
  */
 export function browserUrlFor(file, { base } = {}) {
   const inSet = componentSetAddress(file)
-  const needsServer = inSet || /<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))
-  if (!base && !needsServer) return pathToFileURL(resolve(file)).href
   const served = base ? { base: base.replace(/\/$/, "") } : ensurePageServer()
   if (!inSet && pagePath(file).startsWith("../"))
     throw new Error(`${file} is outside the content folder, ${CONTENT}, so no server has it`)

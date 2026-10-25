@@ -2,6 +2,7 @@
  * Types the epic page MIGRATIONS share (`Migrations`, each step, `MigrateCommands`).
  * - Data only:  nothing here runs.
  */
+import type { SRV } from "spell/server"
 import type { DataFileMove } from "spell-epic/data/DataFile"
 
 /**
@@ -72,6 +73,11 @@ export type MigrationContext = {
    * (`migrate`);  steps READ it, never write it:  they say what to change in `moves`.
    */
   inbox?: InboxView
+  /**
+   * The links `html` (the page, assembled) holds that its next write makes ROOT PATHS (`root-links`, epic
+   * `epic-engine` P46):  the page's linker's `rootLinks()`, mending, from its folder;  when the runner has one
+   */
+  rootLinks?: (html: string) => SRV.RootLinkChange[]
   /** One line for each thing a step fixed or found, for the page's report:  `links-agree:  ...`. */
   notes?: string[]
   /** Comments to move to another anchor, which the runner writes into the inbox after the page (`AnchorMove`). */

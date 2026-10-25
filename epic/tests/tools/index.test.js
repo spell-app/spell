@@ -74,7 +74,7 @@ describe("the home page's cards", () => {
       "Templates"
     ])
     const sets = cards.filter((card) => card.id === "epic-ui" || card.id === "app-ui")
-    expect(sets.map((card) => card.href)).toEqual(["../components/epics/index.html", "../components/app/index.html"])
+    expect(sets.map((card) => card.href)).toEqual(["/components/epics/index.html", "/components/app/index.html"])
     expect(sets[0].meta).toBe("served at /components/epics/, by the page server")
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
@@ -85,7 +85,7 @@ describe("the home page's cards", () => {
     expect(count.brand).toBe("1 copy · 1 element · 1 page")
     expect(count.templates).toBe("1 template")
     expect(count.sagas).toBe("2 sagas")
-    expect(cards.find((card) => card.id === "sagas").href).toBe("../sagas/index.html")
+    expect(cards.find((card) => card.id === "sagas").href).toBe("/sagas/index.html")
     // the App is only on the page server:  no link from disk
     expect(cards.find((card) => card.id === "app").href).toBeUndefined()
   })
@@ -115,7 +115,7 @@ describe("the list pages", () => {
     expect(order).toEqual(["s", "z", "b", "p", "c", "f", "e", "a"])
     expect(html).toMatch(/<epic-list class="spell-epics">\n<!-- running-epics -->\n<epic-card/)
     expect(html).toMatch(/<!-- running-epics:end -->\n<\/epic-list>\n<\/ui-section>$/)
-    expect(html).toContain(`<a href="b/b.plan.html">b</a>`)
+    expect(html).toContain(`<a href="/epics/b/b.plan.html">b</a>`)
     // the facts the card draws its state from, and the page server marks it again by
     expect(html).toContain(`<epic-card id="epic-p" epic="p" data-status="open" phases="todo" updated="2026-01-01">`)
     expect(html).toMatch(
@@ -156,10 +156,10 @@ describe("the list pages", () => {
       "saga-epics",
       "misc"
     ])
-    expect(html).toContain(`<span slot="label"><a href="../sagas/epics/epics.saga.html">Epic Tooling</a></span>`)
+    expect(html).toContain(`<span slot="label"><a href="/sagas/epics/epics.saga.html">Epic Tooling</a></span>`)
     expect(html).toMatch(/id="saga-drawable-spell"[\s\S]*No guides name this saga yet[\s\S]*id="saga-epics"/)
     expect(html).toMatch(
-      /id="saga-epics"[\s\S]*href="a.html"[\s\S]*id="misc"[\s\S]*href="b\/b.html"[\s\S]*href="c.html"/
+      /id="saga-epics"[\s\S]*href="a.html"[\s\S]*id="misc"[\s\S]*href="\/guides\/b\/b.html"[\s\S]*href="c.html"/
     )
   })
 
@@ -168,7 +168,7 @@ describe("the list pages", () => {
     const pages = [{ ...epic("a", []), saga: "epics" }, page("guides/a.html", "epics"), page("guides/b.html", "epics")]
     const html = listSection(sagas, pages, undefined, SAGAS)
     expect(Array.from(html.matchAll(/<ui-card id="([\w-]+)"/g), (m) => m[1])).toEqual(["drawable-spell", "epics"])
-    expect(html).toContain(`<a href="epics/epics.saga.html">Epic Tooling</a>`)
+    expect(html).toContain(`<a href="/sagas/epics/epics.saga.html">Epic Tooling</a>`)
     expect(html).toContain(`<ui-meta>1 epic · 2 guides · sagas/epics/epics.saga.html</ui-meta>`)
     expect(listSection(sagas, [], undefined, [])).toContain("No sagas yet")
   })
@@ -188,8 +188,8 @@ describe("the list pages", () => {
 
   it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
     const html = skeleton(guides)
-    expect(html).toContain(`<spell-site-header root=".."></spell-site-header>`)
-    expect(html).toContain(`<ui-breadcrumb link="../pages/index.html" target="_self">Docs</ui-breadcrumb>`)
+    expect(html).toContain(`<spell-site-header></spell-site-header>`)
+    expect(html).toContain(`<ui-breadcrumb link="/pages/index.html" target="_self">Docs</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)

@@ -136,7 +136,7 @@ export class EpicServer {
 
   /**
    * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`):  the default repo's settings' `"siteTabs"`,
-   * as its own page server tells them;  none:  `undefined`, and pages show their bundle's (`defineSite({ tabs })`)
+   * as its own page server tells them;  none:  `undefined`, and pages show no tabs (epic `epic-engine` P46)
    */
   private readonly siteTabs?: readonly SiteTab[]
 

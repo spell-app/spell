@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname, join, posix } from "node:path"
 
 import { SRV } from "spell/server"
 
@@ -8,8 +8,11 @@ import { SRV } from "spell/server"
  * An epic page in PARTS (epic `claude-design`, P3):  a SKELETON, `epics/<name>/<name>.plan.html`, plus one BODY file
  * per bulky section or item, `epics/<name>/parts/<id>.html`, which the page loads the first time it's opened.  Rules:
  * `PLAN-DOC.md` beside this, "Parts".
- * - the parts' FILES and URLS:  where a part lives (`partFile()`), reading one (`reader()`), rebasing a body's
- *   relative URLs to `parts/` and back (`rebase()`), formatting and writing (`formatHTML()`, `writeChanged()`)
+ * - the parts' FILES and URLS:  where a part lives (`partFile()`), reading one (`reader()`), the few relative URLs a
+ *   body still holds rebased to `parts/` and back (`rebase()`), formatting and writing (`formatHTML()`,
+ *   `writeChanged()`)
+ *   - every other link is a ROOT PATH (epic `epic-engine` P46), the same text in a part as in its page:  only a
+ *     page's links into its own folder stay relative (Owen's Q1), and a part's own `parts/` siblings
  * - `EpicParts` beside this splits and assembles a doc on them;  so does the converter (`spell-epic/convert`), whose
  *   first pass also assembles a doc in the old markup (`OldParts`)
  * - a part is told from a page by its FOLDER, `parts/`:  every page walker skips it (`pages.js` `findPages()`:  the
@@ -39,13 +42,27 @@ export class PlanParts {
   }
 
   /**
-   * A page-relative URL as the part sees it (`parts/` is one folder down):  `../x`;  `parts/y` -> `y`.
-   * - pure, and passed on as a callback (`rebase()`)
+   * A page-relative URL as a part of the page served from `folder` (its root path, `/epics/seo/`) holds it:
+   * `parts/y` -> `y`;  any other, the page's own folder's (`x.png`, `requests/r3/a.png`) -> its root path,
+   * `/epics/seo/x.png` (epic `epic-engine` P46:  from `parts/` it would climb, and a link never does)
+   * - one that climbs above the root (none should, after the linker), or no `folder` (a test's doc):  `../` more, as
+   *   before P46
+   * - pure;  the callback `rebase()` takes
    */
-  static toPart = (url: string): string =>
-    url.startsWith(`${PARTS_DIR}/`) ? url.slice(PARTS_DIR.length + 1) : `../${url}`
+  static toPartFrom(folder?: string): (url: string) => string {
+    return (url) => {
+      if (url.startsWith(`${PARTS_DIR}/`)) return url.slice(PARTS_DIR.length + 1)
+      // from the root without its slash, so one that climbs above it says so (`../x`), never clamped to `/x`
+      const rooted = folder === undefined ? ".." : posix.normalize(`${folder.replace(/^\/|\/?$/g, "")}/${url}`)
+      return rooted.startsWith("..") ? `../${url}` : `/${rooted}`
+    }
+  }
 
-  /** A part-relative URL as the page sees it:  the inverse of `toPart()`. */
+  /**
+   * A part-relative URL as the page sees it:  `y` -> `parts/y`;  `../x` -> `x`.
+   * - reads a part written before epic `epic-engine` P46 too, whose links climb from `parts/`;  a root path, which
+   *   every link is since, isn't relative and is never rebased
+   */
   static toPage = (url: string): string => (url.startsWith("../") ? url.slice(3) : `${PARTS_DIR}/${url}`)
 
   ////////////////

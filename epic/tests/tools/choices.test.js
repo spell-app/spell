@@ -68,7 +68,7 @@ beforeAll(() => {
 
 afterAll(() => rmSync(docs, { recursive: true, force: true }))
 
-test("new:  the page, its rows in it as elements and beside it as JSON, fixed for its depth", () => {
+test("new:  the page, its rows in it as elements and beside it as JSON, the same at any depth", () => {
   const file = createPage(docs, "names", { epic: "big", data: DATA })
   expect(file).toBe(join(docs, "epics/big/details/names.html"))
   const html = readFileSync(file, "utf8")
@@ -76,7 +76,7 @@ test("new:  the page, its rows in it as elements and beside it as JSON, fixed fo
   expect(html).toContain('<script src="/_epic/assets/spell-ui.js">')
   expect(html).toContain('source="/_epic/pack/epics.pack.js"')
   expect(html).not.toContain("syntax-choices.js")
-  expect(html).toContain('root="../../.."')
+  expect(html).toContain("<spell-site-header></spell-site-header>")
   expect(html).toContain("Which <b>names</b> change?")
   expect(html).toContain('<epic-field label="Just now">counted them</epic-field>')
   expect(html).toContain("<code>names.rows.json5</code>")

@@ -103,7 +103,7 @@ describe("GuideChanges.gather()", () => {
     const doc = epicText()
     expect(doc).toMatch(/<epic-phase[^>]*title="Memory"/)
     expect(doc).toMatch(
-      /href="\.\.\/\.\.\/guides\/memory\/memory\.html#sizes"[^>]*>table in 2\. Sizes<\/a>\s+on\s+<q>Name Size<\/q>/
+      /href="\/guides\/memory\/memory\.html#sizes"[^>]*>table in 2\. Sizes<\/a>\s+on\s+<q>Name Size<\/q>/
     )
     expect(doc).toContain("Too wide on a phone?")
     expect(doc).toContain("Still true?")
@@ -161,7 +161,7 @@ describe("GuideChanges.gather()", () => {
     expect(await changes.gather()).toMatchObject([
       { page: "components/epics/epic-item.html", as: "phase", comments: [id] }
     ])
-    expect(epicText()).toMatch(/href="\.\.\/\.\.\/components\/epics\/epic-item\.html#1-example"/)
+    expect(epicText()).toMatch(/href="\/components\/epics\/epic-item\.html#1-example"/)
     expect(GuideInbox.read(inbox).comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc" } })
   })
 
@@ -189,7 +189,7 @@ describe("GuideChanges.gather()", () => {
     expect(await changes.gather()).toMatchObject(
       Object.keys(pages).map((page) => ({ page, as: "phase", comments: [ids[page]] }))
     )
-    expect(epicText()).toMatch(/href="\.\.\/\.\.\/components\/app\/Chooser\.html#sizes"/)
+    expect(epicText()).toMatch(/href="\/components\/app\/Chooser\.html#sizes"/)
   })
 
   // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into feedback

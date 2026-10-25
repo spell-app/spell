@@ -58,6 +58,12 @@ describe("EpicParts.split() / assemble()", () => {
     expect(doc.querySelector("main")!.innerHTML.replace(/\s+/g, "")).toBe(whole.replace(/\s+/g, ""))
   })
 
+  test("given its folder, a part holds the page's own folder's URLs as root paths (epic `epic-engine` P46)", () => {
+    const doc = parseHTML(DOC.replace("../../guides/a.html", "shot.png")).document as unknown as Document
+    const parts = new EpicParts(doc).split({ folder: "/epics/x/" })
+    expect(parts.get("o1")).toContain('href="/epics/x/shot.png"')
+  })
+
   test("a missing part is reported;  its host stays empty", () => {
     const doc = document()
     new EpicParts(doc).split()

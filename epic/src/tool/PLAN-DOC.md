@@ -26,11 +26,11 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
 ```html
 <ui-root>
   <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
-  <spell-site-header root="../.."></spell-site-header>
+  <spell-site-header></spell-site-header>
   <div class="spell-doc"><main class="spell-doc-main">
     <epic-page epic="seo" title="SEO" branch="seo" worktree="/.../seo" started="2026-10-01" updated="2026-10-07"
       repo="https://github.com/spell-app/spell-app">
-      <a slot="durable" href="../../guides/seo.html">SEO</a>
+      <a slot="durable" href="/guides/seo.html">SEO</a>
       <epic-overview id="overview" estimate="4h-5h in all, 2h left">
         <epic-summary>Two sentences.</epic-summary>
         <epic-prompt><p>the kickoff prompt</p></epic-prompt>
@@ -883,6 +883,17 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       (`ContentRelink.respellComments()`)
     - test screenshots keep their file names:  pages name them by path
     - idempotent:  a migrated page has no Caveats section and no `t` ids in its Manual tests
+  - `root-links` (2026-10-25, on command;  epic `epic-engine` P46):  every local link a ROOT PATH, as the page server
+    serves it (`RootLinks`;  the rules:  spell-epic's `src/AGENTS.md`, "Links")
+    - the page's step only finds what's left (its `context.rootLinks`, the page's linker);  the write it triggers makes
+      them root paths (`SRV.Linker.link()`), a broken one at its one new home
+    - then the CONTENT FOLDER's pass, in the same run (`RootLinks.run()`):  every HTML and Markdown file of `epics`,
+      `guides`, `pages`, `sagas`, `goals` and `brand` (never `ui`), parts and details pages included, as plain text,
+      every other byte kept;  each under its page's lock;  the census printed (by folder, by target, every link mended
+      or still broken)
+      - `epic migrate <epic>`:  that epic's folder only;  `--notify`:  a running epic's folder left to its session
+    - the other kinds' pages:  the docs tools' own `root-links` step, a TEXT step (`migrate.js`)
+    - a link that climbs above the root is left, and listed;  a second run writes nothing
     - it retired `caveats-and-tests`:  no page needed it any more, and it would read the new Todo section's `t` ids
       as old todos
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
@@ -905,9 +916,16 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
 - A host's body is every child but its slotted ones:  the title stays in the skeleton.
 - In the skeleton, a host carries `source="parts/<id>.html"`, `part-ids` and `commits`.
 - No placeholder line:  the element loads its own body.
-- HTML a command is handed (`update --plan`, `details --file`) has the PAGE's links, one `../` less than a part's.
-  - A link copied out of a part file (`../../../spell-ui/x.ts`) is taken as the part's when only that one is there:
-    so it lands as the part held it, from any checkout (`PlanDocFiles.fixPartRelativeLinks()`, epic `epic-engine` I134).
+- Every link in a part is a ROOT PATH, as in the page (epic `epic-engine` P46):  `/spell-ui/x.ts`, `/guides/x.html`,
+  `/epics/seo/details/q.html`, the same text in the skeleton and its parts, from any checkout.
+  - The tool writes them so on every write (`SRV.Linker.link()`, in `PlanDocFiles.writeDoc()`):  a relative link
+    handed over is made the root path of what it reaches from the page.
+  - A link to a file in the page's OWN folder stays relative in the skeleton (Owen's Q1), and is that folder's root
+    path in a part, as it's split (`PlanParts.toPartFrom()`):  from `parts/` it would climb.
+  - A part written before P46 holds links relative to `parts/` (`../../../spell-ui/x.ts`):  read, they're rebased to
+    the page (`PlanParts.toPage()`), and the next write makes them root paths.
+  - A link copied out of such a part (one `../` too many for the page) is taken as the part's when only that one is
+    there (`PlanDocFiles.rootPartLinks()`, epic `epic-engine` I134).
 - `.html`, not `.htm` (Q12).
   - A part is told from a page by its folder, and every page walker skips `parts/`.
   - The tool reads and writes `.html` only.

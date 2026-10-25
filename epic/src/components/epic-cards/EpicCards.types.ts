@@ -16,7 +16,7 @@ export type SagaEpic = {
   name: string
   /** its epic page's title:  `Python Target` */
   title: string
-  /** its epic page, from the saga page's folder:  `../../epics/python-target/python-target.plan.html` */
+  /** its epic page, a root path:  `/epics/python-target/python-target.plan.html` */
   href: string
   /** its `<epic-summary>`, as text;  `""` with none */
   summary: string

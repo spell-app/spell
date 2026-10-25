@@ -87,8 +87,8 @@ describe("POST /api/epics/favorite", () => {
     const { pages } = JSON.parse(answer.text) as { pages: { href: string; title: string; kind: string }[] }
     const byHref = (a: string[], b: string[]) => a[0]!.localeCompare(b[0]!)
     expect(pages.map(({ href, title, kind }) => [href, title, kind]).sort(byHref)).toEqual([
-      ["details/bare.html", "bare", "details"],
-      ["details/names.html", "Boolean names", "choices"]
+      ["/epics/seo/details/bare.html", "bare", "details"],
+      ["/epics/seo/details/names.html", "Boolean names", "choices"]
     ])
     expect(JSON.parse((await ask(port, "GET", "/api/epics/pages?epic=nothing-here")).text)).toEqual({
       pages: [],
@@ -112,7 +112,7 @@ describe("POST /api/epics/favorite", () => {
       id: "epics",
       title: "Epic Tooling",
       purpose: "epics",
-      href: "../../sagas/epics/epics.saga.html"
+      href: "/sagas/epics/epics.saga.html"
     })
     writeFileSync(page, `<epic-page epic="named" title="Named" saga="gone"></epic-page>`)
     expect(await sagaOf()).toBeNull()
@@ -136,7 +136,7 @@ describe("POST /api/epics/favorite", () => {
         saga: "epics",
         open: 1,
         page: "/epics/tested/tested.plan.html",
-        href: "../tested/tested.plan.html"
+        href: "/epics/tested/tested.plan.html"
       }
     ])
   })

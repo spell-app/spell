@@ -70,7 +70,7 @@ export class SeeAlso {
   /**
    * Epic `name`'s See Also, in its box's order:  the guide, then its own pages (details, choices) newest first,
    * then the guides it links, newest first.
-   * - each `href` from the epic page's folder (`details/analysis.html`, `../../guides/x.html`)
+   * - each `href` a root path (`/epics/seo/details/analysis.html`, `/guides/x.html`;  epic `epic-engine` P46)
    * - none for an epic with no files:  `[]`
    */
   linksOf(name: string): SeeAlsoLink[] {
@@ -80,7 +80,7 @@ export class SeeAlso {
     const page = (path: string, kind: SeeAlsoKind): SeeAlsoLink => {
       const file = join(this.content, path)
       return {
-        href: posix.relative(`${EPICS}/${name}`, path),
+        href: `/${path}`,
         title: titleOf(file),
         kind,
         updated: statSync(file).mtime.toISOString()
@@ -174,7 +174,7 @@ export type SeeAlsoKind = "durable" | "guide" | "details" | "choices"
 
 /** One page in an epic's See Also, as `GET /api/epics/pages` lists it (`<epic-page>`'s `SeeAlsoLink`). */
 export type SeeAlsoLink = {
-  /** from the epic page's folder:  `details/analysis.html`, `../../guides/python-target.html` */
+  /** a root path:  `/epics/seo/details/analysis.html`, `/guides/python-target.html` (epic `epic-engine` P46) */
   href: string
   /** its `<title>` (without a site suffix), else its file's name */
   title: string
@@ -316,16 +316,18 @@ function linksIn(root: string, name: string): { durable: string[]; guides: strin
 /**
  * Link `href`, written in `file`, as a checkout path (`guides/x.html`);  `undefined` for a link within the page, to
  * another site, or out of the checkout.
+ * - a ROOT PATH (`/guides/x.html`, epic `epic-engine` P46):  that path, as the page server serves it
  */
 function pathOf(root: string, file: string, href: string): string | undefined {
   const bare = href.replace(/[?#].*$/, "")
-  if (!bare || /^[a-z][\w+.-]*:/i.test(bare) || bare.startsWith("/")) return undefined
+  if (!bare || /^[a-z][\w+.-]*:/i.test(bare) || bare.startsWith("//")) return undefined
   let decoded: string
   try {
     decoded = decodeURI(bare)
   } catch {
     return undefined
   }
+  if (decoded.startsWith("/")) return decoded.slice(1)
   const path = relative(root, resolve(dirname(file), decoded))
     .split(sep)
     .join("/")

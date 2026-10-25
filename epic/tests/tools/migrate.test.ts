@@ -117,8 +117,12 @@ describe("page kinds", () => {
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
       expect(step.kinds.every((kind) => KINDS.includes(kind) && kind !== "epic")).toBe(true)
     }
-    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["components-not-markup", "engine-asset-paths"])
-    expect(stepsFor("goal-set").map((step) => step.name)).toEqual(["engine-asset-paths"])
+    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual([
+      "components-not-markup",
+      "engine-asset-paths",
+      "root-links"
+    ])
+    expect(stepsFor("goal-set").map((step) => step.name)).toEqual(["engine-asset-paths", "root-links"])
     expect(() => stepsFor("guide", "nope")).toThrow(/no step "nope"/)
   })
 })
@@ -135,7 +139,7 @@ describe("engine-asset-paths", () => {
     const root = checkout({ "goals/spell/ai/ai.html": page, "sagas/s/s.saga.html": page })
     const pages = pagesFor(root)
     expect(pages.map(({ kind }) => kind)).toEqual(["goal-set", "goal"])
-    const { results } = migratePages(pages, { tidied: false })
+    const { results } = migratePages(pages, { step: "engine-asset-paths", tidied: false })
     expect(results[0]!.notes).toEqual([
       "engine-asset-paths:  ../../../packages/epics/tools/_assets/spell-doc.css -> /_epic/assets/spell-doc.css",
       "engine-asset-paths:  ../../../packages/epics/tools/_assets/goals-live.js -> /_epic/assets/goals-live.js",
@@ -147,7 +151,7 @@ describe("engine-asset-paths", () => {
     expect(html).toContain('source="/_epic/pack/epics.pack.js"')
     expect(html).toContain('<a href="../../../packages/epics/tools/_assets/spell-ui.js">')
     expect(html).toContain('src="/_epic/assets/goals-live.js"')
-    expect(migratePages(pagesFor(root), { tidied: false }).written).toEqual([])
+    expect(migratePages(pagesFor(root), { step: "engine-asset-paths", tidied: false }).written).toEqual([])
   })
 })
 
@@ -293,5 +297,29 @@ describe("PlanAnchors agrees with BlockAnchors", () => {
     // p2's field, saved when it was p1's second:  both find it by its excerpt
     const moved = { anchor: "p1#field-3", excerpt: "Two." }
     expect(PlanAnchors.find(document, moved.anchor, moved.excerpt).block).toBe(findBlock(main, moved).block)
+  })
+})
+
+// epic `epic-engine` P46:  every local link a root path, as text:  every other byte kept
+describe("root-links", () => {
+  test("a guide's relative links as root paths, its site header's root dropped, the rest kept byte for byte;  once", () => {
+    const guide =
+      '<!doctype html>\n<html><body>\n  <spell-site-header root="../.."></spell-site-header>\n' +
+      '  <main><a  href="../../spell-ui/README.md#x">ui</a> <a href="details/d.html">d</a> <a href="x.html">x</a>\n' +
+      '  <img src="shots/a.png"> <a href="../../../above.html">up</a></main>\n</body></html>\n'
+    const root = checkout({ "guides/x/x.html": guide, "spell-ui/README.md": "", "guides/x/details/d.html": "" })
+    const pages = pagesFor(root).filter(({ file }) => file.endsWith("x/x.html"))
+    const { results } = migratePages(pages, { step: "root-links", tidied: false, root })
+    expect(results[0]!.ran).toEqual(["root-links"])
+    expect(results[0]!.notes).toEqual([
+      "root-links:  3 links as root paths",
+      "root-links:  LEFT, above the root, for a person:  ../../../above.html -> ../../../above.html"
+    ])
+    expect(readFileSync(join(root, "guides/x/x.html"), "utf8")).toBe(
+      "<!doctype html>\n<html><body>\n  <spell-site-header></spell-site-header>\n" +
+        '  <main><a  href="/spell-ui/README.md#x">ui</a> <a href="/guides/x/details/d.html">d</a> <a href="x.html">x</a>\n' +
+        '  <img src="shots/a.png"> <a href="../../../above.html">up</a></main>\n</body></html>\n'
+    )
+    expect(migratePages(pages, { step: "root-links", tidied: false, root }).written).toEqual([])
   })
 })

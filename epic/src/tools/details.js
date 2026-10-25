@@ -61,7 +61,7 @@ import {
 } from "./answerPages.js"
 import { AskListeners } from "./AskListeners.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
-import { CONTENT, ROOT, atDepth, inContent, openInVSCode, serialize } from "./pages.js"
+import { CONTENT, ROOT, fromTemplate, inContent, openInVSCode, serialize } from "./pages.js"
 import {
   archiveAnswer,
   askedOf,
@@ -196,8 +196,7 @@ export function createPage(docs, slug, { title, epic, description, spec } = {}) 
  */
 function pageDocument(docs, folder, { title, description, spec }) {
   title ??= spec?.title ?? "Details"
-  const depth = relative(docs, folder).split("/").length
-  const { document } = parseHTML(atDepth(readFileSync(join(TOOL_TEMPLATES, "details.html"), "utf8"), depth))
+  const { document } = parseHTML(fromTemplate(readFileSync(join(TOOL_TEMPLATES, "details.html"), "utf8")))
   // the date up top, under "Asked by":  the notes are the page's bottom, so no footer
   fillHead(document, {
     title,

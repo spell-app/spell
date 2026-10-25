@@ -77,7 +77,7 @@ export class EpicTests {
         saga: attribute(page, "saga") ?? null,
         open,
         page: `/epics/${epic}/${fileName}`,
-        href: `../${epic}/${fileName}`
+        href: `/epics/${epic}/${fileName}`
       }
     ]
   }
@@ -260,7 +260,7 @@ export type EpicTestCount = {
   open: number
   /** its page's URL path on the page server:  `/epics/seo/seo.plan.html` */
   page: string
-  /** its page from another epic page's folder:  `../seo/seo.plan.html` */
+  /** its page, a root path, as a link on any page writes it:  `/epics/seo/seo.plan.html` (epic `epic-engine` P46) */
   href: string
 }
 
