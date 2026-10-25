@@ -1,3 +1,4 @@
+// spell ui rename: leave this file (it documents the old-name mechanism, with old names as its examples)
 /**
  * The VOCABULARY's types:  the schema every set's `<Name>.en.ts` follows (Spell UI's, the epics', the app's ...),
  * and the translation `Dictionary` contract.

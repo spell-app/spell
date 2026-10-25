@@ -1,3 +1,4 @@
+// spell ui rename: leave this file (it documents the old-name mechanism, with old names as its examples)
 /**
  * Shared types for `spell/element`, what makes a custom element on Solid:
  * - how a `ComponentVocabulary` becomes typed, converted property values (`AttributeValues`)
