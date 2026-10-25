@@ -29,8 +29,9 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { after, before, describe, it } from "node:test"
 import { fileURLToPath } from "node:url"
-import { chromium, type Browser, type Page } from "playwright"
+import type { Browser, Page } from "playwright"
 
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { DevServer } from "spell/element-tools/DevServer"
 
 void describe("hot module replacement (Vite dev, tools/demo/hmr.html)", () => {
@@ -215,11 +216,10 @@ class HmrPage {
   /** Start the dev server and chromium, load the demo page and wait for its elements. */
   static async open(): Promise<HmrPage> {
     const server = await DevServer.start({ root: ROOT, port: PORT })
-    const browser = await chromium.launch()
-    const page = await browser.newPage()
-    // tsx compiles this file with esbuild `keepNames`, which wraps named functions in `__name(...)` -- also the
-    // ones `page.evaluate()` serializes into the page, where no `__name` exists
-    await page.addInitScript("globalThis.__name = (fn) => fn")
+    const browser = await BrowserPage.launch()
+    // `BrowserPage` gives the page `__name`, for the functions `page.evaluate()` sends it;
+    // the constructor records EVERY console message, not only problems, so it listens itself
+    const page = await BrowserPage.newPage(browser)
     const hmr = new HmrPage({ server, browser, page })
     await page.goto(server.url("/src/tools/demo/hmr.html"))
     await hmr.ready()
