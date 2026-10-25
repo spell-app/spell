@@ -1,5 +1,5 @@
 {
-  // spell-parser's TypeScript settings for its browser-safe code:  parser, markdown, core, py's writers and spell.
+  // spell-parser's TypeScript settings for its browser-safe code:  parser, markdown, core, py's writers, spell and spellx.
   // - Every import is a package name, spell-parser's own too (`spell-parser/parser/rules/Rule`, epic `repo-split` Q47):
   //   NO `paths`.  `spell-parser-source` reads this repo's names as its source, through `package.json`'s `exports`;
   //   another repo's (`spell/util` ...) as its declarations, its `types`.
@@ -14,7 +14,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "spell/toolchain/types"]
   },
-  "include": ["src/parser", "src/markdown", "src/core", "src/py", "src/spell"],
+  "include": ["src/parser", "src/markdown", "src/core", "src/py", "src/spell", "src/spellx"],
   "exclude": [
     // node-only:  tsconfig.node.json's
     "src/parser/test",

@@ -1,0 +1,3 @@
+<spell-thing "deck" template="list of cards">
+	<action "shuffle it">put its cards in a random order</>
+</spell-thing>

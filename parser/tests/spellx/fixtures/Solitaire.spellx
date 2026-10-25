@@ -1,0 +1,50 @@
+<spell-app "solitaire" menu-bar="GameMenu">
+	Klondike solitaire:  deal seven columns, then build four foundations, ace to king, one suit each.
+
+	<property "deck">a new deck</>
+	<property "columns" description="The seven piles cards are played on">7 new columns</>
+	<property "moves" description="Every move so far, newest last">a new list of moves</>
+
+	<action "start a new game" shortcut="meta+N">
+		shuffle its deck
+		deal its deck into its columns
+	</action>
+	<action "undo the last move" shortcut="meta+Z" enabled-when="it has moves">
+		take back the last of its moves
+	</action>
+
+	<menu "GameMenu">
+		<action "start a new game" />
+		<action "undo the last move" />
+	</menu>
+
+	<on mouse down>
+		<comment>A press a card passed on:  the original target is that card;  the target is the game.</>
+		if the original target is a card
+			move the original target to the best pile for it
+	</>
+
+	<draw>
+		<toolbar menu="GameMenu" />
+		<comment>A card made by its own tag:  the game's logo, with the game menu on a right click.</>
+		<solitaire-card rank="ace" suit="spades" direction="up" part="logo" context-menu="GameMenu" />
+		<for each column in its columns>
+			{column}
+		</>
+	</draw>
+</spell-app>
+
+<spell-page-template "score page">
+	A page that lists games, best first.
+	<property "scores">a new list of scores</>
+</spell-page-template>
+
+<spell-page "high scores" template="score page">
+	The ten best games, fastest first.
+	<draw>
+		<header>High scores</header>
+		<for each score in the first 10 of its scores>
+			<text>{the score's time}</text>
+		</>
+	</draw>
+</spell-page>

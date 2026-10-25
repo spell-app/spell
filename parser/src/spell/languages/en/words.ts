@@ -127,6 +127,53 @@ export const englishWords: SP.LanguageWords = {
     "drawable-list": "viewable list"
   },
 
+  /**
+   * Spellx's words, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SP.SpellxWords`.
+   * - Template tags carry the prefix, `<spell-view>`;  everything inside them is a short word, `<property>` (Q37).
+   */
+  spellx: {
+    prefix: "spell",
+    templates: {
+      view: "view",
+      thing: "thing",
+      page: "page",
+      app: "app",
+      "page-template": "page template",
+      "app-template": "app template"
+    },
+    declarations: {
+      property: "property",
+      alias: "alias",
+      action: "action",
+      draw: "draw",
+      event: "event",
+      test: "test",
+      menu: "menu"
+    },
+    notes: { description: "description", comment: "comment" },
+    handlers: { on: "on", when: "when", while: "while" },
+    controls: {
+      if: "if",
+      "otherwise if": "otherwise if",
+      "else if": "otherwise if",
+      otherwise: "otherwise",
+      else: "otherwise",
+      "for each": "for each"
+    },
+    attributes: {
+      name: "name",
+      aka: "aka",
+      template: "template",
+      "one-of": "one-of",
+      alias: "alias",
+      description: "description",
+      shortcut: "shortcut",
+      "enabled-when": "enabled-when",
+      "selected-when": "selected-when",
+      "menu-bar": "menu-bar"
+    }
+  },
+
   /** The kind of a property's values:  `card suit`, from a card's `its "suit" is one of ...`. */
   propertyKindName: "{type} {property}",
 

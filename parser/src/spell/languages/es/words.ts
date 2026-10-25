@@ -112,6 +112,66 @@ export const spanishWords: SP.LanguageWords = {
   },
 
   /**
+   * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
+   * - Spell is `encanto` in Spanish (Q36):  `<encanto-vista>`.
+   * - With their accents (Q49);  each also without, as a person may type it, which the editor upgrades.
+   * - A template's short name is `alias` here, as in Spanish spell's `una cuenta bancaria alias cuenta`;
+   *   what English calls an alias is a `frase` (J7).
+   */
+  spellx: {
+    prefix: "encanto",
+    templates: {
+      vista: "view",
+      cosa: "thing",
+      página: "page",
+      pagina: "page",
+      aplicación: "app",
+      aplicacion: "app",
+      "plantilla-de-página": "page template",
+      "plantilla-de-pagina": "page template",
+      "plantilla-de-aplicación": "app template",
+      "plantilla-de-aplicacion": "app template"
+    },
+    declarations: {
+      propiedad: "property",
+      frase: "alias",
+      acción: "action",
+      accion: "action",
+      dibujar: "draw",
+      evento: "event",
+      probar: "test",
+      menú: "menu",
+      menu: "menu"
+    },
+    notes: { descripción: "description", descripcion: "description", comentario: "comment" },
+    handlers: { al: "on", cuando: "when", mientras: "while" },
+    controls: {
+      si: "if",
+      "si no si": "otherwise if",
+      "sino si": "otherwise if",
+      "de lo contrario si": "otherwise if",
+      "si no": "otherwise",
+      sino: "otherwise",
+      "de lo contrario": "otherwise",
+      "para cada": "for each"
+    },
+    attributes: {
+      nombre: "name",
+      alias: "aka",
+      plantilla: "template",
+      "uno-de": "one-of",
+      frase: "alias",
+      descripción: "description",
+      descripcion: "description",
+      atajo: "shortcut",
+      "activa-cuando": "enabled-when",
+      "elegida-cuando": "selected-when",
+      "barra-de-menú": "menu-bar",
+      "barra-de-menu": "menu-bar"
+    }
+  },
+
+  /**
    * The kind of a property's values, by Spanish's word order:  `palo de carta`, from a carta's `su "palo" es uno de ...`.
    * - Its plural is its first word's, `palos de carta`, as for any name with `de` in it.
    */

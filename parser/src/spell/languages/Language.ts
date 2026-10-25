@@ -305,9 +305,10 @@ export type ParserMessages = Record<ParserMessageKey, string>
 
 /**
  * The language part of a spell file's name, before its `.spell`:  `es` in `Carta.es.spell`, `pt-BR` in `x.pt-BR.spell`.
+ * - A spellx file says it the same way:  `Carta.es.spellx` (epic `elemental-spell`).
  * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
  */
-const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?::[\d-]*)?$/
+const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spellx?(?::[\d-]*)?$/
 
 /** A named placeholder in a message, `{type}` -- see `Language.parserMessage()`. */
 const PLACEHOLDER = /\{(\w+)\}/g
@@ -385,13 +386,69 @@ export type LanguageWords = {
   builtInMembers?: Record<string, string[]>
   /**
    * Words for built-in types the language no longer takes, each with the words that replaced it (epic `elemental-spell`):
-   * English's `{ "view": "view" }`.
+   * English's `{ "drawable thing": "view" }`.
    * - Still read, so the line keeps its meaning;  but each is a parse error naming its replacement,
    *   which a quick fix can put in its place -- see `SpellType.retiredWordErrorsIn()`.
    * - None:  nothing retired.
    */
   retiredTypeWords?: Record<string, string>
+  /**
+   * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
+   * - None:  a spellx file in this language reads English's.
+   */
+  spellx?: SpellxWords
 }
+
+////////////////
+// ## Spellx's words
+////////////////
+
+/**
+ * A language's words for SPELLX, the tag-shaped form of a spell file (epic `elemental-spell`):  a CLOSED vocabulary.
+ * - Each table maps a word as a person writes it to what it means, named in English:
+ *   Spanish's `{ propiedad: "property" }`.
+ * - The spellx reader (`spell-parser/spellx`) knows no other words:
+ *   one that's in none of these is an error naming the closest.
+ * - Several spellings may mean one thing, e.g. `página` and `pagina`:  the first is the one a writer uses.
+ */
+export type SpellxWords = {
+  /** The first word of a template's tag:  `spell` in `<spell-view>`, `encanto` in `<encanto-vista>`. */
+  prefix: string
+  /** A template's word, after the prefix and its dash:  `view` in `<spell-view>`. */
+  templates: Record<string, SpellxTemplateKind>
+  /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
+  declarations: Record<string, SpellxDeclarationKind>
+  /** A tag holding prose about what it's in:  `<description>`, `<comment>`. */
+  notes: Record<string, SpellxNoteKind>
+  /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
+  handlers: Record<string, SpellxHandlerKind>
+  /**
+   * A tag whose head is a spell phrase, deciding what a drawing shows:  `if`, `otherwise if`, `for each` ...
+   * - A word of several words is written with single spaces:  `otherwise if`, Spanish's `de lo contrario si`.
+   */
+  controls: Record<string, SpellxControlKind>
+  /**
+   * An attribute's name => its English name:  Spanish's `{ "uno-de": "one-of", frase: "alias" }`.
+   * - English's map each to itself, so every name a reader meets is in one table.
+   * - An event's attributes are its parameters, never checked here.
+   */
+  attributes: Record<string, string>
+}
+
+/** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
+export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template"
+
+/** What a spellx member tag declares. */
+export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu"
+
+/** A spellx block of prose:  a member's long description, or a comment among its lines. */
+export type SpellxNoteKind = "description" | "comment"
+
+/** A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51). */
+export type SpellxHandlerKind = "on" | "when" | "while"
+
+/** A spellx control tag in a drawing:  an if-chain's branches (Q53), or a loop. */
+export type SpellxControlKind = "if" | "otherwise if" | "otherwise" | "for each"
 
 /**
  * How a language's raw text declares things, found before a file is parsed (`SpellParser.declaredTypes()` ...),
