@@ -878,6 +878,9 @@ function headKey(doc: Document): string {
     const src = script.getAttribute("src")
     if (src?.startsWith("/api/server/") || (!src && script.textContent.includes("SPELL_SERVER"))) continue
     if (!src && isInert(script)) continue
+    // one the page server adds to every page (`PageServer.withPageScripts()`):  not the page's own, and the copy sent
+    // with a change may lack it;  counted, every epic page reloaded on every edit (2026-10-25)
+    if (script.hasAttribute("data-spell-page-script")) continue
     parts.push(src ? `js ${src}` : `inline ${squash(script.textContent)}`)
   }
   return parts.join("\n")
