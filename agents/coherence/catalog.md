@@ -13,6 +13,8 @@ The coherence agent reads it too, for every sweep and plan review (epic `coheren
   ([README-cli.md](../../README-cli.md), "Asking the map").
 - A mechanism that doesn't exist YET, but should (several copies, no shared one):  under "Wanted", with its copies.
 - Grown by each sweep, and by Owen's verdicts on its findings.
+  - Sweep 1 (2026-10-25):  its five reports, with every place, are in the coherence epic's folder of the shared
+    content, `details/sweep-1/`;  its findings are issues on that epic's page.
   A copy that's fine as it is goes under "Fine as it is", with why, so no sweep flags it again.
 - The words:  [words.md](words.md).
 
@@ -89,14 +91,16 @@ What `/coherence sweep` reads, an agent each.
 - **It is:**  `FileLock` (`spell/server`)
 - **Use it when:**  several processes (sessions, agents, the page server) may write one file.
 - **Flag:**  `\.lock["'\x60]|writeFileSync\(.*\.lock`
-- **Copies:**  `--`
+- **Copies:**  three in spell-epic (`withLocks`, `withLock`, `lock`), one of which two runs can both take
+  - Why they exist:  `FileLock` imports the server's barrel, so plain `node` can't load it.
 
 ### A process that's running, or gone
 
 - **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`)
 - **Use it when:**  recording a background process to find, stop or restart it later.
 - **Flag:**  `process\.kill\(\w+, 0\)`
-- **Copies:**  `--`
+- **Copies:**  five `isProcessAlive()` in spell-epic, word for word
+  - Fine:  `spell-epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
 
 ### A free port, a server that stops cleanly
 
@@ -116,8 +120,8 @@ What `/coherence sweep` reads, an agent each.
 
 - **It is:**  `openBrowser()`, `openInNewWindow()`, `openInChromeTab()`, `noBrowser()` (`spell/server`, `src/server/open.ts`)
 - **Use it when:**  a command shows a page.
-- **Flag:**  `spawn\(["']open["']|exec\(["']open `
-- **Copies:**  `--`
+- **Flag:**  `spawn\(["']open["']|exec\(["']open |osascript`
+- **Copies:**  `spell-epic/src/tools/pages.js` (`openUrlInChrome`), `openInChromeTab()` line for line, plus `front`
 
 ### The shared content folder
 
@@ -141,6 +145,8 @@ What `/coherence sweep` reads, an agent each.
     `spell-epic/src/tools/pages.js`
   - `spell-epic/src/window.mjs`
   - `spell-brand/scripts/compare.ts`
+  - six more flag readers (sweep 1):  spell-epic's `parseVerbArgs` and `flagsOf`, `check-spell.js`, the kit's
+    `tools/content-links.ts`, `scripts/favicon.ts`, `tools/repos.ts`
   - beside them, node's own `parseArgs` in Spell UI's tools (`spell-ui/src/tools/cli.ts` ...):  fine for a
     package-local tool
 
@@ -151,7 +157,10 @@ What `/coherence sweep` reads, an agent each.
 - **It is:**  `$fetch()` (`spell/util`):  throws a `ResponseError` subclass for every failure (`NotFoundError` ...)
 - **Use it when:**  any request from a page or a client.  Callers never check `response.ok`.
 - **Flag:**  `response\.ok|\.ok\)` after a `fetch(`
-- **Copies:**  `--`
+- **Copies:**
+  - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
+  - the app's runner:  four, asking for `cache: "no-cache"`, which `$fetch()` has no option for yet
+  - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it keeps its own small fetches
 
 ### Remembering a preference
 
@@ -174,6 +183,8 @@ What `/coherence sweep` reads, an agent each.
     `spell-epic/src/answers/ChoicesForm.ts`
   - `spell-epic/src/review/ServerLink.ts`, `spell-epic/src/review/SendCountdown.ts`
   - `spell-epic/src/tools/AskListeners.ts`, `spell-epic/src/tools/_assets/spell-doc-comments.js`
+  - sweep 1 found about 30 more:  the docs pages' runtime and comments, Spell UI's site, the app's runner and
+    editor, the parser's command line (sleeps:  `await after(0.25)` instead)
 
 ### Building a bundle on demand
 
@@ -187,6 +198,14 @@ What `/coherence sweep` reads, an agent each.
 - **It is:**  `Linker` (`spell/server`):  link targets;  `formatHTML()` for the files it writes
 - **Use it when:**  writing a page that links others, or fixing links after a move.
 - **Copies:**  `--`
+
+### The page server, from an epic page
+
+- **It is:**  `ServerLink` (`spell-epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,
+  and `watch()`:  polling while the page is visible, and hearing the page server's file events
+- **Use it when:**  an epic element or form reads or writes through the page server.
+- **Flag:**  `SPELL_SERVER\?\.token|protocol !== "file:"`
+- **Copies:**  three writes, about a dozen reads, about ten "is this page served?" tests (sweep 1, epic-pages #1, #6)
 
 ## Errors and logging
 
@@ -216,6 +235,78 @@ What `/coherence sweep` reads, an agent each.
 - **Flag:**  `console\.(log|debug)\(`
 - **Copies:**  `--`
 
+## In Spell UI
+
+What a component, or a page built on Spell UI, reaches for first.
+
+### Arrow keys through a list
+
+- **It is:**  `RovingTabindex` (`spell-ui/src/runtime/RovingTabindex.ts`), through `UI.focus.roving()`
+- **Use it when:**  arrows, Home and End move through items:  a tab list, a radio group, a rating, swatches.
+- **Flag:**  `Key\.(arrow\w+|home|end)\b`
+- **Copies:**  five (the accordion, markdown's tab list, the radio group, the rating, the theme editor's swatches)
+  - Fine:  `UICalendar`'s grid, on purpose, as its docs say.
+
+### A keyboard shortcut
+
+- **It is:**  `UI.keyboard` (`spell-ui/src/runtime/Keyboard.ts`) and `Chord` (`spell-ui/src/runtime/Chord.ts`):
+  one registry, scopes per overlay, `Mod` for Command on a Mac and Control elsewhere
+- **Use it when:**  any key combination a page or component answers.
+- **Flag:**  `(metaKey|ctrlKey) &&`
+- **Copies:**  six (sweep 0, the elemental-spell dry run):  the editor's hotkeys, the docs search, the epic toolbar and
+  comments, the live client, a details pane
+
+### An animation in or out
+
+- **It is:**  `UIComponent.onVisibleChange()` (`src/element/UIComponent.tsx`):  animates as an element shows or hides
+- **Use it when:**  an overlay or a toast comes and goes.
+- **Copies:**  six overlays write their own (sweep 1, ui-components #4):  "Wanted:  A disclosure"
+
+### The next frame
+
+- **It is:**  `nextFrame()` (`spell/util`, `src/util/dom.ts`)
+- **Copies:**  three in Spell UI's site and tools
+
+### The section being read;  landing on a link
+
+- **It is:**  `TocIndex` (`spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`):  `current()`, `decode()`, `slug()`
+- **Use it when:**  following the scroll, or turning an address's `#hash` into a section.
+- **Copies:**  the docs pages' runtime and the comments' entry (sweep 1, epic-pages #4;  ui-docs-tools #3)
+
+### A file a script writes, kept current
+
+- **It is:**  `writeOrCheck()`, `spliceGenerated()` (`spell-ui/src/tools/generatedFiles.ts`)
+- **Use it when:**  a script writes a file, or a block of one, that `--check` must find unchanged.
+- **Copies:**  five, in spell-epic, the brand, the app and the kit (sweep 1, ui-docs-tools #7):  to move into the kit
+
+## In spell-epic and the parser
+
+### Git, from spell-epic
+
+- **It is:**  `Git` (`spell-epic/src/command/Git.ts`);  the kit's `checkoutOf()` (`src/server/checkout.ts`) for a
+  checkout and its main checkout;  `RealPath` (`spell-epic/src/config/RealPath.ts`)
+- **Flag:**  `spawnSync\("git"|"--git-common-dir"|realpathSync`
+- **Copies:**  about 20 git runners, 10 checkout finders, 9 real-path helpers (sweep 1, epic-tools-kit #2-4)
+
+### Clipboard, with VS Code's side bar
+
+- **It is:**  `Clipboard` (`spell-epic/src/components/epic-page/Clipboard.ts`):  falls back where the side bar refuses
+  the clipboard
+- **Flag:**  `navigator\.clipboard\.writeText`
+- **Copies:**  four bare ones, in Spell UI and the brand:  it should move down into Spell UI
+
+### A growing text box
+
+- **It is:**  `<epic-text-box>` (spell-epic):  grows with its text, to a third of the window
+- **Flag:**  `field-sizing|growField`
+- **Copies:**  six (sweep 1, epic-pages #7)
+
+### The same program in two forms
+
+- **It is:**  the translator (`spell-parser/src/spell/translate/Translator.ts`), rule by rule over the match tree;
+  `ShapeCheck` (`spell-parser/src/spell/translate/ShapeCheck.ts`) to compare what two forms compile to
+- **Use it when:**  writing spell out in another language or form, or testing two forms say the same.
+
 ## Showing and hiding
 
 ### A fold:  open and closed
@@ -243,12 +334,23 @@ code (epic `coherence`, Q4 and Q5).
 
 - **A disclosure:**  one open / closed state, its event pair (`opening` / `opened`, `closing` / `closed`),
   `aria-expanded`, and find-in-page opening it;  each fold above takes it, and fold-all / open-all are built on it.
+  - sweep 1 added:  four popover panels in Spell UI (dropdown, calendar, search, icon picker), six overlays'
+    animations, ten fold buttons in the epic pages
+- **Small string helpers,** in `spell/util`:  a slug from a title (8 copies, 4 rules), `escapeRegExp` (16),
+  `escapeHTML` (7), `withoutAccents` (9), `dedent` / `indented` (9), a size in KB (7, in two units), `clamp` (14).
+  Generic ones, so Spell UI may import them file by file.
+- **A local time stamp:**  15 copies in spell-epic and the kit;  three write the UTC date (tomorrow, in the evening).
+- **Colour maths:**  OKLCH, sRGB, contrast:  four copies (Spell UI's styles and tools, the brand, the kit's A11y).
+- **A headless page check:**  open a page in chromium, collect its errors, wait for it to settle:  15 copies.
+- **A draft that saves itself:**  seven in the epic pages.
+- **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
-- **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`:  the epic forms each
-  write it by hand, with `visibilitychange`.
+- **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
+  - The epic pages already have one:  `ServerLink.watch()` (above);  their copies should use it first.
 - **Waiting until something is true** (node):  `waitUntil(read, { timeout, every })`:
   `spell-epic/src/tools/details.js` (`waitForAnswer`), `spell-epic/src/tools/agents.ts` (`waitForRedirects`) and
-  `spell-epic/src/demo/check-test-run.mjs` (`waitFor`).
+  `spell-epic/src/demo/check-test-run.mjs` (`waitFor`);  sweep 1 added eight more, the kit's `PidFile` and
+  `spell server` among them:  so its home is the kit.
 
 ## Fine as it is
 
@@ -256,6 +358,9 @@ Copies a sweep found and Owen kept, with why:  a later sweep skips them.
 
 - `spell-parser/src/markdown/blocks/BlockScanner.ts`:  markdown's block structure is a state machine, not a grammar;
   it asks rulex's line rules what each line is.
+- Spell UI's marked and the parser's markdown:  two engines on purpose (the parser's markdown `AGENTS.md`).
+- `spell-app/src/app/solid/InspectorSource.ts`:  reads tags by hand on purpose:  "no parser, a best guess".
+- `spell-epic/bin/`, its hooks:  each stands alone, so a few lines of boilerplate repeat.
 
 ## See also
 
