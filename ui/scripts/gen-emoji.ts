@@ -16,7 +16,7 @@
  * - Output is COMMITTED (like the icon data):  installs and CI need neither the reference clone nor this
  *   dependency.  The `fmt` settings (`vite.lint.ts`) ignore it, so formatting never inflates it.
  * - Chunks:  `a` ... `z` by the name's first letter, `0` for names starting with a digit (`100`, `1st_place_medal`).
- *   `EmojiData.chunkFor()` MUST agree.
+ *   ONE rule for this and `EmojiData`:  `emojiChunkFor()` (`UIEmoji.types.ts`).
  */
 
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
@@ -25,6 +25,7 @@ import { fileURLToPath } from "node:url"
 
 import { NodePackage } from "spell/element-tools/NodePackage"
 import { Terminal } from "spell/element-tools/Terminal"
+import { emojiChunkFor } from "spell-ui/components/ui-emoji/UIEmoji.types"
 
 /****************
  * ### `EmojiGenerator`
@@ -124,7 +125,7 @@ class EmojiGenerator {
   chunk(entries: [string, string][]): Map<string, Record<string, string>> {
     const chunks = new Map<string, Record<string, string>>()
     for (const [name, emoji] of [...entries].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
-      const key = EmojiGenerator.chunkFor(name)
+      const key = emojiChunkFor(name)
       if (!chunks.has(key)) chunks.set(key, {})
       chunks.get(key)![name] = emoji
     }
@@ -152,15 +153,6 @@ class EmojiGenerator {
       .filter((point) => point !== VS16)
       .join("-")
   }
-
-  /**
-   * Chunk key of `name`:  its first letter, or `0` for a digit.  MUST match `EmojiData.chunkFor()`.
-   * - Static:  a pure function of its argument.
-   */
-  static chunkFor(name: string): string {
-    const first = name[0] ?? ""
-    return /[a-z]/.test(first) ? first : DIGIT_CHUNK
-  }
 }
 
 ////////////////
@@ -181,9 +173,6 @@ const VS16 = 0xfe0f
 
 /** `<code points>: <name>;` inside `@emoji-map`. */
 const ENTRY = /^\s*([0-9a-f-]+):\s*([^;]+);/gm
-
-/** Chunk of names starting with anything but a letter. */
-const DIGIT_CHUNK = "0"
 
 ////////////////
 // ## Types

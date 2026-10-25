@@ -28,11 +28,12 @@ import type { Page } from "playwright"
 import { readJSON5File } from "spell/util/node/json5"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { Terminal } from "spell/element-tools/Terminal"
+import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 
 import type { SiteDataFile, SiteFamily } from "spell-ui/docs-components/docs-components.types"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, spliceGenerated, writeOrCheck } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT } from "spell-ui/tools/generatedFiles"
 
 /** The repo's root:  `spell-ui/`. */
 const UI = path.resolve(import.meta.dirname, "..")

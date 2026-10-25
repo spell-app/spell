@@ -80,7 +80,7 @@ export type TocAllFolds = (typeof TOC_ALL_FOLDS)[number]
 /** `TocAllFolds`' values. */
 export const TOC_ALL_FOLDS = ["expanded", "collapsed"] as const
 
-/** The reader's own folds on one page, by section id:  `true` opened, `false` folded. */
+/** The viewer's own folds on one page, by section id:  `true` opened, `false` folded. */
 export type TocFolds = Readonly<Record<string, boolean>>
 
 /**

@@ -9,7 +9,7 @@ import { FALLBACK_HEX } from "./UIDocsTokens.types"
  *   and its computed colour (an `oklch()`, `color(srgb ...)` ...) is painted on a 1px canvas and read back as sRGB.
  * - Batched:  every probe goes in, THEN every colour is read, so a table of 200 colours costs one style recalc.
  * - Lossy on purpose:  alpha is flattened onto the page background and wide-gamut colours clip,
- *   both the native input's limits.  The token keeps its real value until the person picks a colour.
+ *   both the native input's limits.  The token keeps its real value until the viewer picks a colour.
  * - Scheme:  `light-dark()` resolves in `context`'s scheme at the time of the probe.
  * - The painting is the browser's;  the hex, the kit's `rgbToHex()`.
  * - Static:  one 1px canvas for the page, made on first use.
@@ -18,7 +18,7 @@ export class ColorProbe {
   /**
    * Each of `values` (key => any CSS colour, `var()` included) as `#rrggbb`, resolved in `context`.
    * - A translucent colour is painted over `backdrop` (default the page background), so the input shows what the
-   *   reader sees, not the bare (often black) ink an alpha role is made of.
+   *   viewer sees, not the bare (often black) ink an alpha role is made of.
    */
   static hexesFor(
     context: Element | ShadowRoot,

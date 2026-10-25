@@ -1,4 +1,5 @@
 import { E } from "spell-ui/core"
+import { emojiChunkFor } from "./UIEmoji.types"
 
 // Above the class:  the static `set` reads it while the class is defined
 /** The name set used until told otherwise. */
@@ -89,12 +90,6 @@ export class EmojiData {
     return name.replace(SEPARATORS, "")
   }
 
-  /** Chunk key of a NORMALIZED name:  its first letter, else `0`.  MUST match `scripts/gen-emoji.ts`. */
-  static chunkFor(name: string): string {
-    const first = name[0] ?? ""
-    return LETTER.test(first) ? first : DIGIT_CHUNK
-  }
-
   ////////////////
   // ## Lookups
   ////////////////
@@ -114,7 +109,7 @@ export class EmojiData {
     const key = EmojiData.normalize(name)
     const known = EmojiData.emojiFor(key, set)
     if (known !== undefined || !key) return known
-    const chunk = EmojiData.chunkFor(key)
+    const chunk = emojiChunkFor(key)
     if (!EmojiData.dataFor(set).loaded.has(chunk)) await EmojiData.load(set, chunk)
     return EmojiData.emojiFor(key, set)
   }
@@ -239,9 +234,3 @@ const CAMEL = /([a-z0-9])([A-Z])/g
 
 /** Every way a name's words may be joined. */
 const SEPARATORS = /[_-]/g
-
-/** A chunk letter. */
-const LETTER = /^[a-z]$/
-
-/** Chunk of names starting with anything but a letter. */
-const DIGIT_CHUNK = "0"

@@ -105,7 +105,7 @@ class VisualPage {
           .filter((element): element is HTMLImageElement => element instanceof HTMLImageElement)
           .map((image) => image.decode().catch(() => undefined))
       )
-      await VisualPage.frames(2)
+      await E.nextFrame(2)
       const signature = VisualPage.signature(elements)
       if (signature === last) break
       last = signature
@@ -143,11 +143,6 @@ class VisualPage {
   /** `promise`, or give up after `ms`:  one element that never gets ready must not hang the capture. */
   static within(promise: Promise<unknown>, ms: number): Promise<unknown> {
     return Promise.race([promise, new Promise((resolve) => setTimeout(resolve, ms))])
-  }
-
-  /** Wait `count` animation frames. */
-  static async frames(count: number): Promise<void> {
-    for (let i = 0; i < count; i++) await new Promise((resolve) => requestAnimationFrame(resolve))
   }
 
   ////////////////

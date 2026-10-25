@@ -27,8 +27,7 @@ import { kb } from "spell/util/number"
 import { ElementManifests } from "spell-ui/tools/ElementManifests"
 import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
-
-import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFiles"
+import { type GeneratedOutput, writeOrCheck } from "spell/element-tools/generatedFiles"
 
 const { values } = parseArgs({ options: { check: { type: "boolean", default: false } } })
 const builder = new SiteDataBuilder()

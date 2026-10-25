@@ -22,9 +22,10 @@ import { escapeHTML, slug } from "spell/util/string"
 import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
 import { Terminal } from "spell/element-tools/Terminal"
+import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT, withoutTicks } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */
