@@ -34,6 +34,7 @@ import {
   sectionOf,
   sectionTitle
 } from "spell-epic/tools/BlockAnchors.js"
+import { nextFrame } from "spell/util/dom"
 import { ThreadFacts } from "spell-epic/comments"
 import { DraftSaver } from "spell-epic/answers"
 import { ServerLink } from "spell-epic/review"
@@ -1711,11 +1712,6 @@ function setOrDrop(element, name, value) {
 async function drawn(element) {
   await customElements.whenDefined(element.localName)
   await element.ready?.catch(() => undefined)
-}
-
-/** Resolves on the next frame:  what an element was just told to show has drawn by then. */
-function nextFrame() {
-  return new Promise((resolve) => requestAnimationFrame(() => resolve()))
 }
 
 /** The floppy's tooltip once saved:  `Saved 14:02 · waiting for Claude`. */

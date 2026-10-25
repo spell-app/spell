@@ -35,8 +35,9 @@
  * - Not on a docs page or an epic page:  their runtime wires the toolbar and the comments (`spell-doc-runtime.js`).
  */
 
+import { nextFrame } from "spell/util/dom"
 import { wireComments } from "./spell-doc-comments.js"
-import { el, nextFrames } from "./spell-doc-helpers.js"
+import { el } from "./spell-doc-helpers.js"
 import { fitTitles, keepFitted, markCurrent, titledItems, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
 
 /** The page's own content box, as the site names it (`PAGE_MAIN`, `packages/ui/site/_src/site.types.ts`). */
@@ -57,7 +58,7 @@ const PAGE_BAR_CLASS = "site-sticky-bar"
 /** The line the site's section titles stick at, px, on `main` (`SiteSections`' `--site-sections-top`). */
 const SECTIONS_TOP = "--site-sections-top"
 
-/** How long a jump's landing takes the site (`SiteSections.go()`:  the root ready, the unfold, two frames), ms. */
+/** How long a jump's landing takes the site (`SiteSections`, through Spell UI's `HashLanding`:  the root ready, the unfold, a few frames), ms. */
 const LANDING_MS = 350
 
 /** Where a section becomes the current one, as a share of the window's height:  Spell UI's toc's `READING_LINE`. */
@@ -166,7 +167,7 @@ function drawToolbar(sections, { signal }) {
   // the site re-measures its sticky lines on a resize:  now the bar is in, and once it has drawn
   const remeasure = () => !signal.aborted && dispatchEvent(new Event("resize"))
   void Promise.all(["ui-sticky", "ui-menu", "ui-item"].map((tag) => customElements.whenDefined(tag)))
-    .then(() => nextFrames(2))
+    .then(() => nextFrame(2))
     .then(remeasure)
   let scheduled = false
   // a clicked item is the current one at once, and stays so while the page glides to its section,
@@ -240,6 +241,8 @@ function sectionLabel(section) {
 
 /**
  * The last of `sections` whose top has reached the reading line;  none above the first.
+ * - Its own copy of Spell UI's rule (`TocIndex.current()`), on purpose:  this script bundles no Spell UI
+ *   (`checkNoSpellUI()`), and the site's bundle doesn't offer it to the page
  * - the line:  the "On this page" list's, never above the line the site sticks its titles at
  * - at the page's end, the last one showing on screen:
  *   a short last section can't scroll up to the line, so a click on it would leave the one above marked

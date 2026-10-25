@@ -15,11 +15,6 @@ import { $fetch } from "spell/util/spell/$fetch"
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
 
-/** Resolves after `count` animation frames:  long enough for UI's first render after its definitions. */
-export async function nextFrames(count) {
-  for (let left = count; left > 0; left--) await new Promise((resolve) => requestAnimationFrame(resolve))
-}
-
 /**
  * The object kept as JSON under `key`, a key named whole (`spell-folds:/x.html`), or `{}`:  nothing kept, or not one.
  * - NEVER throws:  storage blocked or a value it can't read is `{}`, logged (`PrefStore`).
