@@ -41,6 +41,7 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       return [["add", ...around([kind])]]
     }
     case "phase":
+    case "move":
     case "updated":
       return [[verb, ...around(ref === undefined ? [] : [needPhase(verb, args[at]!, ref)])]]
     case "file":

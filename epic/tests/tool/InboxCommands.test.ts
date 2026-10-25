@@ -795,3 +795,35 @@ test("one question, one choice set:  two open sets are said by choiceSetProblems
   expect(plan.choiceSetProblems()).toEqual([`${q.toUpperCase()} asks 2 choice sets at once:  one question, one set`])
   expect(plan.check().some((problem) => problem.includes("choice sets"))).toBe(false)
 })
+
+////////////////
+// ## Add and order phases (epic `epic-engine` P34)
+////////////////
+
+test("move:  a to-do phase to another place;  numbers, links and 'P3 · Name' text follow, history keeps its own", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two", "Event", "Event Model"]) plan.addPhase(name)
+  plan.setPhase(1, "done")
+  const q = plan.addItem("caveat", "Later")
+  plan.document.getElementById(q)!.setAttribute("work", "P4 · Event Model")
+  plan.document.getElementById(q)!.setAttribute("phase", "4")
+  plan.findSection("log")!.insertAdjacentHTML("beforeend", "<epic-event>queued for P4 · Event Model</epic-event>")
+  plan.document.querySelector("#o1 > p")!.innerHTML =
+    `See <a href="#p-event-model">P4 · Event Model</a> and P3 · Event.`
+  expect(plan.movePhase(4, 2)).toBe(2)
+  expect(plan.phases.map((phase) => phase.name)).toEqual(["One", "Event Model", "Two", "Event"])
+  const item = plan.document.getElementById(q)!
+  expect([item.getAttribute("work"), item.getAttribute("phase")]).toEqual(["P2 · Event Model", "2"])
+  expect(plan.document.querySelector("#o1 > p")!.textContent).toBe("See P2 · Event Model and P4 · Event.")
+  expect(plan.findSection("log")!.textContent).toContain("queued for P4 · Event Model")
+  // a done phase never moves, nor does a phase move past one
+  expect(() => plan.movePhase(2, 1)).toThrow("P1 has started")
+})
+
+test("add-phase --before:  the 'P8 · Name' text naming the later phases follows their numbers (r21)", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Event Model"]) plan.addPhase(name)
+  plan.document.querySelector("#o1 > p")!.innerHTML = "Waits for P2 · Event Model."
+  plan.addPhase("Declarations", { before: 2 })
+  expect(plan.document.querySelector("#o1 > p")!.textContent).toBe("Waits for P3 · Event Model.")
+})

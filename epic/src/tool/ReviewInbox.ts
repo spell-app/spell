@@ -840,6 +840,13 @@ export class ReviewInbox {
         throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
       return { action, stage: stage as PageStage }
     }
+    // a phase dragged to another place (epic `epic-engine` P34):  its new number
+    if (action === "move") {
+      const { to } = mark as Record<string, unknown>
+      if (!Number.isInteger(to) || (to as number) < 1)
+        throw new InboxError(`move where?  a phase's place, 1 or more:  ${to}`)
+      return { action, to: to as number }
+    }
     // Make Todo's note (epic `windows-and-review` P2:  its note box's button, until 2026-10-09):  why follow it up;
     // a todo's plane and x, and every note box's x (skip this), take the note box's words too (Owen, 2026-10-09)
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
@@ -961,8 +968,15 @@ export type InboxMark = CheckedMark & { at: string }
  * - `kind`, `title`, `near`:  a new item's (`action: "new"`, epic `airplane` P2)
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
+ * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
  */
-export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: string; stage?: PageStage } & PickFields &
+export type CheckedMark = {
+  action: MarkAction
+  when?: RevisitWhen
+  note?: string
+  stage?: PageStage
+  to?: number
+} & PickFields &
   NewItemFields &
   TestFields
 
@@ -1088,13 +1102,14 @@ export const ACTIONS = [
   "test",
   "accept",
   "defer",
+  "move",
   "reopen"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
 
 /** What a new item from the page may be (`setNew()`):  `plan-doc add`'s kinds Owen asks for. */
-export const NEW_KINDS = ["todo", "question", "issue", "test"] as const
+export const NEW_KINDS = ["todo", "question", "issue", "test", "phase"] as const
 /** One of `NEW_KINDS`. */
 export type NewKind = (typeof NEW_KINDS)[number]
 

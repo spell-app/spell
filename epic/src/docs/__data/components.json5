@@ -5171,6 +5171,11 @@
           "description": "Kind:  a test, for Owen to try by hand."
         },
         {
+          "key": "newPhase",
+          "text": "Phase",
+          "description": "Kind:  a phase, which Claude drafts from its name and Owen's note."
+        },
+        {
           "key": "newUnsent",
           "text": "not sent yet:  Send hands it to Claude",
           "description": "A pending new item, not sent."

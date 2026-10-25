@@ -160,6 +160,14 @@ export class PlanDocCommands {
         // (it updates itself in place, `spell-doc-runtime.js` `wireLiveUpdate()`),
         // and showing the page the view already has only reveals it (`packages/vscode/src/DocView.ts`)
         return flags.noOpen ? undefined : this.openInVSCode(file)
+      case "move":
+        // epic `epic-engine` P34:  a to-do phase to another place among the to-do phases;  numbers and text follow
+        return this.edit(file, (plan) => {
+          const from = plan.phaseNumber(need(rest[0], "a phase"))
+          const to = Number(need(rest[1], "its new place (a number)").replace(/^p/i, ""))
+          plan.movePhase(from, to)
+          this.print(`P${from} -> P${to}`)
+        })
       case "phase-body":
         return this.edit(file, (plan) => {
           const n = plan.phaseNumber(need(rest[0], "a phase"))
@@ -1061,6 +1069,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
                                                    brings the doc forward in VS Code (it updates itself)
+  move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
+                                                   numbers, links and "P5 · Name" text follow (epic-engine P34)
   add <name> question|judgement|caveat|issue|todo|test|decision "title" [--details html] [--calm]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that

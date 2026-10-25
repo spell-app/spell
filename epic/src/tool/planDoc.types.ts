@@ -517,6 +517,8 @@ export type PlanMark = {
   shot?: string
   /** the stage a stage button's mark ends (`action: "accept"`, epic `epic-engine` P29):  `overview`, `phases` */
   stage?: string
+  /** a phase dragged to another place (`action: "move"`, epic `epic-engine` P34):  its new number */
+  to?: number
   /** when Owen made the mark (ISO) */
   at?: string
 }

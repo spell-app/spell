@@ -252,6 +252,11 @@ export class EpicProgram {
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
     ).usage("<epic>#P3 todo | active | done [--done <html>] [--no-open]")
     this.page(
+      epic.command("move"),
+      "move a to-do phase to another place among the to-do phases:  the numbers, links and text naming them follow",
+      "epic move seo#P7 4"
+    ).usage("<epic>#P7 <place>")
+    this.page(
       epic.command("commit"),
       "list a commit under a phase or an item (replacing its entry there)",
       'epic commit seo#P3 1a2b3c4 "the sitemap, written on build"'
