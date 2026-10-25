@@ -220,6 +220,16 @@ export class Linker {
     return this.swap(resolvePath(dir), 1, 0)
   }
 
+  /**
+   * The file a LOCAL `href` in a page in `pageDir` points at, absolute, whether or not it exists:  resolved from where
+   * the page is served, as the file it is (`../../spell-ui/x.ts` from `<content>/epics/seo` => `<top>/spell-ui/x.ts`).
+   * - its `#hash` dropped;  `href` decoded already (no `&amp;`)
+   * - what `check()` checks a link against
+   */
+  fileFor(href: string, _pageDir: string): string {
+    return this.real(resolvePath(this.servedDir(_pageDir), href.split("#")[0]))
+  }
+
   /** `path`, resolved from a served place, as the file it is:  `<root>/components/ui/x` => `<root>/packages/ui/docs/x`. */
   private real(path: string): string {
     return this.swap(path, 0, 1)
@@ -378,7 +388,7 @@ export class Linker {
       if (!hrefMatch || hrefMatch[1].startsWith("#") || SAGA_ADDRESS.test(hrefMatch[1])) continue
       const href = decodeEntities(hrefMatch[1])
       const local = !URL_START.test(href)
-      const dest = local ? this.real(resolvePath(pageDir, href.split("#")[0])) : href
+      const dest = local ? this.fileFor(href, pageDir) : href
       if (local && !existsSync(dest)) {
         if (!this.isGitIgnored(dest + (href.split("#")[0].endsWith("/") ? "/" : ""))) problems.push(`missing:  ${href}`)
       } else if (local && !this.isInside(dest)) problems.push(`outside repo:  ${href}`)
