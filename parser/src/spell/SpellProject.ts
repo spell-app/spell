@@ -133,7 +133,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * `SpellJSFile` for this project's compiled output, e.g. `Solitaire.spell.js`.
    * - The server keeps it in the project's build folder, `build/` at the repo root, not beside its source.
-   *   - Every file spell builds goes there, e.g. `Solitaire.scopes.js`, `Solitaire.spell.py`.
+   *   - Every file spell builds goes there, e.g. `Solitaire.scopes.js`, `Solitaire.spell.py`,
+   *     its declarations and words (since epic `elemental-spell` P4).
    * - Asked for by name, as any file is.
    *   Where it is on disk is the server's `serverPath` (`project-utils.ts`, `buildFolderFor()`).
    */
@@ -146,8 +147,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * File for this project's declarations, committed beside its source, e.g. `Solitaire.declarations.json5`.
+   * File for this project's declarations, e.g. `Solitaire.declarations.json5`:  in its build folder, as `outputFile`.
    * - What it offers projects importing it:  see `SP.SpellDeclarations`.
+   * - Written by every compile, never committed (epic `elemental-spell` P4:  it was beside the source before).
    * - A `SpellJSFile`:  any text file, loaded and saved the same way.
    */
   /*@memoize*/
@@ -159,7 +161,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * File for this project's words in language `lang`, committed beside its source, e.g. `Solitaire.en.js`.
+   * File for this project's words in language `lang`, e.g. `Solitaire.en.js`:  in its build folder, as `outputFile`.
    * - The words:  spell's wording of each member of its types, by the name its compiled code uses.
    *   See `SP.SpellWords`.
    * - For a runner's Thing Explorer;  and what the core says to the person running it, in that language.
@@ -326,7 +328,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * File for `target`'s own words in language `lang`, committed beside our source, e.g. `Solitaire.py.en.json5`.
+   * File for `target`'s own words in language `lang`, e.g. `Solitaire.py.en.json5`:  in our build folder, beside its output.
    * - One per language, as `wordsFileFor()`.
    * - `undefined` for a target with none (`SP.Target.wordsSuffix`).
    */

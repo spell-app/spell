@@ -110,7 +110,7 @@ It also holds what changes from one language to the next:
 | `js/solid` | [`JSWriter`](src/parser/writers/JSWriter.ts) | `<Project>.spell.js` | `@spell/core`, spell-parser's core |
 | `ts/solid` | [`TSWriter`](src/parser/writers/TSWriter.ts), on `JSWriter` | `<Project>.spell.tsx` | `@spell/core`;  `@spell/elements` for a view's element |
 | `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell-parser/core/model`:  the core with no drawing, so no Solid |
-| `py` | [`PyWriter`](src/py/PyWriter.ts), on [`PyBaseWriter`](src/py/PyBaseWriter.ts) | `<Project>.spell.py`;  beside the source, its words, `<Project>.py.en.json5`, and for a program that draws, its web app, `<Project>.app.py` | `spell_core` |
+| `py` | [`PyWriter`](src/py/PyWriter.ts), on [`PyBaseWriter`](src/py/PyBaseWriter.ts) | `<Project>.spell.py` and its words, `<Project>.py.en.json5`;  beside the source, for a program that draws, its web app, `<Project>.app.py` | `spell_core` |
 | `py`, a program that draws | [`ElementsWriter`](src/py/ElementsWriter.ts), on `JSWriter` | its page, in JavaScript:  `<Project>.elements.spell.js` | `@spell/core` |
 
 - Every project also gets its declarations, its words and its scope pack, whatever its targets;

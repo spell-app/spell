@@ -257,7 +257,8 @@ core.console.log(card.isARank("queen"))
 
 - A project writes its aliases' syntaxes down, so another project can register the same rules from data:
   that example's are in
-  [Solitaire.declarations.json5](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.declarations.json5).
+  [Solitaire.snapshot.declarations.json5](https://github.com/spell-app/spell-app/blob/main/tests/spell/__examples__/Solitaire/Solitaire.snapshot.declarations.json5),
+  its test's copy of what a compile writes.
 - The code that builds an alias's syntax, word by word:
   [QuotedPropertyFormula.ts](src/spell/rules/classes/QuotedPropertyFormula.ts).
 - What aliases are, from the language's side:  [README-spell](README-spell.md).
