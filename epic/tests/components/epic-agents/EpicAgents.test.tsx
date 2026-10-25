@@ -5,13 +5,13 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell-epic/components/epic-agents"
 
-// the panel with agents in it, on a page:  `EpicPage.test.tsx`, "<epic-page> Agents running"
+// the agents and the session's line, on a page:  `EpicPage.test.tsx`, "<epic-page> Agents running", "what Claude is doing"
 
 describe("<epic-agents>", () => {
-  test("no page served with a token, no list:  its box is there, empty;  passes axe", async () => {
+  test("no page served with a token, no list, nothing doing:  its tools are there, empty;  passes axe", async () => {
     const host = await ElementFixture.render(`<epic-agents></epic-agents>`)
     const box = host.shadowRoot!.querySelector("[part~='base']")!
-    expect([box.className, box.childElementCount]).toEqual(["agents-box", 0])
+    expect([box.className, box.childElementCount]).toEqual(["tools", 0])
     await expectAccessible(host)
   })
 })

@@ -82,6 +82,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *     - Send hands them over, as it does marks (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude):
  *       a waiting comment whose last words are newer than `sent` is unsent (`unsentComments`);
  *       a waiting session takes it with the send (`takeWork()`), once, until Owen speaks on its thread again
+ *   - `doing`:  `{ text, items?, at }`, what the listening session is doing now (epic `epic-engine` P35:  "Responding",
+ *     "Building P35"), the page's toolbar line;  `items`, what it's answering (`{ id, title }`), the line's tooltip
+ *     - set by `epic inbox status`, gone with `--clear`, `ignore`, or the listener's heartbeat going stale
+ *       (`forPage()` answers `doing: null` then:  a stale line never lingers)
  *   - `woken`:  `{ at, state, did, message }`, the last time the page server WOKE the epic (epic `epic-workflow`
  *     P16:  a Send or Do Now with nobody listening typed `/epic review <epic>` somewhere), else `null`
  *     - so one epic is woken once:  a second Send inside `WAKE_COOLDOWN_MS` says what the first one did
@@ -117,6 +121,8 @@ export class ReviewInbox {
   comments: Record<string, Comment> = {}
   /** the page server's last wake of the epic (P16), else `null` */
   woken: InboxWoken | null = null
+  /** what the listening session is doing now (P35:  the page's toolbar line), else `null` */
+  doing: InboxDoing | null = null
 
   /**
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
@@ -572,9 +578,22 @@ export class ReviewInbox {
    */
   setListening(session: string | null, at = isoTime(), pid?: number): InboxListener | null {
     this.listening = session === null ? null : { session, since: at, seen: at, ...(pid ? { pid } : {}) }
+    // nobody listening:  nobody doing anything either (P35)
+    if (session === null) this.doing = null
     // a session took over:  the wake did its job, and the next Send with nobody listening may wake again
     if (session !== null) this.woken = null
     return this.listening
+  }
+
+  /**
+   * What the session is doing now (`text`:  "Responding", "Building P35"), and what it's answering (`items`);
+   * `null`:  nothing (epic `epic-engine` P35).  Stamps the session's heartbeat.
+   */
+  setDoing(doing: { text: string; items?: DoingItem[] } | null, at = isoTime()): InboxDoing | null {
+    const text = doing?.text.trim()
+    this.doing = text ? { text, ...(doing!.items?.length && { items: doing!.items }), at } : null
+    this.touchListening(at)
+    return this.doing
   }
 
   /**
@@ -614,6 +633,8 @@ export class ReviewInbox {
     return {
       ...this.toRecord(),
       listening,
+      // a session gone (or none) is doing nothing:  its last line never lingers (P35)
+      doing: listening ? this.doing : null,
       // a wake under way has nothing to say yet
       woken: woken?.state === "waking" ? null : woken,
       unsentComments: this.unsentComments.map((comment) => comment.id)
@@ -949,7 +970,21 @@ export type InboxRecord = {
   handedOver: string | null
   comments: Record<string, Comment>
   woken: InboxWoken | null
+  doing: InboxDoing | null
 }
+
+/** What the listening session is doing now (`ReviewInbox.doing`, epic `epic-engine` P35). */
+export type InboxDoing = {
+  /** a word or two:  `Responding`, `Building P35` */
+  text: string
+  /** what it's answering, by id and title */
+  items?: DoingItem[]
+  /** when it was set, ISO */
+  at: string
+}
+
+/** One thing the session is answering:  its id (`q6`, `m3`) and title. */
+export type DoingItem = { id: string; title: string }
 
 /**
  * The inbox as the routes answer (`ReviewInbox.forPage()`):

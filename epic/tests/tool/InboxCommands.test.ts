@@ -13,7 +13,7 @@ import { GuideInbox } from "spell-epic/tool/GuideInbox"
 import { PlanDoc } from "spell-epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { LISTEN_STALE_MS, ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 import { PageInboxes } from "spell-epic/tools/PageInboxes"
 
@@ -826,4 +826,51 @@ test("add-phase --before:  the 'P8 · Name' text naming the later phases follows
   plan.document.querySelector("#o1 > p")!.innerHTML = "Waits for P2 · Event Model."
   plan.addPhase("Declarations", { before: 2 })
   expect(plan.document.querySelector("#o1 > p")!.textContent).toBe("Waits for P3 · Event Model.")
+})
+
+////////////////
+// ## What Claude is doing (epic `epic-engine` P35)
+////////////////
+
+test("status:  the session's line, with what it answers (titles from the doc, a comment's first words);  --clear", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const q = plan.addItem("question", "Which way?")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setListening("s1")
+    inbox.comments.m3 = {
+      anchor: "o1",
+      kind: "section",
+      label: "",
+      excerpt: "",
+      text: "This   reads oddly, and goes on",
+      at: T1,
+      status: "new"
+    } as never
+  })
+  await commands().inbox.run("x", file, ["status", "Responding"], { items: `${q},m3` })
+  const doing = ReviewInbox.read(inboxFile).doing!
+  expect([doing.text, doing.items]).toEqual([
+    "Responding",
+    [
+      { id: q, title: "Which way?" },
+      { id: "m3", title: "This reads oddly, and goes on" }
+    ]
+  ])
+  expect(printed.join("\n")).toContain(`doing:  Responding (${q.toUpperCase()}, M3)`)
+  await commands().inbox.run("x", file, ["status"], { clear: true })
+  expect(ReviewInbox.read(inboxFile).doing).toBeNull()
+  await expect(commands().inbox.run("x", file, ["status", "Responding"], { items: "q99" })).rejects.toThrow(
+    "no item Q99"
+  )
+})
+
+test("a stale line never lingers:  ignore clears it;  the page reads none once the listener's heartbeat is old", () => {
+  const inbox = ReviewInbox.read(inboxFile)
+  inbox.setListening("s1", T1)
+  inbox.setDoing({ text: "Building P35" }, T1)
+  expect(inbox.forPage(Date.parse(T1) + 1000).doing?.text).toBe("Building P35")
+  expect(inbox.forPage(Date.parse(T1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  inbox.setListening(null)
+  expect(inbox.doing).toBeNull()
 })

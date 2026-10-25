@@ -397,7 +397,7 @@ const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "saga", "summarie
 const PHASE_VERBS = ["phase", "updated", "file"]
 
 /** `inbox`'s verbs on the whole inbox:  `epic inbox wait seo`. */
-const INBOX_PAGE_VERBS = ["watch", "ignore", "wait", "apply"]
+const INBOX_PAGE_VERBS = ["watch", "ignore", "wait", "apply", "status"]
 
 /** `inbox`'s verbs on one item (or comment):  `epic inbox done seo#J3`. */
 const INBOX_ITEM_VERBS = ["working", "done", "clear"]

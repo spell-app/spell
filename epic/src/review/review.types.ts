@@ -9,6 +9,7 @@
 
 import { PlanDates } from "spell-epic/dates"
 import type {
+  InboxDoing,
   InboxDraft,
   InboxListener,
   InboxMark,
@@ -204,11 +205,16 @@ export const AGENTS_FILE = "agents.json5"
  *   (`ReviewInbox.forPage()`);  `[]` from a server started before Send took comments
  * - `woken`:  the page server's wake of the epic (epic `epic-workflow` P16), while it counts and nobody listens;
  *   `null` otherwise, or from a server started before it woke epics
+ * - `doing`:  what the listening session is doing now (epic `epic-engine` P35), the toolbar's line;  `null` for
+ *   nothing, nobody listening, or a server started before it
  */
 export type Inbox = Pick<
   PageInbox,
-  "marks" | "drafts" | "urgency" | "sent" | "now" | "working" | "listening" | "unsentComments" | "woken"
+  "marks" | "drafts" | "urgency" | "sent" | "now" | "working" | "listening" | "unsentComments" | "woken" | "doing"
 >
+
+/** What the session is doing, as the page reads it (`Inbox.doing`). */
+export type { InboxDoing }
 
 /**
  * What the page server's wake did, in a Send's or Do Now's answer (`wake`, epic `epic-workflow` P16):
@@ -343,6 +349,10 @@ export function inboxOf(reply: unknown): Inbox {
     woken:
       isObject(record.woken) && typeof (record.woken as InboxWoken).message === "string"
         ? (record.woken as InboxWoken)
+        : null,
+    doing:
+      isObject(record.doing) && typeof (record.doing as InboxDoing).text === "string"
+        ? (record.doing as InboxDoing)
         : null
   }
 }

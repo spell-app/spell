@@ -126,7 +126,7 @@
    * ## TEST MODE (epic `epic-engine` P4):  the run over its blocks.  Only the header (Send, the step label) and the
    * pill stay;  the blocks go by their slot, so the doc is never touched and every part already loaded stays
    */
-  :host(:state(testing)) :is(.bar, .review-line, .meta, .see-also, .hung, .notice, epic-agents, slot:not([name])) {
+  :host(:state(testing)) :is(.bar, .review-line, .meta, .see-also, .hung, .notice, slot:not([name])) {
     display: none;
   }
 

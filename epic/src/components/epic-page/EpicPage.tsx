@@ -164,7 +164,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     page in the epic's folder changes (`spell-server:file`):  a page made or linked a moment ago shows
  *   - none, or not served (`file://`):  no box
  *   - open, folding (a `<details>`):  short, and it's how to get to them
- * - RUNNING AGENTS (epic `skillz` P3), right before its blocks:  the "Agents running" panel (`<epic-agents>`).
+ * - WHAT CLAUDE IS DOING (epic `epic-engine` P35), in its toolbar:  the session's line and the running agents (epic
+ *   `skillz` P3) in a popover (`<epic-agents>`);  no "Agents running" panel above its blocks any more.
  *   - only while the page is served with a token, the epic's list answers (`AgentsClient`) and an agent runs
  *   - each row a note box that redirects that agent
  *   - in the shadow root:  not a section, so the rail and counts never see it
@@ -720,8 +721,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.future}>{this.futureNotice()}</Show>
         <Show when={this.planning()}>{this.hungNotice()}</Show>
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
-        {/* a saga has no agents of its own:  no list to ask for */}
-        {this.isSaga ? undefined : <epic-agents part={this.partForName("agents")} />}
         <Show when={this.testRun}>
           <epic-test-run part={this.partForName("test-run")} all={this.testRun === TEST_ALL ? "" : undefined} />
         </Show>
@@ -873,7 +872,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The sticky bar's last row, the TOOLBAR (epic `airplane` P8), in its order:
    * - the docs runtime's section buttons (`slot="toolbar"`)
-   * - at the right, the page's state filter (`pageFilter()`), then expand-all and collapse-all
+   * - at the right, what Claude is doing and the agents running (`<epic-agents>`, epic `epic-engine` P35), the
+   *   page's state filter (`pageFilter()`), then expand-all and collapse-all
    * - no new item button:  each item section has its own, on its title (Owen, 2026-10-13:  "Remove "comment" icon
    *   from top header -- add it to question/todo/issue/test headers")
    */
@@ -882,6 +882,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       <div class={TOOLBAR} part={this.partForName("toolbar")}>
         <slot name={this.slotForName("toolbar")} />
         <span class={TOOLBAR_TOOLS}>
+          {/* what Claude is doing, and the agents running (P35);  a saga has no session or agents of its own */}
+          {this.isSaga ? undefined : <epic-agents part={this.partForName("agents")} />}
           {this.pageFilter()}
           {Fold.expandAllButton({
             label: this.translationForKey("expandAll"),

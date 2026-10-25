@@ -129,8 +129,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
-      - `<epic-page>` draws them as its "Agents running" panel:
-        `<epic-agents>`, in its shadow root, before its blocks (not a section).
+      - `<epic-page>` draws them in its toolbar (epic `epic-engine` P35):  `<epic-agents>`, in its shadow root,
+        "2 agents running", a button whose popover holds their rows;  beside the session's line ("Responding",
+        `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:file`.
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
@@ -1086,8 +1087,11 @@ In `tools/`:
         - `EPIC_WAIT_MS`, 5s at most:  a pack that won't load doesn't hold up the page
       - remembers their folds
       - lands links inside them (a link to an `<epic-item>` opens it)
-    - Running agents (epic `skillz` P3):  `<epic-page>` draws the "Agents running" panel above its first section.
+    - Running agents (epic `skillz` P3):  `<epic-page>`'s toolbar has "2 agents running", a button opening their
+      rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs.
+      - Beside it, the session's line (P35):  "Responding", "Building P35" (`epic inbox status`), gone when idle or
+        nobody listens;  hovered, a styled tooltip of what it's answering.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.
@@ -2121,7 +2125,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - An entry leaves when its agent finishes (`done`).
     Empty, the file goes.
   - Every write is under the file's lock (`SRV.FileLock`) and atomic, as the review inbox's.
-  - REDIRECTS (P3):  an epic page's "Agents running" panel (`<epic-page>`, spell-epic) shows an epic's list,
+  - REDIRECTS (P3):  an epic page's agents popover (`<epic-page>`'s toolbar, spell-epic) shows an epic's list,
     with a note box per agent.
     - Owen's note goes through [agentRoutes.ts](tools/agentRoutes.ts), guarded as the review routes are:
       - `GET /api/epics/agents?page=`

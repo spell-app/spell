@@ -344,7 +344,10 @@ export class EpicProgram {
       epic.command("inbox"),
       "the marks and comments Owen sends from the page, and how a review session takes them"
     )
-      .usage("[watch | ignore | wait | apply] <epic>  |  working <epic>#J3 on | off  |  done | clear <epic>#J3")
+      .usage(
+        '[watch | ignore | wait | apply] <epic>  |  status <epic> "<text>" [--items q3,m2] | --clear  |  ' +
+          "working <epic>#J3 on | off  |  done | clear <epic>#J3"
+      )
       .addHelpText("after", INBOX_HELP)
     this.page(
       epic.command("test"),
@@ -988,5 +991,6 @@ Examples:
   epic inbox wait seo             block until there's work, print it, exit 0 (run it in the background)
   epic inbox apply seo [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not
   epic inbox working seo#J3 on    the page's spinner on an item (or a comment, seo#M3);  off:  stopped
+  epic inbox status seo "Responding" --items q3,m2   the toolbar's line:  what the session is doing;  --clear:  idle
   epic inbox done seo#J3          an agent finished the item:  its mark and spinner go
   epic inbox clear seo#J3         drop its marks (a revisit talked over)`

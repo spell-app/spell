@@ -231,7 +231,7 @@ export const epicPageVocabulary = {
     {
       name: "agents",
       description:
-        "The running agents (an `<epic-agents>`, epic `skillz` P3), right before its blocks:  only while an agent runs."
+        "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
     },
     {
       name: "test-run",

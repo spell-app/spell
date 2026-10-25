@@ -357,6 +357,7 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
 
 1. `epic phase <name>#P<N> active`, then CLAUDE'S BUILD PLAN, accepted before any code (epic `epic-engine` P33, M1).
    - Check the session's name (the isolate skill's "Session name").
+   - The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
    - Write it into the phase (or each phase of a group built together):
      `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
      left out;  short, in Owen's terms.
@@ -671,6 +672,7 @@ epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
 epic inbox apply <name> [ids]              approve / pick / Make Caveat marks into the doc;  prints what's left
 epic inbox working <name>#<id> on|off      the page's spinner on an item
+epic inbox status <name> "<text>" [--items q3,m2] | --clear   the toolbar's line:  what you're doing, what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
 epic update <name>#<id> noted "<what>"         only RECORDED Owen's choice:  an outlined Noted card (what;  what's next)
@@ -743,6 +745,8 @@ A revisit note that says just `do it` (now or soon) means:  DO it, no question b
 as asked.  Revisit puts it in a judgement call's or caveat's empty note box for him (Owen, 2026-10-19:  "I generally
 want you to just do it").
 
+0. The toolbar's line (epic `epic-engine` P35), FIRST:  `epic inbox status <name> "Responding" --items <the ids
+   taken>`, so Owen sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 
 1b. CANCELED:  Owen said "nevermind" on a running Do Now (epic `windows-and-review` P2).

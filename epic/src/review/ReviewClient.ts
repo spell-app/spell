@@ -15,6 +15,7 @@ import {
   isSent,
   pickOf,
   type Inbox,
+  type InboxDoing,
   type InboxDraft,
   type InboxMark,
   type InboxUrgency,
@@ -262,6 +263,11 @@ export class ReviewClient {
   /** Is a Claude session waiting on the inbox? */
   get listening(): boolean {
     return !!this.inbox.listening
+  }
+
+  /** What the listening session is doing now (`epic inbox status`, epic `epic-engine` P35);  `null` for nothing. */
+  get doing(): InboxDoing | null {
+    return this.inbox.doing ?? null
   }
 
   /**

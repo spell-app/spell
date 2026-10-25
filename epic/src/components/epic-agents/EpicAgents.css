@@ -1,8 +1,8 @@
 /*
- * `<epic-agents>` (`EpicAgents.tsx`), drawn by `<epic-page>`:  "Agents running" above the page's blocks.
- * - a quiet panel, not a section
- * - a row per agent (name, status, age, task), its redirects so far, and a note box with Send
- * - the same look as the old page runtime's "Running agents" (`plan-doc.css`)
+ * `<epic-agents>` (`EpicAgents.tsx`), in `<epic-page>`'s toolbar:  what Claude is doing (epic `epic-engine` P35).
+ * - the session's line:  a quiet spinner and a word or two, its styled tooltip (`<ui-popup>`) listing what it answers
+ * - "2 agents running", a quiet button, and its popover:  a row per agent (name, status, age, task), its redirects so
+ *   far, and a note box with Send
  * - colours:  the pack's tokens (`EpicPage.css`) and Spell UI's, each with a fallback:  light and dark alike
  * - Units:  px and em, never rem (WWOD §18).
  */
@@ -10,73 +10,137 @@
 @layer ui.components.epic-agents;
 
 @layer ui.components.epic-agents {
-  /* always drawn, empty without agents:  `flow-root`, so the panel's margins count in its height */
-  .agents-box {
-    display: flow-root;
+  :host {
+    display: contents;
   }
-  .agents {
-    margin: 0 var(--epic-inset, 16px) 24px;
-    overflow: hidden;
-    border: 1px solid var(--epic-rule, var(--ui-border-color));
-    border-radius: 10px;
-    background: var(--epic-band-row, var(--ui-background));
-    font: 14px/1.4 var(--epic-sans, var(--ui-font-family));
-  }
-  /* the title folds the rows (every titled box folds:  Owen, 2026-10-08):  a plain button, chevron first */
-  .agents-title {
-    display: flex;
+  .tools {
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 4px 10px;
-    border: none;
-    background: var(--epic-accent-soft, var(--ui-primary-background));
-    color: var(--epic-heading-ink, var(--ui-text-color));
-    font: inherit;
-    font-size: 13px;
-    text-align: start;
-    cursor: pointer;
+    min-width: 0;
+    font: 13px/1.3 var(--epic-sans, var(--ui-font-family));
   }
-  .agents-title:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent, Highlight));
-    outline-offset: -2px;
-  }
-  .agents-title .chevron {
-    flex: none;
-    width: 12px;
-    height: 12px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    transition: rotate 0.12s;
-  }
-  .agents-title[aria-expanded="true"] .chevron {
-    rotate: 90deg;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .agents-title .chevron {
-      transition: none;
-    }
-  }
-  .agents-list[hidden] {
+  .tools:empty {
     display: none;
   }
-  .agents-count {
+
+  /* ## The session's line:  quiet, a word or two, never wrapping;  it comes and goes with no motion */
+  .doing {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
     color: var(--epic-muted, var(--ui-text-muted));
-    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
-  .agents-count::before {
-    content: "· ";
+  .doing:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent, Highlight));
+    outline-offset: 2px;
   }
-  .agents ui-icon::part(icon) {
-    width: auto;
+  .spinner {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 1.5px solid color-mix(in oklab, currentColor 25%, transparent);
+    border-top-color: var(--ui-blue, #1a67e0);
+    border-radius: 50%;
+    animation: epic-agents-turn 1.1s linear infinite;
+  }
+  @keyframes epic-agents-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: none;
+    }
+  }
+  /* the tooltip:  what it's answering, each id chip and title, linked */
+  .doing-tip {
+    --ui-popup-max-width: 320px;
+  }
+  .tip-head {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .tip-items {
     margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tip-items li + li {
+    margin-top: 3px;
+  }
+  .tip-items a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .tip-items a:hover {
+    text-decoration: underline;
+  }
+  .tip-chip {
+    display: inline-block;
+    min-width: 2.2em;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--epic-accent-soft, var(--ui-primary-background));
+    font: 600 11px/1.6 var(--epic-mono, var(--ui-font-family-mono));
+    text-align: center;
   }
 
-  /* ## A row:  its line (name, status, age), task, redirects, then the note box */
+  /* ## The agents' button and popover */
+  .agents-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border: 1px solid var(--epic-rule, var(--ui-border-color));
+    border-radius: 999px;
+    background: transparent;
+    color: var(--epic-heading-ink, var(--ui-text-color));
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .agents-button:hover {
+    background: var(--epic-accent-soft, var(--ui-primary-background));
+  }
+  .agents-button:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent, Highlight));
+    outline-offset: 2px;
+  }
+  .agents-pop {
+    --ui-popup-max-width: min(420px, calc(100vw - 24px));
+  }
+  /* the count:  only narrow, in place of the words */
+  .count {
+    display: none;
+  }
+  /*
+   * Narrow (the side bar, a phone):  the spinner alone, and the robot with a count, so the toolbar's own buttons keep
+   * their room;  the words stay in the tooltip and the names a screen reader hears
+   */
+  @container epic-page (max-width: 520px) {
+    .words {
+      display: none;
+    }
+    .count {
+      display: inline;
+    }
+    .agents-button {
+      padding-inline: 6px;
+    }
+  }
+  .agents-list {
+    max-height: min(60vh, 520px);
+    overflow: auto;
+    font: 14px/1.4 var(--epic-sans, var(--ui-font-family));
+  }
   .agent {
     display: flex;
     flex-direction: column;

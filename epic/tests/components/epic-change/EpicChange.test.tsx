@@ -32,7 +32,8 @@ class FakeRoutes {
     working: {},
     listening: null,
     unsentComments: [],
-    woken: null
+    woken: null,
+    doing: null
   }
 
   readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
