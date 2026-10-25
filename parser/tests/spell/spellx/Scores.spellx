@@ -1,0 +1,13 @@
+<spell-page-template "score page">
+	<property "scores">a new list of numbers</>
+</spell-page-template>
+
+<spell-app "scorer">
+	<property "best" one-of="low, high" />
+	<action "start over" shortcut="meta+N">
+		print "again"
+	</action>
+	<test "starting over">
+		start over
+	</>
+</spell-app>

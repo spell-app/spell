@@ -116,6 +116,7 @@ export class Tokenizer {
    * - `BlockToken` lines / blocks
    * - JSX element attributes + children, a fragment's children, attribute values, expression `contents` when it's a token
    * - JSX expression `innerTokens`, once a rule has parsed its `{...}` contents
+   * - any other token's `nested` ones, e.g. a spellx tag's
    */
   static forEachToken(tokens: P.Token[], callback: (token: P.Token) => void) {
     tokens.forEach(visit)
@@ -139,6 +140,8 @@ export class Tokenizer {
       } else if (token instanceof P.JSXExpressionToken) {
         visit(token.contents)
         token.innerTokens?.forEach(visit)
+      } else {
+        token.nested?.forEach(visit)
       }
     }
   }
@@ -1058,7 +1061,7 @@ export class Tokenizer {
 }
 
 /** Constructor props for `Tokenizer`. */
-type TokenizerProps = {
+export type TokenizerProps = {
   /** See `Tokenizer.whitespacePolicy`. */
   whitespacePolicy?: P.WhitespacePolicy
   /** See `Tokenizer.quoteSymbols`. */

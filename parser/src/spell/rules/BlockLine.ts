@@ -51,18 +51,32 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
    *   e.g. `a apple` -- see `SP.SpellWarnings.noteArticles()`.
    */
   parse(scope: P.Scope, lines: P.Token[]): P.Match | undefined {
-    const line = lines[0]
-    if (!line) return undefined
+    const written = lines[0]
+    if (!written) return undefined
     const matched: (P.Match | P.Token)[] = []
     const errors: P.Match[] = []
-    const tokensMatched: P.Token[] = [line]
+    const tokensMatched: P.Token[] = [written]
     let lineStatement: P.Match | undefined
     let lineBodyMark: P.JournalMark | undefined
     let fromBody: string | undefined
     let bodyErrorsAt: number | undefined
-    if (!(line instanceof P.LineToken)) {
-      console.warn("BlockLine.parse(): got non-line", line)
+    if (!(written instanceof P.LineToken)) {
+      console.warn("BlockLine.parse(): got non-line", written)
       return undefined
+    }
+    // a spellx tag line reads as its code-spell twin, with the body that takes (epic `elemental-spell` P6):
+    // only in a spellx file, so code spell's lines pay nothing for it
+    const spellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx"
+    const twin = spellx ? SP.SpellxTwin.of(scope, written, lines[1]) : undefined
+    if (spellx) errors.push(...SP.SpellxTwin.errorsIn(scope, written))
+    const line = twin?.line ?? written
+    const nextItem = twin ? twin.body : lines[1]
+    if (twin?.swallowsNextItem) tokensMatched.push(lines[1]!)
+    if (twin?.skipped) {
+      if (twin.takesNextItem) tokensMatched.push(lines[1]!)
+      const result: P.MatchFor<this> = new P.Match({ rule: this, matched: errors, tokens: tokensMatched, scope })
+      if (errors.length) result.data.errors = errors
+      return result
     }
     const { tokens } = line
     // Blank line
@@ -87,14 +101,18 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       const start = 0
       let end = tokens.length
 
-      // pop comment (which will be a single token) off of the end if found
-      const last = tokens[tokens.length - 1]!
-      const comment = scope.parser?.parse([last], "comment", scope)
-      if (comment) {
+      // pop the comment (a single token) off of the end if found -- or each of a spellx twin's, its description's
+      // lines (`SP.SpellxTwin`):  code spell's line has one at most
+      const comments: P.Match[] = []
+      while (end > 0) {
+        const comment = scope.parser?.parse([tokens[end - 1]!], "comment", scope)
+        if (!comment) break
+        comments.unshift(comment)
         end -= 1
-        // add comment BEFORE statement
-        matched.push(comment)
+        if (!(tokens[end] instanceof SP.SpellxProseToken)) break
       }
+      // add comments BEFORE statement
+      matched.push(...comments)
 
       // parse the statement (which may parse an inline body as well)
       const unparsed = tokens.slice(start, end)
@@ -134,7 +152,6 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         // an old word for a built-in type, e.g. `drawable thing`:  an error naming its new word, the line still compiled
         errors.push(...SpellType.retiredWordErrorsIn(statement))
 
-        const nextItem = lines[1]
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined
         const committed = commitStatement(statement, nextItem)
         // once committed:  a type this line declares has its gender -- see `SpellWarnings.noteArticles()`
@@ -148,8 +165,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
           if (nestedBlockMatch.is(Block)) errors.push(...(nestedBlockMatch.data.errors ?? []))
           // a body that's ONE expression, e.g. `return` with its markup on the lines below:  errors in its JSX
           else errors.push(...SpellJSX.parseErrorsIn(nestedBlockMatch))
-          // add the nestedBlock to `tokensMatched` to account for it in the output
-          tokensMatched.push(nextItem!)
+          // add the nestedBlock to `tokensMatched` to account for it in the output:  a twin's, the block it took
+          if (!twin) tokensMatched.push(nextItem!)
+          else if (twin.takesNextItem) tokensMatched.push(lines[1]!)
         }
 
         // Add parse error if we got both an inline body and a nested one

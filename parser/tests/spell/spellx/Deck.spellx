@@ -1,0 +1,6 @@
+<spell-thing "card" />
+
+<spell-thing "deck" template="list of cards">
+	<property "name">"the deck"</>
+	<action "announce it">print its name</>
+</spell-thing>

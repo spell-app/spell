@@ -145,7 +145,7 @@ export const PARSER_MESSAGES = {
   "the-property-of-a-type": "the {property} of a {type}",
 
   ////////////////
-  // ## Spellx:  what `SX.SpellxReader` says about a .spellx file (epic `elemental-spell`)
+  // ## Spellx:  what spell says about a .spellx file, as it reads it (epic `elemental-spell`)
   ////////////////
 
   /** A tag word spellx doesn't know, with the closest it does:  `{tag}` is `<propety>`, `{suggestion}` `<property>`. */
@@ -185,6 +185,8 @@ export const PARSER_MESSAGES = {
   "spellx-where-member": "it goes among its template's members, beside the drawing",
   /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
   "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+  /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
+  "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

@@ -286,8 +286,9 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
         }
         above.unshift(comment)
       }
-      const onLine = (item as P.Match).matched.find((it) => this.isComment(it))
-      const comments = above.length ? above : onLine ? [onLine as P.Match] : []
+      // its line's own comments:  code spell's one, or a spellx twin's description lines (`SP.SpellxTwin`)
+      const onLine = (item as P.Match).matched.filter((it): it is P.Match => this.isComment(it))
+      const comments = above.length ? above : onLine
       if (comments.length) docs.set(statement, { lines: comments.map((it) => this.commentText(it)), comments })
     })
     return docs

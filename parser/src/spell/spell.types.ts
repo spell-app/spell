@@ -21,6 +21,12 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 /** The subset of `AnySpellFile` that can actually be `parse()`d/`compile()`d as spell source. */
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
+/**
+ * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+ * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
+ */
+export type SpellForm = "spell" | "spellx"
+
 // ## SpellProject
 
 /**

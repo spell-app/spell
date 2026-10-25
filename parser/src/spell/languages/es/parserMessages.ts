@@ -115,6 +115,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
   "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
   "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
+  "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
 
   ////////////////
   // ## Long forms

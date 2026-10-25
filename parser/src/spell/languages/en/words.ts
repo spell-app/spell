@@ -170,7 +170,56 @@ export const englishWords: SP.LanguageWords = {
       shortcut: "shortcut",
       "enabled-when": "enabled-when",
       "selected-when": "selected-when",
+      "undone-as": "undone-as",
+      icon: "icon",
       "menu-bar": "menu-bar"
+    },
+    // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
+    twins: {
+      template: "{a name} {name} is {a super} {super} :",
+      templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
+      singleton: "{words} is {a super} {super} :",
+      supers: {
+        view: "view",
+        thing: "thing",
+        page: "page",
+        app: "app",
+        "page template": "page",
+        "app template": "app"
+      },
+      property: {
+        list: "its {name} is one of {one-of}",
+        listBody: "its {name} is one of {one-of} :",
+        body: "its {name} is :",
+        value: "its {name} is",
+        bare: "it has {a words} {words}"
+      },
+      propertyAlias: "it {quoted alias}",
+      alias: "it {name}",
+      aliasBlock: "it {name} :",
+      action: "to {words} :",
+      actionDetails: {
+        shortcut: "shortcut {shortcut}",
+        "enabled-when": "enabled when {enabled-when}",
+        "selected-when": "selected when {selected-when}",
+        "undone-as": "undone as {quoted undone-as}",
+        icon: "icon {quoted icon}"
+      },
+      test: "to test {words} :",
+      event: "it sends {name}",
+      eventWith: "with",
+      eventParam: "{param} as {a value} {value}",
+      eventAnd: "and",
+      draw: "to draw it :",
+      drawPart: "to draw its {words} :",
+      placePart: "draw its {words}",
+      handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
+      controls: {
+        if: "if {phrase}",
+        "otherwise if": "otherwise if {phrase}",
+        otherwise: "otherwise",
+        "for each": "for each {phrase}"
+      }
     }
   },
 

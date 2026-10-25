@@ -255,7 +255,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Parse our active spell files from scratch into `scope`, in order, and hand each file its result.
    * - Each by its own language's rules:  a file in another language than our scope's parser reads
-   *   parses with its twin (`SP.SpellParser.twinFor()`).
+   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spellx`.
    * - Other files, e.g. `.css`, parse themselves.
    */
   parseImports(): void {
@@ -269,7 +269,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         path: file.path,
         name: file.file,
         text: file.parseText,
-        parser: parser.twinFor(file.language)
+        parser: parser.twinFor(file.language, file.form)
       }))
     })
     spellFiles.forEach((file) => {

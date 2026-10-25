@@ -6,6 +6,18 @@ import { SP } from "spell-parser/spell"
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
 import "spell-parser/parser/rulex"
 
+/** Spell's tokenizer's props -- see `SpellParser.spellTokenizer`. */
+const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
+  // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
+  // TODO: backtick as alternative quote, for embedding double quotes?
+  quoteSymbols: [`"`],
+  // Remove "normal" whitespace (leaving newlines and indents) when parsing
+  whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
+  // never read as spell:  a view type's own styles (`css_block`),
+  // and formatted text (`markdown_block`, `markdown_description`)
+  rawTextTags: ["css", "markdown"]
+}
+
 /**
  * `P.Parser` subclass for the spell language.
  * - Holds spell's `tokenizer`:
@@ -34,22 +46,33 @@ export class SpellParser extends P.Parser {
    * Tokenizer for spell source: double-quote strings only, keeping newlines/indents (`LEADING_ONLY`
    * whitespace policy) since block structure is significant.
    */
-  get tokenizer() {
-    return this.derived(
-      "tokenizer",
-      () =>
-        new P.Tokenizer({
-          // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
-          // TODO: backtick as alternative quote, for embedding double quotes?
-          quoteSymbols: [`"`],
-          // Remove "normal" whitespace (leaving newlines and indents) when parsing
-          whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
-          // never read as spell:  a view type's own styles (`css_block`),
-          // and formatted text (`markdown_block`, `markdown_description`)
-          rawTextTags: ["css", "markdown"]
-        })
-    )
+  get tokenizer(): P.Tokenizer {
+    if (this.form === "spellx") {
+      return this.derived(
+        "spellxTokenizer",
+        () =>
+          new SP.SpellxTokenizer({
+            ...SPELL_TOKENIZER_PROPS,
+            language: this.language ?? SP.Language.default,
+            spell: this.spellTokenizer
+          })
+      )
+    }
+    return this.spellTokenizer
   }
+
+  /** Spell's own tokenizer, for code spell -- and inside a spellx file's tags (`SP.SpellxTokenizer.spell`). */
+  get spellTokenizer(): P.Tokenizer {
+    return this.derived("tokenizer", () => new P.Tokenizer(SPELL_TOKENIZER_PROPS))
+  }
+
+  /**
+   * Which FORM of spell we read:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+   * - Only our tokenizer differs:  a spellx file's tags are tokens of their own (`SP.SpellxTokenizer`), and each tag
+   *   line reads as its code-spell twin (`SP.SpellxTwin`), parsed by the same rules (epic `elemental-spell` P6).
+   * - A project's spellx files parse with its twin of that form (`twinFor()`).
+   */
+  declare form: SP.SpellForm | undefined
 
   /**
    * Register a rule class with ONLY its `syntax` + `tests` -- everything else lives on the class as `@proto static`.
@@ -164,7 +187,8 @@ export class SpellParser extends P.Parser {
   ////////////////
 
   /**
-   * This project parser's twin reading `language`, for a file written in it -- us, for our own language.
+   * This project parser's twin reading `language` in `form`, for a file written so -- us, for our own.
+   * - `form`:  `spellx` for a spellx file, `Card.spellx` (epic `elemental-spell` P6):  the same rules, its own tokenizer.
    * - So one project can mix languages (epic `spanish` P19):  `Carta.es.spell` beside `Card.spell`.
    * - The twin has `language`'s own rules, plus every rule our project added, ours and our imports':
    *   - the ones there already, copied from each layer between us and our language's parser
@@ -174,12 +198,13 @@ export class SpellParser extends P.Parser {
    * - Its journal is ours (`P.IncrementalProject` gives every file's parser the same one).
    * - One per language, kept while this parser lives:  a new parse's new project parser makes new ones.
    */
-  twinFor(language: SP.Language): SpellParser {
-    if (!this.language || language === this.language) return this
+  twinFor(language: SP.Language, form: SP.SpellForm = "spell"): SpellParser {
+    const formOf = (parser: SpellParser) => parser.form ?? "spell"
+    if (!this.language || (language === this.language && form === formOf(this))) return this
     const twins = (this.twins ??= [this])
-    const existing = twins.find((twin) => twin.language === language)
+    const existing = twins.find((twin) => twin.language === language && formOf(twin) === form)
     if (existing) return existing
-    const twin = language.parser.clone({ module: this.module })
+    const twin = language.parser.clone({ module: this.module, ...(form === "spellx" ? { form } : {}) } as P.ParserProps)
     for (const layer of this.layersOver(this.language.parser).reverse()) {
       for (const [ruleName, rule] of Object.entries(layer.ownRules)) twin.addTwinsRule(ruleName, rule)
     }
@@ -253,8 +278,13 @@ export class SpellParser extends P.Parser {
   /**
    * Tokenize `input`, then re-group into indented blocks when `ruleName` is `"block"`.
    * - Why:  spell's significant-whitespace block structure isn't just a flat token stream.
+   * - A spellx parser's tokenizer reads only a whole file, a `"block"`:  any other text it parses is spell, e.g. a
+   *   quoted alias, `"is a (suit)"`, read again as its words -- so it's tokenized as spell (`spellTokenizer`).
    */
   tokenize(input: string, ruleName: string) {
+    if (this.form === "spellx" && ruleName !== "block" && typeof input === "string") {
+      return this.spellTokenizer.tokenize(input)
+    }
     const tokens = super.tokenize(input)
     if (!tokens) return undefined
     if (typeof input === "string" && ruleName === "block") return this.tokenizer.breakIntoIndentedBlocks(tokens)
@@ -277,6 +307,7 @@ export class SpellParser extends P.Parser {
    * - The kind of a property's values too, e.g. `card suit` (epic `spanish` P22):  see `declaredPropertyKinds()`.
    */
   declaredTypes(text: string): string[] {
+    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
     const types = [...text.matchAll(this.declarations.typeDeclaration)].map(
       ([, type, words, created, onlyOne]) =>
         type ??
@@ -326,6 +357,7 @@ export class SpellParser extends P.Parser {
    * - Up to its `:`, so its body isn't parsed:  `to cheat at it:  print 1` is `to cheat at it`.
    */
   declaredMethods(text: string): string[] {
+    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
     const found: string[] = []
     let subject = ""
     for (const line of text.split("\n")) {

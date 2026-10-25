@@ -458,6 +458,79 @@ export type SpellxWords = {
    * - An event's attributes are its parameters, never checked here.
    */
   attributes: Record<string, string>
+  /**
+   * Code spell's TWIN of each tag, in this language:  the line a spellx tag reads as (epic `elemental-spell` P6).
+   * - A spellx file is read by spell's own rules:  each tag line is made into its twin's tokens, which parse as code
+   *   spell's line would (`SP.SpellxTwin`).
+   * - None:  a spellx file in this language can't be read yet.
+   */
+  twins?: SpellxTwinWords
+}
+
+/**
+ * A language's code-spell twin of each spellx tag:  how `SP.SpellxTwin` writes the line a tag reads as.
+ * - Each is a line of code spell with SLOTS, its words separated by spaces;  a word that isn't a slot is the
+ *   language's own, e.g. `its {name} is one of {one-of}`.
+ * - The slots:
+ *   - `{name}`:  the tag's name, quoted (`"suit"`);  `{words}`:  its name as words (`turn it over`)
+ *   - `{<attribute>}`:  an attribute's value as spell, e.g. `{one-of}`;  `{quoted <attribute>}` quoted, as text
+ *   - `{phrase}`:  a handler's or control's phrase
+ *   - `{super}`:  the template it extends;  `{aka}`:  its short name
+ *   - `{a <slot>}`:  the indefinite article agreeing with that slot's first word (`a card`, `an app`)
+ *   - `{param}` / `{value}`:  an event's parameter, its name and its kind
+ */
+export type SpellxTwinWords = {
+  /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
+  template: string
+  /** A template with a short name too, `aka=`:  its name as words, `{a words} {words} aka {aka} is ...`. */
+  templateAka: string
+  /** A one-of-a-kind template, `<spell-app>` or `<spell-page>`:  `{words} is {a super} {super} :`. */
+  singleton: string
+  /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
+  supers: Record<string, string>
+  /** A property's twin, by what the tag holds. */
+  property: {
+    /** a list of values, `one-of=`, and nothing inside */
+    list: string
+    /** a list of values, and lines inside working out its value */
+    listBody: string
+    /** lines inside working out its value */
+    body: string
+    /** its value on the tag's own line:  `<property "deck">a new deck</>` */
+    value: string
+    /** nothing but its name */
+    bare: string
+  }
+  /** One of a property's own aliases, `alias=`:  `it {quoted alias}`. */
+  propertyAlias: string
+  /** An alias tag:  `it {name}`, then its body. */
+  alias: string
+  /** An alias tag whose body is the indented lines:  `it {name} :`. */
+  aliasBlock: string
+  /** An action:  `to {words} :`. */
+  action: string
+  /** An action's details, by attribute:  `{ shortcut: "shortcut {shortcut}" }`. */
+  actionDetails: Record<string, string>
+  /** A test:  `to test {words} :`. */
+  test: string
+  /** An event its things send:  `it sends {name}`. */
+  event: string
+  /** The words before an event's parameters:  `with`. */
+  eventWith: string
+  /** One of an event's parameters:  `{param} as {a value} {value}`. */
+  eventParam: string
+  /** The word joining two of them:  `and`. */
+  eventAnd: string
+  /** A drawing:  `to draw it :`. */
+  draw: string
+  /** A part's drawing:  `to draw its {words} :`. */
+  drawPart: string
+  /** A part placed in a drawing:  `draw its {words}`. */
+  placePart: string
+  /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
+  handlers: Record<string, string>
+  /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
+  controls: Record<string, string>
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
