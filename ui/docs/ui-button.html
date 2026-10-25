@@ -771,7 +771,7 @@
                 <ui-docs-example
                   description="Circular buttons inside groups get a slight margin so they don't appear attached together."
                 >
-                  <ui-buttons wrapping appearance="circular">
+                  <ui-buttons wrapping padding="compact" appearance="circular">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
@@ -911,10 +911,20 @@
 
                   The actions:
 
-                  - `show-modal / close / request-close` act on a `<dialog>`.
-                  - `show-popover / hide-popover / toggle-popover` act on a popover.
-                  - A custom `--name` arrives at the target as a `command` event.
-                    `<ui-modal>` answers `--show / --close / --toggle`.
+                  - A `<dialog>` and a popover take the browser's own commands.
+                  - A custom command's name starts with two dashes.
+                    It reaches the target as a `command` event.
+                  - `<ui-modal>` answers three custom commands.
+
+                  ```text
+                  <dialog>
+                    show-modal, close, request-close
+                  a popover
+                    show-popover, hide-popover,
+                    toggle-popover
+                  <ui-modal>
+                    --show, --close, --toggle
+                  ```
 
                   The button inside the shadow root can't see a light-DOM id,
                   so the element hands it the target itself (`commandForElement`).
@@ -1107,10 +1117,21 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    Variations build on the base tokens: `compact` scales your `--ui-button-padding-block`, while
-                    `circular` replaces the radius whatever you set. To restyle a variation itself, target it with
-                    plain properties: `ui-button[circular]::part(button) { border-radius: 0.5em }`. Never set the
-                    `--_ui-*` / `--_button-*` names: they're the sheet's private plumbing.
+                    Variations build on the base tokens:
+
+                    - `compact` scales your `--ui-button-padding-block`.
+                    - `circular` replaces the radius, whatever you set.
+
+                    To restyle a variation itself, target it with plain properties:
+
+                    ```css
+                    /* less round */
+                    ui-button[circular]::part(button) {
+                      border-radius: 0.5em;
+                    }
+                    ```
+
+                    Never set the private names, `--_ui-*` and `--_button-*`:  they're the sheet's own plumbing.
                   </script>
                 </ui-markdown>
               </ui-message>

@@ -235,6 +235,24 @@ describe("<ui-docs-api tag>", () => {
     expect(rowOf(attributes, "type").cells[3]!.textContent).toBe("button")
   })
 
+  it("heads every column alike, the first too;  values and descriptions keep a width to read, cells at the top", async () => {
+    const host = await render(`<ui-docs-api tag="x-button"></ui-docs-api>`)
+    const attributes = tablesOf(host).get("Attributes")!
+    expect(attributes.tHead!.classList.contains("full-width")).toBe(true)
+    const [first, second] = [...attributes.tHead!.rows[0]!.cells].map((cell) => getComputedStyle(cell))
+    expect({ weight: first!.fontWeight, background: first!.backgroundColor, color: first!.color }).toEqual({
+      weight: second!.fontWeight,
+      background: second!.backgroundColor,
+      color: second!.color
+    })
+    const color = rowOf(attributes, "color")
+    expect([...color.cells].map((cell) => cell.className)).toEqual(["", "", "values", "", "description"])
+    const fontSize = parseFloat(getComputedStyle(color.cells[2]!).fontSize)
+    expect(color.cells[2]!.getBoundingClientRect().width).toBeGreaterThanOrEqual(14 * fontSize - 1)
+    expect(color.cells[4]!.getBoundingClientRect().width).toBeGreaterThanOrEqual(16 * fontSize - 1)
+    expect(getComputedStyle(color.cells[4]!).verticalAlign).toBe("top")
+  })
+
   it("draws values as mini labels:  hues in their colour, a numeric run as one label, the set named", async () => {
     const host = await render(`<ui-docs-api tag="x-button"></ui-docs-api>`)
     const attributes = tablesOf(host).get("Attributes")!

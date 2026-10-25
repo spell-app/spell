@@ -515,6 +515,52 @@ describe("<ui-buttons> track", () => {
     const host = await ElementFixture.render<DOMElement>(`<ui-buttons><ui-button>A</ui-button></ui-buttons>`)
     expect(host.shadowRoot!.querySelectorAll(".row")).toHaveLength(0)
   })
+
+  it("`trackless`:  buttons with their OWN outline or fill sit joined, with no track round them", async () => {
+    const host = await ElementFixture.render<DOMElement>(
+      `<ui-buttons><ui-button>Cancel</ui-button><ui-button color="positive">Save</ui-button></ui-buttons>`
+    )
+    const track = host.shadowRoot!.firstElementChild as HTMLElement
+    await expect.poll(() => track.className).toBe("ui trackless buttons")
+    expect(getComputedStyle(track)).toMatchObject({ backgroundColor: "rgba(0, 0, 0, 0)", paddingTop: "0px" })
+    const [cancel, save] = [...host.querySelectorAll("ui-button")].map((it) => it.getBoundingClientRect())
+    expect(save!.left - cancel!.right).toBeCloseTo(0, 1)
+    expect(save!.top).toBeCloseTo(track.getBoundingClientRect().top, 1)
+    // a plain button among them keeps its own fill, square where it meets the next
+    const plain = getComputedStyle(host.querySelector("ui-button")!.shadowRoot!.querySelector("[part~=button]")!)
+    expect(plain.backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    expect(plain.borderTopRightRadius).toBe("0px")
+  })
+
+  it("`trackless` follows its buttons:  `basic` ones too, and back to a track when none draws its own", async () => {
+    const host = await ElementFixture.render<DOMElement>(
+      `<ui-buttons><ui-button appearance="basic" color="red">One</ui-button><ui-button basic>Two</ui-button></ui-buttons>`
+    )
+    const track = host.shadowRoot!.firstElementChild as HTMLElement
+    await expect.poll(() => track.classList.contains("trackless")).toBe(true)
+    const [red, old] = [...host.querySelectorAll("ui-button")]
+    red!.removeAttribute("color")
+    red!.removeAttribute("appearance")
+    await expect.poll(() => track.classList.contains("trackless")).toBe(true)
+    old!.removeAttribute("basic")
+    await expect.poll(() => track.classList.contains("trackless")).toBe(false)
+    expect(getComputedStyle(track).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+  })
+
+  it("`circular` and spaced groups:  as much room between rows as between buttons", async () => {
+    for (const attributes of ['appearance="circular"', 'spacing="md"']) {
+      const box = await ElementFixture.render(
+        `<div style="width: 200px"><ui-buttons wrapping padding="compact" ${attributes}>` +
+          `<ui-button>One</ui-button><ui-button>Two</ui-button><ui-button>Three</ui-button><ui-button>Four</ui-button>` +
+          `</ui-buttons></div>`
+      )
+      const [one, two, ...rest] = [...box.querySelectorAll("ui-button")].map((it) => it.getBoundingClientRect())
+      const nextRow = rest.find((it) => it.top > one!.bottom)!
+      expect(two!.top, attributes).toBeCloseTo(one!.top, 0)
+      expect(nextRow.top - one!.bottom, attributes).toBeCloseTo(two!.left - one!.right, 0)
+      expect(two!.left - one!.right, attributes).toBeGreaterThan(0)
+    }
+  })
 })
 
 /** Width of the box `group()` renders a button group in. */

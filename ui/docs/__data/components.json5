@@ -36547,6 +36547,11 @@
           "description": "Accessible name of a playground's table, when it scrolls:  apart from the same group's table elsewhere."
         },
         {
+          "key": "tryFamily",
+          "text": "Try the {family} tokens",
+          "description": "Accessible name of a playground's family table, when it scrolls:  `{family}` is the family's name, lower case."
+        },
+        {
           "key": "noTokens",
           "text": "{tag} exposes no tokens of its own.",
           "description": "Message for a family without public tokens."
@@ -38037,6 +38042,18 @@
           "default": "var(--ui-surface-strong)",
           "description": "Background of inline code.",
           "type": "color"
+        },
+        {
+          "name": "--ui-docs-api-values-width",
+          "default": "14em",
+          "description": "Narrowest a values cell gets: its labels flow in rows, never one a line.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-api-description-width",
+          "default": "16em",
+          "description": "Narrowest a description cell gets, in a table of three or more columns: a few words a line; a narrow page scrolls the table sideways instead. Beside the name alone it takes the rest of the row.",
+          "type": "length"
         }
       ]
     },
@@ -38585,6 +38602,18 @@
           "name": "--ui-docs-tokens-search-width",
           "default": "20em",
           "description": "Widest the filter input grows.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-tokens-name-width",
+          "default": "40%",
+          "description": "Share of the table the token names take, at most: a long name breaks after a dash instead.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-tokens-name-min-width",
+          "default": "9em",
+          "description": "Narrowest the names get (a phone): two or three lines a name, not one word a line.",
           "type": "length"
         }
       ]
@@ -41159,7 +41188,8 @@
         },
         {
           "name": "--ui-markdown-code-background",
-          "default": "var(--ui-surface-muted)",
+          "default": "var(--ui-surface-strong)",
+          "description": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space",
           "type": "color"
         }
       ]

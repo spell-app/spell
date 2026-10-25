@@ -223,6 +223,31 @@ describe("<ui-docs-tokens family>", () => {
     expect(table.tBodies[0]!.rows[0]!.cells).toHaveLength(2)
   })
 
+  it("with descriptions on under a quarter of its rows, shows each under its token's name, no column", async () => {
+    const tokens: SiteToken[] = Array.from({ length: 9 }, (_, at) => ({
+      name: `--x-few-${at}`,
+      default: "1em",
+      type: "length"
+    }))
+    const data = {
+      ...DATA,
+      families: {
+        "x-few": familyOf("x-few", ["x-few"], [{ ...tokens[0]!, description: "Only `one`." }, ...tokens.slice(1)])
+      }
+    }
+    const host = await render(
+      `<ui-docs-tokens family="x-few"></ui-docs-tokens>`,
+      `data:application/json,${encodeURIComponent(JSON.stringify(data))}`
+    )
+    const table = tablesOf(host)[0]!
+    expect([...table.tHead!.rows[0]!.cells].map((cell) => cell.textContent)).toEqual(["Token", "Default"])
+    const note = rowOf(host, "--x-few-0Only one.").cells[0]!.querySelector("small.ui-caption")!
+    expect({ text: note.textContent, code: note.querySelector("code")!.textContent }).toEqual({
+      text: "Only one.",
+      code: "one"
+    })
+  })
+
   it.each([
     [`family="x-nope"`, "No family x-nope in the site data.", "negative", true],
     [`tag="x-nope"`, "No family x-nope in the site data.", "negative", true],
@@ -314,6 +339,11 @@ describe("<ui-docs-tokens playground>", () => {
   it("names its table apart from a plain table of the same tokens:  the region it scrolls in takes the name", async () => {
     const host = await playground(`caption="Button tokens"`)
     expect(host.shadowRoot!.querySelector("ui-table")!.getAttribute("aria-label")).toBe("Try Button tokens")
+  })
+
+  it("names a family's table from the family when it has no caption:  `Try the x-button tokens`", async () => {
+    const host = await playground()
+    expect(host.shadowRoot!.querySelector("ui-table")!.getAttribute("aria-label")).toBe("Try the x-button tokens")
   })
 
   it("starts a colour input at the token's current colour", async () => {

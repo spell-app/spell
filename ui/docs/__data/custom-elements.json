@@ -15759,7 +15759,8 @@
             },
             {
               "name": "--ui-markdown-code-background",
-              "default": "var(--ui-surface-muted)"
+              "default": "var(--ui-surface-strong)",
+              "description": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space"
             }
           ]
         }

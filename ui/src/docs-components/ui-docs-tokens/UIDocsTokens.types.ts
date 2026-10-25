@@ -31,6 +31,8 @@ export type TokenTable = {
   id: string
   /** group title;  `undefined` for a family's one table */
   title?: string
+  /** a family's one table:  the family's title (`Button`);  `undefined` for a group's */
+  family?: string
   /** group description;  `` `x` `` is code */
   description?: string
   /** its rows, after the `tokens` attribute and the filter */

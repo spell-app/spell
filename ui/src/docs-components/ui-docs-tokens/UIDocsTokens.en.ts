@@ -149,6 +149,12 @@ export const docsTokensVocabulary = {
         "Accessible name of a playground's table, when it scrolls:  apart from the same group's table elsewhere."
     },
     {
+      key: "tryFamily",
+      text: "Try the {family} tokens",
+      description:
+        "Accessible name of a playground's family table, when it scrolls:  `{family}` is the family's name, lower case."
+    },
+    {
       key: "noTokens",
       text: "{tag} exposes no tokens of its own.",
       description: "Message for a family without public tokens."

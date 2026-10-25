@@ -5185,7 +5185,7 @@
       "name": "--ui-markdown-code-background",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-markdown>`'s token.  Default:  `var(--ui-surface-muted)`"
+        "value": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space\n\n`<ui-markdown>`'s token.  Default:  `var(--ui-surface-strong)`"
       }
     },
     {

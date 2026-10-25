@@ -21,6 +21,7 @@
  *     - `active` / `disabled` / `loading` / `toggle` are keyOnly attributes, so `ClassBuilder` emits them
  *   - `<ui-buttons>`:  `<div class="ui ... buttons" role="group" part="group"><slot></slot></div>`
  *     - `wrapping`:  a `<span class="row">` after the slot for each row, the row's track (`UIButtons.rows`)
+ *     - `trackless`:  its buttons draw their own outline or fill, so it draws no track (`UIButtons.isTrackless`)
  *   - `<ui-or>`:  `<span class="or" part="or" data-text="or">` -- `data-text` from the vocabulary text `or`
  * - The `:state()`s the components must set (the DOM element's own layout can't come from inside):
  *   - `:state(fluid)` -- the DOM element is block-level:  `fluid`, bare / `top` / `bottom` `attached`,
@@ -460,7 +461,8 @@
    *   - `--ui-button-group-item-radius`:  the corners where its buttons meet;
    *     by default the inner radius, so every tile is rounded all round
    * - Its buttons lose the inset from their own padding (`--_buttons-trim`), so it stands as tall as a lone button.
-   * - Separate buttons (`circular`, `spacing="md"`) and `tertiary` ones (no fill) have no track.
+   * - Separate buttons (`circular`, `spacing="md"`) and `tertiary` ones (no fill) have no track;
+   *   nor do buttons that draw their own outline or fill ("Trackless group" below).
    */
   .ui.buttons {
     /* a group's inset:  how far its buttons sit in from its edge */
@@ -845,10 +847,20 @@
     --_ui-button-group-padding: 0px;
   }
 
-  /* Circular / spaced groups:  separate round buttons, each with its own fill and corners;  no track. */
+  /*
+   * Circular / spaced groups:  separate round buttons, each with its own fill and corners;  no track.
+   * - The room between them is the group's `gap`, so a wrapping one leaves the same room between its rows
+   *   as between its buttons (with margins on the buttons, a circular group's rows touched).
+   */
   .ui:is(.circular, .spaced).buttons {
     --_ui-button-group-padding: 0px;
     background-color: transparent;
+  }
+  .ui.circular.buttons {
+    gap: var(--_ui-button-margin-inline);
+  }
+  .ui.spaced.buttons {
+    gap: var(--_ui-button-spaced-margin);
   }
   .ui:is(.circular, .spaced).buttons > *,
   .ui:is(.circular, .spaced).buttons > ::slotted(*) {
@@ -860,17 +872,23 @@
     --_buttons-background: initial;
     --_buttons-trim: 0px;
   }
-  .ui.circular.buttons > *,
-  .ui.circular.buttons > ::slotted(*) {
-    --_ui-buttons-margin: 0 var(--_ui-button-margin-inline) 0 0;
+
+  /*
+   * Trackless group:  its buttons draw their own outline (`basic`) or fill (a `color`),
+   * so the group draws no track for them to sit in:  a ring inside a fill reads as a mistake.
+   * - They sit joined, square where they meet, as before groups were tracks;  a plain button among them keeps its fill.
+   * - `<ui-buttons>` adds the class (`UIButtons.extraClass`);  class grammar writes `ui trackless buttons`.
+   */
+  .ui.trackless.buttons {
+    --_ui-button-group-padding: 0px;
+    background-color: transparent;
   }
-  .ui.circular.vertical.buttons > *,
-  .ui.circular.vertical.buttons > ::slotted(*) {
-    --_ui-buttons-margin: 0 0 var(--_ui-button-margin-inline) 0;
-  }
-  .ui.spaced.buttons > *,
-  .ui.spaced.buttons > ::slotted(*) {
-    --_ui-buttons-margin: 0 var(--_ui-button-spaced-margin) var(--_ui-button-spaced-margin) 0;
+  .ui.trackless.buttons > *,
+  .ui.trackless.buttons > ::slotted(*) {
+    --_buttons-outer-radius: initial;
+    --_buttons-joint-radius: initial;
+    --_buttons-background: initial;
+    --_buttons-trim: 0px;
   }
 
   /*
@@ -903,7 +921,7 @@
     background-color: var(--_button-bg, var(--ui-color, var(--_ui-button-background)));
     pointer-events: none;
   }
-  .ui:is(.circular, .spaced).buttons > .row {
+  .ui:is(.circular, .spaced, .trackless).buttons > .row {
     display: none;
   }
   .ui.compact.wrapping.buttons > :not(.or),

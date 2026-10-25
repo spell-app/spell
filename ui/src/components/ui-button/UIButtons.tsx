@@ -1,5 +1,5 @@
 import { For } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 import { buttonsVocabulary } from "./UIButtons.en"
@@ -17,6 +17,8 @@ import buttonCSS from "./UIButton.css?inline"
  *   `fluid` (also for a `width`, or `attach` top / bottom / both) and the floats.
  * - A `wrapping` group measures its rows, and draws a track behind each (`rows`):
  *   CSS can't tell which button starts or ends a row.
+ * - A group whose buttons draw their own outline or fill draws no track (`isTrackless`):
+ *   CSS can't see into the slot (`:host(:has())` isn't in Chrome).
  ****************/
 export class UIButtons extends E.UIComponent<typeof buttonsVocabulary> {
   @E.proto static vocabulary = buttonsVocabulary
@@ -43,6 +45,36 @@ export class UIButtons extends E.UIComponent<typeof buttonsVocabulary> {
   @E.cssState("right-floated")
   get floatsRight(): boolean {
     return this.floated === "right"
+  }
+
+  ////////////////
+  // ## The track
+  ////////////////
+
+  /**
+   * Its buttons draw their own look, an outline (`basic`) or a fill (a `color`):
+   * the group then draws no track for them to sit in, and they sit joined (`UIButton.css`, "Trackless group").
+   * - Follows its children and their attributes;  never on a server.
+   */
+  @E.watches({ childList: true, subtree: true, attributes: true })
+  get isTrackless(): boolean {
+    return !isServer && [...this.domElement.children].some((child) => UIButtons.drawsOwnLook(child))
+  }
+
+  /** `trackless` while its buttons draw their own look (`isTrackless`). */
+  protected get extraClass(): string | undefined {
+    return this.isTrackless ? TRACKLESS_CLASS : undefined
+  }
+
+  /**
+   * A child draws its own look:  a `color`, or `basic` among its `appearance` words.
+   * - Read from its attribute values, which already take old names (`primary`, `basic`) and other languages.
+   */
+  private static drawsOwnLook(child: Element): boolean {
+    const values = (child as Partial<E.DOMElement>).attributeValues
+    if (!values) return false
+    const { appearance } = values
+    return !!values.color || (typeof appearance === "string" && appearance.split(/\s+/).includes(BASIC))
   }
 
   ////////////////
@@ -177,6 +209,12 @@ type RowGrowth = { left: number; top: number; right: number; bottom: number }
 
 /** Class word of a row's box. */
 const ROW_CLASS = "row"
+
+/** Class word of a group that draws no track:  its buttons draw their own look. */
+const TRACKLESS_CLASS = "trackless"
+
+/** The `appearance` word of an outlined button. */
+const BASIC = "basic"
 
 /** Same rows, to the half pixel:  a re-measure that moved nothing leaves `rows` alone. */
 function sameRows(a: readonly RowBox[], b: readonly RowBox[]): boolean {
