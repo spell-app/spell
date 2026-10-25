@@ -1,6 +1,8 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E } from "spell-ui/core"
 
 import { PageStages } from "spell-epic/phases"
@@ -788,21 +790,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /** This page's JSON under `prefix`;  `{}` without storage, or for bad JSON. */
   private static saved(prefix: string): Record<string, unknown> {
-    try {
-      const value = JSON.parse(localStorage.getItem(prefix + location.pathname) ?? "{}") as unknown
-      return value && typeof value === "object" ? (value as Record<string, unknown>) : {}
-    } catch {
-      return {}
-    }
+    const value = PrefStore.getAt(prefix + location.pathname)
+    return value && typeof value === "object" ? (value as Record<string, unknown>) : {}
   }
 
-  /** Keep `value` for this page under `prefix`;  a browser that blocks storage just doesn't remember. */
+  /** Keep `value` for this page under `prefix`, as JSON;  a browser that blocks storage keeps it for the visit. */
   private static save(prefix: string, value: object) {
-    try {
-      localStorage.setItem(prefix + location.pathname, JSON.stringify(value))
-    } catch {
-      // private mode:  the choice lasts the visit
-    }
+    PrefStore.setAt(prefix + location.pathname, value)
   }
 }
 

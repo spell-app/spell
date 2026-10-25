@@ -7,6 +7,8 @@
  *   so a card counts before it has upgraded.
  */
 
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell-epic/list/EpicCards"
 import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
 
@@ -17,12 +19,19 @@ export const FAVORITE_API = "/api/epics/favorite"
  * `localStorage` key of the sagas the Epics page shows:  a JSON list of their ids (`""` for No saga).
  * - absent:  every one
  * - one for every Epics page
- * - the docs runtime's key before epic `epic-engine` P3, so a choice carries over
+ * - `spell-epics-sagas` before epic `prefs-and-undo` P4 (`OLD_KEYS`), and the docs runtime's before epic
+ *   `epic-engine` P3, so a choice carries over
  */
-export const SAGAS_SHOWN_KEY = "spell-epics-sagas"
+export const SAGAS_SHOWN_KEY = "spell-epics:sagas"
 
-/** `localStorage` key of the Epics page's sort:  `title` (the default) or `date`.  The docs runtime's before P3. */
-export const SORT_KEY = "spell-epics-sort"
+/** `localStorage` key of the Epics page's sort:  `title` (the default) or `date`;  `spell-epics-sort` before P4. */
+export const SORT_KEY = "spell-epics:sort"
+
+/**
+ * Each key's name before epic `prefs-and-undo` P4, with no store:  moved over on its first read, once.
+ * - TODO:  drop once every browser has opened the Epics page since
+ */
+const OLD_KEYS: Record<string, string> = { [SAGAS_SHOWN_KEY]: "spell-epics-sagas", [SORT_KEY]: "spell-epics-sort" }
 
 /** How the Epics page sorts the cards in each group:  A to Z by title, or by when each was last worked on. */
 export const SORTS = ["title", "date"] as const
@@ -168,28 +177,23 @@ export function shortDay(value: string | null | undefined): string | undefined {
 
 /** The JSON list kept under `key`, or `undefined`:  none, not a list, or no storage.  NEVER throws. */
 export function savedList(key: string): string[] | undefined {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) ?? "null") as unknown
-    return Array.isArray(value) ? value.filter((each): each is string => typeof each === "string") : undefined
-  } catch {
-    return undefined
-  }
+  const value = kept(key)
+  return Array.isArray(value) ? value.filter((each): each is string => typeof each === "string") : undefined
 }
 
 /** The sort kept under `SORT_KEY`:  `title` unless it says `date`.  NEVER throws. */
 export function savedSort(): EpicSortName {
-  try {
-    return localStorage.getItem(SORT_KEY) === "date" ? "date" : "title"
-  } catch {
-    return "title"
-  }
+  return kept(SORT_KEY) === "date" ? "date" : "title"
 }
 
-/** Keep `value` under `key`;  a browser that blocks storage just doesn't remember.  NEVER throws. */
-export function save(key: string, value: string) {
-  try {
-    localStorage.setItem(key, value)
-  } catch {
-    // private mode:  the choice lasts the visit
-  }
+/** Keep `value` under `key`, as text or JSON;  a browser that blocks storage keeps it for the visit.  NEVER throws. */
+export function save(key: string, value: unknown) {
+  PrefStore.setAt(key, value)
+}
+
+/** The value kept under `key`, its old name's moved over first (`OLD_KEYS`). */
+function kept(key: string): unknown {
+  const old = OLD_KEYS[key]
+  if (old) PrefStore.moveOldKey(old, key)
+  return PrefStore.getAt(key)
 }

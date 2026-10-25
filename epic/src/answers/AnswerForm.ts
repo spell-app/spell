@@ -1,3 +1,6 @@
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { StoragePlace } from "spell/util/persist/StoragePlace"
 import { PlanDates } from "spell-epic/dates"
 import { ServerLink, sentence, type ServerLinkOptions } from "spell-epic/review"
 
@@ -617,11 +620,7 @@ export class AnswerForm {
     this.isUnsaved = false
     this.typed = undefined
     this.setDraftText("")
-    try {
-      this.options.storage?.removeItem(this.localKey)
-    } catch {
-      // storage blocked:  nothing was kept there either
-    }
+    PrefStore.setAt(this.localKey, undefined, this.copies)
   }
 
   /** The draft's save status;  `isError`:  in red, as a choice page's failed save (P15:  "says so loudly"). */
@@ -635,24 +634,21 @@ export class AnswerForm {
     return `${DRAFT_KEY_PREFIX}${this.options.page}`
   }
 
-  /** Write the draft to the browser's copy;  storage that throws (blocked, full) just doesn't keep it. */
+  /**
+   * Where the browser's copy is kept:  `options.storage`, through `PrefStore`.
+   * - None, or storage that throws (blocked, full):  this page's memory;  the page server's copy still is.
+   */
+  private copies = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
+
+  /** Write the draft to the browser's copy, as JSON. */
   private writeLocal() {
-    try {
-      this.options.storage?.setItem(this.localKey, JSON.stringify(this.draftNow()))
-    } catch {
-      // nowhere to keep it:  the page server's copy still is
-    }
+    PrefStore.setAt(this.localKey, this.draftNow(), this.copies)
   }
 
-  /** The browser's copy of the draft, or `undefined` (none, bad JSON, storage that throws). */
+  /** The browser's copy of the draft, or `undefined` (none, or not a draft). */
   private readLocal(): DetailsDraft | undefined {
-    try {
-      const text = this.options.storage?.getItem(this.localKey)
-      const draft = text ? (JSON.parse(text) as DetailsDraft) : undefined
-      return draft && typeof draft.saved === "string" && draft.answers && draft.labels ? draft : undefined
-    } catch {
-      return undefined
-    }
+    const draft = PrefStore.getAt(this.localKey, this.copies) as DetailsDraft | undefined
+    return draft && typeof draft.saved === "string" && draft.answers && draft.labels ? draft : undefined
   }
 
   /**

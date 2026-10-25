@@ -1,4 +1,7 @@
-import { ACTIVITY_EVENTS, COUNTDOWN_KEY, COUNTDOWN_MS, COUNTDOWN_TICK_MS } from "./review.types"
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { StoragePlace } from "spell/util/persist/StoragePlace"
+import { ACTIVITY_EVENTS, COUNTDOWN_KEY, COUNTDOWN_MS, COUNTDOWN_TICK_MS, OLD_COUNTDOWN_KEY } from "./review.types"
 
 /****************
  * ### `SendCountdown`
@@ -61,12 +64,13 @@ export class SendCountdown {
 
   /** Countdown mode:  on unless this browser was told off (`COUNTDOWN_KEY`).  NEVER throws. */
   get isOn(): boolean {
-    try {
-      return this.options.storage?.getItem(COUNTDOWN_KEY) !== "off"
-    } catch {
-      return true
-    }
+    // TODO:  drop the move once every browser has opened an epic page since epic `prefs-and-undo` P4
+    this.modes.moveText(OLD_COUNTDOWN_KEY, ...PrefStore.splitKey(COUNTDOWN_KEY))
+    return PrefStore.getAt(COUNTDOWN_KEY, this.modes) !== "off"
   }
+
+  /** Where the mode is kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
+  private modes = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
 
   /**
    * Turn countdown mode on or off, and remember it for every page in this browser.
@@ -74,11 +78,7 @@ export class SendCountdown {
    * - a storage that refuses (blocked site data):  the mode holds for this page only (`modeHere`)
    */
   toggle(on = !this.isOn) {
-    try {
-      this.options.storage?.setItem(COUNTDOWN_KEY, on ? "on" : "off")
-    } catch {
-      // blocked site data:  this page only
-    }
+    PrefStore.setAt(COUNTDOWN_KEY, on ? "on" : "off", this.modes)
     this.modeHere = on
     if (on && this.isPending) this.start()
     else this.stop()

@@ -1,3 +1,6 @@
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { StoragePlace } from "spell/util/persist/StoragePlace"
 import { PlanDates } from "spell-epic/dates"
 import { ServerLink, sentence } from "spell-epic/review"
 
@@ -389,14 +392,11 @@ export class ChoicesForm {
     const sections = ChoicesForm.sectionsOf(document)
     const isAllOpen = ChoicesForm.isAllOpen(document)
     for (const section of sections) section.collapsed = isAllOpen
-    try {
-      const key = `${FOLD_KEY_PREFIX}${document.location.pathname}`
-      const folds = JSON.parse(localStorage.getItem(key) ?? "{}") as Record<string, boolean>
-      for (const section of sections) folds[section.id] = isAllOpen
-      localStorage.setItem(key, JSON.stringify(folds))
-    } catch {
-      // storage blocked:  the folds just aren't remembered
-    }
+    const key = `${FOLD_KEY_PREFIX}${document.location.pathname}`
+    const saved = PrefStore.getAt(key)
+    const folds = (saved && typeof saved === "object" ? saved : {}) as Record<string, boolean>
+    for (const section of sections) folds[section.id] = isAllOpen
+    PrefStore.setAt(key, folds)
     return !isAllOpen
   }
 
@@ -431,35 +431,28 @@ export class ChoicesForm {
     return `${CHOICES_KEY_PREFIX}${this.options.page}`
   }
 
-  /** Write the draft to the browser's copy;  storage that throws (blocked, full) just doesn't keep it. */
+  /**
+   * Where the browser's copy is kept:  `options.storage`, through `PrefStore`.
+   * - None, or storage that throws (blocked, full):  this page's memory;  the page server's copy still is.
+   */
+  private copies = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
+
+  /** Write the draft to the browser's copy, as JSON. */
   private writeLocal() {
-    try {
-      this.options.storage?.setItem(this.localKey, JSON.stringify(this.draftNow()))
-    } catch {
-      // nowhere to keep it:  the page server's copy still is
-    }
+    PrefStore.setAt(this.localKey, this.draftNow(), this.copies)
   }
 
-  /** The browser's copy of the draft, or `undefined` (none, bad JSON, storage that throws). */
+  /** The browser's copy of the draft, or `undefined` (none, or not a draft). */
   private readLocal(): ChoicesDraft | undefined {
-    try {
-      const text = this.options.storage?.getItem(this.localKey)
-      const draft = text ? (JSON.parse(text) as ChoicesDraft) : undefined
-      return draft && typeof draft.saved === "string" && draft.values && typeof draft.values === "object"
-        ? draft
-        : undefined
-    } catch {
-      return undefined
-    }
+    const draft = PrefStore.getAt(this.localKey, this.copies) as ChoicesDraft | undefined
+    return draft && typeof draft.saved === "string" && draft.values && typeof draft.values === "object"
+      ? draft
+      : undefined
   }
 
   /** Sent:  the browser's copy is done with. */
   private dropLocal() {
-    try {
-      this.options.storage?.removeItem(this.localKey)
-    } catch {
-      // storage blocked:  nothing was kept there either
-    }
+    PrefStore.setAt(this.localKey, undefined, this.copies)
   }
 
   ////////////////
