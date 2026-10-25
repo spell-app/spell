@@ -96,8 +96,8 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
         </Show>
         <ui-menu
           part={this.partForName("menu")}
-          vertical=""
-          text=""
+          direction="vertical"
+          appearance="text"
           fluid=""
           size={this.menuSize}
           aria-label={this.translationForKey("label")}
@@ -115,7 +115,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
         <ui-item
           part={this.partForName("section")}
           class={SECTION}
-          href={`#${section.id}`}
+          link={`#${section.id}`}
           selected={this.sectionIdInView === section.id ? "" : undefined}
         >
           {section.text}
@@ -134,13 +134,19 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     return (
       <Show when={isOpen()}>
         <ui-item class={ENTRIES} padding="none-y">
-          <ui-menu part={this.partForName("entries")} vertical="" text="" fluid="" size={this.menuSize}>
+          <ui-menu
+            part={this.partForName("entries")}
+            direction="vertical"
+            appearance="text"
+            fluid=""
+            size={this.menuSize}
+          >
             <For each={parent.entries}>
               {(entry) => (
                 <>
                   <ui-item
                     part={this.partForName("entry")}
-                    href={`#${entry.id}`}
+                    link={`#${entry.id}`}
                     selected={this.idInView === entry.id ? "" : undefined}
                   >
                     {entry.text}

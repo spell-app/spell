@@ -148,7 +148,7 @@ export const FALLBACK_CASES: readonly FallbackCase[] = [
   {
     name: "a family without a fallback shows its children through a bare slot",
     async run(adapter) {
-      const container = await adapter.mount(`<ui-divider horizontal>Or</ui-divider>`)
+      const container = await adapter.mount(`<ui-divider direction="horizontal">Or</ui-divider>`)
       const host = container.querySelector<HTMLElement>("ui-divider")!
       await captureErrors(() => adapter.breakRender(host))
       check(host.matches(":state(errored)"), ":state(errored) (did the render really fail?)")

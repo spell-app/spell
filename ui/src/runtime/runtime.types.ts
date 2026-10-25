@@ -584,7 +584,7 @@ export type SourceSaveRequest = {
   text: string
   /** version the text was edited from (`SourceText.etag`);  a saver sends it as `If-Match` */
   etag?: string
-  /** `id` of the ONE element of an HTML page to replace, e.g. `<ui-include select="#intro">` saving its part */
+  /** `id` of the ONE element of an HTML page to replace, e.g. `<ui-include selector="#intro">` saving its part */
   fragment?: string
 }
 

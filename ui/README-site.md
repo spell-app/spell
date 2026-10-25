@@ -167,7 +167,7 @@ _The page shows once its layout, its theme and every element on it are ready:  n
   An example whose markup changes as it runs holds it in a `<template>` child instead.
 - After the first page, a click on another page of the site doesn't load a page.
   The site's router fetches it, loads the families it uses, swaps only the `main`
-  (through a `<ui-include select="main#main">`) and pushes its real URL:
+  (through a `<ui-include selector="main#main">`) and pushes its real URL:
   inside a View Transition, where the browser has them.
   - The chrome stays;  back, forward, deep links and reloads work as with plain pages.
   - A swap that fails falls back to a full load.

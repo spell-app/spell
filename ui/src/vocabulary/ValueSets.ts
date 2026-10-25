@@ -67,7 +67,7 @@ export class ValueSets {
     "grey",
     "black",
     // what a click does, as Fomantic's buttons had them:  `colors.css` remaps them as it does every hue
-    // (epic `ui-gaps` P4:  `<ui-button positive>` became `color="positive"`)
+    // (epic `ui-gaps` P4:  `<ui-button color="positive">` became `color="positive"`)
     "positive",
     "negative"
   ] as const

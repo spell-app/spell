@@ -109,7 +109,7 @@ describe("<ui-docs-toc> scan", () => {
     const { wrapper, toc } = await render(PAGE)
     const ids = [...wrapper.querySelectorAll("#content > [id]")].map((element) => element.id)
     expect(ids).toEqual(["types", "button", "labeled-icon", "states-section", "disabled", "loading"])
-    const hrefs = [...toc.shadowRoot!.querySelectorAll("[part~=section]")].map((item) => item.getAttribute("href"))
+    const hrefs = [...toc.shadowRoot!.querySelectorAll("[part~=section]")].map((item) => item.getAttribute("link"))
     expect(hrefs).toEqual(["#types", "#states-section"])
   })
 
@@ -169,7 +169,7 @@ describe("<ui-docs-toc> scan", () => {
     api.dispatchEvent(new CustomEvent("ui-drawn", { bubbles: true, composed: true }))
     await vi.waitFor(() => expect(links(toc, "entry")).toEqual(["open"]))
     const entry = toc.shadowRoot!.querySelector("[part~=entry]")!
-    expect(entry.getAttribute("href")).toBe("#api-states-open")
+    expect(entry.getAttribute("link")).toBe("#api-states-open")
   })
 })
 
