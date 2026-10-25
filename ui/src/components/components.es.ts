@@ -181,6 +181,7 @@ export const sharedEs = {
     raised: "elevado",
     link: "enlace",
     header: "encabezado",
+    heading: "encabezado",
     description: "descripcion",
     image: "imagen",
     columns: "columnas",

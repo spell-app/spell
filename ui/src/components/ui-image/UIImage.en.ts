@@ -17,7 +17,7 @@ import type { E } from "spell-ui/core"
 /****************
  * ### `imageVocabulary`
  * The names of `<ui-image>`, an image:  `<img class="ui … image" part="image">`,
- * or `<a class="ui … image" part="image">` around `<img part="img">` with `href`.
+ * or `<a class="ui … image" part="image">` around `<img part="img">` with `link`.
  ****************/
 export const imageVocabulary = {
   tag: "ui-image",
@@ -106,13 +106,19 @@ export const imageVocabulary = {
       values: ["eager", "lazy"],
       description: "When to load, as the native `<img loading>`."
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) around the image." }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`) around the image.  Its old name is `href`."
+    }
   ],
   events: [],
   slots: [],
   parts: [
-    { name: "image", description: "The image box:  the `<img>`, or the `<a>` with `href`." },
-    { name: "img", description: "With `href`:  the `<img>` inside the link." }
+    { name: "image", description: "The image box:  the `<img>`, or the `<a>` with `link`." },
+    { name: "img", description: "With `link`:  the `<img>` inside the link." }
   ],
   states: [{ name: "disabled", description: "Faded:  shown as unavailable." }],
   texts: []

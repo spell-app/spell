@@ -9200,6 +9200,34 @@
       }
     },
     {
+      "name": "--ui-text-link-color",
+      "description": {
+        "kind": "markdown",
+        "value": "A link (`link`), and code and highlight inside text (`font`; epic `ui-gaps` P3).\n\n`<ui-text>`'s token.  Default:  `var(--ui-link)`"
+      }
+    },
+    {
+      "name": "--ui-text-link-hover-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-text>`'s token.  Default:  `var(--ui-link-hover)`"
+      }
+    },
+    {
+      "name": "--ui-text-code-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-text>`'s token.  Default:  `var(--ui-surface-strong)`"
+      }
+    },
+    {
+      "name": "--ui-text-highlight-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-text>`'s token.  Default:  `var(--ui-yellow-background)`"
+      }
+    },
+    {
       "name": "--ui-text-size-mini",
       "description": {
         "kind": "markdown",
@@ -10024,14 +10052,14 @@
       "name": "::part(image)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-avatar>`:  The `<img>` rendered from `src`.\n- `<ui-card>`:  The `image` shorthand's box.\n- `<ui-event>`:  The `<img>` of the `image` shorthand.\n- `<ui-image>`:  The image box:  the `<img>`, or the `<a>` with `href`.\n- `<ui-item>`:  List / menu:  the `<img>` of the `image` shorthand.\n- `<ui-label>`:  The `<img>` of an `image` label with a URL.\n- `<ui-placeholder-image>`:  The image block."
+        "value": "Part of:\n\n- `<ui-avatar>`:  The `<img>` rendered from `src`.\n- `<ui-card>`:  The `image` shorthand's box.\n- `<ui-event>`:  The `<img>` of the `image` shorthand.\n- `<ui-image>`:  The image box:  the `<img>`, or the `<a>` with `link`.\n- `<ui-item>`:  List / menu:  the `<img>` of the `image` shorthand.\n- `<ui-label>`:  The `<img>` of an `image` label with a URL.\n- `<ui-placeholder-image>`:  The image block."
       }
     },
     {
       "name": "::part(img)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-image>`:  With `href`:  the `<img>` inside the link."
+        "value": "Part of:\n\n- `<ui-image>`:  With `link`:  the `<img>` inside the link."
       }
     },
     {
@@ -10073,7 +10101,7 @@
       "name": "::part(label)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-button>`:  The joined label of a `label` button.\n- `<ui-checkbox>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-dropdown>`:  Each chosen value of a `multiple` dropdown.\n- `<ui-event>`:  The label box beside the content.\n- `<ui-field>`:  The label.\n- `<ui-input>`:  The joined label box.\n- `<ui-label>`:  The label box (`<span>`, or `<a>` with `href`).\n- `<ui-progress>`:  The label under the track.\n- `<ui-property>`:  The label.\n- `<ui-radio>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-slider>`:  One step label (and its tick).\n- `<ui-statistic>`:  The `label` shorthand."
+        "value": "Part of:\n\n- `<ui-button>`:  The joined label of a `label` button.\n- `<ui-checkbox>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-dropdown>`:  Each chosen value of a `multiple` dropdown.\n- `<ui-event>`:  The label box beside the content.\n- `<ui-field>`:  The label.\n- `<ui-input>`:  The joined label box.\n- `<ui-label>`:  The label box (`<span>`, or `<a>` with `link`).\n- `<ui-progress>`:  The label under the track.\n- `<ui-property>`:  The label.\n- `<ui-radio>`:  The `<label>` drawing the box, the mark and the text.\n- `<ui-slider>`:  One step label (and its tick).\n- `<ui-statistic>`:  The `label` shorthand."
       }
     },
     {
@@ -10367,7 +10395,7 @@
       "name": "::part(section)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-breadcrumb-section>`:  The section (`<a>`, or `<span>` when active or without `href`).\n- `<ui-panel>`:  The section box.\n- `<ui-property-editor>`:  The section box.\n- `<ui-property-group>`:  The section box.\n- `<ui-section>`:  The section box."
+        "value": "Part of:\n\n- `<ui-breadcrumb-section>`:  The section (`<a>`, or `<span>` when active or without `link`).\n- `<ui-panel>`:  The section box.\n- `<ui-property-editor>`:  The section box.\n- `<ui-property-group>`:  The section box.\n- `<ui-section>`:  The section box."
       }
     },
     {

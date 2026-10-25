@@ -13,7 +13,7 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `<ui-button>`
- * A button:  a semantic `<button>` (or `<a>` with `href`) in the shadow root.
+ * A button:  a semantic `<button>` (or `<a>` with `link`) in the shadow root.
  ****************/
 export const buttonVocabulary = {
   tag: "ui-button",
@@ -229,14 +229,20 @@ export const buttonVocabulary = {
         "`<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that " +
         "the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`)."
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a button." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`) styled as a button.  Its old name is `href`."
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {
       name: "download",
       group: "link",
       kind: "string",
       description:
-        "With `href`:  downloads the file instead of opening it, as the native `<a download>`;  a value names the " +
+        "With `link`:  downloads the file instead of opening it, as the native `<a download>`;  a value names the " +
         "saved file."
     },
     {

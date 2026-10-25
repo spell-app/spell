@@ -95,7 +95,7 @@
                   <ui-button commandfor="flyout-types-shorthand" command="--show">Show</ui-button>
                   <ui-flyout
                     id="flyout-types-shorthand"
-                    header="Profile"
+                    heading="Profile"
                     content="A flyout from its attributes alone."
                     closable
                   ></ui-flyout>
@@ -113,31 +113,31 @@
                   <ui-button commandfor="flyout-width-default" command="--show">Default</ui-button>
                   <ui-button commandfor="flyout-width-wide" command="--show">Wide</ui-button>
                   <ui-button commandfor="flyout-width-very-wide" command="--show">Very wide</ui-button>
-                  <ui-flyout id="flyout-width-very-thin" width="very thin" header="Very thin" closable></ui-flyout>
+                  <ui-flyout id="flyout-width-very-thin" width="very thin" heading="Very thin" closable></ui-flyout>
                   <ui-flyout
                     id="flyout-width-thin"
                     width="thin"
-                    header="Thin"
+                    heading="Thin"
                     content="A thin flyout."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-width-default"
-                    header="Default"
+                    heading="Default"
                     content="The default width."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-width-wide"
                     width="wide"
-                    header="Wide"
+                    heading="Wide"
                     content="A wide flyout."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-width-very-wide"
                     width="very wide"
-                    header="Very wide"
+                    heading="Very wide"
                     content="A very wide flyout."
                     closable
                   ></ui-flyout>
@@ -154,25 +154,25 @@
                   <ui-button commandfor="flyout-width-5" command="--show">Five wide</ui-button>
                   <ui-button commandfor="flyout-width-8" command="--show">Eight wide</ui-button>
                   <ui-button commandfor="flyout-width-12" command="--show">Twelve wide</ui-button>
-                  <ui-flyout id="flyout-width-2" width="2" header="Two" closable></ui-flyout>
+                  <ui-flyout id="flyout-width-2" width="2" heading="Two" closable></ui-flyout>
                   <ui-flyout
                     id="flyout-width-5"
                     width="5"
-                    header="Five wide"
+                    heading="Five wide"
                     content="Five columns of sixteen."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-width-8"
                     width="8"
-                    header="Eight wide"
+                    heading="Eight wide"
                     content="Half the viewport."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-width-12"
                     width="12"
-                    header="Twelve wide"
+                    heading="Twelve wide"
                     content="Three quarters of the viewport."
                     closable
                   ></ui-flyout>
@@ -195,21 +195,21 @@
                   <ui-flyout
                     id="flyout-position-left"
                     position="left"
-                    header="Left"
+                    heading="Left"
                     content="From the left edge."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-position-right"
                     position="right"
-                    header="Right"
+                    heading="Right"
                     content="From the right edge."
                     closable
                   ></ui-flyout>
                   <ui-flyout
                     id="flyout-position-top"
                     position="top"
-                    header="Top"
+                    heading="Top"
                     content="From the top edge."
                     closable
                   ></ui-flyout>
@@ -226,7 +226,7 @@
                   <ui-flyout
                     id="flyout-fullscreen"
                     fullscreen
-                    header="Full screen"
+                    heading="Full screen"
                     content="The whole viewport wide."
                     closable
                   ></ui-flyout>
@@ -248,7 +248,7 @@
                     <code>&lt;ui-content scrolling&gt;</code> caps nothing here.</ui-message
                   >
                   <ui-button commandfor="flyout-content-scrolling" command="--show">Show terms</ui-button>
-                  <ui-flyout id="flyout-content-scrolling" position="right" header="Terms" closable>
+                  <ui-flyout id="flyout-content-scrolling" position="right" heading="Terms" closable>
                     <ui-content scrolling>
                       <p>A flyout's content grows to fill its height.</p>
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -324,7 +324,7 @@
                   description="A flyout can use the dark scheme:  `inverted` replaces the background, the header colour and the actions background."
                 >
                   <ui-button commandfor="flyout-inverted" command="--show">Show</ui-button>
-                  <ui-flyout id="flyout-inverted" position="top" inverted header="Notice" closable>
+                  <ui-flyout id="flyout-inverted" position="top" inverted heading="Notice" closable>
                     <ui-content><p>A top flyout in the dark scheme.</p></ui-content>
                   </ui-flyout>
                 </ui-docs-example>
@@ -337,7 +337,7 @@
                     id="flyout-blurring"
                     position="right"
                     blurring
-                    header="Blurring"
+                    heading="Blurring"
                     content="The page behind is blurred."
                     closable
                   ></ui-flyout>
@@ -353,7 +353,7 @@
                     position="right"
                     width="thin"
                     modeless
-                    header="Modeless"
+                    heading="Modeless"
                     content="Scroll the page:  this stays open.  A click on the page closes it, and still lands."
                     closable
                   ></ui-flyout>
@@ -505,7 +505,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-flyout visible={open} position="right" header="Help" onui-close={() => setOpen(false)}>
+                  <ui-flyout visible={open} position="right" heading="Help" onui-close={() => setOpen(false)}>
                     ...
                   </ui-flyout>
                 </script>
@@ -514,7 +514,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-flyout :visible="open" position="right" header="Help" @ui-close="open = false">...</ui-flyout>
+                  <ui-flyout :visible="open" position="right" heading="Help" @ui-close="open = false">...</ui-flyout>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -524,7 +524,7 @@
                   <ui-flyout
                     visible={open()}
                     position="right"
-                    header="Help"
+                    heading="Help"
                     on-ui-close={() => setOpen(false)}
                   >
                     ...

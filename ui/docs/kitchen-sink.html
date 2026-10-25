@@ -309,7 +309,7 @@
               </ui-docs-example>
               <ui-docs-example description="Image link">
                 <ui-image
-                  href="#image-link"
+                  link="#image-link"
                   src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                   alt="A landscape"
                 ></ui-image>
@@ -354,17 +354,17 @@
               </ui-docs-example>
               <ui-docs-example description="Image">
                 <ui-label
-                  href="#joe"
+                  link="#joe"
                   image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                   >Joe</ui-label
                 >
                 <ui-label
-                  href="#elliot"
+                  link="#elliot"
                   image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                   >Elliot</ui-label
                 >
                 <ui-label
-                  href="#veronika"
+                  link="#veronika"
                   color="blue"
                   image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                   detail="Friend"
@@ -440,19 +440,19 @@
                 <ui-list relaxed divided>
                   <ui-item icon="github">
                     <ui-content>
-                      <ui-header href="#ui">fomantic/Fomantic-UI</ui-header>
+                      <ui-header link="#ui">fomantic/Fomantic-UI</ui-header>
                       <ui-description>Updated 10 mins ago</ui-description>
                     </ui-content>
                   </ui-item>
                   <ui-item icon="github">
                     <ui-content>
-                      <ui-header href="#docs">fomantic/Fomantic-UI-Docs</ui-header>
+                      <ui-header link="#docs">fomantic/Fomantic-UI-Docs</ui-header>
                       <ui-description>Updated 22 mins ago</ui-description>
                     </ui-content>
                   </ui-item>
                   <ui-item icon="github">
                     <ui-content>
-                      <ui-header href="#less">fomantic/Fomantic-UI-LESS</ui-header>
+                      <ui-header link="#less">fomantic/Fomantic-UI-LESS</ui-header>
                       <ui-description>Updated 34 mins ago</ui-description>
                     </ui-content>
                   </ui-item>
@@ -749,21 +749,21 @@
                   <a href="ui-step.html">Step page</a>
                 </p>
                 <ui-steps>
-                  <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
+                  <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                 </ui-steps>
               </ui-docs-example>
               <ui-docs-example description="Steps">
                 <ui-steps>
-                  <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                  <ui-step selected icon="credit-card" header="Billing" description="Enter billing information"></ui-step>
-                  <ui-step disabled icon="circle-info" header="Confirm Order"></ui-step>
+                  <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                  <ui-step selected icon="credit-card" heading="Billing" description="Enter billing information"></ui-step>
+                  <ui-step disabled icon="circle-info" heading="Confirm Order"></ui-step>
                 </ui-steps>
               </ui-docs-example>
               <ui-docs-example description="Ordered">
                 <ui-steps ordered>
-                  <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                  <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                  <ui-step selected header="Confirm Order" description="Verify order details"></ui-step>
+                  <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                  <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                  <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                 </ui-steps>
               </ui-docs-example>
             </ui-section>
@@ -806,27 +806,27 @@
                   <a href="ui-breadcrumb.html">Breadcrumb page</a>
                 </p>
                 <ui-breadcrumb aria-label="Breadcrumb demo">
-                  <ui-breadcrumb-section href="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section href="#store">Store</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
                   <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
               <ui-docs-example description="Semantic list, token divider">
                 <ui-breadcrumb aria-label="Token divider demo">
-                  <ui-breadcrumb-section href="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section href="#store">Store</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
                   <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
                 <ui-breadcrumb aria-label="Custom divider demo" divider="›">
-                  <ui-breadcrumb-section href="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section href="#store">Store</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
                   <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
               <ui-docs-example description="Icon divider">
                 <ui-breadcrumb aria-label="Icon divider demo" divider-icon="chevron right">
-                  <ui-breadcrumb-section href="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section href="#registration">Registration</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#registration">Registration</ui-breadcrumb-section>
                   <ui-breadcrumb-section active>Personal Information</ui-breadcrumb-section>
                 </ui-breadcrumb>
               </ui-docs-example>
@@ -957,7 +957,7 @@
                 </ui-message>
               </ui-docs-example>
               <ui-docs-example description="List message">
-                <ui-message header="New site features">
+                <ui-message heading="New site features">
                   <ul>
                     <li>You can now have cover images on blog pages</li>
                     <li>Drafts will now auto-save while writing</li>
@@ -965,7 +965,7 @@
                 </ui-message>
               </ui-docs-example>
               <ui-docs-example description="Icon message">
-                <ui-message header="Have you heard about our mailing list?">
+                <ui-message heading="Have you heard about our mailing list?">
                   <ui-icon slot="icon" name="envelope"></ui-icon>
                   <p>Get the best news in your e-mail every day.</p>
                 </ui-message>
@@ -1149,7 +1149,7 @@
                     alt="Kristy"
                   />
                   <ui-content>
-                    <ui-header href="#kristy">Kristy</ui-header>
+                    <ui-header link="#kristy">Kristy</ui-header>
                     <ui-meta><span>Joined in 2013</span></ui-meta>
                     <ui-description>Kristy is an art director living in New York.</ui-description>
                   </ui-content>
@@ -1166,7 +1166,7 @@
                       alt="Matthew"
                     />
                     <ui-content>
-                      <ui-header href="#matthew">Matthew</ui-header>
+                      <ui-header link="#matthew">Matthew</ui-header>
                       <ui-meta><span>Joined in 2015</span></ui-meta>
                       <ui-description>Matthew is a musician living in Nashville.</ui-description>
                     </ui-content>
@@ -1180,7 +1180,7 @@
                       alt="Molly"
                     />
                     <ui-content>
-                      <ui-header href="#molly">Molly</ui-header>
+                      <ui-header link="#molly">Molly</ui-header>
                       <ui-meta><span>Coworker</span></ui-meta>
                       <ui-description>Molly is a personal assistant living in Paris.</ui-description>
                     </ui-content>
@@ -1194,7 +1194,7 @@
                       alt="Elyse"
                     />
                     <ui-content>
-                      <ui-header href="#elyse">Elyse</ui-header>
+                      <ui-header link="#elyse">Elyse</ui-header>
                       <ui-meta><span>Friend</span></ui-meta>
                       <ui-description>Elyse is a copywriter working in New York.</ui-description>
                     </ui-content>
@@ -1211,7 +1211,7 @@
                     alt="Jenny"
                   />
                   <ui-content>
-                    <ui-header href="#jenny">Jenny</ui-header>
+                    <ui-header link="#jenny">Jenny</ui-header>
                     <ui-meta><span>Friend</span></ui-meta>
                     <ui-description>Jenny is a student studying Media Management.</ui-description>
                   </ui-content>
@@ -1232,7 +1232,7 @@
                       src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                     ></ui-avatar>
                     <ui-content>
-                      <ui-author href="#matt">Matt</ui-author>
+                      <ui-author link="#matt">Matt</ui-author>
                       <ui-meta><span>Today at 5:42PM</span></ui-meta>
                       <ui-description>How artistic!</ui-description>
                       <ui-actions><button type="button">Reply</button></ui-actions>
@@ -1243,7 +1243,7 @@
                       src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                     ></ui-avatar>
                     <ui-content>
-                      <ui-author href="#elliot-fu">Elliot Fu</ui-author>
+                      <ui-author link="#elliot-fu">Elliot Fu</ui-author>
                       <ui-meta><span>Yesterday at 12:30AM</span></ui-meta>
                       <ui-description>This has been very useful for my research. Thanks as well!</ui-description>
                       <ui-actions><button type="button">Reply</button></ui-actions>
@@ -1254,7 +1254,7 @@
                           src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                         ></ui-avatar>
                         <ui-content>
-                          <ui-author href="#jenny-hess">Jenny Hess</ui-author>
+                          <ui-author link="#jenny-hess">Jenny Hess</ui-author>
                           <ui-meta><span>Just now</span></ui-meta>
                           <ui-description>Elliot you are always so right :)</ui-description>
                           <ui-actions><button type="button">Reply</button></ui-actions>
@@ -1267,7 +1267,7 @@
                       src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
                     ></ui-avatar>
                     <ui-content>
-                      <ui-author href="#joe-henderson">Joe Henderson</ui-author>
+                      <ui-author link="#joe-henderson">Joe Henderson</ui-author>
                       <ui-meta><span>5 days ago</span></ui-meta>
                       <ui-description>Dude, this is awesome. Thanks so much</ui-description>
                       <ui-actions><button type="button">Reply</button></ui-actions>
@@ -1295,7 +1295,7 @@
                   >
                     <ui-content>
                       <ui-summary
-                        ><ui-author href="#elliot-fu">Elliot Fu</ui-author> added you as a friend
+                        ><ui-author link="#elliot-fu">Elliot Fu</ui-author> added you as a friend
                         <ui-date>1 Hour Ago</ui-date></ui-summary
                       >
                       <ui-meta
@@ -1308,7 +1308,7 @@
                   >
                     <ui-content>
                       <ui-summary
-                        ><ui-author href="#helen-troy">Helen Troy</ui-author> added 2 new illustrations
+                        ><ui-author link="#helen-troy">Helen Troy</ui-author> added 2 new illustrations
                         <ui-date>4 days ago</ui-date></ui-summary
                       >
                       <ui-extra text
@@ -1324,7 +1324,7 @@
                   >
                     <ui-content>
                       <ui-summary
-                        ><ui-author href="#jenny-hess">Jenny Hess</ui-author> added you as a friend
+                        ><ui-author link="#jenny-hess">Jenny Hess</ui-author> added you as a friend
                         <ui-date>2 Days Ago</ui-date></ui-summary
                       >
                       <ui-meta
@@ -1349,7 +1349,7 @@
                       alt=""
                     />
                     <ui-content>
-                      <ui-header href="#cute-dog">Cute Dog</ui-header>
+                      <ui-header link="#cute-dog">Cute Dog</ui-header>
                       <ui-meta><span>Description</span></ui-meta>
                       <ui-description><p>Many people also have their own barometers for what makes a cute dog.</p></ui-description>
                       <ui-extra>Additional details</ui-extra>
@@ -1361,7 +1361,7 @@
                       alt=""
                     />
                     <ui-content>
-                      <ui-header href="#arrowhead-valley-camp">Arrowhead Valley Camp</ui-header>
+                      <ui-header link="#arrowhead-valley-camp">Arrowhead Valley Camp</ui-header>
                       <ui-meta><span>$1200 1 month</span></ui-meta>
                       <ui-description><p>Ours is a life of constant reruns.</p></ui-description>
                       <ui-extra>Limited availability</ui-extra>
@@ -1375,7 +1375,7 @@
                     image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                   >
                     <ui-content>
-                      <ui-header href="#bucks-homebrew-stayaway">Buck's Homebrew Stayaway</ui-header>
+                      <ui-header link="#bucks-homebrew-stayaway">Buck's Homebrew Stayaway</ui-header>
                       <ui-meta><span>$1000 2 weeks</span></ui-meta>
                       <ui-description><p>We're always looking to include new people.</p></ui-description>
                     </ui-content>
@@ -1657,12 +1657,19 @@
               </ui-docs-example>
               <ui-docs-example description="Right, shorthands">
                 <button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
-                <ui-flyout id="flyout-types-right" position="right" width="thin" header="Profile" content="A thin flyout." closable>
+                <ui-flyout
+                  id="flyout-types-right"
+                  position="right"
+                  width="thin"
+                  heading="Profile"
+                  content="A thin flyout."
+                  closable
+                >
                 </ui-flyout>
               </ui-docs-example>
               <ui-docs-example description="Top, inverted">
                 <button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
-                <ui-flyout id="flyout-types-top" position="top" inverted header="Notice" closable>
+                <ui-flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
                   <ui-content><p>A top flyout is full width, as tall as its content.</p></ui-content>
                 </ui-flyout>
               </ui-docs-example>
@@ -1713,7 +1720,7 @@
               </ui-docs-example>
               <ui-docs-example description="Basic">
                 <button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
-                <ui-modal id="modal-types-basic" basic size="small" header="Archive Old Messages">
+                <ui-modal id="modal-types-basic" basic size="small" heading="Archive Old Messages">
                   <ui-content>
                     <p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</p>
                   </ui-content>
@@ -1755,11 +1762,15 @@
               </ui-docs-example>
               <ui-docs-example description="Titled">
                 <ui-button id="popup-types-rating">Rating</ui-button>
-                <ui-popup for="popup-types-rating" header="User Rating" content="A popup can have a header and content."></ui-popup>
+                <ui-popup
+                  for="popup-types-rating"
+                  heading="User Rating"
+                  content="A popup can have a header and content."
+                ></ui-popup>
               </ui-docs-example>
               <ui-docs-example description="HTML content, on click">
                 <ui-button id="popup-types-plan">Choose a plan</ui-button>
-                <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing header="Basic plan">
+                <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
                   <p>Does not include upload or chat.</p>
                   <ui-button size="small" primary>Choose</ui-button>
                 </ui-popup>
@@ -2077,7 +2088,7 @@
                 <ui-toast message="I am a toast, nice to meet you!"></ui-toast>
               </ui-docs-example>
               <ui-docs-example description="Titled">
-                <ui-toast header="Better?" message="Hey, I am a nice message!"></ui-toast>
+                <ui-toast heading="Better?" message="Hey, I am a nice message!"></ui-toast>
               </ui-docs-example>
               <ui-docs-example description="Consequences">
                 <ui-toast type="info" icon message="An info toast, with its icon."></ui-toast>

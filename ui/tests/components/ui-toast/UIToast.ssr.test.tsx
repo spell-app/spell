@@ -16,7 +16,7 @@ describe("<ui-toast> static render", () => {
   })
 
   it("renders a toast box with its parts and role", () => {
-    const html = StaticRender.fragment(`<ui-toast header="Saved" message="All done." closable></ui-toast>`)
+    const html = StaticRender.fragment(`<ui-toast heading="Saved" message="All done." closable></ui-toast>`)
     const box = fragment(html).firstElementChild!
     expect(box.getAttribute("class")).toContain("toast-box")
     expect(box.getAttribute("data-ui")).toBe("toast")

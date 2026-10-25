@@ -11,7 +11,7 @@ import imageCSS from "./UIImage.css?inline"
  * The component behind `<ui-image>`:  an image, optionally a link.
  *
  * - Its shadow DOM is `<img class="ui … image" part="image" src alt width height loading>`;
- *   with `href`, Fomantic's wrapper form, `<a class="ui … image" part="image" href><img part="img" …></a>`,
+ *   with `link`, Fomantic's wrapper form, `<a class="ui … image" part="image" href><img part="img" …></a>`,
  *   the link carrying the classes.
  *   The element is `display: contents`:  the inner box IS the image, so it floats and sits in text as Fomantic's did.
  *
@@ -23,7 +23,7 @@ import imageCSS from "./UIImage.css?inline"
  * - `width` / `height` are the native intrinsic size (they reserve space before it loads);
  *   `size` sets the drawn width.
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
- *   faded, the image (or its link) inert, `aria-disabled`;  a link also loses its `href`.
+ *   faded, the image (or its link) inert, `aria-disabled`;  a link also loses its link.
  ****************/
 export class UIImage extends E.UIComponent<typeof imageVocabulary> {
   @E.proto static vocabulary = imageVocabulary
@@ -35,11 +35,11 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
 
   render(): JSX.Element {
     return (
-      <Show when={this.href} fallback={this.image("image")}>
+      <Show when={this.link} fallback={this.image("image")}>
         <a
           class={this.rootClass}
           part={this.partForName("image")}
-          href={this.disabled ? undefined : this.href}
+          href={this.disabled ? undefined : this.link}
           aria-disabled={this.disabled ? "true" : undefined}
         >
           {this.image("img")}

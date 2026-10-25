@@ -84,7 +84,7 @@ describe("<ui-message> classes", () => {
 
 describe("<ui-message> content", () => {
   it("renders in contract order:  icon, content (header, slot), close", async () => {
-    const { root } = await message(`<ui-message icon="envelope" header="Mail" dismissible>Body</ui-message>`)
+    const { root } = await message(`<ui-message icon="envelope" heading="Mail" dismissible>Body</ui-message>`)
     expect(partsOf(root)).toEqual(["span.icon", "div.content", "button.close"])
     const content = root.querySelector("[part~=content]")!
     expect(content.className).toBe("content")
@@ -275,5 +275,22 @@ describe("<ui-message> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-message> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-message header="Old">Body</ui-message>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-message heading="New">Body</ui-message>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

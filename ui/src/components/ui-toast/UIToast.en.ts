@@ -39,7 +39,13 @@ export const toastVocabulary = {
       kind: "keyOnly",
       description: "The dark scheme;  a coloured one takes its light variant."
     },
-    { name: "header", group: "name", kind: "string", description: "Bold first line (Fomantic's `title`)." },
+    {
+      name: "heading",
+      replaces: ["header"],
+      group: "name",
+      kind: "string",
+      description: "Bold first line (Fomantic's `title`).  Its old name is `header`."
+    },
     { name: "message", group: "appearance", kind: "string", description: "Body text;  slotted content follows it." },
     {
       name: "icon",

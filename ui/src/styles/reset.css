@@ -117,6 +117,39 @@
   }
 
   /*
+   * The shared `font` (`UIComponent`, "Shared words";  epic `ui-gaps`):  how the letters look, on every element.
+   * - `<ui-text>` draws each word as its HTML element (`<strong>`, `<em>` ...);  every other element, the look alone.
+   * - Weight, slant and the code face inherit through a `display: contents` element, so they go on the element;
+   *   lines through and under the text don't, so they go on the shadow root's top-level boxes.
+   * - `highlight`, `subscript` and `superscript` only mean something inside running text:  `<ui-text>` draws them.
+   * - `:state(linked)`, a shared `link`:  a pointer.
+   */
+  :host(:state(font-bold)) {
+    font-weight: var(--ui-font-weight-bold);
+  }
+  :host(:state(font-italic)) {
+    font-style: italic;
+  }
+  :host(:state(font-code)) {
+    font-family: var(--ui-font-family-mono);
+  }
+  :host(:state(font-underline)) > :not(slot) {
+    text-decoration-line: underline;
+    /* as a link's (`<ui-text link>`):  one underline, drawn one way */
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.15em;
+  }
+  :host(:state(font-strikethrough)) > :not(slot) {
+    text-decoration-line: line-through;
+  }
+  :host(:state(font-underline):state(font-strikethrough)) > :not(slot) {
+    text-decoration-line: underline line-through;
+  }
+  :host(:state(linked)) {
+    cursor: pointer;
+  }
+
+  /*
    * `loading`, the base class's loader (`:state(busy)`):  a spinner over the element's first box.
    * - Placed by anchor positioning:  the DOM element may have no box of its own to be the spinner's container.
    */

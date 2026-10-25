@@ -304,14 +304,14 @@
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
                 <ui-docs-example
-                  description="With `href` the button renders a real link, so it navigates and opens in a new tab."
+                  description="With `link` the button renders a real link, so it navigates and opens in a new tab."
                 >
-                  <ui-button href="#link">A link styled as a button</ui-button>
+                  <ui-button link="#link">A link styled as a button</ui-button>
                 </ui-docs-example>
                 <ui-docs-example
                   description="`download` saves the file instead of opening it, as `&lt;a download&gt;`;  a value names the saved file."
                 >
-                  <ui-button href="images/wireframe/image.png" download="wireframe.png" icon="download">PNG</ui-button>
+                  <ui-button link="images/wireframe/image.png" download="wireframe.png" icon="download">PNG</ui-button>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -846,7 +846,7 @@
                   - `medium` is a real size meaning "default": it renders no class.
                   - `icon`, `label` and `content` are shorthands for the `icon`, `label` and default slots; slotted
                     children win.
-                  - `href` renders an `<a>` instead of a `<button>`, so the button navigates like a link.
+                  - `link` renders an `<a>` instead of a `<button>`, so the button navigates like a link.
                   - Wrap buttons in `<ui-buttons>` to join them; the group's words (`basic`, `size`, `color` ...)
                     reach every button in it.
                 </script>
@@ -969,7 +969,7 @@
                   - **Tab** / **Shift+Tab** moves focus to and from the button. The host delegates focus
                     (`delegatesFocus`), so it is never a tab stop of its own and the focus ring is drawn on the inner
                     control.
-                  - **Enter** or **Space** clicks a button; **Enter** follows an `href` link.
+                  - **Enter** or **Space** clicks a button; **Enter** follows a `link`.
                   - A `toggle` button flips `active` on **Enter** / **Space**, like a click.
                   - A `disabled` button is skipped by **Tab**.
                 </script>
@@ -980,7 +980,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - Focus, **Enter** and **Space**, form submission and the accessible name come from the browser's own
-                    `<button>` (or `<a>` with `href`).
+                    `<button>` (or `<a>` with `link`).
                   - An icon-only button needs a name: put `aria-label` on the host; the element forwards it to the
                     inner control.
                   - `toggle` buttons expose `aria-pressed` and update it with `active` (but not with state texts: see

@@ -90,7 +90,13 @@ export const headerVocabulary = {
       kind: "keyOnly",
       description: "For dark backgrounds:  the dark scheme, for it and its parts."
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a header." }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`) styled as a header.  Its old name is `href`."
+    }
   ],
   events: [],
   slots: [

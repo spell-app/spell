@@ -75,10 +75,10 @@
               </ui-section>
 
               <ui-section id="examples-types-image-link" label="Image Link" sticky collapsible dividing>
-                <ui-docs-example description="An image can be formatted to link to other content:  `href`.">
+                <ui-docs-example description="An image can be formatted to link to other content:  `link`.">
                   <ui-image
                     size="large"
-                    href="#image-link"
+                    link="#image-link"
                     src="images/wireframe/image-text.png"
                     alt="Image link"
                   ></ui-image>
@@ -375,7 +375,7 @@
                     it is drawn. (`width` is NOT the column `width` grammar here.)
                   - An image is a block on its own line; `avatar`, `inline`, `spaced` and `vertical-align` make it sit in a line of
                     text instead.
-                  - `href` wraps it in a real link.
+                  - `link` wraps it in a real link.
                   - `<ui-images>` shares its size, shape, border and alignment with every image inside it, plain `<img>`s included.
                   - Images have no events.
                 </script>
@@ -385,7 +385,7 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A plain image takes no focus. A linked image (`href`) is a real link: **Tab** reaches it, **Enter** follows it;
+                  A plain image takes no focus. A linked image (`link`) is a real link: **Tab** reaches it, **Enter** follows it;
                   a `disabled` one is skipped.
                 </script>
               </ui-markdown>
@@ -396,7 +396,7 @@
                 <script type="text/markdown">
                   - Give every image an `alt`. `alt=""` marks it decorative, so screen readers skip it; a missing `alt` stays
                     missing, and accessibility checkers will flag it.
-                  - A linked image (`href`) is a real link, named by its `alt`: describe where it goes.
+                  - A linked image (`link`) is a real link, named by its `alt`: describe where it goes.
                   - `disabled` removes the link's `href` and sets `aria-disabled`, so it is no longer focusable.
                   - `<ui-images>` is a plain box with no role; wrap it in a list or give it a label if the group means something.
                   - If the element fails to render, the `<img>`, its `alt` and any link around it go: only children

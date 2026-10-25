@@ -64,7 +64,13 @@ export const stepVocabulary = {
     { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a step." },
     { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
     { name: "icon", group: "content", kind: "icon", description: "Icon name, before the content." },
-    { name: "header", group: "name", kind: "string", description: "Shorthand for the title (Fomantic's `.title`)." },
+    {
+      name: "heading",
+      replaces: ["header"],
+      group: "name",
+      kind: "string",
+      description: "Shorthand for the title (Fomantic's `.title`).  Its old name is `header`."
+    },
     {
       name: "description",
       group: "content",

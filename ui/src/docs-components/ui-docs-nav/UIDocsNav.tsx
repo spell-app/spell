@@ -591,7 +591,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     return (
       <Switch>
         <Match when={this.loadError}>
-          <ui-message class={PROBLEM} size="small" state="negative" header={this.translationForKey("loadError")}>
+          <ui-message class={PROBLEM} size="small" state="negative" heading={this.translationForKey("loadError")}>
             {this.loadError}
           </ui-message>
         </Match>

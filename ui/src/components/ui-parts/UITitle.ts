@@ -3,7 +3,7 @@ import { titleVocabulary } from "./UITitle.en"
 
 /****************
  * ### `UITitle`
- * The component behind `<ui-title>`:  a title, `<div class="title">`, or `<a class="title">` with `href`.
+ * The component behind `<ui-title>`:  a title, `<div class="title">`, or `<a class="title">` with `link`.
  *
  * - A step's, an accordion panel's or a search result's title.
  ****************/
@@ -11,11 +11,11 @@ export class UITitle extends E.PartComponent<typeof titleVocabulary> {
   @E.proto static vocabulary = titleVocabulary
 
   protected get rootTag(): string {
-    return this.href ? "a" : "div"
+    return this.link ? "a" : "div"
   }
 
   protected get rootHref(): string | undefined {
-    return this.href
+    return this.link
   }
 }
 

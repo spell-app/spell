@@ -365,7 +365,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   /** A click popup's dialog is named by `header`. */
   @E.aria("label")
   protected get accessibleName(): string | undefined {
-    return this.isInteractive ? this.header : undefined
+    return this.isInteractive ? this.heading : undefined
   }
 
   /** SIDE EFFECT:  the DOM element's `position-area` follows `position`. */
@@ -436,9 +436,9 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     if (isServer) return this.serverMarkup()
     return (
       <div ref={(element) => (this.box = element)} class={this.rootClass} part={this.partForName("popup")}>
-        <Show when={this.header}>
+        <Show when={this.heading}>
           <div class={UIT.HEADER} part={this.partForName("header")}>
-            {this.header}
+            {this.heading}
           </div>
         </Show>
         <Show when={this.content}>
@@ -460,9 +460,9 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   private serverMarkup(): JSX.Element {
     return (
       <span class={this.rootClass} part={this.partForName("popup")} popover={this.serverPopover}>
-        <Show when={this.header}>
+        <Show when={this.heading}>
           <span class={UIT.HEADER} part={this.partForName("header")}>
-            {this.header}
+            {this.heading}
           </span>
         </Show>
         <Show when={this.content}>

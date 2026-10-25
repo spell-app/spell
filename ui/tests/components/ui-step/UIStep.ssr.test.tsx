@@ -18,7 +18,7 @@ describe("<ui-steps> static render", () => {
 
   it("renders an <ol> whose box steps ARE the <li>s, the selected one aria-current", () => {
     const html = StaticRender.fragment(
-      `<ui-steps ordered><ui-step selected header="Billing" description="Enter"></ui-step></ui-steps>`
+      `<ui-steps ordered><ui-step selected heading="Billing" description="Enter"></ui-step></ui-steps>`
     )
     expect(sorted(html)).toBe(
       sorted(
@@ -32,7 +32,7 @@ describe("<ui-steps> static render", () => {
   })
 
   it("wraps a link step in an <li>", () => {
-    const html = StaticRender.fragment(`<ui-steps><ui-step href="#c" disabled header="Confirm"></ui-step></ui-steps>`)
+    const html = StaticRender.fragment(`<ui-steps><ui-step href="#c" disabled heading="Confirm"></ui-step></ui-steps>`)
     expect(html).toMatch(/<li data-ui-li=""><a [^>]*class="disabled step"/)
     expect(html).toContain(`aria-disabled="true"`)
     expect(html).not.toContain(`href=`)
@@ -40,7 +40,7 @@ describe("<ui-steps> static render", () => {
 
   it("shows only the check on a completed step:  its icon is left out, as the hidden slot hid it", () => {
     const html = StaticRender.fragment(
-      `<ui-steps><ui-step completed icon="truck" header="Shipping"></ui-step></ui-steps>`
+      `<ui-steps><ui-step completed icon="truck" heading="Shipping"></ui-step></ui-steps>`
     )
     const icon = html.match(/<span class="icon" part="icon">(.*?)<\/span>/s)?.[1] ?? ""
     expect(icon.match(/<svg/g)).toHaveLength(1)

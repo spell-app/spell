@@ -66,8 +66,8 @@
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example description="With `href`, the detail is a link of its own.">
-                  <ui-label color="teal">Tag<ui-detail href="#tags">See all</ui-detail></ui-label>
+                <ui-docs-example description="With `link`, the detail is a link of its own.">
+                  <ui-label color="teal">Tag<ui-detail link="#tags">See all</ui-detail></ui-label>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -80,7 +80,7 @@
                   `<ui-detail>` is a label's dimmer second value, such as a count: Fomantic's `.detail` inside a `ui label`.
 
                   - Slot it into a `<ui-label>`, after the label's text.
-                  - `href` renders it as a link of its own (`<a class="detail">`), apart from the label.
+                  - `link` renders it as a link of its own (`<a class="detail">`), apart from the label.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -103,7 +103,7 @@
                 <script type="text/markdown">
                   - Read together with the label's text ("Dogs 214"): make the pair make sense out loud, or give the label an
                     `aria-label`.
-                  - With `href` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
+                  - With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
                 </script>
               </ui-markdown>
             </ui-section>

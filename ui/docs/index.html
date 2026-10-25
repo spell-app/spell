@@ -50,8 +50,8 @@
             <ui-header>Beautiful, themeable, accessible components that load themselves on demand</ui-header>
           </ui-header>
           <ui-divider spacer></ui-divider>
-          <ui-button size="huge" inverted href="getting-started.html">Get Started</ui-button>
-          <ui-button size="huge" inverted basic href="components.html">Browse Components</ui-button>
+          <ui-button size="huge" inverted link="getting-started.html">Get Started</ui-button>
+          <ui-button size="huge" inverted basic link="components.html">Browse Components</ui-button>
         </ui-container>
       </ui-segment>
 
@@ -198,7 +198,7 @@
                   <ui-header>Light and dark in OKLCH</ui-header>
                 </ui-header>
                 <p>The one dogma: <em>everything arbitrary is a token</em>, read live, no build step.</p>
-                <ui-button size="large" href="theming.html">Theming Guide</ui-button>
+                <ui-button size="large" link="theming.html">Theming Guide</ui-button>
               </ui-column>
               <ui-column>
                 <ui-header level="2" icon id="components">
@@ -210,7 +210,7 @@
                   Build a whole site with one UI stack, including the functional side: calendar, slider, toast,
                   flyout, form validation.
                 </p>
-                <ui-button size="large" primary href="components.html">Browse UI</ui-button>
+                <ui-button size="large" primary link="components.html">Browse UI</ui-button>
               </ui-column>
               <ui-column>
                 <ui-header level="2" icon id="tested">
@@ -222,7 +222,7 @@
                   Every component has unit, accessibility and visual tests, and each form control a fallback test too,
                   all run in Chromium, Firefox and WebKit.
                 </p>
-                <ui-button size="large" href="https://github.com/spell-app/spell-ui"
+                <ui-button size="large" link="https://github.com/spell-app/spell-ui"
                   >Visit GitHub</ui-button
                 >
               </ui-column>
@@ -242,7 +242,7 @@
             </ui-markdown>
             <ui-grid stackable columns="3">
               <ui-column>
-                <ui-header size="small" href="ui-menu.html">Menu</ui-header>
+                <ui-header size="small" link="ui-menu.html">Menu</ui-header>
                 <ui-menu vertical>
                   <ui-item selected>Inbox <ui-label color="green">1</ui-label></ui-item>
                   <ui-item>Trash <ui-label>1</ui-label></ui-item>
@@ -260,7 +260,7 @@
                   <ui-item>Starred</ui-item>
                   <ui-item>Trash</ui-item>
                 </ui-menu>
-                <ui-header size="small" href="ui-divider.html">Divider</ui-header>
+                <ui-header size="small" link="ui-divider.html">Divider</ui-header>
                 <ui-segment>
                   <ui-grid columns="2" text-align="center">
                     <ui-column><ui-button>A</ui-button></ui-column>
@@ -270,27 +270,27 @@
                 </ui-segment>
               </ui-column>
               <ui-column>
-                <ui-header size="small" href="ui-card.html">Card</ui-header>
-                <ui-card image="images/avatar2/large/rachel.png" header="Rachel Maddow" meta="Pundit">
+                <ui-header size="small" link="ui-card.html">Card</ui-header>
+                <ui-card image="images/avatar2/large/rachel.png" heading="Rachel Maddow" meta="Pundit">
                   <ui-extra>22 Friends &middot; Joined in 2014</ui-extra>
                 </ui-card>
-                <ui-header size="small" href="ui-step.html">Step</ui-header>
+                <ui-header size="small" link="ui-step.html">Step</ui-header>
                 <ui-steps vertical>
                   <ui-step
                     completed
                     icon="truck"
-                    header="Shipping"
+                    heading="Shipping"
                     description="Choose your shipping options"
                   ></ui-step>
                   <ui-step
                     selected
                     icon="credit card"
-                    header="Billing"
+                    heading="Billing"
                     description="Enter billing information"
                   ></ui-step>
-                  <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                  <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                 </ui-steps>
-                <ui-header size="small" href="ui-label.html">Label</ui-header>
+                <ui-header size="small" link="ui-label.html">Label</ui-header>
                 <ui-list>
                   <ui-item><ui-label color="red" circular empty></ui-label> Bug</ui-item>
                   <ui-item><ui-label color="blue" circular empty></ui-label> Enhancement</ui-item>
@@ -299,7 +299,7 @@
                   <ui-item><ui-label color="pink" circular empty></ui-label> Interesting</ui-item>
                   <ui-item><ui-label color="green" circular empty></ui-label> Discussion</ui-item>
                 </ui-list>
-                <ui-header size="small" href="ui-segment.html">Segment</ui-header>
+                <ui-header size="small" link="ui-segment.html">Segment</ui-header>
                 <ui-segment stacked></ui-segment>
                 <ui-segment raised></ui-segment>
                 <ui-segment secondary></ui-segment>
@@ -309,7 +309,7 @@
                 <ui-segment attached="bottom"></ui-segment>
               </ui-column>
               <ui-column>
-                <ui-header size="small" href="ui-input.html">Input</ui-header>
+                <ui-header size="small" link="ui-input.html">Input</ui-header>
                 <ui-input icon="search" icon-position="left" placeholder="Search..." aria-label="Search">
                   <ui-button slot="action" color="teal">Search</ui-button>
                 </ui-input>
@@ -325,15 +325,15 @@
                 <ui-input labeled="right" placeholder="Enter categories" aria-label="Categories">
                   <ui-label slot="label" tag>Add Tags</ui-label>
                 </ui-input>
-                <ui-header size="small" href="ui-message.html">Message</ui-header>
+                <ui-header size="small" link="ui-message.html">Message</ui-header>
                 <ui-message dismissible>This site uses cookies</ui-message>
-                <ui-message state="warning" header="Looking for help?">
+                <ui-message state="warning" heading="Looking for help?">
                   <ul>
                     <li>Use our help center</li>
                     <li>Check our FAQ</li>
                   </ul>
                 </ui-message>
-                <ui-header size="small" href="ui-checkbox.html">Checkbox</ui-header>
+                <ui-header size="small" link="ui-checkbox.html">Checkbox</ui-header>
                 <ui-checkbox label="I enjoy having fun"></ui-checkbox>
                 <ui-divider spacer></ui-divider>
                 <ui-checkbox type="slider" label="Receive weekly poodle newsletter"></ui-checkbox>
@@ -354,7 +354,7 @@
                   Every size is an <code>em</code> of one token, <code>--ui-font-size</code>. Grids, cards and
                   tables answer to their container's width, not only the viewport's.
                 </p>
-                <ui-button size="large" href="ui-grid.html">Responsive Grids</ui-button>
+                <ui-button size="large" link="ui-grid.html">Responsive Grids</ui-button>
               </ui-column>
               <ui-column>
                 <ui-header level="2" icon id="integrations">
@@ -365,7 +365,7 @@
                   Tested in <b>React 19, Vue 3.5, Svelte 5, Solid, Angular 20 and Preact 10</b>: the same tags,
                   properties and events in each.
                 </p>
-                <ui-button size="large" href="getting-started.html#frameworks">See Integrations</ui-button>
+                <ui-button size="large" link="getting-started.html#frameworks">See Integrations</ui-button>
               </ui-column>
             </ui-grid>
           </ui-segment>
@@ -387,7 +387,7 @@
               <ui-item href="components.html" icon="cubes">Components</ui-item>
             </ui-list>
             <ui-divider spacer></ui-divider>
-            <ui-button size="large" primary labeled="right" icon="chevron right" href="getting-started.html"
+            <ui-button size="large" primary labeled="right" icon="chevron right" link="getting-started.html"
               >Get Started Now</ui-button
             >
           </ui-segment>

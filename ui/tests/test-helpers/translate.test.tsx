@@ -68,7 +68,20 @@ describe("UIComponent.define(tag, dictionary)", () => {
       attributes: { label: "etiqueta" }
     }) as DOMElementClass
     // `SharedVocabulary.es.ts`;  `visible` turned round is the platform's `hidden`
-    expect(Class.observedAttributes).toEqual(["etiqueta", "desactivado", "cargando", "visible", "animacion", "hidden"])
+    expect(Class.observedAttributes).toEqual([
+      "etiqueta",
+      "desactivado",
+      "cargando",
+      "visible",
+      "animacion",
+      "enlace",
+      "destino",
+      "letra",
+      "ayuda",
+      // the shared `link`'s old name
+      "href",
+      "hidden"
+    ])
   })
 
   it("dispatches translated events", async () => {

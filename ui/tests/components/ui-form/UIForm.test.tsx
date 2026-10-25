@@ -107,7 +107,7 @@ const SIGN_UP = `<ui-form>
       <ui-input id="su-confirm" name="confirm" type="password"></ui-input>
     </ui-field>
     <ui-field><ui-checkbox name="terms">I agree to the terms</ui-checkbox></ui-field>
-    <ui-message state="error" header="Please fix the fields"></ui-message>
+    <ui-message state="error" heading="Please fix the fields"></ui-message>
     <ui-button type="submit">Sign up</ui-button>
   </form>
 </ui-form>`

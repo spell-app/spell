@@ -14,7 +14,7 @@ import containerCSS from "./UIToast.container.css?inline"
  *   in `<body>`, styled by the page sheet `toast-container` (`UIToast.container.css`).
  *   - Shown (or re-shown, to be lifted above anything opened since) for each new toast, unless focus is inside it.
  *   - Removed when its last toast goes.
- * - Options map onto attributes (`title` => `header`, `showProgress` => `progress` …);
+ * - Options map onto attributes (`title` => `heading`, `showProgress` => `progress` …);
  *   `displayTime` defaults to Fomantic's `3000`.
  * - `class` words sort themselves:  a `type` word, a hue (`color`) or `inverted`.
  *   Every word also stays on the `<ui-toast>`,
@@ -74,7 +74,7 @@ export class ToastStack implements E.ToastProvider {
     toast.id = id
     // keys checked against the vocabulary
     const attributes: Partial<Record<E.AttributeNameOf<Vocabulary>, string>> = {
-      header: options.title,
+      heading: options.title,
       message: options.message,
       "display-time": String(options.displayTime ?? DEFAULT_DISPLAY_TIME),
       icon: options.showIcon === true ? "" : options.showIcon || undefined,

@@ -18,7 +18,7 @@ describe("<ui-popup> static render", () => {
 
   it("renders a tooltip as a hidden popover that describes its target", () => {
     const html = StaticRender.fragment(
-      `<p>Press <ui-button>Add</ui-button><ui-popup header="Add" content="Adds a row"></ui-popup> now.</p>`
+      `<p>Press <ui-button>Add</ui-button><ui-popup heading="Add" content="Adds a row"></ui-popup> now.</p>`
     )
     const paragraph = fragment(html).firstElementChild!
     // phrasing content:  the paragraph stays one paragraph when a browser parses the page
@@ -42,7 +42,7 @@ describe("<ui-popup> static render", () => {
   it("renders a click popup as an auto popover dialog the target controls", () => {
     const html = StaticRender.fragment(
       `<ui-button id="plan">Plan</ui-button>` +
-        `<ui-popup for="plan" open-on="click" header="Basic" id="plans"><p>Details</p></ui-popup>`
+        `<ui-popup for="plan" open-on="click" heading="Basic" id="plans"><p>Details</p></ui-popup>`
     )
     const [button, popup] = [...fragment(html).children]
     expect(popup!.id).toBe("plans")

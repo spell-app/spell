@@ -4,7 +4,7 @@
  *   `<span class="ui [size] [color] [state] [keyOnly ...] text" part="text"><slot></slot></span>`
  *   - `state` (`error`, `info`, `success`, `warning`) writes its word alone, like a colour:
  *     `colors.css` remaps `.ui.error` … onto the same generic tokens, so ONE rule set colours hues and states alike
- * - It keys on `span.ui.text`, as Fomantic does:  `ui text container`,
+ * - It keys on `span.ui.text` (and `a.ui.text`, a link), as Fomantic keys on `span.ui.text`:  `ui text container`,
  *   `ui text menu` and `ui text loader` are other components' boxes.
  * - The DOM element is `display: contents` (`:host`):  the inner span IS the inline box,
  *   flowing with the text around it.
@@ -18,7 +18,9 @@
  *   - The element resets `--ui-scale` and the `--ui-color*` a coloured parent would hand down,
  *     so text in a large red button is neither scaled twice nor painted red on red.
  *
- * - The public tokens (`--ui-text-line-height`, `--ui-text-size-*`, `--ui-text-disabled-opacity`)
+ * - The public tokens (`--ui-text-line-height`, `--ui-text-size-*`, `--ui-text-disabled-opacity`,
+ *   `--ui-text-link-color`, `--ui-text-link-hover-color`, `--ui-text-code-background`,
+ *   `--ui-text-highlight-background`)
  *   are NEVER declared here.
  *   - The token block gives each a private alias, and every rule reads the alias:
  *     `--_ui-text-line-height: var(--ui-text-line-height, 1)`.
@@ -53,9 +55,17 @@
   }
 
   /* Tokens:  one per `text.variables` entry that still matters, each the private alias of its public token. */
-  span.ui.text {
+  :is(span, a).ui.text {
     --_ui-text-line-height: var(--ui-text-line-height, 1);
     --_ui-text-disabled-opacity: var(--ui-text-disabled-opacity, var(--ui-disabled-opacity));
+    /* A link (`link`), and code and highlight inside text (`font`;  epic `ui-gaps` P3). */
+    --_ui-text-link-color: var(--ui-text-link-color, var(--ui-link));
+    --_ui-text-link-hover-color: var(--ui-text-link-hover-color, var(--ui-link-hover));
+    --_ui-text-code-background: var(--ui-text-code-background, var(--ui-surface-strong));
+    --_ui-text-highlight-background: var(
+      --ui-text-highlight-background,
+      light-dark(oklch(from var(--ui-yellow) 0.92 calc(c * 0.55) h), oklch(from var(--ui-yellow) 0.38 calc(c * 0.6) h))
+    );
     /* Fomantic's text ladder, relative to the surrounding text. */
     --_ui-text-size-mini: var(--ui-text-size-mini, 0.4);
     --_ui-text-size-tiny: var(--ui-text-size-tiny, 0.5);
@@ -75,10 +85,39 @@
   }
 
   /* Text:  inline, coloured by its hue or state, sized against the text around it. */
-  span.ui.text {
+  :is(span, a).ui.text {
     color: var(--ui-color-text, inherit);
     font-size: calc(1em * var(--ui-scale, 1));
     line-height: var(--_ui-text-line-height);
+  }
+
+  /* A link in running text (`link`):  the page's link colour, unless the text has a hue;  underlined. */
+  a.ui.text {
+    color: var(--ui-color-text, var(--_ui-text-link-color));
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.15em;
+  }
+  a.ui.text:hover {
+    color: var(--ui-color-text, var(--_ui-text-link-hover-color));
+  }
+  /* The text's line is only as tall as its letters:  a ring a little away from them, lightly rounded. */
+  a.ui.text:focus-visible {
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  /* Code and a highlight inside the text (`font="code"`, `font="highlight"`). */
+  .ui.text code {
+    padding: 0.125em 0.375em;
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.875em;
+    background-color: var(--_ui-text-code-background);
+    border-radius: var(--ui-radius-s);
+  }
+  .ui.text mark {
+    color: inherit;
+    background-color: var(--_ui-text-highlight-background);
   }
 }
 

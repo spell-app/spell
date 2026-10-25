@@ -13,7 +13,7 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `titleVocabulary`
- * The names of `<ui-title>`, a title:  `<div class="title">` (`<a>` with `href`).
+ * The names of `<ui-title>`, a title:  `<div class="title">` (`<a>` with `link`).
  ****************/
 export const titleVocabulary = {
   tag: "ui-title",
@@ -22,7 +22,15 @@ export const titleVocabulary = {
   noun: "title",
   ui: false,
   description: "A title:  a step's, an accordion panel's, a search result's.",
-  attributes: [{ name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`)." }],
+  attributes: [
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`).  Its old name is `href`."
+    }
+  ],
   events: [],
   slots: [{ name: "", description: "Text." }],
   parts: [{ name: "title", description: "The title box." }],

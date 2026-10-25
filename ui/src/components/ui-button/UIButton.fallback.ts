@@ -8,7 +8,7 @@ import { Invoker } from "./Invoker"
  * The native fallback of `<ui-button>`:  what it shows when its component breaks,
  * so a submit or reset button still works in its form.
  *
- * - Its shadow DOM:  a native `<button part="button" class="ui … button">` (an `<a>` with `href`)
+ * - Its shadow DOM:  a native `<button part="button" class="ui … button">` (an `<a>` with `link`)
  *   around a `<slot>`.
  * - `submit` calls `form.requestSubmit()`, with the button's `name=value` in the submission;
  *   `reset` calls `form.reset()`.
@@ -30,7 +30,8 @@ export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
 
   protected override build() {
     const { domElement } = this
-    const href = this.attr("href")
+    // `href`:  `link`'s old name (`AttributeSpec.replaces`)
+    const href = this.attr("link") ?? domElement.getAttribute("href") ?? undefined
     const isDisabled = this.flag("disabled")
     const isToggle = this.flag("toggle")
     // a bare `icon` (`"true"`) names no glyph, so it can't name the button either

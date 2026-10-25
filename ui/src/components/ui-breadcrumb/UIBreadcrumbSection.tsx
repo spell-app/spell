@@ -13,8 +13,8 @@ import breadcrumbCSS from "./UIBreadcrumb.css?inline"
  * - Its shadow DOM is its own leading divider, `<span class="divider" part="divider" aria-hidden="true">`,
  *   then the section around the `<slot>`:
  *   - `active`:  `<span class="active section" part="section" aria-current="page">`:
- *     the current page, never a link, even with `href`
- *   - `href`:  `<a class="section" part="section" href target>`
+ *     the current page, never a link, even with `link`
+ *   - `link`:  `<a class="section" part="section" href target>`
  *   - else `<span class="section" part="section">`
  * - The divider is empty:  `UIBreadcrumb.css` draws the breadcrumb's divider tokens into it,
  *   and hides it on the first section.
@@ -34,8 +34,8 @@ export class UIBreadcrumbSection extends E.UIComponent<typeof breadcrumbSectionV
     const content = (
       <>
         <span class={DIVIDER} part={this.partForName("divider")} aria-hidden="true" />
-        <Show when={this.href && !this.active} fallback={this.plainSection()}>
-          <a class={this.rootClass} part={this.partForName("section")} href={this.href} target={this.target}>
+        <Show when={this.link && !this.active} fallback={this.plainSection()}>
+          <a class={this.rootClass} part={this.partForName("section")} href={this.link} target={this.target}>
             <slot />
           </a>
         </Show>

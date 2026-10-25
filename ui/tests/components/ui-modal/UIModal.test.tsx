@@ -121,7 +121,7 @@ describe("<ui-modal> classes", () => {
 
 describe("<ui-modal> content", () => {
   it("renders in contract order:  header, content, slot, close icon (last)", async () => {
-    const { dialog } = await modal(`<ui-modal header="Title" content="Body" closable>x</ui-modal>`)
+    const { dialog } = await modal(`<ui-modal heading="Title" content="Body" closable>x</ui-modal>`)
     expect([...dialog.children].map((child) => `${child.localName}.${child.getAttribute("part")}`)).toEqual([
       "div.header",
       "div.content",
@@ -227,7 +227,7 @@ describe("<ui-modal> tokens from outside", () => {
 
 describe("<ui-modal> open / close", () => {
   it("`open` shows it with showModal():  top layer, inert page, scroll lock;  ui-show, then ui-hide", async () => {
-    const { host, dialog } = await modal(`<ui-modal header="Hi">x</ui-modal>`)
+    const { host, dialog } = await modal(`<ui-modal heading="Hi">x</ui-modal>`)
     const opens = record(host, "ui-open")
     const shows = record(host, "ui-show")
     await open(host)
@@ -273,7 +273,7 @@ describe("<ui-modal> open / close", () => {
   })
 
   it("Escape closes it (reason `escape`), and focus returns to the trigger", async () => {
-    const { host, dialog, trigger } = await modal(`<ui-modal header="Hi"><button>Inside</button></ui-modal>`)
+    const { host, dialog, trigger } = await modal(`<ui-modal heading="Hi"><button>Inside</button></ui-modal>`)
     const closes = record(host, "ui-close")
     await open(host, trigger)
     await userEvent.keyboard("{Escape}")
@@ -312,7 +312,7 @@ describe("<ui-modal> open / close", () => {
   })
 
   it("a click on the dimmer closes it (reason `outside`);  one inside doesn't", async () => {
-    const { host, dialog } = await modal(`<ui-modal size="mini" header="Hi" content="Body"></ui-modal>`)
+    const { host, dialog } = await modal(`<ui-modal size="mini" heading="Hi" content="Body"></ui-modal>`)
     const closes = record(host, "ui-close")
     await open(host)
     await userEvent.click(dialog.querySelector(".content")!)
@@ -476,7 +476,7 @@ describe("<ui-modal> open / close", () => {
 describe("<ui-modal> actions", () => {
   /** A modal with deny / approve buttons in its actions. */
   const ACTIONS =
-    `<ui-modal header="Sure?"><ui-actions><ui-button class="deny">No</ui-button>` +
+    `<ui-modal heading="Sure?"><ui-actions><ui-button class="deny">No</ui-button>` +
     `<ui-button positive>Yes</ui-button></ui-actions></ui-modal>`
 
   it("approve:  a cancelable ui-approve naming the button, then closes (reason `approve`)", async () => {
@@ -515,7 +515,7 @@ describe("<ui-modal> actions", () => {
 
 describe("<ui-modal> accessibility", () => {
   it("is named by its header shorthand, a slotted <ui-header>, or the DOM element's aria-label", async () => {
-    const { dialog: shorthand } = await modal(`<ui-modal header="Title">x</ui-modal>`)
+    const { dialog: shorthand } = await modal(`<ui-modal heading="Title">x</ui-modal>`)
     const id = shorthand.getAttribute("aria-labelledby")!
     expect(shorthand.querySelector(`#${id}`)!.textContent).toBe("Title")
     const { host, dialog } = await modal(`<ui-modal><ui-header>Slotted</ui-header></ui-modal>`)
@@ -528,7 +528,7 @@ describe("<ui-modal> accessibility", () => {
 
   it("keyboard walkthrough:  Enter on the trigger opens, focus starts inside, Tab stays inside, Escape returns", async () => {
     const { host, dialog, wrapper } = await modal(
-      `<ui-modal id="m" header="Walk" closable><ui-actions><ui-button class="deny">No</ui-button>` +
+      `<ui-modal id="m" heading="Walk" closable><ui-actions><ui-button class="deny">No</ui-button>` +
         `<ui-button class="approve">Yes</ui-button></ui-actions></ui-modal>`
     )
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="m" command="--show">Show</button>`)
@@ -589,7 +589,7 @@ describe("UI.modals", () => {
   it("confirm():  true on approve, false on deny or Escape;  removed once hidden", async () => {
     const approved = UI.modals.confirm({ title: "Delete?", message: "It can't be undone." })
     let host = await current()
-    expect(host.getAttribute("header")).toBe("Delete?")
+    expect(host.getAttribute("heading")).toBe("Delete?")
     expect(host.querySelector("p")!.textContent).toBe("It can't be undone.")
     expect([...host.querySelectorAll("ui-button")].map((button) => button.textContent)).toEqual(["Cancel", "OK"])
     host.querySelector<HTMLElement>(".approve")!.click()
@@ -655,5 +655,22 @@ describe("UI.modals", () => {
     } finally {
       UI.i18n.locale = locale
     }
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-modal> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-modal header="Old">Body</ui-modal>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-modal heading="New">Body</ui-modal>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

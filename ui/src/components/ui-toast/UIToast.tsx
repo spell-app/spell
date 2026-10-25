@@ -226,9 +226,9 @@ export class UIToast extends E.UIComponent<Vocabulary> {
           </span>
         </Show>
         <div class={UIT.CONTENT} part={this.partForName("content")}>
-          <Show when={this.header}>
+          <Show when={this.heading}>
             <div class={UIT.HEADER} part={this.partForName("header")}>
-              {this.header}
+              {this.heading}
             </div>
           </Show>
           <Show when={this.message}>
@@ -390,7 +390,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
     const body = [...this.domElement.childNodes].filter((node) =>
       node.nodeType === E.NodeType.element ? (node as Element).slot !== actions : node.nodeType === E.NodeType.text
     )
-    const text = [this.header, this.message, ...body.map((node) => node.textContent)].join(" ")
+    const text = [this.heading, this.message, ...body.map((node) => node.textContent)].join(" ")
     const words = text.split(UIT.WHITESPACE).filter(Boolean).length
     return Math.max(MIN_DISPLAY_TIME, (words / WORDS_PER_MINUTE) * 60_000)
   }

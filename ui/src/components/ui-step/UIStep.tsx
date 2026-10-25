@@ -74,7 +74,7 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
 
   /** Has shorthand content? */
   get hasShorthand(): boolean {
-    return !!this.header || !!this.description
+    return !!this.heading || !!this.description
   }
 
   /** Has content (shorthand or slotted):  `:state(content)`. */
@@ -155,9 +155,9 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
         </Show>
         <Show when={this.hasShorthand}>
           <div class={this.staticPart(UIT.CONTENT)} part={this.partForName("content")}>
-            <Show when={this.header}>
+            <Show when={this.heading}>
               <div class={this.staticPart(TITLE_PART)} part={this.partForName("title")}>
-                {this.header}
+                {this.heading}
               </div>
             </Show>
             <Show when={this.description}>

@@ -192,7 +192,7 @@ describe("<ui-toast> tokens from outside", () => {
 describe("<ui-toast> content", () => {
   it("renders in contract order:  icon, content (header, message, slot), close", async () => {
     const { root, box } = await toast(
-      `<ui-toast icon="bell" header="Title" message="Body" closable display-time="0">More</ui-toast>`
+      `<ui-toast icon="bell" heading="Title" message="Body" closable display-time="0">More</ui-toast>`
     )
     expect(partsOf(box)).toEqual(["div.toast"])
     expect(partsOf(root)).toEqual(["span.icon", "div.content", "button.close"])
@@ -293,7 +293,7 @@ describe("<ui-toast> actions bar", () => {
   /** Render a toast with actions inside a `scheme` wrapper;  returns the toast root and its action bar. */
   async function withActions(scheme: "ui-light" | "ui-dark") {
     const wrapper = await ElementFixture.render(
-      `<div class="${scheme}"><ui-toast header="Delete?" message="Really?">` +
+      `<div class="${scheme}"><ui-toast heading="Delete?" message="Really?">` +
         `<button slot="actions">Yes</button><button slot="actions">No</button></ui-toast></div>`
     )
     const root = wrapper.querySelector("ui-toast")!.shadowRoot!.querySelector<HTMLElement>("[part~=toast]")!
@@ -568,7 +568,7 @@ describe("UI.toast()", () => {
     await ElementFixture.settle(element)
     expect(element.localName).toBe("ui-toast")
     expect(element.id).toBe(handle.id)
-    expect(element.getAttribute("header")).toBe("Saved")
+    expect(element.getAttribute("heading")).toBe("Saved")
     expect(element.getAttribute("message")).toBe("All good")
     expect(element.getAttribute("type")).toBe("success")
     const container = element.parentElement!
@@ -791,5 +791,22 @@ describe("<ui-toast> invoker commands", () => {
     } finally {
       supports.invokers = was
     }
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-toast> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-toast header="Old">Body</ui-toast>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-toast heading="New">Body</ui-toast>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

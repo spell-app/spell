@@ -164,6 +164,11 @@ describe("Vocabulary.define() with the English identity dictionary", () => {
       "loading",
       "visible",
       "animation",
+      "link",
+      "target",
+      "font",
+      "tooltip",
+      "label",
       "checked"
     ])
     expect(localized.attributes.get("checked")).toBe(CARD.attributes[5])

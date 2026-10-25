@@ -113,6 +113,31 @@
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
+
+              <ui-section id="examples-types-link" label="Link" sticky collapsible dividing>
+                <ui-docs-example
+                  description="A text with a `link` is a link in running text:  a real link, which the keyboard reaches.  `target` opens it elsewhere, as a link's does."
+                >
+                  <ui-segment>
+                    Read <ui-text link="#examples-types-link">the guide</ui-text> first, or open
+                    <ui-text link="https://fomantic-ui.com" target="_blank">Fomantic's docs</ui-text> in a new tab.
+                  </ui-segment>
+                </ui-docs-example>
+              </ui-section>
+
+              <ui-section id="examples-types-letter-styles" label="Letter styles" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`font` says how the letters look, several words at once:  each is drawn as its HTML element, so screen readers hear it."
+                >
+                  <ui-segment>
+                    It's <ui-text font="bold">free</ui-text>, <ui-text font="italic">today</ui-text> only.
+                    Run <ui-text font="code">yarn review</ui-text> first;
+                    <ui-text font="highlight">nothing is saved</ui-text> until then.
+                    <ui-text font="strikethrough">Was 10</ui-text> now 5. H<ui-text font="subscript">2</ui-text>O,
+                    E&nbsp;=&nbsp;mc<ui-text font="superscript">2</ui-text>, <ui-text font="bold italic underline">all three</ui-text>.
+                  </ui-segment>
+                </ui-docs-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>

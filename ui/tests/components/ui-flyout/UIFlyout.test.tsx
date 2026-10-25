@@ -171,7 +171,7 @@ describe("<ui-flyout> classes", () => {
   })
 
   it("renders the shared dialog contract:  header, content, slot, close icon (last)", async () => {
-    const { dialog } = await flyout(`<ui-flyout header="Title" content="Body" closable>x</ui-flyout>`)
+    const { dialog } = await flyout(`<ui-flyout heading="Title" content="Body" closable>x</ui-flyout>`)
     expect([...dialog.children].map((child) => `${child.localName}.${child.getAttribute("part")}`)).toEqual([
       "div.header",
       "div.content",
@@ -188,7 +188,7 @@ describe("<ui-flyout> classes", () => {
 
 describe("<ui-flyout> layout", () => {
   it("slides in from its edge, full height;  widths by word and column", async () => {
-    const { host, dialog } = await flyout(`<ui-flyout position="right" header="Hi">x</ui-flyout>`)
+    const { host, dialog } = await flyout(`<ui-flyout position="right" heading="Hi">x</ui-flyout>`)
     await open(host)
     const rect = dialog.getBoundingClientRect()
     expect(Math.round(rect.right)).toBe(document.documentElement.clientWidth)
@@ -239,7 +239,7 @@ describe("<ui-flyout> layout", () => {
 
 describe("<ui-flyout> behaviour (DialogComponent)", () => {
   it("`open` shows it with showModal():  top layer, scroll lock;  ui-show then ui-hide", async () => {
-    const { host, dialog } = await flyout(`<ui-flyout header="Hi">x</ui-flyout>`)
+    const { host, dialog } = await flyout(`<ui-flyout heading="Hi">x</ui-flyout>`)
     const shows = record(host, "ui-show")
     await open(host)
     expect(dialog.matches(":modal")).toBe(true)
@@ -254,7 +254,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
   })
 
   it("a click on the dimmer closes it (reason `outside`);  one inside doesn't", async () => {
-    const { host, dialog } = await flyout(`<ui-flyout header="Hi" content="Body"></ui-flyout>`)
+    const { host, dialog } = await flyout(`<ui-flyout heading="Hi" content="Body"></ui-flyout>`)
     const closes = record(host, "ui-close")
     await open(host)
     await userEvent.click(dialog.querySelector(".content")!)
@@ -268,7 +268,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 
   it("approve:  a cancelable ui-approve, then closes;  the close icon closes (reason `close`)", async () => {
     const { host, dialog } = await flyout(
-      `<ui-flyout header="Sure?" content="Body" closable><ui-actions><ui-button class="approve">Yes</ui-button>` +
+      `<ui-flyout heading="Sure?" content="Body" closable><ui-actions><ui-button class="approve">Yes</ui-button>` +
         `</ui-actions></ui-flyout>`
     )
     const closes = record(host, "ui-close")
@@ -295,7 +295,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 
   it("keyboard walkthrough:  --show opens, focus starts inside, the page is out of reach, Escape returns it", async () => {
     const { host, dialog, wrapper } = await flyout(
-      `<ui-flyout id="f" header="Walk" closable><ui-actions><ui-button class="deny">No</ui-button>` +
+      `<ui-flyout id="f" heading="Walk" closable><ui-actions><ui-button class="deny">No</ui-button>` +
         `<ui-button class="approve">Yes</ui-button></ui-actions></ui-flyout>`
     )
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="f" command="--show">Show</button>`)
@@ -324,7 +324,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 
   it("with CloseWatcher (the browser's close requests), Escape closes one opened by a click", async () => {
     UI.overlays.useCloseWatcher = true
-    const { host, dialog, wrapper } = await flyout(`<ui-flyout id="f" header="Hi">x</ui-flyout>`)
+    const { host, dialog, wrapper } = await flyout(`<ui-flyout id="f" heading="Hi">x</ui-flyout>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="f" command="--show">Show</button>`)
     const closes = record(host, "ui-close")
     const shown = next(host, "ui-show")
@@ -337,7 +337,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
   })
 
   it("is named by its header shorthand or aria-label", async () => {
-    const { dialog } = await flyout(`<ui-flyout header="Title">x</ui-flyout>`)
+    const { dialog } = await flyout(`<ui-flyout heading="Title">x</ui-flyout>`)
     const id = dialog.getAttribute("aria-labelledby")!
     expect(dialog.querySelector(`#${id}`)!.textContent).toBe("Title")
   })
@@ -360,7 +360,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 
 describe("<ui-flyout> modeless", () => {
   it("shows with show():  no dimmer, no scroll lock;  a click on the page lands, and closes it", async () => {
-    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless header="Hi" content="Body"></ui-flyout>`)
+    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless heading="Hi" content="Body"></ui-flyout>`)
     const clicks = record<MouseEvent>(trigger, "click")
     const closes = record(host, "ui-close")
     await open(host)
@@ -382,7 +382,7 @@ describe("<ui-flyout> modeless", () => {
   })
 
   it("a click inside it leaves it open", async () => {
-    const { host, dialog } = await flyout(`<ui-flyout modeless header="Hi" content="Body"></ui-flyout>`)
+    const { host, dialog } = await flyout(`<ui-flyout modeless heading="Hi" content="Body"></ui-flyout>`)
     await open(host)
     await userEvent.click(dialog)
     await settle()
@@ -401,7 +401,7 @@ describe("<ui-flyout> modeless", () => {
   })
 
   it("Escape and the close icon still close it", async () => {
-    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless closable header="Hi">x</ui-flyout>`)
+    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless closable heading="Hi">x</ui-flyout>`)
     const closes = record(host, "ui-close")
     await open(host, trigger)
     await userEvent.keyboard("{Escape}")
@@ -417,7 +417,7 @@ describe("<ui-flyout> modeless", () => {
 
 describe("<ui-flyout> sliding out", () => {
   it("stays drawn while `hidden` slides it out:  the DOM element keeps its box until the dialog has left", async () => {
-    const { host, dialog } = await flyout(`<ui-flyout header="Hi">x</ui-flyout>`)
+    const { host, dialog } = await flyout(`<ui-flyout heading="Hi">x</ui-flyout>`)
     host.style.setProperty("--ui-flyout-close-duration", "400ms")
     onTestFinished(() => void host.style.removeProperty("--ui-flyout-close-duration"))
     await open(host)
@@ -426,5 +426,22 @@ describe("<ui-flyout> sliding out", () => {
     expect(getComputedStyle(host).display).toBe("contents")
     expect(getComputedStyle(dialog).display).not.toBe("none")
     expect(dialog.getAnimations().length).toBeGreaterThan(0)
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-flyout> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-flyout header="Old">Body</ui-flyout>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-flyout heading="New">Body</ui-flyout>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

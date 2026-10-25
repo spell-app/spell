@@ -13,7 +13,7 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `authorVocabulary`
- * The names of `<ui-author>`, an author:  `<span class="author">` (`<a>` with `href`).
+ * The names of `<ui-author>`, an author:  `<span class="author">` (`<a>` with `link`).
  ****************/
 export const authorVocabulary = {
   tag: "ui-author",
@@ -23,8 +23,14 @@ export const authorVocabulary = {
   ui: false,
   description: "Who wrote a comment or did a feed event (Fomantic's feed `user`).",
   attributes: [
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`), e.g. to a profile." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`), e.g. to a profile.  Its old name is `href`."
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],
   events: [],
   slots: [{ name: "", description: "The name." }],

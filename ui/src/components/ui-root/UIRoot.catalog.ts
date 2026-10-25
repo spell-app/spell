@@ -29,14 +29,14 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-actions": { folder: "ui-parts", attributes: [] },
   "ui-ad": { folder: "ui-ad", skeleton: { width: "18em", height: "15em" }, attributes: ["unit", "centered", "test"] },
-  "ui-author": { folder: "ui-parts", attributes: ["href", "target"] },
+  "ui-author": { folder: "ui-parts", attributes: ["link", "href", "target"] },
   "ui-avatar": { folder: "ui-parts", attributes: ["src", "alt"] },
   "ui-breadcrumb": {
     folder: "ui-breadcrumb",
     skeleton: { parts: [{ shape: "line", length: "medium" }] },
     attributes: ["size", "inverted", "divider", "divider-icon"]
   },
-  "ui-breadcrumb-section": { folder: "ui-breadcrumb", attributes: ["active", "href", "target"] },
+  "ui-breadcrumb-section": { folder: "ui-breadcrumb", attributes: ["active", "link", "href", "target"] },
   "ui-button": {
     folder: "ui-button",
     skeleton: { display: "inline", width: "6em", height: "2.5em" },
@@ -73,6 +73,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "type",
       "commandfor",
       "command",
+      "link",
       "href",
       "target",
       "download",
@@ -167,6 +168,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "loading",
       "href",
       "target",
+      "heading",
       "header",
       "meta",
       "description",
@@ -261,7 +263,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "floated", "text-align", "vertical-align"] },
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },
   "ui-description": { folder: "ui-parts", attributes: [] },
-  "ui-detail": { folder: "ui-parts", attributes: ["href"] },
+  "ui-detail": { folder: "ui-parts", attributes: ["link", "href"] },
   "ui-dimmer": {
     folder: "ui-dimmer",
     attributes: ["shade", "page", "inverted", "blurring", "simple", "disabled", "vertical-align", "show-on", "closedby"]
@@ -473,6 +475,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "width",
       "closable",
       "closedby",
+      "heading",
       "header",
       "content"
     ]
@@ -537,6 +540,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "fitted",
       "disabled",
       "inverted",
+      "link",
       "href"
     ]
   },
@@ -593,6 +597,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "width",
       "height",
       "loading",
+      "link",
       "href"
     ]
   },
@@ -710,6 +715,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "detail",
       "removable",
+      "link",
       "href",
       "target"
     ]
@@ -822,6 +828,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "attached",
       "text-align",
       "icon",
+      "heading",
       "header",
       "dismissible"
     ]
@@ -839,6 +846,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "vertical-align",
       "closable",
       "closedby",
+      "heading",
       "header",
       "content"
     ]
@@ -922,6 +930,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "position",
       "open-on",
       "for",
+      "heading",
       "header",
       "content",
       "hoverable",
@@ -1348,6 +1357,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "href",
       "target",
       "icon",
+      "heading",
       "header",
       "description"
     ]
@@ -1485,13 +1495,14 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     formControl: true
   },
   "ui-theme-editor": { folder: "ui-theme-editor", skeleton: { height: "30em" }, attributes: ["base", "value"] },
-  "ui-title": { folder: "ui-parts", attributes: ["href"] },
+  "ui-title": { folder: "ui-parts", attributes: ["link", "href"] },
   "ui-toast": {
     folder: "ui-toast",
     attributes: [
       "type",
       "color",
       "inverted",
+      "heading",
       "header",
       "message",
       "icon",

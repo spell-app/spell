@@ -77,6 +77,7 @@ export class ServerDOMElement {
    * `element`'s attribute values as the browser element would hold them on first connect:
    * each attribute's text converted, else its starting value.
    * - `visible`:  what the markup says, `hidden` included (`ElementDefinition.visibleInMarkup()`).
+   * - An old name an attribute replaces (`href` for `link`) is read as the browser element reads it.
    */
   static attributeValuesOf(
     element: Element,
@@ -87,6 +88,14 @@ export class ServerDOMElement {
     for (const attribute of definition.attributes) {
       const text = element.getAttribute(attribute.attribute)
       values[attribute.key] = text === null ? definition.startingValue(attribute) : definition.convert(attribute, text)
+    }
+    // an OLD name (`href`, `primary`:  `AttributeSpec.replaces`) stands for its new attribute, which wins when written
+    for (const name of definition.oldAttributeNames) {
+      const text = element.getAttribute(name)
+      const old = definition.oldAttributeNamed(name)!
+      if (text === null || element.hasAttribute(old.attribute.attribute)) continue
+      const next = definition.valueFromOld(old, text, values[old.attribute.key])
+      if (next) values[old.attribute.key] = next.value
     }
     if (definition.takesShared("visible")) {
       values.visible = definition.visibleInMarkup((name) => element.getAttribute(name), startsVisible)

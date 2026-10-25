@@ -88,7 +88,10 @@ describe("material.css", () => {
 
   it("modal:  square corners, no header rule", async () => {
     await ThemeHarness.use("material")
-    const { host, style } = await ThemeHarness.inner(`<ui-modal header="Title" content="Body"></ui-modal>`, ".ui.modal")
+    const { host, style } = await ThemeHarness.inner(
+      `<ui-modal heading="Title" content="Body"></ui-modal>`,
+      ".ui.modal"
+    )
     expect(style.borderTopLeftRadius).toBe("0px")
     const header = host.shadowRoot!.querySelector(".ui.modal > .header")!
     expect(getComputedStyle(header).borderBottomStyle).toBe("none")
@@ -218,7 +221,7 @@ describe("fixed-width.css", () => {
     await page.viewport(1000, 800)
     await T3.use("fixed-width")
     const root = await ElementFixture.render(
-      `<div><ui-modal header="A"></ui-modal><ui-modal size="small" header="B"></ui-modal></div>`
+      `<div><ui-modal heading="A"></ui-modal><ui-modal size="small" heading="B"></ui-modal></div>`
     )
     expect(T3.style(root, "ui-modal", ".ui.modal").width).toBe("700px")
     expect(T3.style(root, "ui-modal", ".ui.modal", undefined, 1).width).toBe("420px")
@@ -500,7 +503,7 @@ describe("basic.css", () => {
   it("step:  transparent pills, no arrows", async () => {
     await T2.use("basic")
     const root = await ElementFixture.render(
-      `<ui-steps><ui-step header="One"></ui-step><ui-step header="Two"></ui-step></ui-steps>`
+      `<ui-steps><ui-step heading="One"></ui-step><ui-step heading="Two"></ui-step></ui-steps>`
     )
     const step = T2.style(root, "ui-step", ".step")
     expect(step.backgroundColor).toBe("rgba(0, 0, 0, 0)")

@@ -77,7 +77,13 @@ export const cardVocabulary = {
     { name: "loading", group: "states", kind: "keyOnly", description: "Dimmed under a spinner, announced as busy." },
     { name: "href", group: "link", kind: "string", description: "Makes the whole card a link (`<a>`)." },
     { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
-    { name: "header", group: "name", kind: "string", description: "Shorthand:  the header of a content block." },
+    {
+      name: "heading",
+      replaces: ["header"],
+      group: "name",
+      kind: "string",
+      description: "Shorthand:  the header of a content block.  Its old name is `header`."
+    },
     { name: "meta", group: "content", kind: "string", description: "Shorthand:  metadata below the header." },
     {
       name: "description",

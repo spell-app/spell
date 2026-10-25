@@ -43,16 +43,16 @@ function token(element: Element, name: string): string {
 /** Three steps in `<ui-steps attributes>`, the middle one selected. */
 function three(attributes = "", width?: number) {
   const steps =
-    `<ui-steps ${attributes}><ui-step header="One"></ui-step><ui-step selected header="Two"></ui-step>` +
-    `<ui-step header="Three"></ui-step></ui-steps>`
+    `<ui-steps ${attributes}><ui-step heading="One"></ui-step><ui-step selected heading="Two"></ui-step>` +
+    `<ui-step heading="Three"></ui-step></ui-steps>`
   return width ? `<div style="width: ${width}px">${steps}</div>` : steps
 }
 
 /** Three steps of uneven titles in `<ui-steps attributes>`, in a 900px box. */
 function uneven(attributes: string) {
   return (
-    `<div style="width: 900px"><ui-steps ${attributes}><ui-step header="A"></ui-step>` +
-    `<ui-step selected header="A much longer step"></ui-step><ui-step header="C"></ui-step></ui-steps></div>`
+    `<div style="width: 900px"><ui-steps ${attributes}><ui-step heading="A"></ui-step>` +
+    `<ui-step selected heading="A much longer step"></ui-step><ui-step heading="C"></ui-step></ui-steps></div>`
   )
 }
 
@@ -74,7 +74,7 @@ describe("<ui-steps> classes", () => {
     ['widths="3"', "ui three steps"],
     ['circular color="red"', "ui red circular steps"]
   ])("<ui-steps %s>", async (attributes, classes) => {
-    const { host, root } = await render(`<ui-steps ${attributes}><ui-step header="A"></ui-step></ui-steps>`)
+    const { host, root } = await render(`<ui-steps ${attributes}><ui-step heading="A"></ui-step></ui-steps>`)
     expect(root.className).toBe(classes)
     expect(root.localName).toBe("ol")
     expect(root.getAttribute("role")).toBe("list")
@@ -93,7 +93,7 @@ describe("<ui-step>", () => {
     ['href="#a"', "a", "step"],
     ["link", "button", "link step"]
   ])("<ui-step %s> => <%s class=%s>", async (attributes, tag, classes) => {
-    const holder = await ElementFixture.render(`<ui-steps><ui-step ${attributes} header="A"></ui-step></ui-steps>`)
+    const holder = await ElementFixture.render(`<ui-steps><ui-step ${attributes} heading="A"></ui-step></ui-steps>`)
     const [root] = stepRoots(holder)
     expect(root!.localName).toBe(tag)
     expect(root!.className).toBe(classes)
@@ -116,7 +116,7 @@ describe("<ui-step>", () => {
 
   it("renders the header / description shorthands as its content parts", async () => {
     const holder = await ElementFixture.render(
-      `<ui-steps><ui-step header="Shipping" description="Choose"></ui-step></ui-steps>`
+      `<ui-steps><ui-step heading="Shipping" description="Choose"></ui-step></ui-steps>`
     )
     const [root] = stepRoots(holder)
     const content = root!.querySelector<HTMLElement>("[part=content]")!
@@ -143,7 +143,7 @@ describe("<ui-step>", () => {
   })
 
   it("draws its icon, and a check in its place once completed, with a hidden 'Completed'", async () => {
-    const holder = await ElementFixture.render(`<ui-steps><ui-step icon="truck" header="Ship"></ui-step></ui-steps>`)
+    const holder = await ElementFixture.render(`<ui-steps><ui-step icon="truck" heading="Ship"></ui-step></ui-steps>`)
     const step = holder.querySelector<DOMElement>("ui-step")!
     const [root] = stepRoots(holder)
     await expect.poll(() => root!.querySelector("[part=icon] svg")).not.toBeNull()
@@ -163,7 +163,7 @@ describe("<ui-step>", () => {
 
   it("keeps a disabled link's <a> without href, and disables a <button>", async () => {
     const holder = await ElementFixture.render(
-      `<ui-steps><ui-step href="#a" disabled header="A"></ui-step><ui-step link disabled header="B"></ui-step></ui-steps>`
+      `<ui-steps><ui-step href="#a" disabled heading="A"></ui-step><ui-step link disabled heading="B"></ui-step></ui-steps>`
     )
     const [link, button] = stepRoots(holder)
     expect(link!.hasAttribute("href")).toBe(false)
@@ -313,8 +313,8 @@ describe("<ui-steps equal>", () => {
 
   it("stacks below 768px of the group all the same", async () => {
     const box = await ElementFixture.render(
-      `<div style="width: 500px"><ui-steps equal><ui-step header="A"></ui-step>` +
-        `<ui-step header="B"></ui-step></ui-steps></div>`
+      `<div style="width: 500px"><ui-steps equal><ui-step heading="A"></ui-step>` +
+        `<ui-step heading="B"></ui-step></ui-steps></div>`
     )
     const [a, b] = stepRoots(box).map((step) => step.getBoundingClientRect())
     expect(b!.top).toBeGreaterThanOrEqual(a!.bottom - 1)
@@ -366,7 +366,7 @@ describe("<ui-steps> tokens from outside", () => {
   /** Three steps, content as a slotted part in the first. */
   const STEPS =
     `<ui-step><ui-content><ui-title>One</ui-title></ui-content></ui-step>` +
-    `<ui-step selected header="Two"></ui-step><ui-step disabled header="Three"></ui-step>`
+    `<ui-step selected heading="Two"></ui-step><ui-step disabled heading="Three"></ui-step>`
 
   /** Background of the first step's root under `holder`. */
   function background(holder: Element): string {
@@ -451,9 +451,9 @@ describe("<ui-steps> tokens from outside", () => {
 describe("<ui-step> keyboard", () => {
   it("makes link and button steps Tab stops, plain steps not", async () => {
     const holder = await ElementFixture.render(
-      `<div><button>before</button><ui-steps><ui-step header="Plain"></ui-step>` +
-        `<ui-step href="#a" header="Link"></ui-step><ui-step link header="Button"></ui-step>` +
-        `<ui-step href="#b" disabled header="Off"></ui-step></ui-steps></div>`
+      `<div><button>before</button><ui-steps><ui-step heading="Plain"></ui-step>` +
+        `<ui-step href="#a" heading="Link"></ui-step><ui-step link heading="Button"></ui-step>` +
+        `<ui-step href="#b" disabled heading="Off"></ui-step></ui-steps></div>`
     )
     const [, link, button] = stepRoots(holder)
     holder.querySelector("button")!.focus()
@@ -479,5 +479,22 @@ describe("<ui-step> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-step> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-step header="Old">Body</ui-step>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-step heading="New">Body</ui-step>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

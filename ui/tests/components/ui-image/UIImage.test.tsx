@@ -219,3 +219,18 @@ describe("<ui-image> accessibility", () => {
     await expectAccessible(root)
   })
 })
+
+////////////////
+// ## `link`, and its old name `href`
+//
+// Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
+////////////////
+
+describe("<ui-image> link", () => {
+  it.each(["link", "href"])("%s draws a real link", async (name) => {
+    const element = await ElementFixture.render(
+      `<ui-image NAME="#there" src="${SRC}" alt="There"></ui-image>`.replace("NAME", name)
+    )
+    expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})

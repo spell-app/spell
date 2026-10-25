@@ -78,11 +78,11 @@
                 <ui-section id="examples-types-popup-element-titled" label="Titled" sticky collapsible dividing>
                   <ui-docs-example description="An element can specify popup content with a title:  `header`.">
                     <ui-image avatar src="images/avatar/small/elliot.jpg" alt="Elliot Fu"></ui-image>
-                    <ui-popup header="Elliot Fu" content="Elliot has been a member since July 2012"></ui-popup>
+                    <ui-popup heading="Elliot Fu" content="Elliot has been a member since July 2012"></ui-popup>
                     <ui-image avatar src="images/avatar/small/stevie.jpg" alt="Stevie Feliciano"></ui-image>
-                    <ui-popup header="Stevie Feliciano" content="Stevie has been a member since August 2013"></ui-popup>
+                    <ui-popup heading="Stevie Feliciano" content="Stevie has been a member since August 2013"></ui-popup>
                     <ui-image avatar src="images/avatar/small/matt.jpg" alt="Matt"></ui-image>
-                    <ui-popup header="Matt" content="Matt has been a member since July 2014"></ui-popup>
+                    <ui-popup heading="Matt" content="Matt has been a member since July 2014"></ui-popup>
                   </ui-docs-example>
                 </ui-section>
 
@@ -139,7 +139,7 @@
                         <ui-button primary icon="play">Watch</ui-button>
                       </ui-buttons>
                     </ui-card>
-                    <ui-popup header="User Rating">
+                    <ui-popup heading="User Rating">
                       <ui-rating color="yellow" value="3" readonly></ui-rating>
                     </ui-popup>
                   </ui-docs-example>
@@ -150,7 +150,7 @@
                     description='`open-on="click"` makes the popup a small non-modal dialog that toggles on click, for content you interact with;  `flowing` lets it be as wide as its content.'
                   >
                     <ui-button id="popup-types-plan">Choose a plan</ui-button>
-                    <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing header="Basic plan">
+                    <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
                       <p>Does not include upload or chat.</p>
                       <ui-button size="small" primary>Choose</ui-button>
                     </ui-popup>
@@ -407,7 +407,7 @@
                   <ui-popup
                     position="bottom left"
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
@@ -415,7 +415,7 @@
                     position="bottom left"
                     inverted
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                 </ui-docs-example>
@@ -426,7 +426,7 @@
                     position="bottom left"
                     color="purple"
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
@@ -434,7 +434,7 @@
                     position="bottom left"
                     color="orange"
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
@@ -442,7 +442,7 @@
                     position="bottom left"
                     color="blue"
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
@@ -450,7 +450,7 @@
                     position="bottom left"
                     color="green"
                     loading
-                    header="Matt"
+                    heading="Matt"
                     content="Matt has been a member since July 2014"
                   ></ui-popup>
                 </ui-docs-example>
@@ -732,7 +732,7 @@
                   <ui-popup
                     for="popup-usage-click"
                     open-on="click"
-                    header="Clicked"
+                    heading="Clicked"
                     content="Click again, or press Escape, to close."
                   ></ui-popup>
                   <ui-input id="popup-usage-focus" placeholder="Focus me" icon="search"></ui-input>
@@ -914,7 +914,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-popup target={anchorEl} open-on="click" header="Share" onui-close={() => setOpen(false)}>
+                  <ui-popup target={anchorEl} open-on="click" heading="Share" onui-close={() => setOpen(false)}>
                     ...
                   </ui-popup>
                 </script>
@@ -923,7 +923,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-popup :target="anchorEl" open-on="click" header="Share" @ui-close="open = false">...</ui-popup>
+                  <ui-popup :target="anchorEl" open-on="click" heading="Share" @ui-close="open = false">...</ui-popup>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -933,7 +933,7 @@
                   <ui-popup
                     target={anchorEl}
                     open-on="click"
-                    header="Share"
+                    heading="Share"
                     on-ui-close={() => setOpen(false)}
                   >
                     ...

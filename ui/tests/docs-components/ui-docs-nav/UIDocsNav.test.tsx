@@ -258,7 +258,7 @@ describe("<ui-docs-nav> lists", () => {
 
     SiteData.url = "/no-such-folder/__data/components.json5"
     const broken = await render()
-    expect(find(broken, "ui-message").getAttribute("header")).toBe("The component list didn't load")
+    expect(find(broken, "ui-message").getAttribute("heading")).toBe("The component list didn't load")
     expect(broken.matches(":state(listed)")).toBe(true)
     expect(links(broken)).toContain("theming")
   })

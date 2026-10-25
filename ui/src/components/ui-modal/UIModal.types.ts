@@ -23,8 +23,8 @@ export type DialogAttributes = {
   closable?: boolean
   /** what dismisses it, as `<dialog closedby>` */
   closedby?: "any" | "closerequest" | "none"
-  /** the `header` shorthand */
-  header?: string
+  /** the `heading` shorthand (old name `header`) */
+  heading?: string
   /** the `content` shorthand */
   content?: string
 }

@@ -123,7 +123,7 @@
                   description="A modal can have a header:  a slotted `<ui-header>`, or the `header` shorthand."
                 >
                   <ui-button commandfor="modal-content-header" command="--show">Show</ui-button>
-                  <ui-modal id="modal-content-header" header="Header" closable></ui-modal>
+                  <ui-modal id="modal-content-header" heading="Header" closable></ui-modal>
                 </ui-docs-example>
               </ui-section>
 
@@ -149,7 +149,7 @@
                   description="A modal can contain image content:  `<ui-content image>` puts an image beside the description."
                 >
                   <ui-button commandfor="modal-content-image" command="--show">Show</ui-button>
-                  <ui-modal id="modal-content-image" header="Select a Photo" closable>
+                  <ui-modal id="modal-content-image" heading="Select a Photo" closable>
                     <ui-content image>
                       <ui-image size="medium" src="images/avatar/large/elliot.jpg" alt=""></ui-image>
                       <ui-description>
@@ -185,7 +185,7 @@
                     event. That's Fomantic's callback returning <code>false</code>.</ui-message
                   >
                   <ui-button commandfor="modal-content-actions" command="--show">Show</ui-button>
-                  <ui-modal id="modal-content-actions" header="Header">
+                  <ui-modal id="modal-content-actions" heading="Header">
                     <ui-content><p>Three actions: approve, a neutral one that does nothing, and cancel.</p></ui-content>
                     <ui-actions>
                       <ui-button class="approve">Approve</ui-button>
@@ -204,7 +204,7 @@
                   <ui-modal
                     id="modal-variations-full"
                     fullscreen
-                    header="Full screen"
+                    heading="Full screen"
                     content="Nearly as wide as the screen."
                     closable
                   ></ui-modal>
@@ -229,7 +229,7 @@
                     id="modal-variations-overlay"
                     overlay
                     fullscreen
-                    header="Overlay full screen"
+                    heading="Overlay full screen"
                     content="Edge to edge."
                     closable
                   ></ui-modal>
@@ -247,28 +247,28 @@
                   <ui-modal
                     id="modal-variations-mini"
                     size="mini"
-                    header="Mini"
+                    heading="Mini"
                     content="A mini modal."
                     closable
                   ></ui-modal>
                   <ui-modal
                     id="modal-variations-tiny"
                     size="tiny"
-                    header="Tiny"
+                    heading="Tiny"
                     content="A tiny modal."
                     closable
                   ></ui-modal>
                   <ui-modal
                     id="modal-variations-small"
                     size="small"
-                    header="Small"
+                    heading="Small"
                     content="A small modal."
                     closable
                   ></ui-modal>
                   <ui-modal
                     id="modal-variations-large"
                     size="large"
-                    header="Large"
+                    heading="Large"
                     content="A large modal."
                     closable
                   ></ui-modal>
@@ -284,7 +284,7 @@
                     tab).</ui-message
                   >
                   <ui-button commandfor="modal-variations-inverted" command="--show">Show</ui-button>
-                  <ui-modal id="modal-variations-inverted" inverted size="mini" header="Inverted" closable>
+                  <ui-modal id="modal-variations-inverted" inverted size="mini" heading="Inverted" closable>
                     <ui-content><p>The dark scheme, on the default dimmer.</p></ui-content>
                     <ui-actions><ui-button class="ok" inverted>OK</ui-button></ui-actions>
                   </ui-modal>
@@ -308,7 +308,7 @@
                     content).</ui-message
                   >
                   <ui-button commandfor="modal-content-scrolling" command="--show">Show terms</ui-button>
-                  <ui-modal id="modal-content-scrolling" header="Terms" closable>
+                  <ui-modal id="modal-content-scrolling" heading="Terms" closable>
                     <ui-content scrolling>
                       <p>A scrolling content block caps its height and scrolls.</p>
                       <p>Very long terms go here, paragraph after paragraph.</p>
@@ -346,7 +346,7 @@
               <ui-section id="examples-variations-left-actions" label="Left Actions" sticky collapsible dividing>
                 <ui-docs-example description="You can also place the action buttons to the left.">
                   <ui-button commandfor="modal-variations-left" command="--show">Show</ui-button>
-                  <ui-modal id="modal-variations-left" header="Look at the Actions">
+                  <ui-modal id="modal-variations-left" heading="Look at the Actions">
                     <ui-content><p>They are aligned to the left</p></ui-content>
                     <ui-actions>
                       <ui-button negative>Cancel</ui-button>
@@ -389,7 +389,7 @@
                   <ui-modal
                     id="modal-states-active"
                     size="tiny"
-                    header="Active"
+                    heading="Active"
                     content="Shown while `visible` is set."
                     closable
                   ></ui-modal>
@@ -414,7 +414,7 @@
                     id="modal-behaviour-top"
                     vertical-align="top"
                     size="small"
-                    header="Top aligned"
+                    heading="Top aligned"
                     content="Pinned near the top."
                     closable
                   ></ui-modal>
@@ -422,7 +422,7 @@
                     id="modal-behaviour-bottom"
                     vertical-align="bottom"
                     size="small"
-                    header="Bottom aligned"
+                    heading="Bottom aligned"
                     content="Pinned near the bottom."
                     closable
                   ></ui-modal>
@@ -464,7 +464,7 @@
                   description="A modal can open a second modal, which opens on top of the first (Fomantic's `allowMultiple: true`);  Escape closes only the topmost."
                 >
                   <ui-button commandfor="modal-behaviour-first" command="--show">Show first</ui-button>
-                  <ui-modal id="modal-behaviour-first" header="Modal Title" closable>
+                  <ui-modal id="modal-behaviour-first" heading="Modal Title" closable>
                     <ui-content image>
                       <ui-icon name="exclamation" size="massive"></ui-icon>
                       <ui-description><p>This modal opens a second one.</p></ui-description>
@@ -480,7 +480,7 @@
                       >
                     </ui-actions>
                   </ui-modal>
-                  <ui-modal id="modal-behaviour-second" size="small" header="Modal Title" closable>
+                  <ui-modal id="modal-behaviour-second" size="small" heading="Modal Title" closable>
                     <ui-content image>
                       <ui-icon name="exclamation" size="huge"></ui-icon>
                       <ui-description><p>That's everything!</p></ui-description>
@@ -554,7 +554,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <ui-button commandfor="welcome" command="--show">Show</ui-button>
-                  <ui-modal id="welcome" header="Welcome" content="Opened by the button, no script." closable></ui-modal>
+                  <ui-modal id="welcome" heading="Welcome" content="Opened by the button, no script." closable></ui-modal>
                 </script>
               </ui-code>
             </ui-section>
@@ -584,7 +584,7 @@
                   description='`closedby="none"`:  Escape and the dimmer do nothing.  The close button is an invoker, `command="--close"`.'
                 >
                   <ui-button commandfor="modal-usage-none" command="--show">Show</ui-button>
-                  <ui-modal id="modal-usage-none" closedby="none" size="small" header="Unsaved changes">
+                  <ui-modal id="modal-usage-none" closedby="none" size="small" heading="Unsaved changes">
                     <ui-content
                       ><p>Escape and clicks on the dimmer do nothing here: only the button closes it.</p></ui-content
                     >
@@ -700,7 +700,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-modal visible={open} header="Delete?" onui-close={() => setOpen(false)} onui-approve={remove}>
+                  <ui-modal visible={open} heading="Delete?" onui-close={() => setOpen(false)} onui-approve={remove}>
                     ...
                   </ui-modal>
                 </script>
@@ -709,7 +709,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-modal :visible="open" header="Delete?" @ui-close="open = false" @ui-approve="remove">...</ui-modal>
+                  <ui-modal :visible="open" heading="Delete?" @ui-close="open = false" @ui-approve="remove">...</ui-modal>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -718,7 +718,7 @@
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-modal
                     visible={open()}
-                    header="Delete?"
+                    heading="Delete?"
                     on-ui-close={() => setOpen(false)}
                     on-ui-approve={remove}
                   >

@@ -86,14 +86,14 @@
               <ui-section id="examples-groups-steps" label="Steps" sticky collapsible dividing>
                 <ui-docs-example>
                   <p slot="description">A set of steps: <code>&lt;ui-steps&gt;</code>.</p>
-                  <ui-message slot="description" state="positive" size="small" icon="mobile" header="Responsive Element"
+                  <ui-message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element"
                     >Steps will automatically stack on mobile. To make steps automatically stack for tablet use
                     <code>stackable="tablet"</code>.</ui-message
                   >
                   <ui-steps>
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -127,20 +127,20 @@
               <ui-section id="examples-groups-ordered" label="Ordered" sticky collapsible dividing>
                 <ui-docs-example description="A step can show an ordered sequence of steps.">
                   <ui-steps ordered>
-                    <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step selected header="Confirm" description="Verify order details"></ui-step>
-                    <ui-step header="Transfer" description="Package on its way"></ui-step>
-                    <ui-step header="Delivered" description="Package received"></ui-step>
+                    <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step selected heading="Confirm" description="Verify order details"></ui-step>
+                    <ui-step heading="Transfer" description="Package on its way"></ui-step>
+                    <ui-step heading="Delivered" description="Package received"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps circular ordered stackable>
-                    <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step selected header="Confirm" description="Verify order details"></ui-step>
-                    <ui-step header="Transfer" description="Package on its way"></ui-step>
-                    <ui-step header="Delivered" description="Package received"></ui-step>
+                    <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step selected heading="Confirm" description="Verify order details"></ui-step>
+                    <ui-step heading="Transfer" description="Package on its way"></ui-step>
+                    <ui-step heading="Delivered" description="Package received"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -151,16 +151,16 @@
                     <ui-step
                       completed
                       icon="truck"
-                      header="Shipping"
+                      heading="Shipping"
                       description="Choose your shipping options"
                     ></ui-step>
                     <ui-step
                       completed
                       icon="credit card"
-                      header="Billing"
+                      heading="Billing"
                       description="Enter billing information"
                     ></ui-step>
-                    <ui-step selected icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example
@@ -170,16 +170,16 @@
                     <ui-step
                       completed
                       icon="truck"
-                      header="Shipping"
+                      heading="Shipping"
                       description="Choose your shipping options"
                     ></ui-step>
                     <ui-step
                       completed
                       icon="credit card"
-                      header="Billing"
+                      heading="Billing"
                       description="Enter billing information"
                     ></ui-step>
-                    <ui-step selected icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -189,9 +189,9 @@
                   description="Vertical circular steps show a series of steps with the connection line between them vertically next to the title and description of each step, similar to a connected feed."
                 >
                   <ui-steps circular vertical>
-                    <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step selected header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -201,7 +201,7 @@
               <ui-section id="examples-content-description" label="Description" sticky collapsible dividing>
                 <ui-docs-example description="A step can contain a description.">
                   <ui-steps>
-                    <ui-step header="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step heading="Shipping" description="Choose your shipping options"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example
@@ -262,7 +262,7 @@
               <ui-section id="examples-content-icon" label="Icon" sticky collapsible dividing>
                 <ui-docs-example description="A step can contain an icon.">
                   <ui-steps>
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example description="Icons in circular steps are part of the title or description.">
@@ -286,16 +286,16 @@
                       href="#link"
                       selected
                       icon="truck"
-                      header="Shipping"
+                      heading="Shipping"
                       description="Choose your shipping options"
                     ></ui-step>
-                    <ui-step href="#link" header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step href="#link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps>
-                    <ui-step link icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step link header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step link icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step link heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -303,16 +303,16 @@
                     <ui-step
                       href="#link"
                       selected
-                      header="Shipping"
+                      heading="Shipping"
                       description="Choose your shipping options"
                     ></ui-step>
-                    <ui-step href="#link" header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step href="#link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps circular>
-                    <ui-step link header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step link header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step link heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step link heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -324,12 +324,12 @@
                   description="A step can be highlighted as active:  `selected` (or Fomantic's `active`), the current step."
                 >
                   <ui-steps>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps circular>
-                    <ui-step selected header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -340,14 +340,14 @@
                     <ui-step
                       completed
                       icon="payment"
-                      header="Billing"
+                      heading="Billing"
                       description="Enter billing information"
                     ></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps circular>
-                    <ui-step completed header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -376,12 +376,12 @@
                   description='A step can stack vertically only on smaller screens:  steps stack below 768px of the group&apos;s width by default, `stackable="tablet"` below 992px.'
                 >
                   <ui-steps stackable="tablet">
-                    <ui-step icon="plane" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="dollar" header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step icon="plane" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="dollar" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step
                       disabled
                       icon="info circle"
-                      header="Confirm Order"
+                      heading="Confirm Order"
                       description="Verify order details"
                     ></ui-step>
                   </ui-steps>
@@ -391,9 +391,9 @@
                   description="Circular steps never stack by width;  set `vertical` on them yourself for phones."
                 >
                   <ui-steps circular>
-                    <ui-step header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -406,13 +406,13 @@
                         <ui-step
                           completed
                           icon="truck"
-                          header="Shipping"
+                          heading="Shipping"
                           description="Choose your shipping options"
                         ></ui-step>
                         <ui-step
                           selected
                           icon="dollar"
-                          header="Billing"
+                          heading="Billing"
                           description="Enter billing information"
                         ></ui-step>
                       </ui-steps>
@@ -427,12 +427,12 @@
               <ui-section id="examples-variations-unstackable" label="Unstackable" sticky collapsible dividing>
                 <ui-docs-example description="A step can prevent itself from stacking on mobile.">
                   <ui-steps unstackable>
-                    <ui-step icon="plane" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="dollar" header="Billing" description="Enter billing information"></ui-step>
+                    <ui-step icon="plane" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="dollar" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step
                       disabled
                       icon="info circle"
-                      header="Confirm Order"
+                      heading="Confirm Order"
                       description="Verify order details"
                     ></ui-step>
                   </ui-steps>
@@ -442,17 +442,17 @@
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example description="Steps can be attached to other elements.">
                   <ui-steps widths="3" attached="top">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                   <ui-segment attached>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
                   <ui-steps widths="3" attached="bottom">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -462,15 +462,15 @@
                   description="Steps can be divided evenly inside their parent:  `widths` is the number of steps."
                 >
                   <ui-steps widths="3">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps widths="2">
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
               </ui-section>
@@ -479,9 +479,9 @@
                   description='`equal` makes every step the same width, counted from the steps themselves:  each as wide as the widest;  with `fluid`, an equal share of the row each.  `widths` above is the older, count-based spelling of `equal fluid`.'
                 >
                   <ui-steps equal>
-                    <ui-step icon="truck" header="Shipping"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm"></ui-step>
+                    <ui-step icon="truck" heading="Shipping"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example description="Horizontal circular steps are always evenly divided.">
@@ -508,9 +508,9 @@
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
                 <ui-docs-example description="Steps can have different sizes.">
                   <ui-steps size="mini">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -537,9 +537,9 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="tiny">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -566,9 +566,9 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="small">
-                    <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected icon="payment" header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                    <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -595,8 +595,8 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="large">
-                    <ui-step icon="truck" header="Shipping"></ui-step>
-                    <ui-step selected icon="payment" header="Billing"></ui-step>
+                    <ui-step icon="truck" heading="Shipping"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -615,8 +615,8 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="big">
-                    <ui-step icon="truck" header="Shipping"></ui-step>
-                    <ui-step selected icon="payment" header="Billing"></ui-step>
+                    <ui-step icon="truck" heading="Shipping"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -635,8 +635,8 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="huge">
-                    <ui-step icon="truck" header="Shipping"></ui-step>
-                    <ui-step selected icon="payment" header="Billing"></ui-step>
+                    <ui-step icon="truck" heading="Shipping"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -655,8 +655,8 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-steps size="massive">
-                    <ui-step icon="truck" header="Shipping"></ui-step>
-                    <ui-step selected icon="payment" header="Billing"></ui-step>
+                    <ui-step icon="truck" heading="Shipping"></ui-step>
+                    <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -679,45 +679,45 @@
                 <ui-docs-example description="A step's color can be inverted.">
                   <ui-segment inverted>
                     <ui-steps inverted>
-                      <ui-step icon="truck" header="Shipping" description="Choose your shipping options"></ui-step>
+                      <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                       <ui-step
                         selected
                         icon="payment"
-                        header="Billing"
+                        heading="Billing"
                         description="Enter billing information"
                       ></ui-step>
-                      <ui-step disabled icon="info" header="Confirm Order"></ui-step>
+                      <ui-step disabled icon="info" heading="Confirm Order"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-segment inverted>
                     <ui-steps inverted circular stackable>
-                      <ui-step header="Shipping" description="Choose your shipping options"></ui-step>
-                      <ui-step selected header="Billing" description="Enter billing information"></ui-step>
-                      <ui-step disabled header="Confirm Order"></ui-step>
+                      <ui-step heading="Shipping" description="Choose your shipping options"></ui-step>
+                      <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
+                      <ui-step disabled heading="Confirm Order"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-segment inverted>
                     <ui-steps inverted ordered>
-                      <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                      <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                      <ui-step selected header="Confirm" description="Verify order details"></ui-step>
-                      <ui-step header="Transfer" description="Package on its way"></ui-step>
-                      <ui-step header="Delivered" description="Package received"></ui-step>
+                      <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                      <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                      <ui-step selected heading="Confirm" description="Verify order details"></ui-step>
+                      <ui-step heading="Transfer" description="Package on its way"></ui-step>
+                      <ui-step heading="Delivered" description="Package received"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-segment inverted>
                     <ui-steps inverted ordered circular stackable>
-                      <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                      <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                      <ui-step selected header="Confirm" description="Verify order details"></ui-step>
-                      <ui-step header="Transfer" description="Package on its way"></ui-step>
-                      <ui-step header="Delivered" description="Package received"></ui-step>
+                      <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                      <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                      <ui-step selected heading="Confirm" description="Verify order details"></ui-step>
+                      <ui-step heading="Transfer" description="Package on its way"></ui-step>
+                      <ui-step heading="Delivered" description="Package received"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
@@ -727,25 +727,25 @@
                       <ui-step
                         completed
                         icon="truck"
-                        header="Shipping"
+                        heading="Shipping"
                         description="Choose your shipping options"
                       ></ui-step>
                       <ui-step
                         completed
                         icon="credit card"
-                        header="Billing"
+                        heading="Billing"
                         description="Enter billing information"
                       ></ui-step>
-                      <ui-step selected icon="info" header="Confirm Order" description="Verify order details"></ui-step>
+                      <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-segment inverted>
                     <ui-steps inverted vertical circular>
-                      <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                      <ui-step completed header="Billing" description="Enter billing information"></ui-step>
-                      <ui-step selected header="Confirm Order" description="Verify order details"></ui-step>
+                      <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                      <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
+                      <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                     </ui-steps>
                   </ui-segment>
                 </ui-docs-example>
@@ -761,12 +761,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -774,7 +774,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -784,12 +784,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -797,7 +797,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -807,12 +807,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -820,7 +820,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -830,12 +830,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -843,7 +843,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -853,12 +853,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -866,7 +866,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -876,12 +876,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -889,7 +889,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -899,12 +899,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -912,7 +912,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -922,12 +922,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -935,7 +935,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -945,12 +945,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -958,7 +958,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -968,12 +968,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -981,7 +981,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -991,12 +991,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -1004,7 +1004,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -1014,12 +1014,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -1027,7 +1027,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -1037,12 +1037,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -1050,7 +1050,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -1060,12 +1060,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -1073,7 +1073,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example>
@@ -1083,12 +1083,12 @@
                         <ui-title>Completed</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step completed selected header="Completed..." description="...and active"></ui-step>
+                    <ui-step completed selected heading="Completed..." description="...and active"></ui-step>
                     <ui-step
                       completed
                       selected
                       disabled
-                      header="Completed..."
+                      heading="Completed..."
                       description="...and active ... and disabled"
                     ></ui-step>
                     <ui-step selected>
@@ -1096,7 +1096,7 @@
                         <ui-title>Active</ui-title>
                       </ui-content>
                     </ui-step>
-                    <ui-step header="Default"></ui-step>
+                    <ui-step heading="Default"></ui-step>
                   </ui-steps>
                 </ui-docs-example>
                 <ui-docs-example description="Single steps of a circular steps group can have a separate color.">
@@ -1144,9 +1144,9 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <ui-steps ordered>
-                    <ui-step completed header="Shipping" description="Choose your shipping options"></ui-step>
-                    <ui-step selected header="Billing" description="Enter billing information"></ui-step>
-                    <ui-step disabled header="Confirm Order"></ui-step>
+                    <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+                    <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
+                    <ui-step disabled heading="Confirm Order"></ui-step>
                   </ui-steps>
                 </script>
               </ui-code>

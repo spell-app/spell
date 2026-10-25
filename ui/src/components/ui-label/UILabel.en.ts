@@ -16,7 +16,7 @@ import type { E } from "spell-ui/core"
 /****************
  * ### `labelVocabulary`
  * The names of `<ui-label>`, a small tag or badge:
- * `<span class="ui … label">` (an `<a>` with `href`) in its shadow root.
+ * `<span class="ui … label">` (an `<a>` with `link`) in its shadow root.
  ****************/
 export const labelVocabulary = {
   tag: "ui-label",
@@ -134,8 +134,14 @@ export const labelVocabulary = {
       kind: "boolean",
       description: "Shows a delete icon button;  clicking it dispatches `ui-remove`."
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a label." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`) styled as a label.  Its old name is `href`."
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],
   events: [
     {
@@ -150,7 +156,7 @@ export const labelVocabulary = {
     { name: "icon", description: "Icon, instead of the `icon` attribute." }
   ],
   parts: [
-    { name: "label", description: "The label box (`<span>`, or `<a>` with `href`)." },
+    { name: "label", description: "The label box (`<span>`, or `<a>` with `link`)." },
     { name: "image", description: "The `<img>` of an `image` label with a URL." },
     { name: "icon", description: "The icon box." },
     { name: "detail", description: "The `detail` shorthand." },

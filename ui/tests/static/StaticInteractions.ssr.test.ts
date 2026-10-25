@@ -18,7 +18,7 @@ describe("StaticInteractions.wire() with JavaScript off", { timeout: 30_000 }, (
     StaticRender.define(...StaticCatalog.classes)
     const body = `
       <ui-button id="open" commandfor="m1" command="--show">Open</ui-button>
-      <ui-modal id="m1" closable header="Hello">
+      <ui-modal id="m1" closable heading="Hello">
         <ui-content>Body</ui-content>
         <ui-actions><ui-button id="ok" approve>OK</ui-button></ui-actions>
       </ui-modal>

@@ -20,7 +20,7 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  *   A third, non-modal overlay would move it to `src/elements/` (`agents/CODE-DEBT.md`, `ui`).
  *
  * - Every dialog vocabulary MUST name (each family's tests check it;  types can't):
- *   - attributes `closable`, `closedby`, `header`, `content`
+ *   - attributes `closable`, `closedby`, `heading`, `content`
  *   - events `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`
  *   - parts `rootPart`, `header`, `content`, `close`;  text `close`.
  *
@@ -53,7 +53,7 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  * - `closable="false"` is Fomantic's `closable: false` AND `closeIcon: false`:
  *   no icon, and (unless `closedby` is set) `closedby="none"`, so Escape and the dimmer do nothing.
  *
- * - Its name:  the DOM element's `aria-label`, else the `header` shorthand, else a slotted `<ui-header>`
+ * - Its name:  the DOM element's `aria-label`, else the `heading` shorthand, else a slotted `<ui-header>`
  *   (by element reflection:  an idref can't reach into the light DOM from the shadow root).
  ****************/
 export abstract class DialogComponent<
@@ -87,8 +87,8 @@ export abstract class DialogComponent<
   /** `closedby`:  what dismisses it, as written;  see `closedBy` for what it means. */
   declare closedby: DialogAttributes["closedby"] | undefined
 
-  /** `header`:  the header shorthand. */
-  declare header: string | undefined
+  /** `heading`:  the heading shorthand (old name `header`). */
+  declare heading: string | undefined
 
   /** `content`:  the content shorthand. */
   declare content: string | undefined
@@ -351,15 +351,15 @@ export abstract class DialogComponent<
    * - Read on the server too, NO `isServer` guard:
    *   the static render (`spell-ui/static`, on linkedom elements) names the dialog by it (`serverLabelledBy()`).
    */
-  @E.state accessor heading: Element | undefined = this.findHeading()
+  @E.state accessor slottedHeading: Element | undefined = this.findHeading()
 
-  /** Id of the `header` shorthand, from `UI.ids` once rendering. */
+  /** Id of the `heading` shorthand, from `UI.ids` once rendering. */
   private headerId = ""
 
   /** The light DOM's slotted children changed:  look for the heading again. */
   @E.on("slotchange", { target: "renderRoot" })
   protected onSlotChange() {
-    this.heading = this.findHeading()
+    this.slottedHeading = this.findHeading()
   }
 
   /** First child element whose definition's noun is `header` (a `<ui-header>`, or a translated one). */
@@ -370,8 +370,8 @@ export abstract class DialogComponent<
     return undefined
   }
 
-  /** The dialog's name:  its `aria-label`, else `aria-labelledby` the `header` shorthand, else the slotted heading. */
-  @E.onChange("isReady", "ariaLabel", "header", "heading")
+  /** The dialog's name:  its `aria-label`, else `aria-labelledby` the `heading` shorthand, else the slotted heading. */
+  @E.onChange("isReady", "ariaLabel", "heading", "slottedHeading")
   protected onNameChanged(
     _isReady: boolean,
     label: string | undefined,
@@ -392,15 +392,15 @@ export abstract class DialogComponent<
 
   /**
    * The dialog's `aria-labelledby` in a server render (`spell-ui/static`):
-   * the `header` shorthand's id, else the slotted heading's,
+   * the `heading` shorthand's id, else the slotted heading's,
    * unless the DOM element has an `aria-label` (which the static output moves onto the dialog).
    * - Why:  on a server no effect applies and no element reflects.
    * - SIDE EFFECT:  gives the slotted heading (the render's parsed copy) an id if it has none.
    */
   private serverLabelledBy(): string | undefined {
     if (this.ariaLabel) return undefined
-    if (this.header) return this.headerId
-    const heading = this.heading
+    if (this.heading) return this.headerId
+    const heading = this.slottedHeading
     return heading ? UI.ids.ensure(heading, `ui-${this.elementDefinition.vocabulary.noun}-heading`) : undefined
   }
 
@@ -421,9 +421,9 @@ export abstract class DialogComponent<
         onPointerDown={this.onPointerDown}
         onClick={this.onDialogClick}
       >
-        <Show when={this.header}>
+        <Show when={this.heading}>
           <div id={this.headerId} class={UIT.HEADER} part={this.dialogPart(UIT.HEADER)}>
-            {this.header}
+            {this.heading}
           </div>
         </Show>
         <Show when={this.content}>

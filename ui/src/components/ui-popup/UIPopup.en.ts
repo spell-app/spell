@@ -98,10 +98,12 @@ export const popupVocabulary = {
       description: "Id of the target, in the popup's own tree;  without it, the previous element sibling."
     },
     {
-      name: "header",
+      name: "heading",
+      replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version."
+      description:
+        "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
     },
     {
       name: "content",

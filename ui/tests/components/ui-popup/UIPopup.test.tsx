@@ -117,7 +117,7 @@ describe("<ui-popup> classes", () => {
 
 describe("<ui-popup> content", () => {
   it("renders the header and content shorthands, then the slot", async () => {
-    const { root } = await popup(`<button>t</button><ui-popup header="Title" content="Body">Extra</ui-popup>`)
+    const { root } = await popup(`<button>t</button><ui-popup heading="Title" content="Body">Extra</ui-popup>`)
     expect([...root.children].map((child) => `${child.className}.${child.getAttribute("part")}`)).toEqual([
       "header.header",
       "content.content",
@@ -386,7 +386,7 @@ describe("<ui-popup> focus", () => {
 
 describe("<ui-popup> click", () => {
   /** A click popup with a control inside. */
-  const CLICK = `<button id="t">Target</button><ui-popup for="t" open-on="click" header="Plan"><button>Choose</button></ui-popup>`
+  const CLICK = `<button id="t">Target</button><ui-popup for="t" open-on="click" heading="Plan"><button>Choose</button></ui-popup>`
 
   it("is a non-modal dialog:  role, name, and aria-haspopup / -expanded / -controls on the target", async () => {
     const { host, wrapper } = await popup(CLICK)
@@ -738,5 +738,22 @@ describe("<ui-popup> invoker commands", () => {
     send(host, "--toggle")
     await settle()
     expect(shown(host)).toBe(false)
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-popup> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-popup header="Old">Body</ui-popup>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-popup heading="New">Body</ui-popup>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

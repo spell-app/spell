@@ -89,7 +89,7 @@ describe("<ui-card> classes and markup", () => {
   })
 
   it("drops a disabled link card's href;  aria-disabled, :state(disabled)", async () => {
-    const host = await render(`<ui-card href="#x" disabled header="Off"></ui-card>`)
+    const host = await render(`<ui-card href="#x" disabled heading="Off"></ui-card>`)
     expect(rootOf(host).hasAttribute("href")).toBe(false)
     expect(rootOf(host).getAttribute("aria-disabled")).toBe("true")
     expect(host.internals.ariaDisabled).toBe("true")
@@ -98,7 +98,7 @@ describe("<ui-card> classes and markup", () => {
   })
 
   it("announces loading:  aria-busy, a status, a spinner", async () => {
-    const host = await render(`<ui-card loading header="Busy"></ui-card>`)
+    const host = await render(`<ui-card loading heading="Busy"></ui-card>`)
     expect(host.internals.ariaBusy).toBe("true")
     expect(host.shadowRoot!.querySelector("[role=status]")!.textContent).toBe("Loading…")
     expect(style(rootOf(host), "::after").animationName).toBe("ui-card-spin")
@@ -116,7 +116,7 @@ describe("<ui-card> classes and markup", () => {
 describe("<ui-card> shorthands", () => {
   it("renders image, content block (header, meta, description) and extra as static parts, in order", async () => {
     const host = await render(
-      `<ui-card image="${PHOTO}" alt="Kristy" header="Kristy" meta="Joined in 2013" description="Art director" extra="22 Friends"><ui-button>Add</ui-button></ui-card>`
+      `<ui-card image="${PHOTO}" alt="Kristy" heading="Kristy" meta="Joined in 2013" description="Art director" extra="22 Friends"><ui-button>Add</ui-button></ui-card>`
     )
     const root = rootOf(host)
     const order = [...root.children].map((child) => child.getAttribute("part") ?? child.localName)
@@ -142,7 +142,7 @@ describe("<ui-card> shorthands", () => {
 
   it("styles a shorthand header like a slotted <ui-header>", async () => {
     const host = await render(
-      `<ui-card header="Shorthand"></ui-card><ui-card><ui-content><ui-header>Slotted</ui-header></ui-content></ui-card>`
+      `<ui-card heading="Shorthand"></ui-card><ui-card><ui-content><ui-header>Slotted</ui-header></ui-content></ui-card>`
     )
     const slotted = host.parentElement!.querySelectorAll("ui-card")[1]!.querySelector("ui-header")!
     expect(slotted.matches(":state(in-card)")).toBe(true)
@@ -153,7 +153,7 @@ describe("<ui-card> shorthands", () => {
 
   it("yields each shorthand to a slotted part of its noun, also added later", async () => {
     const host = await render(
-      `<ui-card image="${PHOTO}" header="Short" meta="Meta"><ui-content><ui-meta>Slotted meta</ui-meta></ui-content></ui-card>`
+      `<ui-card image="${PHOTO}" heading="Short" meta="Meta"><ui-content><ui-meta>Slotted meta</ui-meta></ui-content></ui-card>`
     )
     expect(shorthand(host, "header")).not.toBeNull()
     expect(shorthand(host, "meta")).toBeNull()
@@ -188,13 +188,13 @@ describe("<ui-card> content parts", () => {
   })
 
   it("draws the rule above a slotted content that follows a shorthand block", async () => {
-    const host = await render(`<ui-card header="A"><ui-content>B</ui-content></ui-card>`)
+    const host = await render(`<ui-card heading="A"><ui-content>B</ui-content></ui-card>`)
     expect(style(shorthand(host, "content")!).borderTopWidth).toBe("0px")
     expect(style(partRoot(host.querySelector("ui-content")!)).borderTopWidth).toBe("1px")
     const imaged = await render(`<ui-card image="${PHOTO}"><ui-content>B</ui-content></ui-card>`)
     expect(style(partRoot(imaged.querySelector("ui-content")!)).borderTopWidth).toBe("1px")
     // ... but not in a horizontal card, whose contents have none
-    const horizontal = await render(`<ui-card horizontal header="A"><ui-content>B</ui-content></ui-card>`)
+    const horizontal = await render(`<ui-card horizontal heading="A"><ui-content>B</ui-content></ui-card>`)
     expect(style(partRoot(horizontal.querySelector("ui-content")!)).borderTopWidth).toBe("0px")
   })
 
@@ -225,8 +225,8 @@ describe("<ui-card> content parts", () => {
 
 describe("<ui-card> variations", () => {
   it("draws a coloured bottom line from the colour remap", async () => {
-    const plain = await render(`<ui-card header="Plain"></ui-card>`)
-    const red = await render(`<ui-card color="red" header="Red"></ui-card>`)
+    const plain = await render(`<ui-card heading="Plain"></ui-card>`)
+    const red = await render(`<ui-card color="red" heading="Red"></ui-card>`)
     expect(style(rootOf(red)).boxShadow).not.toBe(style(rootOf(plain)).boxShadow)
     expect(style(rootOf(plain)).boxShadow).toContain("rgba(0, 0, 0, 0) 0px 2px 0px 0px")
   })
@@ -269,7 +269,7 @@ describe("<ui-card> variations", () => {
   })
 
   it("rises on hover when `link`, or as a link card", async () => {
-    const host = await render(`<ui-card link header="Hover me"></ui-card>`)
+    const host = await render(`<ui-card link heading="Hover me"></ui-card>`)
     expect(style(rootOf(host)).transform).toBe("none")
     await userEvent.hover(rootOf(host))
     await expect.poll(() => style(rootOf(host)).transform).toBe("matrix(1, 0, 0, 1, 0, -3)")
@@ -278,7 +278,9 @@ describe("<ui-card> variations", () => {
 
   it("a link card's hover ring takes `--ui-card-hover-border-color`", async () => {
     const red = "rgb(255, 0, 0)"
-    const host = await render(`<ui-card link header="Hover me" style="--ui-card-hover-border-color: ${red}"></ui-card>`)
+    const host = await render(
+      `<ui-card link heading="Hover me" style="--ui-card-hover-border-color: ${red}"></ui-card>`
+    )
     expect(style(rootOf(host)).boxShadow).not.toContain(`${red} 0px 0px 0px 1px`)
     await userEvent.hover(rootOf(host))
     await expect.poll(() => style(rootOf(host)).boxShadow).toContain(`${red} 0px 0px 0px 1px`)
@@ -289,37 +291,37 @@ describe("<ui-card> variations", () => {
     const red = "rgb(255, 0, 0)"
     const ring = `${red} 0px 0px 0px 1px`
     const onHost = await render(
-      `<ui-card header="Flat" style="--ui-card-shadow: none; --ui-card-border-color: ${red}"></ui-card>`
+      `<ui-card heading="Flat" style="--ui-card-shadow: none; --ui-card-border-color: ${red}"></ui-card>`
     )
     expect(style(rootOf(onHost)).boxShadow).toContain(ring)
     expect(style(rootOf(onHost)).boxShadow).not.toContain("3px")
     const above = await ElementFixture.render(
-      `<div style="--ui-card-shadow: none; --ui-card-border-color: ${red}"><ui-card header="Flat"></ui-card></div>`
+      `<div style="--ui-card-shadow: none; --ui-card-border-color: ${red}"><ui-card heading="Flat"></ui-card></div>`
     )
     expect(style(rootOf(above.querySelector("ui-card")!)).boxShadow).toContain(ring)
-    const noRing = await render(`<ui-card header="Bare" style="--ui-card-border-shadow: none"></ui-card>`)
+    const noRing = await render(`<ui-card heading="Bare" style="--ui-card-border-shadow: none"></ui-card>`)
     expect(style(rootOf(noRing)).boxShadow).toContain("3px")
   })
 
   it("`dashed`:  a dashed outline in the border colour instead of the ring, no drop shadow", async () => {
     const red = "rgb(255, 0, 0)"
-    const host = await render(`<ui-card dashed header="Placeholder" style="--ui-card-border-color: ${red}"></ui-card>`)
+    const host = await render(`<ui-card dashed heading="Placeholder" style="--ui-card-border-color: ${red}"></ui-card>`)
     expect(rootOf(host).className).toBe("ui dashed card")
     const root = style(rootOf(host))
     expect([root.outlineStyle, root.outlineColor, root.outlineWidth]).toEqual(["dashed", red, "1px"])
     expect(root.boxShadow).not.toContain(red)
     expect(root.boxShadow).not.toContain("3px")
-    const plain = await render(`<ui-card header="Plain"></ui-card>`)
+    const plain = await render(`<ui-card heading="Plain"></ui-card>`)
     expect(style(rootOf(plain)).outlineStyle).toBe("none")
-    const raised = await render(`<ui-card dashed raised header="Raised"></ui-card>`)
+    const raised = await render(`<ui-card dashed raised heading="Raised"></ui-card>`)
     expect(style(rootOf(raised)).boxShadow).not.toBe(root.boxShadow)
   })
 
   it("takes its public tokens from the DOM element, an ancestor or `::part(card)`", async () => {
-    const onHost = await render(`<ui-card style="--ui-card-radius: 20px" header="Host"></ui-card>`)
+    const onHost = await render(`<ui-card style="--ui-card-radius: 20px" heading="Host"></ui-card>`)
     expect(style(rootOf(onHost)).borderTopLeftRadius).toBe("20px")
     const wrapper = await ElementFixture.render(
-      `<div style="--ui-cards-spacing: 3em"><ui-cards><ui-card header="A"></ui-card></ui-cards></div>`
+      `<div style="--ui-cards-spacing: 3em"><ui-cards><ui-card heading="A"></ui-card></ui-cards></div>`
     )
     const group = wrapper.querySelector("ui-cards")!
     expect(style(rootOf(group)).marginLeft).toBe("-24px")
@@ -355,7 +357,7 @@ describe("<ui-card> variations", () => {
 ////////////////
 
 describe("<ui-cards>", () => {
-  const THREE = `<ui-card header="A"></ui-card><ui-card header="B"></ui-card><ui-card header="C"></ui-card>`
+  const THREE = `<ui-card heading="A"></ui-card><ui-card heading="B"></ui-card><ui-card heading="C"></ui-card>`
 
   it("renders a list of listitem cards with :state(in-cards)", async () => {
     const group = await render(`<ui-cards>${THREE}</ui-cards>`)
@@ -368,7 +370,7 @@ describe("<ui-cards>", () => {
       expect(card.internals.role).toBe("listitem")
       expect(card.matches(":state(in-cards)")).toBe(true)
     }
-    const standalone = await render(`<ui-card header="Alone"></ui-card>`)
+    const standalone = await render(`<ui-card heading="Alone"></ui-card>`)
     expect(standalone.internals.role).toBeNull()
   })
 
@@ -409,7 +411,7 @@ describe("<ui-cards>", () => {
   })
 
   it("doubles and stacks by its OWN width (container queries)", async () => {
-    const four = `${THREE}<ui-card header="D"></ui-card>`
+    const four = `${THREE}<ui-card heading="D"></ui-card>`
     const wrapper = await ElementFixture.render(
       `<div style="width: 1200px"><div style="width: 600px"><ui-cards columns="4" doubling>${four}</ui-cards></div>` +
         `<div style="width: 600px"><ui-cards columns="4" stackable>${four}</ui-cards></div></div>`
@@ -425,7 +427,7 @@ describe("<ui-cards>", () => {
   })
 
   it('`stack-with="page"` doubles and stacks by the SCREEN;  the token too, and the attribute beats it', async () => {
-    const four = `${THREE}<ui-card header="D"></ui-card>`
+    const four = `${THREE}<ui-card heading="D"></ui-card>`
     const wrapper = await ElementFixture.render(
       `<div style="width: 600px"><ui-cards columns="4" stackable stack-with="page">${four}</ui-cards>` +
         `<div style="--ui-stack-with: page"><ui-cards columns="4" stackable>${four}</ui-cards>` +
@@ -454,7 +456,7 @@ describe("<ui-cards>", () => {
   })
 
   it("lets a card leave its group:  no role, no group classes", async () => {
-    const group = await render(`<ui-cards raised><ui-card header="Moving"></ui-card></ui-cards>`)
+    const group = await render(`<ui-cards raised><ui-card heading="Moving"></ui-card></ui-cards>`)
     const card = cardsOf(group)[0]!
     group.after(card)
     await ElementFixture.tick()
@@ -472,7 +474,7 @@ describe("<ui-cards>", () => {
 describe("<ui-card> keyboard", () => {
   it("is one Tab stop as a link card, followed with Enter", async () => {
     const wrapper = await ElementFixture.render(
-      `<div><button>Before</button><ui-card href="#kristy" header="Kristy" description="Art director"></ui-card><ui-card header="Plain"></ui-card><button>After</button></div>`
+      `<div><button>Before</button><ui-card href="#kristy" heading="Kristy" description="Art director"></ui-card><ui-card heading="Plain"></ui-card><button>After</button></div>`
     )
     const [before, after] = wrapper.querySelectorAll("button")
     const card = wrapper.querySelector("ui-card")!
@@ -502,5 +504,22 @@ describe("<ui-card> accessibility", () => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await ElementFixture.settle(root)
     await expectAccessible(root)
+  })
+})
+
+////////////////
+// ## Old names
+////////////////
+
+describe("<ui-card> heading", () => {
+  it("takes `header`, its old name, as `heading`", async () => {
+    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-card header="Old">Body</ui-card>`
+    )
+    expect(element.heading).toBe("Old")
+    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
+      `<ui-card heading="New">Body</ui-card>`
+    )
+    expect(written.heading).toBe("New")
   })
 })

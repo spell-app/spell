@@ -26,13 +26,19 @@ export const breadcrumbSectionVocabulary = {
       kind: "keyOnly",
       description: 'The current page:  bold, not a link, `aria-current="page"`.'
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) to this level." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: "Renders a link (`<a>`) to this level.  Its old name is `href`."
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],
   events: [],
   slots: [{ name: "", description: "The section's text (and an optional `<ui-icon>`)." }],
   parts: [
-    { name: "section", description: "The section (`<a>`, or `<span>` when active or without `href`)." },
+    { name: "section", description: "The section (`<a>`, or `<span>` when active or without `link`)." },
     { name: "divider", description: "The divider before it, drawn from the breadcrumb's tokens;  hidden on the first." }
   ],
   states: [{ name: "active", description: "The current page." }],

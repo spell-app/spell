@@ -192,8 +192,8 @@
                 description="GitHub restyles labels and breadcrumbs;  Gmail and GitHub restyle messages."
               >
                 <ui-breadcrumb aria-label="Gallery breadcrumb">
-                  <ui-breadcrumb-section href="#theme-gallery">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section href="#theme-gallery">Store</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#theme-gallery">Home</ui-breadcrumb-section>
+                  <ui-breadcrumb-section link="#theme-gallery">Store</ui-breadcrumb-section>
                   <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
                 </ui-breadcrumb>
                 <ui-labels>
@@ -201,7 +201,7 @@
                   <ui-label color="blue">Blue</ui-label>
                   <ui-label color="green" tag>New</ui-label>
                 </ui-labels>
-                <ui-message header="Changes in Service">
+                <ui-message heading="Changes in Service">
                   <p>We just updated our privacy policy here to better service our customers.</p>
                 </ui-message>
               </ui-docs-example>
@@ -222,7 +222,7 @@
                 <ui-comments>
                   <ui-comment>
                     <ui-content>
-                      <ui-author href="#theme-gallery">Matt</ui-author>
+                      <ui-author link="#theme-gallery">Matt</ui-author>
                       <ui-meta>Today at 5:42PM</ui-meta>
                       <ui-description>How artistic!</ui-description>
                     </ui-content>
@@ -246,16 +246,16 @@
                   <ui-step
                     completed
                     icon="truck"
-                    header="Shipping"
+                    heading="Shipping"
                     description="Choose your shipping options"
                   ></ui-step>
                   <ui-step
                     selected
                     icon="credit card"
-                    header="Billing"
+                    heading="Billing"
                     description="Enter billing information"
                   ></ui-step>
-                  <ui-step disabled icon="circle info" header="Confirm Order"></ui-step>
+                  <ui-step disabled icon="circle info" heading="Confirm Order"></ui-step>
                 </ui-steps>
                 <ui-segment>
                   <ui-loader visible inline centered></ui-loader>
@@ -328,7 +328,7 @@
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
                 <ui-popup content="Add users to your feed"></ui-popup>
                 <ui-button commandfor="theming-gallery-modal" command="--show">Show modal</ui-button>
-                <ui-modal id="theming-gallery-modal" header="Profile Picture" closable>
+                <ui-modal id="theming-gallery-modal" heading="Profile Picture" closable>
                   <ui-content>
                     <p>Is it okay to use this photo?</p>
                   </ui-content>
@@ -380,8 +380,8 @@
                       <td>amazon.com circa 2015: 13px Arial, gradient buttons, an orange primary. Page-wide.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label></ui-labels
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -390,11 +390,11 @@
                       <td>Stripped back: flat grey buttons, borderless cards, pill steps, no progress track.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-card.html">Card</ui-label
-                          ><ui-label href="ui-progress.html">Progress</ui-label
-                          ><ui-label href="ui-step.html">Step</ui-label
-                          ><ui-label href="ui-table.html">Table</ui-label></ui-labels
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-card.html">Card</ui-label
+                          ><ui-label link="ui-progress.html">Progress</ui-label
+                          ><ui-label link="ui-step.html">Step</ui-label
+                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -402,7 +402,7 @@
                       <td><code>bookish</code></td>
                       <td>Serif "book" headers in Karma.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-header.html">Header</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-header.html">Header</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -411,7 +411,7 @@
                         Bootstrap 3's <code>.btn</code>: white, a grey hairline, a small radius, Bootstrap's palette.
                       </td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-button.html">Button</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -419,14 +419,14 @@
                       <td>Big, soft, padded controls.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-accordion.html">Accordion</ui-label
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-comment.html">Comment</ui-label
-                          ><ui-label href="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label href="ui-form.html">Form</ui-label
-                          ><ui-label href="ui-input.html">Input</ui-label
-                          ><ui-label href="ui-menu.html">Menu</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label></ui-labels
+                          ><ui-label link="ui-accordion.html">Accordion</ui-label
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-comment.html">Comment</ui-label
+                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
+                          ><ui-label link="ui-form.html">Form</ui-label
+                          ><ui-label link="ui-input.html">Input</ui-label
+                          ><ui-label link="ui-menu.html">Menu</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -435,7 +435,7 @@
                       <td>Checkboxes, radios and sliders chosen in the primary colour.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-checkbox.html">Checkbox</ui-label></ui-labels
+                          ><ui-label link="ui-checkbox.html">Checkbox</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -443,14 +443,14 @@
                       <td><code>duo</code></td>
                       <td>A two-colour loader ring: primary and secondary halves.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-loader.html">Loader</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-loader.html">Loader</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
                       <td><code>fixed-width</code></td>
                       <td>Narrower, fixed modal widths.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-modal.html">Modal</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-modal.html">Modal</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -458,10 +458,10 @@
                       <td>A flatter, brighter site with underlined form fields. Page-wide.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label href="ui-form.html">Form</ui-label
-                          ><ui-label href="ui-input.html">Input</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label></ui-labels
+                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
+                          ><ui-label link="ui-form.html">Form</ui-label
+                          ><ui-label link="ui-input.html">Input</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -473,11 +473,11 @@
                       </td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-card.html">Card</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label
-                          ><ui-label href="ui-progress.html">Progress</ui-label
-                          ><ui-label href="ui-table.html">Table</ui-label></ui-labels
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-card.html">Card</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label
+                          ><ui-label link="ui-progress.html">Progress</ui-label
+                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -486,21 +486,21 @@
                       <td>GitHub's look, circa 2015. Page-wide.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-breadcrumb.html">Breadcrumb</ui-label
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label href="ui-form.html">Form</ui-label
-                          ><ui-label href="ui-grid.html">Grid</ui-label
-                          ><ui-label href="ui-image.html">Image</ui-label
-                          ><ui-label href="ui-input.html">Input</ui-label
-                          ><ui-label href="ui-label.html">Label</ui-label
-                          ><ui-label href="ui-menu.html">Menu</ui-label
-                          ><ui-label href="ui-message.html">Message</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label
-                          ><ui-label href="ui-popup.html">Popup</ui-label
-                          ><ui-label href="ui-segment.html">Segment</ui-label
-                          ><ui-label href="ui-step.html">Step</ui-label
-                          ><ui-label href="ui-table.html">Table</ui-label></ui-labels
+                          ><ui-label link="ui-breadcrumb.html">Breadcrumb</ui-label
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
+                          ><ui-label link="ui-form.html">Form</ui-label
+                          ><ui-label link="ui-grid.html">Grid</ui-label
+                          ><ui-label link="ui-image.html">Image</ui-label
+                          ><ui-label link="ui-input.html">Input</ui-label
+                          ><ui-label link="ui-label.html">Label</ui-label
+                          ><ui-label link="ui-menu.html">Menu</ui-label
+                          ><ui-label link="ui-message.html">Message</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label
+                          ><ui-label link="ui-popup.html">Popup</ui-label
+                          ><ui-label link="ui-segment.html">Segment</ui-label
+                          ><ui-label link="ui-step.html">Step</ui-label
+                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -509,7 +509,7 @@
                       <td>Compact grey notice bars, like Gmail's.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-message.html">Message</ui-label></ui-labels
+                          ><ui-label link="ui-message.html">Message</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -517,7 +517,7 @@
                       <td><code>instagram</code></td>
                       <td>Flat bordered cards in Montserrat, like Instagram's posts.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-card.html">Card</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-card.html">Card</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -525,11 +525,11 @@
                       <td>Google's Material Design, circa 2016. Page-wide.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-button.html">Button</ui-label
-                          ><ui-label href="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label href="ui-menu.html">Menu</ui-label
-                          ><ui-label href="ui-modal.html">Modal</ui-label
-                          ><ui-label href="ui-header.html">Header</ui-label></ui-labels
+                          ><ui-label link="ui-button.html">Button</ui-label
+                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
+                          ><ui-label link="ui-menu.html">Menu</ui-label
+                          ><ui-label link="ui-modal.html">Modal</ui-label
+                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -537,14 +537,14 @@
                       <td><code>pulsar</code></td>
                       <td>A primary-coloured loader that fades in, whirls and fades out.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-loader.html">Loader</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-loader.html">Loader</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
                       <td><code>raised</code></td>
                       <td>Buttons with a 3D bottom edge.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-button.html">Button</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -556,7 +556,7 @@
                       <td><code>round</code></td>
                       <td>White, pill-shaped, uppercase outlined buttons.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-button.html">Button</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
@@ -569,7 +569,7 @@
                       <td>Diagonal stripes on progress bars, marching while <code>active</code>.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label href="ui-progress.html">Progress</ui-label></ui-labels
+                          ><ui-label link="ui-progress.html">Progress</ui-label></ui-labels
                         >
                       </td>
                     </tr>
@@ -582,14 +582,14 @@
                       <td><code>timeline</code></td>
                       <td>A feed drawn as a timeline: a line down the labels, round badges on it.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-feed.html">Feed</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-feed.html">Feed</ui-label></ui-labels>
                       </td>
                     </tr>
                     <tr>
                       <td><code>twitter</code></td>
                       <td>twitter.com circa 2015: pale gradient buttons, a sky-blue primary.</td>
                       <td>
-                        <ui-labels size="mini"><ui-label href="ui-button.html">Button</ui-label></ui-labels>
+                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
                       </td>
                     </tr>
                   </tbody>
@@ -1079,13 +1079,13 @@
               </script>
             </ui-markdown>
             <ui-steps vertical ordered>
-              <ui-step icon="lock" header="Foundation" description="tokens.css, colors.css:  ui.tokens"></ui-step>
+              <ui-step icon="lock" heading="Foundation" description="tokens.css, colors.css:  ui.tokens"></ui-step>
               <ui-step
                 icon="download"
-                header="Packaged theme"
+                heading="Packaged theme"
                 description="classic + a Fomantic theme:  ui.theme"
               ></ui-step>
-              <ui-step icon="user" header="Your site" description="tokens and the app stylesheet:  ui.app"></ui-step>
+              <ui-step icon="user" heading="Your site" description="tokens and the app stylesheet:  ui.app"></ui-step>
             </ui-steps>
 
             <ui-section
@@ -1172,35 +1172,35 @@
             </ui-markdown>
             <ui-steps vertical ordered>
               <ui-step
-                header="Read the theme"
+                heading="Read the theme"
                 description="reference/Fomantic-UI/src/themes/<name>/**:  globals/site.variables first, then each component's .variables and .overrides.  Only what's there is the theme."
               ></ui-step>
               <ui-step
-                header="Create the sheet"
+                heading="Create the sheet"
                 description="themes/<name>.css with a header comment like github.css's (what, touches, font, dark scheme, NOT ported), all inside @layer ui.theme.  No registry edit:  UI.themes globs the folder."
               ></ui-step>
               <ui-step
-                header="Tokens first"
+                heading="Tokens first"
                 description="On :root, from each component's token block or its docs table;  the mapping table below."
               ></ui-step>
               <ui-step
-                header="Overrides second"
+                heading="Overrides second"
                 description="Fomantic's .overrides, and any variable with no token, as class-grammar rules with the selectors the component's own sheet uses."
               ></ui-step>
               <ui-step
-                header="Skip what can't be ported"
+                heading="Skip what can't be ported"
                 description="List it in the header's NOT ported, and record a caveat."
               ></ui-step>
               <ui-step
-                header="Assets"
+                heading="Assets"
                 description="Images or a font the theme really needs go in themes/<name>/, referenced relatively."
               ></ui-step>
               <ui-step
-                header="Test"
+                heading="Test"
                 description='A describe("<name>") in the themes test (themes.test.ts):  at least one computed style per touched component, inside its shadow root.'
               ></ui-step>
               <ui-step
-                header="Look"
+                heading="Look"
                 description="Screenshot the touched components with the theme applied, next to fomantic-ui.com's, light and dark."
               ></ui-step>
             </ui-steps>

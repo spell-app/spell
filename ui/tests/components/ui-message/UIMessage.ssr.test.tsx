@@ -12,7 +12,7 @@ describe("<ui-message> static render", () => {
   })
 
   it("renders the header shorthand above the slotted content", () => {
-    const html = StaticRender.fragment(`<ui-message state="info" header="Hello"><p>Body</p></ui-message>`)
+    const html = StaticRender.fragment(`<ui-message state="info" heading="Hello"><p>Body</p></ui-message>`)
     expect(sorted(html)).toBe(
       sorted(
         `<div data-ui="message" class="ui info message" part="message"><div class="content" part="content">` +

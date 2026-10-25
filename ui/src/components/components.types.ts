@@ -969,6 +969,25 @@ export const NO_ANIMATION = "none"
 /** Every value `animation` takes:  Fomantic's names, then `none`. */
 export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_ANIMATION] as const
 
+/**
+ * The words the shared `font` takes, several at once (`font="bold italic"`;  epic `ui-gaps` P3):  how letters look.
+ * - `<ui-text>` draws each as its HTML element (`<strong>`, `<em>`, `<code>`, `<mark>`, `<sub>`, `<sup>` ...);
+ *   every other element shows the look alone (`reset.css`).
+ */
+export const FontWords = [
+  "bold",
+  "italic",
+  "underline",
+  "strikethrough",
+  "code",
+  "highlight",
+  "subscript",
+  "superscript"
+] as const
+
+/** One of them. */
+export type FontWord = (typeof FontWords)[number]
+
 /** One of `Animations`, Fomantic's spelling (`fade up`), or `"none"`. */
 export type Animation = (typeof Animations)[number]
 
@@ -1468,6 +1487,9 @@ export const CONTENT = "content"
 
 /** The `header` word:  a part, a class, a slot. */
 export const HEADER = "header"
+
+/** The `heading` attribute:  the heading shorthand of a card, modal, message ... (its old name `header`). */
+export const HEADING = "heading"
 
 /** The `description` word:  a part, a class. */
 export const DESCRIPTION = "description"

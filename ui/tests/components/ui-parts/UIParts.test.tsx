@@ -449,3 +449,55 @@ describe("<ui-{part}> accessibility", () => {
     await expectAccessible(root, { rules: { "heading-order": headingOrder } })
   })
 })
+
+////////////////
+// ## `link`, and its old name `href`
+//
+// Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
+////////////////
+
+describe("<ui-header> link", () => {
+  it.each(["link", "href"])("%s draws a real link", async (name) => {
+    const element = await ElementFixture.render(`<ui-header NAME="#there">Go</ui-header>`.replace("NAME", name))
+    expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+////////////////
+// ## `link`, and its old name `href`
+//
+// Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
+////////////////
+
+describe("<ui-title> link", () => {
+  it.each(["link", "href"])("%s draws a real link", async (name) => {
+    const element = await ElementFixture.render(`<ui-title NAME="#there">Go</ui-title>`.replace("NAME", name))
+    expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+////////////////
+// ## `link`, and its old name `href`
+//
+// Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
+////////////////
+
+describe("<ui-author> link", () => {
+  it.each(["link", "href"])("%s draws a real link", async (name) => {
+    const element = await ElementFixture.render(`<ui-author NAME="#there">Go</ui-author>`.replace("NAME", name))
+    expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+////////////////
+// ## `link`, and its old name `href`
+//
+// Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
+////////////////
+
+describe("<ui-detail> link", () => {
+  it.each(["link", "href"])("%s draws a real link", async (name) => {
+    const element = await ElementFixture.render(`<ui-detail NAME="#there">Go</ui-detail>`.replace("NAME", name))
+    expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})

@@ -77,18 +77,18 @@
                 <ui-docs-example
                   description="A label can be formatted to emphasize an image:  `image` is the photo's URL."
                 >
-                  <ui-label href="#label" image="../images/avatar/small/joe.jpg">Joe</ui-label>
-                  <ui-label href="#label" image="../images/avatar/small/elliot.jpg">Elliot</ui-label>
-                  <ui-label href="#label" image="../images/avatar/small/stevie.jpg">Stevie</ui-label>
+                  <ui-label link="#label" image="../images/avatar/small/joe.jpg">Joe</ui-label>
+                  <ui-label link="#label" image="../images/avatar/small/elliot.jpg">Elliot</ui-label>
+                  <ui-label link="#label" image="../images/avatar/small/stevie.jpg">Stevie</ui-label>
                 </ui-docs-example>
                 <ui-docs-example description="With a `detail`.">
-                  <ui-label href="#label" color="blue" image="../images/avatar/small/veronika.jpg" detail="Friend"
+                  <ui-label link="#label" color="blue" image="../images/avatar/small/veronika.jpg" detail="Friend"
                     >Veronika</ui-label
                   >
-                  <ui-label href="#label" color="teal" image="../images/avatar/small/jenny.jpg" detail="Student"
+                  <ui-label link="#label" color="teal" image="../images/avatar/small/jenny.jpg" detail="Student"
                     >Veronika</ui-label
                   >
-                  <ui-label href="#label" color="yellow" image="../images/avatar/small/christian.jpg" detail="Co-worker"
+                  <ui-label link="#label" color="yellow" image="../images/avatar/small/christian.jpg" detail="Co-worker"
                     >Helen</ui-label
                   >
                 </ui-docs-example>
@@ -166,13 +166,13 @@
                   <ui-grid columns="2">
                     <ui-column>
                       <ui-segment>
-                        <ui-label href="#label" corner="left" icon="heart" aria-label="Like"></ui-label>
+                        <ui-label link="#label" corner="left" icon="heart" aria-label="Like"></ui-label>
                         <ui-image fluid src="images/wireframe/image.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
                     <ui-column>
                       <ui-segment>
-                        <ui-label href="#label" color="red" corner="right" icon="save" aria-label="Save"></ui-label>
+                        <ui-label link="#label" color="red" corner="right" icon="save" aria-label="Save"></ui-label>
                         <ui-image fluid src="images/wireframe/image.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
@@ -182,9 +182,9 @@
 
               <ui-section id="examples-types-tag" label="Tag" sticky collapsible dividing>
                 <ui-docs-example description="A label can appear as a tag.">
-                  <ui-label href="#label" tag>New</ui-label>
-                  <ui-label href="#label" color="red" tag>Upcoming</ui-label>
-                  <ui-label href="#label" color="teal" tag>Featured</ui-label>
+                  <ui-label link="#label" tag>New</ui-label>
+                  <ui-label link="#label" color="red" tag>Upcoming</ui-label>
+                  <ui-label link="#label" color="teal" tag>Featured</ui-label>
                 </ui-docs-example>
               </ui-section>
 
@@ -195,18 +195,18 @@
                   <ui-grid columns="2">
                     <ui-column>
                       <ui-segment raised>
-                        <ui-label href="#label" color="red" ribbon>Overview</ui-label>
+                        <ui-label link="#label" color="red" ribbon>Overview</ui-label>
                         <span>Account Details</span>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                        <ui-label href="#label" color="blue" ribbon>Community</ui-label> User Reviews
+                        <ui-label link="#label" color="blue" ribbon>Community</ui-label> User Reviews
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
                     <ui-column>
                       <ui-segment>
-                        <ui-label href="#label" color="orange" ribbon="right">Specs</ui-label>
+                        <ui-label link="#label" color="orange" ribbon="right">Specs</ui-label>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                        <ui-label href="#label" color="teal" ribbon="right">Reviews</ui-label>
+                        <ui-label link="#label" color="teal" ribbon="right">Reviews</ui-label>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
@@ -482,23 +482,23 @@
 
               <ui-section id="examples-content-image" label="Image" sticky collapsible dividing>
                 <ui-docs-example description="A label can include an image.">
-                  <ui-label href="#label"
+                  <ui-label link="#label"
                     ><ui-image avatar spaced="right" src="images/avatar/small/elliot.jpg" alt=""></ui-image
                     >Elliot</ui-label
                   >
-                  <ui-label href="#label"
+                  <ui-label link="#label"
                     ><ui-image avatar src="images/avatar/small/stevie.jpg" alt=""></ui-image>Stevie</ui-label
                   >
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example description="A label can be a link (`href`) or contain an item that links.">
-                  <ui-label href="#label" icon="mail">23</ui-label>
+                <ui-docs-example description="A label can be a link (`link`) or contain an item that links.">
+                  <ui-label link="#label" icon="mail">23</ui-label>
                 </ui-docs-example>
                 <!-- GAP I78:  the linked detail draws the browser's link blue, not the label's colour. -->
                 <ui-docs-example>
-                  <ui-label icon="mail">23<ui-detail href="#label">View Mail</ui-detail></ui-label>
+                  <ui-label icon="mail">23<ui-detail link="#label">View Mail</ui-detail></ui-label>
                 </ui-docs-example>
               </ui-section>
 
@@ -519,14 +519,14 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
                 <ui-docs-example description="A label can show it is the current selection.">
-                  <ui-label href="#label" active>Active</ui-label>
-                  <ui-label href="#label">Inactive</ui-label>
+                  <ui-label link="#label" active>Active</ui-label>
+                  <ui-label link="#label">Inactive</ui-label>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
                 <ui-docs-example description="A label can show it is currently unable to be interacted with.">
-                  <ui-label href="#label" disabled>Disabled Label</ui-label>
+                  <ui-label link="#label" disabled>Disabled Label</ui-label>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -546,44 +546,44 @@
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
                 <ui-docs-example description="A label can be circular.">
-                  <ui-label color="red" href="#label" circular>2</ui-label>
-                  <ui-label color="orange" href="#label" circular>2</ui-label>
-                  <ui-label color="yellow" href="#label" circular>2</ui-label>
-                  <ui-label color="olive" href="#label" circular>2</ui-label>
-                  <ui-label color="green" href="#label" circular>2</ui-label>
-                  <ui-label color="teal" href="#label" circular>2</ui-label>
-                  <ui-label color="blue" href="#label" circular>2</ui-label>
-                  <ui-label color="violet" href="#label" circular>2</ui-label>
-                  <ui-label color="purple" href="#label" circular>2</ui-label>
-                  <ui-label color="pink" href="#label" circular>2</ui-label>
-                  <ui-label color="brown" href="#label" circular>2</ui-label>
-                  <ui-label color="grey" href="#label" circular>2</ui-label>
-                  <ui-label color="black" href="#label" circular>2</ui-label>
+                  <ui-label color="red" link="#label" circular>2</ui-label>
+                  <ui-label color="orange" link="#label" circular>2</ui-label>
+                  <ui-label color="yellow" link="#label" circular>2</ui-label>
+                  <ui-label color="olive" link="#label" circular>2</ui-label>
+                  <ui-label color="green" link="#label" circular>2</ui-label>
+                  <ui-label color="teal" link="#label" circular>2</ui-label>
+                  <ui-label color="blue" link="#label" circular>2</ui-label>
+                  <ui-label color="violet" link="#label" circular>2</ui-label>
+                  <ui-label color="purple" link="#label" circular>2</ui-label>
+                  <ui-label color="pink" link="#label" circular>2</ui-label>
+                  <ui-label color="brown" link="#label" circular>2</ui-label>
+                  <ui-label color="grey" link="#label" circular>2</ui-label>
+                  <ui-label color="black" link="#label" circular>2</ui-label>
                 </ui-docs-example>
                 <ui-docs-example description="With `empty`, an empty dot.">
-                  <ui-label color="red" href="#label" empty circular></ui-label>
-                  <ui-label color="orange" href="#label" empty circular></ui-label>
-                  <ui-label color="yellow" href="#label" empty circular></ui-label>
-                  <ui-label color="olive" href="#label" empty circular></ui-label>
-                  <ui-label color="green" href="#label" empty circular></ui-label>
-                  <ui-label color="teal" href="#label" empty circular></ui-label>
-                  <ui-label color="blue" href="#label" empty circular></ui-label>
-                  <ui-label color="violet" href="#label" empty circular></ui-label>
-                  <ui-label color="purple" href="#label" empty circular></ui-label>
-                  <ui-label color="pink" href="#label" empty circular></ui-label>
-                  <ui-label color="brown" href="#label" empty circular></ui-label>
-                  <ui-label color="grey" href="#label" empty circular></ui-label>
-                  <ui-label color="black" href="#label" empty circular></ui-label>
+                  <ui-label color="red" link="#label" empty circular></ui-label>
+                  <ui-label color="orange" link="#label" empty circular></ui-label>
+                  <ui-label color="yellow" link="#label" empty circular></ui-label>
+                  <ui-label color="olive" link="#label" empty circular></ui-label>
+                  <ui-label color="green" link="#label" empty circular></ui-label>
+                  <ui-label color="teal" link="#label" empty circular></ui-label>
+                  <ui-label color="blue" link="#label" empty circular></ui-label>
+                  <ui-label color="violet" link="#label" empty circular></ui-label>
+                  <ui-label color="purple" link="#label" empty circular></ui-label>
+                  <ui-label color="pink" link="#label" empty circular></ui-label>
+                  <ui-label color="brown" link="#label" empty circular></ui-label>
+                  <ui-label color="grey" link="#label" empty circular></ui-label>
+                  <ui-label color="black" link="#label" empty circular></ui-label>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A label can reduce its complexity.">
-                  <ui-label href="#label" basic>Basic</ui-label>
-                  <ui-label href="#label" basic pointing>Pointing</ui-label>
-                  <ui-label href="#label" basic image="../images/avatar/small/elliot.jpg">Elliot</ui-label>
-                  <ui-label href="#label" color="red" basic pointing>Red Pointing</ui-label>
-                  <ui-label href="#label" color="blue" basic>Blue</ui-label>
+                  <ui-label link="#label" basic>Basic</ui-label>
+                  <ui-label link="#label" basic pointing>Pointing</ui-label>
+                  <ui-label link="#label" basic image="../images/avatar/small/elliot.jpg">Elliot</ui-label>
+                  <ui-label link="#label" color="red" basic pointing>Red Pointing</ui-label>
+                  <ui-label link="#label" color="blue" basic>Blue</ui-label>
                 </ui-docs-example>
               </ui-section>
 
@@ -600,21 +600,21 @@
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
                 <ui-docs-example description="A label can have different colors.">
-                  <ui-label color="primary" href="#label">Primary</ui-label>
-                  <ui-label color="secondary" href="#label">Secondary</ui-label>
-                  <ui-label color="red" href="#label">Red</ui-label>
-                  <ui-label color="orange" href="#label">Orange</ui-label>
-                  <ui-label color="yellow" href="#label">Yellow</ui-label>
-                  <ui-label color="olive" href="#label">Olive</ui-label>
-                  <ui-label color="green" href="#label">Green</ui-label>
-                  <ui-label color="teal" href="#label">Teal</ui-label>
-                  <ui-label color="blue" href="#label">Blue</ui-label>
-                  <ui-label color="violet" href="#label">Violet</ui-label>
-                  <ui-label color="purple" href="#label">Purple</ui-label>
-                  <ui-label color="pink" href="#label">Pink</ui-label>
-                  <ui-label color="brown" href="#label">Brown</ui-label>
-                  <ui-label color="grey" href="#label">Grey</ui-label>
-                  <ui-label color="black" href="#label">Black</ui-label>
+                  <ui-label color="primary" link="#label">Primary</ui-label>
+                  <ui-label color="secondary" link="#label">Secondary</ui-label>
+                  <ui-label color="red" link="#label">Red</ui-label>
+                  <ui-label color="orange" link="#label">Orange</ui-label>
+                  <ui-label color="yellow" link="#label">Yellow</ui-label>
+                  <ui-label color="olive" link="#label">Olive</ui-label>
+                  <ui-label color="green" link="#label">Green</ui-label>
+                  <ui-label color="teal" link="#label">Teal</ui-label>
+                  <ui-label color="blue" link="#label">Blue</ui-label>
+                  <ui-label color="violet" link="#label">Violet</ui-label>
+                  <ui-label color="purple" link="#label">Purple</ui-label>
+                  <ui-label color="pink" link="#label">Pink</ui-label>
+                  <ui-label color="brown" link="#label">Brown</ui-label>
+                  <ui-label color="grey" link="#label">Grey</ui-label>
+                  <ui-label color="black" link="#label">Black</ui-label>
                 </ui-docs-example>
               </ui-section>
 
@@ -626,22 +626,22 @@
                 dividing
               >
                 <ui-docs-example description="Tag labels can be basic too.">
-                  <ui-label href="#label" basic tag>Standard Tag</ui-label>
-                  <ui-label color="primary" href="#label" basic tag>Primary</ui-label>
-                  <ui-label color="secondary" href="#label" basic tag>Secondary</ui-label>
-                  <ui-label color="red" href="#label" basic tag>Red</ui-label>
-                  <ui-label color="orange" href="#label" basic tag>Orange</ui-label>
-                  <ui-label color="yellow" href="#label" basic tag>Yellow</ui-label>
-                  <ui-label color="olive" href="#label" basic tag>Olive</ui-label>
-                  <ui-label color="green" href="#label" basic tag>Green</ui-label>
-                  <ui-label color="teal" href="#label" basic tag>Teal</ui-label>
-                  <ui-label color="blue" href="#label" basic tag>Blue</ui-label>
-                  <ui-label color="violet" href="#label" basic tag>Violet</ui-label>
-                  <ui-label color="purple" href="#label" basic tag>Purple</ui-label>
-                  <ui-label color="pink" href="#label" basic tag>Pink</ui-label>
-                  <ui-label color="brown" href="#label" basic tag>Brown</ui-label>
-                  <ui-label color="grey" href="#label" basic tag>Grey</ui-label>
-                  <ui-label color="black" href="#label" basic tag>Black</ui-label>
+                  <ui-label link="#label" basic tag>Standard Tag</ui-label>
+                  <ui-label color="primary" link="#label" basic tag>Primary</ui-label>
+                  <ui-label color="secondary" link="#label" basic tag>Secondary</ui-label>
+                  <ui-label color="red" link="#label" basic tag>Red</ui-label>
+                  <ui-label color="orange" link="#label" basic tag>Orange</ui-label>
+                  <ui-label color="yellow" link="#label" basic tag>Yellow</ui-label>
+                  <ui-label color="olive" link="#label" basic tag>Olive</ui-label>
+                  <ui-label color="green" link="#label" basic tag>Green</ui-label>
+                  <ui-label color="teal" link="#label" basic tag>Teal</ui-label>
+                  <ui-label color="blue" link="#label" basic tag>Blue</ui-label>
+                  <ui-label color="violet" link="#label" basic tag>Violet</ui-label>
+                  <ui-label color="purple" link="#label" basic tag>Purple</ui-label>
+                  <ui-label color="pink" link="#label" basic tag>Pink</ui-label>
+                  <ui-label color="brown" link="#label" basic tag>Brown</ui-label>
+                  <ui-label color="grey" link="#label" basic tag>Grey</ui-label>
+                  <ui-label color="black" link="#label" basic tag>Black</ui-label>
                 </ui-docs-example>
               </ui-section>
 
@@ -713,11 +713,11 @@
               <ui-section id="examples-groups-colored-group" label="Colored Group" sticky collapsible dividing>
                 <ui-docs-example description="Labels can share colors together.">
                   <ui-labels color="blue">
-                    <ui-label href="#label" removable>Fun</ui-label>
-                    <ui-label href="#label" detail="22">Happy</ui-label>
-                    <ui-label href="#label">Smart</ui-label>
-                    <ui-label href="#label">Insane</ui-label>
-                    <ui-label href="#label">Exciting</ui-label>
+                    <ui-label link="#label" removable>Fun</ui-label>
+                    <ui-label link="#label" detail="22">Happy</ui-label>
+                    <ui-label link="#label">Smart</ui-label>
+                    <ui-label link="#label">Insane</ui-label>
+                    <ui-label link="#label">Exciting</ui-label>
                   </ui-labels>
                 </ui-docs-example>
               </ui-section>
@@ -725,11 +725,11 @@
               <ui-section id="examples-groups-basic-group" label="Basic Group" sticky collapsible dividing>
                 <ui-docs-example description="Labels can share their style together.">
                   <ui-labels basic>
-                    <ui-label href="#label" removable>Fun</ui-label>
-                    <ui-label href="#label" detail="22">Happy</ui-label>
-                    <ui-label href="#label">Smart</ui-label>
-                    <ui-label href="#label">Insane</ui-label>
-                    <ui-label href="#label">Exciting</ui-label>
+                    <ui-label link="#label" removable>Fun</ui-label>
+                    <ui-label link="#label" detail="22">Happy</ui-label>
+                    <ui-label link="#label">Smart</ui-label>
+                    <ui-label link="#label">Insane</ui-label>
+                    <ui-label link="#label">Exciting</ui-label>
                   </ui-labels>
                 </ui-docs-example>
               </ui-section>
@@ -737,11 +737,11 @@
               <ui-section id="examples-groups-tag-group" label="Tag Group" sticky collapsible dividing>
                 <ui-docs-example description="Labels can share tag formatting.">
                   <ui-labels tag>
-                    <ui-label href="#label">$10.00</ui-label>
-                    <ui-label href="#label">$19.99</ui-label>
-                    <ui-label href="#label">$24.99</ui-label>
-                    <ui-label href="#label">$30.99</ui-label>
-                    <ui-label href="#label">$10.25</ui-label>
+                    <ui-label link="#label">$10.00</ui-label>
+                    <ui-label link="#label">$19.99</ui-label>
+                    <ui-label link="#label">$24.99</ui-label>
+                    <ui-label link="#label">$30.99</ui-label>
+                    <ui-label link="#label">$10.25</ui-label>
                   </ui-labels>
                 </ui-docs-example>
               </ui-section>
@@ -749,11 +749,11 @@
               <ui-section id="examples-groups-circular-group" label="Circular Group" sticky collapsible dividing>
                 <ui-docs-example description="Labels can share shapes.">
                   <ui-labels circular>
-                    <ui-label href="#label">11</ui-label>
-                    <ui-label href="#label">22</ui-label>
-                    <ui-label href="#label">33</ui-label>
-                    <ui-label href="#label">44</ui-label>
-                    <ui-label href="#label">141</ui-label>
+                    <ui-label link="#label">11</ui-label>
+                    <ui-label link="#label">22</ui-label>
+                    <ui-label link="#label">33</ui-label>
+                    <ui-label link="#label">44</ui-label>
+                    <ui-label link="#label">141</ui-label>
                   </ui-labels>
                 </ui-docs-example>
               </ui-section>
@@ -767,9 +767,9 @@
                 <script type="text/markdown">
                   Write `<ui-label>` with text inside, and add attributes for the look: `<ui-label color="red" basic tag>`.
 
-                  - `href` renders a link; without one the label is a plain `<span>`-like box.
+                  - `link` renders a link; without one the label is a plain `<span>`-like box.
                   - `icon` puts an icon before the text (alone, it centres the icon); the `icon` slot takes any markup.
-                  - `detail` adds a dimmer second value (a count); a `<ui-detail>` child does the same, and with `href` it links.
+                  - `detail` adds a dimmer second value (a count); a `<ui-detail>` child does the same, and with `link` it links.
                   - `image` with a URL makes an image label around its own photo; bare `image` styles a slotted `<img>`.
                   - `<ui-labels>` shares `size`, `color`, `basic`, `tag`, `circular` ... with every label inside it.
                   - Colour follows Fomantic: a plain label stays grey inside a coloured owner (a red segment); only its own
@@ -811,8 +811,8 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - A label with `href` is a real link: **Tab** reaches it, **Enter** follows it.
-                  - Without `href` a label is inert text, never a tab stop.
+                  - A label with `link` is a real link: **Tab** reaches it, **Enter** follows it.
+                  - Without `link` a label is inert text, never a tab stop.
                   - A `removable` label's delete button is its own tab stop; **Enter** or **Space** fires `ui-remove`.
                 </script>
               </ui-markdown>

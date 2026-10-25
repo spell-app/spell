@@ -11,7 +11,7 @@ import buttonCSS from "./UIButton.css?inline"
 
 /****************
  * ### `UIButton`
- * The component behind `<ui-button>`:  a button, drawn as a native `<button>` (or an `<a>` with `href`)
+ * The component behind `<ui-button>`:  a button, drawn as a native `<button>` (or an `<a>` with `link`)
  * in Fomantic's class grammar.
  *
  * - A form control only so `type="submit"` / `"reset"` can reach its form (`internals.form`).
@@ -174,12 +174,12 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     )
   }
 
-  /** The inner `<button>`, or `<a>` with `href`. */
+  /** The inner `<button>`, or `<a>` with `link`. */
   private control(): JSX.Element {
     const iconAndText = () => this.iconAndText()
     return (
       <Show
-        when={this.href}
+        when={this.link}
         fallback={
           <button
             ref={(element) => {
@@ -205,7 +205,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
           ref={(element) => (this.innerControl = element)}
           class={this.rootClass}
           part={this.partForName("button")}
-          href={this.isDisabled ? undefined : this.href}
+          href={this.isDisabled ? undefined : this.link}
           target={this.target}
           download={this.download}
           role={this.isDisabled ? "link" : undefined}

@@ -13,7 +13,7 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `detailVocabulary`
- * The names of `<ui-detail>`, a detail:  `<span class="detail">` (`<a>` with `href`).
+ * The names of `<ui-detail>`, a detail:  `<span class="detail">` (`<a>` with `link`).
  ****************/
 export const detailVocabulary = {
   tag: "ui-detail",
@@ -23,7 +23,13 @@ export const detailVocabulary = {
   ui: false,
   description: "A label's dimmer second value, e.g. a count.",
   attributes: [
-    { name: "href", group: "link", kind: "string", description: 'Renders a link (`<a class="detail" href>`).' }
+    {
+      name: "link",
+      group: "link",
+      kind: "string",
+      replaces: ["href"],
+      description: 'Renders a link (`<a class="detail" href>`).  Its old name is `href`.'
+    }
   ],
   events: [],
   slots: [{ name: "", description: "Text, an icon." }],

@@ -44,19 +44,19 @@ describe("<ui-modal> static render", () => {
   })
 
   it("names the dialog by its header shorthand, or the DOM element's aria-label", () => {
-    const shorthand = fragment(StaticRender.fragment(`<ui-modal header="Archive" content="Sure?"></ui-modal>`))
+    const shorthand = fragment(StaticRender.fragment(`<ui-modal heading="Archive" content="Sure?"></ui-modal>`))
     const dialog = shorthand.firstElementChild!
     const header = dialog.querySelector(":scope > .header")!
     expect(header.textContent).toBe("Archive")
     expect(dialog.getAttribute("aria-labelledby")).toBe(header.id)
     expect(dialog.querySelector(":scope > .content")!.textContent).toBe("Sure?")
-    const labelled = fragment(StaticRender.fragment(`<ui-modal aria-label="Named" header="Archive"></ui-modal>`))
+    const labelled = fragment(StaticRender.fragment(`<ui-modal aria-label="Named" heading="Archive"></ui-modal>`))
     expect(labelled.firstElementChild!.getAttribute("aria-label")).toBe("Named")
     expect(labelled.firstElementChild!.hasAttribute("aria-labelledby")).toBe(false)
   })
 
   it("stays closed when written open:  showing a modal needs JS", () => {
-    const dialog = fragment(StaticRender.fragment(`<ui-modal visible header="Hi"></ui-modal>`)).firstElementChild!
+    const dialog = fragment(StaticRender.fragment(`<ui-modal visible heading="Hi"></ui-modal>`)).firstElementChild!
     expect(dialog.localName).toBe("dialog")
     expect(dialog.hasAttribute("open")).toBe(false)
   })

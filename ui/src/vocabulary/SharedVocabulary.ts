@@ -6,7 +6,9 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
 /****************
  * ### `SharedVocabulary`
  * The attributes and states EVERY component has, without its vocabulary declaring them:
- * `disabled`, `loading`, `visible` and `animation` (epic `spell-element`, P8 and P12).
+ * - `disabled`, `loading`, `visible` and `animation` (epic `spell-element`, P8 and P12)
+ * - `link` and `target`, `font`, `tooltip` and `label` (epic `ui-gaps` P3, Owen's request r1):
+ *   where a click goes, how its letters look, the browser's tooltip, its accessible name
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):
  *   so `<ui-menu disabled>`, `<ui-table loading>`, `<ui-message visible="false">`
  *   and `<ui-modal animation="fly down">` work, though those vocabularies never name them.
@@ -58,11 +60,15 @@ export class SharedVocabulary {
   }
 
   /**
-   * The shared attributes' names, which every tag observes unless its vocabulary declares its own:
-   * what a root adds to a tag it defines before its family loads (`RootLoader.defineEarly()`).
+   * The shared attributes' names, and the old names they replace (`href`), which every tag observes unless its
+   * vocabulary declares its own:  what a root adds to a tag it defines before its family loads
+   * (`RootLoader.defineEarly()`).
    */
   static get attributeNames(): readonly string[] {
-    return SHARED_ATTRIBUTES.map(({ name }) => name)
+    return SHARED_ATTRIBUTES.flatMap(({ name, replaces = [] }) => [
+      name,
+      ...replaces.map((old) => (typeof old === "string" ? old : old.from))
+    ])
   }
 
   /** Is `name` one of the shared attributes? */
@@ -143,6 +149,46 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
       "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, " +
       "else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion " +
       "setting does;  an element inside can't turn it back on."
+  },
+  {
+    name: "link",
+    group: "link",
+    kind: "string",
+    replaces: ["href"],
+    description:
+      "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  " +
+      "A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click " +
+      "goes there, except on a control of its own inside.  Its old name is `href`."
+  },
+  {
+    name: "target",
+    group: "link",
+    kind: "string",
+    description: "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+  },
+  {
+    name: "font",
+    group: "appearance",
+    kind: "multiple",
+    values: UIT.FontWords,
+    description:
+      "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, " +
+      '`highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML ' +
+      "element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+  },
+  {
+    name: "tooltip",
+    group: "content",
+    kind: "string",
+    description: "Its tooltip:  the browser's own, written as the element's `title`."
+  },
+  {
+    name: "label",
+    group: "content",
+    kind: "string",
+    description:
+      "Its name for screen readers (`aria-label`), where it has no words of its own.  " +
+      "A family whose `label` is something else (a field's, a statistic's) keeps its own."
   }
 ]
 

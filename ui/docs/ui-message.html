@@ -72,7 +72,7 @@
 
               <ui-section id="examples-types-list-message" label="List Message" sticky collapsible dividing>
                 <ui-docs-example description="A message with a list.  `header` is the shorthand for a header.">
-                  <ui-message header="New Site Features">
+                  <ui-message heading="New Site Features">
                     <ul>
                       <li>You can now have cover images on blog pages</li>
                       <li>Drafts will now auto-save while writing</li>
@@ -85,12 +85,12 @@
                 <ui-docs-example
                   description="A message can contain an icon:  the `icon` attribute takes a name, the `icon` slot any markup."
                 >
-                  <ui-message icon="inbox" header="Have you heard about our mailing list?">
+                  <ui-message icon="inbox" heading="Have you heard about our mailing list?">
                     <p>Get the best news in your e-mail every day.</p>
                   </ui-message>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-message header="Just one second">
+                  <ui-message heading="Just one second">
                     <ui-icon slot="icon" name="circle notch" loading></ui-icon>
                     <p>We're fetching that content for you.</p>
                   </ui-message>
@@ -107,7 +107,7 @@
                     <code>ui-dismiss</code>, then the message sets <code>hidden</code> on itself (see the Usage tab).
                     Reload the page to bring it back.</ui-message
                   >
-                  <ui-message dismissible header="Welcome back!">
+                  <ui-message dismissible heading="Welcome back!">
                     <p>This is a special notification which you can dismiss if you're bored with it.</p>
                   </ui-message>
                 </ui-docs-example>
@@ -164,7 +164,7 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
                 <ui-docs-example description='A message can be displayed center aligned:  `text-align="center"`.'>
-                  <ui-message text-align="center" header="New Version is available!">
+                  <ui-message text-align="center" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
                 </ui-docs-example>
@@ -172,7 +172,7 @@
 
               <ui-section id="examples-variations-right-aligned" label="Right Aligned" sticky collapsible dividing>
                 <ui-docs-example description='A message can be displayed right aligned:  `text-align="right"`.'>
-                  <ui-message text-align="right" header="New Version is available!">
+                  <ui-message text-align="right" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
                 </ui-docs-example>
@@ -180,7 +180,7 @@
 
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
                 <ui-docs-example description="`centered` centres the text and an icon together with the content.">
-                  <ui-message centered icon="envelope" header="Centered icon">
+                  <ui-message centered icon="envelope" heading="Centered icon">
                     <p>Icon and content centred together.</p>
                   </ui-message>
                 </ui-docs-example>
@@ -206,7 +206,7 @@
                 <ui-docs-example
                   description='A message can be formatted to attach itself to other content:  `attached` joins the content below, `attached="bottom"` the content above.'
                 >
-                  <ui-message attached header="Welcome to our site!">
+                  <ui-message attached heading="Welcome to our site!">
                     <p>Fill out the form below to sign-up for a new account</p>
                   </ui-message>
                   <ui-segment attached>
@@ -247,7 +247,7 @@
                 <ui-docs-example
                   description='A message may be formatted to display warning messages:  `state="warning"`.'
                 >
-                  <ui-message state="warning" dismissible header="You must register before you can do that!">
+                  <ui-message state="warning" dismissible heading="You must register before you can do that!">
                     Visit our registration page, then try again
                   </ui-message>
                 </ui-docs-example>
@@ -255,7 +255,7 @@
 
               <ui-section id="examples-variations-info" label="Info" sticky collapsible dividing>
                 <ui-docs-example description="A message may be formatted to display information.">
-                  <ui-message state="info" dismissible header="Was this what you wanted?">
+                  <ui-message state="info" dismissible heading="Was this what you wanted?">
                     <ul>
                       <li>It's good to see you again.</li>
                       <li>Did you know it's been a while?</li>
@@ -277,12 +277,12 @@
                     >Positive / success and negative / error messages use the same colours by default, but each has its
                     own colour token that a theme can tell apart.</ui-message
                   >
-                  <ui-message state="positive" dismissible header="You are eligible for a reward">
+                  <ui-message state="positive" dismissible heading="You are eligible for a reward">
                     <p>Go to your <b>special offers</b> page to see now.</p>
                   </ui-message>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-message state="success" dismissible header="Your user registration was successful.">
+                  <ui-message state="success" dismissible heading="Your user registration was successful.">
                     <p>You may now log-in with the username you have chosen</p>
                   </ui-message>
                 </ui-docs-example>
@@ -290,12 +290,12 @@
 
               <ui-section id="examples-variations-negative-error" label="Negative / Error" sticky collapsible dividing>
                 <ui-docs-example description="A message may be formatted to display a negative message.">
-                  <ui-message state="negative" dismissible header="We're sorry we can't apply that discount">
+                  <ui-message state="negative" dismissible heading="We're sorry we can't apply that discount">
                     <p>That offer has expired</p>
                   </ui-message>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-message state="error" dismissible header="There were some errors with your submission">
+                  <ui-message state="error" dismissible heading="There were some errors with your submission">
                     <ul>
                       <li>You must include both a upper and lower case letters in your password.</li>
                       <li>You need to select your home country.</li>
@@ -337,13 +337,13 @@
                 <ui-docs-example
                   description="A message can use the dark scheme;  a coloured one keeps its hue in the text."
                 >
-                  <ui-message inverted header="Inverted">
+                  <ui-message inverted heading="Inverted">
                     <p>The dark scheme.</p>
                   </ui-message>
-                  <ui-message color="red" inverted header="Inverted red">
+                  <ui-message color="red" inverted heading="Inverted red">
                     <p>Keeps its hue in the text.</p>
                   </ui-message>
-                  <ui-message state="positive" inverted icon="envelope" header="Inverted positive">
+                  <ui-message state="positive" inverted icon="envelope" heading="Inverted positive">
                     <p>With an icon.</p>
                   </ui-message>
                 </ui-docs-example>
@@ -434,7 +434,7 @@
                   {shown && (
                     <ui-message
                       dismissible
-                      header="Saved"
+                      heading="Saved"
                       onui-dismiss={(event) => {
                         event.preventDefault()
                         setShown(false)
@@ -447,7 +447,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-message v-if="shown" dismissible header="Saved" @ui-dismiss.prevent="shown = false" />
+                  <ui-message v-if="shown" dismissible heading="Saved" @ui-dismiss.prevent="shown = false" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -457,7 +457,7 @@
                   <Show when={shown()}>
                     <ui-message
                       dismissible
-                      header="Saved"
+                      heading="Saved"
                       on-ui-dismiss={(event) => {
                         event.preventDefault()
                         setShown(false)

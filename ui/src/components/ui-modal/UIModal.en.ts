@@ -78,10 +78,12 @@ export const modalVocabulary = {
         'buttons.  Read when it opens;  when set, it wins over `closable="false"`.'
     },
     {
-      name: "header",
+      name: "heading",
+      replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog)."
+      description:
+        "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`."
     },
     {
       name: "content",

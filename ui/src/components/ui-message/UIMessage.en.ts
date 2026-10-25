@@ -75,10 +75,12 @@ export const messageVocabulary = {
       description: "Icon name, shown large beside the content;  the root gets the `icon` class."
     },
     {
-      name: "header",
+      name: "heading",
+      replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version."
+      description:
+        "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
     },
     {
       name: "dismissible",

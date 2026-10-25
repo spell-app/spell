@@ -71,9 +71,9 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
           </span>
         </Show>
         <div class={UIT.CONTENT} part={this.partForName("content")}>
-          <Show when={this.header}>
+          <Show when={this.heading}>
             <div class={UIT.HEADER} part={this.partForName("header")}>
-              {this.header}
+              {this.heading}
             </div>
           </Show>
           <slot />

@@ -101,7 +101,7 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
 
   /** Does shorthand `noun` render:  set, and no slotted part of that noun? */
   rendersShorthand(noun: Shorthand): boolean {
-    return !!this[noun] && !this.slottedNouns.has(noun)
+    return !!this[noun === UIT.HEADER ? UIT.HEADING : noun] && !this.slottedNouns.has(noun)
   }
 
   /** Some shorthand of the content block renders. */
@@ -149,7 +149,7 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
           <div class={this.staticPart(UIT.CONTENT)} part={this.partForName("content")}>
             <Show when={this.rendersShorthand(UIT.HEADER)}>
               <div class={this.staticPart(UIT.HEADER)} part={this.partForName("header")}>
-                {this.header}
+                {this.heading}
               </div>
             </Show>
             <Show when={this.rendersShorthand(META)}>
@@ -197,7 +197,7 @@ const EXTRA = "extra"
 /** Shorthands drawn in the card's content block, in order. */
 const ContentShorthands = [UIT.HEADER, META, UIT.DESCRIPTION] as const
 
-/** Every shorthand attribute, by the part noun it renders. */
+/** Every shorthand, by the part noun it renders;  the header's attribute is `heading` (`UIT.HEADING`). */
 const Shorthands = [UIT.IMAGE, UIT.HEADER, META, UIT.DESCRIPTION, EXTRA] as const
 
 /** One of `Shorthands`. */

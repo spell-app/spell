@@ -11,7 +11,7 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
  * ### `UILabel`
  * The component behind `<ui-label>`:  a small tag, badge or count beside other content.
  *
- * - Its shadow DOM is one box, `<span class="ui … label" part="label">` (an `<a>` with `href`), holding, in order:
+ * - Its shadow DOM is one box, `<span class="ui … label" part="label">` (an `<a>` with `link`), holding, in order:
  *   the `image` `<img>`, the icon box, the default slot, the `detail` shorthand and the `removable` delete button.
  *   - It adds the `icon` class (before the noun) when there's an icon and no text:  the icon centres.
  *
@@ -30,7 +30,7 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
  * - The element's `aria-label` moves to the inner box, so an icon-only or corner label has a name.
  *
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
- *   faded, its link and delete button inert, `aria-disabled`;  a link label also loses its `href`.
+ *   faded, its link and delete button inert, `aria-disabled`;  a link label also loses its link.
  ****************/
 export class UILabel extends E.UIComponent<typeof labelVocabulary> {
   @E.proto static vocabulary = labelVocabulary
@@ -108,14 +108,14 @@ export class UILabel extends E.UIComponent<typeof labelVocabulary> {
   private label(): JSX.Element {
     return (
       <Dynamic
-        component={this.href ? "a" : "span"}
+        component={this.link ? "a" : "span"}
         class={this.rootClass}
         part={this.partForName("label")}
-        href={this.disabled ? undefined : this.href}
-        target={this.href ? this.target : undefined}
+        href={this.disabled ? undefined : this.link}
+        target={this.link ? this.target : undefined}
         aria-label={this.ariaLabel}
-        aria-disabled={this.disabled && this.href ? "true" : undefined}
-        role={this.ariaLabel && !this.href ? "img" : undefined}
+        aria-disabled={this.disabled && this.link ? "true" : undefined}
+        role={this.ariaLabel && !this.link ? "img" : undefined}
       >
         <Show when={this.imageSrc}>
           <img class={UIT.IMAGE} part={this.partForName("image")} src={this.imageSrc} alt="" />

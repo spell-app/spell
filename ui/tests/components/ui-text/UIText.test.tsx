@@ -143,3 +143,36 @@ describe("<ui-text> accessibility", () => {
     await expectAccessible(root)
   })
 })
+
+////////////////
+// ## Links and letters
+//
+// The shared `link` and `font` (epic `ui-gaps` P3).
+////////////////
+
+describe("<ui-text> link and font", () => {
+  it("draws a real link with `link`, in its `target`, that the keyboard reaches", async () => {
+    const { host, root } = await text(`<ui-text link="help.html" target="_blank">the help</ui-text>`)
+    expect(root.localName).toBe("a")
+    expect([root.getAttribute("href"), root.getAttribute("target")]).toEqual(["help.html", "_blank"])
+    expect(root.tabIndex).toBe(0)
+    await expectAccessible(host)
+  })
+
+  it("reads `href`, the old name, as `link`", async () => {
+    const { root } = await text(`<ui-text href="help.html">the help</ui-text>`)
+    expect([root.localName, root.getAttribute("href")]).toEqual(["a", "help.html"])
+  })
+
+  it("draws each `font` word as its HTML element, outermost first", async () => {
+    const { root } = await text(`<ui-text font="italic bold highlight">free</ui-text>`)
+    expect(root.querySelector("strong > em > mark > slot")).not.toBe(null)
+  })
+
+  it("follows a change of `font`", async () => {
+    const { host, root } = await text(`<ui-text font="bold">free</ui-text>`)
+    host.setAttribute("font", "code")
+    await ElementFixture.settle()
+    expect([root.querySelector("strong"), root.querySelector("code > slot")]).toEqual([null, expect.anything()])
+  })
+})

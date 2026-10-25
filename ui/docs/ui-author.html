@@ -61,7 +61,7 @@
                     <ui-comment>
                       <ui-avatar src="images/avatar/small/matt.jpg"></ui-avatar>
                       <ui-content>
-                        <ui-author href="#matt">Matt</ui-author>
+                        <ui-author link="#matt">Matt</ui-author>
                         <ui-meta><span>Today at 5:42PM</span></ui-meta>
                         <ui-description>How artistic!</ui-description>
                       </ui-content>
@@ -75,7 +75,7 @@
                   <ui-feed>
                     <ui-event>
                       <ui-content>
-                        <ui-summary><ui-author href="#elliot">Elliot Fu</ui-author> added you as a friend</ui-summary>
+                        <ui-summary><ui-author link="#elliot">Elliot Fu</ui-author> added you as a friend</ui-summary>
                       </ui-content>
                     </ui-event>
                   </ui-feed>
@@ -85,11 +85,11 @@
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example description="With `href`, an author is a real link;  without, plain text.">
+                <ui-docs-example description="With `link`, an author is a real link;  without, plain text.">
                   <ui-comments>
                     <ui-comment>
                       <ui-content>
-                        <ui-author href="#stevie">Stevie Feliciano</ui-author>
+                        <ui-author link="#stevie">Stevie Feliciano</ui-author>
                         <ui-description>A linked author.</ui-description>
                       </ui-content>
                     </ui-comment>
@@ -111,7 +111,7 @@
                 <script type="text/markdown">
                   `<ui-author>` names who wrote a comment or did a feed event (Fomantic's comment `author` and feed `user`).
 
-                  - `href` renders a real link (`<a>`), e.g. to a profile; `target` goes with it.
+                  - `link` renders a real link (`<a>`), e.g. to a profile; `target` goes with it.
                   - In a feed it sits inline in the `<ui-summary>`; in a comment it opens the content, before the `<ui-meta>`.
                 </script>
               </ui-markdown>
@@ -134,8 +134,8 @@
             <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - With `href` it renders a real `<a>`: **Tab** reaches it, **Enter** follows it.
-                  - Without `href` it is plain inline text with no role.
+                  - With `link` it renders a real `<a>`: **Tab** reaches it, **Enter** follows it.
+                  - Without `link` it is plain inline text with no role.
                 </script>
               </ui-markdown>
             </ui-section>

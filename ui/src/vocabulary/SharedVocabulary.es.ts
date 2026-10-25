@@ -8,5 +8,15 @@ import type { SharedDictionary } from "spell/element/vocabulary.types"
  */
 export const sharedEs = {
   lang: "es",
-  attributes: { disabled: "desactivado", loading: "cargando", visible: "visible", animation: "animacion" }
+  attributes: {
+    disabled: "desactivado",
+    loading: "cargando",
+    visible: "visible",
+    animation: "animacion",
+    link: "enlace",
+    target: "destino",
+    font: "letra",
+    tooltip: "ayuda",
+    label: "etiqueta"
+  }
 } as const satisfies SharedDictionary
