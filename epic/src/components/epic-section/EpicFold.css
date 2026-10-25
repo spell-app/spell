@@ -217,7 +217,7 @@
     border-top: none;
     border-end-start-radius: var(--epic-drawer-radius, 8px);
     border-end-end-radius: var(--epic-drawer-radius, 8px);
-    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
+    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02)));
   }
   /* the note box, last:  the drawer's bottom, side to side, its bottom corners the drawer's */
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child {

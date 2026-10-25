@@ -54,7 +54,7 @@
      * an open block's DRAWER (an item, a phase, an Overview part:  I104, I115):  its fill, how far in from its title's
      * edges its sides run, its rounded corners
      */
-    --epic-drawer-fill: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03));
+    --epic-drawer-fill: light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02));
     --epic-drawer-inset: 4px;
     --epic-drawer-radius: 8px;
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));

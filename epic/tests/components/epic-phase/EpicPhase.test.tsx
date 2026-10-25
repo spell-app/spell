@@ -183,7 +183,7 @@ describe("<epic-updated> (retired:  migrated to <epic-update>)", () => {
 // epic `epic-workflow` P25:  the page's own buttons in the title row, where the docs runtime puts the bullhorn too
 describe("<epic-phase> actions slot", () => {
   // P25:  the page's own buttons at the title's end, before its fold
-  test('`slot="actions"`:  at the title\'s end, before the chevron;  a click never folds it', async () => {
+  test('`slot="actions"`:  at the title\'s end, the chevron at its start;  a click never folds it', async () => {
     const host = await render(
       `<epic-phase id="p-one" title="One" status="active"><button slot="actions" aria-label="Copy">C</button></epic-phase>`
     )
@@ -192,7 +192,7 @@ describe("<epic-phase> actions slot", () => {
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
     const header = inner(host).shadowRoot!.querySelector('[part~="header"]')!
     const [b, fold, words] = [button, chevron, header].map((each) => each.getBoundingClientRect())
-    expect([words.right <= b.left + 0.5, b.right <= fold.left + 0.5]).toEqual([true, true])
+    expect([words.right <= b.left + 0.5, fold.right <= words.left + 0.5]).toEqual([true, true])
     button.click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(false)

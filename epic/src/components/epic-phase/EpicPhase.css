@@ -23,6 +23,15 @@
      */
     --epic-inset: var(--epic-card-inset, 16px);
   }
+  /*
+   * its status icon in a cell as wide as an item's id chip, so its title starts where an item's does:  chevron, icon
+   * and title in the same columns as the Questions' (Owen, 2026-10-25)
+   */
+  ui-section::part(icon) {
+    box-sizing: border-box;
+    width: var(--epic-phase-icon-cell, 30px);
+    justify-content: flex-start;
+  }
   :host([status="done"]) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
   }
