@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 
 import type { E } from "spell-ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -9,6 +10,7 @@ import "spell-epic/components/epic-section"
 import "spell-epic/components/epic-phase"
 import "spell-epic/components/epic-update"
 import "spell-epic/components/epic-item"
+import "spell-ui/components/ui-modal"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -167,6 +169,99 @@ describe("<epic-field>", () => {
     const states = Array.from(field.querySelectorAll("a"), (link) => link.getAttribute("data-spell-state"))
     // without a `state`:  decided green for good, canceled grey (no longer relevant)
     expect(states).toEqual(["attention", "recent", "old"])
+  })
+})
+
+// epic `epic-engine`, r31 (Owen, 2026-10-25):  "this needs to be collapsable ... smaller with click to show in modal"
+describe("<epic-field> requests", () => {
+  /** A 400 x 300 PNG, drawn on a canvas:  bigger than a thumbnail both ways. */
+  function screenshot(): string {
+    const canvas = document.createElement("canvas")
+    Object.assign(canvas, { width: 400, height: 300 })
+    canvas.getContext("2d")!.fillRect(0, 0, 400, 300)
+    return canvas.toDataURL("image/png")
+  }
+
+  /** A Requests field holding one request, as `epic file` writes it, with a screenshot. */
+  async function renderRequest(): Promise<E.DOMElement> {
+    const src = screenshot()
+    const field = await render<E.DOMElement>(
+      `<epic-field name="requests"><epic-field label="r31 · debut (ad62dff0)">` +
+        `<blockquote><p>Make these foldable.</p></blockquote><p>Sent 2026-10-25 14:05;  request.md</p>` +
+        `<p><a href="${src}" target="shot"><img src="${src}" alt="r31, screenshot 1" style="max-width: 100%" /></a></p>` +
+        `</epic-field></epic-field>`,
+      "epic-field[label]"
+    )
+    await field.querySelector("img")!.decode()
+    return field
+  }
+
+  test("a request folds:  folded to start with, its title row opens it, Enter on its chevron folds it again", async () => {
+    const request = await renderRequest()
+    const shadow = request.shadowRoot!
+    const body = shadow.querySelector<HTMLElement>('[part~="body"]')!
+    const button = shadow.querySelector<HTMLButtonElement>('[part~="toggle"]')!
+    // its label as the title, without a colon;  the prose folded, find-in-page still reaching it
+    expect(shadow.querySelector('[part~="label"]')!.textContent).toBe("r31 · debut (ad62dff0)")
+    expect([request.hasAttribute("open"), body.getAttribute("hidden"), button.getAttribute("aria-expanded")]).toEqual([
+      false,
+      "until-found",
+      "false"
+    ])
+    expect(request.matches(":state(request)")).toBe(true)
+    // a click on the label opens it:  its `open` attribute, page state the live patch keeps
+    ;(shadow.querySelector('[part~="label"]') as HTMLElement).click()
+    await ElementFixture.tick()
+    expect([request.hasAttribute("open"), body.hasAttribute("hidden"), request.matches(":state(open)")]).toEqual([
+      true,
+      false,
+      true
+    ])
+    button.focus()
+    await userEvent.keyboard("{Enter}")
+    await ElementFixture.tick()
+    expect([request.hasAttribute("open"), body.getAttribute("hidden")]).toEqual([false, "until-found"])
+    // an `open` written from outside (a live patch carrying it, a restore):  it follows
+    request.setAttribute("open", "")
+    await ElementFixture.tick()
+    expect(body.hasAttribute("hidden")).toBe(false)
+    await expectAccessible(request)
+  })
+
+  test("only a labelled field right inside Requests folds:  a Where block stays a plain labelled block", async () => {
+    const field = await render(`<epic-field label="Where"><p>The inbox file.</p></epic-field>`)
+    expect([field.matches(":state(request)"), field.shadowRoot!.querySelector('[part~="toggle"]')]).toEqual([
+      false,
+      null
+    ])
+  })
+
+  test("its screenshot is a thumbnail;  a click shows it full size in a modal, not its link;  Escape closes it", async () => {
+    const request = await renderRequest()
+    request.setAttribute("open", "")
+    await ElementFixture.tick()
+    const image = request.querySelector("img")!
+    const box = image.getBoundingClientRect()
+    expect([box.width <= 200.5, box.height <= 140.5, getComputedStyle(image).borderTopStyle]).toEqual([
+      true,
+      true,
+      "solid"
+    ])
+    const followed = vi.fn((event: Event) => event.defaultPrevented)
+    document.addEventListener("click", followed, { once: true })
+    image.click()
+    await ElementFixture.tick()
+    // the link isn't followed:  the click's default is prevented
+    expect(followed).toHaveReturnedWith(true)
+    const modal = request.shadowRoot!.querySelector<E.DOMElement>('[part~="zoom"]')!
+    await modal.ready
+    await ElementFixture.tick()
+    expect(modal.hasAttribute("visible")).toBe(true)
+    const zoomed = request.shadowRoot!.querySelector<HTMLImageElement>("img.zoomed")!
+    expect([zoomed.src === image.src, zoomed.alt]).toEqual([true, "r31, screenshot 1, full size"])
+    await userEvent.keyboard("{Escape}")
+    await vi.waitFor(() => expect(modal.hasAttribute("visible")).toBe(false))
+    expect(request.shadowRoot!.querySelector("img.zoomed")).toBeNull()
   })
 })
 
