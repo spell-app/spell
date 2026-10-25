@@ -227,13 +227,28 @@ export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   get isUnaryTag() {
     return this.record.isUnaryTag
   }
+  /** A chain branch's kind, `<if ...>`, `<otherwise>` ...:  see `Tokenizer.chainTags`.  `undefined` for an element. */
+  get chain() {
+    return this.record.chain
+  }
+  /** A chain branch's phrase, its condition, as if written `{...}`:  `undefined` for `<otherwise>`. */
+  get phrase() {
+    return this.record.phrase
+  }
 }
+/** The kinds of branch a chain tag starts, `<if>`, `<otherwise if>`, `<otherwise>`:  see `Tokenizer.chainTags`. */
+export type JSXChainKind = "if" | "otherwise if" | "otherwise"
+
 /** Extra `record` props for `JSXElementToken`. */
 export type JSXElementTokenProps = Prettify<P.TokenProps<never>> & {
   /** Tag name. */
   tagName: string
   /** Does this represent a unary tag? */
   isUnaryTag?: boolean
+  /** A chain branch's kind -- see `JSXElementToken.chain`. */
+  chain?: JSXChainKind
+  /** A chain branch's phrase -- see `JSXElementToken.phrase`. */
+  phrase?: JSXExpressionToken
   /** Array of attributes. */
   attributes?: JSXAttributeToken[]
   /** Array of children. */

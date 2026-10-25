@@ -164,21 +164,59 @@ describe("spellx:  a third style of spell", () => {
       expect(errors).toEqual(['3:10 Don\'t understand "</image>"'])
     })
 
-    test("a control inside an element says to write it on a line of its own (C29)", () => {
-      const lines = [
+    // Owen, 2026-10-25:  "Inside an element:  hidden" -- it was an error (C29) until then
+    test("an <if> inside an element keeps every branch, each hidden until it's the one", () => {
+      const { code, errors } = compiledText([
         '<spell-view "card">',
         "\t<draw>",
         "\t\t<segment>",
         "\t\t\t<if it is a card>",
         "\t\t\t\t<text>a</>",
+        "\t\t\t<otherwise>",
+        "\t\t\t\tb",
         "\t\t\t</>",
         "\t\t</segment>",
         "\t</draw>",
         "</spell-view>"
-      ]
-      const { errors } = compiledText(lines)
-      expect(errors).toEqual([
-        "4:3 <if ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain('h("ui-text", { hidden: () => this instanceof Card ? undefined : "until-found" }, "a")')
+      expect(code).toContain('h("span", { hidden: () => !(this instanceof Card) ? undefined : "until-found" }, "b")')
+    })
+
+    test("in Spanish:  <si ...>, <si no>", () => {
+      const { code, errors } = compiledText(
+        [
+          '<encanto-vista "carta">',
+          '\t<propiedad "arriba">sí o no</>',
+          "\t<dibujar>",
+          "\t\t<texto>",
+          "\t\t\t<si su arriba es sí>arriba<si no>abajo</>",
+          "\t\t</texto>",
+          "\t</dibujar>",
+          "</encanto-vista>"
+        ],
+        { path: "/Carta.es.spellx" }
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain('h("span", { hidden: () => this.arriba ? undefined : "until-found" }, "arriba")')
+      expect(code).toContain('h("span", { hidden: () => !(this.arriba) ? undefined : "until-found" }, "abajo")')
+    })
+
+    test("an <otherwise> with no <if> before it, and a branch in no element, say so", () => {
+      const lonely = compiledText([
+        '<spell-view "card">',
+        "\t<draw>",
+        "\t\t<segment><otherwise>b</></segment>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(lonely.errors).toEqual(['3:11 <otherwise> needs an "if" before it'])
+      const alone = compiledText(['a "card" is a view where:', "\t- to draw it:", "\t\t<if it is a card>a</>"], {
+        path: "/test.spell"
+      })
+      expect(alone.errors).toEqual([
+        '3:2 <if ...> picks what an element shows, so it goes inside one:  to pick the whole drawing, write "if ..." on a line of its own'
       ])
     })
 

@@ -126,6 +126,47 @@ describe("SpellxView.read():  the examples", () => {
 ////////////////
 
 describe("SpellxView.read():  what a tag says", () => {
+  test("an if-chain inside an element is a choice of its branches, as a drawing's own is", () => {
+    const text = [
+      '<spell-view "card">',
+      "\t<draw>",
+      "\t\t<segment>",
+      "\t\t\t<if its up is yes>",
+      "\t\t\t\t<text>up</text>",
+      "\t\t\t<otherwise if its rank is 1>ace",
+      "\t\t\t<otherwise>",
+      "\t\t\t\t{its rank}",
+      "\t\t\t</>",
+      "\t\t</segment>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const file = read(text)
+    expect(file.diagnostics).toEqual([])
+    const draw = file.templates[0]!.children.find((node) => node.kind === "declaration" && node.type === "draw")
+    expect(draw).toMatchObject({
+      children: [
+        {
+          kind: "element",
+          name: "segment",
+          children: [
+            {
+              kind: "choice",
+              branches: [
+                { type: "if", word: "if", phrase: "its up is yes", children: [{ kind: "element", name: "text" }] },
+                { type: "otherwise if", phrase: "its rank is 1", children: [{ kind: "text" }] },
+                { type: "otherwise", phrase: undefined, children: [{ kind: "hole", code: "its rank" }] }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    const branch = (draw as SX.SpellxDeclaration).children[0]
+    const [first] = (branch as SX.SpellxElement).children as SX.SpellxChoice[]
+    expect(text.slice(first!.branches[1]!.phraseSpan!.start, first!.branches[1]!.phraseSpan!.end)).toBe("its rank is 1")
+  })
+
   test("a name, quoted or `name=`, and attributes that repeat (Q6, Q39)", () => {
     const file = read(`<spell-view "card">
 	<property name="color" one-of="red, black" alias="is (color)" alias="is a (color) card" />

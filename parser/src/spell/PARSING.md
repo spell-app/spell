@@ -1199,8 +1199,18 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
     carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
     imports Spell UI.
-  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a control inside an element,
-    `spellx-tag-in-markup` (C29).
+  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler or `<for each>` inside an
+    element, `spellx-tag-in-markup` (C29).
+- An IF-CHAIN INSIDE MARKUP, in either form (epic `elemental-spell`, Owen 2026-10-25):
+  `<text><if it is done>✓<otherwise>{its title}</></text>`.
+  - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a
+    `JSXElementToken` with its `chain` kind and its `phrase` (a `JSXExpressionToken`, as if written `{...}`);
+    a branch ends where the next starts, and ONE closer, `</>` or `</if>`, ends the chain.
+  - `SpellJSX` keeps every branch on the page:  each branch's elements get `hidden="until-found"` while it isn't
+    the one, its text and holes a `<span>` each (`childASTs()`).  So it compiles the same from both forms:
+    code spell writes the same tags.
+  - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  spellx's tag
+    line, code spell's `if` lines.  A branch in no element is `chain-outside-markup`.
   - Code spell's drawings are untouched;  so are a `<spell>` chunk's, in a spellx file (J83):  the tokenizer marks
     its JSX as it unwraps the chunk (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything
     inside it, `{...}` too, as code spell.

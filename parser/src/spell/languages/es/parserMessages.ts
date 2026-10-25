@@ -111,6 +111,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
   "spellx-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
   "spellx-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
+  "chain-outside-markup":
+    '{tag} elige lo que muestra un elemento, así que va dentro de uno:  para elegir todo el dibujo, escribe "{if} ..." en una línea propia',
   "spellx-otherwise-without-if": '{tag} necesita un "{if}" antes',
   "spellx-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
   "spellx-missing-phrase": '{tag} necesita palabras después de su "{word}"',

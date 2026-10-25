@@ -94,6 +94,14 @@ export type JSXMatchData = {
   children?: Array<P.Match | undefined>
   /** (`jsxAttribute`) A text value's `[name]` fill-ins, if it has any -- see `parseFillIns()`. */
   fillIns?: FillInParts
+  /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */
+  chain?: P.JSXChainKind
+  /** (`jsxElement`) A chain branch's condition, its phrase parsed as `{...}` (`jsxChild`);  none for `<otherwise>`. */
+  condition?: P.Match
+  /** (`jsxElement`) A chain branch inside an element, as it must be:  its element said so. */
+  inMarkup?: boolean
+  /** (`jsxElement`) A chain branch's error if it turns out to stand alone, outside any element. */
+  aloneError?: P.Match
 }
 
 /**

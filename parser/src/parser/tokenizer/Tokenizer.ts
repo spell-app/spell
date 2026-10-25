@@ -39,6 +39,18 @@ export class Tokenizer {
   emptyEndTagCloses = false
 
   /**
+   * CHAIN tags inside markup, by their words:  `<if its done is yes>`, `<otherwise if ...>`, `<otherwise>`
+   * (epic `elemental-spell`, Owen 2026-10-25):  each word, lowercase, => which kind of branch it starts.
+   * - Its head is a PHRASE up to its `>`, not attributes:  the phrase is its `phrase`, a `JSXExpressionToken` as if
+   *   written `{...}`.
+   * - A branch ends where the next branch of its chain starts, unclosed;  the chain's last branch ends at `</>`
+   *   (in any form of spell) or a named closer, `</if>`:  ONE closer for the whole chain.
+   * - e.g. spell's English and Spanish words, `if`, `otherwise if`, `si no` ...
+   * - None by default:  `<if>` is then an element like any other.
+   */
+  chainTags: Record<string, P.JSXChainKind> = {}
+
+  /**
    * Quote symbols recognized by `matchText`.
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
@@ -477,10 +489,16 @@ export class Tokenizer {
     const fragment = this.matchJSXFragment(text, start, end)
     if (fragment) return fragment
 
-    const jsxElement = this.matchJSXStartTag(text, start, end)
+    const jsxElement = this.matchJSXChainTag(text, start, end) ?? this.matchJSXStartTag(text, start, end)
     if (!jsxElement) return undefined
 
-    if (!jsxElement.record.isUnaryTag) {
+    if (jsxElement.record.chain) {
+      const children = this.matchJSXBranchChildren(text, jsxElement.next, end)
+      if (children.length) {
+        jsxElement.record.children = children as P.JSXElementToken[]
+        jsxElement.record.raw = text.slice(start, children[children.length - 1]!.next)
+      }
+    } else if (!jsxElement.record.isUnaryTag) {
       const children = this.rawTextTags.includes(jsxElement.tagName)
         ? this.matchRawJSXChildren(jsxElement.tagName, text, jsxElement.next, end)
         : this.matchJSXChildren(jsxElement.tagName, text, jsxElement.next, end)
@@ -572,6 +590,86 @@ export class Tokenizer {
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
     return new P.JSXAttributeToken({ name: "name", start, value, raw: text.slice(start, next) })
+  }
+
+  /**
+   * A CHAIN tag's head at `start` of `text`, `<otherwise if its done is yes>`, as a `JSXElementToken` with its `chain`
+   * and `phrase` -- `undefined` if no word of `chainTags` starts a tag there.
+   * - Its phrase runs to its `>`:  a `>` inside quotes, parens or braces is the phrase's.
+   * - Ignores leading whitespace.
+   */
+  matchJSXChainTag(text: string, start = 0, end?: number): P.JSXElementToken | undefined {
+    if (typeof end !== "number" || end > text.length) end = text.length
+    const at = this.eatWhitespace(text, start, end)
+    if (text[at] !== "<") return undefined
+    const word = this.chainWords.find((candidate) => {
+      const after = text[at + 1 + candidate.length]
+      return text.slice(at + 1, at + 1 + candidate.length).toLowerCase() === candidate && /[\s>]/.test(after ?? "")
+    })
+    if (!word) return undefined
+    const phraseStart = at + 1 + word.length
+    let pos = phraseStart
+    let depth = 0
+    let quote: string | undefined
+    for (; pos < end; pos++) {
+      const char = text[pos]!
+      if (quote) {
+        if (char === quote) quote = undefined
+      } else if (char === '"') quote = char
+      else if (char === "(" || char === "{" || char === "[") depth++
+      else if ((char === ")" || char === "}" || char === "]") && depth > 0) depth--
+      else if (char === ">" && depth === 0) break
+    }
+    const raw = text.slice(phraseStart, pos)
+    const lead = raw.length - raw.trimStart().length
+    const contents = raw.trim()
+    const element = new P.JSXElementToken({
+      tagName: text.slice(at + 1, at + 1 + word.length),
+      start,
+      raw: text.slice(start, Math.min(pos + 1, end)),
+      chain: this.chainTags[word],
+      phrase: contents ? new P.JSXExpressionToken({ contents, raw: contents, start: phraseStart + lead }) : undefined
+    })
+    if (text[pos] !== ">") element.record.error = "No end >"
+    return element
+  }
+
+  /** `chainTags`' words, longest first, so `otherwise if` is found before `otherwise`. */
+  private get chainWords(): string[] {
+    return Object.keys(this.chainTags).sort((one, other) => other.length - one.length)
+  }
+
+  /**
+   * A chain branch's children at `start` of `text`:  up to the next branch of its chain, which it leaves for its
+   * parent to match, or to the chain's closer, `</>` or `</if>`, which it takes as its last child.
+   */
+  matchJSXBranchChildren(text: string, start: number, end: number): P.Token[] {
+    const children: P.Token[] = []
+    let next = start
+    while (next < end) {
+      const at = this.eatWhitespace(text, next, end)
+      const branch = this.matchJSXChainTag(text, at, end)
+      if (branch && branch.record.chain !== "if") break
+      const closer = this.matchJSXChainEnd(text, next, end)
+      if (closer) {
+        children.push(closer)
+        break
+      }
+      const child = this.matchJSXChild("", text, next, end)
+      if (!child) break
+      children.push(child)
+      next = child.next
+    }
+    return children
+  }
+
+  /** The closer ending a chain at `start`:  `</>`, or `</if>` in any of `chainTags`' words for an `if`. */
+  private matchJSXChainEnd(text: string, start: number, end: number): P.JSXEndTagToken | undefined {
+    const at = this.eatWhitespace(text, start, end)
+    const closers = ["", ...Object.keys(this.chainTags).filter((word) => this.chainTags[word] === "if")]
+    const word = closers.find((candidate) => text.startsWith(`</${candidate}>`, at))
+    if (word === undefined) return undefined
+    return new P.JSXEndTagToken({ raw: text.slice(start, at + word.length + 3), tagName: word, start })
   }
 
   /**
@@ -1105,6 +1203,8 @@ export type TokenizerProps = {
   quotedNameTags?: string[]
   /** See `Tokenizer.emptyEndTagCloses`. */
   emptyEndTagCloses?: boolean
+  /** See `Tokenizer.chainTags`. */
+  chainTags?: Record<string, P.JSXChainKind>
 }
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */

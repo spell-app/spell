@@ -372,10 +372,25 @@ export class SpellxView {
     return this.text[first.start] === "{" && this.closingOf(first.start, last.end) === last.end - 1
   }
 
-  /** Markup `tokens` as elements, text and holes. */
+  /**
+   * Markup `tokens` as elements, text and holes.
+   * - An if-chain inside markup, `<text><if ...>a<otherwise>b</></text>`, as a `choice` of its `branch`es, as a
+   *   drawing's own `<if>` lines are (epic `elemental-spell`, Owen 2026-10-25).
+   */
   private markupOf(tokens: P.Token[]): SX.SpellxNode[] {
     const nodes: SX.SpellxNode[] = []
+    let choice: SX.SpellxChoice | undefined
     for (const token of tokens) {
+      if (token instanceof P.JSXElementToken && token.chain) {
+        const branch = this.branchOf(token)
+        if (token.chain !== "if" && choice) {
+          choice.branches.push(branch)
+          choice.span = { start: choice.span.start, end: branch.span.end }
+        } else nodes.push((choice = { kind: "choice", branches: [branch], span: { ...branch.span } }))
+        continue
+      }
+      // the indent between branches leaves the chain open;  anything else ends it
+      if (!(token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())) choice = undefined
       if (token instanceof P.JSXFragmentToken) nodes.push(...this.markupOf(token.children ?? []))
       else if (token instanceof P.JSXElementToken) nodes.push(this.element(token))
       else if (token instanceof P.JSXExpressionToken) nodes.push(...this.hole(token))
@@ -387,6 +402,23 @@ export class SpellxView {
       }
     }
     return nodes
+  }
+
+  /** A branch of an if-chain inside markup, `<otherwise if its rank is 1>`, and what it shows. */
+  private branchOf(token: P.JSXElementToken): SX.SpellxBranch {
+    const children = (token.children ?? []) as P.Token[]
+    const { phrase } = token
+    const headEnd = children.length ? children[0]!.start : token.end
+    return {
+      kind: "branch",
+      type: token.chain!,
+      word: token.tagName,
+      phrase: phrase ? `${phrase.contents}` : undefined,
+      phraseSpan: phrase ? { start: phrase.start, end: phrase.end } : undefined,
+      children: this.markupOf(children.filter((child) => !(child instanceof P.JSXEndTagToken))),
+      headSpan: { start: token.start, end: headEnd },
+      span: { start: token.start, end: token.end }
+    }
   }
 
   /** An element:  `<text part="face" color={its color}>`, its attributes and what's inside. */

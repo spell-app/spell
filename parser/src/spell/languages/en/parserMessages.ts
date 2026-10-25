@@ -171,6 +171,9 @@ export const PARSER_MESSAGES = {
   /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
   "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
   /** An `<otherwise>` with no `<if>` before it. */
+  /** An if-chain's branch in markup with no element around it (epic `elemental-spell`, Owen 2026-10-25). */
+  "chain-outside-markup":
+    '{tag} picks what an element shows, so it goes inside one:  to pick the whole drawing, write "{if} ..." on a line of its own',
   "spellx-otherwise-without-if": '{tag} needs an "{if}" before it',
   /** An `<otherwise>` after a `</>` that closed its `<if>` (Q53). */
   "spellx-otherwise-after-closed-if":

@@ -6,6 +6,25 @@ import { SP } from "spell-parser/spell"
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
 import "spell-parser/parser/rulex"
 
+/**
+ * The words of an if-chain's tags in markup, every language's:  `<if ...>`, `<otherwise if ...>`, `<otherwise>`
+ * -- each language's `spellx.controls` but `for each`.
+ */
+export const CHAIN_TAGS: Record<string, P.JSXChainKind> = {
+  if: "if",
+  "otherwise if": "otherwise if",
+  "else if": "otherwise if",
+  otherwise: "otherwise",
+  else: "otherwise",
+  si: "if",
+  "si no si": "otherwise if",
+  "sino si": "otherwise if",
+  "de lo contrario si": "otherwise if",
+  "si no": "otherwise",
+  sino: "otherwise",
+  "de lo contrario": "otherwise"
+}
+
 /** Spell's tokenizer's props -- see `SpellParser.spellTokenizer`. */
 const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
@@ -18,7 +37,11 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   rawTextTags: ["css", "markdown"],
   // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
   // `elemental-spell` P16);  each language's word
-  quotedNameTags: ["example", "ejemplo"]
+  quotedNameTags: ["example", "ejemplo"],
+  // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
+  // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
+  // `spellx.controls` say them (`SpellParser.test.ts` checks)
+  chainTags: CHAIN_TAGS
 }
 
 // Above the class:  read while this module is still loading (the built-in templates compile then)

@@ -367,6 +367,15 @@ export abstract class ProgramWriter extends Writer {
     if (inner instanceof P.ASTNewInstanceExpression) return inner.type.name === "List" ? "list" : inner.type.name
     if (inner instanceof P.ASTInfixExpression) return this.infixKindOf(inner, depth)
     if (inner instanceof P.ASTNotExpression) return "choice"
+    // a choice between two literals, `nothing` or a text:  that text's kind, e.g. an if-chain's `hidden` (`SpellJSX`)
+    if (inner instanceof P.ASTTernaryExpression) {
+      const sides = [inner.trueValue, inner.falseValue].filter(
+        (side) => !(unwrapped(side) instanceof P.ASTNothingLiteral)
+      )
+      const literal = sides.every((side) => unwrapped(side) instanceof P.ASTLiteral)
+      const kinds = new Set(sides.map((side) => this.kindOf(side, depth + 1)))
+      if (literal && kinds.size === 1) return [...kinds][0]
+    }
     if (inner instanceof P.ASTVariableExpression && !(inner instanceof P.ASTCoreExpression)) {
       if (inner.name === "this") return this.currentClass
       const value = this.localValue(inner.name) ?? this.project.moduleValues.get(inner.name)
