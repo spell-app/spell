@@ -27,13 +27,17 @@ describe("PlanParts", () => {
 
   test("a part holds the page's own folder's URLs as root paths (epic `epic-engine` P46), its siblings by name", () => {
     const toPart = PlanParts.toPartFrom("/epics/seo/")
-    expect(["x.png", "./requests/r3/a.png#h", "parts/q1.html"].map(toPart)).toEqual([
+    expect(["x.png", "./requests/r3/a.png#h", "parts/q1.html", "parts/"].map(toPart)).toEqual([
       "/epics/seo/x.png",
       "/epics/seo/requests/r3/a.png#h",
-      "q1.html"
+      "q1.html",
+      "./"
     ])
     // read back:  a sibling is the page's `parts/`;  a part written before P46 climbs from `parts/`
-    expect(["q1.html", "../../../guides/x.html"].map(PlanParts.toPage)).toEqual(["parts/q1.html", "../../guides/x.html"])
+    expect(["q1.html", "../../../guides/x.html"].map(PlanParts.toPage)).toEqual([
+      "parts/q1.html",
+      "../../guides/x.html"
+    ])
     // no folder (a test's doc):  as before P46, and exact back
     for (const url of ["a/b.html", "parts/q1.html", "./y"])
       expect(PlanParts.toPage(PlanParts.toPartFrom()(url))).toBe(url)

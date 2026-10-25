@@ -43,7 +43,7 @@ export class PlanParts {
 
   /**
    * A page-relative URL as a part of the page served from `folder` (its root path, `/epics/seo/`) holds it:
-   * `parts/y` -> `y`;  any other, the page's own folder's (`x.png`, `requests/r3/a.png`) -> its root path,
+   * `parts/y` -> `y` (`parts/` itself -> `./`);  any other, the page's own folder's (`x.png`, `requests/r3/a.png`) -> its root path,
    * `/epics/seo/x.png` (epic `epic-engine` P46:  from `parts/` it would climb, and a link never does)
    * - one that climbs above the root (none should, after the linker), or no `folder` (a test's doc):  `../` more, as
    *   before P46
@@ -51,7 +51,8 @@ export class PlanParts {
    */
   static toPartFrom(folder?: string): (url: string) => string {
     return (url) => {
-      if (url.startsWith(`${PARTS_DIR}/`)) return url.slice(PARTS_DIR.length + 1)
+      // the parts folder itself:  the part's own folder, `./` (an empty href would be the part's own page)
+      if (url.startsWith(`${PARTS_DIR}/`)) return url.slice(PARTS_DIR.length + 1) || "./"
       // from the root without its slash, so one that climbs above it says so (`../x`), never clamped to `/x`
       const rooted = folder === undefined ? ".." : posix.normalize(`${folder.replace(/^\/|\/?$/g, "")}/${url}`)
       return rooted.startsWith("..") ? `../${url}` : `/${rooted}`
