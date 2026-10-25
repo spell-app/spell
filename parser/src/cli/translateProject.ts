@@ -833,7 +833,7 @@ type ProjectManifest = { title?: string; description?: string; imports?: Array<{
 /**
  * Copy the project's other files, e.g. `styles.css`:  never its spell, its builds, its snapshots or our own files.
  * - A style sheet's selectors in the other language (`ElementNames.translateStyles()`):
- *   `ui-item[type="header"]` => `es-elemento[tipo="encabezado"]`.
+ *   `ui-item[kind="header"]` => `es-elemento[clase="encabezado"]`.
  */
 function copyOtherFiles(folder: string, outFolder: string, elements: ElementNames): void {
   for (const name of readdirSync(folder)) {

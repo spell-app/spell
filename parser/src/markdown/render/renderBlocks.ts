@@ -73,11 +73,11 @@ export function renderBlocks(
   function drawBlockquote(block: MD.Block, inOrdered: boolean): MD.Markup {
     const alert = MD.alertOf(block)
     const children = (alert?.children ?? block.children).map((child) => draw(child, false, inOrdered))
-    if (!alert) return ui ? h("ui-segment", { secondary: "" }, ...children) : h("blockquote", {}, ...children)
+    if (!alert) return ui ? h("ui-segment", { appearance: "secondary" }, ...children) : h("blockquote", {}, ...children)
     const { kind, title } = alert
     if (ui) {
       const { state, color, icon } = MD.ALERT_LOOKS[kind]!
-      return h("ui-message", { state, color, icon, header: title }, ...children)
+      return h("ui-message", { state, color, icon, heading: title }, ...children)
     }
     return h(
       "div",

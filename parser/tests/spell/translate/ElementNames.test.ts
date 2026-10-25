@@ -25,14 +25,14 @@ const UI_TAGS: Record<string, string> = {
   "ui-input": "es-entrada"
 }
 const UI_ATTRIBUTES: Record<string, string> = {
-  type: "tipo",
-  content: "contenido",
+  kind: "clase",
+  label: "etiqueta",
   inverted: "invertido",
   size: "tamano"
 }
 const UI_VALUES: Record<string, Record<string, string>> = {
   color: { red: "rojo", black: "negro", blue: "azul" },
-  type: { header: "encabezado" },
+  kind: { header: "encabezado" },
   size: { small: "pequeño" }
 }
 const UI_SPANISH: UIVocabulary = {
@@ -76,7 +76,7 @@ const CARD = `a "card" is a view where:
 				{its picture}
 			</ui-text>
 	- to "draw its header":
-		return <ui-item type="header" aria-label="Auto play">Klondike<ui-popup content="Auto play" inverted size="small"/></ui-item>
+		return <ui-item kind="header" aria-label="Auto play">Klondike<ui-popup label="Auto play" inverted size="small"/></ui-item>
 `
 
 describe("ElementNames:  the elements a project draws with, in the other language", () => {
@@ -91,7 +91,7 @@ describe("ElementNames:  the elements a project draws with, in the other languag
       "\t\t\t</es-texto>"
     ])
     expect(lines[11]).toBe(
-      '\t\tdevolver <es-elemento tipo="encabezado" aria-label="Jugar solo">Klondike<es-emergente contenido="Jugar solo" invertido tamano="pequeño"/></es-elemento>'
+      '\t\tdevolver <es-elemento clase="encabezado" aria-label="Jugar solo">Klondike<es-emergente etiqueta="Jugar solo" invertido tamano="pequeño"/></es-elemento>'
     )
   })
 
@@ -118,7 +118,7 @@ describe("ElementNames:  the elements a project draws with, in the other languag
       '/* a pile by its layout, e.g. <solitaire-pile layout="stacked"> */',
       ".board {",
       "  --ui-grid-gutter: 2rem;",
-      '  ui-item[type="header"] { color: red }',
+      '  ui-item[kind="header"] { color: red }',
       "}",
       '[layout="stacked"] > *, [layout]::part(placeholder) { margin: 0 }',
       "solitaire-pile[layout] { display: flex }",
@@ -128,7 +128,7 @@ describe("ElementNames:  the elements a project draws with, in the other languag
       '/* a pile by its layout, e.g. <solitaire-pile layout="stacked"> */',
       ".board {",
       "  --ui-grid-gutter: 2rem;",
-      '  es-elemento[tipo="encabezado"] { color: red }',
+      '  es-elemento[clase="encabezado"] { color: red }',
       "}",
       '[disposición="apilada"] > *, [disposición]::part(marcador) { margin: 0 }',
       "solitario-pila[disposición] { display: flex }",

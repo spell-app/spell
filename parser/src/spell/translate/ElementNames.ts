@@ -7,7 +7,7 @@ import type { MissingName, UIVocabulary } from "./translate.types"
  * The names of the ELEMENTS a project draws with, in the other language (epic `spanish` P25):
  * its tags, their attributes and their values -- in its JSX, and in its style sheets' selectors.
  * - Spell UI's tags through Spell UI's own dictionaries (`UIVocabulary`, spell-app's):
- *   `<ui-text color="red">` => `<es-texto color="rojo">`, `<ui-item type="header">` => `<es-elemento tipo="encabezado">`.
+ *   `<ui-text color="red">` => `<es-texto color="rojo">`, `<ui-item kind="header">` => `<es-elemento clase="encabezado">`.
  *   - A text people read (`aria-label`, `content` ...) through the project's dictionary's texts:
  *     `aria-label="Auto play"` => `aria-label="Jugar solo"`.
  *   - `part` names one of the project's own parts:  through its names, `part="picture"` => `part="imagen"`.
@@ -129,7 +129,7 @@ export class ElementNames {
 
   /**
    * `css` with each selector's names in the other language:  its tags, attribute selectors and `::part()`s.
-   * - `ui-item[type="header"]` => `es-elemento[tipo="encabezado"]`;  `[layout="vertical"]` => `[disposición="vertical"]`
+   * - `ui-item[kind="header"]` => `es-elemento[clase="encabezado"]`;  `[layout="vertical"]` => `[disposición="vertical"]`
    *   (an attribute with no tag is taken as one of the project's own things');  `::part(placeholder)` => `::part(marcador)`.
    * - Comments, declarations and custom properties (`--ui-grid-gutter`) stay as they are.
    * - Nested rules too:  a selector is what comes before a `{`, after the last `;`, `{` or `}`.
