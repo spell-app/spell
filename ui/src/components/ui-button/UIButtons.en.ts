@@ -25,8 +25,8 @@ export const buttonsVocabulary = {
       kind: "color",
       replaces: COLOR_SWITCHES,
       description:
-        "Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  " +
-        "Old names:  `primary`, `secondary`, `positive`, `negative` written alone."
+        "The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  " +
+        "Those four also work written alone, their old names."
     },
     {
       name: "appearance",
@@ -41,8 +41,10 @@ export const buttonsVocabulary = {
         { from: "circular", value: "circular" }
       ],
       description:
-        "The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` " +
-        "(text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`."
+        "The look of every button, several words at once.  " +
+        "`basic` puts them inside one outer border, and `tertiary` is text only.  " +
+        "`circular` makes them separate pill-shaped buttons.  " +
+        "Each word also works written alone, its old name."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Inverted buttons, for dark backgrounds." },
     { name: "icon", group: "content", kind: "keyOnly", description: "Icon-only buttons:  square padding." },
@@ -51,7 +53,7 @@ export const buttonsVocabulary = {
       group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
-      description: 'With `icon`:  `labeled icon` buttons;  `labeled="right"` puts the icons at the end.'
+      description: 'With `icon`, labeled icon buttons.  `labeled="right"` puts the icons at the end.'
     },
     {
       name: "padding",
@@ -103,7 +105,7 @@ export const buttonsVocabulary = {
       classes: ATTACH_CLASSES,
       replaces: [{ from: "attached", value: "both" }],
       description:
-        "Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`."
+        "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`."
     },
     {
       name: "floated",
@@ -120,8 +122,9 @@ export const buttonsVocabulary = {
       canEqual: true,
       values: "widths",
       description:
-        'Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width="3"` => ' +
-        '`three`) or `"equal"` (`equal width`).'
+        "The older, count-based way to write `equal fluid`:  equal-width buttons that fill the row.  " +
+        'A count draws its word (`width="3"` draws `three buttons`).  ' +
+        '`"equal"` draws `equal width buttons`.'
     }
   ],
   events: [],
@@ -130,7 +133,7 @@ export const buttonsVocabulary = {
   states: [
     {
       name: "fluid",
-      description: "The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`."
+      description: "The host is block-level:  `fluid`, `width`, or attached top, bottom or both."
     },
     { name: "left-floated", description: "The host floats left." },
     { name: "right-floated", description: "The host floats right." }

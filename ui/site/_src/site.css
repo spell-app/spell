@@ -911,8 +911,12 @@
     --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
-  /* an example's buttons that wrap keep apart, row from row:  their rows touched */
-  ui-docs-example > :is(ui-button, ui-buttons, ui-label) {
+  /*
+   * an example's buttons that wrap keep apart, row from row:  their rows touched
+   * - also inside the example's own segment (Button's Inverted example:  0px between rows, 8px between columns)
+   */
+  ui-docs-example > :is(ui-button, ui-buttons, ui-label),
+  ui-docs-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
     margin-block: 0.25em;
   }
   /* a message given as an example's description runs the frame's width, as every other message does */

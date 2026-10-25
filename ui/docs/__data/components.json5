@@ -2137,7 +2137,7 @@
           ],
           "valueSet": "sizes",
           "default": "medium",
-          "description": "Size, `mini` ... `massive`;  `medium` is the default."
+          "description": "How big it is, from `mini` to `massive`.  The default is `medium`."
         },
         {
           "name": "color",
@@ -2180,7 +2180,7 @@
               "value": "negative"
             }
           ],
-          "description": "Hue;  fills the button (or its ring and text when `basic`).  `primary` and `secondary` are the brand's, `positive` and `negative` say what pressing it does.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone."
+          "description": "Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Those four also work written alone, their old names."
         },
         {
           "name": "appearance",
@@ -2204,7 +2204,7 @@
               "value": "circular"
             }
           ],
-          "description": "The look, several words at once:  `basic` (less pronounced:  transparent with a hairline ring), `tertiary` (least pronounced:  text only, underlined on hover), `circular` (pill shaped;  round when it holds only an icon).  Old names:  `basic`, `tertiary`, `circular` written alone."
+          "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Each word also works written alone, its old name."
         },
         {
           "name": "inverted",
@@ -2214,7 +2214,7 @@
         {
           "name": "toggle",
           "kind": "keyOnly",
-          "description": "Toggles `selected` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
+          "description": "Each click turns `selected` on or off, and `aria-pressed` with it.  It sends `ui-selected` or `ui-deselected` as it turns."
         },
         {
           "name": "selected",
@@ -2229,12 +2229,12 @@
         {
           "name": "active-text",
           "kind": "string",
-          "description": "Fomantic's `state` behaviour:  the text while `selected` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
+          "description": "The text shown while `selected`, instead of the content:  `Following`.  It's Fomantic's `state` behaviour.  With either state text the label says the state, so a toggle button leaves `aria-pressed` off (WAI-ARIA APG)."
         },
         {
           "name": "inactive-text",
           "kind": "string",
-          "description": "Fomantic's `state` behaviour:  the text while NOT `selected` (`Follow`), instead of the content."
+          "description": "The text shown while NOT `selected`, instead of the content:  `Follow`.  It's Fomantic's `state` behaviour, as `active-text` is."
         },
         {
           "name": "disabled",
@@ -2292,7 +2292,7 @@
             "left",
             "right"
           ],
-          "description": "With `icon`:  the icon in its own block, `labeled` (start) or `labeled=\"right\"`.  With `badge`:  which side the badge goes, `labeled` (end) or `labeled=\"left\"`."
+          "description": "With `icon`, the icon gets a block of its own:  at the start, or at the end with `labeled=\"right\"`.  With `badge`, it picks which side the badge goes:  the end, or the start with `labeled=\"left\"`."
         },
         {
           "name": "reveal",
@@ -2308,7 +2308,7 @@
               "value": "slide"
             }
           ],
-          "description": "Brings the `icon` slot in over the content on hover:  `slide` (sideways), `fade` or `vertical`.  Its old name is `animated`."
+          "description": "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name is `animated`."
         },
         {
           "name": "attach",
@@ -2326,7 +2326,7 @@
               "value": "both"
             }
           ],
-          "description": "Joined to the edge of a segment or another element:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`."
+          "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`."
         },
         {
           "name": "floated",
@@ -2341,7 +2341,7 @@
         {
           "name": "icon",
           "kind": "icon",
-          "description": "Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the `icon` class (square padding);  with `labeled` it becomes a `labeled icon` button."
+          "description": "Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button."
         },
         {
           "name": "icon-position",
@@ -2350,7 +2350,7 @@
             "left",
             "right"
           ],
-          "description": "Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`."
+          "description": "Which side of the text the icon goes:  `left` (the default) or `right`.  `right` is Fomantic's right icon, as in `Next →`.  The space between them is `--ui-button-icon-spacing`.  A labeled icon block takes its side from `labeled` instead."
         },
         {
           "name": "label",
@@ -2360,12 +2360,12 @@
               "name": "content"
             }
           ],
-          "description": "Shorthand for the button's text, instead of the default slot;  slotted children win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, now `badge`."
+          "description": "The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now."
         },
         {
           "name": "badge",
           "kind": "string",
-          "description": "Shorthand for a joined badge, e.g. a count;  renders `ui labeled button` around the button.  It was `label` (no old name:  `label` is the text now)."
+          "description": "A badge joined to the button, such as a count:  it draws a `ui labeled button` round the button.  It used to be `label`, which is the button's text now, so it has no old name."
         },
         {
           "name": "type",
@@ -2376,18 +2376,18 @@
             "reset"
           ],
           "default": "button",
-          "description": "Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`."
+          "description": "What it does in a form, as the native `<button type>`.  `submit` calls `form.requestSubmit()`."
         },
         {
           "name": "commandfor",
           "kind": "string",
           "property": "commandFor",
-          "description": "Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in commands itself."
+          "description": "The id of the element `command` acts on, as the native `<button commandfor>`.  It's looked up in the button's own tree.  The inner button gets the element itself (`commandForElement`), since a shadow button can't see a light-DOM id.  In a browser without invoker commands (`UI.browser.supports.invokers`), a click runs the built-in commands itself."
         },
         {
           "name": "command",
           "kind": "string",
-          "description": "Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a `<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`)."
+          "description": "The invoker command to run, as the native `<button command>`.  A dialog takes `show-modal / close / request-close`, a popover `show-popover / hide-popover / toggle-popover`.  Any other is a custom `--name`, which the target hears as a `command` event.  `<ui-modal>` answers `--show / --close / --toggle`."
         },
         {
           "name": "link",
@@ -2546,7 +2546,7 @@
         },
         {
           "name": "fluid",
-          "description": "The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`."
+          "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)."
         },
         {
           "name": "left-floated",
@@ -2676,7 +2676,7 @@
               "value": "negative"
             }
           ],
-          "description": "Hue of every button in the group:  any hue, `primary`, `secondary`, `positive` or `negative`.  Old names:  `primary`, `secondary`, `positive`, `negative` written alone."
+          "description": "The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Those four also work written alone, their old names."
         },
         {
           "name": "appearance",
@@ -2700,7 +2700,7 @@
               "value": "circular"
             }
           ],
-          "description": "The look of every button, several words at once:  `basic` (inside one outer border), `tertiary` (text only), `circular` (separate pill-shaped buttons).  Old names:  `basic`, `tertiary`, `circular`."
+          "description": "The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Each word also works written alone, its old name."
         },
         {
           "name": "inverted",
@@ -2719,7 +2719,7 @@
             "left",
             "right"
           ],
-          "description": "With `icon`:  `labeled icon` buttons;  `labeled=\"right\"` puts the icons at the end."
+          "description": "With `icon`, labeled icon buttons.  `labeled=\"right\"` puts the icons at the end."
         },
         {
           "name": "padding",
@@ -2804,7 +2804,7 @@
               "value": "both"
             }
           ],
-          "description": "Joined to the edge of a segment:  `top`, `bottom`, `left`, `right`, or `both`.  Its old name is `attached`."
+          "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`."
         },
         {
           "name": "floated",
@@ -2838,7 +2838,7 @@
             "16"
           ],
           "valueSet": "widths",
-          "description": "Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width=\"3\"` => `three`) or `\"equal\"` (`equal width`)."
+          "description": "The older, count-based way to write `equal fluid`:  equal-width buttons that fill the row.  A count draws its word (`width=\"3\"` draws `three buttons`).  `\"equal\"` draws `equal width buttons`."
         },
         {
           "name": "disabled",
@@ -2963,7 +2963,7 @@
       "states": [
         {
           "name": "fluid",
-          "description": "The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`."
+          "description": "The host is block-level:  `fluid`, `width`, or attached top, bottom or both."
         },
         {
           "name": "left-floated",

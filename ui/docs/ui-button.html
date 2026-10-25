@@ -65,11 +65,6 @@
                   <ui-button>Follow</ui-button>
                 </ui-docs-example>
               </ui-section>
-              <ui-message size="small" class="site-not-ported"
-                >Not ported: Fomantic's focusable <code>&lt;div class="ui button" tabindex="0"&gt;</code>. Every
-                <code>&lt;ui-button&gt;</code> renders a real button (or link), so it is always keyboard
-                focusable.</ui-message
-              >
 
               <ui-section id="examples-types-emphasis" label="Emphasis" sticky collapsible dividing>
                 <ui-docs-example>
@@ -111,11 +106,6 @@
                     A button can appear alongside a badge:  <code>badge</code>, or the label slot, joins one.
                     <code>labeled="left"</code> puts it first.
                   </p>
-                  <ui-message slot="description" size="small" class="site-not-ported"
-                    >Not ported: the label's pointing shape (<code>right pointing</code> / <code>left pointing</code>).
-                    Shapes belong to <code>&lt;ui-label&gt;</code>, so the joined label is a plain basic
-                    label.</ui-message
-                  >
                   <ui-button icon="heart" badge="2,048">Like</ui-button>
                   <ui-button labeled="left" icon="heart" badge="2,048">Like</ui-button>
                   <ui-button labeled="left" icon="fork" badge="1,048" aria-label="Fork"></ui-button>
@@ -134,7 +124,7 @@
 
               <ui-section id="examples-types-labeled-icon" label="Labeled Icon" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A button can use an icon as a label:  `labeled` with an `icon`, `labeled="right"` for the end.'
+                  description='A button can use an icon as a label:  `labeled` with an `icon`.  `labeled="right"` puts it at the end.'
                 >
                   <ui-button labeled icon="pause">Pause</ui-button>
                   <ui-button labeled="right" icon="arrow right">Next</ui-button>
@@ -340,7 +330,7 @@
 
               <ui-section id="examples-states-state-texts" label="State texts" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A `toggle` button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow."
+                  description="A toggle button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow."
                 >
                   <ui-button toggle inactive-text="Follow" active-text="Following"></ui-button>
                   <ui-button toggle selected inactive-text="Subscribe" active-text="Subscribed" color="primary"></ui-button>
@@ -349,20 +339,9 @@
                   <ui-button toggle icon="bell" active-text="Watching">Watch</ui-button>
                 </ui-docs-example>
               </ui-section>
-              <ui-message size="small" class="site-not-ported"
-                >Not ported: the rest of Fomantic's state behaviour (hover texts, <code>flash</code>,
-                <code>sync</code>, API and automatic states). A name that changes under the pointer confuses screen
-                readers.</ui-message
-              >
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-message size="small" class="site-not-ported"
-                >Not ported: Social buttons (<code>facebook</code>, <code>twitter</code> ...). Brand colours age
-                fast:  colour a button with <code>color</code> or <code>--ui-color</code>, and a brand icon
-                instead.</ui-message
-              >
-
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
                 <ui-docs-example description="A button can have different sizes.">
                   <ui-button size="mini">Mini</ui-button>
@@ -591,7 +570,7 @@
 
               <ui-section id="examples-group-variations-mixed-group" label="Mixed Group" sticky collapsible dividing>
                 <ui-docs-example description="Groups can be formatted to use multiple button types together.">
-                  <ui-buttons>
+                  <ui-buttons wrapping>
                     <ui-button labeled icon="chevron left">Back</ui-button>
                     <ui-button icon="stop">Stop</ui-button>
                     <ui-button labeled="right" icon="chevron right">Forward</ui-button>
@@ -603,7 +582,7 @@
                 <ui-docs-example
                   description="Groups can have their widths divided evenly:  `width` is the number of buttons."
                 >
-                  <ui-buttons width="5">
+                  <ui-buttons width="5" wrapping>
                     <ui-button>Overview</ui-button>
                     <ui-button>Specs</ui-button>
                     <ui-button>Warranty</ui-button>
@@ -611,7 +590,7 @@
                     <ui-button>Support</ui-button>
                   </ui-buttons>
                   <ui-divider></ui-divider>
-                  <ui-buttons width="3">
+                  <ui-buttons width="3" wrapping>
                     <ui-button>Overview</ui-button>
                     <ui-button>Specs</ui-button>
                     <ui-button>Support</ui-button>
@@ -621,15 +600,15 @@
 
               <ui-section id="examples-group-variations-equal" label="Equal" sticky collapsible dividing>
                 <ui-docs-example
-                  description='`equal` makes every button the same width, counted from the buttons themselves:  each as wide as the widest, the group hugging them;  with `fluid`, an equal share of the row each.  `width="3"` above is the older, count-based spelling of `equal fluid`.'
+                  description='`equal` makes every button as wide as the widest, and the group hugs them.  With `fluid`, each takes an equal share of the row instead.  `width="3"` above is the older, count-based way to write `equal fluid`.'
                 >
                   <ui-buttons equal>
-                    <ui-button>Overview</ui-button>
-                    <ui-button>Specifications</ui-button>
-                    <ui-button>Support</ui-button>
+                    <ui-button>OK</ui-button>
+                    <ui-button>Cancel</ui-button>
+                    <ui-button>Save draft</ui-button>
                   </ui-buttons>
                   <ui-divider></ui-divider>
-                  <ui-buttons equal fluid appearance="basic">
+                  <ui-buttons equal fluid wrapping appearance="basic">
                     <ui-button>Overview</ui-button>
                     <ui-button>Specifications</ui-button>
                     <ui-button>Support</ui-button>
@@ -716,10 +695,6 @@
               >
                 <ui-docs-example>
                   <p slot="description">Grouped buttons can automatically wrap, sharing the overall available width.</p>
-                  <ui-message slot="description" size="small" class="site-not-ported"
-                    >Not ported: Fomantic's <code>wrapped</code> helper (a corner tweak for a group known to wrap) --
-                    our groups draw one border plus dividers, so they need no hint.</ui-message
-                  >
                   <ui-buttons wrapping>
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
@@ -796,7 +771,7 @@
                 <ui-docs-example
                   description="Circular buttons inside groups get a slight margin so they don't appear attached together."
                 >
-                  <ui-buttons appearance="circular">
+                  <ui-buttons wrapping appearance="circular">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
@@ -829,6 +804,35 @@
                 </ui-docs-example>
               </ui-section>
             </ui-section>
+
+            <ui-section
+              id="examples-not-ported-from-fomantic"
+              label="Not ported from Fomantic"
+              sticky
+              collapsible
+              collapsed
+              dividing
+            >
+              <ui-markdown>
+                <script type="text/markdown">
+                  Five things from Fomantic's button page are left out on purpose.
+
+                  - **Focusable `<div>` buttons** ([Types](#examples-types)):  every `<ui-button>` draws a real
+                    button (or link), so it's always keyboard-focusable.
+                  - **Pointing labels** ([Labeled](#examples-types-labeled)):  the joined badge has no
+                    `right pointing` / `left pointing` shape.
+                    Shapes belong to `<ui-label>`, so the badge is a plain basic label.
+                  - **The rest of the state behaviour** ([State texts](#examples-states-state-texts)):
+                    hover texts, `flash`, `sync`, API and automatic states.
+                    A name that changes under the pointer confuses screen readers.
+                  - **Social buttons** ([Circular](#examples-variations-circular)):  no `facebook`, `twitter` ...
+                    Brand colours age fast:  colour a button with `color` or `--ui-color`, and give it a brand icon.
+                  - **The `wrapped` helper** ([Wrapping Buttons](#examples-group-variations-wrapping-buttons)):
+                    Fomantic's corner fix for a group known to wrap.
+                    Each row of a `wrapping` group is a rounded track of its own, so it needs no hint.
+                </script>
+              </ui-markdown>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
@@ -836,18 +840,21 @@
             <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Write `<ui-button>` with text inside, and add attributes for the look. Most attributes become
-                  Fomantic's class words on the real `<button>` in the shadow root:
-                  `<ui-button size="small" color="primary" appearance="basic">` renders `ui small basic primary button`.
+                  Write `<ui-button>` with its text inside, and add attributes for the look.
 
-                  - A boolean attribute is true when present, empty, `"true"` or `"yes"`, and false for `"false"` or
-                    `"no"`.
-                  - `medium` is a real size meaning "default": it renders no class.
-                  - `icon`, `label` and `content` are shorthands for the `icon`, `label` and default slots; slotted
-                    children win.
-                  - `link` renders an `<a>` instead of a `<button>`, so the button navigates like a link.
-                  - Wrap buttons in `<ui-buttons>` to join them; the group's words (`basic`, `size`, `color` ...)
-                    reach every button in it.
+                  Most attributes become Fomantic's class words, on the real button in the shadow root:
+                  `<ui-button size="small" color="primary" appearance="basic">` draws `ui small basic primary button`.
+
+                  - A boolean attribute is true when it's there, or empty.
+                    `"true"` and `"yes"` mean true too;  `"false"` and `"no"` mean false.
+                  - `medium` is a real size meaning "default":  it draws no class.
+                  - Three attributes stand in for slots, and children in the slot win:
+                    - `icon` for the `icon` slot
+                    - `label` for the default slot (`content` is its old name)
+                    - `badge` for the `label` slot:  the joined badge
+                  - `link` draws an `<a>` in place of the button, so it navigates like a link.
+                  - Wrap buttons in `<ui-buttons>` to join them.
+                    The group's words (`size`, `color` ...) reach every button in it.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -855,8 +862,9 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A plain click is the native `click`. A `toggle` button sends `ui-selected` when it turns on and `ui-deselected` when it
-                  turns off, with `event.detail.active`.
+                  A plain click is the native `click`.
+                  A toggle button also sends `ui-selected` as it turns on, and `ui-deselected` as it turns off.
+                  Both carry the new state in `event.detail.active`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -871,14 +879,17 @@
             <ui-section id="usage-state-texts" label="State texts" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Fomantic's `state` behaviour is two attributes on a `toggle` button, not a module of its own:
-                  `inactive-text` replaces the content while the button is not `active`, `active-text` while it is.
-                  With only one of them, the button's own content shows in the other state (live examples: States,
-                  on the Examples tab).
+                  Fomantic's `state` behaviour is two attributes on a toggle button here, not a module of its own:
 
-                  Because the label SAYS the state, a `toggle` button with a state text leaves `aria-pressed` off: a
-                  toggle button whose name changes would announce the state twice (WAI-ARIA APG). Listen for
-                  `ui-selected` and `ui-deselected` as usual.
+                  - `inactive-text` replaces the content while the button is off.
+                  - `active-text` replaces it while the button is on (`selected`).
+                  - With only one of them, the button's own content shows in the other state.
+
+                  They're live on the Examples tab, under [State texts](#examples-states-state-texts).
+
+                  The label SAYS the state, so a toggle button with a state text leaves `aria-pressed` off.
+                  A toggle button whose name changes would announce the state twice (WAI-ARIA APG).
+                  Listen for `ui-selected` and `ui-deselected` as usual.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -893,17 +904,22 @@
             <ui-section id="usage-invoker-commands" label="Invoker commands" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A `<ui-button>` drives other elements with no script, like a native `<button>`: `commandfor` is
-                  the id of the target (looked up in the button's own tree) and `command` the action.
+                  A `<ui-button>` drives other elements with no script, as a native button does:
 
-                  - `show-modal` / `close` / `request-close` act on a `<dialog>`.
-                  - `show-popover` / `hide-popover` / `toggle-popover` act on a popover.
-                  - A custom `--name` arrives as a `command` event on the target; `<ui-modal>` answers `--show`,
-                    `--close` and `--toggle`.
+                  - `commandfor` is the target's id, looked up in the button's own tree.
+                  - `command` is the action.
 
-                  The shadow `<button>` can't see a light-DOM id, so the element hands it the target element
-                  (`commandForElement`); in browsers without invokers (`UI.browser.supports.invokers`) a click runs
-                  the built-in commands itself.
+                  The actions:
+
+                  - `show-modal / close / request-close` act on a `<dialog>`.
+                  - `show-popover / hide-popover / toggle-popover` act on a popover.
+                  - A custom `--name` arrives at the target as a `command` event.
+                    `<ui-modal>` answers `--show / --close / --toggle`.
+
+                  The button inside the shadow root can't see a light-DOM id,
+                  so the element hands it the target itself (`commandForElement`).
+                  In a browser without invoker commands (`UI.browser.supports.invokers`),
+                  a click runs the built-in commands itself.
                 </script>
               </ui-markdown>
               <ui-section
@@ -914,7 +930,7 @@
                 dividing
               >
                 <ui-docs-example
-                  description="A `<ui-button>` opens a popup and a modal with `commandfor` and `command`."
+                  description="A button opens a popup and a modal with `commandfor` and `command`, no script."
                 >
                   <ui-button commandfor="button-invoker-popup" command="toggle-popover">Toggle popup</ui-button>
                   <ui-popup
@@ -938,14 +954,15 @@
                 <script type="text/markdown">
                   A `<ui-button>` is a form-associated element, so it works inside a `<form>` like a native button.
 
-                  - `type` is `button` by default, so a plain `<ui-button>` never submits by accident.
-                  - `type="submit"` submits the enclosing form (`form.requestSubmit()`, so validation and the `submit`
-                    event run); `type="reset"` resets it.
+                  - `type` is `button` by default, so a plain one never submits by accident.
+                  - `type="submit"` submits the form round it with `form.requestSubmit()`,
+                    so validation and the submit event run.
+                    `type="reset"` resets it.
                   - `name` / `value` are submitted with the form when this button submits it.
-                  - `button.click()` from script presses it as a click would (submits, toggles, follows its link), so
-                    Enter in a `<ui-input>` submits through the form's `<ui-button type="submit">`.
+                  - `button.click()` from a script presses it as a click would:  it submits, toggles or follows its link.
+                    So Enter in a `<ui-input>` submits through the form's submit button.
                   - A disabled `<fieldset>` disables the buttons inside it.
-                  - `<ui-form>` (or a plain `<form>`) needs a light-DOM `<form>` for the buttons to submit.
+                  - To submit, the buttons need a real `<form>` in the light DOM:  inside a `<ui-form>` too.
                 </script>
               </ui-markdown>
               <ui-code language="html">
@@ -970,7 +987,7 @@
                     (`delegatesFocus`), so it is never a tab stop of its own and the focus ring is drawn on the inner
                     control.
                   - **Enter** or **Space** clicks a button; **Enter** follows a `link`.
-                  - A `toggle` button flips `active` on **Enter** / **Space**, like a click.
+                  - A toggle button flips `selected` on **Enter** or **Space**, as a click does.
                   - A `disabled` button is skipped by **Tab**.
                 </script>
               </ui-markdown>
@@ -979,14 +996,15 @@
             <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - Focus, **Enter** and **Space**, form submission and the accessible name come from the browser's own
-                    `<button>` (or `<a>` with `link`).
-                  - An icon-only button needs a name: put `aria-label` on the host; the element forwards it to the
-                    inner control.
-                  - `toggle` buttons expose `aria-pressed` and update it with `active` (but not with state texts: see
-                    above).
-                  - `loading` sets `aria-busy`; `disabled` disables the inner control.
-                  - `<ui-buttons>` is a `role="group"`; label it with `aria-label` when the group needs a name.
+                  - Focus, **Enter** and **Space**, form submission and the accessible name
+                    all come from the browser's own `<button>`;  with `link`, from its `<a>`.
+                  - An icon-only button needs a name:  put `aria-label` on the element.
+                    It forwards it to the inner button, and shows it as the button's tooltip.
+                  - A toggle button sets `aria-pressed`, and keeps it in step with `selected`.
+                    Not with a state text:  see [State texts](#usage-state-texts).
+                  - `loading` sets `aria-busy`.
+                    `disabled` disables the inner button.
+                  - `<ui-buttons>` has the group role:  give it an `aria-label` when the group needs a name.
                   - If the element fails to render, its native fallback keeps a plain `<button>` styled by the same
                     class words, so the button still renders, focuses and submits its form.
                 </script>
@@ -1003,14 +1021,14 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-button toggle onui-toggle={(event) => setOn(event.detail.active)} color="primary">Vote</ui-button>
+                  <ui-button toggle onui-selected={() => setOn(true)} onui-deselected={() => setOn(false)} color="primary">Vote</ui-button>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-button toggle @ui-toggle="(event) => (on = event.detail.active)" color="primary">Vote</ui-button>
+                  <ui-button toggle @ui-selected="on = true" @ui-deselected="on = false" color="primary">Vote</ui-button>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -1061,10 +1079,13 @@
             <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Theme with the public `--ui-button-*` tokens: set one on the element, on any ancestor (a group, a
-                  toolbar, `:root`), or on the inner box through `::part(button)`. They inherit into the shadow root,
-                  where the sheet reads each through a private alias, so nothing inside blocks them. Set on a
-                  `<ui-buttons>`, they reach every button in the group.
+                  Theme a button with the public `--ui-button-*` tokens.
+                  Set one on the element, on any ancestor (a group, a toolbar, `:root`),
+                  or on the inner box through `::part(button)`.
+
+                  - They inherit into the shadow root, where the sheet reads each through a private alias,
+                    so nothing inside blocks them.
+                  - Set on a `<ui-buttons>`, they reach every button in the group.
                 </script>
               </ui-markdown>
               <ui-code language="css">

@@ -10796,7 +10796,7 @@
       "name": ":state(fluid)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or `attach` `top` / `bottom` / `both`.\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or `attach` `top` / `bottom` / `both`.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
+        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or attached top, bottom or both (`attach`).\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or attached top, bottom or both.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
       }
     },
     {
