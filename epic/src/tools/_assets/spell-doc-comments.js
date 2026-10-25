@@ -518,9 +518,17 @@ class PageComments {
     const [start, end] = field ? [field.selectionStart, field.selectionEnd] : [0, 0]
     const onFold = [...this.threads.values()].find((each) => each.isFoldFocused)
     this.read = readJSON(this.readKey)
-    for (const old of main.querySelectorAll(".spell-comment-mark")) dropBlockAction(old)
     const blocks = blocksIn(main)
     const head = pageHeadIn(main)
+    // the bullhorns KEPT where they still stand (epic `epic-engine` P28):  taking down and redrawing every one, on
+    // every inbox change, poll and patch, redrew each item's title row under Owen's cursor
+    const wanted = new Set(head ? [head, ...blocks] : blocks)
+    const kept = new Set()
+    for (const old of main.querySelectorAll(".spell-comment-mark")) {
+      const block = bullhornBlocks.get(old)
+      if (block && wanted.has(block) && !kept.has(block) && standsBy(old, block)) kept.add(block)
+      else dropBlockAction(old)
+    }
     const groups = new Map()
     const quotes = []
     for (const comment of this.list) {
@@ -543,7 +551,7 @@ class PageComments {
         thread.remove()
         this.threads.delete(id)
       }
-    for (const block of head ? [head, ...blocks] : blocks) this.addBullhorn(block)
+    for (const block of wanted) if (!kept.has(block)) this.addBullhorn(block)
     this.drawSend()
     const boxes = new Map()
     for (const [under, found] of groups) {
@@ -741,9 +749,12 @@ class PageComments {
           : "block"
     const button = iconButton("bullhorn", tip)
     const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true }, button)
+    bullhornBlocks.set(mark, block)
     button.addEventListener("click", (event) => {
       event.stopPropagation()
-      this.openBox({ key: place.anchor, place }, event.currentTarget.getBoundingClientRect())
+      // where it is NOW:  a kept bullhorn's block may have moved since it was drawn (an anchor is its place)
+      const now = this.placeOf(block)
+      this.openBox({ key: now.anchor, place: now }, event.currentTarget.getBoundingClientRect())
     })
     if (where === "section" || where === "title") {
       mark.slot = "actions"
@@ -1670,4 +1681,18 @@ function savedTip() {
 /** The floppy's tooltip when a save failed:  why, and that the words are kept. */
 function notSavedTip(error) {
   return `Not saved:  ${error.message} (kept in this browser)`
+}
+
+/** Each bullhorn's block (`addBullhorn()`):  what `draw()` checks a kept one against. */
+const bullhornBlocks = new WeakMap()
+
+/**
+ * Does bullhorn `mark` still stand by `block`:  in its title row (a child of it), the page header's tools, or the
+ * actions row just before it (`addBlockAction()`)?
+ */
+function standsBy(mark, block) {
+  if (!mark.isConnected || !block.isConnected) return false
+  if (mark.parentElement === block || mark.classList.contains("at-page")) return true
+  const row = mark.closest(".spell-block-actions")
+  return Boolean(row) && row.nextElementSibling === block
 }
