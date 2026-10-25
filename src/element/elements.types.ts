@@ -510,8 +510,10 @@ export type OldAttribute = {
   name: string
   /** the attribute it now stands for */
   attribute: ResolvedAttribute
-  /** an old switch's value (`primary`);  `undefined` for a plain old name, whose text is the value */
+  /** what the old name stands for written bare (`primary`);  `undefined` for a plain old name */
   value?: string
+  /** old text => new value (`{ very: "very-basic" }`), where the values change too */
+  values?: Readonly<Record<string, string>>
 }
 
 ////////////////

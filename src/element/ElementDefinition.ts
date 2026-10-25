@@ -146,14 +146,29 @@ export class ElementDefinition {
    * The value `old`'s attribute takes from the old name's `text` (`null`:  removed), boxed (`{ value }`);
    * `undefined` when it should keep the one it has.
    * - a plain old name:  its text, converted as the attribute's own would be
-   * - an old switch turned on:  its value (`primary`);  turned off:  the default, but only if the value is still the one
-   *   the switch set (`current`), so turning `primary` off doesn't clear a `secondary` set since
+   * - an old switch (or an old name whose values change) turned on:  its new value, from `values` or `value`;
+   *   turned off:  the default, unless the value (`current`) is one ANOTHER old name of the attribute sets,
+   *   so turning `primary` off doesn't clear a `secondary` set since
+   * - on an attribute that takes several words (`kind: "multiple"`):  its word added to `current`'s, or removed
    */
   valueFromOld(old: E.OldAttribute, text: string | null, current: unknown): { value: unknown } | undefined {
-    if (old.value === undefined) return { value: this.convert(old.attribute, text) }
-    const value = this.convert(old.attribute, old.value)
-    if (this.words.converters.boolean(text, old.name)) return { value }
-    return current === value ? { value: this.convert(old.attribute, null) } : undefined
+    const { attribute } = old
+    if (old.value === undefined && !old.values) return { value: this.convert(attribute, text) }
+    const isOn = text !== null && this.words.converters.boolean(text, old.name)
+    const ownWords = new Set([old.value, ...Object.values(old.values ?? {})].filter((word) => word !== undefined))
+    if (attribute.spec.kind === "multiple") {
+      const words = new Set(ElementDefinition.text(current ?? "").split(/\s+/).filter(Boolean))
+      for (const word of ownWords) words.delete(word)
+      if (isOn) words.add(ElementDefinition.newWord(old, text!))
+      return { value: this.convert(attribute, [...words].join(" ") || null) }
+    }
+    if (isOn) return { value: this.convert(attribute, ElementDefinition.newWord(old, text!)) }
+    // off:  keep a value another old name of the same attribute set (`secondary`, once `primary` goes)
+    const currentText = current == null ? undefined : ElementDefinition.text(current)
+    const setByAnother = [...this.byOldName.values()].some(
+      (other) => other.attribute === attribute && other.value !== old.value && other.value === currentText
+    )
+    return setByAnother ? undefined : { value: this.convert(attribute, null) }
   }
 
   /**
@@ -313,11 +328,17 @@ export class ElementDefinition {
    */
   private addOldNames(resolved: E.ResolvedAttribute, dictionary: E.Dictionary | undefined) {
     for (const replacement of resolved.spec.replaces ?? []) {
-      const { from, value } = typeof replacement === "string" ? { from: replacement, value: undefined } : replacement
+      const { from, value, values } =
+        typeof replacement === "string" ? { from: replacement, value: undefined, values: undefined } : replacement
       const translated =
         dictionary?.components?.[this.vocabulary.tag]?.attributes?.[from] ?? dictionary?.attributes?.[from]
       for (const name of new Set([from, translated ?? from])) {
-        this.byOldName.set(name, { name, attribute: resolved, ...(value === undefined ? {} : { value }) })
+        this.byOldName.set(name, {
+          name,
+          attribute: resolved,
+          ...(value === undefined ? {} : { value }),
+          ...(values === undefined ? {} : { values })
+        })
       }
     }
   }
@@ -325,6 +346,14 @@ export class ElementDefinition {
   ////////////////
   // ## Statics
   ////////////////
+
+  /** The new value an old name's `text` stands for:  `values[text]`, else its bare `value`, else the text itself. */
+  private static newWord(old: E.OldAttribute, text: string): string {
+    const trimmed = text.trim()
+    const mapped = old.values?.[trimmed]
+    if (mapped !== undefined) return mapped
+    return BARE.has(trimmed.toLowerCase()) ? (old.value ?? trimmed) : trimmed
+  }
 
   /**
    * A primitive as attribute / class text;  anything else as JSON (never `[object Object]`).
@@ -344,6 +373,9 @@ export class ElementDefinition {
 
 /** The shared `visible` attribute's canonical name (`SharedVocabulary`). */
 const VISIBLE = "visible"
+
+/** An old switch's text that means "on, bare":  `<x basic>`, `basic=""`, `basic="true"`. */
+const BARE = new Set(["", "true", "yes"])
 
 /** The old names already noted in the console on this page (`noteOldName()`):  each is noted once. */
 const NOTED_OLD_NAMES = new Set<string>()
