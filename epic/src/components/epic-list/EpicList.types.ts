@@ -19,12 +19,16 @@ export const FAVORITE_API = "/api/epics/favorite"
  * `localStorage` key of the sagas the Epics page shows:  a JSON list of their ids (`""` for No saga).
  * - absent:  every one
  * - one for every Epics page
- * - `spell-epics-sagas` before epic `prefs-and-undo` P4 (`OLD_KEYS`), and the docs runtime's before epic
- *   `epic-engine` P3, so a choice carries over
+ * - its older names, so a choice carries over:
+ *   - `spell-epics-sagas`, before epic `prefs-and-undo` P4 (`OLD_KEYS`)
+ *   - the docs runtime's, before epic `epic-engine` P3
  */
 export const SAGAS_SHOWN_KEY = "spell-epics:sagas"
 
-/** `localStorage` key of the Epics page's sort:  `title` (the default) or `date`;  `spell-epics-sort` before P4. */
+/**
+ * `localStorage` key of the Epics page's sort:  `title` (the default) or `date`.
+ * - `spell-epics-sort` before epic `prefs-and-undo` P4 (`OLD_KEYS`);  the docs runtime's before epic `epic-engine` P3
+ */
 export const SORT_KEY = "spell-epics:sort"
 
 /**

@@ -56,22 +56,24 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   and answered by each send;  `<epic-send>` says it (`listenLine`).  Nobody waiting:  Send still saves the answer,
  *   and says so (`notice`):  the next `ask wait` or `ask answer` reads it.
  * - Keeps a DRAFT of what's typed and not sent (P18:  agents rewrote a page under Owen, and lost what he typed):
- *   - every change Owen makes (`edited()`) goes into `typed`, the page as he left it, at once;  a copy goes into
- *     the browser's storage at once, and to the page server as he types (`DETAILS_SAVE_MS`, half a second;
- *     `POST /api/docs/details/draft`, `<slug>.draft.json5`), one save at a time, and as the page goes away (`watch()`)
- *   - a save that fails says so in red, and tries again every `ANSWER_RETRY_MS` (3s) until one goes through:  a page
- *     server back on its address takes it, with its new token (`ServerLink`;  epic `epic-engine` P15, r14)
+ *   - every change Owen makes (`edited()`) goes into `typed` at once:  the page as he left it
+ *   - a copy goes into the browser's storage at once, and to the page server as he types:
+ *     `DETAILS_SAVE_MS` (half a second) after a change, one save at a time, and as the page goes away (`watch()`)
+ *     - the server's copy:  `POST /api/docs/details/draft`, which writes `<slug>.draft.json5`
+ *   - a save that fails says so in red, and tries again every `ANSWER_RETRY_MS` (3s) until one goes through:
+ *     a page server back on its address takes it, with its new token (`ServerLink`;  epic `epic-engine` P15, r14)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
- *   - an agent's rewrite patched IN PLACE replaces the questions that changed:  a part that joins while there's a
- *     draft shows the draft's share, not the answer's
- *   - what was typed for a question, option or section that's gone from the page is KEPT (`settle()`, a moment
- *     after a part leaves, and after load), shown in its own box (the notes box draws it) and sent with the rest
+ *   - an agent's rewrite patched IN PLACE replaces the questions that changed:
+ *     a part that joins while there's a draft shows the draft's share, not the answer's
+ *   - what was typed for a question, option or section that's gone from the page is KEPT,
+ *     shown in its own box (the notes box draws it) and sent with the rest
+ *     - kept by `settle()`, a moment after a part leaves, and after load
  *     - a part that comes back later than that moment takes its text back out of the kept box (`takeBack()`, I9)
  *   - only on a details page (`DETAILS_PAGE`):  an element's docs page keeps nothing
- * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;  `fetch` and the storage
- *   come in through `AnswerFormOptions`, so tests stub them.
+ * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;
+ *   `fetch` and the storage come in through `AnswerFormOptions`, so tests stub them.
  * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers.
  *   NEVER imports Solid or Spell UI:  the elements bridge its changes (`subscribe()`) into their own state.
  ****************/
@@ -95,8 +97,8 @@ export class AnswerForm {
   kept: KeptText[] = []
 
   /**
-   * The page as Owen left it, by id, since he last changed it (or since a draft came back);  `undefined` with
-   * nothing typed since the last send.
+   * The page as Owen left it, by id, since he last changed it (or since a draft came back);
+   * `undefined` with nothing typed since the last send.
    * - holds what a part that just left had, until `settle()` keeps it
    */
   typed: TypedAnswer | undefined
@@ -147,8 +149,8 @@ export class AnswerForm {
   private settleTimer: ReturnType<typeof setTimeout> | undefined
 
   /**
-   * The page as typed just before each `settle()` that kept something, laid over the last:  each kept text's own
-   * value, to move back into a part slower than the settle (`takeBack()`, I9).
+   * The page as typed just before each `settle()` that kept something, laid over the last:
+   * each kept text's own value, to move back into a part slower than the settle (`takeBack()`, I9).
    */
   private settledAway: TypedAnswer | undefined
 
@@ -191,8 +193,8 @@ export class AnswerForm {
    * Register `part` while it's connected;  returns the undo.
    * - the answer already read back (or a draft over it):  it shows its share at once,
    *   and the page counts as sent still, unless it had changes before
-   * - text kept from its ids (it came back later than `settle()` waited):  moved back into it, out of the kept box
-   *   (`takeBack()`, I9)
+   * - text kept from its ids (it came back later than `settle()` waited):
+   *   moved back into it, out of the kept box (`takeBack()`, I9)
    * - the undo, with a draft:  what it held is kept if it doesn't come back (`settle()`)
    */
   add(part: AnswerPart): () => void {
@@ -399,10 +401,10 @@ export class AnswerForm {
   }
 
   /**
-   * Read back the answer already sent (`<slug>.answer.json5`, through the route), and show it in every part;  then
-   * the newest draft newer than it (the server's `<slug>.draft.json5`, or the browser's copy) over it.
-   * - once per form;  nothing off a details page (`DETAILS_PAGE`:  an element's docs page, say);  from `file://`
-   *   or without a page server, only the browser's copy
+   * Read back the answer already sent (`<slug>.answer.json5`, through the route), and show it in every part;
+   * then the newest draft newer than it (the server's `<slug>.draft.json5`, or the browser's copy) over it.
+   * - once per form;  nothing off a details page (`DETAILS_PAGE`:  an element's docs page, say)
+   * - from `file://`, or without a page server:  only the browser's copy
    * - NEVER throws:  no answer, or no route, shows nothing
    */
   load(): Promise<void> {
@@ -485,8 +487,8 @@ export class AnswerForm {
   }
 
   /**
-   * What each part shows:  the answer sent, with `typed` laid over it when there is one;  `undefined` before
-   * either.
+   * What each part shows:  the answer sent, with `typed` laid over it when there is one.
+   * - `undefined` before either.
    */
   get shown(): SentAnswer | undefined {
     if (!this.typed) return this.sent
@@ -521,8 +523,8 @@ export class AnswerForm {
   /**
    * Save the draft to the page server now, if anything changed since the last save;  after any save on its way.
    * - `keepalive`:  the page is going away;  the request outlives it
-   * - NEVER throws:  a failure shows in `draftText`, in red (the browser's copy still has it), and it tries again in
-   *   `ANSWER_RETRY_MS`
+   * - NEVER throws:  a failure shows in `draftText`, in red (the browser's copy still has it),
+   *   and it tries again in `ANSWER_RETRY_MS`
    */
   saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
     if (this.saveTimer) clearTimeout(this.saveTimer)

@@ -3,17 +3,21 @@
  * (epic `airplane` P11;  `wireComments()` below says it all).
  * - Its own module since epic `epic-engine` P2 (T3), so two scripts carry it:
  *   - the docs bundle, `spell-ui.js`, through the page runtime (`spell-doc-runtime.js`):  guides, epic pages ...
- *   - `spell-comments.js` by itself (`spell-comments.entry.js`), on Epic UI's pages:  they load Spell UI's site
- *     bundle, not the docs bundle, so nothing else of the runtime;  it draws with the page's own Spell UI
+ *   - `spell-comments.js` by itself (`spell-comments.entry.js`), on Epic UI's pages:
+ *     they load Spell UI's site bundle, not the docs bundle, so nothing else of the runtime;
+ *     it draws with the page's own Spell UI
  * - Plain DOM:  it makes elements and lets the page draw them, never imports Spell UI or the epics pack itself:
  *   - Spell UI's (`<ui-button>`), which the page's Spell UI draws
- *   - the epics pack's (epic `epic-engine` P3):  each comment's thread (`<epic-thread>`, in an `<epic-threads>` box
- *     under its block) and the comment pane (`<epic-comment-pane>`), which every page that takes comments loads
- *     (the docs runtime's `loadEpicsPack()`;  Epic UI's layout);  each upgrades as the pack registers
+ *   - the epics pack's (epic `epic-engine` P3), which every page that takes comments loads
+ *     (the docs runtime's `loadEpicsPack()`;  Epic UI's layout), each upgrading as the pack registers:
+ *     - each comment's thread, `<epic-thread>`, in an `<epic-threads>` box under its block
+ *     - the comment pane, `<epic-comment-pane>`
  *   - Owen's field, in the pane or a thread:  a native `<textarea>` this code owns, so it lives through every redraw
  *   - what a thread shows, and its ids and words:  `ThreadFacts` (`spell-epic/comments`), which the elements share
- * - Its look:  `spell-comments.css`, beside it (the bullhorns, Send, Owen's field, where a thread sits);  the
- *   elements' own sheets draw the rest.
+ * - Its look:  `spell-comments.css`, beside it (the bullhorns, Send, Owen's field, where a thread sits);
+ *   the elements' own sheets draw the rest.
+ * - What it keeps in the browser (drafts, what's been seen) goes through the kit's `PrefStore`:
+ *   the helpers' `readJSON()` / `writeJSON()`.
  */
 
 import {
@@ -64,9 +68,10 @@ export function commentsOnPage() {
 const COMMENT_DRAFT_KEY_PREFIX = "spell-comment-draft:"
 
 /**
- * `localStorage` key prefix of the Claude replies Owen has SEEN on a page (`{ [comment id]: time of the latest
- * Claude reply seen }`), per page.  The store the news-only cards kept before threads, read the same way:  a time
- * at or after the latest reply means seen.
+ * `localStorage` key prefix of the Claude replies Owen has SEEN on a page, per page:
+ * `{ [comment id]: time of the latest Claude reply seen }`.
+ * - the store the news-only cards kept before threads, read the same way:
+ *   a time at or after the latest reply means seen
  */
 const COMMENT_READ_KEY_PREFIX = "spell-comment-read:"
 
@@ -89,22 +94,26 @@ const COMMENT_SAVE_MS = 600
 const REDRAW_MS = 150
 
 /**
- * How often a docs page with a Send asks again who is listening, ms:  the server calls a session gone once its
- * heartbeat is 90s old (`ReviewInbox` `LISTEN_STALE_MS`), with no file change to announce it.
+ * How often a docs page with a Send asks again who is listening, ms.
+ * - the server calls a session gone once its heartbeat is 90s old (`ReviewInbox` `LISTEN_STALE_MS`),
+ *   with no file change to announce it
  */
 const SEND_POLL_MS = 30_000
 
 /**
- * The blocks with a title row and an `actions` slot in it (epic `epic-workflow` P25):  their bullhorn goes in that
- * slot, after the title and before their own buttons (review pills, the date, the fold), never over them.
+ * The blocks with a title row and an `actions` slot in it (epic `epic-workflow` P25).
+ * - their bullhorn goes in that slot, never over their own buttons:
+ *   after the title, before the review pills, the date, the fold
  * - an epic page's item, update (drawn as a block, with its date), aside and code block:
  *   `Fold.types.ts`, in the epics pack
- * - the Overview (`<epic-overview>`, a comment on all of it):  first in its title row, before its review buttons,
- *   expand-all, collapse-all and the fold (epic `epic-engine` I55;  Owen, 2026-10-20:  "The buttons on the left should
- *   move into the 1. Overview header, as well as a bullhorn");  its summary and prose keep their own, on their corners
- * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`);  every other block (a paragraph, a
- *   table, a list, a message, cards, a phase's field, the summary) has no title row:  its bullhorn sits over its
- *   corner, first in its actions row (`.at-block`, in `.spell-block-actions`:  `addBlockAction()`)
+ * - the Overview (`<epic-overview>`, a comment on all of it):  first in its title row,
+ *   before its review buttons, expand-all, collapse-all and the fold (epic `epic-engine` I55)
+ *   - Owen, 2026-10-20:  "The buttons on the left should move into the 1. Overview header, as well as a bullhorn"
+ *   - its summary and prose keep their own, on their corners
+ * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`)
+ * - every other block (a paragraph, a table, a list, a message, cards, a phase's field, the summary) has no title row:
+ *   its bullhorn sits over its corner, first in its actions row
+ *   (`.at-block`, in `.spell-block-actions`:  `addBlockAction()`)
  */
 const TITLE_ROW_BLOCKS = "epic-overview, epic-item, epic-update[at], epic-aside, epic-code"
 
@@ -112,66 +121,78 @@ const TITLE_ROW_BLOCKS = "epic-overview, epic-item, epic-update[at], epic-aside,
 const THREADS_FIRST = /^(ui-section|epic-overview)$/
 
 /**
- * COMMENTS (epic `airplane`, P11):  Owen's comments for Claude, on a page's blocks or on text he selected, kept by
- * the page server (`commentsRoutes.ts`):  a docs page's in its inbox file (`<page>.inbox.json5`), an epic page's in the
- * epic's review inbox.  No Claude, no network:  only the page server, so it works on a plane.
+ * COMMENTS (epic `airplane`, P11):  Owen's comments for Claude, on a page's blocks or on text he selected,
+ * kept by the page server (`commentsRoutes.ts`).
+ * - a docs page's in its inbox file (`<page>.inbox.json5`), an epic page's in the epic's review inbox
+ * - No Claude, no network:  only the page server, so it works on a plane.
  * - served by the page server with a token, on a page that takes comments (the `GET` says `takesComments`):
- *   - a BULLHORN beside every major block (`BlockAnchors.js` `blocksIn()`:  sections, tables, asides, code,
- *     messages, cards, steps, top-level lists;  an epic page's items, phase fields, summary and Overview prose) and in
- *     the page header (the whole page):  shown while the block is hovered
- *     - in the block's title row, when it has one:  a docs section's, an epic page item's, update's, aside's or code
- *       block's (their `actions` slot);  else over the block's top right corner
- *   - SELECTED TEXT:  ⌘ / Ctrl I, or the bullhorn that floats beside the selection:  the box opens for that block,
- *     its header the text's first words;  the comment keeps the quote, highlighted on the page while it exists
- *   - the box is a small PANE, fixed on the screen, just under the selection (or the button clicked):  the page
- *     never scrolls, and Owen drags it by its header (Owen, 2026-10-10:  "a little floating pane below the selected
- *     text that I can move around -- don't scroll the page and lose context!")
- *   - in it (`<epic-comment-pane>`):  a header (the first words, a floppy, a trash once saved, ×) and a textarea
- *     that grows, with no placeholder;  ivory, no buttons below (Owen, 2026-10-10);  it saves itself as Owen types,
- *     the floppy says so;  ×, Escape or the focus leaving it (Tab, a click elsewhere) closes it;  what's typed and
- *     not saved yet is kept in this browser (`COMMENT_DRAFT_KEY_PREFIX`)
+ *   - a BULLHORN beside every major block, and in the page header (the whole page):  shown while the block is hovered
+ *     - the blocks (`BlockAnchors.js` `blocksIn()`):  sections, tables, asides, code, messages, cards, steps,
+ *       top-level lists;  an epic page's items, phase fields, summary and Overview prose
+ *     - in the block's title row, when it has one (its `actions` slot):
+ *       a docs section's, an epic page item's, update's, aside's or code block's
+ *     - else over the block's top right corner
+ *   - SELECTED TEXT:  ⌘ / Ctrl I, or the bullhorn that floats beside the selection
+ *     - the box opens for that block, its header the text's first words
+ *     - the comment keeps the quote, highlighted on the page while it exists
+ *   - the box is a small PANE, fixed on the screen, just under the selection (or the button clicked):
+ *     the page never scrolls, and Owen drags it by its header
+ *     - Owen, 2026-10-10:  "a little floating pane below the selected text that I can move around --
+ *       don't scroll the page and lose context!"
+ *   - in it (`<epic-comment-pane>`):  a header (the first words, a floppy, a trash once saved, ×),
+ *     and a textarea that grows, with no placeholder
+ *     - ivory, no buttons below (Owen, 2026-10-10)
+ *     - it saves itself as Owen types, the floppy says so
+ *     - ×, Escape or the focus leaving it (Tab, a click elsewhere) closes it
+ *     - what's typed and not saved yet is kept in this browser (`COMMENT_DRAFT_KEY_PREFIX`)
  *   - NEVER an empty comment:  nothing typed saves nothing;  emptied, it's deleted at once
  *   - the pane is for writing a NEW comment;  once saved and closed, it's a THREAD (below)
- *   - THREADS (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane"):  every
- *     comment shows as one, folding, under the paragraph (list item, cell ...) holding its quote (`holderOf()`), else
- *     under its block:  an `<epic-thread>` (`thread()`), in an `<epic-threads>` box
- *     - all ivory, the pane's outline and corners, whoever spoke last;  its edges an epic page item's note box's, else
- *       the block's it's under (spell-comments.css)
- *     - its header:  a chevron, the bullhorn (a check circle once done), the pane's summary
- *       (`ThreadFacts.headline()`), then Owen's answer while it's his turn (Claude spoke last):  an epic page item's
- *       review pills (`<epic-review buttons="thread">`), Approve / Revisit / the x, as "that's good" / reply /
- *       "skip it";  Reopen once done;  the trash, always
- *     - the messages in order, a bold "You:" / "Claude:" first:  his plain on the ivory, Claude's in a light violet
- *       box;  each one's time in its top right corner (the first's with the day);  then a green Done line once
- *       closed;  "Claude: thinking…" last while Claude is at work on it (`working`)
+ *   - THREADS (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane"):
+ *     every comment shows as one, folding:  an `<epic-thread>` (`thread()`), in an `<epic-threads>` box
+ *     - where:  under the paragraph (list item, cell ...) holding its quote (`holderOf()`), else under its block
+ *     - all ivory, the pane's outline and corners, whoever spoke last
+ *     - its edges:  an epic page item's note box's, else the block's it's under (spell-comments.css)
+ *     - its header:  a chevron, the bullhorn (a check circle once done), the pane's summary (`ThreadFacts.headline()`)
+ *       - then Owen's answer while it's his turn (Claude spoke last):  an epic page item's review pills
+ *         (`<epic-review buttons="thread">`), Approve / Revisit / the x, as "that's good" / reply / "skip it"
+ *       - Reopen once done;  the trash, always
+ *     - the messages in order, a bold "You:" / "Claude:" first
+ *       - his plain on the ivory, Claude's in a light violet box
+ *       - each one's time in its top right corner (the first's with the day)
+ *       - then a green Done line once closed;  "Claude: thinking…" last while Claude is at work on it (`working`)
  *     - open while it's Owen's turn, or Claude is thinking, or he opened it;  else folded to its header
- *     - a REPLY BOX last while it's open, saved as he types (`reply`), and as the focus leaves it;  Revisit puts
- *       the cursor in it;  the pen edits his first words while Claude hasn't had them
+ *     - a REPLY BOX last while it's open, saved as he types (`reply`), and as the focus leaves it
+ *       - Revisit puts the cursor in it
+ *       - the pen edits his first words while Claude hasn't had them
  *   - a click on a highlighted quote opens its thread
  *   - the trash, on a thread or the pane:  one click (`delete` while it waits, else `clear`);  Undo in the toast
- *   - the BULLHORN only ever starts a new comment:  no count, since the block's threads are right there (Owen,
- *     2026-10-10:  "Bullhorn to the far right is unnecessary")
- * - IDS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "use `M3` for mark 1"):  shown `M3`, small and muted in each
- *   thread's header, before its summary (`<epic-thread>`);  the server keys them `m3`, and a typed id takes `M3`,
- *   `m3` or `cm3` (`ThreadFacts.numberOf()`)
- * - JUMPING to the threads waiting on Owen (Claude spoke last;  Owen, 2026-10-10:  "Is there a way to jump to comments
- *   in replies?"):
- *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it:  each click lands on the next, in
- *     page order, round again after the last, opened, below the stuck titles (`nextWaiting()`);  none:  hidden
+ *   - the BULLHORN only ever starts a new comment:  no count, since the block's threads are right there
+ *     (Owen, 2026-10-10:  "Bullhorn to the far right is unnecessary")
+ * - IDS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "use `M3` for mark 1"):
+ *   shown `M3`, small and muted in each thread's header, before its summary (`<epic-thread>`)
+ *   - the server keys them `m3`, and a typed id takes `M3`, `m3` or `cm3` (`ThreadFacts.numberOf()`)
+ * - JUMPING to the threads waiting on Owen (Claude spoke last;
+ *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
+ *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
+ *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
+ *       opened, below the stuck titles
  *   - Cmd / Ctrl + K takes a comment's id, and lists them (`openJumpPrompt()`)
- * - drawn again after a live patch (`spell-doc:updated`), when the page's content changes (an epic page's part
- *   loading), when the inbox file changes (`spell-server:file`:  another window, Claude), and when the page comes
- *   back into view
+ * - drawn again:
+ *   - after a live patch (`spell-doc:updated`)
+ *   - when the page's content changes (an epic page's part loading)
+ *   - when the inbox file changes (`spell-server:file`:  another window, Claude)
+ *   - when the page comes back into view
  * - what it adds in `main` carries `data-spell-added`:  a patch steps around it, the anchors never count it
  * - NEVER throws:  a page with no server, or a server without the routes, shows no bullhorns
  * - options:
- *   - `go(id)`:  lands on an id as a link to it does (the runtime's `wireAnchors()`);  without it, the browser's
- *     `scrollIntoView()`
- *   - `fitToolbar(toolbar)`:  fits the toolbar's titles again once its bullhorn shows or hides (the runtime's
- *     `fitTitles()`)
- *   - `signal`:  an `AbortSignal` that takes it all down again (Epic UI's pages, whose `main` the site's router swaps
- *     for the next page's:  `spell-comments.entry.js`):  every listener, observer and timer, the floating bullhorn;
- *     what's typed and not saved yet is sent first, as on leaving the page
+ *   - `go(id)`:  lands on an id as a link to it does (the runtime's `wireAnchors()`);
+ *     without it, the browser's `scrollIntoView()`
+ *   - `fitToolbar(toolbar)`:  fits the toolbar's titles again (the runtime's `fitTitles()`),
+ *     once its bullhorn shows or hides
+ *   - `signal`:  an `AbortSignal` that takes it all down again
+ *     - for Epic UI's pages, whose `main` the site's router swaps for the next page's (`spell-comments.entry.js`)
+ *     - every listener, observer and timer, the floating bullhorn
+ *     - what's typed and not saved yet is sent first, as on leaving the page
  */
 export async function wireComments(main, { go, fitToolbar, signal } = {}) {
   if (!window.SPELL_SERVER?.token || location.protocol === "file:") return
@@ -217,9 +238,9 @@ export async function wireComments(main, { go, fitToolbar, signal } = {}) {
 }
 
 /**
- * The URL paths the page server may announce inbox file `inbox` (`<page>.inbox.json5`) by:  it, and the same without
- * a worktree's prefix (`/worktrees/<w>/`:  a shared folder's changes come without it);  each by its old name too,
- * `.inbox.json`.
+ * The URL paths the page server may announce inbox file `inbox` (`<page>.inbox.json5`) by:
+ * - it, and the same without a worktree's prefix (`/worktrees/<w>/`:  a shared folder's changes come without it)
+ * - each by its old name too, `.inbox.json`
  */
 function inboxPathsOf(inbox) {
   const paths = [inbox, inbox.replace(/^\/worktrees\/[^/]+(?=\/)/, "")]
@@ -228,8 +249,10 @@ function inboxPathsOf(inbox) {
 
 /****************
  * ### `PageComments`
- * One page's comments:  what the server holds, drawn under their blocks;  the one comment pane open;  the floating
- * bullhorn of a text selection.
+ * One page's comments:
+ * - what the server holds, drawn under their blocks
+ * - the one comment pane open
+ * - the floating bullhorn of a text selection
  * - `list`:  the comments as the server last answered;  every write answers the whole list, which is drawn again
  * - NEVER throws:  a failed save says so (the floppy turns red), the text kept in the pane
  ****************/
@@ -255,31 +278,34 @@ class PageComments {
     /** the comments, as the server last answered (`CommentList` `all`) */
     this.list = []
     /**
-     * the pane open for a NEW comment, if any:  `{ key, place, id?, finish? }` (`place`:  `{ anchor, kind, label,
-     * excerpt, quote? ... }`;  `id`, once its first save made it;  `finish()`:  saves what's typed, then forgets its
-     * draft)
+     * the pane open for a NEW comment, if any:  `{ key, place, id?, finish? }`
+     * - `place`:  `{ anchor, kind, label, excerpt, quote? ... }`
+     * - `id`:  once its first save made it
+     * - `finish()`:  saves what's typed, then forgets its draft
      */
     this.open = null
     /**
-     * the open pane's element (`showPane()`, an `<epic-comment-pane>`), in `main` but fixed on the screen:  a redraw
-     * never touches it
+     * the open pane's element (`showPane()`, an `<epic-comment-pane>`), in `main` but fixed on the screen:
+     * a redraw never touches it
      */
     this.pane = null
     /**
-     * each comment's THREAD, by comment id (`thread()`):  ONE `<epic-thread>` for the visit, given what the server
-     * holds at each redraw, and moved only when its place changes, so Owen's box in it and the cursor stay
+     * each comment's THREAD, by comment id (`thread()`):  ONE `<epic-thread>` for the visit,
+     * given what the server holds at each redraw, and moved only when its place changes,
+     * so Owen's box in it and the cursor stay
      */
     this.threads = new Map()
     /**
-     * each open thread's REPLY BOX, by comment id (`replyBoxFor()`):  `{ id, how: "reply", box, field, floppy,
-     * saved(), busy(), finish(), flush() }`;  `box` (`field`):  its `<textarea>`, slotted into the thread, kept across
-     * redraws while Owen is in it or it holds words not saved yet;  `floppy`:  how its last save went
-     * (`{ tip, failed }`, none before one), which the thread shows
+     * each open thread's REPLY BOX, by comment id (`replyBoxFor()`):
+     * `{ id, how: "reply", box, field, floppy, saved(), busy(), finish(), flush() }`
+     * - `box` (`field`):  its `<textarea>`, slotted into the thread,
+     *   kept across redraws while Owen is in it or it holds words not saved yet
+     * - `floppy`:  how its last save went (`{ tip, failed }`, none before one), which the thread shows
      */
     this.replyBoxes = new Map()
     /**
-     * the pen's box, editing his first words while Claude hasn't had them (`startEdit()`), if open:  as a reply box,
-     * `how: "edit"`;  it stands in for the thread's reply box meanwhile
+     * the pen's box, editing his first words while Claude hasn't had them (`startEdit()`), if open:
+     * as a reply box, `how: "edit"`;  it stands in for the thread's reply box meanwhile
      */
     this.editing = null
     /** each quote's range on the page, by comment id (`highlightQuotes()`):  a click on one opens its thread */
@@ -288,10 +314,10 @@ class PageComments {
     this.folds = new Map()
     const page = decodeURIComponent(location.pathname)
     /**
-     * the URL paths of the inbox files the comments may be in, as the page server announces their changes:  a
-     * worktree's page (`/worktrees/<w>/epics/...`) is in a shared folder, whose changes it announces without that
-     * prefix;  each by its old name too, `.inbox.json`, which a checkout on older code writes (epic `epic-workflow`
-     * P21)
+     * the URL paths of the inbox files the comments may be in, as the page server announces their changes
+     * - a worktree's page (`/worktrees/<w>/epics/...`) is in a shared folder,
+     *   whose changes it announces without that prefix
+     * - each by its old name too, `.inbox.json`, which a checkout on older code writes (epic `epic-workflow` P21)
      */
     const inbox = page.replace(/(\.plan|\.saga)?\.html$/, ".inbox.json5")
     this.inboxPaths = inboxPathsOf(inbox)
@@ -309,9 +335,10 @@ class PageComments {
   }
 
   /**
-   * Whether `comment` is ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).  Looking at it
-   * doesn't clear it (Owen, 2026-10-10:  "I was expecting this to be orange, not ivory");  `markSeen()` only records
-   * the reply as read.  Never once it's done.
+   * Whether `comment` is ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).
+   * - Looking at it doesn't clear it (Owen, 2026-10-10:  "I was expecting this to be orange, not ivory"):
+   *   `markSeen()` only records the reply as read.
+   * - Never once it's done.
    */
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
@@ -375,13 +402,16 @@ class PageComments {
   }
 
   /**
-   * Keep a corner bullhorn off a thread's buttons (Owen, 2026-10-10:  "Overlap in bullhorn buttons"):  a block with no
-   * title row has its bullhorn over its top right corner, in its actions row (`.spell-block-actions`, with a table's
-   * expand button), so a thread just under a short block (a one-line paragraph) can lie under them:  that thread's
-   * header leaves room on its right, its buttons moving left (`--epic-thread-head-room`, which `<epic-thread>` reads).
-   * - a block with a title row has its bullhorn IN that row (`TITLE_ROW_BLOCKS`), beside its own buttons:  nothing
-   *   to move.  Before P25 of epic `epic-workflow` this also moved an item's corner bullhorn left of its review pills,
-   *   and an update's left of its date.
+   * Keep a corner bullhorn off a thread's buttons (Owen, 2026-10-10:  "Overlap in bullhorn buttons").
+   * - a block with no title row has its bullhorn over its top right corner, in its actions row
+   *   (`.spell-block-actions`, with a table's expand button)
+   * - so a thread just under a short block (a one-line paragraph) can lie under them:
+   *   that thread's header leaves room on its right, its buttons moving left
+   *   (`--epic-thread-head-room`, which `<epic-thread>` reads)
+   * - a block with a title row has its bullhorn IN that row (`TITLE_ROW_BLOCKS`), beside its own buttons:
+   *   nothing to move
+   *   - Before P25 of epic `epic-workflow` this also moved an item's corner bullhorn left of its review pills,
+   *     and an update's left of its date.
    */
   makeRoom() {
     alignBlockActions(this.main)
@@ -426,8 +456,9 @@ class PageComments {
   ////////////////
 
   /**
-   * Keep a docs page's Send state from a comments route's answer (`send`:  `{ epic, owned, wakes, listening, sent,
-   * unsent, waiting }`, `commentsRoutes.ts` `PageSend`);  an epic page's answer has none (its Send is `<epic-page>`'s).
+   * Keep a docs page's Send state from a comments route's answer:
+   * `send`, `{ epic, owned, wakes, listening, sent, unsent, waiting }` (`commentsRoutes.ts` `PageSend`).
+   * - an epic page's answer has none:  its Send is `<epic-page>`'s
    * - the epic's review inbox joins the files whose change redraws the page:  who is listening is in it
    */
   keepSend(answer) {
@@ -486,8 +517,9 @@ class PageComments {
       this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
       this.keepSend(answer)
       const count = `${send.unsent.length} comment${send.unsent.length === 1 ? "" : "s"}`
-      // nobody listening:  the server woke the epic (P16;  a page no epic owns:  `feedback`, epic `epic-engine` T9)
-      // and says what it did;  else they wait for its review, or (`feedback` not made yet) for /airplane land
+      // nobody listening:  the server woke the epic and says what it did
+      // (P16;  a page no epic owns:  `feedback`, epic `epic-engine` T9);
+      // else they wait for its review, or (`feedback` not made yet) for /airplane land
       const later = this.send.listening
         ? ""
         : answer.wake?.message
@@ -609,11 +641,12 @@ class PageComments {
   }
 
   /**
-   * The toolbar's BULLHORN (Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count, jumps to
-   * the next thread waiting on you"):  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a
-   * guide's alike), an orange count of the threads waiting on Owen;  hidden when none.
-   * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):  a `<ui-item link>` (a button),
-   *   its count a `<ui-label>` over the icon's top right, as a section's badge
+   * The toolbar's BULLHORN:  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a guide's alike),
+   * an orange count of the threads waiting on Owen;  hidden when none.
+   * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
+   *   jumps to the next thread waiting on you"
+   * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
+   *   a `<ui-item link>` (a button), its count a `<ui-label>` over the icon's top right, as a section's badge
    * - kept when the toolbar is built anew (a live update), and drawn again with the comments
    * - where it goes:  `waitingHome()`, the one place to change to move it
    */
@@ -662,9 +695,10 @@ class PageComments {
   }
 
   /**
-   * Land on comment `id`'s thread, opened:  as a link to it would (`go()`:  what hides it unfolds, it lands below the
-   * stuck titles, the address says `#comment-m3`), then the focus to its header without scrolling.  Seen
-   * (`markSeen()`).
+   * Land on comment `id`'s thread, opened, then the focus to its header without scrolling.
+   * - as a link to it would (`go()`):  what hides it unfolds, it lands below the stuck titles,
+   *   the address says `#comment-m3`
+   * - seen (`markSeen()`)
    */
   async landOn(id) {
     if (!this.list.some((each) => each.id === id)) return
@@ -727,15 +761,18 @@ class PageComments {
   ////////////////
 
   /**
-   * The bullhorn of `block`:  in a docs section's title (its `actions` slot), in an epic page block's title row (its
-   * `actions` slot:  `TITLE_ROW_BLOCKS`), in the page header, else first in the block's actions row
-   * (`addBlockAction()`:  a line of no height just before it, over its top right corner;  a table's expand button
-   * after it).
+   * The bullhorn of `block`, wherever its block keeps its own controls:
+   * - a docs section's title (its `actions` slot)
+   * - an epic page block's title row (its `actions` slot:  `TITLE_ROW_BLOCKS`)
+   * - the page header
+   * - else first in the block's actions row (`addBlockAction()`):
+   *   a line of no height just before it, over its top right corner;  a table's expand button after it
    * - in a title row it's the last of the page's own buttons there, before the block's own (pills, date, fold)
    * - quiet until the block is hovered, always:  a click opens the pane for a NEW comment on it
-   * - no count, and nothing to say about the block's comments (Owen, 2026-10-10:  "Bullhorn to the far right is
-   *   unnecessary"):  each has its thread right there on the page, orange while it has news (`thread()`).
-   *   Before, a block with comments showed "📢 N" always, its click listing them.
+   * - no count, and nothing to say about the block's comments:
+   *   each has its thread right there on the page, orange while it has news (`thread()`)
+   *   - Owen, 2026-10-10:  "Bullhorn to the far right is unnecessary"
+   *   - Before, a block with comments showed "📢 N" always, its click listing them.
    */
   addBullhorn(block) {
     const place = this.placeOf(block)
@@ -781,9 +818,12 @@ class PageComments {
   }
 
   /**
-   * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`), an `<epic-threads>`
-   * made on first use:  a docs section's and the Overview's first in its body (under its title);  a list item's or
-   * cell's last inside it;  the page's right under the page header;  anything else's right after it.
+   * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`):
+   * an `<epic-threads>`, made on first use.
+   * - a docs section's and the Overview's:  first in its body, under its title
+   * - a list item's or cell's:  last inside it
+   * - the page's:  right under the page header
+   * - anything else's:  right after it
    * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
    */
   boxFor(under) {
@@ -811,8 +851,8 @@ class PageComments {
    * Comment on selected text:  ⌘ / Ctrl I, or the bullhorn floating beside the selection (`floatingBullhorn()`).
    * - only a selection inside one of the page's blocks;  never in a comment box or a field
    * - leaves the selection alone:  copy, ⌘ A ... work as before
-   * - a click on a comment's highlighted quote opens that comment in the pane again (`quoteAt()`);  the pointer
-   *   says so over one
+   * - a click on a comment's highlighted quote opens that comment in the pane again (`quoteAt()`);
+   *   the pointer says so over one
    */
   wireSelection() {
     let timer = 0
@@ -1011,11 +1051,13 @@ class PageComments {
   }
 
   /**
-   * A reply box for comment `id`:  `how` `reply` (his reply) or `edit` (his first words);  `saved`, the words the
-   * server holds for it.  The pane's field:  a `<textarea>`, no placeholder, an `aria-label` (Owen, 2026-10-10);  its
-   * thread draws the floppy in its corner.  Wired by `wireReply()`.
-   * - a native `<textarea>` this code makes and keeps, slotted into the thread:  it lives through every redraw, the
-   *   cursor and what's typed with it (not a `<ui-textarea>`, whose form look would have to be undone)
+   * A reply box for comment `id`, wired by `wireReply()`.
+   * - `how`:  `reply` (his reply) or `edit` (his first words);  `saved`:  the words the server holds for it
+   * - the pane's field:  a `<textarea>`, no placeholder, an `aria-label` (Owen, 2026-10-10)
+   * - its thread draws the floppy in its corner
+   * - a native `<textarea>` this code makes and keeps, slotted into the thread:
+   *   it lives through every redraw, the cursor and what's typed with it
+   *   (not a `<ui-textarea>`, whose form look would have to be undone)
    */
   makeBox(id, how, saved) {
     const field = el("textarea", {
@@ -1053,8 +1095,9 @@ class PageComments {
   }
 
   /**
-   * Close thread `id`:  `good` ("that's good") or `skip` ("skip it").  It folds, with a check circle in its header
-   * and a green Done line at its end;  a toast says so, with Undo (`reopen()`).  NEVER throws.
+   * Close thread `id`:  `good` ("that's good") or `skip` ("skip it").  NEVER throws.
+   * - It folds, with a check circle in its header and a green Done line at its end.
+   * - A toast says so, with Undo (`reopen()`).
    */
   async resolve(id, how) {
     if (this.editing?.id === id && !(await this.closeEdit())) return
@@ -1134,8 +1177,9 @@ class PageComments {
   }
 
   /**
-   * Save and close the pen's box, if open;  resolves to whether it closed.  Emptied, the comment goes (Undo in the
-   * toast).  A save that failed keeps it open, and says why in a toast.
+   * Save and close the pen's box, if open;  resolves to whether it closed.
+   * - Emptied, the comment goes (Undo in the toast).
+   * - A save that failed keeps it open, and says why in a toast.
    */
   async closeEdit() {
     const editing = this.editing
@@ -1151,12 +1195,14 @@ class PageComments {
 
   /**
    * Wire reply box `replying` (`makeBox()`);  `saved`:  the words the server holds for it.
-   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops, as the pane does:  his reply (`reply`;  emptied,
-   *   his pending reply goes), or his first words (`edit`);  the floppy says how the last save went
-   * - FOCUS LEAVING it (Tab, a click elsewhere;  Owen, 2026-10-10:  "Tabbing out ... saves it automatically.  If it's
-   *   empty, delete it"):  a reply box saves at once, an emptied pending reply going;  the pen's box closes
-   * - NEVER an empty comment:  his first words emptied go only as the pen's box closes (`remove()`, Undo in its
-   *   toast), so clearing them to type afresh never loses the thread
+   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops, as the pane does:
+   *   his reply (`reply`;  emptied, his pending reply goes), or his first words (`edit`)
+   *   - the floppy says how the last save went
+   * - FOCUS LEAVING it (Tab, a click elsewhere):
+   *   a reply box saves at once, an emptied pending reply going;  the pen's box closes
+   *   - Owen, 2026-10-10:  "Tabbing out ... saves it automatically.  If it's empty, delete it"
+   * - NEVER an empty comment:  his first words emptied go only as the pen's box closes (`remove()`, Undo in its toast),
+   *   so clearing them to type afresh never loses the thread
    * - a draft is kept in this browser while what's typed differs from what's saved (`<id>~<how>`)
    * - Escape, or ⌘ / Ctrl Enter:  saved, and the cursor leaves it (the pen's box closes)
    * - `busy()`:  Owen is in it, or it holds words not saved yet:  a redraw keeps it as it is
@@ -1240,8 +1286,8 @@ class PageComments {
       else field.blur()
     })
     field.addEventListener("blur", () => {
-      // a redraw moves the box, and takes the cursor back into it;  another window or tab keeps it here:  only a
-      // real leave counts
+      // a redraw moves the box, and takes the cursor back into it;  another window or tab keeps it here:
+      // only a real leave counts
       setTimeout(() => {
         if (!box.isConnected || document.activeElement === field) return
         if (how === "edit") {
@@ -1256,8 +1302,9 @@ class PageComments {
   ////////////////
 
   /**
-   * Delete comment `id`, whatever its state, at once:  gone from the inbox, its thread and highlight with it;  a toast
-   * says so, with Undo for `UNDO_MS` (Owen, 2026-10-10:  "didn't know it needed two clicks").  NEVER throws.
+   * Delete comment `id`, whatever its state, at once:  gone from the inbox, its thread and highlight with it.
+   * NEVER throws.
+   * - a toast says so, with Undo for `UNDO_MS` (Owen, 2026-10-10:  "didn't know it needed two clicks")
    * - while it waits for Claude:  `delete`;  once Claude has it:  `clear` (a taken one stays in its epic)
    * - its pane or reply box, if open, closes;  any draft of it is forgotten
    */
@@ -1307,9 +1354,9 @@ class PageComments {
   ////////////////
 
   /**
-   * Open the comment pane for `open` (`{ key, place }`), just under `near` (a `DOMRect`:  the selection's last line,
-   * the button clicked):  a NEW comment on `place`'s block (`quote`:  on that text).  Once saved and closed, it's a
-   * thread (`thread()`);  until then its thread isn't drawn.
+   * Open the comment pane for `open` (`{ key, place }`):  a NEW comment on `place`'s block (`quote`:  on that text).
+   * - just under `near`, a `DOMRect`:  the selection's last line, the button clicked
+   * - once saved and closed, it's a thread (`thread()`);  until then its thread isn't drawn
    * - only one is open:  opening another saves what's typed in this one, then closes it
    * - the same one again:  the cursor goes back into it, where Owen put it
    * - the page never scrolls (Owen, 2026-10-10:  "don't scroll the page and lose context!")
@@ -1334,8 +1381,8 @@ class PageComments {
   /**
    * Put the pane on the screen under `near`, else above it when there's no room below, never past the window's
    * edges;  the cursor in its field.
-   * - an `<epic-comment-pane>` (the epics pack), which places itself under `near` and Owen drags;  its field is a
-   *   `<textarea>` this code makes, slotted into it
+   * - an `<epic-comment-pane>` (the epics pack), which places itself under `near` and Owen drags;
+   *   its field is a `<textarea>` this code makes, slotted into it
    * - fixed on the screen, in `main` (where the comments' styles reach):  the page scrolls under it
    * - the cursor goes in once the pane has drawn (it upgrades as the pack registers)
    */
@@ -1371,8 +1418,8 @@ class PageComments {
 
   /**
    * Wire pane `pane` and its `field`, for `open` (`openBox()`'s).
-   * - × or Escape closes it (⌘ / Ctrl Enter too, in the field), saving what's typed first;  so does the focus
-   *   leaving it (Tab, a click elsewhere):  emptied, the comment goes
+   * - × or Escape closes it (⌘ / Ctrl Enter too, in the field), saving what's typed first
+   * - so does the focus leaving it (Tab, a click elsewhere):  emptied, the comment goes
    * - the trash deletes the comment, one click, Undo in its toast;  shown once it's saved
    * - the field has no placeholder (Owen, 2026-10-10:  "remove the 'Anything:  a correction...' placeholder")
    */
@@ -1386,10 +1433,11 @@ class PageComments {
       event.stopPropagation()
       void close()
     })
-    // focus leaving the pane (Tab, a click elsewhere;  Owen, 2026-10-10:  "Tabbing out of a bullhorn modal saves it
-    // automatically.  If it's empty, delete it"):  closed as × closes it, so what's typed is saved, and an emptied
-    // comment goes, with no Undo.  Another window or tab keeps the focus here:  it stays open.  Its own buttons
-    // (in its shadow root) count as in it:  the focus there is the pane's.
+    // focus leaving the pane (Tab, a click elsewhere):  closed as × closes it,
+    // so what's typed is saved, and an emptied comment goes, with no Undo
+    // - Owen, 2026-10-10:  "Tabbing out of a bullhorn modal saves it automatically.  If it's empty, delete it"
+    // - another window or tab keeps the focus here:  it stays open
+    // - its own buttons (in its shadow root) count as in it:  the focus there is the pane's
     pane.addEventListener("focusout", () => {
       setTimeout(() => {
         if (this.pane !== pane || pane.contains(document.activeElement)) return
@@ -1401,12 +1449,14 @@ class PageComments {
 
   /**
    * Wire the pane's field for `open`;  returns what closes it.
-   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops (Owen, 2026-10-10:  "Save should just happen as I
-   *   type"):  the first save adds the comment, the next ones edit it;  the floppy says how the last one went
-   * - NEVER an empty comment (Owen, 2026-10-10:  "don't save an empty bullhorn comment"):  nothing typed (or only
-   *   spaces) saves nothing;  emptied, a saved one goes at once (`delete`, else `clear`);  the trash deletes it
-   * - a DRAFT is kept in this browser (`COMMENT_DRAFT_KEY_PREFIX`) only while what's typed differs from what the
-   *   server holds:  under the comment's id once it has one, else under the pane's `key`.
+   * - saves itself as Owen types, `COMMENT_SAVE_MS` after he stops:
+   *   the first save adds the comment, the next ones edit it;  the floppy says how the last one went
+   *   - Owen, 2026-10-10:  "Save should just happen as I type"
+   * - NEVER an empty comment (Owen, 2026-10-10:  "don't save an empty bullhorn comment"):
+   *   - nothing typed (or only spaces) saves nothing
+   *   - emptied, a saved one goes at once (`delete`, else `clear`);  the trash deletes it
+   * - a DRAFT is kept in this browser (`COMMENT_DRAFT_KEY_PREFIX`) only while what's typed differs from what the server
+   *   holds:  under the comment's id once it has one, else under the pane's `key`.
    *   - So a reload never brings back, as a NEW comment, text already saved.
    *     Before 2026-10-10 it did, and closing the pane at once saved that text a second time.
    *   - A new comment's draft that copies a comment already on its block is dropped (`draftOf()`).
@@ -1548,9 +1598,9 @@ function sendWords({ epic, unsent, waiting }, state) {
 }
 
 /**
- * Who is listening, beside a docs page's Send (`drawSend()`):  `python-target is listening`, `nobody is listening`;
- * a page no epic owns names the standing epic its comments go to (epic `epic-engine` T9):  `feedback is listening`,
- * `nobody is listening:  Send wakes feedback`.
+ * Who is listening, beside a docs page's Send (`drawSend()`):  `python-target is listening`, `nobody is listening`.
+ * - a page no epic owns names the standing epic its comments go to (epic `epic-engine` T9):
+ *   `feedback is listening`, `nobody is listening:  Send wakes feedback`
  */
 function whoLabel({ epic, owned, wakes, listening }) {
   if (listening) return `${epic} is listening`

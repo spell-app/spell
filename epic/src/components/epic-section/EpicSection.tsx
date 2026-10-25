@@ -419,9 +419,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
 
   /**
-   * A Todos, Questions, Issues or Tests section's NEW button, on its title, while reviewed:  comment dots, round, its
-   * name the tooltip (Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test
-   * headers").  A click opens the section, then the form at its end (`openNewForm()`).
+   * A Todos, Questions, Issues or Tests section's NEW button, on its title, while reviewed:
+   * comment dots, round, its name the tooltip.
+   * - Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers".
+   * - A click opens the section, then the form at its end (`openNewForm()`).
    */
   private newButton(kind: NewKind): JSX.Element {
     const words = () => this.translationForKey("addNew", { kind: this.translationForKey(NEW_KIND_LOOKS[kind].label) })
@@ -444,8 +445,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * The To test section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9";  a click asks the
-   * page for its test run (`epic-test-start`, out of the shadow root).
+   * The To test section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
+   * - A click asks the page for its test run (`epic-test-start`, out of the shadow root).
    */
   private startTesting(open: number): JSX.Element {
     return (

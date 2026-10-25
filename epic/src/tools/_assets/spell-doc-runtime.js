@@ -16,13 +16,14 @@
  *       remembers their folds, and lands links inside them
  *   - HEADINGS (the saga pages):  `section.s2|s3` > `<ui-sticky class="spell-h2|spell-h3">` > `<h2|h3 id>`;
  *     this runtime adds the fold chevrons and every sticky's `offset`
- * - the TOOLBAR, the page's one navigation (epic `airplane` P8;  the floating right-edge rail before):  a row of the
- *   top-level sections' buttons, the last row of the sticky page header (`buildPageToolbar()`):  mark and title,
- *   the titles shrinking, then gone on a narrow window.  No contents list:  Owen, 2026-10-08
- *   - an EPIC PAGE's (`buildToolbar()`):  its blocks' icons only, with badges of the items waiting on Owen, in
- *     `<epic-page>`'s header;  and Cmd / Ctrl + K asks for an item to jump to (`wireJumpKey()`)
- *   - at its right, on any page that takes comments, a bullhorn counting the threads waiting on Owen, landing on the
- *     next at each click (`PageComments.drawWaiting()`);  Cmd / Ctrl + K takes a comment's id there too (`M3`)
+ * - the TOOLBAR, the page's one navigation (epic `airplane` P8;  the floating right-edge rail before):
+ *   a row of the top-level sections' buttons, the last row of the sticky page header (`buildPageToolbar()`)
+ *   - mark and title, the titles shrinking, then gone on a narrow window
+ *   - No contents list:  Owen, 2026-10-08
+ *   - an EPIC PAGE's (`buildToolbar()`):  its blocks' icons only, with badges of the items waiting on Owen,
+ *     in `<epic-page>`'s header;  and Cmd / Ctrl + K asks for an item to jump to (`wireJumpKey()`)
+ *   - at its right, on any page that takes comments, a bullhorn counting the threads waiting on Owen,
+ *     landing on the next at each click (`PageComments.drawWaiting()`);  Cmd / Ctrl + K takes a comment's id too (`M3`)
  * - sticky headers:  the page header (`ui-sticky.spell-h1`) sticks at the top, each top-level title below it,
  *   nested ones below their parents' (re-measured on resize);
  *   CSS variables on the sections let anchors land below them all
@@ -35,19 +36,21 @@
  *   the toolbar shows, with a red badge, how many NEED OWEN (none:  no badge;  `countItems()`);
  *   an epic card section also gets state chips with counts, filtering its items (`wireItemFilters()`)
  * - scroll-follow:  the toolbar's button of the section being read is highlighted, and the address follows it
- * - links to any id in `main` (a section, a heading, a plan item) land below the stuck titles, unfolding what
- *   hides it;  a `#hash` in another case than the page's id (`#T1` for `t1`) lands too
- * - SHORT ADDRESSES (`wireAddresses()`, epic `epic-workflow` P15):  a link to `SAGA:/<saga>[/<epic>][#<id>]`
- *   becomes the saga or epic page and its `#id`, so both kinds of link work
+ * - links to any id in `main` (a section, a heading, a plan item) land below the stuck titles,
+ *   unfolding what hides it;  a `#hash` in another case than the page's id (`#T1` for `t1`) lands too
+ * - SHORT ADDRESSES (`wireAddresses()`, epic `epic-workflow` P15):
+ *   a link to `SAGA:/<saga>[/<epic>][#<id>]` becomes the saga or epic page and its `#id`, so both kinds of link work
  * - the CHEATSHEET card filters
  * - highlight.js, when the page loaded it
- * - COMMENTS (`wireComments()`):  served by the page server, a bullhorn beside every major block (and in the page
- *   header), and ⌘ I or a floating bullhorn on selected text, which open a comment box under the block;  the
- *   comments wait in an inbox file (a docs page's own, an epic page's review inbox), drawn under their blocks.
- *   Their own module, `spell-doc-comments.js` (epic `epic-engine` P2), which Epic UI's pages load alone too.
- *   PAGE NOTES (`wireNotes()`), written into docs pages before them:  each `<spell-note>` a folded card
- * - the EPICS PAGE's sort buttons, `<epic-sort>`, in its header (`wireEpicSort()`):  its list, its cards' stars and
- *   saga chips are the epics pack's elements (`<epic-list>`, `<epic-card>`), which do their own
+ * - COMMENTS (`wireComments()`), served by the page server:
+ *   - a bullhorn beside every major block (and in the page header), and ⌘ I or a floating bullhorn on selected text,
+ *     which open a comment box under the block
+ *   - the comments wait in an inbox file (a docs page's own, an epic page's review inbox), drawn under their blocks
+ *   - their own module, `spell-doc-comments.js` (epic `epic-engine` P2), which Epic UI's pages load alone too
+ *   - PAGE NOTES (`wireNotes()`), written into docs pages before them:  each `<spell-note>` a folded card
+ * - the EPICS PAGE's sort buttons, `<epic-sort>`, in its header (`wireEpicSort()`):
+ *   its list, its cards' stars and saga chips are the epics pack's elements (`<epic-list>`, `<epic-card>`),
+ *   which do their own
  * LANDING -- where a jump puts its target, ONE model for every kind of jump:
  * - the line:  just below the lowest title that will be stuck over the target:  site header + `--spell-top` (page
  *   header, filter bar) + the stack of the target's sections' titles
@@ -72,7 +75,7 @@
  * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the person).
  */
 
-import { PrefStore } from "spell/util/persist"
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
@@ -203,8 +206,8 @@ const FOLD_KEY_PREFIX = "spell-folds:"
 const KEPT_FOLDS_KEY_PREFIX = "spell-doc:kept-folds:"
 
 /**
- * `localStorage` key prefix of a page's item filters (`{ [section id]: [states shown] }`), per page:
- *   `<epic-section>`'s own key too (its `FILTER_KEY`), the same shape.
+ * `localStorage` key prefix of a page's item filters (`{ [section id]: [states shown] }`), per page.
+ * - `<epic-section>`'s own key too (its `FILTER_KEY`), the same shape
  * - NOTE: not `spell-item-filter:`, Open | All's before P3 of `review-review`:  its saved "open" meant "not done"
  */
 const ITEM_FILTER_KEY_PREFIX = "spell-item-state:"
@@ -220,8 +223,8 @@ else void start()
 ////////////////
 
 /**
- * Is the page an epic page showing its TEST RUN (epic `epic-engine` P4)?  `<epic-page testing>`, or the address's
- * `?test` before the page has set it.
+ * Is the page an epic page showing its TEST RUN (epic `epic-engine` P4)?
+ * `<epic-page testing>`, or the address's `?test` before the page has set it.
  * - the run owns the address's `#id` then (the test it's on):  scroll-follow and a live reload leave it alone (J44)
  */
 function isTestRun() {
@@ -317,15 +320,15 @@ function loadEpicsPack() {
 }
 
 /**
- * The page's head on ONE line, as an epic page's (Owen, 2026-10-13:  "Make the header changes in the other doc
- * files"):  `DOCS / SPELL SYNTAX`, the crumbs then the title, in the crumbs' own type, the title twice their size
- * and bold (`spell-doc.css`, "The page's head on one line").
+ * The page's head on ONE line, as an epic page's:  `DOCS / SPELL SYNTAX`, the crumbs then the title,
+ * in the crumbs' own type, the title twice their size and bold (`spell-doc.css`, "The page's head on one line").
+ * - Owen, 2026-10-13:  "Make the header changes in the other doc files"
  * - a copy of the page's breadcrumb (`.spell-crumbs`, before the sticky head) goes INTO the h1, before its text;
  *   `data-spell-added`, so a live update steps around it
- *   - its last section (the page itself) stays, emptied:  the title says its words;  so the `/` before the title is
- *     the breadcrumb's own divider (epic `epic-engine` P3:  a `<span>` of ours before)
- * - the breadcrumb itself stays where it was, hidden (`<body class="spell-one-line-head">`):  live updates still
- *   patch it, and the copy follows when the page reloads
+ *   - its last section (the page itself) stays, emptied:  the title says its words;
+ *     so the `/` before the title is the breadcrumb's own divider (epic `epic-engine` P3:  a `<span>` of ours before)
+ * - the breadcrumb itself stays where it was, hidden (`<body class="spell-one-line-head">`):
+ *   live updates still patch it, and the copy follows when the page reloads
  * - a page with no breadcrumb:  the title alone, in the same type
  */
 function oneLineHead(main) {
@@ -349,8 +352,8 @@ function oneLineHead(main) {
 }
 
 /**
- * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):  `SOLID 2 · 48 min read`,
- * a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
+ * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):
+ * `SOLID 2 · 48 min read`, a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
  * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
  * - every page with the docs head:  guides, the index pages, details and choice pages
  * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
@@ -383,13 +386,15 @@ function drawReadingTime(main) {
 }
 
 /**
- * The wide layout, every page's (`spell-doc.css`, "Layout";  epic `epic-engine` P2):  every table sits in the reading
- * column, as prose does, with an EXPAND button over its top right corner that runs it the page's full width
- * (Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ... Remember that setting
- * per table").
- * - The button is a bare icon (`.spell-table-toggle`, a `<ui-button basic>` with no edge:  `spell-doc.css`) in the table's ACTIONS ROW
- *   (`addBlockAction()`), right of its bullhorn (Owen, 2026-10-19:  "The expand button should be to the right of the
- *   bullhorn rather than in its own line"):  a line of no height, so it takes no room;  a click flips it back.
+ * The wide layout, every page's (`spell-doc.css`, "Layout";  epic `epic-engine` P2):
+ * every table sits in the reading column, as prose does,
+ * with an EXPAND button over its top right corner that runs it the page's full width.
+ * - Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ...
+ *   Remember that setting per table"
+ * - The button is a bare icon in the table's ACTIONS ROW (`addBlockAction()`), right of its bullhorn.
+ *   - `.spell-table-toggle`, a `<ui-button basic>` with no edge (`spell-doc.css`)
+ *   - Owen, 2026-10-19:  "The expand button should be to the right of the bullhorn rather than in its own line"
+ *   - the row is a line of no height, so it takes no room;  a click flips it back
  * - Expanded, the row moves with the table:  its buttons stay over the table's top right corner.
  * - Expanded:  CSS can't know how far in a table starts (a list's indent, an item's inset), so this measures it,
  *   moving the table out to the page's gutter with the page's width, less the gutter on both sides.
@@ -419,8 +424,8 @@ function wireTableWidths(main) {
     const parent = box.parentElement
     if (!toggle || !parent || !box.isConnected) return
     const row = toggle.closest(".spell-block-actions")
-    // its width in the column, measured while not widened:  the column is often the table's own `max-width`, not
-    // its parent's
+    // its width in the column, measured while not widened:
+    // the column is often the table's own `max-width`, not its parent's
     if (!box.style.width && box.getClientRects().length) narrow.set(box, box.getBoundingClientRect().width)
     toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
     const wide = isWide(box) && !toggle.hidden
@@ -488,22 +493,27 @@ function wireTableWidths(main) {
 }
 
 /**
- * A table's HEADER ROW sticks (epic `epic-engine` r4;  Owen, 2026-10-19:  "make the table headers sticky"):  while its
- * rows scroll past, it stays just under the stuck titles, the page header's and the sections', until the table ends.
+ * A table's HEADER ROW sticks (epic `epic-engine` r4;  Owen, 2026-10-19:  "make the table headers sticky"):
+ * while its rows scroll past, it stays just under the stuck titles, the page header's and the sections',
+ * until the table ends.
  * - its header:  its `<thead>`, else a first row of `<th>`s alone
- * - a PIN, not the row itself:  `position: sticky` on a `<thead>` holds only inside its nearest scroll box, and a table
- *   wider than its column scrolls sideways in its own box (every `<ui-table>`, a bare table at phone width), which
- *   scrolls nothing up or down.  So a COPY of the header (`.spell-table-pin`, `data-spell-added`) sticks instead:
- *   - a line of no height just before the table (and its actions row), sticking at the line below the titles:  the
- *     browser holds it there while the page scrolls, as it holds the titles
- *   - shown only while the table's own header is under that line, over the table's width as it shows (its box's,
- *     wide or not, scrolled sideways or not), its columns as wide as the table's, moved sideways with them
+ * - a PIN, not the row itself:  `position: sticky` on a `<thead>` holds only inside its nearest scroll box.
+ *   - A table wider than its column scrolls sideways in its own box (every `<ui-table>`, a bare table at phone width),
+ *     which scrolls nothing up or down.
+ *   - So a COPY of the header (`.spell-table-pin`, `data-spell-added`) sticks instead.
+ * - the copy:
+ *   - a line of no height just before the table (and its actions row), sticking at the line below the titles:
+ *     the browser holds it there while the page scrolls, as it holds the titles
+ *   - shown only while the table's own header is under that line,
+ *     over the table's width as it shows (its box's, wide or not, scrolled sideways or not),
+ *     its columns as wide as the table's, moved sideways with them
  *   - as the table ends, it goes up with the table's last row, cut off at the line:  never over a title
  *   - the copy draws as the table does:  the same classes in the same place (a `<ui-table>` copy for a `<ui-table>`);
  *     no pointer, no ids, hidden from readers
  * - the line, below the titles stuck over the table (`tableLine()`)
- * - read only for the tables on screen (an IntersectionObserver), a frame at a time, on any scroll (the page's, or a
- *   table's sideways) or resize;  tables a part's body or a live update adds later get theirs too
+ * - read only for the tables on screen (an IntersectionObserver), a frame at a time,
+ *   on any scroll (the page's, or a table's sideways) or resize
+ * - tables a part's body or a live update adds later get theirs too
  */
 function wireTableHeads(main) {
   const pins = new Map()
@@ -664,13 +674,14 @@ function tableLine(box) {
 }
 
 /**
- * Stuck titles on ONE row (Owen, 2026-10-13:  "This could collapse to one row when stickified"):  while a nested
- * section's title is stuck under its parent's, the top-level stuck title reads `2. Files on disk › 2.1 The repo`, and
- * the nested stuck titles under it hide (their room shows the text scrolling under them).
+ * Stuck titles on ONE row (Owen, 2026-10-13:  "This could collapse to one row when stickified").
+ * - while a nested section's title is stuck under its parent's,
+ *   the top-level stuck title reads `2. Files on disk › 2.1 The repo`
+ * - the nested stuck titles under it hide:  their room shows the text scrolling under them
  * - the trail is the top-level title's `::part(header)::after`, from `--spell-stuck-trail` on it, with
  *   `data-spell-trail`;  each hidden one has `data-spell-merged` (`spell-doc.css`, "Stuck titles on one row")
- * - worked out again on every scroll and resize, a frame at a time, and once more as it settles:  `:state(stuck)`
- *   (`<ui-section sticky>`'s) sends no event
+ * - worked out again on every scroll and resize, a frame at a time, and once more as it settles:
+ *   `:state(stuck)` (`<ui-section sticky>`'s) sends no event
  * - every page's `<ui-section>`s;  an epic page draws its own sections, in its elements' shadow roots
  */
 function wireStuckTrail(main) {
@@ -726,8 +737,8 @@ function wireStuckTrail(main) {
       update()
     })
   }
-  // `:state(stuck)` follows a moment after the scroll (`StickyWatch` hears it from an observer):  so again once the
-  // scrolling settles, or the last frame would read the titles as they were
+  // `:state(stuck)` follows a moment after the scroll (`StickyWatch` hears it from an observer):
+  // so again once the scrolling settles, or the last frame would read the titles as they were
   let settle
   const later = () => {
     soon()
@@ -754,11 +765,11 @@ function tableKey(box, main) {
 }
 
 /**
- * How far a widened table `box` may run, as window x's `{ left, right }`:  `main`'s width less its gutter
- * (`--spell-gutter`) on both sides, cut to every ancestor between them that clips its overflow (`overflow-x` not
- * `visible`), at that ancestor's inner edges.
- * - up through slots and shadow roots:  a table in an `<epic-*>` element's light DOM is laid out in its shadow root's
- *   boxes
+ * How far a widened table `box` may run, as window x's `{ left, right }`:
+ * `main`'s width less its gutter (`--spell-gutter`) on both sides,
+ * cut to every ancestor between them that clips its overflow (`overflow-x` not `visible`), at its inner edges.
+ * - up through slots and shadow roots:
+ *   a table in an `<epic-*>` element's light DOM is laid out in its shadow root's boxes
  */
 function roomFor(box, main) {
   const page = main.getBoundingClientRect()
@@ -829,11 +840,12 @@ function land({ hash, scroll }, jump, follow) {
 }
 
 /**
- * Keep the page at `top` while it settles after a live reload:  every frame for `RESTORE_HOLD_MS`,
- * until the reader does anything (`READER_INPUT`).
- * - why:  the page grows as it settles (the folds put back draw, their parts load), and the browser and the elements
- *   scroll it meanwhile;  one scroll, and one more after `SETTLE_MS` only when nothing else had moved it, landed short
- *   (I23 of `epic-engine`:  1150 -> 671)
+ * Keep the page at `top` while it settles after a live reload:
+ * every frame for `RESTORE_HOLD_MS`, until the reader does anything (`READER_INPUT`).
+ * - why:  the page grows as it settles (the folds put back draw, their parts load),
+ *   and the browser and the elements scroll it meanwhile
+ *   - one scroll, and one more after `SETTLE_MS` only when nothing else had moved it, landed short
+ *     (I23 of `epic-engine`:  1150 -> 671)
  * - the page may be too short for `top` at first:  it gets there as it grows
  */
 function holdScroll(top) {
@@ -1784,8 +1796,8 @@ const EPIC_ATTENTION =
   ':scope > epic-item:is([state="attention"], [state="replied"]), :scope > epic-phase[state="attention"]'
 
 /**
- * Of those, the ones Claude answered with options, waiting on Owen's pick (`replied`, orange):  the plan-doc toolbar
- * shows them apart from the urgent ones (red;  `buildToolbar()`).
+ * Of those, the ones Claude answered with options, waiting on Owen's pick (`replied`, orange):
+ * the plan-doc toolbar shows them apart from the urgent ones (red;  `buildToolbar()`).
  */
 const EPIC_REPLIED = ':scope > :is(epic-item, epic-phase)[state="replied"]'
 
@@ -1878,8 +1890,10 @@ const ITEM_STATES = [
 ]
 
 /**
- * A closed item's state, by its status:  decided or done stay `recent` (green) however old;  only `canceled` is `old`
- * (grey:  no longer relevant).  Owen, 2026-10-08;  `spell-epic` `PlanReader.itemState()`, the same rule.
+ * A closed item's state, by its status:
+ * - decided or done stay `recent` (green) however old
+ * - only `canceled` is `old` (grey:  no longer relevant)
+ * - Owen, 2026-10-08;  `spell-epic` `PlanReader.itemState()`, the same rule
  */
 const CLOSED_STATES = { done: "recent", decided: "recent", canceled: "old" }
 
@@ -1936,16 +1950,20 @@ function markItemStates(main) {
 /**
  * The status filter on every top-level `<ui-section>` with a filterable list
  * (the index's `.spell-epics`, a `.plan-items` list, each holding `[data-status]` children):
- * - its chips are the epics pack's, `<epic-state-filter>` (epic `epic-engine` P3:  the ONE chip element, an epic page's
- *   too):  a chip per state the section has items in, in its colour, with how many (Owen, 2026-10-10:  no filter
- *   icon);  SOLID while its items show, OUTLINED while hidden
- * - a click (`epic-state-pick`), by the one rule (`StateFilter.nextShown()`, in the element):  everything showing, only
- *   that state;  else a hidden state shows too and a shown one hides;  the only one showing, everything again
+ * - its chips are the epics pack's `<epic-state-filter>` (epic `epic-engine` P3):
+ *   the ONE chip element, an epic page's too
+ *   - a chip per state the section has items in, in its colour, with how many (Owen, 2026-10-10:  no filter icon)
+ *   - SOLID while its items show, OUTLINED while hidden
+ * - a click (`epic-state-pick`), by the one rule (`StateFilter.nextShown()`, in the element):
+ *   - everything showing:  only that state
+ *   - else a hidden state shows too, and a shown one hides
+ *   - the only one showing:  everything again
  * - in the title's `actions` slot (`.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
- * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):  a click
- *   there (`epic-show-all`) shows all
- * - the choice:  `data-show="<states shown>"` on the section (none for all), `data-spell-hidden` on the items it
- *   hides (CSS hides them);  remembered per page (`localStorage`, `{ [section id]: [states] }`);  all by default
+ * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):
+ *   a click there (`epic-show-all`) shows all
+ * - the choice:  `data-show="<states shown>"` on the section (none for all),
+ *   `data-spell-hidden` on the items it hides (CSS hides them)
+ *   - remembered per page (`localStorage`, `{ [section id]: [states] }`);  all by default
  * - an epic page's sections filter themselves (`<epic-section>`), with the same element
  * - SIDE EFFECT:  marks the items' states (`markItemStates()`), adds the chips and notes to the page;
  *   callable again (it replaces the ones it added)
@@ -1992,8 +2010,9 @@ function wireItemFilters(main) {
 }
 
 /**
- * Show the items of the states `shown` in a filter's section (`{ section, lists, notes, chips, states }`):  its chips
- * say which (`shown`, none while every state shows);  an "N hidden" note under each list that hides any.
+ * Show the items of the states `shown` in a filter's section (`{ section, lists, notes, chips, states }`).
+ * - its chips say which (`shown`, none while every state shows)
+ * - an "N hidden" note under each list that hides any
  */
 function showItems({ section, lists, notes, chips, states }, shown) {
   const showing = new Set(shown)
@@ -2030,8 +2049,8 @@ function itemsOf(list) {
  * The page's navigation:  an epic page's toolbar (`buildToolbar()`), else the page toolbar (`buildPageToolbar()`).
  * - both the SAME element, Spell UI's menu (`toolbarMenu()`):  a guide's and an epic page's band look and behave alike
  * - returns the menu, whose `[data-rail]` items scroll-follow marks `selected`;  none without top-level sections
- * - `data-rail`:  the name the floating rail gave them (gone since epic `airplane` P8);  kept, as scroll-follow,
- *   a details page's `<epic-ask>` and `check-spell.js` read it
+ * - `data-rail`:  the name the floating rail gave them (gone since epic `airplane` P8)
+ *   - kept, as scroll-follow, a details page's `<epic-ask>` and `check-spell.js` read it
  */
 function buildNavigation(main, outline, counts) {
   const page = document.body.classList.contains("plan-doc") ? main.querySelector("epic-page") : null
@@ -2039,20 +2058,24 @@ function buildNavigation(main, outline, counts) {
 }
 
 /**
- * Every other page's navigation (Owen, 2026-10-10:  "Make the floating sidebar in guides a sticky top toolbar like the
- * epic page.  Have section titles in this one"):  a row of buttons, one per top-level section, in the sticky page
- * header, in place of the floating rail.
- * - each:  the section's mark and its title, a link to it (`wireAnchors()` lands it);  scroll-follow marks the current
- *   one `selected`, by `data-rail`
- *   - the mark:  an item's number, an icon, a number or a letter (`titledItems()`, `spell-doc-toolbar.js`, which Epic
- *     UI's pages build theirs with too)
+ * Every other page's navigation:  a row of buttons, one per top-level section, in the sticky page header,
+ * in place of the floating rail.
+ * - Owen, 2026-10-10:  "Make the floating sidebar in guides a sticky top toolbar like the epic page.
+ *   Have section titles in this one"
+ * - each:  the section's mark and its title, a link to it (`wireAnchors()` lands it);
+ *   scroll-follow marks the current one `selected`, by `data-rail`
+ *   - the mark:  an item's number, an icon, a number or a letter
+ *     (`titledItems()`, `spell-doc-toolbar.js`, which Epic UI's pages build theirs with too)
  *   - a red badge:  how many of its items need Owen (`counts`, `attention`);  none, none
- * - titles too long for the row end in `...`;  when each would get under 50px, they go, and the buttons show their
- *   marks only, the title as their tooltip (`fitTitles()`);  still too wide, the row scrolls sideways
- * - where:  the last row of the sticky page header (`ui-sticky.spell-h1 > header.spell-page-head`), so it sticks with
- *   it and the titles stick below it;  a page without one (the saga pages, a cheat sheet):  the last row of its
- *   filter bar (`.spell-filter`), else a sticky bar of its own before the first section (`.spell-toolbar-alone`,
- *   measured as the filter bar is:  `trackStickyHeights()`)
+ * - titles too long for the row end in `...`
+ *   - when each would get under 50px, they go (`fitTitles()`):
+ *     the buttons show their marks only, the title as their tooltip
+ *   - still too wide, the row scrolls sideways
+ * - where:  the last row of the sticky page header (`ui-sticky.spell-h1 > header.spell-page-head`),
+ *   so it sticks with it and the titles stick below it
+ *   - a page without one (the saga pages, a cheat sheet):  the last row of its filter bar (`.spell-filter`),
+ *     else a sticky bar of its own before the first section
+ *     (`.spell-toolbar-alone`, measured as the filter bar is:  `trackStickyHeights()`)
  * - HEADINGS (the saga pages):  only the h2s that head a sticky section
  * - callable again (a page updated in place):  replaces the toolbar it built before
  * - SIDE EFFECT:  adds the menu inside `main`, marked `data-spell-added` so the live patch steps around it;
@@ -2093,13 +2116,14 @@ function buildPageToolbar(main, outline, counts) {
  *   - red:  urgent (`state="attention"`)
  *   - orange:  Claude answered with options, his turn to pick (`state="replied"`)
  *   - both kinds:  both badges, red first
- *   - over the icon's top right, a third of a badge on the icon (Owen, 2026-10-10:  "Make badge 1/3 way overlap the
- *     icon"):  every button is the same width, badge or not
- * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header, and the header's measured height,
- *   where every title below sticks (`--epic-stack`), takes it in;  `<epic-page>` draws the rest of that row at its
- *   right (the page's state filter, collapse-all, the new item button)
- * - a window too narrow for every button:  the row scrolls sideways (`spell-toolbar.css`), the current button
- *   scrolled into view
+ *   - over the icon's top right, a third of a badge on the icon:  every button is the same width, badge or not
+ *     (Owen, 2026-10-10:  "Make badge 1/3 way overlap the icon")
+ * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header,
+ *   and the header's measured height, where every title below sticks (`--epic-stack`), takes it in
+ *   - `<epic-page>` draws the rest of that row at its right:
+ *     the page's state filter, collapse-all, the new item button
+ * - a window too narrow for every button:
+ *   the row scrolls sideways (`spell-toolbar.css`), the current button scrolled into view
  * - callable again (a page updated in place):  replaces the toolbar built before
  * - SIDE EFFECT:  appends the menu to `page`, marked `data-spell-added` so the live patch steps around it
  */
@@ -2166,11 +2190,11 @@ function buildToolbar(page, outline, counts) {
  *   a heading that has its chevron keeps it
  */
 /**
- * EXPAND ALL and COLLAPSE ALL, in the page header of every docs page with folding sections (Owen, 2026-10-24,
- * urgent:  "add expand all / collapse all to page header on these and all similar pages"):  details, choice and
- * review pages, guides, the spell syntax guide.
- * - two icon buttons, first in the header's tools row (`addHeadTool()`, "folds"), each opens or folds every section
- *   and sub-section (`wireFolds()`' `foldAll()`)
+ * EXPAND ALL and COLLAPSE ALL, in the page header of every docs page with folding sections:
+ * details, choice and review pages, guides, the spell syntax guide.
+ * - Owen, 2026-10-24, urgent:  "add expand all / collapse all to page header on these and all similar pages"
+ * - two icon buttons, first in the header's tools row (`addHeadTool()`, "folds"),
+ *   each opens or folds every section and sub-section (`wireFolds()`' `foldAll()`)
  * - not an epic page:  its own header has collapse-all and expand-all (`<epic-page>`)
  * - drawn once:  a live update leaves the header's tools in place
  */
@@ -2421,10 +2445,11 @@ function restoreEpicFolds(main, kept) {
 /**
  * Keep every fold as it is as the page goes (`pagehide`), for a LIVE reload to put back (`takeKeptFolds()`):
  * `{ [id]: open }` in `sessionStorage`, of every section, folding heading, epic page block and ITEM with an id.
- * - why:  the saved folds (`spell-folds:<path>`) hold only what the reader folded or unfolded himself, never an
- *   item nor what a link opened;  a reload for new code must come back as he left it (I23 of `epic-engine`)
- * - written on every `pagehide`;  read only after a live reload:  a reload the reader asks for starts from the saved
- *   folds, as before
+ * - why:  the saved folds (`spell-folds:<path>`) hold only what the reader folded or unfolded himself,
+ *   never an item nor what a link opened;  a reload for new code must come back as he left it (I23 of `epic-engine`)
+ * - written on every `pagehide`;  read only after a live reload:
+ *   a reload the reader asks for starts from the saved folds, as before
+ * - storage blocked:  kept for this page only (`PrefStore`), so a live reload starts from the saved folds
  */
 function keepFoldsForReload(main) {
   addEventListener("pagehide", () => {
@@ -2653,8 +2678,8 @@ function wireAnchors(main, outline, sticky, follow, folds) {
   return { jump, go, canGo: (id) => !!(targetIn(id) || hostHolding(main, id)) }
 
   /**
-   * Follow a same-page link to `id`:  a history entry (unless the address is there already), then the jump;  resolves
-   * once it has landed (`jump()`).
+   * Follow a same-page link to `id`:  a history entry (unless the address is there already), then the jump.
+   * - Resolves once it has landed (`jump()`).
    */
   function go(id) {
     if (hashId() !== id) {
@@ -2886,8 +2911,8 @@ function stuckBottom(main) {
   for (const sticky of main.querySelectorAll("ui-sticky"))
     boxes.push(sticky.shadowRoot?.querySelector('[part~="sticky"]'))
   for (const section of main.querySelectorAll(`ui-section[sticky], ${EPIC_FOLDS}`)) boxes.push(titleOf(section))
-  // an epic page's page header and its toolbar's bar under it (the title between them scrolls away);  an OPEN item's
-  // line sticks below the titles (a closed one's isn't sticky:  skipped)
+  // an epic page's page header and its toolbar's bar under it (the title between them scrolls away);
+  // an OPEN item's line sticks below the titles (a closed one's isn't sticky:  skipped)
   for (const page of main.querySelectorAll("epic-page"))
     boxes.push(...(page.shadowRoot?.querySelectorAll('[part~="header"], [part~="bar"]') ?? []))
   for (const item of main.querySelectorAll("epic-item")) boxes.push(item.shadowRoot?.querySelector('[part~="line"]'))
@@ -3159,9 +3184,10 @@ function readSaved(key) {
 ////////////////
 
 /**
- * PAGE NOTES (epic `airplane`, P3):  notes written INTO a page (`<spell-notes>` / `<spell-note>`;  the markup and its
- * rules:  `src/tools/PageNotes.js`), each drawn as a folded card (`drawNoteCards()`), its head line an
- * `<epic-page-note-head>` (the epics pack;  epic `epic-engine` P3).
+ * PAGE NOTES (epic `airplane`, P3):  notes written INTO a page, `<spell-notes>` / `<spell-note>`.
+ * - the markup and its rules:  `src/tools/PageNotes.js`
+ * - each drawn as a folded card (`drawNoteCards()`),
+ *   its head line an `<epic-page-note-head>` (the epics pack;  epic `epic-engine` P3)
  * - READ ONLY since P11:  comments (below) replaced the bubbles and the Note pill that wrote them;
  *   the notes already written still show, and `epic notes` still answers them
  * - every page, `file://` too;  drawn again on `spell-doc:updated` (an answer changes the page)
@@ -3198,11 +3224,11 @@ function drawNoteCards(main) {
 ////////////////
 
 /**
- * The Epics page's SORT buttons (Owen, 2026-10-13:  "Add buttons to epics header to sort by date or alphabetical,
- * within the sessions"):  an `<epic-sort>` (the epics pack, epic `epic-engine` P3) in the page header, beside the New
- * epic pill.
- * - only where the page has an `<epic-list>`, which follows it;  the elements do the rest:  the buttons, remembering,
- *   the sorting, the groups, the saga chips, the stars
+ * The Epics page's SORT buttons:  an `<epic-sort>` (the epics pack, epic `epic-engine` P3) in the page header,
+ * beside the New epic pill.
+ * - Owen, 2026-10-13:  "Add buttons to epics header to sort by date or alphabetical, within the sessions"
+ * - only where the page has an `<epic-list>`, which follows it
+ * - the elements do the rest:  the buttons, remembering, the sorting, the groups, the saga chips, the stars
  * - callable again (a page updated in place):  one at most
  * - SIDE EFFECT:  adds it to the header, marked `data-spell-added` so the live patch steps around it
  */
