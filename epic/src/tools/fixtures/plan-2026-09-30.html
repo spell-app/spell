@@ -18,15 +18,15 @@
           PLAN DOC TEMPLATE.  NEVER copy by hand:  `yarn plan-doc new <name>` fills the {{placeholders}}.
           - Ids and classes here are what `scripts/plan-doc.js` edits:  keep them.  Rules:  `plan-doc.md` beside this.
         -->
-        <ui-breadcrumb class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb-section href="../../content/index.html" target="src-packages-docs-index-html"
-            >Docs</ui-breadcrumb-section
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb href="../../content/index.html" target="src-packages-docs-index-html"
+            >Docs</ui-breadcrumb
           >
-          <ui-breadcrumb-section href="../../content/index.html#plans" target="src-packages-docs-index-html"
-            >Plans</ui-breadcrumb-section
+          <ui-breadcrumb href="../../content/index.html#plans" target="src-packages-docs-index-html"
+            >Plans</ui-breadcrumb
           >
-          <ui-breadcrumb-section active>{{title}}</ui-breadcrumb-section>
-        </ui-breadcrumb>
+          <ui-breadcrumb active>{{title}}</ui-breadcrumb>
+        </ui-breadcrumbs>
         <h1>{{title}}</h1>
         <ui-list class="plan-meta">
           <ui-item icon="code branch"

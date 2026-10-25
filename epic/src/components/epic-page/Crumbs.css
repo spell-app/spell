@@ -2,7 +2,7 @@
  * `<epic-page>`'s crumbs (`crumbs()` in EpicPage.tsx):  `Docs / Epics /` before the epic's name, in the h1, the docs' EYEBROW
  * -- small mono capitals, tracked out, the links in the accent and the page itself muted -- as `spell-doc.css`'s
  * `.spell-crumbs`, which can't reach into the shadow root.
- * - Spell UI's `<ui-breadcrumb>`, through its public tokens and `::part(breadcrumb)`.
+ * - Spell UI's `<ui-breadcrumbs>`, through its public tokens and `::part(breadcrumb)`.
  * - The eyebrow's type from the docs (`--spell-eyebrow-font`, `--spell-eyebrow-tracking`), each with a fallback.
  * - Its narrow breakpoint, where it hides, is a bare px media query, the site header's own:  this
  *   sheet isn't built with Spell UI's `@custom-media` ranges, and `--ui-mobile` (768px) isn't the header's width.
@@ -24,14 +24,14 @@
     letter-spacing: var(--spell-eyebrow-tracking, 0.14em);
     text-transform: uppercase;
   }
-  .crumbs > ui-breadcrumb {
+  .crumbs > ui-breadcrumbs {
     display: inline-block;
   }
   .crumb-divider {
     color: var(--epic-muted);
     font: var(--spell-eyebrow-font, 500 11px/1.2 var(--epic-mono));
   }
-  .crumbs ui-breadcrumb::part(breadcrumb) {
+  .crumbs ui-breadcrumbs::part(breadcrumb) {
     font: var(--spell-eyebrow-font, 500 11px/1.2 var(--epic-mono));
   }
   /*

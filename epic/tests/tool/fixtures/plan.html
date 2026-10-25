@@ -21,15 +21,15 @@
           - Sections are `<ui-section id header sticky collapsible dividing collapsed collapsed>`;  Overview sub-sections nest inside it
             (`#o1` "1.1 ...");  phases are `<ui-section data-phase>` in `#phases`, written by the script.
         -->
-        <ui-breadcrumb class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb-section href="../../pages/index.html" target="src-packages-docs-index-html"
-            >Docs</ui-breadcrumb-section
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb href="../../pages/index.html" target="src-packages-docs-index-html"
+            >Docs</ui-breadcrumb
           >
-          <ui-breadcrumb-section href="../../epics/index.html" target="src-epics-index-html"
-            >Epics</ui-breadcrumb-section
+          <ui-breadcrumb href="../../epics/index.html" target="src-epics-index-html"
+            >Epics</ui-breadcrumb
           >
-          <ui-breadcrumb-section active>{{title}}</ui-breadcrumb-section>
-        </ui-breadcrumb>
+          <ui-breadcrumb active>{{title}}</ui-breadcrumb>
+        </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head">
             <h1>Epic: {{title}}</h1>
