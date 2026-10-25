@@ -249,6 +249,11 @@ export class SiteDataBuilder {
       ...(shared && { valueSet: shared }),
       ...(spec.default !== undefined && { default: spec.default }),
       ...(spec.aliases?.length && { aliases: [...spec.aliases] }),
+      ...(spec.replaces?.length && {
+        replaces: spec.replaces.map((old) =>
+          typeof old === "string" ? { name: old } : { name: old.from, value: old.value }
+        )
+      }),
       ...(spec.property && { property: spec.property }),
       ...(spec.reflect === false && { reflect: false }),
       ...(isShared && { shared: true }),

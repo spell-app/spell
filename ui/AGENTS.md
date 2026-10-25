@@ -310,6 +310,9 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - Names several tags share, the shared value sets and `words`:
       once, in [components.es.ts](src/components/components.es.ts), which gathers the tag files into `es`.
     - Names ASCII (`tamano`);  values and texts keep their accents.
+  - A tag that's planned but not built is in [the planned components](src/components/components.planned.ts),
+    with its Spanish name (epic `ui-gaps`):  it LEAVES that list in the change that builds it
+    ([its test](./tests/components/components.planned.test.ts) fails on one already in the root catalog).
     - A two-letter code before `.ts` means a vocabulary:
       the tools find them by it (`VocabularyFiles.languageOf()`), so no other family file is named so.
   - It also holds `topics` and `aka`:
