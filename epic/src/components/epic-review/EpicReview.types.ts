@@ -165,9 +165,10 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
  */
 export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "approve", color: "green", icon: "circle check", label: "acceptPlan", tip: "acceptPlanTip" },
+  // Revisit between them (Owen, 2026-10-25:  "revisit should be between accept / defer")
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   // Owen, 2026-10-25:  "Add a 'Defer Phase' button next to 'Accept Phase'":  after the other phases, still to do
-  { action: "defer", color: "grey", icon: "clock", label: "deferPhase", tip: "deferTip" },
-  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
+  { action: "defer", color: "grey", icon: "clock", label: "deferPhase", tip: "deferTip" }
 ]
 
 /**
@@ -333,16 +334,6 @@ export const DO_IT_ID = /^[jc]\d+$/i
 export const REVIEW_CONTROLS = "review-controls"
 export const REVIEW_GROUP = "review-group"
 export const REVIEW_DO_NOW = "review-do-now"
-/** A waiting plan's Accept plan:  a worded pill of its own (epic `epic-engine` I118). */
-export const REVIEW_ACCEPT = "review-accept"
-/** ... and Defer Phase beside it:  the same pill, quiet. */
-export const REVIEW_DEFER = "review-defer"
-/** The two together, one segmented pill (Owen, 2026-10-25:  "make this single segmented pill, with just Accept Defer"). */
-export const REVIEW_PLAN = "review-plan"
-/** Class of a review button Owen pressed (its mark dashed or outlined) */
-export const PRESSED = "pressed"
-/** Class of a segment in the middle of the plan pill (Revisit):  square at both ends */
-export const REVIEW_MIDDLE = "review-middle"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
 export const NOTE_BOX = "note-box"

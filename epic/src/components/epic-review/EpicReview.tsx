@@ -19,11 +19,6 @@ import {
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
-  REVIEW_ACCEPT,
-  REVIEW_DEFER,
-  REVIEW_MIDDLE,
-  PRESSED,
-  REVIEW_PLAN,
   REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
@@ -157,15 +152,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    */
   private controls(): JSX.Element {
     const specs = () => BUTTONS_OF[this.buttons ?? "item"]
-    // a waiting plan's Accept plan, in WORDS, apart from the icons:  the page asks for it (Owen, 2026-10-25:  "p37 not
-    // asking me to accept";  a small grey check before)
-    const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
-    // ... and Defer Phase beside it (Owen, 2026-10-25)
-    const defer = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "defer") : undefined)
-    // ... and Revisit between them, in the same pill (Owen, 2026-10-25:  "revisit should be between accept / defer")
-    const revisit = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "revisit") : undefined)
-    const inPill = (spec: ReviewButtonSpec) => spec === accept() || spec === revisit() || spec === defer()
-    const group = () => specs().filter((spec) => spec.action !== "details" && !inPill(spec))
+    const group = () => specs().filter((spec) => spec.action !== "details")
     const doNow = () => specs().find((spec) => spec.action === "details")
     return (
       <span
@@ -190,26 +177,23 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             </span>
           )}
         </Show>
-        <Show when={accept()}>
-          <span class={REVIEW_PLAN}>
-            <Show when={accept()}>
-              {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
-            </Show>
-            <Show when={revisit()}>
-              {(spec) =>
-                this.button(
-                  spec(),
-                  `${REVIEW_ACCEPT} ${REVIEW_DEFER} ${REVIEW_MIDDLE}`,
-                  this.translationForKey(spec().label)
-                )
-              }
-            </Show>
-            <Show when={defer()}>
-              {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
-            </Show>
-          </span>
-        </Show>
-        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+        {/* a waiting plan's Accept, Revisit and Defer:  icons like every row's, so they line up row to row;  the group
+            ringed 3px solid while it waits on Owen, dotted once he's pressed one (Owen, 2026-10-25:  "Make the entire
+            group just icons, black border.  Dotted when action is being taken, 3px solid when you're waiting on input
+            from me") */}
+        <ui-buttons
+          class={REVIEW_GROUP}
+          basic=""
+          icon=""
+          size="mini"
+          data-asks={
+            this.buttons === "plan"
+              ? group().some((spec) => this.fillOf(spec) !== "none")
+                ? "taken"
+                : "waiting"
+              : undefined
+          }
+        >
           <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
         <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>
@@ -264,8 +248,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const busy = () => this.review.busyButton() === spec.action
     return (
       <ui-button
-        // `pressed`:  marked (dashed or outlined), for a look that's more than the fill (the plan pill's)
-        class={[extra, this.fillOf(spec) !== "none" && PRESSED].filter(Boolean).join(" ") || undefined}
+        class={extra}
         basic={extra ? "" : undefined}
         size={extra ? "mini" : undefined}
         icon={spec.icon}

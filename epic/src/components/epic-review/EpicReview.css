@@ -86,63 +86,18 @@
     color: var(--_epic-act-ink);
   }
   /*
-   * Accept plan, while a phase's build plan waits:  a worded green pill before the group, so the page plainly asks
-   * (Owen, 2026-10-25:  "p37 not asking me to accept");  pressed, dashed then outlined, as every review button
+   * A waiting plan's Accept, Revisit and Defer (`buttons="plan"`):  icons in the row's own group, so they line up row to
+   * row;  the group ringed in the text's colour, 3px solid while it waits on Owen, dotted once he's pressed one
+   * (Owen, 2026-10-25:  "Make the entire group just icons, black border.  Dotted when action is being taken, 3px solid
+   * when you're waiting on input from me")
    */
-  /* Accept, Revisit and Defer:  ONE segmented pill, round at its two ends, square where they meet, a hairline between */
-  .review-plan {
-    display: inline-flex;
-    flex: none;
-    margin-inline-end: 6px;
+  .review-group[data-asks] {
+    border-radius: 999px;
+    outline: 3px solid var(--ui-text-color, CanvasText);
+    outline-offset: 1px;
   }
-  .review-controls .review-accept::part(button) {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    width: auto;
-    padding: 0 10px 0 8px;
-    border-radius: 999px 0 0 999px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .review-controls .review-accept:not([data-fill="dashed"], [data-fill="outline"])::part(button),
-  .review-controls .review-accept:not([data-fill="dashed"], [data-fill="outline"]):hover::part(button) {
-    background: var(--_epic-act-green);
-    color: var(--ui-green-on, white);
-  }
-  /* Defer Phase:  the same pill, quiet, outlined in grey */
-  .review-controls .review-defer::part(button) {
-    border-radius: 0 999px 999px 0;
-  }
-  .review-controls .review-defer:not([data-fill="dashed"], [data-fill="outline"])::part(button),
-  .review-controls .review-defer:not([data-fill="dashed"], [data-fill="outline"]):hover::part(button) {
-    background: transparent;
-    box-shadow: inset 0 0 0 1px var(--_epic-act-green);
-    color: var(--_epic-act-green);
-  }
-  /*
-   * The pill once one of its three is pressed (Owen, 2026-10-25:  "I made a mark and pressed revisit -- that should be
-   * green"):  the pressed one solid green, white dashes inside while not sent;  the others, Accept too, outlined
-   */
-  .review-controls .review-plan .pressed::part(button),
-  .review-controls .review-plan .pressed:hover::part(button) {
-    background: var(--_epic-act-green);
-    box-shadow: none;
-    color: var(--ui-green-on, white);
-    outline-color: var(--ui-green-on, white);
-  }
-  .review-controls .review-plan:has(.pressed) .review-accept:not(.pressed)::part(button) {
-    background: transparent;
-    box-shadow: inset 0 0 0 1px var(--_epic-act-green);
-    color: var(--_epic-act-green);
-  }
-  /* Revisit, between them:  square at both ends, a hairline each side */
-  .review-controls .review-middle::part(button) {
-    border-radius: 0;
-    margin-inline: -1px;
-  }
-  .review-accept::part(icon) {
-    margin: 0;
+  .review-group[data-asks="taken"] {
+    outline: 2px dotted var(--ui-text-color, CanvasText);
   }
   /* Do Now:  an action, not a state (Q8, Q20):  its own round button, apart from the group */
   .review-do-now {
