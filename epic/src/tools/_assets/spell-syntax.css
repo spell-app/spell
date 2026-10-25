@@ -1,54 +1,9 @@
 /*
  * The spell syntax guide (`guides/spell-syntax/spell-syntax.html`), on top of `spell-doc.css` and
- * `syntax-choices.css` (its boxes and toolbar are a choice page's):  the rules' tables `spell-syntax.js` draws,
- * and its Expand all and Collapse all in the page toolbar.
+ * `syntax-choices.css` (its boxes and toolbar are a choice page's):  the rules' tables `spell-syntax.js` draws;
+ * its Expand all and Collapse all are the page header's, every docs page's (the runtime's `addFoldAll()`).
  * - Phone width:  each table scrolls inside its own box (`spell-doc.css`'s `ui-table` rule), never the page.
  */
-
-/*******************************
-   Expand all, Collapse all
-*******************************/
-
-/*
- * At the right of the page toolbar's ivory band (`spell-doc.css`, "Every other page's toolbar"), in its menu's row
- * after the section buttons, which take the room left (and scroll under it):  drawn as they are
- */
-.spell-toolbar-titled > .spell-syntax-folds {
-  position: sticky;
-  right: 0;
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 1px;
-  margin-inline-start: auto;
-  background: var(--spell-rail-fill);
-}
-/* `<ui-button basic>`s drawn as the toolbar's section buttons (`spell-doc.css`, `.spell-toolbar-item`):  no ring, a
-   pill of the band's ink, its hover tint;  the words go with the section titles' (`.spell-toolbar-icons`) */
-.spell-doc-page ui-button.spell-syntax-fold {
-  --ui-button-basic-border-width: 0px;
-  --ui-button-basic-background-hover: var(--spell-rail-hover);
-  --ui-button-basic-background-down: var(--spell-rail-selected);
-  flex: none;
-}
-.spell-doc-page ui-button.spell-syntax-fold::part(button) {
-  height: 30px;
-  min-width: 30px;
-  margin: 0;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--spell-rail-ink);
-  font: 500 13px/1 var(--spell-sans);
-  white-space: nowrap;
-}
-.spell-doc-page ui-button.spell-syntax-fold:hover::part(button) {
-  background: var(--spell-rail-hover);
-}
-/* the pointer lands on the titled button, not its words, so its tooltip shows ("TOOLTIPS that show") */
-.spell-doc-page ui-button.spell-syntax-fold > * {
-  pointer-events: none;
-}
 
 /*******************************
             Tables

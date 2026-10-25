@@ -21,7 +21,8 @@
  *   holding a table Rule name | Syntax | Purpose, a row per rule class (its internal classes first).
  *   - OPEN, as every section of this page, unlike other docs pages
  *     (Owen, 2026-10-12:  "Start out with all everything expanded")
- * - EXPAND ALL and COLLAPSE ALL at the right of the page toolbar, the ivory band (`wireFoldAll()`).
+ * - EXPAND ALL and COLLAPSE ALL:  the page header's, every docs page's (the runtime's `addFoldAll()`;  its own pair
+ *   at the toolbar's right went 2026-10-24).
  * - Rule name:
  *   - the class's name, a link to its source (its rule names its tooltip), with a pencil to suggest another name
  *   - then each syntax it's registered with, a bullet each
@@ -63,16 +64,6 @@
   const NO_PURPOSE = "(no docstring yet)"
   /** How much of a table's text a comment's excerpt keeps:  `BlockAnchors.js` `EXCERPT_LENGTH`. */
   const EXCERPT_LENGTH = 80
-  /** The toolbar's fold buttons:  folds every section?, its icon, its words. */
-  const FOLD_BUTTONS = [
-    [false, "angles down", "Expand all"],
-    [true, "angles up", "Collapse all"]
-  ]
-  /**
-   * Where the runtime remembers this page's folds, `{ [section id]: folded }`:
-   * `spell-doc-runtime.js` `wireFolds()`.
-   */
-  const FOLDS_KEY = `spell-folds:${location.pathname}`
   const script = document.currentScript
   const bundle = new URL("spell-ui.js", script.src).href
   const server = window.SPELL_SERVER
@@ -108,7 +99,6 @@
       notice(`Couldn't draw the rules:  ${error.message}`)
     }
     document.body.append(el("script", { src: bundle }))
-    wireFoldAll()
     if (data) await restore()
   }
 
@@ -405,91 +395,6 @@
     holder?.prepend(
       el("ui-message", { state: "warning", header: "Rules not drawn" }, el("p", {}, ...withCode(message)))
     )
-  }
-
-  ////////////////
-  // ## Expand all, Collapse all
-  ////////////////
-
-  /**
-   * Expand all and Collapse all, at the right of the page toolbar:
-   * the ivory band the runtime builds in the page header once the bundle runs (`buildPageToolbar()`).
-   * - added as soon as the toolbar is there, and again whenever the runtime builds it anew (a live update)
-   * - each opens or folds every section and sub-section (`foldAll()`)
-   * - drawn as the toolbar's section buttons:  their words go when the section titles go (`fitTitles()`)
-   */
-  function wireFoldAll() {
-    const head = document.querySelector(".spell-page-head")
-    if (!head) return
-    const add = () => {
-      const toolbar = head.querySelector(":scope > .spell-toolbar")
-      if (toolbar && !toolbar.querySelector(".spell-syntax-folds")) toolbar.append(foldButtons())
-    }
-    // a frame after the toolbar comes:  an icon drawn while the bundle is still starting stays blank
-    new MutationObserver(() => requestAnimationFrame(add)).observe(head, { childList: true })
-    add()
-    document.addEventListener("ui-opening", keepFolds)
-    document.addEventListener("ui-closing", keepFolds)
-  }
-
-  /**
-   * The two buttons, in a box of their own:  `<ui-button basic>`s drawn as the toolbar's section buttons
-   * (`spell-syntax.css`), their words the toolbar's `.spell-toolbar-label`, which go when its titles go.
-   */
-  function foldButtons() {
-    const buttons = FOLD_BUTTONS.map(([isFolded, icon, label]) => {
-      const button = el(
-        "ui-button",
-        { class: "spell-syntax-fold", basic: "", icon, title: label, "aria-label": label },
-        el("span", { class: "spell-toolbar-label" }, label)
-      )
-      titleInside(button)
-      button.addEventListener("click", () => foldAll(isFolded))
-      return button
-    })
-    return el("span", { class: "spell-syntax-folds" }, ...buttons)
-  }
-
-  /**
-   * Fold (`isFolded`) or open every section and sub-section at once, without their height animation,
-   * remembered as the reader's folds (`saveFolds()`).
-   * - folding them all shows the page from its top:  every title, folded, fits in a window or two
-   */
-  function foldAll(isFolded) {
-    const main = document.querySelector("main")
-    main.style.setProperty("--ui-section-duration", "0s")
-    for (const section of main.querySelectorAll("ui-section[collapsible]"))
-      section.toggleAttribute("collapsed", isFolded)
-    saveFolds()
-    if (isFolded) scrollTo({ top: 0, behavior: "instant" })
-    requestAnimationFrame(() => requestAnimationFrame(() => main.style.removeProperty("--ui-section-duration")))
-  }
-
-  /**
-   * The reader folded or opened one section:  remember every section's fold again, after the runtime saved that one.
-   * - why:  the runtime saves the folds it knows of when the page loaded, plus that one;
-   *   it doesn't know what Expand all / Collapse all did, and a reload would undo it
-   * - a `ui-opening` it can't cancel is the browser's own reveal (find in page):  not the reader's, as for the runtime
-   */
-  function keepFolds(event) {
-    const section = event.target
-    if (event.defaultPrevented || !event.cancelable || section.localName !== "ui-section" || !section.id) return
-    saveFolds({ [section.id]: !event.detail?.open })
-  }
-
-  /**
-   * Remember every section's fold as it is now (`changing` as it's about to be),
-   * where the runtime reads them when the page loads (`FOLDS_KEY`).
-   */
-  function saveFolds(changing = {}) {
-    const folds = {}
-    for (const section of document.querySelectorAll("main ui-section[collapsible][id]"))
-      folds[section.id] = section.hasAttribute("collapsed")
-    try {
-      localStorage.setItem(FOLDS_KEY, JSON.stringify({ ...folds, ...changing }))
-    } catch {
-      // storage blocked (a private window):  the folds just aren't remembered
-    }
   }
 
   ////////////////
