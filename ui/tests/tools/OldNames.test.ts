@@ -81,6 +81,16 @@ describe("OldNames.rewrite()", () => {
     )
   })
 
+  test("leaves markup quoted inside an attribute value alone:  a title naming a tag is text", () => {
+    const page =
+      `<epic-item title="top tabs = <ui-tabs history basic>"></epic-item>` +
+      `<ui-menu title='<ui-menu vertical secondary>' vertical></ui-menu>`
+    expect(rewrite(page)).toBe(
+      `<epic-item title="top tabs = <ui-tabs history basic>"></epic-item>` +
+        `<ui-menu title='<ui-menu vertical secondary>' direction="vertical"></ui-menu>`
+    )
+  })
+
   test("lists what it can't see, and never guesses", () => {
     const { text, manual } = names.rewrite(`<ui-button basic={isQuiet}>x</ui-button><ui-button label="3">y</ui-button>`)
     expect(text).toBe(`<ui-button basic={isQuiet}>x</ui-button><ui-button label="3">y</ui-button>`)

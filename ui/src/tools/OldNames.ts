@@ -68,18 +68,42 @@ export class OldNames {
     const renames: string[] = []
     const manual: string[] = []
     let rewritten = OLD_BREADCRUMB_STEP.test(text) && !markupOnly ? OldNames.swapBreadcrumbs(text, renames) : text
-    rewritten = rewritten.replace(START_TAG, (whole, open: string, tag: string, attributes: string, close: string) => {
-      const escaped = open === ESCAPED_OPEN
-      if (escaped && markupOnly) return whole
-      const parsed = OldNames.parse(escaped ? attributes.replaceAll(ESCAPED_QUOTE, '"') : attributes)
-      if (!parsed) return whole
-      const changed = this.rewriteTag(tag, parsed.attributes, renames, manual)
-      if (!changed) return whole
-      const text = OldNames.unparse(parsed)
-      return `${open}${tag}${escaped ? text.replaceAll('"', ESCAPED_QUOTE) : text}${close}`
-    })
+    const quoted = OldNames.quotedValues(rewritten)
+    rewritten = rewritten.replace(
+      START_TAG,
+      (whole, open: string, tag: string, attributes: string, close: string, at: number) => {
+        // a tag QUOTED in another tag's attribute (a title naming markup) is text, not a tag:  left as it is
+        if (quoted.some(([start, end]) => at >= start && at < end)) return whole
+        const escaped = open === ESCAPED_OPEN
+        if (escaped && markupOnly) return whole
+        const parsed = OldNames.parse(escaped ? attributes.replaceAll(ESCAPED_QUOTE, '"') : attributes)
+        if (!parsed) return whole
+        const changed = this.rewriteTag(tag, parsed.attributes, renames, manual)
+        if (!changed) return whole
+        const text = OldNames.unparse(parsed)
+        return `${open}${tag}${escaped ? text.replaceAll('"', ESCAPED_QUOTE) : text}${close}`
+      }
+    )
     this.unreadTags(rewritten, markupOnly, manual)
     return { text: rewritten, renames, manual }
+  }
+
+  /**
+   * Where `text`'s quoted attribute values are, as `[start, end)` offsets:  markup written INSIDE one
+   * (`title="the tabs are <ui-tabs basic>"`) is text, and a rewrite there would add raw `"` that ends the value.
+   * - Static:  pure, of the text alone.
+   */
+  private static quotedValues(text: string): [number, number][] {
+    const ranges: [number, number][] = []
+    for (const tag of text.matchAll(ANY_START_TAG)) {
+      const head = tag[0]
+      for (const value of head.matchAll(QUOTED_VALUE)) {
+        const quote = value[1]!
+        const start = tag.index + value.index + value[0].indexOf(quote) + 1
+        ranges.push([start, start + quote.length - 2])
+      }
+    }
+    return ranges
   }
 
   /**
@@ -258,6 +282,12 @@ const COMPONENTS_FOLDER = fileURLToPath(new URL("../components", import.meta.url
  */
 const START_TAG =
   /(<|&lt;)(ui-[a-z][a-z0-9-]*)((?:\s+[^\s=>&/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|\{[^{}]*\}|&quot;.*?&quot;|[^\s"'>&]+))?)*\s*)(\/?>|\/?&gt;)/g
+
+/** Any element's start tag, its quoted attribute values whole (so a `>` inside one doesn't end it). */
+const ANY_START_TAG = /<[a-zA-Z][\w:-]*(?:\s+[^\s=>/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'>]+))?)*\s*\/?>/g
+
+/** A quoted attribute value, its quotes included. */
+const QUOTED_VALUE = /=\s*("[^"]*"|'[^']*')/g
 
 /** Where any `ui-*` tag starts, read or not. */
 const ANY_TAG_START = /(<|&lt;)(ui-[a-z][a-z0-9-]*)(?=[\s>/&])/g
