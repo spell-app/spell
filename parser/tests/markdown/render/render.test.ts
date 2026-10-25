@@ -60,9 +60,9 @@ describe("MD.render() -- ui-* elements", () => {
 
   it("alerts:  ui-message;  plain quotes:  ui-segment", () => {
     expect(ui("> [!WARNING]\n> Careful.\n")).toBe(
-      '<ui-message state="warning" icon="exclamation triangle" header="Warning"><p>Careful.</p></ui-message>'
+      '<ui-message state="warning" icon="exclamation triangle" heading="Warning"><p>Careful.</p></ui-message>'
     )
-    expect(ui("> quoted\n")).toBe('<ui-segment secondary=""><p>quoted</p></ui-segment>')
+    expect(ui("> quoted\n")).toBe('<ui-segment appearance="secondary"><p>quoted</p></ui-segment>')
   })
 
   it("tables in ui-table;  thematic breaks as ui-divider", () => {

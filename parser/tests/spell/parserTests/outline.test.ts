@@ -267,7 +267,7 @@ describe("outline style", () => {
       "a card is a thing",
       "a pile is a viewable list of cards where:",
       "\t- to draw its placeholder:",
-      "\t\treturn <ui-button basic/>",
+      '\t\treturn <ui-button appearance="basic"/>',
       "\t- to draw it:",
       "\t\treturn <div>{draw its placeholder}</div>"
     ])
