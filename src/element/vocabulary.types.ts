@@ -110,6 +110,17 @@ export type AttributeSpec = {
    *     (`<ui-item active>`, checkbox `checked`, `<ui-tab active>`).
    */
   aliases?: readonly string[]
+  /**
+   * The OLD names this attribute replaces, still read until every page is rewritten (epic `ui-gaps`, request r1).
+   * - Each one is:
+   *   - a plain old name, the same value under a new name:  `"href"` on `link`
+   *   - an old switch and the value it stands for:  `{ from: "primary", value: "primary" }` on `color`
+   * - The element reads an old name as this attribute, and notes it once per page in the console.
+   * - Written with the new name too, the new one wins.
+   * - Unlike `aliases`, the family needs no code of its own.
+   * - Its translated name, if the dictionary still has one (`primario`), is read too.
+   */
+  replaces?: readonly AttributeReplacement[]
   /** What it does, for docs and the custom-elements manifest:  written for developers. */
   description: string
 
@@ -182,6 +193,13 @@ export const ATTRIBUTE_GROUPS = [
 ] as const
 /** One of them. */
 export type AttributeGroup = (typeof ATTRIBUTE_GROUPS)[number]
+
+/**
+ * One old name an attribute replaces (`AttributeSpec.replaces`).
+ * - text:  an old name for the same value (`"href"` on `link`)
+ * - `{ from, value }`:  an old switch, which stands for `value` (`{ from: "primary", value: "primary" }` on `color`)
+ */
+export type AttributeReplacement = string | { readonly from: string; readonly value: string }
 
 /**
  * What a value IS, as a form edits it.
