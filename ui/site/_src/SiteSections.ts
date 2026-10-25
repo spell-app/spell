@@ -1,3 +1,5 @@
+// Import directly:  in `core`'s util barrel it cost every page 1.9 kB
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 // A leaf, not the barrel:  the barrel defines `<ui-docs-toc>`, which `<ui-root>` does on first use
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
@@ -474,23 +476,15 @@ export class SiteSections {
     for (let frame = 0; frame < count; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
   }
 
-  /** This page's saved folds, `{}` when none (or storage is blocked). */
+  /** This page's saved folds, `{}` when none. */
   private static readFolds(): Record<string, boolean> {
-    try {
-      const saved = JSON.parse(localStorage.getItem(FOLDS_KEY + location.pathname) ?? "{}") as unknown
-      return saved && typeof saved === "object" ? (saved as Record<string, boolean>) : {}
-    } catch {
-      return {}
-    }
+    const saved = PrefStore.getAt(FOLDS_KEY + location.pathname)
+    return saved && typeof saved === "object" ? (saved as Record<string, boolean>) : {}
   }
 
-  /** Save this page's folds;  silently not, where storage is blocked. */
+  /** Save this page's folds, as JSON;  where storage is blocked, for this page only. */
   private static writeFolds(folds: Record<string, boolean>): void {
-    try {
-      localStorage.setItem(FOLDS_KEY + location.pathname, JSON.stringify(folds))
-    } catch {
-      // private window, blocked storage:  folds last until the next visit only
-    }
+    PrefStore.setAt(FOLDS_KEY + location.pathname, folds)
   }
 }
 
