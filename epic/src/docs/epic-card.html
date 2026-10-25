@@ -51,17 +51,17 @@
           <p class="meta">
             For anyone changing the Epics page's cards.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P3), in the
-            <a href="../../spell-epic/src/components/epic-list/" target="src-spell-epic-src-components-epic-list"><code title="spell-epic/src/components/epic-list/">epic-list</code></a> family, with <code>&lt;epic-list&gt;</code>,
+            <a href="/spell-epic/src/components/epic-list/" target="src-spell-epic-src-components-epic-list"><code title="spell-epic/src/components/epic-list/">epic-list</code></a> family, with <code>&lt;epic-list&gt;</code>,
             <code>&lt;epic-card&gt;</code> and <code>&lt;epic-sort&gt;</code>.<br />
-            Its vocabulary: <a href="../../spell-epic/src/components/epic-list/EpicCard.en.ts" target="src-spell-epic-src-components-epic-list-epiccard-en-ts"><code title="spell-epic/src/components/epic-list/EpicCard.en.ts">EpicCard.en.ts</code></a><br />
-            Its component: <a href="../../spell-epic/src/components/epic-list/EpicCard.tsx" target="src-spell-epic-src-components-epic-list-epiccard-tsx"><code title="spell-epic/src/components/epic-list/EpicCard.tsx">EpicCard.tsx</code></a>.
+            Its vocabulary: <a href="/spell-epic/src/components/epic-list/EpicCard.en.ts" target="src-spell-epic-src-components-epic-list-epiccard-en-ts"><code title="spell-epic/src/components/epic-list/EpicCard.en.ts">EpicCard.en.ts</code></a><br />
+            Its component: <a href="/spell-epic/src/components/epic-list/EpicCard.tsx" target="src-spell-epic-src-components-epic-list-epiccard-tsx"><code title="spell-epic/src/components/epic-list/EpicCard.tsx">EpicCard.tsx</code></a>.
           </p>
 
           <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
             <div style="max-width: 360px">
               <epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
-                <a href="../../epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+                <a href="/epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
                 <span slot="description">One engine for every repo's epics.</span>
                 <span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
               </epic-card>
@@ -117,7 +117,7 @@
               </ui-content>
             </ui-accordion>
             <ul>
-              <li>Written by <a href="../../spell-epic/src/list/EpicCards.ts" target="src-spell-epic-src-list-epiccards-ts"><code title="spell-epic/src/list/EpicCards.ts">epicCardHtml()</code></a>, for <code>epic pages index</code> and the page server alike.</li>
+              <li>Written by <a href="/spell-epic/src/list/EpicCards.ts" target="src-spell-epic-src-list-epiccards-ts"><code title="spell-epic/src/list/EpicCards.ts">epicCardHtml()</code></a>, for <code>epic pages index</code> and the page server alike.</li>
               <li><code>data-status</code>: <code>done</code> or <code>open</code>, for the docs runtime's count and state chips.</li>
               <li>The page server marks each card <code>running</code> and <code>favorite</code> as they are now, as it serves the page.</li>
             </ul>
@@ -146,7 +146,7 @@
                   <tr><th>Attribute</th><th>Value</th><th>What it is</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic</code> (required)</td><td>an epic's name</td><td>Its folder in <a href="../../epics/" target="src-epics"><code>epics/</code></a>: <code>airplane</code>.</td></tr>
+                  <tr><td><code>epic</code> (required)</td><td>an epic's name</td><td>Its folder in <a href="/epics/" target="src-epics"><code>epics/</code></a>: <code>airplane</code>.</td></tr>
                   <tr><td><code>phases</code></td><td>statuses, space-separated</td><td>Each phase's status, in order: <code>done done active todo</code>.</td></tr>
                   <tr><td><code>updated</code></td><td>a date</td><td>Its page's <code>updated</code> day: paused after 3 days without one.</td></tr>
                   <tr><td><code>urgent</code></td><td>item ids</td><td>Its items that need Owen: <code>q3 j12</code>.</td></tr>
@@ -206,7 +206,7 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li><code>epic pages index</code>, from each epic page; the page server, for an epic still in its worktree.</li>
-              <li>A star click writes the shared <a href="../../epics/favorites.json5" target="src-epics-favorites-json5"><code>epics/favorites.json5</code></a>, through <code>POST /api/epics/favorite</code>.</li>
+              <li>A star click writes the shared <a href="/epics/favorites.json5" target="src-epics-favorites-json5"><code>epics/favorites.json5</code></a>, through <code>POST /api/epics/favorite</code>.</li>
             </ul>
           </ui-section>
 

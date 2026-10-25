@@ -83,7 +83,7 @@ review this doc, type `/epic review <name>`"). None of it is written by hand.
   ```html
   <ui-item icon="map"
     ><b>Epic page:</b>
-    <a href="epics/unified-server/unified-server.plan.html" target="unified-server">epic unified-server</a></ui-item
+    <a href="/templates/epics/epics/unified-server/unified-server.plan.html" target="unified-server">epic unified-server</a></ui-item
   >
   ```
 
@@ -476,8 +476,9 @@ nothing flickers. The tool's `EpicParts` does it; the markup (`source`, `part-id
 - How a part is told from a page: by its folder. Every page walker skips `parts/` folders (spell-epic's `src/tools/
 pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and link repairs never take
   a part for a page.
-- A part file: a one-line comment saying whose body it is, then the body's markup. Its relative URLs are relative to
-  `parts/`: one `../` more than the skeleton's (`../../../guides/x.html`, not `../../guides/x.html`).
+- A part file: a one-line comment saying whose body it is, then the body's markup. Its links are ROOT PATHS, as the
+  skeleton's are (`/guides/x.html`, `/spell-ui/src/x.ts`;  epic `epic-engine` P46): the same text in a part and in
+  its page, from any folder. Only a part's own `parts/` siblings go by name.
 - Edit a body's prose in its part file, at its real path (shared content). Structured edits stay commands.
 - Where each body goes is decided by rule on EVERY write: an item that gains details gets a part; a new Overview
   sub-section written whole into the skeleton has its body moved into a part by the next command. Content a host

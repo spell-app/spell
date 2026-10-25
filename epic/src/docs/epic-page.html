@@ -29,7 +29,7 @@
         <ui-container>
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
-              link="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="/spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -59,18 +59,18 @@
           <p class="meta">
             Written for: anyone reading or writing an epic page's markup, or changing this element.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> in
-            <a href="../../spell-epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
+            <a href="/spell-epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
               ><code title="spell-epic/src/components/epic-page/">epic-page/</code></a
             >.<br />
             Its vocabulary (attributes, slots, parts, children):
             <a
-              href="../../spell-epic/src/components/epic-page/EpicPage.en.ts"
+              href="/spell-epic/src/components/epic-page/EpicPage.en.ts"
               target="src-spell-epic-src-components-epic-page-epicpage-en-ts"
               ><code title="spell-epic/src/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
             >.<br />
             The component:
             <a
-              href="../../spell-epic/src/components/epic-page/EpicPage.tsx"
+              href="/spell-epic/src/components/epic-page/EpicPage.tsx"
               target="src-spell-epic-src-components-epic-page-epicpage-tsx"
               ><code title="spell-epic/src/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
             >.
@@ -83,7 +83,7 @@
               <p>
                 An <code>&lt;epic-page&gt;</code> takes over the page around it: its header sticks under the site
                 header, and its sections join the page's rail. So it shows only as markup here; to see one drawn, open
-                <a href="../../epics/epic-components/epic-components.plan.html" target="epic-components"
+                <a href="/epics/epic-components/epic-components.plan.html" target="epic-components"
                   >this epic's own epic page</a
                 >.
               </p>
@@ -134,7 +134,7 @@
               </li>
               <li>
                 served by the page server, a See Also box above the blocks: the epic's guide, every page it made for
-                itself in its <a href="../../pages/details/" target="src-pages-details"><code>details/</code></a> folder
+                itself in its <a href="/pages/details/" target="src-pages-details"><code>details/</code></a> folder
                 (details pages, choice pages, its review page), then every guide its page and parts link to, each with
                 its kind's icon and word (guide, details, choices, guide)
               </li>
@@ -148,7 +148,7 @@
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               The opening of a real epic page (<a
-                href="../../epics/epic-components/epic-components.plan.html"
+                href="/epics/epic-components/epic-components.plan.html"
                 target="epic-components"
                 title="epics/epic-components/epic-components.plan.html"
                 ><code>epic-components.plan.html</code></a
@@ -365,7 +365,7 @@
                     <td><code>epic</code></td>
                     <td>text: epic name</td>
                     <td>
-                      The epic's name: its folder in <a href="../../epics/" target="src-epics"><code>epics/</code></a
+                      The epic's name: its folder in <a href="/epics/" target="src-epics"><code>epics/</code></a
                       >, and its branch's (<code>epic-components</code>). Absent on a saga page, which
                       <code>saga</code> names instead.
                     </td>
@@ -386,7 +386,7 @@
                     <td>
                       On an epic page, the saga it serves (<code>drawable-spell</code>); on a saga page, the saga it is.
                       One of
-                      <a href="../../sagas/sagas.json5" target="src-sagas-sagas-json5"
+                      <a href="/sagas/sagas.json5" target="src-sagas-sagas-json5"
                         ><code title="sagas/sagas.json5">sagas.json</code></a
                       >'s ids.
                     </td>
@@ -615,7 +615,7 @@
                       <td><code>see-also</code></td>
                       <td>
                         Above the blocks: the pages the epic made or leans on (its guide, its
-                        <a href="../../pages/details/" target="src-pages-details"><code>details/</code></a> folder, the
+                        <a href="/pages/details/" target="src-pages-details"><code>details/</code></a> folder, the
                         guides it links), each a link with its kind (an <code>li[data-kind]</code>), gathered by the
                         page server's <code>GET /api/epics/pages</code>. None, no box.
                       </td>
@@ -670,7 +670,7 @@
               </li>
               <li>
                 <b>The step label</b>, at the header's right, follows the phases (<a
-                  href="../../guides/epic-components/colours.html"
+                  href="/guides/epic-components/colours.html"
                   target="src-guides-epic-components-colours-html"
                   >the colour scheme</a
                 >):
@@ -762,7 +762,7 @@
               <li>
                 <code>epic create &lt;epic&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
                 tool's template (<a
-                  href="../../spell-epic/src/tool/templates/plan.html"
+                  href="/spell-epic/src/tool/templates/plan.html"
                   target="src-spell-epic-src-tool-templates-plan-html"
                   title="spell-epic/src/tool/templates/plan.html"
                   ><code>plan.html</code></a
@@ -794,7 +794,7 @@
               <li>
                 The rules for the doc's data:
                 <a
-                  href="../../spell-epic/src/tool/PLAN-DOC.md"
+                  href="/spell-epic/src/tool/PLAN-DOC.md"
                   target="src-spell-epic-src-tool-plan-doc-md"
                   title="spell-epic/src/tool/PLAN-DOC.md"
                   ><code>PLAN-DOC.md</code></a
@@ -830,7 +830,7 @@
               <li>
                 Made by <code>epic saga page &lt;id&gt;</code> from the tool's
                 <a
-                  href="../../spell-epic/src/tool/templates/saga.html"
+                  href="/spell-epic/src/tool/templates/saga.html"
                   target="src-spell-epic-src-tool-templates-saga-html"
                   ><code title="spell-epic/src/tool/templates/saga.html">saga.html</code></a
                 >; every <code>epic</code> verb edits it as <code>SAGA:/&lt;id&gt;</code>.

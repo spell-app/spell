@@ -32,7 +32,7 @@
         <ui-container>
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
-              link="../../spell-epic/src/tool/PLAN-DOC.md"
+              link="/spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -57,19 +57,19 @@
           <p class="meta">
             Written for: anyone reading or writing a saga page's markup, or changing this element.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-workflow</code> P15), in the
-            <a href="../../spell-epic/src/components/epic-cards/" target="src-spell-epic-src-components-epic-cards"
+            <a href="/spell-epic/src/components/epic-cards/" target="src-spell-epic-src-components-epic-cards"
               ><code title="spell-epic/src/components/epic-cards/">epic-cards</code></a
             >
             folder of the epics package.<br />
             Its vocabulary (attributes, parts, texts):
             <a
-              href="../../spell-epic/src/components/epic-cards/EpicCards.en.ts"
+              href="/spell-epic/src/components/epic-cards/EpicCards.en.ts"
               target="src-spell-epic-src-components-epic-cards-epiccards-en-ts"
               ><code title="spell-epic/src/components/epic-cards/EpicCards.en.ts">EpicCards.en.ts</code></a
             >.<br />
             The component:
             <a
-              href="../../spell-epic/src/components/epic-cards/EpicCards.tsx"
+              href="/spell-epic/src/components/epic-cards/EpicCards.tsx"
               target="src-spell-epic-src-components-epic-cards-epiccards-tsx"
               ><code title="spell-epic/src/components/epic-cards/EpicCards.tsx">EpicCards.tsx</code></a
             >.
@@ -113,7 +113,7 @@
             </ui-accordion>
             <p>
               From the tool's saga page template (<a
-                href="../../spell-epic/src/tool/templates/saga.html"
+                href="/spell-epic/src/tool/templates/saga.html"
                 target="src-spell-epic-src-tool-templates-saga-html"
                 ><code title="spell-epic/src/tool/templates/saga.html">saga.html</code></a
               >), which <code>epic saga page &lt;id&gt;</code> fills in. Nothing else goes in it: the cards come from
@@ -226,7 +226,7 @@
               <li><code>epic saga page &lt;id&gt;</code>: the saga page template writes it, once.</li>
               <li>
                 What it draws comes from the page server, <code>GET /api/epics/saga?saga=&lt;id&gt;</code> (<a
-                  href="../../spell-epic/src/tool/SagaEpics.ts"
+                  href="/spell-epic/src/tool/SagaEpics.ts"
                   target="src-spell-epic-src-tool-sagaepics-ts"
                   ><code title="spell-epic/src/tool/SagaEpics.ts">SagaEpics</code></a
                 >): every epic page whose <code>&lt;epic-page saga&gt;</code> names it. It asks again whenever an epic
