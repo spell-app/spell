@@ -304,3 +304,40 @@ class WaitedOnPlace extends PrefPlace {
       .map((key) => key.slice(store.length + 1))
   }
 }
+
+////////////////
+// ## Keys named whole
+////////////////
+
+describe("PrefStore.splitKey() / getAt() / setAt() / moveOldKey()", () => {
+  test("a key named whole is its store and its key, split at the FIRST colon", () => {
+    expect(PrefStore.splitKey("spell-site:scheme")).toEqual(["spell-site", "scheme"])
+    expect(PrefStore.splitKey("spell-ui-site:folds:/x.html")).toEqual(["spell-ui-site", "folds:/x.html"])
+    expect(() => PrefStore.splitKey("spell.typeExplorer")).toThrow(/has no store/)
+  })
+
+  test("`getAt()` / `setAt()` read and keep a key named whole, as a plain script reads it", () => {
+    PrefStore.setAt("PrefStore-test-whole:scheme", "dark")
+    expect(localStorage.getItem("PrefStore-test-whole:scheme")).toBe("dark")
+    expect(PrefStore.getAt("PrefStore-test-whole:scheme")).toBe("dark")
+    PrefStore.setAt("PrefStore-test-whole:scheme", undefined)
+    expect(localStorage.getItem("PrefStore-test-whole:scheme")).toBeNull()
+  })
+
+  test("`moveOldKey()` moves a key no store names, byte for byte, once;  a value already there wins", () => {
+    localStorage.setItem("PrefStore-test-old-sort", "date")
+    localStorage.setItem("PrefStore-test-old-list", '["a",""]')
+    PrefStore.moveOldKey("PrefStore-test-old-sort", "PrefStore-test-moved:sort")
+    PrefStore.moveOldKey("PrefStore-test-old-list", "PrefStore-test-moved:list")
+    PrefStore.moveOldKey("PrefStore-test-old-sort", "PrefStore-test-moved:sort")
+    expect(localStorage.getItem("PrefStore-test-moved:sort")).toBe("date")
+    expect(PrefStore.getAt("PrefStore-test-moved:list")).toEqual(["a", ""])
+    expect(localStorage.getItem("PrefStore-test-old-sort")).toBeNull()
+
+    localStorage.setItem("PrefStore-test-old-sort", "title")
+    PrefStore.moveOldKey("PrefStore-test-old-sort", "PrefStore-test-moved:sort")
+    expect(localStorage.getItem("PrefStore-test-moved:sort")).toBe("date")
+    expect(localStorage.getItem("PrefStore-test-old-sort")).toBeNull()
+    void new PrefStore("PrefStore-test-moved").forgetAll()
+  })
+})

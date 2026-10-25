@@ -87,8 +87,8 @@ Each folder of `src/` links to its own `AGENTS.md`:  read it before working ther
     `lint.imports.ts`).
 - Which folder may use which:
   - `toolchain` and `util` are the bottom:  every config uses the toolchain.
-  - `server` uses node, `json5`, linkedom, oxfmt (`formatHTML()`, loaded when it runs), util's json5 and the
-    toolchain's format settings.
+  - `server` uses node, `json5`, linkedom, oxfmt (`formatHTML()`, loaded when it runs), util's json5, util's
+    `persist/` (the site header's preferences) and the toolchain's format settings.
   - `element` uses util's generic files, one by one, and Solid.
   - `element-tools` uses `element`'s node-safe leaves (`SkeletonText`, the vocabulary types), server, Vite and `tsx`.
   - `test-helpers` use the DOM, Solid and `element`.

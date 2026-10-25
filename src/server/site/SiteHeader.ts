@@ -1,7 +1,8 @@
+import { PrefStore } from "spell/util/persist"
 import type { ServerConfig, ServerInfo } from "spell/server"
 import {
   DARK_QUERY,
-  EDIT_KEY,
+  EDIT_PREF,
   FAVICON_SVG,
   forcedScheme,
   LEGACY_SCHEME_KEYS,
@@ -9,7 +10,9 @@ import {
   LOGO_MARK,
   SCHEME_CLASSES,
   SCHEME_KEY,
+  SCHEME_PREF,
   SITE_HOME,
+  SITE_PREFS,
   type SiteScheme,
   type SiteTab
 } from "spell/server/site"
@@ -278,13 +281,7 @@ export class SiteHeader extends HTMLElement {
   private flipTheme(): void {
     const next: Theme = this.shownTheme() === "dark" ? "light" : "dark"
     const stored = next === this.osTheme() ? undefined : next
-    themeFallback = stored
-    try {
-      if (stored) localStorage.setItem(SCHEME_KEY, stored)
-      else localStorage.removeItem(SCHEME_KEY)
-    } catch {
-      // storage blocked:  this page only (`themeFallback`)
-    }
+    sitePrefs.set(SCHEME_PREF, stored)
     applyTheme(stored)
     this.render()
   }
@@ -292,13 +289,7 @@ export class SiteHeader extends HTMLElement {
   /** edit mode on / off, for this tab;  tells `<spell-section-editor>` */
   private toggleEdit(): void {
     const on = !readEdit()
-    try {
-      if (on) sessionStorage.setItem(EDIT_KEY, "1")
-      else sessionStorage.removeItem(EDIT_KEY)
-    } catch {
-      // storage blocked:  until reload
-    }
-    editFallback = on
+    tabPrefs.set(EDIT_PREF, on ? EDIT_ON : undefined)
     document.dispatchEvent(new CustomEvent("spell-site:edit", { detail: { on } }))
     this.render()
   }
@@ -319,11 +310,17 @@ export class SiteHeader extends HTMLElement {
 /** A chosen color scheme;  `undefined` follows the OS. */
 type Theme = SiteScheme
 
-/** The chosen scheme when storage is blocked:  this page only. */
-let themeFallback: Theme | undefined
+/**
+ * The site's lasting preferences:  the chosen scheme, `SCHEME_KEY`.
+ * - Storage blocked:  kept for this page (`PrefStore`'s memory).
+ */
+const sitePrefs = new PrefStore(SITE_PREFS)
 
-/** Edit mode when storage is blocked. */
-let editFallback = false
+/** This tab's:  edit mode, `spell-site:edit`. */
+const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
+
+/** Edit mode on, as kept:  `1`, as it always was. */
+const EDIT_ON = 1
 
 /** The page's `window.SPELL_SERVER`, if the page server injected one. */
 export function serverConfig(): ServerConfig | undefined {
@@ -337,11 +334,7 @@ export function serverConfig(): ServerConfig | undefined {
  */
 export function readEdit(): boolean {
   if (document.querySelector(`${SiteHeader.tag}[no-tools]`)) return false
-  try {
-    return sessionStorage.getItem(EDIT_KEY) === "1"
-  } catch {
-    return editFallback
-  }
+  return tabPrefs.get(EDIT_PREF) === EDIT_ON
 }
 
 /**
@@ -349,27 +342,25 @@ export function readEdit(): boolean {
  * - SIDE EFFECT:  while `SCHEME_KEY` is absent, moves an old key's scheme over (`migrateTheme()`).
  */
 function readTheme(): Theme | undefined {
-  try {
-    const theme = localStorage.getItem(SCHEME_KEY) ?? migrateTheme(localStorage)
-    return theme === "light" || theme === "dark" ? theme : undefined
-  } catch {
-    return themeFallback
-  }
+  const theme = sitePrefs.get(SCHEME_PREF) ?? migrateTheme()
+  return theme === "light" || theme === "dark" ? theme : undefined
 }
 
 /**
  * Move the scheme from the keys it lived under before `SCHEME_KEY` (`LEGACY_SCHEME_KEYS`).
- * Returns the scheme, else `null`.
+ * Returns the scheme, else `undefined`.
  * - the first valid one is copied to `SCHEME_KEY`, and every old key removed, so this runs once
  * - the same steps as Spell UI's `ThemePreference`:  whichever site the viewer opens first moves it
  */
-function migrateTheme(storage: Storage): string | null {
-  const found = LEGACY_SCHEME_KEYS.map((key) => storage.getItem(key)).find(
-    (value) => value === "light" || value === "dark"
-  )
-  if (found) storage.setItem(SCHEME_KEY, found)
-  for (const key of LEGACY_SCHEME_KEYS) storage.removeItem(key)
-  return found ?? null
+function migrateTheme(): Theme | undefined {
+  let found: Theme | undefined
+  for (const key of LEGACY_SCHEME_KEYS) {
+    const value = PrefStore.getAt(key)
+    if (!found && (value === "light" || value === "dark")) found = value
+    PrefStore.setAt(key, undefined)
+  }
+  if (found) sitePrefs.set(SCHEME_PREF, found)
+  return found
 }
 
 /**
