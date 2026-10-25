@@ -10577,7 +10577,7 @@
       "name": "::part(toggle)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-panel>`:  With `collapsible`:  the `<button>` inside the heading that folds the section.\n- `<ui-property-editor>`:  With `collapsible`:  the `<button>` inside the heading that folds the section.\n- `<ui-property-group>`:  With `collapsible`:  the `<button>` inside the heading that folds the section.\n- `<ui-section>`:  With `collapsible`:  the `<button>` inside the heading that folds the section."
+        "value": "Part of:\n\n- `<ui-panel>`:  With `collapsible`:  the `<button>` inside the heading that opens and closes the section.\n- `<ui-property-editor>`:  With `collapsible`:  the `<button>` inside the heading that opens and closes the section.\n- `<ui-property-group>`:  With `collapsible`:  the `<button>` inside the heading that opens and closes the section.\n- `<ui-section>`:  With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
       }
     },
     {
@@ -10649,7 +10649,7 @@
       "name": ":state(animated)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-accordion>`:  Panels open and close with a height transition (`interpolate-size`).\n- `<ui-panel>`:  Folds with a height transition (`interpolate-size`).\n- `<ui-property-editor>`:  Folds with a height transition (`interpolate-size`).\n- `<ui-property-group>`:  Folds with a height transition (`interpolate-size`).\n- `<ui-section>`:  Folds with a height transition (`interpolate-size`)."
+        "value": "Custom state of:\n\n- `<ui-accordion>`:  Panels open and close with a height transition (`interpolate-size`).\n- `<ui-panel>`:  Opens and closes with a height transition (`interpolate-size`).\n- `<ui-property-editor>`:  Opens and closes with a height transition (`interpolate-size`).\n- `<ui-property-group>`:  Opens and closes with a height transition (`interpolate-size`).\n- `<ui-section>`:  Opens and closes with a height transition (`interpolate-size`)."
       }
     },
     {
@@ -10754,7 +10754,7 @@
       "name": ":state(collapsed)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-comment>`:  `collapsed`.\n- `<ui-comments>`:  `collapsed`.\n- `<ui-panel>`:  Folded.\n- `<ui-property-editor>`:  Folded.\n- `<ui-property-group>`:  Folded.\n- `<ui-section>`:  Folded."
+        "value": "Custom state of:\n\n- `<ui-comment>`:  `collapsed`.\n- `<ui-comments>`:  `collapsed`.\n- `<ui-panel>`:  Closed.\n- `<ui-property-editor>`:  Closed.\n- `<ui-property-group>`:  Closed.\n- `<ui-section>`:  Closed."
       }
     },
     {

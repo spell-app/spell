@@ -84,8 +84,8 @@ function folded(content: HTMLElement) {
 describe("<ui-section> definition", () => {
   it("registers its texts with UI.i18n when DEFINED", async () => {
     await UI.load()
-    expect(UI.i18n.t("fold")).toBe("Fold")
-    expect(UI.i18n.t("unfold")).toBe("Unfold")
+    expect(UI.i18n.t("closeSection")).toBe("Close this section")
+    expect(UI.i18n.t("openSection")).toBe("Open this section")
   })
 })
 

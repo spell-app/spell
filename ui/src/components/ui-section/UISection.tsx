@@ -540,7 +540,9 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             part={this.partForName("toggle")}
             aria-expanded={this.isCollapsible ? (this.isFolded ? "false" : "true") : undefined}
             aria-controls={this.isCollapsible ? CONTENT_ID : undefined}
-            title={this.isCollapsible ? this.translationForKey(this.isFolded ? "unfold" : "fold") : undefined}
+            title={
+              this.isCollapsible ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined
+            }
             disabled={this.isCollapsible && this.disabled ? true : undefined}
             aria-describedby={this.hasDescription && this.isCollapsible ? TIP_ID : undefined}
             onClick={this.onToggleClick}
@@ -587,7 +589,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
         class={FOLD_ICON_CLASS}
         part={this.partForName("fold-icon")}
         aria-hidden="true"
-        title={onClick ? this.translationForKey(this.isFolded ? "unfold" : "fold") : undefined}
+        title={onClick ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined}
         onClick={onClick}
       >
         {this.foldGlyph.svg}

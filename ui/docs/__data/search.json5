@@ -1937,7 +1937,7 @@
     {
       "path": "ui-panel.html",
       "title": "Panel",
-      "summary": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.",
+      "summary": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.",
       "tag": "ui-panel",
       "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
       "sections": [
@@ -2096,7 +2096,7 @@
     {
       "path": "ui-property-editor.html",
       "title": "Property Editor",
-      "summary": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
+      "summary": "A property editor draws a form from a schema:  one field per property, in groups that open and close, for one thing or many.",
       "tag": "ui-property-editor",
       "tabs": {"examples":"Examples","usage":"Usage","api":"API"},
       "sections": [
@@ -2312,7 +2312,7 @@
     {
       "path": "ui-section.html",
       "title": "Section",
-      "summary": "A section is a titled block of content that can fold away and keep its title in view.",
+      "summary": "A section is a titled block of content that can close and keep its title in view.",
       "tag": "ui-section",
       "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
       "sections": [
@@ -2353,7 +2353,7 @@
         {"id":"examples-variations-inverted","title":"Inverted","parent":22},
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
         {"id":"usage-heading-levels","title":"Heading levels","tab":"usage"},
-        {"id":"usage-folding","title":"Folding","tab":"usage"},
+        {"id":"usage-opening-and-closing","title":"Opening and closing","tab":"usage"},
         {"id":"usage-content-from-a-file","title":"Content from a file","tab":"usage"},
         {"id":"usage-sticky-titles","title":"Sticky titles","tab":"usage"},
         {"id":"usage-slots","title":"Slots","tab":"usage"},

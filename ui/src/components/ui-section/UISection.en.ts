@@ -36,7 +36,7 @@ export const sectionVocabulary = {
   // a title over its content, as a segment's skeleton
   skeleton: "header, paragraph",
   noun: "section",
-  description: "A section is a titled block of content that can fold away and keep its title in view.",
+  description: "A section is a titled block of content that can close and keep its title in view.",
   attributes: [
     {
       name: "label",
@@ -84,7 +84,7 @@ export const sectionVocabulary = {
       group: "content",
       kind: "string",
       description:
-        "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button " +
+        "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button " +
         'has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line ' +
         "breaks)."
     },
@@ -93,7 +93,7 @@ export const sectionVocabulary = {
       group: "behaviour",
       kind: "boolean",
       description:
-        "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside " +
+        "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside " +
         '`<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.'
     },
     {
@@ -101,8 +101,8 @@ export const sectionVocabulary = {
       group: "states",
       kind: "boolean",
       description:
-        "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto " +
-        "a person's changes.  Find-in-page unfolds a match."
+        "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto " +
+        "a person's changes.  Find-in-page opens a match."
     },
     {
       name: "fold-icon",
@@ -110,8 +110,8 @@ export const sectionVocabulary = {
       kind: "enum",
       values: ["start", "end"],
       description:
-        "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at " +
-        "the far end of the title bar, after the badge and actions (a click on it folds too)."
+        "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at " +
+        "the far end of the title bar, after the badge and actions (a click on it closes and opens too)."
     },
     {
       name: "sticky",
@@ -196,7 +196,12 @@ export const sectionVocabulary = {
       kind: "keyOnly",
       description: "Dims the content under a spinner;  `aria-busy`."
     },
-    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert;  can't be folded." },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Dimmed and inert;  can't be closed or opened."
+    },
     ...UIT.SourceBodyAttributes
   ],
   events: [
@@ -205,24 +210,24 @@ export const sectionVocabulary = {
       detail: "{ open: boolean, section: Element, originalEvent?: Event }",
       cancelable: true,
       description:
-        "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, " +
-        "`cancelable: false`).  Cancel to stay folded."
+        "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, " +
+        "`cancelable: false`).  Cancel to stay closed."
     },
     {
       name: "ui-opened",
       detail: "{ open: boolean, section: Element }",
-      description: "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+      description: "Opened, by any route:  the title, the page removing `collapsed`, find-in-page."
     },
     {
       name: "ui-closing",
       detail: "{ open: boolean, section: Element, originalEvent?: Event }",
       cancelable: true,
-      description: "About to fold:  the title was activated.  Cancel to stay open."
+      description: "About to close:  the title was activated.  Cancel to stay open."
     },
     {
       name: "ui-closed",
       detail: "{ open: boolean, section: Element }",
-      description: "Folded, by any route:  the title, or the page setting `collapsed`."
+      description: "Closed, by any route:  the title, or the page setting `collapsed`."
     },
     ...UIT.SourceBodyEvents
   ],
@@ -232,14 +237,17 @@ export const sectionVocabulary = {
     { name: "hint", description: "Rich hint, instead of the `hint` attribute." },
     { name: "icon", description: "Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image)." },
     { name: "badge", description: "Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`)." },
-    { name: "actions", description: "Controls at the right of the title bar (buttons, a menu);  never fold it." },
+    { name: "actions", description: "Controls at the right of the title bar (buttons, a menu);  never close it." },
     { name: "description", description: "Rich tip, instead of the `description` attribute (bold words, line breaks)." }
   ],
   parts: [
     { name: "section", description: "The section box." },
     { name: "title", description: "The title bar:  sticks with `sticky`." },
     { name: "heading", description: "The `<h1>` ... `<h6>`." },
-    { name: "toggle", description: "With `collapsible`:  the `<button>` inside the heading that folds the section." },
+    {
+      name: "toggle",
+      description: "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
+    },
     {
       name: "fold-icon",
       description:
@@ -258,9 +266,9 @@ export const sectionVocabulary = {
     ...UIT.SourceBodyParts
   ],
   states: [
-    { name: "collapsed", description: "Folded." },
+    { name: "collapsed", description: "Closed." },
     { name: "stuck", description: "With `sticky`:  the title bar is stuck to the top." },
-    { name: "animated", description: "Folds with a height transition (`interpolate-size`)." },
+    { name: "animated", description: "Opens and closes with a height transition (`interpolate-size`)." },
     { name: "nested", description: "Nested in another section." },
     { name: "in-group", description: "Directly in a `<ui-sections>` group (no section between)." },
     {
@@ -275,8 +283,8 @@ export const sectionVocabulary = {
   ],
   texts: [
     { key: "loading", text: "Loading…", description: "Announced while `loading`." },
-    { key: "fold", text: "Fold", description: "Tooltip of the fold button while open." },
-    { key: "unfold", text: "Unfold", description: "Tooltip of the fold button while folded." },
+    { key: "closeSection", text: "Close this section", description: "Tooltip of the open / close button while open." },
+    { key: "openSection", text: "Open this section", description: "Tooltip of the open / close button while closed." },
     ...UIT.SourceFailureTexts
   ],
   ownsParts: ["section"]

@@ -20226,7 +20226,7 @@
       "name": "ui-panel",
       "description": {
         "kind": "markdown",
-        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
       },
       "attributes": [
         {
@@ -20295,28 +20295,28 @@
           "name": "description",
           "description": {
             "kind": "markdown",
-            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
           }
         },
         {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
-            "value": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
+            "value": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "fold-icon",
           "description": {
             "kind": "markdown",
-            "value": "Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.\n\nTakes:  `start` · `end`"
+            "value": "Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.\n\nTakes:  `start` · `end`"
           },
           "values": [
             {
@@ -20568,7 +20568,7 @@
           "name": "disabled",
           "description": {
             "kind": "markdown",
-            "value": "Dimmed and inert;  can't be folded.\n\nTakes:  flag (present / absent)"
+            "value": "Dimmed and inert;  can't be closed or opened.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -23435,28 +23435,28 @@
           "name": "description",
           "description": {
             "kind": "markdown",
-            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
           }
         },
         {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
-            "value": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
+            "value": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "fold-icon",
           "description": {
             "kind": "markdown",
-            "value": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).\n\nTakes:  `start` · `end`"
+            "value": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).\n\nTakes:  `start` · `end`"
           },
           "values": [
             {
@@ -23845,7 +23845,7 @@
       "name": "ui-property-group",
       "description": {
         "kind": "markdown",
-        "value": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`"
+        "value": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`"
       },
       "attributes": [
         {
@@ -23963,28 +23963,28 @@
           "name": "description",
           "description": {
             "kind": "markdown",
-            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
           }
         },
         {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
-            "value": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
+            "value": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "fold-icon",
           "description": {
             "kind": "markdown",
-            "value": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).\n\nTakes:  `start` · `end`"
+            "value": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).\n\nTakes:  `start` · `end`"
           },
           "values": [
             {
@@ -24236,7 +24236,7 @@
           "name": "disabled",
           "description": {
             "kind": "markdown",
-            "value": "Dimmed and inert;  can't be folded.\n\nTakes:  flag (present / absent)"
+            "value": "Dimmed and inert;  can't be closed or opened.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -27679,7 +27679,7 @@
       "name": "ui-section",
       "description": {
         "kind": "markdown",
-        "value": "A section is a titled block of content that can fold away and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A section is a titled block of content that can close and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
       },
       "attributes": [
         {
@@ -27748,28 +27748,28 @@
           "name": "description",
           "description": {
             "kind": "markdown",
-            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+            "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
           }
         },
         {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
-            "value": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
+            "value": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.\n\nTakes:  flag (present / absent)"
+            "value": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "fold-icon",
           "description": {
             "kind": "markdown",
-            "value": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).\n\nTakes:  `start` · `end`"
+            "value": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).\n\nTakes:  `start` · `end`"
           },
           "values": [
             {
@@ -28021,7 +28021,7 @@
           "name": "disabled",
           "description": {
             "kind": "markdown",
-            "value": "Dimmed and inert;  can't be folded.\n\nTakes:  flag (present / absent)"
+            "value": "Dimmed and inert;  can't be closed or opened.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -28226,14 +28226,14 @@
       "name": "ui-sections",
       "description": {
         "kind": "markdown",
-        "value": "A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.\n\nAlso known as:  accordion, section group, collapsible group, outline.\n\n**Slots:**  default"
+        "value": "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.\n\nAlso known as:  accordion, section group, collapsible group, outline.\n\n**Slots:**  default"
       },
       "attributes": [
         {
           "name": "collapsing",
           "description": {
             "kind": "markdown",
-            "value": "Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded ones stack with no space between.  A section opts out with `collapsible=\"false\"`.\n\nTakes:  flag (present / absent)"
+            "value": "Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed ones stack with no space between.  A section opts out with `collapsible=\"false\"`.\n\nTakes:  flag (present / absent)"
           }
         },
         {

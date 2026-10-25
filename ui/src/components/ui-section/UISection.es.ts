@@ -13,8 +13,8 @@ export const sectionEs = {
   aka: ["sección", "panel", "plegable", "desplegable", "conjunto de campos"],
   texts: {
     loading: "Cargando…",
-    fold: "Plegar",
-    unfold: "Desplegar",
+    closeSection: "Cerrar esta sección",
+    openSection: "Abrir esta sección",
     sourceLoadError: "No se pudo cargar {source}.",
     sourceCrossOrigin: "No se puede mostrar {source}:  solo se pueden mostrar archivos de este sitio.",
     sourceFileProtocol:

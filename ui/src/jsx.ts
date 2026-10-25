@@ -18233,24 +18233,24 @@ export interface UIOrJSXAttributes
 /** `<ui-panel>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPanelEventMap {
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -18339,7 +18339,7 @@ export interface UIPanelAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -18349,7 +18349,7 @@ export interface UIPanelAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -18359,7 +18359,7 @@ export interface UIPanelAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -18369,7 +18369,7 @@ export interface UIPanelAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
+   * Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -18590,7 +18590,7 @@ export interface UIPanelAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -18754,24 +18754,24 @@ export interface UIPanelAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPanelEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPanelEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPanelEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPanelEventMap["ui-closed"]) => void
@@ -20988,24 +20988,24 @@ export interface UIPropertyEditorEventMap {
    */
   "ui-cancelled": CustomEvent<{ changes: UIT.FormChange[] }>
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -21300,7 +21300,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -21310,7 +21310,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -21320,7 +21320,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -21330,7 +21330,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -21713,24 +21713,24 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-cancelled"?: (event: UIPropertyEditorEventMap["ui-cancelled"]) => void
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPropertyEditorEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyEditorEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPropertyEditorEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyEditorEventMap["ui-closed"]) => void
@@ -21766,24 +21766,24 @@ export interface UIPropertyGroupEventMap {
    */
   "ui-saved": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -21917,7 +21917,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -21927,7 +21927,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -21937,7 +21937,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -21947,7 +21947,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -22168,7 +22168,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -22322,24 +22322,24 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-saved"?: (event: UIPropertyGroupEventMap["ui-saved"]) => void
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UIPropertyGroupEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UIPropertyGroupEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIPropertyGroupEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UIPropertyGroupEventMap["ui-closed"]) => void
@@ -25256,24 +25256,24 @@ export interface UISearchJSXAttributes
 /** `<ui-section>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISectionEventMap {
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-opening": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-opened": CustomEvent<{ open: boolean; section: Element }>
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ open: boolean; section: Element; originalEvent?: Event }>
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "ui-closed": CustomEvent<{ open: boolean; section: Element }>
@@ -25362,7 +25362,7 @@ export interface UISectionAttributes {
    */
   "prop:badge"?: string
   /**
-   * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
+   * A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
@@ -25372,7 +25372,7 @@ export interface UISectionAttributes {
    */
   "prop:description"?: string
   /**
-   * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
+   * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
@@ -25382,7 +25382,7 @@ export interface UISectionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
+   * Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -25392,7 +25392,7 @@ export interface UISectionAttributes {
    */
   "prop:collapsed"?: boolean | ""
   /**
-   * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
+   * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
@@ -25613,7 +25613,7 @@ export interface UISectionAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Dimmed and inert;  can't be folded.
+   * Dimmed and inert;  can't be closed or opened.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
@@ -25777,24 +25777,24 @@ export interface UISectionAttributes {
    */
   "prop:tooltip"?: string
   /**
-   * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
+   * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-opening"?: (event: UISectionEventMap["ui-opening"]) => void
   /**
-   * `ui-opened`:  Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page.
+   * `ui-opened`:  Opened, by any route:  the title, the page removing `collapsed`, find-in-page.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-opened"?: (event: UISectionEventMap["ui-opened"]) => void
   /**
-   * `ui-closing`:  About to fold:  the title was activated.  Cancel to stay open.
+   * `ui-closing`:  About to close:  the title was activated.  Cancel to stay open.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UISectionEventMap["ui-closing"]) => void
   /**
-   * `ui-closed`:  Folded, by any route:  the title, or the page setting `collapsed`.
+   * `ui-closed`:  Closed, by any route:  the title, or the page setting `collapsed`.
    * - `event.detail`:  `{ open: boolean, section: Element }`
    */
   "on-ui-closed"?: (event: UISectionEventMap["ui-closed"]) => void
@@ -25825,7 +25825,7 @@ export interface UISectionJSXAttributes
 /** `<ui-sections>`'s own attributes, from its vocabulary. */
 export interface UISectionsAttributes {
   /**
-   * Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded ones stack with no space between.  A section opts out with `collapsible="false"`.
+   * Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed ones stack with no space between.  A section opts out with `collapsible="false"`.
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
@@ -34391,7 +34391,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-or": UIOrJSXAttributes
       /**
-       * `<ui-panel>`:  A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.
+       * `<ui-panel>`:  A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.
        * - also known as:  inspector, property panel, properties, settings panel, fieldset, property sheet
        * - slots:
        *   - default:  The content:  anything, nested `<ui-section>`s included.
@@ -34399,7 +34399,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
@@ -34474,13 +34474,13 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
        */
       "ui-property-editor": UIPropertyEditorJSXAttributes
       /**
-       * `<ui-property-group>`:  A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.
+       * `<ui-property-group>`:  A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.
        * - also known as:  property group, fieldset, settings group, inspector section
        * - slots:
        *   - `output`:  Rich output (instead of `output`).
@@ -34489,7 +34489,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`
        */
@@ -34569,7 +34569,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-search": UISearchJSXAttributes
       /**
-       * `<ui-section>`:  A section is a titled block of content that can fold away and keep its title in view.
+       * `<ui-section>`:  A section is a titled block of content that can close and keep its title in view.
        * - also known as:  section, panel, collapsible, disclosure, fieldset, expander
        * - slots:
        *   - default:  The content:  anything, nested `<ui-section>`s included.
@@ -34577,13 +34577,13 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint, instead of the `hint` attribute.
        *   - `icon`:  Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image).
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
-       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
+       *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
       "ui-section": UISectionJSXAttributes
       /**
-       * `<ui-sections>`:  A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.
+       * `<ui-sections>`:  A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.
        * - also known as:  accordion, section group, collapsible group, outline
        * - slots:
        *   - default:  `<ui-section>`s, and anything between them.

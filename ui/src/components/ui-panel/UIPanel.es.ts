@@ -13,8 +13,8 @@ export const panelEs = {
   aka: ["panel", "sección", "inspector", "panel de propiedades", "panel de ajustes"],
   texts: {
     loading: "Cargando…",
-    fold: "Plegar",
-    unfold: "Desplegar",
+    closeSection: "Cerrar esta sección",
+    openSection: "Abrir esta sección",
     sourceLoadError: "No se pudo cargar {source}.",
     sourceCrossOrigin: "No se puede mostrar {source}:  solo se pueden mostrar archivos de este sitio.",
     sourceFileProtocol:

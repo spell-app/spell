@@ -7,7 +7,7 @@
     <title>Panel | Spell UI</title>
     <meta
       name="description"
-      content="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold."
+      content="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close."
     />
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -40,7 +40,7 @@
           </ui-menu>
           <ui-header level="1" class="site-title">
             Panel
-            <ui-header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.</ui-header>
+            <ui-header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</ui-header>
           </ui-header>
           <ui-docs-themes for="ui-panel" show="theme" compact class="site-themes"></ui-docs-themes>
         </ui-container>
@@ -82,7 +82,7 @@
 
               <ui-section id="examples-types-collapsible" label="Collapsible" sticky collapsible dividing>
                 <ui-docs-example
-                  description="`collapsible` bands fold and unfold when clicked;  `collapsed` starts one folded.  A folded LAST band closes the box, no gap under it."
+                  description="`collapsible` bands close and open when clicked;  `collapsed` starts one closed.  A closed LAST band closes the box, no gap under it."
                 >
                   <ui-panel label="Color Set" collapsible style="max-width: 320px">
                     <ui-panel label="Tweak" collapsible>
@@ -122,7 +122,7 @@
 
               <ui-section id="examples-content-info-tip" label="Info tip" sticky collapsible dividing>
                 <ui-docs-example
-                  description='`description` (or `slot="description"`, for bold words and paragraphs):  a tip about the band, shown under it while the pointer is on its title or its fold button has focus.'
+                  description='`description` (or `slot="description"`, for bold words and paragraphs):  a tip about the band, shown under it while the pointer is on its title or its open / close button has focus.'
                 >
                   <ui-panel label="Theme" collapsible style="max-width: 320px">
                     <span slot="description"
@@ -208,7 +208,7 @@
 
                   - Put fields straight inside: inputs, sliders, checkboxes, `<ui-field>`s. They stack 8px apart.
                   - Nest a panel to start a sub-head band; its fields follow it.
-                  - `collapsed` is controlled: set it to fold or unfold; cancel `ui-opening` / `ui-closing` to keep the
+                  - `collapsed` is controlled: set it to close or open; cancel `ui-opening` / `ui-closing` to keep the
                     user's click from changing it.
                   - It needs no theme: under any theme it's a `primary`-tinted box. The brand pages' `spell-brand`
                     theme adds the `accent` hue (Polished Ivory) and the brand's shadow.
@@ -226,7 +226,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   `source` comes with `<ui-section source>` (being built in epic `claude-design`): a collapsed band
-                  loads its body from a file the first time it's unfolded. The panel takes it with no change of its
+                  loads its body from a file the first time it's opened. The panel takes it with no change of its
                   own, as it takes every section attribute; until then the attribute does nothing.
                 </script>
               </ui-markdown>
@@ -250,11 +250,11 @@
                   <tbody>
                     <tr>
                       <td>Tab / Shift + Tab</td>
-                      <td>Move to a band's fold button, then its actions, then the fields</td>
+                      <td>Move to a band's open / close button, then its actions, then the fields</td>
                     </tr>
                     <tr>
                       <td>Enter / Space</td>
-                      <td>Fold or unfold the focused band</td>
+                      <td>Close or open the focused band</td>
                     </tr>
                   </tbody>
                 </table>
@@ -265,9 +265,9 @@
                 <script type="text/markdown">
                   - Each band is a real heading (`h2`, nested ones one level deeper), so panels appear in the page
                     outline.
-                  - A collapsible band's heading CONTAINS its fold button, which says whether the content is shown
+                  - A collapsible band's heading CONTAINS its open / close button, which says whether the content is shown
                     (`aria-expanded`) and which content it controls. The chevron is decoration.
-                  - Find-in-page reaches folded content and unfolds it.
+                  - Find-in-page reaches closed content and opens it.
                   - Name every field: a panel's band doesn't label the controls under it.
                 </script>
               </ui-markdown>

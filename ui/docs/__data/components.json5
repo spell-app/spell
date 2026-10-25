@@ -17179,7 +17179,7 @@
         "fieldset",
         "property sheet"
       ],
-      "description": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.",
+      "description": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.",
       "noun": "section",
       "attributes": [
         {
@@ -17223,17 +17223,17 @@
         {
           "name": "description",
           "kind": "string",
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
           "kind": "boolean",
-          "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
+          "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match."
         },
         {
           "name": "fold-icon",
@@ -17242,7 +17242,7 @@
             "start",
             "end"
           ],
-          "description": "Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title."
+          "description": "Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title."
         },
         {
           "name": "sticky",
@@ -17385,7 +17385,7 @@
         {
           "name": "disabled",
           "kind": "keyOnly",
-          "description": "Dimmed and inert;  can't be folded."
+          "description": "Dimmed and inert;  can't be closed or opened."
         },
         {
           "name": "source",
@@ -17509,7 +17509,7 @@
         },
         {
           "name": "actions",
-          "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+          "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
         },
         {
           "name": "description",
@@ -17521,23 +17521,23 @@
           "name": "ui-opening",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded."
+          "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed."
         },
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Opened, by any route:  the title, the page removing `collapsed`, find-in-page."
         },
         {
           "name": "ui-closing",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to fold:  the title was activated.  Cancel to stay open."
+          "description": "About to close:  the title was activated.  Cancel to stay open."
         },
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Closed, by any route:  the title, or the page setting `collapsed`."
         },
         {
           "name": "ui-loading",
@@ -17571,7 +17571,7 @@
         },
         {
           "name": "toggle",
-          "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+          "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
         },
         {
           "name": "fold-icon",
@@ -17613,7 +17613,7 @@
       "states": [
         {
           "name": "collapsed",
-          "description": "Folded."
+          "description": "Closed."
         },
         {
           "name": "stuck",
@@ -17621,7 +17621,7 @@
         },
         {
           "name": "animated",
-          "description": "Folds with a height transition (`interpolate-size`)."
+          "description": "Opens and closes with a height transition (`interpolate-size`)."
         },
         {
           "name": "nested",
@@ -17695,14 +17695,14 @@
           "description": "Announced while `loading`."
         },
         {
-          "key": "fold",
-          "text": "Fold",
-          "description": "Tooltip of the fold button while open."
+          "key": "closeSection",
+          "text": "Close this section",
+          "description": "Tooltip of the open / close button while open."
         },
         {
-          "key": "unfold",
-          "text": "Unfold",
-          "description": "Tooltip of the fold button while folded."
+          "key": "openSection",
+          "text": "Open this section",
+          "description": "Tooltip of the open / close button while closed."
         },
         {
           "key": "sourceLoadError",
@@ -19977,17 +19977,17 @@
         {
           "name": "description",
           "kind": "string",
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
           "kind": "boolean",
-          "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
+          "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match."
         },
         {
           "name": "fold-icon",
@@ -19996,7 +19996,7 @@
             "start",
             "end"
           ],
-          "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too)."
+          "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too)."
         },
         {
           "name": "sticky",
@@ -20226,7 +20226,7 @@
         },
         {
           "name": "actions",
-          "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+          "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
         },
         {
           "name": "description",
@@ -20296,23 +20296,23 @@
           "name": "ui-opening",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded."
+          "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed."
         },
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Opened, by any route:  the title, the page removing `collapsed`, find-in-page."
         },
         {
           "name": "ui-closing",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to fold:  the title was activated.  Cancel to stay open."
+          "description": "About to close:  the title was activated.  Cancel to stay open."
         },
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Closed, by any route:  the title, or the page setting `collapsed`."
         },
         {
           "name": "ui-error",
@@ -20360,7 +20360,7 @@
         },
         {
           "name": "toggle",
-          "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+          "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
         },
         {
           "name": "fold-icon",
@@ -20438,7 +20438,7 @@
         },
         {
           "name": "collapsed",
-          "description": "Folded."
+          "description": "Closed."
         },
         {
           "name": "stuck",
@@ -20446,7 +20446,7 @@
         },
         {
           "name": "animated",
-          "description": "Folds with a height transition (`interpolate-size`)."
+          "description": "Opens and closes with a height transition (`interpolate-size`)."
         },
         {
           "name": "nested",
@@ -20533,14 +20533,14 @@
           "description": "Announced while `loading`."
         },
         {
-          "key": "fold",
-          "text": "Fold",
-          "description": "Tooltip of the fold button while open."
+          "key": "closeSection",
+          "text": "Close this section",
+          "description": "Tooltip of the open / close button while open."
         },
         {
-          "key": "unfold",
-          "text": "Unfold",
-          "description": "Tooltip of the fold button while folded."
+          "key": "openSection",
+          "text": "Open this section",
+          "description": "Tooltip of the open / close button while closed."
         },
         {
           "key": "sourceLoadError",
@@ -20582,7 +20582,7 @@
         "settings group",
         "inspector section"
       ],
-      "description": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.",
+      "description": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.",
       "noun": "section",
       "attributes": [
         {
@@ -20657,17 +20657,17 @@
         {
           "name": "description",
           "kind": "string",
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
           "kind": "boolean",
-          "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
+          "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match."
         },
         {
           "name": "fold-icon",
@@ -20676,7 +20676,7 @@
             "start",
             "end"
           ],
-          "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too)."
+          "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too)."
         },
         {
           "name": "sticky",
@@ -20819,7 +20819,7 @@
         {
           "name": "disabled",
           "kind": "keyOnly",
-          "description": "Dimmed and inert;  can't be folded."
+          "description": "Dimmed and inert;  can't be closed or opened."
         },
         {
           "name": "visible",
@@ -20937,7 +20937,7 @@
         },
         {
           "name": "actions",
-          "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+          "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
         },
         {
           "name": "description",
@@ -20959,23 +20959,23 @@
           "name": "ui-opening",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded."
+          "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed."
         },
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Opened, by any route:  the title, the page removing `collapsed`, find-in-page."
         },
         {
           "name": "ui-closing",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to fold:  the title was activated.  Cancel to stay open."
+          "description": "About to close:  the title was activated.  Cancel to stay open."
         },
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Closed, by any route:  the title, or the page setting `collapsed`."
         },
         {
           "name": "ui-loading",
@@ -21012,7 +21012,7 @@
         },
         {
           "name": "toggle",
-          "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+          "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
         },
         {
           "name": "fold-icon",
@@ -21066,7 +21066,7 @@
         },
         {
           "name": "collapsed",
-          "description": "Folded."
+          "description": "Closed."
         },
         {
           "name": "stuck",
@@ -21074,7 +21074,7 @@
         },
         {
           "name": "animated",
-          "description": "Folds with a height transition (`interpolate-size`)."
+          "description": "Opens and closes with a height transition (`interpolate-size`)."
         },
         {
           "name": "nested",
@@ -21140,14 +21140,14 @@
           "description": "Announced while `loading`."
         },
         {
-          "key": "fold",
-          "text": "Fold",
-          "description": "Tooltip of the fold button while open."
+          "key": "closeSection",
+          "text": "Close this section",
+          "description": "Tooltip of the open / close button while open."
         },
         {
-          "key": "unfold",
-          "text": "Unfold",
-          "description": "Tooltip of the fold button while folded."
+          "key": "openSection",
+          "text": "Open this section",
+          "description": "Tooltip of the open / close button while closed."
         }
       ],
       "mainTag": "ui-property-editor",
@@ -23903,7 +23903,7 @@
         "fieldset",
         "expander"
       ],
-      "description": "A section is a titled block of content that can fold away and keep its title in view.",
+      "description": "A section is a titled block of content that can close and keep its title in view.",
       "noun": "section",
       "attributes": [
         {
@@ -23947,17 +23947,17 @@
         {
           "name": "description",
           "kind": "string",
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
           "kind": "boolean",
-          "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
+          "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
         },
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Closed:  only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match."
         },
         {
           "name": "fold-icon",
@@ -23966,7 +23966,7 @@
             "start",
             "end"
           ],
-          "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too)."
+          "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too)."
         },
         {
           "name": "sticky",
@@ -24109,7 +24109,7 @@
         {
           "name": "disabled",
           "kind": "keyOnly",
-          "description": "Dimmed and inert;  can't be folded."
+          "description": "Dimmed and inert;  can't be closed or opened."
         },
         {
           "name": "source",
@@ -24233,7 +24233,7 @@
         },
         {
           "name": "actions",
-          "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+          "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
         },
         {
           "name": "description",
@@ -24245,23 +24245,23 @@
           "name": "ui-opening",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded."
+          "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed."
         },
         {
           "name": "ui-opened",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Unfolded, by any route:  the title, the page removing `collapsed`, find-in-page."
+          "description": "Opened, by any route:  the title, the page removing `collapsed`, find-in-page."
         },
         {
           "name": "ui-closing",
           "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
           "cancelable": true,
-          "description": "About to fold:  the title was activated.  Cancel to stay open."
+          "description": "About to close:  the title was activated.  Cancel to stay open."
         },
         {
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
-          "description": "Folded, by any route:  the title, or the page setting `collapsed`."
+          "description": "Closed, by any route:  the title, or the page setting `collapsed`."
         },
         {
           "name": "ui-loading",
@@ -24295,7 +24295,7 @@
         },
         {
           "name": "toggle",
-          "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+          "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
         },
         {
           "name": "fold-icon",
@@ -24337,7 +24337,7 @@
       "states": [
         {
           "name": "collapsed",
-          "description": "Folded."
+          "description": "Closed."
         },
         {
           "name": "stuck",
@@ -24345,7 +24345,7 @@
         },
         {
           "name": "animated",
-          "description": "Folds with a height transition (`interpolate-size`)."
+          "description": "Opens and closes with a height transition (`interpolate-size`)."
         },
         {
           "name": "nested",
@@ -24419,14 +24419,14 @@
           "description": "Announced while `loading`."
         },
         {
-          "key": "fold",
-          "text": "Fold",
-          "description": "Tooltip of the fold button while open."
+          "key": "closeSection",
+          "text": "Close this section",
+          "description": "Tooltip of the open / close button while open."
         },
         {
-          "key": "unfold",
-          "text": "Unfold",
-          "description": "Tooltip of the fold button while folded."
+          "key": "openSection",
+          "text": "Open this section",
+          "description": "Tooltip of the open / close button while closed."
         },
         {
           "key": "sourceLoadError",
@@ -24468,13 +24468,13 @@
         "collapsible group",
         "outline"
       ],
-      "description": "A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.",
+      "description": "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.",
       "noun": "sections",
       "attributes": [
         {
           "name": "collapsing",
           "kind": "keyOnly",
-          "description": "Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded ones stack with no space between.  A section opts out with `collapsible=\"false\"`."
+          "description": "Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed ones stack with no space between.  A section opts out with `collapsible=\"false\"`."
         },
         {
           "name": "disabled",

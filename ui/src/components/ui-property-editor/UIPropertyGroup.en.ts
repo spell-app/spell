@@ -32,7 +32,7 @@ export const propertyGroupVocabulary = {
   topics: ["forms", "layout"],
   aka: ["property group", "fieldset", "settings group", "inspector section"],
   description:
-    "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.",
+    "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.",
   attributes: passThrough<E.AttributeSpec>(
     [
       {
