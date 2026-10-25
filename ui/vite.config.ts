@@ -51,7 +51,7 @@ export const COMPONENTS = [
   "ui-loader",
   "ui-placeholder",
   "ui-message",
-  "ui-breadcrumb",
+  "ui-breadcrumbs",
   "ui-input",
   "ui-checkbox",
   "ui-form",

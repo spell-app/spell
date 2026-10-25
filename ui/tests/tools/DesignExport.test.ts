@@ -136,6 +136,17 @@ describe("DesignExport.build() tokens.json", () => {
       package: "."
     })
   })
+
+  // the evening-date bug (epic `coherence` I5):  the UTC date is tomorrow's from 5pm in California
+  it("stamps `synced` with the LOCAL date, in the evening too", () => {
+    const evening = new DesignExport({
+      data: DATA,
+      git: { branch: "main", sha: "abc1234", user: "Test" },
+      now: new Date(2026, 9, 25, 21, 30)
+    }).build()
+    const evenTokens = JSON.parse(evening.files.find((file) => file.path === "tokens.json")!.text) as DesignTokensFile
+    expect(evenTokens.meta.synced).toBe("2026-10-25")
+  })
 })
 
 ////////////////

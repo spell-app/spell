@@ -7,6 +7,7 @@ import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { segmentsVocabulary } from "spell-ui/components/ui-segment/UISegments.en"
 import { segmentVocabulary } from "spell-ui/components/ui-segment/UISegment.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
 import segmentRaw from "spell-ui/components/ui-segment/UISegment.css?raw"
@@ -116,9 +117,9 @@ describe("UISegment.css examples", () => {
     const style = getComputedStyle(inverted)
     expect(style.colorScheme).toBe("dark")
     expect(style.getPropertyValue("--ui-inverted").trim()).toBe("1")
-    expect(luminance(style.backgroundColor)).toBeLessThan(0.3)
-    expect(luminance(style.color)).toBeGreaterThan(0.7)
-    expect(luminance(getComputedStyle(inverted.querySelector("p:last-child")!).color)).toBeGreaterThan(0.5)
+    expect(Painted.luminance(style.backgroundColor)).toBeLessThan(0.07)
+    expect(Painted.luminance(style.color)).toBeGreaterThan(0.45)
+    expect(Painted.luminance(getComputedStyle(inverted.querySelector("p:last-child")!).color)).toBeGreaterThan(0.2)
   })
 
   it("inverts the members of an inverted group (Fomantic: dark members), not segments nested in them", () => {
@@ -129,10 +130,10 @@ describe("UISegment.css examples", () => {
     const member = getComputedStyle(root.querySelector("#m")!)
     expect(member.colorScheme).toBe("dark")
     expect(member.getPropertyValue("--ui-inverted").trim()).toBe("1")
-    expect(luminance(member.backgroundColor)).toBeLessThan(0.3)
+    expect(Painted.luminance(member.backgroundColor)).toBeLessThan(0.07)
     const nested = getComputedStyle(root.querySelector("#n")!)
     expect(nested.colorScheme).toBe("light")
-    expect(luminance(nested.backgroundColor)).toBeGreaterThan(0.7)
+    expect(Painted.luminance(nested.backgroundColor)).toBeGreaterThan(0.45)
   })
 
   it("resets a plain segment nested in an inverted one to the light scheme, Fomantic-style", () => {
@@ -322,13 +323,4 @@ describe("UISegment.css in shadow roots", () => {
 /** The foundation plus `UISegment.css`, as a `<ui-segment>` adopts them. */
 function sheets(): string[] {
   return [...foundationCSS, segmentCSS]
-}
-
-/** Relative luminance (0..1) of a computed `rgb()` / `oklch()` colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }

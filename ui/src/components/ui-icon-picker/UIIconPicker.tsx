@@ -448,7 +448,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   private highlight(cell: number) {
     const last = this.cells.length - 1
     if (last < 0) return
-    this.highlighted = Math.min(last, Math.max(0, cell))
+    this.highlighted = E.clamp(cell, 0, last)
     this.reveal(this.highlighted)
   }
 

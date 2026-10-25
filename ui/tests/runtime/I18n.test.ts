@@ -40,16 +40,16 @@ describe("I18n.registerDefaults()", () => {
   it("scopes component texts:  two defaults under one key don't collide", () => {
     const i18n = new I18n({ locale: "es" })
     i18n.registerDefaults({ label: "Table" }, "ui-table")
-    i18n.registerDefaults({ label: "Breadcrumb" }, "ui-breadcrumb")
+    i18n.registerDefaults({ label: "Breadcrumb" }, "ui-breadcrumbs")
     expect(i18n.t("label", undefined, "ui-table")).toBe("Table")
-    expect(i18n.t("label", undefined, "ui-breadcrumb")).toBe("Breadcrumb")
+    expect(i18n.t("label", undefined, "ui-breadcrumbs")).toBe("Breadcrumb")
     // unscoped:  the first family's default
     expect(i18n.t("label")).toBe("Table")
     // a shared translation covers both;  a scoped one wins for its component
     i18n.register("es", { label: "Etiqueta" })
-    i18n.register("es", { label: "Migas" }, "ui-breadcrumb")
+    i18n.register("es", { label: "Migas" }, "ui-breadcrumbs")
     expect(i18n.t("label", undefined, "ui-table")).toBe("Etiqueta")
-    expect(i18n.t("label", undefined, "ui-breadcrumb")).toBe("Migas")
+    expect(i18n.t("label", undefined, "ui-breadcrumbs")).toBe("Migas")
     expect(i18n.has("label", "ui-table")).toBe(true)
   })
 

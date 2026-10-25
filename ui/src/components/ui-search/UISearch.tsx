@@ -257,7 +257,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     const count = this.shownResults.length
     if (!count) return
     const from = this.highlightedIndex
-    this.highlightedIndex = from < 0 ? (delta > 0 ? 0 : count - 1) : Math.max(0, Math.min(count - 1, from + delta))
+    this.highlightedIndex = from < 0 ? (delta > 0 ? 0 : count - 1) : E.clamp(from + delta, 0, count - 1)
   }
 
   ////////////////

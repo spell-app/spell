@@ -16,7 +16,7 @@
       "summary": "An ad displays third-party promotional content.",
       "status": "done"
     },
-    "ui-breadcrumb": {
+    "ui-breadcrumbs": {
       "title": "Breadcrumb",
       "summary": "A breadcrumb is used to show hierarchy between content.",
       "status": "done"

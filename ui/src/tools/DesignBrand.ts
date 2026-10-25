@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { dedent } from "spell/util/string"
 
-import { DesignComponents } from "./DesignComponents.ts"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 import { COMPONENTS, type DesignExample, type DesignSource } from "./tools.types.ts"
 
@@ -75,7 +75,7 @@ export class DesignBrand {
       // its title:  `label`
       const headers = [...before.matchAll(/<ui-section\b[^>]*\slabel="([^"]*)"/g)]
       const title = headers.at(-1)?.[1] ?? "Example"
-      const markup = DesignComponents.dedent(match[1]!)
+      const markup = dedent(match[1]!)
       if (markup.trim()) result.push({ title, markup, source: `${this.shownFolder}/${PAGES}/${folder}.html` })
     }
     return result
@@ -85,9 +85,7 @@ export class DesignBrand {
   style(folder: string): string {
     // comments out first:  a page's header comment may NAME a `<style>`
     const page = this.page(folder).replace(/<!--[\s\S]*?-->/g, "")
-    const own = [...page.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map((match) =>
-      DesignComponents.dedent(match[1]!)
-    )
+    const own = [...page.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map((match) => dedent(match[1]!))
     return own.join("\n").trim()
   }
 

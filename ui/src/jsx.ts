@@ -221,15 +221,19 @@ export interface UIAccordionAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -1389,15 +1393,19 @@ export interface UIAvatarAttributes {
    */
   "prop:src"?: string
   /**
-   * Alternative text;  default `""` (decorative, the name is nearby).
+   * Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`.
    * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * @deprecated An old name:  write `tooltip`.  It still works until every page is rewritten.
    */
   alt?: string
   /**
-   * `alt`, as the DOM element's property.
-   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
    */
-  "prop:alt"?: string
+  "prop:tooltip"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -1543,6 +1551,182 @@ export interface UIAvatarAttributes {
    */
   "prop:font"?: string
   /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-avatar>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIAvatarJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIAvatarAttributes>, UIAvatarAttributes {}
+
+/** `<ui-breadcrumb>`'s own attributes, from its vocabulary. */
+export interface UIBreadcrumbAttributes {
+  /**
+   * The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.
+   * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
+   */
+  active?: boolean | ""
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: boolean | ""
+  /**
+   * Renders a link (`<a>`) to this level.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Link target, with `link`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -1564,12 +1748,12 @@ export interface UIAvatarAttributes {
   "prop:label"?: string
 }
 
-/** `<ui-avatar>` in JSX:  its own attributes, and HTML's global ones. */
-export interface UIAvatarJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIAvatarAttributes>, UIAvatarAttributes {}
+/** `<ui-breadcrumb>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIBreadcrumbJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIBreadcrumbAttributes>, UIBreadcrumbAttributes {}
 
-/** `<ui-breadcrumb>`'s own attributes, from its vocabulary. */
-export interface UIBreadcrumbAttributes {
+/** `<ui-breadcrumbs>`'s own attributes, from its vocabulary. */
+export interface UIBreadcrumbsAttributes {
   /**
    * Text size, `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
@@ -1776,197 +1960,9 @@ export interface UIBreadcrumbAttributes {
   "prop:label"?: string
 }
 
-/** `<ui-breadcrumb>` in JSX:  its own attributes, and HTML's global ones. */
-export interface UIBreadcrumbJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIBreadcrumbAttributes>, UIBreadcrumbAttributes {}
-
-/** `<ui-breadcrumb-section>`'s own attributes, from its vocabulary. */
-export interface UIBreadcrumbSectionAttributes {
-  /**
-   * The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.
-   * - takes:  flag (present / absent)
-   */
-  selected?: boolean | ""
-  /**
-   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
-   */
-  active?: boolean | ""
-  /**
-   * `selected`, as the DOM element's property.
-   * @deprecated write `selected` -- `prop:` stays only for compiled spell
-   */
-  "prop:selected"?: boolean | ""
-  /**
-   * Renders a link (`<a>`) to this level.  Its old name is `href`.
-   * - takes:  text
-   */
-  link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
-  /**
-   * `link`, as the DOM element's property.
-   * @deprecated write `link` -- `prop:` stays only for compiled spell
-   */
-  "prop:link"?: string
-  /**
-   * Link target, with `link`.
-   * - takes:  text
-   */
-  target?: string
-  /**
-   * `target`, as the DOM element's property.
-   * @deprecated write `target` -- `prop:` stays only for compiled spell
-   */
-  "prop:target"?: string
-  /**
-   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
-   * - takes:  flag (present / absent)
-   */
-  disabled?: boolean | ""
-  /**
-   * `disabled`, as the DOM element's property.
-   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
-   */
-  "prop:disabled"?: boolean | ""
-  /**
-   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
-   * - takes:  flag (present / absent)
-   */
-  loading?: boolean | ""
-  /**
-   * `loading`, as the DOM element's property.
-   * @deprecated write `loading` -- `prop:` stays only for compiled spell
-   */
-  "prop:loading"?: boolean | ""
-  /**
-   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
-   * - takes:  flag (present / absent)
-   */
-  visible?: boolean | ""
-  /**
-   * `visible`, as the DOM element's property.
-   * @deprecated write `visible` -- `prop:` stays only for compiled spell
-   */
-  "prop:visible"?: boolean | ""
-  /**
-   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
-   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
-   */
-  animation?:
-    | "fade"
-    | "fade up"
-    | "fade down"
-    | "fade left"
-    | "fade right"
-    | "scale"
-    | "zoom"
-    | "drop"
-    | "browse"
-    | "browse right"
-    | "fly"
-    | "fly up"
-    | "fly down"
-    | "fly left"
-    | "fly right"
-    | "slide"
-    | "slide up"
-    | "slide down"
-    | "slide left"
-    | "slide right"
-    | "swing"
-    | "swing up"
-    | "swing down"
-    | "swing left"
-    | "swing right"
-    | "horizontal flip"
-    | "vertical flip"
-    | "flash"
-    | "shake"
-    | "bounce"
-    | "tada"
-    | "pulse"
-    | "jiggle"
-    | "glow"
-    | "none"
-  /**
-   * `animation`, as the DOM element's property.
-   * @deprecated write `animation` -- `prop:` stays only for compiled spell
-   */
-  "prop:animation"?:
-    | "fade"
-    | "fade up"
-    | "fade down"
-    | "fade left"
-    | "fade right"
-    | "scale"
-    | "zoom"
-    | "drop"
-    | "browse"
-    | "browse right"
-    | "fly"
-    | "fly up"
-    | "fly down"
-    | "fly left"
-    | "fly right"
-    | "slide"
-    | "slide up"
-    | "slide down"
-    | "slide left"
-    | "slide right"
-    | "swing"
-    | "swing up"
-    | "swing down"
-    | "swing left"
-    | "swing right"
-    | "horizontal flip"
-    | "vertical flip"
-    | "flash"
-    | "shake"
-    | "bounce"
-    | "tada"
-    | "pulse"
-    | "jiggle"
-    | "glow"
-    | "none"
-  /**
-   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
-   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
-   */
-  font?: string
-  /**
-   * `font`, as the DOM element's property.
-   * @deprecated write `font` -- `prop:` stays only for compiled spell
-   */
-  "prop:font"?: string
-  /**
-   * Its tooltip:  the browser's own, written as the element's `title`.
-   * - takes:  text
-   */
-  tooltip?: string
-  /**
-   * `tooltip`, as the DOM element's property.
-   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
-   */
-  "prop:tooltip"?: string
-  /**
-   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
-   * - takes:  text
-   */
-  label?: string
-  /**
-   * `label`, as the DOM element's property.
-   * @deprecated write `label` -- `prop:` stays only for compiled spell
-   */
-  "prop:label"?: string
-}
-
-/** `<ui-breadcrumb-section>` in JSX:  its own attributes, and HTML's global ones. */
-export interface UIBreadcrumbSectionJSXAttributes
-  extends
-    Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIBreadcrumbSectionAttributes>,
-    UIBreadcrumbSectionAttributes {}
+/** `<ui-breadcrumbs>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIBreadcrumbsJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIBreadcrumbsAttributes>, UIBreadcrumbsAttributes {}
 
 /** `<ui-button>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIButtonEventMap {
@@ -13325,15 +13321,19 @@ export interface UIIncludeAttributes {
    */
   "prop:load"?: "eager" | "visible" | "idle"
   /**
-   * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.
+   * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Put the included markup in the element's LIGHT DOM, so the page's stylesheets style it.  Default:  a shadow root, where only inherited values (fonts, colours, `--ui-*` tokens) reach it.
    * - takes:  flag (present / absent)
@@ -18806,15 +18806,19 @@ export interface UIPanelAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -21270,15 +21274,19 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the layout page is used.
+   * With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
@@ -22007,15 +22015,19 @@ export interface UIPropertyGroupEventMap {
 /** `<ui-property-group>`'s own attributes, from its vocabulary. */
 export interface UIPropertyGroupAttributes {
   /**
-   * A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).
+   * A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
@@ -25839,15 +25851,19 @@ export interface UISectionAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
    * - takes:  text
+   */
+  selector?: string
+  /**
+   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
    */
   select?: string
   /**
-   * `select`, as the DOM element's property.
-   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   * `selector`, as the DOM element's property.
+   * @deprecated write `selector` -- `prop:` stays only for compiled spell
    */
-  "prop:select"?: string
+  "prop:selector"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -34210,19 +34226,19 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-avatar": UIAvatarJSXAttributes
       /**
-       * `<ui-breadcrumb>`:  A breadcrumb is used to show hierarchy between content.
-       * - also known as:  crumbs, path, trail, location
-       * - slots:
-       *   - default:  `<ui-breadcrumb-section>`s, in order.
-       */
-      "ui-breadcrumb": UIBreadcrumbJSXAttributes
-      /**
-       * `<ui-breadcrumb-section>`:  A section of a breadcrumb:  a link to a level of the hierarchy, or the current page.
+       * `<ui-breadcrumb>`:  A section of a breadcrumb:  a link to a level of the hierarchy, or the current page.
        * - also known as:  crumb, breadcrumb item
        * - slots:
        *   - default:  The section's text (and an optional `<ui-icon>`).
        */
-      "ui-breadcrumb-section": UIBreadcrumbSectionJSXAttributes
+      "ui-breadcrumb": UIBreadcrumbJSXAttributes
+      /**
+       * `<ui-breadcrumbs>`:  A breadcrumb is used to show hierarchy between content.
+       * - also known as:  crumbs, path, trail, location
+       * - slots:
+       *   - default:  `<ui-breadcrumb>`s, in order.
+       */
+      "ui-breadcrumbs": UIBreadcrumbsJSXAttributes
       /**
        * `<ui-button>`:  A button indicates a possible action.
        * - also known as:  btn, action, submit, link button
@@ -35060,7 +35076,7 @@ declare global {
     "ui-author": HTMLElement
     "ui-avatar": HTMLElement
     "ui-breadcrumb": HTMLElement
-    "ui-breadcrumb-section": HTMLElement
+    "ui-breadcrumbs": HTMLElement
     "ui-button": UIHTMLElement<UIButtonEventMap>
     "ui-buttons": HTMLElement
     "ui-calendar": UIHTMLElement<UICalendarEventMap>

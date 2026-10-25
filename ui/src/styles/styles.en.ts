@@ -185,7 +185,7 @@ export const neutrals = {
 
 /**
  * Foreground candidates for text ON a solid colour, in preference order:  `--ui-<name>-on`.
- * - `StyleGenerator` picks, per colour and per scheme, the FIRST candidate that reaches `ColorContrast.text`
+ * - `StyleGenerator` picks, per colour and per scheme, the FIRST candidate that reaches WCAG AA's text contrast
  *   (4.5:1) on the colour AND every interaction state of it;  failing that, the best one.
  * - White first:  Fomantic put white on every hue, so keep it wherever it passes.
  * - `dark` is the light scheme's ink, emitted as `var(--ui-ink-on-light)` so a re-inked theme follows.

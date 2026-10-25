@@ -1,4 +1,4 @@
-import { UIT } from "spell-ui/core"
+import { E, UIT } from "spell-ui/core"
 
 /****************
  * ### `SearchMatcher`
@@ -41,7 +41,7 @@ export class SearchMatcher {
   search(source: readonly UIT.SearchResult[], query: string): UIT.SearchResult[] {
     const term = this.fold(query.trim())
     if (!term) return []
-    const wordStart = new RegExp(`(?:\\s|^)${term.replace(REGEXP_SPECIALS, "\\$&")}`, "u")
+    const wordStart = new RegExp(`(?:\\s|^)${E.escapeRegExp(term)}`, "u")
     const words = term.split(UIT.WHITESPACE)
     const first: UIT.SearchResult[] = []
     const exact: UIT.SearchResult[] = []
@@ -118,7 +118,7 @@ export class SearchMatcher {
 
   /** `text` compared the configured way:  diacritics stripped, lower-cased. */
   private fold(text: string): string {
-    const plain = this.ignoreDiacritics ? text.normalize("NFD").replace(COMBINING_MARKS, "") : text
+    const plain = this.ignoreDiacritics ? E.withoutAccents(text) : text
     return this.ignoreCase ? plain.toLowerCase() : plain
   }
 
@@ -165,9 +165,3 @@ export type SearchMatcherProps = {
 
 /** Fields searched by default. */
 const DEFAULT_FIELDS = ["title", "description"]
-
-/** Characters to escape in a `RegExp` source. */
-const REGEXP_SPECIALS = /[$()*+./?[\\\]^{|}-]/g
-
-/** Unicode combining diacritical marks. */
-const COMBINING_MARKS = /[̀-ͯ]/g

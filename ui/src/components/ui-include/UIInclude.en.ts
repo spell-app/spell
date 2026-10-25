@@ -25,12 +25,13 @@ export const includeVocabulary = {
   attributes: [
     ...UIT.SourceAttributes,
     {
-      name: "select",
+      name: "selector",
       group: "appearance",
+      replaces: ["select"],
       kind: "string",
       description:
         "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  " +
-        "With it, `save()` saves just that element, by its `id`."
+        "With it, `save()` saves just that element, by its `id`.  Its old name is `select`."
     },
     {
       name: "page-styles",

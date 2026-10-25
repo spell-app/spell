@@ -23,6 +23,7 @@
 import path from "node:path"
 import { parseArgs } from "node:util"
 
+import { kb } from "spell/util/number"
 import { ElementManifests } from "spell-ui/tools/ElementManifests"
 import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
@@ -44,10 +45,10 @@ const outputs: GeneratedOutput[] = [
 
 const stale = writeOrCheck(outputs, { command: "site:data", isCheck: values.check })
 if (!values.check) {
-  const kb = (Buffer.byteLength(outputs[0]![1]) / 1024).toFixed(1)
+  const size = kb(Buffer.byteLength(outputs[0]![1]))
   Terminal.out(
     `site data:  ${data.components.length} component tags + ${data.docs.length} docs tags, ` +
-      `${Object.keys(data.families).length} families, ${kb} KB;  ` +
+      `${Object.keys(data.families).length} families, ${size};  ` +
       (stale.length ? `wrote ${stale.map((file) => path.basename(file)).join(", ")}` : "unchanged")
   )
 }

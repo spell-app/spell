@@ -803,32 +803,32 @@
               <ui-docs-example>
                 <p slot="description">
                   A breadcrumb is used to show hierarchy between content.
-                  <a href="ui-breadcrumb.html">Breadcrumb page</a>
+                  <a href="ui-breadcrumbs.html">Breadcrumb page</a>
                 </p>
-                <ui-breadcrumb aria-label="Breadcrumb demo">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Breadcrumb demo">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
               <ui-docs-example description="Semantic list, token divider">
-                <ui-breadcrumb aria-label="Token divider demo">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
-                <ui-breadcrumb aria-label="Custom divider demo" divider="›">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Token divider demo">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
+                <ui-breadcrumbs aria-label="Custom divider demo" divider="›">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
               <ui-docs-example description="Icon divider">
-                <ui-breadcrumb aria-label="Icon divider demo" divider-icon="chevron right">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#registration">Registration</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>Personal Information</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Icon divider demo" divider-icon="chevron right">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
+                  <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
             </ui-section>
 
@@ -1088,7 +1088,7 @@
             <ui-section id="collections-toolbar" label="Toolbar" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.
+                  A toolbar is a horizontal menu whose items scroll sideways when they don&#39;t fit, with a button at each end while there&#39;s more to see that way.
                   <a href="ui-toolbar.html">Toolbar page</a>
                 </p>
                 <ui-toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
@@ -1685,10 +1685,10 @@
                   >Loading the release notes...</ui-include
                 >
               </ui-docs-example>
-              <ui-docs-example description="One part, with the page's styles">
+              <ui-docs-example description="One part, with the page&#39;s styles">
                 <ui-include
                   source="examples/release-notes.html"
-                  select="#notes"
+                  selector="#notes"
                   page-styles
                 ></ui-include>
               </ui-docs-example>
@@ -1836,7 +1836,7 @@
             <ui-section id="modules-select" label="Select" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  A select lets a user choose a value from a list, with the platform's own picker.
+                  A select lets a user choose a value from a list, with the platform&#39;s own picker.
                   <a href="ui-select.html">Select page</a>
                 </p>
                 <ui-select placeholder="Gender" name="gender">
@@ -2183,7 +2183,7 @@
             <ui-section id="spell-ui-s-own-code" label="Code" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  Code shows a block of source code coloured by its language, from the element's own text or a file on this site.
+                  Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site.
                   <a href="ui-code.html">Code page</a>
                 </p>
                 <ui-code language="typescript">
@@ -2226,7 +2226,7 @@
             <ui-section id="spell-ui-s-own-markdown" label="Markdown" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.
+                  Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site.
                   <a href="ui-markdown.html">Markdown page</a>
                 </p>
                 <ui-markdown source="examples/readme.md" heading-offset="4"></ui-markdown>
@@ -2277,7 +2277,7 @@
             <ui-section id="spell-ui-s-own-root" label="Root" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows them once they're ready.
+                  A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows them once they&#39;re ready.
                   <a href="ui-root.html">Root page</a>
                 </p>
                 <ui-root>

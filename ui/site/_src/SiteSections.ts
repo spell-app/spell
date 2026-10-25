@@ -123,6 +123,14 @@ export class SiteSections {
   ////////////////
 
   /**
+   * Where top-level titles stick, px from the viewport's top (the last measure):  nothing above it is being read
+   * (`SitePatch` keeps the line below it where it is).
+   */
+  get stuckBottom(): number {
+    return this.top
+  }
+
+  /**
    * `main` is the page shown (its first load, or a swap):  restore its folds, set the sticky offsets,
    * and again once its `<ui-root>` is ready (the tabs' bar has drawn).
    * - `isFirst`:  before the sections are defined, so a restored fold just starts folded.

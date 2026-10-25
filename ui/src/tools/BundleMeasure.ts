@@ -7,8 +7,10 @@ import { transform } from "esbuild"
 import * as vite from "vite"
 import type { InlineConfig, Plugin, PluginOption, Rolldown, UserConfig } from "vite"
 
+import { kb } from "spell/util/number"
+import { localDate } from "spell/util/time"
 import {
-  kB,
+  REPORT_DIGITS,
   OwnKinds,
   type Bucket,
   type ChunkSize,
@@ -33,7 +35,7 @@ import { Terminal } from "spell/element-tools/Terminal"
  * - Builds the library IN MEMORY (`write: false`) with the repo's Vite config, entries overridden to the shared
  *   entries (`core`, `forms`) + one per family + the `extra` ones (`api`, `styles`), and attributes every emitted
  *   module to a bucket (`PackageConfig.groups`).
- * - Sizes:  esbuild `transform({ minify: true })`, then gzip level 9;  kB = 1000 bytes.  Each tier is minified
+ * - Sizes:  esbuild `transform({ minify: true })`, then gzip level 9;  KB = 1024 bytes.  Each tier is minified
  *   and gzipped ON ITS OWN, as a page fetches them as separate files, so a scenario is a sum of tiers.
  * - Tiers:
  *   - `library` -- the peer set AS USED:  exactly the bindings `dist/` imports from each peer specifier, bundled
@@ -72,14 +74,18 @@ export class BundleMeasure {
     const folder = this.path(this.config.results)
     mkdirSync(folder, { recursive: true })
     writeFileSync(join(folder, file), `${JSON.stringify(results, null, 2)}\n`)
-    const shared = Object.entries(results.shared ?? {}).map(([name, size]) => `${name} ${kB(size.gzip)}`)
-    const full = results.libraryFull ? ` (full ${kB(results.libraryFull.gzip)})` : ""
-    Terminal.out(`${this.config.name}:  library ${kB(results.library.gzip)}${full}  ${shared.join("  ")} kB`)
+    const shared = Object.entries(results.shared ?? {}).map(([name, size]) => `${name} ${kb(size.gzip, REPORT_DIGITS)}`)
+    const full = results.libraryFull ? ` (full ${kb(results.libraryFull.gzip, REPORT_DIGITS)})` : ""
+    Terminal.out(
+      `${this.config.name}:  library ${kb(results.library.gzip, REPORT_DIGITS)}${full}  ${shared.join("  ")}`
+    )
     for (const [family, own] of Object.entries(results.own)) {
-      Terminal.out(`  own ${family} ${kB(own.gzip)} kB  (+ ${results.families?.[family]?.shared.join(" + ")})`)
+      Terminal.out(
+        `  own ${family} ${kb(own.gzip, REPORT_DIGITS)}  (+ ${results.families?.[family]?.shared.join(" + ")})`
+      )
     }
     for (const [name, scenario] of Object.entries(results.scenarios)) {
-      Terminal.out(`  ${name}:  ${kB(scenario.gzip)} kB`)
+      Terminal.out(`  ${name}:  ${kb(scenario.gzip, REPORT_DIGITS)}`)
     }
     const failed = Object.entries(results.checks).filter(([, value]) => (value as string[]).length)
     for (const [check, ids] of failed) Terminal.err(`  CHECK ${check}:  ${(ids as string[]).join(", ")}`)
@@ -172,7 +178,7 @@ export class BundleMeasure {
     const needs = this.families({ chunks, sharedChunks, library, shared, own })
     const results: MeasureResults = {
       package: config.name,
-      date: new Date().toISOString().slice(0, 10),
+      date: localDate(),
       units: UNITS,
       versions: this.versions(library.specifiers),
       library,
@@ -540,7 +546,7 @@ type ScenariosParams = Pick<FamiliesParams, "library" | "shared" | "own"> & {
 }
 
 /** What `MeasureResults.units` says the numbers mean. */
-const UNITS = "bytes;  min = esbuild minify, gzip = gzip level 9 of min;  kB = 1000 bytes"
+const UNITS = "bytes;  min = esbuild minify, gzip = gzip level 9 of min;  KB = 1024 bytes"
 
 /** Plugins left out of the measured builds, by name. */
 const SKIPPED_PLUGINS = new Set(["vite:dts", "spell-emit-icon-packs"])

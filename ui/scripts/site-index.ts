@@ -17,13 +17,14 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { escapeHTML, slug } from "spell/util/string"
 
 import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
 import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT, spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */
@@ -54,7 +55,7 @@ class ComponentIndexWriter {
     for (const topic of index.topics) {
       lines.push(
         "",
-        `${indent}<ui-header level="2" dividing id="topic-${ComponentIndexWriter.slug(topic.id)}">${escapeHtml(topic.title)}</ui-header>`,
+        `${indent}<ui-header level="2" dividing id="topic-${slug(topic.id)}">${escapeHTML(topic.title)}</ui-header>`,
         `${indent}<ui-cards>`
       )
       for (const row of topic.rows) lines.push(...this.card(tags.get(row.tag)!, `${indent}  `))
@@ -71,10 +72,10 @@ class ComponentIndexWriter {
     const family = this.data.families[tag.folder]
     const status = family?.pages?.[tag.tag]?.status ?? family?.status ?? "done"
     const attributes = [
-      `href="${escapeHtml(ComponentIndexWriter.href(tag))}"`,
-      `header="${escapeHtml(tag.name)}"`,
-      `meta="${escapeHtml(`<${tag.tag}>`)}"`,
-      ...(tag.description ? [`description="${escapeHtml(withoutTicks(tag.description))}"`] : []),
+      `href="${escapeHTML(ComponentIndexWriter.href(tag))}"`,
+      `header="${escapeHTML(tag.name)}"`,
+      `meta="${escapeHTML(`<${tag.tag}>`)}"`,
+      ...(tag.description ? [`description="${escapeHTML(withoutTicks(tag.description))}"`] : []),
       ...(status === "done" ? [] : [`extra="${STATUS_TEXT[status] ?? status}"`])
     ]
     const line = `${indent}<ui-card ${attributes.join(" ")}></ui-card>`
@@ -88,14 +89,6 @@ class ComponentIndexWriter {
    */
   private static href(tag: SiteTag): string {
     return tag.href ?? `${tag.folder}.html#${tag.tag}`
-  }
-
-  /** `date & time` => `date-time`. */
-  private static slug(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
   }
 }
 

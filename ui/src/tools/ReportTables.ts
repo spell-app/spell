@@ -3,9 +3,10 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
+import { kb } from "spell/util/number"
 import type { PerfRecord, PerfResult, PerfStep } from "spell-ui/test-helpers/PerfRun"
 import {
-  kB,
+  REPORT_DIGITS,
   ScenarioNames,
   type LocResults,
   type MeasureChecks,
@@ -119,32 +120,47 @@ export class ReportTables {
       const description = name === "core" ? "element core + foundation JS" : (size.description ?? "shared entry")
       const usedBy =
         name !== "core" ? `;  imported by ${users.map(([family]) => `\`${family}\``).join(", ") || "no family"}` : ""
-      return [`${name} (${description}${usedBy})`, kB(size.min), kB(size.gzip), "eager"]
+      return [`${name} (${description}${usedBy})`, kb(size.min, REPORT_DIGITS), kb(size.gzip, REPORT_DIGITS), "eager"]
     })
     const library = [
-      ["library (as used:  the bindings `dist/` imports)", kB(results.library.min), kB(results.library.gzip), "eager"],
+      [
+        "library (as used:  the bindings `dist/` imports)",
+        kb(results.library.min, REPORT_DIGITS),
+        kb(results.library.gzip, REPORT_DIGITS),
+        "eager"
+      ],
       [
         "library (full:  every export of the peer set)",
-        kB(results.libraryFull.min),
-        kB(results.libraryFull.gzip),
+        kb(results.libraryFull.min, REPORT_DIGITS),
+        kb(results.libraryFull.gzip, REPORT_DIGITS),
         "comparison"
       ]
     ]
     const rows = [
       ...library,
       ...shared,
-      [`own, all ${Object.keys(results.own).length} families`, kB(ownMin), kB(ownGzip), "eager"],
+      [
+        `own, all ${Object.keys(results.own).length} families`,
+        kb(ownMin, REPORT_DIGITS),
+        kb(ownGzip, REPORT_DIGITS),
+        "eager"
+      ],
       ...Object.entries(results.extra ?? {}).map(([name, size]) => [
         `${name} (${EXTRA[name] ?? "extra entry"})`,
-        kB(size.min),
-        kB(size.gzip),
+        kb(size.min, REPORT_DIGITS),
+        kb(size.gzip, REPORT_DIGITS),
         "app only"
       ]),
-      ["runtime (`UIRuntime` + foundation CSS)", kB(results.lazy.runtime.min), kB(results.lazy.runtime.gzip), "lazy"],
+      [
+        "runtime (`UIRuntime` + foundation CSS)",
+        kb(results.lazy.runtime.min, REPORT_DIGITS),
+        kb(results.lazy.runtime.gzip, REPORT_DIGITS),
+        "lazy"
+      ],
       [
         "icons (none bundled:  pack indexes and SVGs are separate files, `notes/icons.md`)",
-        kB(results.lazy.icons.min),
-        kB(results.lazy.icons.gzip),
+        kb(results.lazy.icons.min, REPORT_DIGITS),
+        kb(results.lazy.icons.gzip, REPORT_DIGITS),
         "lazy"
       ],
       // older results files have no `data` tier
@@ -152,14 +168,14 @@ export class ReportTables {
         ? [
             [
               "family data (emoji name chunks, each loaded on its own)",
-              kB(results.lazy.data.min),
-              kB(results.lazy.data.gzip),
+              kb(results.lazy.data.min, REPORT_DIGITS),
+              kb(results.lazy.data.gzip, REPORT_DIGITS),
               "lazy"
             ]
           ]
         : [])
     ]
-    return ReportTables.table(["Tier", "min kB", "min+gz kB", "Loaded"], rows, ["left", "right", "right", "left"])
+    return ReportTables.table(["Tier", "min", "min+gz", "Loaded"], rows, ["left", "right", "right", "left"])
   }
 
   /**
@@ -171,20 +187,20 @@ export class ReportTables {
       const needs = results.families[family] ?? { shared: [], page: 0 }
       return [
         `\`${family}\``,
-        `**${kB(own.gzip)}**`,
-        kB(own.classes.gzip),
-        kB(own.css.gzip),
-        kB(own.vocabulary.gzip),
-        kB(own.fallback.gzip),
+        `**${kb(own.gzip, REPORT_DIGITS)}**`,
+        kb(own.classes.gzip, REPORT_DIGITS),
+        kb(own.css.gzip, REPORT_DIGITS),
+        kb(own.vocabulary.gzip, REPORT_DIGITS),
+        kb(own.fallback.gzip, REPORT_DIGITS),
         needs.shared.join(" + "),
-        kB(needs.page),
-        results.standalone[family] ? kB(results.standalone[family].gzip) : "--"
+        kb(needs.page, REPORT_DIGITS),
+        results.standalone[family] ? kb(results.standalone[family].gzip, REPORT_DIGITS) : "--"
       ]
     })
     return ReportTables.table(
       [
         "Family",
-        "own min+gz kB",
+        "own min+gz",
         "classes",
         "css",
         "vocabulary",
@@ -209,9 +225,14 @@ export class ReportTables {
     const rows = ScenarioNames.map((name) => {
       const scenario = results.scenarios[name]
       const before = standalone[name]
-      return [name, ReportTables.parts(scenario.parts), `**${kB(scenario.gzip)}**`, before ? kB(before.gzip) : "--"]
+      return [
+        name,
+        ReportTables.parts(scenario.parts),
+        `**${kb(scenario.gzip, REPORT_DIGITS)}**`,
+        before ? kb(before.gzip, REPORT_DIGITS) : "--"
+      ]
     })
-    return ReportTables.table(["Scenario", "Adds up", "shared runtime min+gz kB", "standalone build"], rows, [
+    return ReportTables.table(["Scenario", "Adds up", "shared runtime min+gz", "standalone build"], rows, [
       "left",
       "left",
       "right",

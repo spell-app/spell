@@ -1,3 +1,4 @@
+import { E } from "spell-ui/core"
 import { LIST_SPLIT } from "./UIProgress.types"
 
 /****************
@@ -42,7 +43,7 @@ export class ProgressValues {
       : values.length
         ? values.map((value) => (total ? (value / total) * 100 : value))
         : [0]
-    percents = percents.map((percent) => Math.min(100, Math.max(0, percent)))
+    percents = percents.map((percent) => E.clamp(percent, 0, 100))
     const sum = percents.reduce((a, b) => a + b, 0)
     if (sum > 100) percents = percents.map((percent) => (percent * 100) / sum)
     this.precision = precision

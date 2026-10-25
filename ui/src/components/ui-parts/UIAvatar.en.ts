@@ -25,10 +25,13 @@ export const avatarVocabulary = {
   attributes: [
     { name: "src", group: "link", kind: "string", description: "Image URL;  renders the `<img>` (or slot one)." },
     {
-      name: "alt",
+      name: "tooltip",
       group: "content",
       kind: "string",
-      description: 'Alternative text;  default `""` (decorative, the name is nearby).'
+      replaces: ["alt"],
+      description:
+        "Who it is:  the picture's tooltip and its alternative text for screen readers.  " +
+        "Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`."
     }
   ],
   events: [],

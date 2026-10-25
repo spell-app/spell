@@ -113,7 +113,7 @@ export class MenuOptions {
     if (!delta) return from
     const step = delta > 0 ? 1 : -1
     const origin = from < 0 || from >= length ? (step > 0 ? -1 : length) : from
-    const target = wrap ? MenuOptions.wrap(origin + delta, length) : Math.max(0, Math.min(length - 1, origin + delta))
+    const target = wrap ? MenuOptions.wrap(origin + delta, length) : E.clamp(origin + delta, 0, length - 1)
     for (let index = target, tries = 0; tries < length; tries++) {
       if (!list[index].disabled) return index
       index += step
@@ -203,7 +203,7 @@ export class MenuOptions {
 
   /** `query` folded the same way as the keys it's compared with. */
   private normalize(query: string, { ignoreCase, ignoreDiacritics }: Folding) {
-    const text = ignoreDiacritics ? MenuOptions.deburr(query) : query
+    const text = ignoreDiacritics ? E.withoutAccents(query) : query
     return ignoreCase ? text.toLowerCase() : text
   }
 
@@ -216,7 +216,7 @@ export class MenuOptions {
     const origins: number[] = []
     let index = 0
     for (const char of text) {
-      let piece = ignoreDiacritics ? MenuOptions.deburr(char) : char
+      let piece = ignoreDiacritics ? E.withoutAccents(char) : char
       if (ignoreCase) piece = piece.toLowerCase()
       for (let unit = 0; unit < piece.length; unit++) origins.push(index)
       folded += piece
@@ -233,12 +233,12 @@ export class MenuOptions {
   private key(option: E.MenuOption, field: E.MenuSearchField, { ignoreCase, ignoreDiacritics }: Folding) {
     if (!ignoreCase) {
       const raw = field === "text" ? option.text : String(option.value)
-      return ignoreDiacritics ? MenuOptions.deburr(raw) : raw
+      return ignoreDiacritics ? E.withoutAccents(raw) : raw
     }
     const keys = this.keysFor(option)
     if (!ignoreDiacritics) return keys[field]
-    if (field === "text") return (keys.plainText ??= MenuOptions.deburr(keys.text))
-    return (keys.plainValue ??= MenuOptions.deburr(keys.value))
+    if (field === "text") return (keys.plainText ??= E.withoutAccents(keys.text))
+    return (keys.plainValue ??= E.withoutAccents(keys.value))
   }
 
   ////////////////
@@ -270,11 +270,6 @@ export class MenuOptions {
       if (!position) return false
     }
     return true
-  }
-
-  /** Strip combining marks after NFD, as Fomantic's `remove.diacritics()`:  `Café` => `Cafe`.  Static:  pure. */
-  private static deburr(text: string) {
-    return text.normalize("NFD").replace(COMBINING_MARKS, "")
   }
 }
 
@@ -313,6 +308,3 @@ const TYPE_AHEAD: Folding = { ignoreCase: true, ignoreDiacritics: true }
 
 /** One character typed more than once, e.g. `aaa`. */
 const REPEATED_CHARACTER = /^(.)\1+$/su
-
-/** Unicode combining diacritical marks. */
-const COMBINING_MARKS = /[\u0300-\u036f]/g

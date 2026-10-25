@@ -67,7 +67,7 @@
 
               <ui-section id="examples-types-one-part" label="One part" sticky collapsible dividing>
                 <ui-docs-example description="`select` shows only the first element a CSS selector matches.">
-                  <ui-include source="examples/release-notes.html" select="#notes"></ui-include>
+                  <ui-include source="examples/release-notes.html" selector="#notes"></ui-include>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -87,7 +87,7 @@
                 <ui-docs-example
                   description="`page-styles` puts the included markup in the element's light DOM, where the page's stylesheets style it."
                 >
-                  <ui-include source="examples/release-notes.html" select="#notes" page-styles></ui-include>
+                  <ui-include source="examples/release-notes.html" selector="#notes" page-styles></ui-include>
                 </ui-docs-example>
               </ui-section>
 
@@ -101,10 +101,10 @@
                 <ui-docs-example
                   description='`load="visible"` waits until the include scrolls into view;  `idle` until the browser has nothing else to do.  Like Astro&apos;s islands.'
                 >
-                  <ui-include source="examples/release-notes.html" select="#aside" load="visible"
+                  <ui-include source="examples/release-notes.html" selector="#aside" load="visible"
                     >Waiting to be scrolled into view...</ui-include
                   >
-                  <ui-include source="examples/release-notes.html" select="#aside" load="idle"
+                  <ui-include source="examples/release-notes.html" selector="#aside" load="idle"
                     >Waiting for the browser to be idle...</ui-include
                   >
                 </ui-docs-example>

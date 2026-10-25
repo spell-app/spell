@@ -68,7 +68,8 @@ export class PerfRun {
     writeFile: (path: string, content: string) => Promise<unknown>,
     path: string
   ) {
-    const full: PerfRecord = { ...record, date: new Date().toISOString().slice(0, 10) }
+    // the LOCAL date, `YYYY-MM-DD` (`en-CA`'s form):  `spell/util/time`'s `localDate()`, but this file imports nothing
+    const full: PerfRecord = { ...record, date: new Date().toLocaleDateString("en-CA") }
     await writeFile(path, `${JSON.stringify(full, null, 2)}\n`)
   }
 
