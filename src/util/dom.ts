@@ -61,6 +61,44 @@ export function nextFrame(): Promise<number> {
   return new Promise((resolve) => requestAnimationFrame(resolve))
 }
 
+////////////////
+// ## Clipboard
+////////////////
+
+/**
+ * Put `text` on the clipboard;  true when it got there.
+ * - the browser's clipboard call first
+ * - where that's refused (VS Code's side bar, a webview without the permission):
+ *   the old `execCommand("copy")` from a hidden textarea
+ * - The one copy every repo's pages share:  Spell UI's code block and theme editor, the brand's colour pickers,
+ *   the epic pages.
+ * - NEVER throws
+ */
+export async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    try {
+      const area = document.createElement("textarea")
+      area.value = text
+      area.setAttribute("readonly", "")
+      area.style.cssText = "position: fixed; opacity: 0; pointer-events: none"
+      document.body.append(area)
+      area.select()
+      const copied = document.execCommand("copy")
+      area.remove()
+      return copied
+    } catch {
+      return false
+    }
+  }
+}
+
+////////////////
+// ## Custom elements
+////////////////
+
 /**
  * Resolve with the class for custom element `tag` once it's defined -- immediately if it already is.
  * - Thin cover over `customElements.whenDefined()` so callers needn't know about the registry,

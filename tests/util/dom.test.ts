@@ -1,6 +1,14 @@
-import { afterEach, describe, expect, it } from "vite-plus/test"
+import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { closestAcrossShadow, flatParentFor, isBrowser, nextFrame, NodeType, whenDefined } from "spell/util/dom"
+import {
+  closestAcrossShadow,
+  copyText,
+  flatParentFor,
+  isBrowser,
+  nextFrame,
+  NodeType,
+  whenDefined
+} from "spell/util/dom"
 
 /** Unique tag per test, since `customElements.define()` can't be undone. */
 let tagCount = 0
@@ -22,6 +30,36 @@ describe("nextFrame()", () => {
   it("resolves with a frame timestamp", async () => {
     const time = await nextFrame()
     expect(typeof time).toBe("number")
+  })
+})
+
+describe("copyText()", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("uses the browser's clipboard call when it's allowed", async () => {
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
+    expect(await copyText("hello")).toBe(true)
+    expect(writeText).toHaveBeenCalledWith("hello")
+  })
+
+  it("falls back to a hidden textarea when the browser REFUSES, and leaves nothing behind", async () => {
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(new DOMException("denied", "NotAllowedError"))
+    const execCommand = vi.spyOn(document, "execCommand").mockImplementation((command) => {
+      expect(command).toBe("copy")
+      expect(document.activeElement).toMatchObject({ value: "side bar" })
+      return true
+    })
+    expect(await copyText("side bar")).toBe(true)
+    expect(execCommand).toHaveBeenCalledOnce()
+    expect(document.querySelector("textarea")).toBeNull()
+  })
+
+  it("is false, NEVER a throw, when both ways fail", async () => {
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(new Error("no"))
+    vi.spyOn(document, "execCommand").mockReturnValue(false)
+    expect(await copyText("x")).toBe(false)
   })
 })
 

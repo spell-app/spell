@@ -201,7 +201,8 @@ What `/coherence sweep` reads, an agent each.
 - **Copies:**
   - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
   - the app's runner:  four, asking for `cache: "no-cache"`, which `$fetch()` has no option for yet
-  - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it keeps its own small fetches
+  - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
+    instead ("In Spell UI", below)
 
 ### Remembering a preference
 
@@ -306,11 +307,63 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### Arrow keys through a list
 
-- **It is:**  `RovingTabindex` (`spell-ui/src/runtime/RovingTabindex.ts`), through `UI.focus.roving()`
+- **It is:**  `RovingTabindex` (`spell-ui/src/runtime/RovingTabindex.ts`):
+  `UI.focus.roving()` attached for an element's life (menus, tabs), `UI.focus.arrowKey()` for one key press from a
+  JSX `onKeyDown`;  `tabindex: "left alone"` when the items' tab stops are the caller's (the accordion's titles)
 - **Use it when:**  arrows, Home and End move through items:  a tab list, a radio group, a rating, swatches.
 - **Flag:**  `Key\.(arrow\w+|home|end)\b`
-- **Copies:**  five (the accordion, markdown's tab list, the radio group, the rating, the theme editor's swatches)
-  - Fine:  `UICalendar`'s grid, on purpose, as its docs say.
+- **Copies:**  `--` since epic `coherence` P10 (the accordion, markdown's tab list, the radio group, the rating, the
+  theme editor's swatches)
+  - Fine:  `UICalendar`'s grid and the icon picker's, on purpose:  they step by rows of a grid.
+  - Fine:  the dropdown's and the search's arrows move a highlight, not focus ("The highlighted option", below);
+    the slider's change its value.
+  - Not swept yet:  the docs' search and themes (`UIDocsSearch`, `UIDocsThemes`), the brand's `BrandColorSet`.
+
+### The highlighted option of a list
+
+- **It is:**  `F.HighlightedOption` (`spell-ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a
+  control's list shows (`aria-activedescendant`), stepping as `MenuOptions.nextEnabledIndexIn()`
+- **Use it when:**  a control opens a list whose arrows move a highlight while focus stays in the field:
+  the dropdown, the search, the icon picker.
+- **Flag:**  `highlightedIndex|activedescendant`
+- **Copies:**  `--` since epic `coherence` P10;  not swept yet:  the docs' search (`UIDocsSearch`)
+
+### Loading once per key
+
+- **It is:**  `LoadOnce` (`spell-ui/util`, `spell-ui/src/util/LoadOnce.ts`):  `get(key, load)`, every caller the same
+  promise;  a failure `kept`, `forgotten`, or `forgotten offline`
+- **Use it when:**  a family's import, a pack's script, a language, an icon's SVG, a source file:  anything loaded once
+  per page.
+- **Flag:**  `Map<string, Promise`
+- **Copies:**  `--` since epic `coherence` P10 (Sources, IconPacks, ComponentPacks, RootLoader's two, EmojiData,
+  CodeHighlighter)
+  - Fine:  `ComponentPacks.defining` (what's running now, not a load), spell-epic's `ReviewClient.asking`,
+    the kit's `PrefStore` (writes in flight)
+
+### Fetching in Spell UI
+
+- **It is:**  `fetchOk()` / `fetchText()` (`spell-ui/src/runtime/runtime.types.ts`):  an OK answer, else the
+  caller's own typed error (`SourceError`, `ApiError` ...)
+- **Use it when:**  Spell UI's runtime fetches;  everywhere else, `$fetch()` (above).
+- **Flag:**  `response\.ok` in `spell-ui/src`
+- **Copies:**  `--` since epic `coherence` P10 (`Api`, `AppStylesheet`, `Sources`, `IconPacks`)
+
+### A fallback's events
+
+- **It is:**  `NativeFallback.send()` (`spell-ui/src/elements/NativeFallback.ts`):  a native fallback's event, named in
+  the page's language and cancelable, as the component's own `send()`
+- **Flag:**  `new CustomEvent` in a `*.fallback.ts`
+- **Copies:**  `--` since epic `coherence` P10 (Spell UI's nine fallbacks, the brand's two)
+
+### A form control's attributes
+
+- **It is:**  `UIT.FormControlAttributes` / `UIT.FormControlStates` (`spell-ui/src/components/components.types.ts`):
+  `name`, `required`, `readonly`, `placeholder`;  the `readonly` and `invalid` states;  ONE shape each
+- **Use it when:**  a vocabulary of a control with a value:  take them by name, its own `description` where it says
+  more.
+- **Flag:**  `name: "readonly"` in a vocabulary
+- **Copies:**  the brand's two controls (`BrandColorPicker.en.ts`, `BrandComposer.en.ts`);  `<ui-field>`'s and the
+  property editor's `readonly` are their own (a group's, reaching each field)
 
 ### A keyboard shortcut
 
@@ -339,6 +392,23 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Use it when:**  following the scroll, or turning an address's `#hash` into a section.
 - **Copies:**  the docs pages' runtime and the comments' entry (sweep 1, epic-pages #4;  ui-docs-tools #3)
 
+### Copying, with VS Code's side bar
+
+- **It is:**  `copyText()` (`spell/util`, `src/util/dom.ts`):  the browser's clipboard call, else the old
+  `execCommand("copy")` VS Code's side bar still allows;  and Spell UI's `E.ClipboardCopy`
+  (`spell-ui/src/elements/ClipboardCopy.ts`) for a copy button:  the copy, then "Copied" for a moment
+- **Flag:**  `navigator\.clipboard\.writeText`
+- **Copies:**  `--` since epic `coherence` P10 (Spell UI's code block and theme editor, the brand's colour picker and
+  swatch, the epic pages' `Clipboard`)
+  - Left:  the parked goals page (`goals-live.js`), read only
+
+### A toast
+
+- **It is:**  `UI.toast({ message })` (`spell-ui/src/components/ui-toast/ToastStack.ts`):  bottom right, with its
+  type's icon, by default (epic `coherence` P10)
+- **Flag:**  `position: "bottom right"|showIcon: true`
+- **Copies:**  `--`;  left:  the parked goals page (`goals-live.js`)
+
 ### A file a script writes, kept current
 
 - **It is:**  `writeOrCheck()`, `spliceGenerated()` (`spell-ui/src/tools/generatedFiles.ts`)
@@ -346,13 +416,6 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Copies:**  five, in spell-epic, the brand, the app and the kit (sweep 1, ui-docs-tools #7):  to move into the kit
 
 ## In spell-epic and the parser
-
-### Clipboard, with VS Code's side bar
-
-- **It is:**  `Clipboard` (`spell-epic/src/components/epic-page/Clipboard.ts`):  falls back where the side bar refuses
-  the clipboard
-- **Flag:**  `navigator\.clipboard\.writeText`
-- **Copies:**  four bare ones, in Spell UI and the brand:  it should move down into Spell UI
 
 ### A growing text box
 
@@ -439,7 +502,6 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 Mechanisms with several copies and no shared one yet:  each a fix for a later phase, or for the epic that owns the
 code (epic `coherence`, Q4 and Q5).
 
-- **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
 - **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
   - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
