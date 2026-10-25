@@ -31,6 +31,13 @@ describe("nextFrame()", () => {
     const time = await nextFrame()
     expect(typeof time).toBe("number")
   })
+
+  it("waits `count` frames", async () => {
+    const frame = vi.spyOn(window, "requestAnimationFrame")
+    await nextFrame(3)
+    expect(frame).toHaveBeenCalledTimes(3)
+    frame.mockRestore()
+  })
 })
 
 describe("copyText()", () => {

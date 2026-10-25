@@ -384,14 +384,25 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### The next frame
 
-- **It is:**  `nextFrame()` (`spell/util`, `src/util/dom.ts`)
-- **Copies:**  three in Spell UI's site and tools
+- **It is:**  `nextFrame(count)` (`spell/util`, `src/util/dom.ts`):  after one frame, or `count` (epic `coherence` P11)
+- **Flag:**  `new Promise\(\(resolve\) => requestAnimationFrame`
+- **Copies:**  `--` since P11 (Spell UI's site sections and visual fixture, the docs pages' `nextFrames()`, the comments'
+  `nextFrame()`)
+  - Left:  `PerfRun`'s own, on purpose:  it has no imports (served as plain JS)
 
 ### The section being read;  landing on a link
 
-- **It is:**  `TocIndex` (`spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`):  `current()`, `decode()`, `slug()`
-- **Use it when:**  following the scroll, or turning an address's `#hash` into a section.
-- **Copies:**  the docs pages' runtime and the comments' entry (sweep 1, epic-pages #4;  ui-docs-tools #3)
+- **It is:**  `TocIndex` (`spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`):  `current()`, `reached()`, `decode()`,
+  `slug()`;  and `HashLanding` beside it (epic `coherence` P11):  landing on a `#hash` below the stuck titles
+  - a landing:  the page ready, its pane shown and folds opened, the scroll to its line, once more as it settles unless
+    the reader moved;  one per document, a newer landing stops an older one
+  - a page with stuck bars of its own lands its hashes itself, by its rules (`use()`):  the site's `SiteSections`, the
+    epic pages' runtime;  `<ui-docs-toc>` and `<ui-docs-api>` then leave them to it, so the page scrolls once
+- **Use it when:**  following the scroll, turning an address's `#hash` into a section, or landing a link.
+- **Flag:**  `scrollIntoView\(|hasReaderMoved`
+- **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime)
+  - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
+  - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
 ### Copying, with VS Code's side bar
 
@@ -412,9 +423,25 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### A file a script writes, kept current
 
-- **It is:**  `writeOrCheck()`, `spliceGenerated()` (`spell-ui/src/tools/generatedFiles.ts`)
+- **It is:**  `writeOrCheck()`, `spliceGenerated()` (`spell/element-tools/generatedFiles`, `src/element-tools/generatedFiles.ts`;
+  epic `coherence` P11, from Spell UI's)
 - **Use it when:**  a script writes a file, or a block of one, that `--check` must find unchanged.
-- **Copies:**  five, in spell-epic, the brand, the app and the kit (sweep 1, ui-docs-tools #7):  to move into the kit
+- **Flag:**  `stale:  .*yarn|readOrEmpty`
+- **Copies:**  `--` since P11 (spell-epic's and the brand's site data, the app's site data, examples README and
+  grammar, the kit's `mermaid:pretty`)
+
+### A page bundle's build
+
+- **It is:**  the kit's `Bundle` (`spell/server`, `src/server/Bundle.ts`):  `clearOutput()`, `linkIconPacks()`,
+  `sizeReport()`, a build script's steps (epic `coherence` P11)
+- **Use it when:**  a script builds a bundle the page server serves.
+- **Copies:**  `--` since P11 (Spell UI's site bundle, the brand's build)
+
+### A component set's data
+
+- **It is:**  Spell UI's `SiteDataBuilder` (`spell-ui/src/tools/SiteDataBuilder.ts`), its `set` and `forSet()`
+  (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
+- **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
 
 ## In spell-epic and the parser
 

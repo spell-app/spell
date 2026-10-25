@@ -7,7 +7,8 @@
  *     in its kind, by what its id or label names (`kindFor()`)
  * - Idempotent:  a block it already styled is restyled, never styled twice;  everything it adds sits on the
  *   directive line and below the `%% the Spell look` line, which it drops and writes again.
- * - Node 24 runs it as is (its types stripped):  node's own modules only, as `tools/repos.ts`.
+ * - Node 24 runs it as is (its types stripped):  node's own modules, and the kit's files by their `.ts` names.
+ * - Writes through the kit's `writeOrCheck()`:  only the pages it changed, or under `--check` none.
  *
  * ```sh
  * yarn mermaid:pretty                  # every page the README check walks
@@ -16,8 +17,10 @@
  * yarn mermaid:pretty --check          # change nothing;  exit 1 if a block isn't styled as it would be
  * ```
  */
-import { readFileSync, writeFileSync } from "node:fs"
-import { relative, resolve } from "node:path"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+
+import { writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles.ts"
 
 import { ReadmeCheck } from "./readme-check.ts"
 
@@ -76,20 +79,14 @@ export class MermaidPretty {
   /** The command line:  `node tools/mermaid-pretty.ts [--dark] [--check] [file ...]`;  the exit status. */
   static main(args: string[]): number {
     const pretty = new MermaidPretty(args.includes("--dark") ? "dark" : "light")
-    const check = args.includes("--check")
+    const isCheck = args.includes("--check")
     const names = args.filter((arg) => !arg.startsWith("--"))
     const files = names.length ? names.map((name) => resolve(process.cwd(), name)) : new ReadmeCheck().pages()
-    const changed: string[] = []
-    for (const file of files) {
-      const text = readFileSync(file, "utf8")
-      const styled = pretty.page(text)
-      if (styled === text) continue
-      changed.push(file)
-      if (!check) writeFileSync(file, styled)
-    }
-    for (const file of changed) console.log(`${check ? "not styled" : "styled"}  ${relative(process.cwd(), file)}`)
-    console.log(`${files.length} files, ${changed.length} ${check ? "not styled" : "restyled"}`)
-    return check && changed.length ? 1 : 0
+    const outputs = files.map((file): GeneratedOutput => [file, pretty.page(readFileSync(file, "utf8"))])
+    const changed = writeOrCheck(outputs, { command: "mermaid:pretty", isCheck })
+    if (!isCheck) for (const name of changed) console.log(`styled  ${name}`)
+    console.log(`${files.length} files, ${changed.length} ${isCheck ? "not styled" : "restyled"}`)
+    return isCheck && changed.length ? 1 : 0
   }
 }
 

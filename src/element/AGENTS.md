@@ -88,6 +88,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     (`spell/element-tools/BrowserPage`, an entry of its own), and it imports Playwright only when it launches
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
+  - [generatedFiles](../element-tools/generatedFiles.ts):  every repo's scripts that write generated files
+    (epic `coherence` P11):  `writeOrCheck()` writes only what changed, or under `--check` fails on it;
+    `spliceGenerated()` puts a block between two markers of a hand-kept page;  plain `node` loads it
   - [jsx-help/](../element-tools/jsx-help/):
     the elements help, which completes and checks slot, part and dashed-attribute names in JSX
     (epic `intellisense` P5, P7;  [README-element.md](../../README-element.md), "The elements help")

@@ -1,8 +1,22 @@
 import { spawnSync, type StdioOptions } from "node:child_process"
 import { createHash } from "node:crypto"
-import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, relative, resolve, sep } from "node:path"
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs"
+import { basename, dirname, join, posix, relative, resolve, sep } from "node:path"
+import { gzipSync } from "node:zlib"
 
+import { kb } from "spell/util/number"
 import { SRV } from "spell/server"
 import { pageServerSettings } from "spell/server/page/settings"
 import { packageRootFor } from "spell/toolchain/sourceNames"
@@ -19,6 +33,8 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
  *   (`Bundle.specs()`)
+ * - Its build scripts share their steps through it (`clearOutput()`, `linkIconPacks()`, `sizeReport()`):
+ *   Spell UI's site bundle and the brand's.
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`SRV.BUNDLES`), found through the checkout's
  *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
  */
@@ -209,6 +225,78 @@ export class Bundle {
     }
   }
 
+  ////////////////
+  // ## A build script's steps
+  ////////////////
+
+  /**
+   * Empty `folder` for a fresh build, so a removed chunk doesn't linger:  everything but the icon packs' link
+   * (`linkIconPacks()`), the build record too;  makes it when missing.
+   * - SIDE EFFECT:  deletes files
+   */
+  static clearOutput(folder: string): void {
+    mkdirSync(folder, { recursive: true })
+    for (const entry of readdirSync(folder)) {
+      if (entry !== ICON_PACKS) rmSync(join(folder, entry), { recursive: true, force: true })
+    }
+  }
+
+  /**
+   * Link Spell UI's icon packs (its `src/icons/icon-packs`, ~8.7 MB, ~2,200 SVGs) into `folder` as `icon-packs`,
+   * unless it's linked there already.
+   * - A LINK, never a copy:  committing the packs twice would double them in every clone.
+   *   The page server follows it;  a static deploy must copy through it (`cp -RL`).
+   * - Relative, so the repos can move together;  Spell UI found as a package, wherever its repo is.
+   * - A link left from another layout (the monorepo's `../../../ui/...`) is pointed again.
+   * - throws when Spell UI isn't installed, or the link leads to no folder
+   * - SIDE EFFECT:  makes or replaces the link
+   */
+  static linkIconPacks(folder: string): void {
+    const spellUI = packageRootFor("spell-ui", folder)
+    if (!spellUI) throw new Error(`Bundle.linkIconPacks():  spell-ui isn't installed where ${folder} finds packages`)
+    const link = join(folder, ICON_PACKS)
+    const target = relative(canonical(folder), join(spellUI, "src", "icons", ICON_PACKS))
+    if (isLink(link) && readlinkSync(link) !== target) rmSync(link)
+    if (!existsSync(link) && !isLink(link)) symlinkSync(target, link, "dir")
+    if (!statSync(link).isDirectory()) {
+      throw new Error(`Bundle.linkIconPacks():  ${link} doesn't lead to the icon packs;  delete it, and build again`)
+    }
+  }
+
+  /**
+   * The lines that report the sizes of the bundle built in `folder`:  its eager files, the totals, the biggest lazy
+   * chunks;  raw and gzipped, in `kb()`.
+   * - eager:  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before any
+   *   `import()`)
+   * - counted:  every file under `folder` but the icon packs and dot files (the build record), or only those `only`
+   *   matches
+   */
+  static sizeReport({ name, folder, seconds, entries, only }: SRV.BundleSizeParams): string[] {
+    const files = filesUnder(folder).filter((file) => !only || only.test(file))
+    const sizes = files.map((file) => {
+      const bytes = readFileSync(join(folder, file))
+      return { file, raw: bytes.length, gzip: gzipSync(bytes).length }
+    })
+    const eagerFiles = new Set<string>()
+    for (const entry of entries) {
+      if (entry.endsWith(".js")) staticGraph(folder, entry, eagerFiles)
+      else eagerFiles.add(entry)
+    }
+    const eager = sizes.filter((size) => eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
+    const lazy = sizes.filter((size) => !eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
+    const sum = (list: readonly FileSize[], key: "raw" | "gzip") => list.reduce((total, size) => total + size[key], 0)
+    return [
+      `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
+      ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
+      `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))});  all ${files.length} files ` +
+        `${kb(sum(sizes, "raw"))} (gz ${kb(sum(sizes, "gzip"))}), icon packs linked`,
+      `  biggest lazy:  ${lazy
+        .slice(0, 6)
+        .map((size) => `${size.file} ${kb(size.raw)}`)
+        .join(", ")}`
+    ]
+  }
+
   /** what its last build recorded;  `undefined` when never built, or unreadable */
   record(): SRV.BundleRecord | undefined {
     try {
@@ -242,3 +330,40 @@ function canonical(path: string): string {
  * (each bundle LINKS Spell UI's `src/icons/icon-packs`, never bundles it).
  */
 const SKIPPED = /^(\..*|node_modules|__snapshots__|icon-packs|.*\.test\.[cm]?[jt]sx?)$/
+
+/** The icon packs' link in a bundle's output folder:  the one entry a fresh build keeps. */
+const ICON_PACKS = "icon-packs"
+
+/** A static `import ... from "./x.js"` / `import "./x.js"` in minified output (never `import("./x.js")`). */
+const STATIC_IMPORT = /(?:^|[;}\n])\s*(?:import|export)(?:[^"'();]*?from)?\s*["'](\.\.?\/[^"']+)["']/g
+
+/** Is `file` a symlink (even a broken one)? */
+function isLink(file: string): boolean {
+  try {
+    return lstatSync(file).isSymbolicLink()
+  } catch {
+    return false
+  }
+}
+
+/** Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs), nor a dot file. */
+function filesUnder(folder: string, prefix = ""): string[] {
+  return readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isSymbolicLink() || entry.name.startsWith(".")) return []
+    const name = `${prefix}${entry.name}`
+    return entry.isDirectory() ? filesUnder(join(folder, entry.name), `${name}/`) : [name]
+  })
+}
+
+/** Add `entry` (in `folder`) and every chunk it imports STATICALLY, transitively, to `seen`. */
+function staticGraph(folder: string, entry: string, seen: Set<string>): void {
+  if (seen.has(entry) || !existsSync(join(folder, entry))) return
+  seen.add(entry)
+  const code = readFileSync(join(folder, entry), "utf8")
+  for (const match of code.matchAll(STATIC_IMPORT)) {
+    staticGraph(folder, posix.join(posix.dirname(entry), match[1]!), seen)
+  }
+}
+
+/** One file's size, raw and gzipped, bytes. */
+type FileSize = { file: string; raw: number; gzip: number }
