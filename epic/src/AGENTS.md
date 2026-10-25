@@ -61,6 +61,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A piece several families draw is a family of its own.
     - It's drawn in their shadow roots, and never written in a doc.
     - Those pieces:  `<epic-review>`, `<epic-new-item>`, `<epic-agents>`, `<epic-thread-message>`.
+  - `<epic-zoom>` (epic `epic-engine` I129):  a screenshot full size over the page, ONE per page, made at the end of
+    `<body>` by `ImageZoom` (`spell-epic/components/epic-zoom/ImageZoom`), never written in a page.
+    - `ImageZoom` is plain DOM:  the docs runtime imports that leaf alone (the barrel would bundle the element), and
+      `<epic-field>`'s request thumbnails call it;  its docstring has the rule for which images open.
     - Each family that draws one imports its barrel first,
       so it's defined wherever they are.
     - Unless it can't be a tag.

@@ -2184,6 +2184,40 @@
           "title": "6. Written by"
         }
       ]
+    },
+    {
+      "path": "epic-zoom.html",
+      "title": "<epic-zoom>",
+      "summary": "The <epic-zoom> element: a screenshot shown full size over the page, Escape to close.",
+      "tag": "epic-zoom",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "epic-zoom-which",
+          "title": "Which images open",
+          "parent": 1
+        },
+        {
+          "id": "3-attributes",
+          "title": "3. Attributes"
+        },
+        {
+          "id": "epic-zoom-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
+        }
+      ]
     }
   ]
 }

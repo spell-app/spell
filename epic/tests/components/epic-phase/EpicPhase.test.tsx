@@ -267,7 +267,7 @@ describe("<epic-field> requests", () => {
     ])
   })
 
-  test("its screenshot is a thumbnail;  a click shows it full size in a modal, not its link;  Escape closes it", async () => {
+  test("its screenshot is a thumbnail;  a click shows it full size in the page's <epic-zoom>, not its link;  Escape closes it", async () => {
     const request = await renderRequest()
     request.setAttribute("open", "")
     await ElementFixture.tick()
@@ -284,15 +284,19 @@ describe("<epic-field> requests", () => {
     await ElementFixture.tick()
     // the link isn't followed:  the click's default is prevented
     expect(followed).toHaveReturnedWith(true)
-    const modal = request.shadowRoot!.querySelector<E.DOMElement>('[part~="zoom"]')!
+    // the page's ONE zoom (`ImageZoom`), made at the end of `<body>`
+    const zoom = document.querySelector<E.DOMElement>("body > epic-zoom")!
+    await zoom.ready
+    const modal = zoom.shadowRoot!.querySelector<E.DOMElement>('[part~="base"]')!
     await modal.ready
     await ElementFixture.tick()
     expect(modal.hasAttribute("visible")).toBe(true)
-    const zoomed = request.shadowRoot!.querySelector<HTMLImageElement>("img.zoomed")!
+    const zoomed = zoom.shadowRoot!.querySelector<HTMLImageElement>('[part~="image"]')!
     expect([zoomed.src === image.src, zoomed.alt]).toEqual([true, "r31, screenshot 1, full size"])
     await userEvent.keyboard("{Escape}")
     await vi.waitFor(() => expect(modal.hasAttribute("visible")).toBe(false))
-    expect(request.shadowRoot!.querySelector("img.zoomed")).toBeNull()
+    expect([zoom.hasAttribute("src"), zoom.shadowRoot!.querySelector('[part~="image"]')]).toEqual([false, null])
+    zoom.remove()
   })
 })
 
