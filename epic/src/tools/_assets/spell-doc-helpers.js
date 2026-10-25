@@ -209,9 +209,7 @@ export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
     window.SpellUI.UI.toast({
       message,
       type,
-      position: "bottom right",
       displayTime,
-      showIcon: true,
       ...(buttons && { actions: buttons, classActions: TOAST_ACTIONS })
     })
   } catch {

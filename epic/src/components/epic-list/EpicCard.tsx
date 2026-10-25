@@ -199,7 +199,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   private toast(key: "starFailed" | "unstarFailed", epic: string, error: string) {
     const message = this.translationForKey(key, { epic, error })
     if (!E.DOMElement.isAttached("ui-toast")) return console.error(message)
-    UI.toast({ message, type: "error", position: "bottom right", displayTime: 3000, showIcon: true })
+    UI.toast({ message, type: "error" })
   }
 }
 

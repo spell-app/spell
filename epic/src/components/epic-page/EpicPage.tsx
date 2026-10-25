@@ -26,7 +26,6 @@ import {
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
 
-import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
   ACTIVE,
@@ -1324,7 +1323,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     const isStarting = Boolean(client && !client.listening && !isAirplane())
     if (isStarting) void client!.startReview()
-    if (!(await (isStarting ? Clipboard.copy(this.command()) : this.copyAndSay(this.command())))) return
+    if (!(await (isStarting ? E.copyText(this.command()) : this.copyAndSay(this.command())))) return
     // off first, so a second click flashes again
     this.isCopied = false
     this.flashTimer?.cancel()
@@ -1352,13 +1351,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.untracked
   private async copyAndSay(text: string): Promise<boolean> {
-    if (!(await Clipboard.copy(text))) return false
+    if (!(await E.copyText(text))) return false
     if (E.DOMElement.isAttached("ui-toast")) {
       UI.toast({
         id: COPIED_TOAST_ID,
         class: "blue",
         message: this.translationForKey("copiedText", { text }),
-        position: "bottom right",
         displayTime: COPIED_TOAST_MS
       })
     }

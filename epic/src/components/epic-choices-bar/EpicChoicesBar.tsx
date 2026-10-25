@@ -4,7 +4,6 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { ChoicesForm } from "spell-epic/answers"
-import { Clipboard } from "spell-epic/components/epic-page/Clipboard"
 import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
 // the feedback box:  its barrel first, so it's defined wherever the bar is
 import "spell-epic/components/epic-text-box"
@@ -206,7 +205,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   private readonly onCopy = async () => {
     const form = this.form
     if (!form) return
-    const isCopied = await Clipboard.copy(form.copyText())
+    const isCopied = await E.copyText(form.copyText())
     this.copyTimer?.cancel()
     this.copyState = isCopied ? "copied" : "failed"
     if (isCopied) this.copyTimer = E.after(COPIED_SECONDS, () => (this.copyState = ""))
