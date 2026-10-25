@@ -37,7 +37,7 @@ describe("UIDocsExample.css layout", () => {
     `<div class="description" part="description">D</div>` +
     `<div class="frame"><button part="toggle">c</button><div part="demo">X</div></div></section>`
 
-  it("puts the header and description above the frame, the code button centred on the frame's top right corner", () => {
+  it("puts the header and description above the frame, the code button inside the frame's top right corner", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, exampleCSS])
     const shadow = host.shadowRoot!
     expect(getComputedStyle(shadow.querySelector(".heading")!).display).toBe("flex")
@@ -48,13 +48,12 @@ describe("UIDocsExample.css layout", () => {
     expect(getComputedStyle(toggle).position).toBe("absolute")
     expect(getComputedStyle(toggle).opacity).toBe("1")
     toggle.style.cssText = "height: 1.35em; box-sizing: border-box; padding: 0; border: 0"
-    // half above the frame, its middle on the frame's top edge (inside its hairline), the example taking no room for it
+    // inside the frame's top right corner, 6px in from its padding box on both sides, over the example
     const box = toggle.getBoundingClientRect()
     const edge = shadow.querySelector<HTMLElement>(".frame")!
-    expect(Math.abs((box.top + box.bottom) / 2 - (frame.top + edge.clientTop))).toBeLessThan(1)
-    // its middle on the frame's right edge (inside its hairline):  centred on the corner
     const borderRight = frame.width - edge.clientLeft - edge.clientWidth
-    expect(Math.abs((box.left + box.right) / 2 - (frame.right - borderRight))).toBeLessThan(1)
+    expect(Math.round(box.top - (frame.top + edge.clientTop))).toBe(6)
+    expect(Math.round(frame.right - borderRight - box.right)).toBe(6)
   })
 
   it("takes a public token from outside", () => {

@@ -38106,6 +38106,12 @@
           "type": "length"
         },
         {
+          "name": "--ui-docs-example-toggle-corner",
+          "default": "6px",
+          "description": "A framed example's code button: in from its frame's top and right edges, just inside its rim.",
+          "type": "length"
+        },
+        {
           "name": "--ui-docs-example-gap",
           "default": "0.5em",
           "description": "Space between the header, description and example.",
