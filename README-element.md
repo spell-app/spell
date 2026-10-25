@@ -173,7 +173,7 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
             return (
               <ui-button
                 icon={button.icon}
-                active={inUse() ? "" : undefined}
+                selected={inUse() ? "" : undefined}
                 ...
                 onClick={() => this.pick(button.sort)}
               >
@@ -202,7 +202,7 @@ Click Date, and `pick()` writes `this.sort`.
 In React, that `setSort` would run the component again, build both buttons anew, diff them and patch the DOM.
 Here, `render()` doesn't run again, and neither does `<For>`.
 The only code that runs again is the bindings that read `inUse()`,
-so the only DOM that changes is each button's `active` attribute and its spoken name.
+so the only DOM that changes is each button's `selected` attribute and its spoken name.
 [Its test](https://github.com/spell-app/spell-epic/blob/main/tests/components/epic-list/EpicSort.test.tsx) clicks Date and checks exactly that,
 and the `epic-sort` event the page hears.
 
