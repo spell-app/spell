@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { core, DrawableList, frameSummary, logError, logFrame, startPage, type PageMessage } from "spell-parser/core"
+import { core, ViewableList, frameSummary, logError, logFrame, startPage, type PageMessage } from "spell-parser/core"
 
 /**
  * A page's frames, as its console shows them (`page.ts`, `logFrame()`):  one folded line each,
@@ -90,7 +90,7 @@ describe("logError()", () => {
 describe("startPage():  a list's drag handlers", () => {
   test("`core.runHandler()`, `startWhile()`, `endWhile()` and a drop event go to the program, as calls on the list", () => {
     /** A tray, as a Python program's drawing half declares it. */
-    class Tray extends DrawableList {}
+    class Tray extends ViewableList {}
     const sent: PageMessage[] = []
     startPage({
       modules: [{ Tray }],

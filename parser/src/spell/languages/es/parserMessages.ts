@@ -81,9 +81,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "belongs-to-not-a-list": "No se puede decir {sentence}:  {aList} no es una lista",
   "markdown-outside-outline":
     "Un bloque <markdown> va en el esquema de un tipo, como su descripción, o en un dibujo:  devolver <markdown>...</markdown>",
-  "css-not-drawable":
-    'Solo un tipo dibujable tiene su propio <css>:  "{type}" no es dibujable:  di "una ... es una cosa dibujable"',
-  "css-outside-outline": "Solo un tipo dibujable tiene su propio <css>:  ponlo en el esquema de un tipo",
+  "retired-type-word": '"{words}" ahora es "{replacement}":  di "{replacement}"',
+  "css-not-a-view": 'Solo una vista tiene su propio <css>:  "{type}" no es una vista:  di "una ... es una vista"',
+  "css-outside-outline": "Solo una vista tiene su propio <css>:  ponlo en el esquema de un tipo",
   "value-line-outside-getter":
     'Una línea del cuerpo de una propiedad calculada:  ponla debajo de una, p. ej. "el color de una carta es:"',
   "cant-set-worked-out": "No se puede poner {what}:  spell lo calcula",

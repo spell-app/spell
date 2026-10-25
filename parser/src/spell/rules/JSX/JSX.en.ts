@@ -228,7 +228,7 @@ JSX.addRule(SpellJSX, {
         scope.variables?.add("card")
       },
       tests: [
-        // where a drawable list's items show
+        // where a viewable list's items show
         [`<children/>`, 'h("slot")', "<slot />"],
         // a named place
         [`<children name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],

@@ -4,8 +4,10 @@
     "Thing",
     "List",
     "App",
-    "Drawable",
-    "DrawableList",
+    "View",
+    "Page",
+    "TwoSidedView",
+    "ViewableList",
     "h",
     "css",
     "positionOf",
@@ -1291,7 +1293,7 @@
       "property": "elementDefiner",
       "of": "core",
       "module": "elements",
-      "description": "How the page defines the element for a drawable class -- `undefined` until the page running programs sets it."
+      "description": "How the page defines the element for a view class -- `undefined` until the page running programs sets it."
     },
     {
       "property": "beforeMove",
@@ -1387,7 +1389,7 @@
           "name": "project"
         }
       ],
-      "description": "Name the element of drawable class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag."
+      "description": "Name the element of view class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag."
     },
     {
       "kind": "method",
@@ -1402,7 +1404,7 @@
           "name": "ElementClass"
         }
       ],
-      "description": "Hand the page `ElementClass`, the element class compiled TypeScript writes for drawable class `Class` (epic `drawable-thing` P10, J41): `core.useElement(Card, CardElement)`, right after `class CardElement extends SpellElement<Card>`."
+      "description": "Hand the page `ElementClass`, the element class compiled TypeScript writes for view class `Class` (epic `drawable-thing` P10, J41): `core.useElement(Card, CardElement)`, right after `class CardElement extends SpellElement<Card>`."
     },
     {
       "kind": "method",
@@ -1414,7 +1416,7 @@
           "name": "Class"
         }
       ],
-      "description": "The element class handed for drawable class `Class` (`useElement()`) -- `undefined` if none was."
+      "description": "The element class handed for view class `Class` (`useElement()`) -- `undefined` if none was."
     },
     {
       "kind": "method",
@@ -1438,7 +1440,7 @@
           "name": "Class"
         }
       ],
-      "description": "What drawable class `Class` shows on the outside of its element (epic `drawable-thing` P8):"
+      "description": "What view class `Class` shows on the outside of its element (epic `drawable-thing` P8):"
     },
     {
       "kind": "method",
@@ -2064,16 +2066,28 @@
       "description": "`App`: a `Thing` that draws a whole application -- what `a game is an app` extends."
     },
     {
-      "type": "Drawable",
+      "type": "View",
       "superType": "Thing",
-      "module": "classes/Drawable",
-      "description": "`Drawable`:  a `Thing` drawn as its own custom element -- what `a card is a drawable thing` extends."
+      "module": "classes/View",
+      "description": "`View`:  a `Thing` drawn as its own custom element -- what `a card is a view` extends."
     },
     {
-      "type": "DrawableList",
+      "type": "Page",
+      "superType": "View",
+      "module": "classes/Page",
+      "description": "`Page`:  a `View` people reach by its own address -- what `a home is a page` extends."
+    },
+    {
+      "type": "TwoSidedView",
+      "superType": "View",
+      "module": "classes/TwoSidedView",
+      "description": "`TwoSidedView`:  a `View` with a front and a back, face up or face down -- what `a card is a two sided view` extends."
+    },
+    {
+      "type": "ViewableList",
       "superType": "List",
-      "module": "classes/DrawableList",
-      "description": "`DrawableList`:  a `List` drawn as its own custom element, its items inside it -- what `a pile is a drawable list of cards` extends."
+      "module": "classes/ViewableList",
+      "description": "`ViewableList`:  a `List` drawn as its own custom element, its items inside it -- what `a pile is a viewable list of cards` extends."
     },
     {
       "kind": "function",
@@ -2098,7 +2112,7 @@
           "name": "...values"
         }
       ],
-      "description": "A drawable type's style sheet, as TEXT:  what its `<css>` block compiles to (epic `drawable-thing`, P10, J14)."
+      "description": "A view type's style sheet, as TEXT:  what its `<css>` block compiles to (epic `drawable-thing`, P10, J14)."
     },
     {
       "kind": "function",

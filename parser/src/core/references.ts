@@ -11,7 +11,7 @@
  *
  * - A reference reads like CSS's `tag#id`:  the type's name, `#`, then the thing's name or its place.
  * - What it's for:
- *   - a drawable element's attribute can hold a thing:  `<solitaire-card pile="Tableau#T1">`
+ *   - a view element's attribute can hold a thing:  `<solitaire-card pile="Tableau#T1">`
  *   - a tag's `id` is the part after the `#`, its tag saying the type (J43):
  *     `<solitaire-tableau id="T1">` draws `Tableau#T1` -- see `thingCalled()`
  *   - spell's words for one thing, `tableau T1` and `the first tableau`, compile to `thingNamed()` and `thingAtPlace()`
@@ -159,9 +159,9 @@ export const referencesMethods = defineCoreModule({
    * The `id` an element the program draws for `thing` takes:  its name, e.g. `queen-of-spades` (J43) --
    * `undefined` for a thing with no name.
    * - So the browser's inspector says which thing an element draws:  `<solitaire-card id="queen-of-spades">`.
-   * - Two of the program's drawable things with one name, e.g. a game with two decks:
+   * - Two of the program's views with one name, e.g. a game with two decks:
    *   the first made is `queen-of-spades`, the second `queen-of-spades-2`, the third `-3`.
-   *   - Counted among every drawable thing the program made, of any type:  ids are the page's.
+   *   - Counted among every view the program made, of any type:  ids are the page's.
    *   - A thing keeps the id it got while it keeps its name,
    *     so each element drawing it says the same, even after an earlier thing is gone.
    * - A space in its name is a dash, as an `id` has none:  `discard pile` => `discard-pile`.
@@ -228,7 +228,7 @@ const PLACE = /^[1-9]\d*$/
 const ELEMENT_IDS = new WeakMap<object, { name: string; id: string }>()
 
 /**
- * How many drawable things the program made before `thing` whose name, as an id, is `name` --
+ * How many views the program made before `thing` whose name, as an id, is `name` --
  * `0` if `thing` isn't the program's.
  */
 function earlierNamed(thing: object, name: string): number {

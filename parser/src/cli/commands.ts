@@ -41,7 +41,11 @@ export default function languageCommands(spell: Command): void {
     )
     .argument("[projects...]", PROJECTS_ARG)
     .option("--json", "print errors as JSON")
-    .option("--fix", "put the editor pages right:  drop gone properties, add new ones, fix controls that don't fit")
+    .option(
+      "--fix",
+      "put right what it can:  retired words (drawable thing => view), " +
+        "and the editor pages (gone properties, new ones, controls that don't fit)"
+    )
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("lint", projects, command))
 

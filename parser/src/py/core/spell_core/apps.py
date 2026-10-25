@@ -1,4 +1,4 @@
-"""Apps and drawable things:  what `a game is an app`, `a card is a drawable thing` compile to.
+"""Apps and views:  what `a game is an app`, `a card is a view` compile to.
 
 ```python
 from spell_core import App, h
@@ -11,7 +11,7 @@ game = Game()
 game.start()   # drawn on the page:  `core.page.body_html()` writes it
 ```
 
-- The twins of the JavaScript core's `App`, `Drawable` and `DrawableList` (`classes/`).
+- The twins of the JavaScript core's `App`, `View`, `Page`, `TwoSidedView` and `ViewableList` (`classes/`).
 """
 
 from spell_core.drawing import Element, h
@@ -40,10 +40,10 @@ class App(Thing):
         core.mount_app(self, element)
 
 
-class Drawable(Thing):
-    """A thing drawn as its own element (`<solitaire-card>`):  what `a card is a drawable thing` extends.
+class View(Thing):
+    """A thing drawn as its own element (`<solitaire-card>`):  what `a card is a view` extends.
 
-    - Its tag:  `element_tag`, which each compiled drawable class names in its body.
+    - Its tag:  `element_tag`, which each compiled view class names in its body.
     - `core.draw_thing()` draws it as that element, its own `draw()` inside;  with no tag, as any thing draws.
     """
 
@@ -55,10 +55,24 @@ class Drawable(Thing):
     can_be_selected: bool = False
 
 
-class DrawableList(List):
-    """A list drawn as its own element, its items inside:  `a pile is a drawable list of cards`.
+class Page(View):
+    """A view people reach by its own address:  what `a home is a page` extends.
 
-    - Its tag:  `element_tag`, as a `Drawable`'s.
+    - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
+    """
+
+
+class TwoSidedView(View):
+    """A view with a front and a back, face up or face down:  what `a card is a two sided view` extends.
+
+    - NOTE:  empty for now, as the JavaScript core's:  its own words and its front and back come with parts.
+    """
+
+
+class ViewableList(List):
+    """A list drawn as its own element, its items inside:  `a pile is a viewable list of cards`.
+
+    - Its tag:  `element_tag`, as a `View`'s.
     - `core.draw_thing()` draws it as that element:  its `draw()` inside, its items' elements in the `<slot>`.
       - That's just the `<slot>` by default:  the element shows its items and nothing else,
         or its placeholder while it's empty (`draw_its_placeholder()`).

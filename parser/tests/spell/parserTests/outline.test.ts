@@ -265,7 +265,7 @@ describe("outline style", () => {
   test("a call that's all words beats a built-in reading:  `{draw its placeholder}` is the pile's own method", () => {
     const compiled = compile([
       "a card is a thing",
-      "a pile is a drawable list of cards where:",
+      "a pile is a viewable list of cards where:",
       "\t- to draw its placeholder:",
       "\t\treturn <ui-button basic/>",
       "\t- to draw it:",
@@ -691,7 +691,7 @@ describe("outline style", () => {
       const { files } = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }])
       expect(files[0]!.errors).toEqual([])
       expect(files[0]!.warnings).toEqual([
-        "6:11 A card rank is one of the values a card lists:  it can't have properties or phrases of its own"
+        "6:11 A card rank is one of the values a card lists:  it can't have properties or aliases of its own"
       ])
     })
 
@@ -718,8 +718,8 @@ describe("outline style", () => {
       expect(
         errorsOf([...CARD, 'the "value" of a card rank is 1', 'a card rank "is a face card" if it is jack'])
       ).toEqual([
-        "5:0 A card rank is one of the values a card lists:  it can't have properties or phrases of its own",
-        "6:0 A card rank is one of the values a card lists:  it can't have properties or phrases of its own"
+        "5:0 A card rank is one of the values a card lists:  it can't have properties or aliases of its own",
+        "6:0 A card rank is one of the values a card lists:  it can't have properties or aliases of its own"
       ])
     })
 
@@ -880,7 +880,7 @@ describe("outline style", () => {
   describe("drawing:  ONE `to draw it`, and a list's `to draw each item` (epic `spanish` P20)", () => {
     test('`to "draw it":` + markup:  the markup IS its `draw()`, no `return` needed', () => {
       const js = compile([
-        "a card is a drawable thing where:",
+        "a card is a view where:",
         "\t- its direction is up or down",
         '\t- to "draw it":',
         '\t\t<ui-image source="images/front.png" />'
@@ -891,7 +891,7 @@ describe("outline style", () => {
 
     test("`to draw it:` unquoted is a method's body, which returns it:  the same `draw()`", () => {
       const js = compile([
-        "a card is a drawable thing where:",
+        "a card is a view where:",
         "\t- its direction is up or down",
         "\t- to draw it:",
         "\t\tif its direction is down",
@@ -901,10 +901,10 @@ describe("outline style", () => {
       expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction === "down"\) return h\("div", \{ class: "back" \}\)/)
     })
 
-    test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
+    test("a viewable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
       const js = compile([
-        "a card is a drawable thing",
-        'a "pile" is a drawable list of cards where:',
+        "a card is a view",
+        'a "pile" is a viewable list of cards where:',
         "\t- to draw it:",
         '\t\treturn <div class="pile"><children/></div>',
         "\t- to draw each item:",
@@ -918,8 +918,8 @@ describe("outline style", () => {
 
     test('`to "draw each item":` + markup:  `the item` is the item too', () => {
       const js = compile([
-        "a card is a drawable thing",
-        "a pile is a drawable list of cards where:",
+        "a card is a view",
+        "a pile is a viewable list of cards where:",
         '\t- to "draw each item": <b>{draw the item}</b>'
       ])
       expect(js).toMatch(/drawEachItem\(item\) \{\s+return h\("b", \(\) => core\.drawThing\(item\)\)/)
@@ -927,10 +927,10 @@ describe("outline style", () => {
 
     test("a list's `to draw its placeholder` is what it shows while it's empty:  `drawItsPlaceholder()` (outline-spell P27)", () => {
       const js = compile([
-        "a card is a drawable thing",
-        "a pile is a drawable list of cards where:",
+        "a card is a view",
+        "a pile is a viewable list of cards where:",
         '\t- to "draw its placeholder": <div part="placeholder"/>',
-        "a heap is a drawable list of cards where:",
+        "a heap is a viewable list of cards where:",
         "\t- to draw its placeholder:",
         '\t\treturn <div class="spot"/>'
       ])
@@ -940,9 +940,9 @@ describe("outline style", () => {
 
     test("`- it can be dragged`, `- can be dropped on`:  dragging is opt-in, a flag on the class (outline-spell P28)", () => {
       const js = compile([
-        "a card is a drawable thing where:",
+        "a card is a view where:",
         "\t- it can be dragged",
-        "a pile is a drawable list of cards where:",
+        "a pile is a viewable list of cards where:",
         "\t- can be dropped on"
       ])
       expect(js).toContain("static canBeDragged = true")
@@ -951,11 +951,11 @@ describe("outline style", () => {
 
     test("`- it is draggable`, `- is droppable`:  the same flags;  `is not` turns one off for a sub-type (outline-spell P28)", () => {
       const js = compile([
-        "a card is a drawable thing where:",
+        "a card is a view where:",
         "\t- it is draggable",
         "a joker is a card where:",
         "\t- it is not draggable",
-        "a pile is a drawable list of cards where:",
+        "a pile is a viewable list of cards where:",
         "\t- is droppable"
       ])
       expect(js).toContain("static canBeDragged = true")
@@ -965,8 +965,8 @@ describe("outline style", () => {
 
     test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
       const js = compile([
-        "a card is a drawable thing",
-        'a "pile" is a drawable list of cards where:',
+        "a card is a view",
+        'a "pile" is a viewable list of cards where:',
         "\t- it can be dropped on",
         '\t- its "hint" is text',
         "\t- when a card is dragged over it:",
@@ -983,8 +983,8 @@ describe("outline style", () => {
 
     test("`- while a card is dragged over it`, `- when something is dropped on it`:  `the thing` is any thing (outline-spell P28)", () => {
       const js = compile([
-        "a card is a drawable thing",
-        'a "pile" is a drawable list of cards where:',
+        "a card is a view",
+        'a "pile" is a viewable list of cards where:',
         "\t- it can be dropped on",
         '\t- its "hint" is text',
         "\t- while a card is dragged over it:",
@@ -1004,9 +1004,9 @@ describe("outline style", () => {
 
     test("`- it can be selected`;  `the selection of the tasks`, what people selected (outline-spell P29)", () => {
       const js = compile([
-        "a task is a drawable thing where:",
+        "a task is a view where:",
         "\t- it can be selected",
-        "a to-do is a drawable list of tasks",
+        "a to-do is a viewable list of tasks",
         "to show the selection of a to-do",
         "\tprint the length of the selection of the to-do"
       ])
@@ -1016,12 +1016,12 @@ describe("outline style", () => {
 
     test("`- its items can be reordered (after 1.5 seconds)`:  the seconds the page waits, on the class (outline-spell P30)", () => {
       const js = compile([
-        "a task is a drawable thing",
-        "a checklist is a drawable list of tasks where:",
+        "a task is a view",
+        "a checklist is a viewable list of tasks where:",
         "\t- its items can be reordered",
-        "a backlog is a drawable list of tasks where:",
+        "a backlog is a viewable list of tasks where:",
         "\t- its items can be reordered after 1.5 seconds",
-        "a queue is a drawable list of tasks where:",
+        "a queue is a viewable list of tasks where:",
         "\t- its items can be reordered immediately"
       ])
       expect(js).toContain("static reorderItemsAfter = 2")
@@ -1031,7 +1031,7 @@ describe("outline style", () => {
 
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
-        "a card is a drawable thing where:",
+        "a card is a view where:",
         "\t- to draw it:",
         '\t\treturn <div><b onClick={print 1}/><i onClick={print 2} style="color: red"/><u/></div>'
       ])
@@ -1041,9 +1041,9 @@ describe("outline style", () => {
     })
 
     test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
-      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
-      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its placeholder": <b/>'])).toHaveLength(1)
-      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a view where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a view where:", '\t- to "draw its placeholder": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a view where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
     })
   })
 

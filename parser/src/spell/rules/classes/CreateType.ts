@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell-parser/parser"
-import { isDrawableType } from "./classes.shared"
+import { isViewType } from "./classes.shared"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
@@ -11,7 +11,7 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - SIDE EFFECT: adds `type` to `scope.types`, unless it's already defined (no redefinition/merge) --
  *   see `TypeDeclaration.declareType()`.
  * - Compiles to an exported class declaration, e.g. `a card is a thing` => `export class Card extends Thing {}`.
- *   - A drawable one defines its element in it -- see `TypeDeclaration.elementMember()`.
+ *   - A view defines its element in it -- see `TypeDeclaration.elementMember()`.
  *   - Another project reaches it by `import`ing it -- no globals.
  */
 export class CreateType extends TypeDeclaration<
@@ -21,14 +21,14 @@ export class CreateType extends TypeDeclaration<
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type", detail: "superType" }
 
   /**
-   * Notes a drawable type's project, for its element (`elementMember()`);
+   * Notes a view type's project, for its element (`elementMember()`);
    * then refuses a name some other type already goes by -- see `TypeDeclaration.refuseTakenNames()`.
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { scopeType } = (match.groups.superType as P.Match<P.MatchGroups, { scopeType?: unknown }>).data
-    if (scopeType instanceof P.TypeScope && isDrawableType(scopeType)) {
+    if (scopeType instanceof P.TypeScope && isViewType(scopeType)) {
       match.data.elementProject = TypeDeclaration.projectNameOf(scope)
     }
     return this.refuseTakenNames(match)

@@ -16,8 +16,10 @@ import { defineCoreModule } from "./core.types"
 import { Thing } from "./classes/Thing"
 import { List } from "./classes/List"
 import { App } from "./classes/App"
-import { Drawable } from "./classes/Drawable"
-import { DrawableList } from "./classes/DrawableList"
+import { View } from "./classes/View"
+import { Page } from "./classes/Page"
+import { TwoSidedView } from "./classes/TwoSidedView"
+import { ViewableList } from "./classes/ViewableList"
 
 /**
  * Registry of the things one run of a program made -- `core.things`, cleared by `resetRuntime()`.
@@ -199,7 +201,7 @@ export class ThingRegistry {
 
   /**
    * Every class `addClass()` has seen:  the program's own, e.g. `Card`, `Pile`, `Tableau` -- NOT spell's own.
-   * - e.g. for what a drawable class's element shows:  `core.elementApiOf()` looks for the lists
+   * - e.g. for what a view class's element shows:  `core.elementApiOf()` looks for the lists
    *   a card belongs to.
    */
   knownClasses(): ThingClass[] {
@@ -450,7 +452,7 @@ export class ThingRegistry {
 }
 
 /** The built-in classes a program's classes extend -- see `classNamed()`. */
-const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, Drawable, DrawableList]
+const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, View, Page, TwoSidedView, ViewableList]
 
 /** Prototypes of the built-in types a program's types extend -- where `propertiesOf()` stops. */
 const BASE_PROTOTYPES: object[] = BUILT_IN_CLASSES.map((Class) => Class.prototype)

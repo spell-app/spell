@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vite-plus/test"
 
 import { bridgeSolid } from "spell/util"
-import { core, Thing, List, DrawableList, prop, drawn, h } from "spell-parser/core"
+import { core, Thing, List, ViewableList, prop, drawn, h } from "spell-parser/core"
 import { isElementThunk, type Drawing } from "spell-parser/core/drawing"
 
 // counts each error boundary drawn:  `drawing.ts` makes one with `createComponent(Errored, ...)`
@@ -291,12 +291,12 @@ describe("@drawn", () => {
     expect(drawCalls.get(card)).toBe(1)
   })
 
-  describe("a drawable list:  `to draw it` wraps its items, `to draw each item` wraps each (epic `spanish` P20)", () => {
-    /** A drawable list with neither of its own:  the defaults. */
-    class Heap extends DrawableList<unknown> {}
+  describe("a viewable list:  `to draw it` wraps its items, `to draw each item` wraps each (epic `spanish` P20)", () => {
+    /** A viewable list with neither of its own:  the defaults. */
+    class Heap extends ViewableList<unknown> {}
 
-    /** A drawable list that wraps each card in a spot. */
-    class SpotPile extends DrawableList<Card> {
+    /** A viewable list that wraps each card in a spot. */
+    class SpotPile extends ViewableList<Card> {
       override drawEachItem(item: Card): Drawing {
         if (item.isBroken) throw new Error("no spot for a broken card")
         return h("div", { class: "spot" }, () => core.drawThing(item)) as unknown as Drawing

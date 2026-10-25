@@ -104,7 +104,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `python -m spell_core.page <program> --seed n` talks to a page over stdin and stdout, a JSON line each.
 - References (`spell_core.references`, P27):  a thing named in text.
   - e.g. `Card#queen-of-spades`, `Tableau#1`
-  - The javascript core's words (drawable-thing's `references.ts`), read the same way.
+  - The javascript core's words (view's `references.ts`), read the same way.
   - A page's message may name things so:  an event's `"target"`, a call's `"on"`.
     - The handler gets the thing as `event.target`, and as `event.card`.
     - `{"$id": ...}` still works.
@@ -117,12 +117,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `reference_for()`
     - Not counted:  a plain `List`, a thing made inside a test, a helper's scratch result (made `core.quietly()`).
     - A name falls back to a thing the program keeps at its top level, as javascript's does.
-- A drawable program (P28) draws its own elements (`<solitaire-card>`) on the page:
+- A program of views (P28) draws its own elements (`<solitaire-card>`) on the page:
   the page's javascript defines them.
-  - Each drawable class still names its tag, `element_tag = "solitaire-card"`, as javascript's names it
+  - Each view class still names its tag, `element_tag = "solitaire-card"`, as javascript's names it
     (epic `spanish` I5).
-  - So the page Python prints (`--page`) draws each drawable thing as its element, as javascript's does:
-    its own drawing inside, a drawable list's items' elements in its `<slot>` (`core.draw_thing()`).
+  - So the page Python prints (`--page`) draws each view as its element, as javascript's does:
+    its own drawing inside, a viewable list's items' elements in its `<slot>` (`core.draw_thing()`).
 - `play_page()` (`spell_core.playing`, P30):  a test plays a program the way its page does, by the page's messages.
   - `game.trigger("card-click", card=game.ref(card))`, `game.call("deal_the_cards")`:  each answered by its patch.
   - `game.thing(id)`, `game.named("stock")`:  what the page holds now, by id.

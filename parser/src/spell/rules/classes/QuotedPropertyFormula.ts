@@ -238,7 +238,7 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
    * see `QuotedPropertyFormulaBits.staticArg`.
    * - Why:  a phrase on a sub-type is used on its super-type's values, `the card is the red joker`,
    *   where an instance method would be missing:  a card has no `isTheColorJoker()`.
-   * - A built-in super-type doesn't count, e.g. `a card is a drawable thing`:  only cards say a card's phrases.
+   * - A built-in super-type doesn't count, e.g. `a card is a view`:  only cards say a card's phrases.
    * - A lookup:  `getBits()` makes it while parsing.
    */
   private static staticArgFor(scope: P.Scope, type: string): { staticArg?: string } {

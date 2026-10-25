@@ -1,7 +1,7 @@
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 import { Wording } from "spell-parser/spell/rules/expressions"
-import { SubjectRule } from "spell-parser/spell/rules/types"
+import { SpellType, SubjectRule } from "spell-parser/spell/rules/types"
 import { SpellStatement, commitStatement } from "./Statement"
 import { Block, type BlockMatchData } from "./Block"
 import { SpellJSX } from "./JSX"
@@ -131,6 +131,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       if (statement) {
         // Errors inside JSX `{...}` -- reported here, but compiled where they are, so NOT added to `matched`.
         errors.push(...SpellJSX.parseErrorsIn(statement))
+        // an old word for a built-in type, e.g. `drawable thing`:  an error naming its new word, the line still compiled
+        errors.push(...SpellType.retiredWordErrorsIn(statement))
 
         const nextItem = lines[1]
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined

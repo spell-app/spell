@@ -1,7 +1,7 @@
 /**
  * Master import file for the classes `core` exposes to compiled spell code.
- * - Re-exported from `spell-parser/core`'s own barrel (`export * from "./classes"`) so `Thing`/`List`/`App`/`Drawable`/
- *   `DrawableList` are available alongside the rest of `core`.
+ * - Re-exported from `spell-parser/core`'s own barrel (`export * from "./classes"`) so `Thing`, `List`, `App`, `View`,
+ *   `Page`, `TwoSidedView` and `ViewableList` are available alongside the rest of `core`.
  *
  * NOTE: imports reach into `spell-parser/core/core` and `spell-parser/core/Core` directly rather than
  * the `spell-parser/core` barrel -- this file helps BUILD that barrel, so going through it would
@@ -13,8 +13,10 @@ import { defineCoreModule, SPELL_BASE_TYPES } from "spell-parser/core/core.types
 import { Thing } from "./Thing"
 import { App } from "./App"
 import { List } from "./List"
-import { Drawable } from "./Drawable"
-import { DrawableList } from "./DrawableList"
+import { View } from "./View"
+import { Page } from "./Page"
+import { TwoSidedView } from "./TwoSidedView"
+import { ViewableList } from "./ViewableList"
 
 /** Base-type registry, and where an app mounts.  Drawing is `../drawing.ts`. */
 export const classesMethods = defineCoreModule({
@@ -55,5 +57,5 @@ export const classesMethods = defineCoreModule({
 Object.assign(core, classesMethods)
 
 // Compiled spell imports these -- `import { core, Thing, List, App, ... } from "@spell/core"`.  No globals.
-export { Thing, List, App, Drawable, DrawableList }
+export { Thing, List, App, View, Page, TwoSidedView, ViewableList }
 export type { ListCallback } from "./List"

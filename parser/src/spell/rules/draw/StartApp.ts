@@ -4,7 +4,7 @@ import { P } from "spell-parser/parser"
 import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
- * `start_app` rule:  start a scoped `App`/`Drawable`, e.g. `start the game` => `game.start()`
+ * `start_app` rule:  start a scoped `App`/`View`, e.g. `start the game` => `game.start()`
  * (a method call, not a global).
  */
 export class StartApp extends SpellStatement<"app"> {

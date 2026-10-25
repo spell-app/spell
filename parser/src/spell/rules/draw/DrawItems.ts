@@ -9,7 +9,7 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * - e.g. `draw each card in the deck`, `draw all cards of the deck`
  * - Only the trailing `{expression}` (the container) is compiled:
  *   - `draw each card in the deck` => `core.drawItems(deck)`, each item in its own error boundary
- *   - the same in javascript and TypeScript:  a drawable list's items are its element's children (epic `spanish` J100)
+ *   - the same in javascript and TypeScript:  a viewable list's items are its element's children (epic `spanish` J100)
  * - The `each {variable}` / `(the|all)? {plural_identifier}` part is purely for readability:
  *   it's matched, but never read in `getAST()`.
  */

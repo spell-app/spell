@@ -12,11 +12,11 @@ import { type MethodBody } from "./classes.shared"
  * `draw_it` rule:  how a type draws, in its outline body (epic `spanish` P20).
  *
  * ```spell
- * a card is a drawable thing where:
+ * a card is a view where:
  * 	- to "draw it":
  * 		<ui-text class="Card">{its picture}</ui-text>
  *
- * a pile is a drawable list of cards where:
+ * a pile is a viewable list of cards where:
  * 	- to draw it:                   // the wrapper around its cards
  * 		return <div class="Pile"><children/></div>
  * 	- to draw each item:            // the wrapper each card is drawn in
@@ -25,7 +25,7 @@ import { type MethodBody } from "./classes.shared"
  * - Three drawings, by what their words MEAN, the `draw_method` word rule:
  *   - `draw`:  `to draw it` => `draw()`, what `draw the card` draws
  *   - `draw_each_item`:  a list's `to draw each item` => `drawEachItem(item)`,
- *     the wrapper each of its items is drawn in -- see `DrawableList.drawEachItem()`
+ *     the wrapper each of its items is drawn in -- see `ViewableList.drawEachItem()`
  *     - `the item`, and the item's type's name, `the card`, are the item;  `it` is the list
  *   - `draw_its_placeholder`:  a list's `to draw its placeholder` => `drawItsPlaceholder()`,
  *     what it shows while it's empty -- see `List.drawItsPlaceholder()` (epic `outline-spell` P27)

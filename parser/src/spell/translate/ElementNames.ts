@@ -13,7 +13,7 @@ import type { MissingName, UIVocabulary } from "./translate.types"
  *   - `part` names one of the project's own parts:  through its names, `part="picture"` => `part="imagen"`.
  *   - A form control's `name` binds it to a property of the thing the form shows (epic `spanish` P28):
  *     through the project's names, as compiled code names the property, `name="newTaskName"` => `name="nombreNuevaTarea"`.
- * - The project's own drawable things by their types' names in the other language, as compiled code names them:
+ * - The project's own views by their types' names in the other language, as compiled code names them:
  *   `<solitaire-tableau layout="stacked">` => `<solitario-columna disposición="apilada">`.
  * - Anything else stays as written:  plain HTML (`<div class="Board">`), names it doesn't know.
  * - Pure:  the vocabulary is handed in, so spell-parser never imports Spell UI.

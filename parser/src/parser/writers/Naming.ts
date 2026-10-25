@@ -21,7 +21,7 @@ import { camelCaseOf } from "./WriterProject"
  *   - A kind with neither is written as spell names it.
  * - spell's own names are the input:
  *   a type in PascalCase (`BankAccount`), anything else in snake_case (`turn_face_up`, `is_set_up`).
- * - A built-in class keeps its runtime's name, e.g. `Thing`, `DrawableList`:  the runtime's code names it, not ours.
+ * - A built-in class keeps its runtime's name, e.g. `Thing`, `ViewableList`:  the runtime's code names it, not ours.
  * - Each writer has one (`P.Writer.naming`);  a writer reads names through it, never writes a case itself.
  ****************/
 export class Naming {

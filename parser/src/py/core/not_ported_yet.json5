@@ -11,7 +11,7 @@
       ]
     },
     {
-      "why": "A browser's only:  a drawable thing's own element (<solitaire-card>), a page's markup, its shadow root",
+      "why": "A browser's only:  a view's own element (<solitaire-card>), a page's markup, its shadow root",
       "names": [
         "elementDefiner",
         "beforeMove",

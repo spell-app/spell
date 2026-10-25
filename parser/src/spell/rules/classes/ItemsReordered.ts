@@ -8,7 +8,7 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * `items_reordered` rule:  people may reorder a list's items on the page, by dragging them (epic `outline-spell` P30).
  *
  * ```spell
- * a "checklist" is a drawable list of tasks where:
+ * a "checklist" is a viewable list of tasks where:
  * 	- its items can be reordered
  * ```
  * - Dragged over the list, a blue line shows where the dragged items would go;  the items stay where they are, dimmed.

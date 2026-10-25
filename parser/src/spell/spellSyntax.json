@@ -3832,30 +3832,30 @@
           "aliases": ["statement"]
         },
         {
-          "className": "CreateDrawableListType",
-          "ruleNames": ["create_drawable_list_type"],
+          "className": "CreateViewableListType",
+          "ruleNames": ["create_viewable_list_type"],
           "internal": false,
-          "file": "src/spell/rules/classes/CreateDrawableListType.ts",
-          "line": 12,
-          "purpose": "`a pile is a drawable list of cards` -- `create_list_type`, extending `DrawableList`.",
+          "file": "src/spell/rules/classes/CreateViewableListType.ts",
+          "line": 14,
+          "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) drawable list of {instanceType:type} {with_nested_statements}?",
-              "example": "a pile is a drawable list of cards",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?",
+              "example": "a pile is a viewable list of cards",
               "outputs": {
                 "js": {
-                  "code": "export class Pile extends DrawableList {\n  static instanceType = Card\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}"
+                  "code": "export class Pile extends ViewableList {\n  static instanceType = Card\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}"
                 },
                 "ts": {
-                  "code": "export class Pile extends DrawableList<Card> {\n  static instanceType = Card\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}\n\nexport class PileElement extends SpellElement<Pile> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-statement-pile\", \"pile\", [])\n}\ncore.useElement(Pile, PileElement)"
+                  "code": "export class Pile extends ViewableList<Card> {\n  static instanceType = Card\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}\n\nexport class PileElement extends SpellElement<Pile> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-statement-pile\", \"pile\", [])\n}\ncore.useElement(Pile, PileElement)"
                 },
                 "py": {
-                  "code": "class Pile(DrawableList):\n    item_type = Card\n    element_tag = \"syntax-statement-pile\""
+                  "code": "class Pile(ViewableList):\n    item_type = Card\n    element_tag = \"syntax-statement-pile\""
                 }
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) drawable list of {instanceType:type} {with_nested_statements}?"
+              "syntax": "(a|an) {type:quoted_type} is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -3866,19 +3866,19 @@
           "internal": false,
           "file": "src/spell/rules/classes/CSSBlock.ts",
           "line": 28,
-          "purpose": "A drawable type's own styles, in its outline (epic `drawable-thing`, P4).",
+          "purpose": "A view type's own styles, in its outline (epic `drawable-thing`, P4).",
           "syntaxes": [
             {
-              "example": "a card is a drawable thing:\n\t<css>\n\t\t.red { color: crimson }\n\t</css>",
+              "example": "a card is a view:\n\t<css>\n\t\t.red { color: crimson }\n\t</css>",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Drawable {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}"
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}"
                 },
                 "ts": {
-                  "code": "export class Card extends Drawable {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n  @E.protoMerged static elementSetup = {\n    styleSheets: { \"syntax-block-card\": Card.css }\n  } satisfies Partial<E.ElementSetup>\n}\ncore.useElement(Card, CardElement)"
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n  @E.protoMerged static elementSetup = {\n    styleSheets: { \"syntax-block-card\": Card.css }\n  } satisfies Partial<E.ElementSetup>\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(Drawable):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\\n  .red { color: crimson }\\n\""
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\\n  .red { color: crimson }\\n\""
                 }
               }
             }
@@ -5242,7 +5242,7 @@
           "internal": false,
           "file": "src/spell/rules/draw/StartApp.ts",
           "line": 10,
-          "purpose": "Start a scoped `App`/`Drawable`, e.g. `start the game` => `game.start()` (a method call, not a global).",
+          "purpose": "Start a scoped `App`/`View`, e.g. `start the game` => `game.start()` (a method call, not a global).",
           "syntaxes": [
             {
               "syntax": "start {app:expression}"

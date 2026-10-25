@@ -173,8 +173,8 @@ export class WriterProject {
     return WriterProject.LIST_CLASSES.some((list) => this.isSubclassOf(typeName, list))
   }
 
-  /** Spell's built-in list classes:  `List`, and `DrawableList`, a list drawn as its own element. */
-  static LIST_CLASSES = ["List", "DrawableList"]
+  /** Spell's built-in list classes:  `List`, and `ViewableList`, a list drawn as its own element. */
+  static LIST_CLASSES = ["List", "ViewableList"]
 
   /** Is class `typeName` class `ancestor`, or below it, e.g. a `DiscardPile` a `Pile`? */
   isSubclassOf(typeName: string | undefined, ancestor: string): boolean {

@@ -6,8 +6,8 @@ import { core } from "spell-parser/core/core"
 import { List } from "./List"
 
 /**
- * `DrawableList`:  a `List` drawn as its own custom element, its items inside it --
- * what `a pile is a drawable list of cards` extends.
+ * `ViewableList`:  a `List` drawn as its own custom element, its items inside it --
+ * what `a pile is a viewable list of cards` extends.
  * - Its element holds its items' elements as its CHILDREN, e.g. `<game-pile>` holding `<game-card>`s:
  *   the same shape in a program and in hand-written HTML.
  * - Two drawings, each overridable (epic `spanish` P20):
@@ -20,17 +20,17 @@ import { List } from "./List"
  *   - A second, named place, `<children name="header"/>`, is filled by children written `in="header"`
  *     (`slot="header"` on the page).
  *   - The list's own items always go in the unnamed one.
- * - The element comes from `core.defineElement()`, as a `Drawable`'s does.
+ * - The element comes from `core.defineElement()`, as a `View`'s does.
  * - Everything else as a `List`.
  */
-export class DrawableList<T = unknown> extends List<T> {
+export class ViewableList<T = unknown> extends List<T> {
   /**
    * May a page let people drop a thing on our lists?  `a pile can be dropped on` says yes (epic `outline-spell` P28).
    * - Even then, only what the list will take:  its `can take` rule.
    */
   static canBeDroppedOn = false
 
-  /** May a page let people drag our lists themselves?  `a pile can be dragged` -- see `Drawable.canBeDragged`. */
+  /** May a page let people drag our lists themselves?  `a pile can be dragged` -- see `View.canBeDragged`. */
   static canBeDragged = false
 
   /**

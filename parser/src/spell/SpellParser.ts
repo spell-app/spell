@@ -44,7 +44,7 @@ export class SpellParser extends P.Parser {
           quoteSymbols: [`"`],
           // Remove "normal" whitespace (leaving newlines and indents) when parsing
           whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
-          // never read as spell:  a drawable type's own styles (`css_block`),
+          // never read as spell:  a view type's own styles (`css_block`),
           // and formatted text (`markdown_block`, `markdown_description`)
           rawTextTags: ["css", "markdown"]
         })

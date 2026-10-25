@@ -241,7 +241,7 @@ describe("TSWriter", () => {
     expect(writer.write(element)).toBe(`<th class="left" colspan="2">{core.drawThing(theStock)}</th>`)
   })
 
-  test("a list's items draw as javascript draws them, `core.drawItems()`:  a drawable list's are its element's children", () => {
+  test("a list's items draw as javascript draws them, `core.drawItems()`:  a viewable list's are its element's children", () => {
     const drawItems = new P.ASTCoreMethodInvocation(match, {
       methodName: "drawItems",
       args: [new P.ASTVariableExpression(match, { name: "the_deck" })]

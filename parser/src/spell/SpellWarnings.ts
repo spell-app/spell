@@ -197,7 +197,7 @@ export class SpellWarnings {
 
   /**
    * What to say of a property or phrase on `type`, the kind of a property's values (epic `spanish` P22):
-   * `A card rank is one of the values a card lists:  it can't have properties or phrases of its own`.
+   * `A card rank is one of the values a card lists:  it can't have properties or aliases of its own`.
    * - It has no class to hold one (`P.ValueKind.property`).
    * - `undefined` for any other type, or when the type listing it isn't in `scope`.
    */

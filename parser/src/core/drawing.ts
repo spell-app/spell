@@ -13,7 +13,7 @@
  *   - compiled JavaScript draws a thing with `core.drawThing(card)`, which puts its `draw()` in the boundary
  *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself:
  *     it draws a child with `core.drawThing(card)` too, which calls a `@drawn` `draw()` straight
- *     (a bare `{card.draw()}` would skip a drawable thing's element -- epic `spanish` J100)
+ *     (a bare `{card.draw()}` would skip a view's element -- epic `spanish` J100)
  *   - `h()` returns a THUNK, a function that makes the element:  the boundary makes it, once (`madeOnce()`)
  * - Solid comes from the PAGE, never a copy of its own:
  *   `spell-runtime.js` imports `solid-js`, `@solidjs/web` and `@solidjs/h` from the page's one shared Solid,
@@ -28,7 +28,7 @@ import { Errored, For, createMemo, runWithOwner } from "solid-js"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
-import { DrawableList } from "./classes/DrawableList"
+import { ViewableList } from "./classes/ViewableList"
 
 /**
  * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
@@ -41,7 +41,7 @@ export { h }
 export type Drawing = JSX.Element
 
 /** Anything that can draw itself, e.g. a `Thing` or a `List`. */
-export type Drawable = {
+export type CanDraw = {
   /** Returns its drawing -- compiled from `to draw (a card)`. */
   draw(): Drawing
 }
@@ -57,19 +57,19 @@ export const drawingMethods = defineCoreModule({
    * - Compiles from `draw the card` -- see `rules/draw/DrawThing.ts`.
    *   Takes ANYTHING, as it checks:
    *   compiled spell draws what TypeScript can't type, e.g. the last card of a pile.
-   * - A DRAWABLE thing (`a card is a drawable thing`) is its element, e.g. `<solitaire-card>`, the card set as its
+   * - A VIEW (`a card is a view`) is its element, e.g. `<solitaire-card>`, the card set as its
    *   `thing`:  it draws itself in there, with `drawOwn()`.  When the page can define it -- see `elementFor()`.
-   *   - A drawable LIST's items are its element's children, e.g. `<game-pile>` holding `<game-card>`s,
+   *   - A viewable LIST's items are its element's children, e.g. `<game-pile>` holding `<game-card>`s,
    *     shown in its drawing's `<slot>` (spell's `<children/>`).
    * - Anything else:  its own drawing, here -- see `drawOwn()`.
    */
   drawThing(drawable?: unknown): Drawing | null {
-    const thing = drawable as Partial<Drawable> | undefined
+    const thing = drawable as Partial<CanDraw> | undefined
     if (typeof thing?.draw !== "function") return null
     const tag = core.elementFor(thing)
     if (tag) {
-      // a drawable list's items are its element's children:  shown in its drawing's `<slot>`
-      const items = thing instanceof DrawableList ? [() => core.drawItems(thing)] : []
+      // a viewable list's items are its element's children:  shown in its drawing's `<slot>`
+      const items = thing instanceof ViewableList ? [() => core.drawItems(thing)] : []
       // made NOW:  the thing is a plain value, set once
       return (h(tag, { "prop:thing": thing }, ...items) as unknown as () => Drawing)()
     }
@@ -78,7 +78,7 @@ export const drawingMethods = defineCoreModule({
 
   /**
    * `drawable`'s OWN drawing, in its own error boundary, never its element -- `null` if it can't draw (no `draw()`).
-   * - What `drawThing()` draws for a thing with no element, and what a drawable thing's element draws inside.
+   * - What `drawThing()` draws for a thing with no element, and what a view's element draws inside.
    * - Its `draw()` re-runs when something it read OUTSIDE its live values changes,
    *   e.g. the `is face down` an `if` chose by:  the card's node is drawn again, nothing else.
    *   Its live values update on their own.
@@ -86,20 +86,20 @@ export const drawingMethods = defineCoreModule({
    *   A thing whose `draw()` is `@drawn` brings its own:  it's called straight.
    */
   drawOwn(drawable?: unknown): Drawing | null {
-    const thing = drawable as Partial<Drawable> | undefined
+    const thing = drawable as Partial<CanDraw> | undefined
     if (typeof thing?.draw !== "function") return null
     // a second boundary around `@drawn`'s own would catch nothing more
     if (isDrawn(thing.draw)) return thing.draw()
-    return drawInBoundary(thing, () => (thing as Drawable).draw())
+    return drawInBoundary(thing, () => (thing as CanDraw).draw())
   },
 
   /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
-   *   And what a drawable list's element holds as its children -- see `drawThing()`.
+   *   And what a viewable list's element holds as its children -- see `drawThing()`.
    * - A list with its own `to draw each item` (`drawEachItem()`) draws each item with it, in a boundary of the list's:
    *   the wrapper each item is drawn in (epic `spanish` P20).
-   *   - A drawable list's default draws the item itself, in the item's own boundary:  no second one around it.
+   *   - A viewable list's default draws the item itself, in the item's own boundary:  no second one around it.
    * - Any other list's item draws as itself (`drawThing()`).
    * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
    */
@@ -131,7 +131,7 @@ export const drawingMethods = defineCoreModule({
    * - SIDE EFFECT:  `element.spellRoot` is the mounted app, so a runner can `unmount()` it before running a program
    *   again (`runCompiled()`).
    */
-  mountApp(app: Drawable, element: HTMLElement): MountedApp {
+  mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
     // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect), whose owner would
     // otherwise own the app's drawing -- and hold or re-run it with the host's
@@ -208,7 +208,7 @@ function isDrawn(draw: Function): boolean {
 /** A mounted app, as `mountApp()` returns it and leaves on its element (`spellRoot`). */
 export type MountedApp = {
   /** The app drawn, e.g. the game:  a recompile that keeps the program's things starts it again (`carryOver()`). */
-  app: Drawable
+  app: CanDraw
   /** Take the app's drawing down, emptying its element. */
   unmount(): void
 }
@@ -216,14 +216,14 @@ export type MountedApp = {
 /** The element an app is mounted into. */
 export type AppElement = HTMLElement & { spellRoot?: MountedApp }
 
-/** A list with its own way to draw each item:  a drawable list's `drawEachItem()`, spell's `to draw each item`. */
+/** A list with its own way to draw each item:  a viewable list's `drawEachItem()`, spell's `to draw each item`. */
 type DrawsEachItem = {
-  /** `item` drawn as one of the list's -- see `DrawableList.drawEachItem()`. */
+  /** `item` drawn as one of the list's -- see `ViewableList.drawEachItem()`. */
   drawEachItem(item: unknown): Drawing
 }
 
-/** A drawable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
-const DEFAULT_DRAW_EACH_ITEM = DrawableList.prototype.drawEachItem
+/** A viewable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
+const DEFAULT_DRAW_EACH_ITEM = ViewableList.prototype.drawEachItem
 
 /** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
 type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing

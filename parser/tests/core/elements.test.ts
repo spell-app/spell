@@ -1,9 +1,9 @@
 import { describe, test, expect, afterEach } from "vite-plus/test"
 
-import { core, Thing, Drawable, DrawableList, css, elementTagFor } from "spell-parser/core"
+import { core, Thing, View, ViewableList, css, elementTagFor } from "spell-parser/core"
 
-/** A drawable class's element:  its tag, named here, defined by the page's `elementDefiner`. */
-describe("drawable things' elements", () => {
+/** A view class's element:  its tag, named here, defined by the page's `elementDefiner`. */
+describe("views' elements", () => {
   afterEach(() => {
     core.elementDefiner = undefined
   })
@@ -24,13 +24,13 @@ describe("drawable things' elements", () => {
     expect(elementTagFor("Games", "DrawableCard")).toBe("games-drawable-card")
   })
 
-  test("defineElement() names a drawable class's tag as it's declared;  the page hears of it once the class is whole", async () => {
+  test("defineElement() names a view class's tag as it's declared;  the page hears of it once the class is whole", async () => {
     const defined: string[] = []
     core.elementDefiner = (tag, Class) => defined.push(`${tag} ${Class.name}`)
-    class Card extends Drawable {
+    class Card extends View {
       static elementTag = core.defineElement(this, "Solitaire")
     }
-    class Pile extends DrawableList<Card> {
+    class Pile extends ViewableList<Card> {
       static elementTag = core.defineElement(this, "Solitaire")
     }
     class Note extends Thing {
@@ -47,13 +47,13 @@ describe("drawable things' elements", () => {
   })
 
   test("with no definer, the tag is still named", () => {
-    class Card extends Drawable {}
+    class Card extends View {}
     core.defineElement(Card, "games")
     expect(core.elementTagOf(new Card())).toBe("games-card")
   })
 
   test("useElement() keeps the element class compiled TypeScript hands over, for the definer to build on (P10)", () => {
-    class Card extends Drawable {}
+    class Card extends View {}
     class Joker extends Card {}
     class Note extends Thing {}
     class CardElement {}
@@ -62,14 +62,14 @@ describe("drawable things' elements", () => {
     expect(core.elementClassOf(Card)).toBe(CardElement)
     // its own only:  a sub-class with none doesn't take its super-class's
     expect(core.elementClassOf(Joker)).toBeUndefined()
-    // not drawable:  nothing kept
+    // not a view:  nothing kept
     expect(core.elementClassOf(Note)).toBeUndefined()
   })
 })
 
-describe("elementApiOf():  what a drawable class shows on its element", () => {
+describe("elementApiOf():  what a view class shows on its element", () => {
   test("its declared properties and its methods, its super-types' too;  not draw(), nor a method with values in it, nor the built-in `id`", () => {
-    class Card extends Drawable {
+    class Card extends View {
       draw() {
         return null
       }
@@ -95,9 +95,9 @@ describe("elementApiOf():  what a drawable class shows on its element", () => {
   })
 
   test("a list it makes for itself is a list;  a list it belongs to is a property, the list holding it (P18)", () => {
-    class Chip extends Drawable {}
+    class Chip extends View {}
     Chip.declareProp("marks", { init: () => [] })
-    class Heap extends DrawableList<Chip> {
+    class Heap extends ViewableList<Chip> {
       static instanceType = Chip
     }
     Heap.exclusive = true
@@ -116,10 +116,10 @@ describe("elementApiOf():  what a drawable class shows on its element", () => {
   })
 })
 
-/** The tag a drawable type's `<css>` block compiles to:  `static css = css`...``. */
+/** The tag a view type's `<css>` block compiles to:  `static css = css`...``. */
 describe("css`...`", () => {
   test("hands back the sheet as text, the indent its lines share taken off", () => {
-    class Card extends Drawable {
+    class Card extends View {
       static css = css`
         :host {
           display: inline-block;
@@ -174,7 +174,7 @@ describe("drag handlers", () => {
     }
   }
   /** A tray with a sign:  `- while a token is dragged over it:` sets its sign's hint, and counts. */
-  class Tray extends DrawableList {
+  class Tray extends ViewableList {
     sign = new Sign()
     whileTokenDraggedOver(label: string) {
       this.sign.hint = `drop ${label} here`

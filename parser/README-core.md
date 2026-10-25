@@ -57,7 +57,7 @@ expected draws.
 [The parser](README-parser.md) reads the English, [a writer](README-targets.md) turns it into code,
 and this is what the code calls:  `spell-parser/core`, one of [spell-parser's](README.md) six folders.
 It's ONE object, `core`, of 143 helpers (`core.getRange(1, 100)`, `core.randomItemOf(deck)`,
-`core.move(card, tableau)` ...), and the five classes a program's types extend.
+`core.move(card, tableau)` ...), and the classes a program's templates extend.
 Every `core.` in compiled JavaScript is a call into it;  compiled Python's go to its twin, `spell_core`.
 
 <details>
@@ -100,7 +100,7 @@ spell lint try/deal
 Compiled JavaScript names the runtime on its first line, and imports nothing else:
 
 ```js
-import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList } from "@spell/core"
 ```
 
 `@spell/core` isn't a package you can install.
@@ -155,25 +155,25 @@ The cost lands on JavaScript, whose output leans on the core far harder:
 reading it means knowing the core's names, and the Core Reference lists all 143, in both languages
 (below, "More in the docs site").
 
-## A type is a class, and the class is the core's
+## A template is a class, and the class is the core's
 
 The other half of the import is classes.
 Here's the start of the card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "suit" is one of clubs, diamonds, hearts or spades
 	- its "color" is:
 		red if its suit is diamonds or hearts
 		black otherwise
 ```
 
-_The card's first five lines, its rank and phrases left out._
+_The card's first five lines, its rank and aliases left out._
 
 And what it compiles to in a project named `solitaire`:
 
 ```js
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
@@ -189,7 +189,7 @@ export class Card extends Drawable {
 }
 ```
 
-`Drawable` is one of the core's five classes, beside `Thing`, `List`, `App` and `DrawableList`;
+`View` is one of the core's classes, beside `Thing`, `List`, `App` and `ViewableList`;
 a card that only said `a card is a thing` would be `class Card extends Thing`.
 `declareProp()`, `getProp()` and `setProp()` are `Thing`'s, and they make `suit` reactive
 ([below](#reactivity--a-write-reads-back-at-once)).
@@ -203,7 +203,7 @@ The other two targets lean on the core in their own ways
   Its element class, `CardElement`, extends `SpellElement`, from a name of its own, `@spell/elements`:
   the core never imports Spell UI.
 - Python's `color` asks `self.suit in [...]`:  Python has the word, so there's no core call.
-  And there's no element, and no `defineElement()`:  a drawable thing's element is a browser's alone.
+  And there's no element, and no `defineElement()`:  a view's element is a browser's alone.
 
 ## The pieces:  one object, built as it loads
 
@@ -213,10 +213,10 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | Piece | What it does | Where |
 | --- | --- | --- |
 | the `core` object | the one object, and the types of everything on it | [index.ts](src/core/index.ts), [core.ts](src/core/core.ts), [core.types.ts](src/core/core.types.ts) |
-| the classes | `Thing`, `List`, `App`, `Drawable`, `DrawableList`, and their ids:  what a program's types extend | [classes/](src/core/classes/) |
+| the classes | `Thing`, `List`, `App`, `View`, `ViewableList`, and their ids:  what a program's templates extend | [classes/](src/core/classes/) |
 | list helpers | positions, ranges, filtering, adding and removing, shuffling | [collection-core.ts](src/core/collection-core.ts), [collection-other.ts](src/core/collection-other.ts), [positions.ts](src/core/positions.ts) |
 | text | text helpers, and dotted paths | [string.ts](src/core/string.ts), [paths.ts](src/core/paths.ts) |
-| drawing | Solid's `h()`, `@drawn`, mounting an app;  each drawable thing in its own element (`<solitaire-card>`), inside its own error boundary, so a throw while drawing it shows a stand-in for that thing alone | [drawing.ts](src/core/drawing.ts), [elements.ts](src/core/elements.ts) |
+| drawing | Solid's `h()`, `@drawn`, mounting an app;  each view in its own element (`<solitaire-card>`), inside its own error boundary, so a throw while drawing it shows a stand-in for that thing alone | [drawing.ts](src/core/drawing.ts), [elements.ts](src/core/elements.ts) |
 | notices and prompts | `notify`, `alert`, `warn` ... | [ui.ts](src/core/ui.ts) |
 | events | `trigger()`, `on()`, `off()`, `once()`;  pauses and processes | [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts) |
 | JSON | every object's JSON names its class first, as `"$type"`:  `{ "$type": "Card", "rank": "ace" }`;  `core.fromJSON()` reads it back as that class | [json.ts](src/core/json.ts) |
@@ -391,7 +391,7 @@ That's simple enough to copy into a second language step for step, which is the 
 A shuffle is lodash's, step for step, in both.
 
 **Not yet:**  36 of the core's names have no Python twin, mostly a browser's own:
-a drawable thing's element, a page's shadow root, carrying things over a recompile
+a view's element, a page's shadow root, carrying things over a recompile
 ([the list, by why](README-targets.md#the-python-half)).
 
 Running the Python half (uv, Python 3.12 or later, the standard library only):  [README-targets](README-targets.md).

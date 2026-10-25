@@ -17,9 +17,9 @@ game.start()                      # the game is drawn on `core.page`, when the p
   - An app mounted on it is drawn each time the page is WRITTEN, not when it starts:
     so it shows its things as they are then, as a live page would.
   - `python -m spell_core.run --page` writes it when the program ends:  what the core contract compares.
-- A drawable thing is its own element here too, `<solitaire-card>`, as the page shows it (epic `spanish` I5):
+- A view is its own element here too, `<solitaire-card>`, as the page shows it (epic `spanish` I5):
   - its own drawing inside, where a browser has its shadow root
-  - a drawable list's items' elements in its drawing's `<slot>`
+  - a viewable list's items' elements in its drawing's `<slot>`
   - So the page prints what the JavaScript run's fake page prints, cards in their piles.
   - Its tag is its class's `element_tag`, which the compiled class names (`element_tag_of()`).
 """
@@ -73,9 +73,9 @@ class DrawingMethods:
 
         - Compiled from `draw the card`, as `h("td", core.draw_thing(stock))`.
         - Takes anything, as it checks:  the last card of an empty pile is `None`, which draws nothing.
-        - A DRAWABLE thing (its class has an `element_tag`) is its element, e.g. `<solitaire-card>`,
+        - A VIEW (its class has an `element_tag`) is its element, e.g. `<solitaire-card>`,
           its own drawing inside (`draw_own()`), as the page shows it:  see `element_of()`.
-          - A drawable LIST's items are drawn in its drawing's `<slot>` (`draw_items()`).
+          - A viewable LIST's items are drawn in its drawing's `<slot>` (`draw_items()`).
         - Anything else:  its own drawing, here.
         """
         if not callable(getattr(drawable, "draw", None)):
@@ -83,9 +83,9 @@ class DrawingMethods:
         tag = self.element_tag_of(drawable)
         if tag is None:
             return self.draw_own(drawable)
-        from spell_core.apps import DrawableList
+        from spell_core.apps import ViewableList
 
-        items = self.draw_items(drawable) if isinstance(drawable, DrawableList) else None
+        items = self.draw_items(drawable) if isinstance(drawable, ViewableList) else None
         return element_of(tag, self.draw_own(drawable), items or [])
 
     def element_tag_of(self, drawable: object = None) -> str | None:
@@ -116,7 +116,7 @@ class DrawingMethods:
         - Compiled from `draw each card in the deck`, as `h("div", ..., core.draw_items(self))`.
         - An item that can't draw shows nothing.
         - A list with its own `to draw each item` (`draw_each_item()`) draws each item with it, as the JavaScript
-          core does:  a drawable list's wrapper around each item.
+          core does:  a viewable list's wrapper around each item.
         """
         from spell_core.lists import List
 
@@ -184,7 +184,7 @@ def element_of(tag: str, drawing: object, children: list[object]) -> Element:
       - each `<slot>` replaced by the children it takes:
         the unnamed one those with no `slot` attribute, and text;  `<slot name="header">` those with `slot="header"`
       - a child goes in the FIRST slot that takes it, as a browser puts it;  a slot with none shows nothing
-    - A drawable thing inside `drawing` is already drawn so (`core.draw_thing()`):
+    - A view inside `drawing` is already drawn so (`core.draw_thing()`):
       its slots are gone, so only `drawing`'s own are filled here.
     """
     unplaced = drawn_children([children])

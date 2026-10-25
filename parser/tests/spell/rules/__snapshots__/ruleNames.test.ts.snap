@@ -192,7 +192,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "create_list_type",
       "create_list_type",
       "create_list_type",
-      "create_drawable_list_type",
+      "create_viewable_list_type",
       "css_block",
       "markdown_description",
       "belongs_to_one",
@@ -282,10 +282,6 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "belongs_to_one",
       "belongs_to_one",
     ],
-    "create_drawable_list_type": [
-      "create_drawable_list_type",
-      "create_drawable_list_type",
-    ],
     "create_list_type": [
       "create_list_type",
       "create_list_type",
@@ -294,6 +290,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "create_type": [
       "create_type",
       "create_type",
+    ],
+    "create_viewable_list_type": [
+      "create_viewable_list_type",
+      "create_viewable_list_type",
     ],
     "define_property_has": [
       "define_property_has",
@@ -608,8 +608,8 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "create_list_type",
       "create_list_type",
       "reopen_type",
-      "create_drawable_list_type",
-      "create_drawable_list_type",
+      "create_viewable_list_type",
+      "create_viewable_list_type",
       "css_block",
       "markdown_description",
       "belongs_to_one",
@@ -757,7 +757,6 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "constant · constants · 1",
     "copy_list · lists · 1",
     "create_animation · methods · 1",
-    "create_drawable_list_type · classes · 2",
     "create_hook · methods · 1",
     "create_hook_words · methods · 1",
     "create_list_type · classes · 3",
@@ -765,6 +764,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "create_one_of_a_kind · classes · 1",
     "create_thing · classes · 1",
     "create_type · classes · 2",
+    "create_viewable_list_type · classes · 2",
     "css · UI · 1",
     "css_block · classes · 1",
     "define_property_has · classes · 10",

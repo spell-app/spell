@@ -1,7 +1,7 @@
 # Output targets:  one program, three languages, the same output
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "suit" is one of clubs, diamonds, hearts or spades
 ```
 
@@ -108,7 +108,7 @@ It also holds what changes from one language to the next:
 | Target | Writer | Writes | Its runtime |
 | --- | --- | --- | --- |
 | `js/solid` | [`JSWriter`](src/parser/writers/JSWriter.ts) | `<Project>.spell.js` | `@spell/core`, spell-parser's core |
-| `ts/solid` | [`TSWriter`](src/parser/writers/TSWriter.ts), on `JSWriter` | `<Project>.spell.tsx` | `@spell/core`;  `@spell/elements` for a drawable thing's element |
+| `ts/solid` | [`TSWriter`](src/parser/writers/TSWriter.ts), on `JSWriter` | `<Project>.spell.tsx` | `@spell/core`;  `@spell/elements` for a view's element |
 | `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell-parser/core/model`:  the core with no drawing, so no Solid |
 | `py` | [`PyWriter`](src/py/PyWriter.ts), on [`PyBaseWriter`](src/py/PyBaseWriter.ts) | `<Project>.spell.py`;  beside the source, its words, `<Project>.py.en.json5`, and for a program that draws, its web app, `<Project>.app.py` | `spell_core` |
 | `py`, a program that draws | [`ElementsWriter`](src/py/ElementsWriter.ts), on `JSWriter` | its page, in JavaScript:  `<Project>.elements.spell.js` | `@spell/core` |
@@ -127,8 +127,8 @@ The differences sit in four places:  imports, types, the element, and each langu
 
 | The card says | JavaScript | TypeScript | Python |
 | --- | --- | --- | --- |
-| _no line of its own:  the imports_ | `core, Thing, List, App, Drawable, DrawableList` from `@spell/core`:  the whole set, used or not | the same and `prop`;  `E, SpellElement` from `@spell/elements` | `from spell_core import Drawable, prop`:  only what it uses |
-| `a "card" is a drawable thing:` | `class Card extends Drawable`, its tag from `core.defineElement(this, "solitaire")` | the same, and a `CardElement` class after it | `class Card(Drawable):`, and no element:  Python draws HTML as text |
+| _no line of its own:  the imports_ | `core, Thing, List, App, View, ViewableList` from `@spell/core`:  the whole set, used or not | the same and `prop`;  `E, SpellElement` from `@spell/elements` | `from spell_core import View, prop`:  only what it uses |
+| `a "card" is a view:` | `class Card extends View`, its tag from `core.defineElement(this, "solitaire")` | the same, and a `CardElement` class after it | `class Card(View):`, and no element:  Python draws HTML as text |
 | `- its "suit" is one of ...` | `static Suits`, a getter and a setter | `Suits` `as const`, then `@prop(...) accessor suit!: Suit` | `SUITS`, a tuple, then `suit = prop(one_of=SUITS)` |
 | `- its "color" is:` ... | `get color()`, asking `core.includes(["diamonds", "hearts"], this.suit)` | the same, character for character | `@property def color(self) -> Any:`, asking `self.suit in [...]` |
 | `- it "is a face card" if ...` | `get isAFaceCard()` | the same | `@property def is_a_face_card(self) -> bool:` |
@@ -176,7 +176,7 @@ More rows, JavaScript beside Python:  [README-core](README-core.md#the-typescrip
 - Standard decorators:  `@prop`, `@derived`, `@thing`, and `@drawn` on `draw()`,
   which draws each thing in its own error boundary.
 - Drawing a thing or a list's items is JavaScript's:  `core.drawThing(this.stock)`, `core.drawItems(this)`.
-  So a drawable thing shows as its own element, and a drawable list's items as its children.
+  So a view shows as its own element, and a viewable list's items as its children.
 - Real JSX, which Solid's compiler builds, in Solid's shapes where they fit:
   - an `if ... return` chain becomes a `<Show>` or a `<Switch>`
   - any other `to draw` re-runs whole, in its error boundary
@@ -199,7 +199,7 @@ The cost:
   then Solid's compiler turns the JSX into DOM calls ([buildTsx()](src/spell/node/buildTsx.ts)).
 - `spell run <project> --target ts` does that build and runs it under node:  its prints and tests in the terminal.
   **A program that draws can't open in a browser that way yet:**  `--target js`, or none, does.
-- A drawable thing's element imports `@spell/elements`, which is spell-app's `SpellElement` and Spell UI's `E`.
+- A view's element imports `@spell/elements`, which is spell-app's `SpellElement` and Spell UI's `E`.
   So the type check needs spell-app installed beside spell-parser;  without it, the check skips itself.
 
 ## A library:  Spell's classes, for code that isn't Spell
@@ -368,7 +368,7 @@ have, grouped by why (36 names):
 
 | Why | Names |
 | --- | --- |
-| a browser's only:  a drawable thing's element, a page's markup, its shadow root | 11 |
+| a browser's only:  a view's element, a page's markup, its shadow root | 11 |
 | pauses and events Python's runtime hasn't needed | 4 |
 | carrying things over a recompile:  the page's runners only | 3 |
 | an element's id on the page | 1 |

@@ -1,4 +1,4 @@
-import { drawableAttributeFor, elementTagFor } from "spell/util"
+import { elementTagFor, viewAttributeFor } from "spell/util"
 import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { JSWriter } from "./JSWriter"
@@ -30,7 +30,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   - an `if ... return` chain becomes a `<Show>` / `<Switch>`
  *   - Any other `to draw` re-runs whole, in its error boundary.
  * - Drawing a thing, or a list's items, as javascript does:  `{core.drawThing(this.stock)}`, `{core.drawItems(this)}`.
- *   - So a drawable thing draws as its element, e.g. `<solitaire-card>`, and a drawable list's items as its children.
+ *   - So a view draws as its element, e.g. `<solitaire-card>`, and a viewable list's items as its children.
  *   - NOT `this.stock.draw()`:  that draws its drawing in place, never its element, so a pile's cards never show
  *     (epic `spanish` J100).
  * - Decorators:
@@ -48,7 +48,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   - a method written outside its class, from what it returns:
  *     `play(): Promise<boolean | undefined>` (`returnType()`, epic `output-targets`, T24)
  *   - a value kind's parameter, from its values:  `static color(suit: (typeof SUITS)[number])` (`valueKindType()`)
- * - A drawable type's element class, after its class -- see `elementClassFor()`:
+ * - A view type's element class, after its class -- see `elementClassFor()`:
  *   `class CardElement extends SpellElement<Card>`,
  *   handed to the page with `core.useElement(Card, CardElement)`.
  * - Spell's own built-ins stay `core` calls, so both targets print the same:
@@ -98,7 +98,7 @@ export class TSWriter extends JSWriter {
   private passedAsFound = false
   /** While writing a callback a list's own method takes:  its item is typed by the list -- see `callback()`. */
   private untypedItems = false
-  /** Each drawable type's tag, e.g. `solitaire-card`, by its element class's name:  see `elementClassFor()`. */
+  /** Each view type's tag, e.g. `solitaire-card`, by its element class's name:  see `elementClassFor()`. */
   private elementTags = new Map<string, string>()
 
   /**
@@ -108,9 +108,9 @@ export class TSWriter extends JSWriter {
    * - a member it adds to a class it imports is declared in that project's module,
    *   `declare module "..." { interface Card {...} }`:
    *   TypeScript refuses an `interface` merged with an import (`TS2440`)
-   * - with a drawable type's element class:
+   * - with a view type's element class:
    *   - `@spell/elements` imported below `@spell/core`
-   *   - each drawable type's tag declared for the JSX, last (`elementTagsDeclaration()`)
+   *   - each view type's tag declared for the JSX, last (`elementTagsDeclaration()`)
    */
   module(code: string): string {
     const solid = SOLID_COMPONENTS.filter((name) => new RegExp(`<${name}[\\s>]`).test(code))
@@ -246,7 +246,7 @@ export class TSWriter extends JSWriter {
 
   /**
    * As javascript's (`JSWriter.coreCall()`), plus a `!` on an item a guard found.
-   * - Drawing is javascript's too:  `core.drawThing(this.stock)`, `core.drawItems(this)` -- so a drawable thing
+   * - Drawing is javascript's too:  `core.drawThing(this.stock)`, `core.drawItems(this)` -- so a view
    *   draws as its element.
    */
   coreCall(node: P.ASTScopedMethodInvocation): string | undefined {
@@ -572,7 +572,7 @@ export class TSWriter extends JSWriter {
         body = `${body}\nexport interface ${this.typeNameOf(type.name)} {\n${indented(methods.join("\n"))}\n}`
       }
       if (hasCreate(declaration)) body = `@thing\n${body}`
-      // a drawable type's element class, with the line handing it to the page
+      // a view type's element class, with the line handing it to the page
       const element = this.elementClassFor(declaration)
       return element ? `${body}\n\n${element}` : body
     } finally {
@@ -796,12 +796,12 @@ export class TSWriter extends JSWriter {
   }
 
   ////////////////
-  // ## A drawable type's element class (epic `drawable-thing` P10, J41)
+  // ## A view type's element class (epic `drawable-thing` P10, J41)
   ////////////////
 
   /**
-   * The element class of drawable class `node`, written after it, and the line handing it to the page --
-   * `undefined` for a class that isn't drawable (no `static elementTag = core.defineElement(...)`).
+   * The element class of view class `node`, written after it, and the line handing it to the page --
+   * `undefined` for a class that isn't a view (no `static elementTag = core.defineElement(...)`).
    *
    * ```ts
    * export class CardElement extends SpellElement<Card> {
@@ -819,7 +819,7 @@ export class TSWriter extends JSWriter {
    * core.useElement(Card, CardElement)
    * ```
    * - Built on the runtime's own element, `SpellElement`, from `@spell/elements`,
-   *   which does what every drawable thing's element does:
+   *   which does what every view's element does:
    *   - drawing its thing
    *   - keeping the thing's properties and the element's attributes the same
    *   - finding its thing, for a tag in a page's layout
@@ -858,7 +858,7 @@ export class TSWriter extends JSWriter {
       ` * \`<${tag}>\`:  ${a(words)} ${words}, drawn in its own element, e.g. by \`draw the ${words}\`.`,
       ` * - The page defines its tag with this class:  \`core.useElement()\`, below.`,
       ` * - Its attributes are its ${words}'s properties;  its methods call its ${words}'s.`,
-      ` * - What every drawable thing's element does, e.g. drawing its ${words}, is \`SpellElement\`'s.`,
+      ` * - What every view's element does, e.g. drawing its ${words}, is \`SpellElement\`'s.`,
       " */"
     ].join("\n")
     const declaration = `export class ${name} extends SpellElement<${typeName}> {\n${indented(body)}\n}`
@@ -873,9 +873,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * An attribute for each property drawable class `node` declares itself, as its element's vocabulary says it:
+   * An attribute for each property view class `node` declares itself, as its element's vocabulary says it:
    * `{ name: "rank", kind: "string", description: "Its rank." }`.
-   * - Named as the page names them:  see `drawableAttributeFor()` in `spell/util`.
+   * - Named as the page names them:  see `viewAttributeFor()` in `spell/util`.
    * - Not a super-type's, nor the list holding it (`a card belongs to one pile`):  the page adds those.
    * - None for a name the page or Spell UI already means something by, e.g. `id`.
    */
@@ -883,7 +883,7 @@ export class TSWriter extends JSWriter {
     const attributes: string[] = []
     for (const member of node.members ?? []) {
       if (!(member instanceof P.ASTReactiveProperty)) continue
-      const attribute = drawableAttributeFor(String(this.write(member.property)), this.declaredTypeOf(member))
+      const attribute = viewAttributeFor(String(this.write(member.property)), this.declaredTypeOf(member))
       if (!attribute) continue
       const { name, kind, description } = attribute
       attributes.push(
@@ -908,7 +908,7 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * A method for each method drawable class `node` has itself, calling its thing's:
+   * A method for each method view class `node` has itself, calling its thing's:
    * `turnOver() { return this.currentThing?.turnOver() }`.
    * - So a page's `card.turnOver()` calls it, typed.
    * - Not a getter, nor `draw()`.  Its super-types' come from their classes, through the page.
@@ -948,7 +948,7 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * Each drawable type's tag, declared for the program's JSX (epic `drawable-thing` I7):
+   * Each view type's tag, declared for the program's JSX (epic `drawable-thing` I7):
    * so a tag written by hand, e.g. `<solitaire-pile>`, type-checks.
    * - Loose:  HTML attributes, plus any attribute or `prop:` its element defines.
    *   - Not so Spell UI's own `<ui-*>` tags:  `spell-ui/jsx` types those exactly.
@@ -960,13 +960,13 @@ export class TSWriter extends JSWriter {
     )
     const intrinsic = `interface IntrinsicElements {\n${indented(tags.join("\n"))}\n}`
     return [
-      "// each drawable type's tag, for the JSX",
+      "// each view type's tag, for the JSX",
       `declare module "@solidjs/web/types/jsx.js" {\n${indented(`namespace JSX {\n${indented(intrinsic)}\n}`)}\n}`
     ].join("\n")
   }
 
   /**
-   * What a drawable type's element can't have as a method:  its own members, `SpellElement`'s and Spell UI's.
+   * What a view type's element can't have as a method:  its own members, `SpellElement`'s and Spell UI's.
    * - A type's method of one of these names is left out of its element class (`elementMethods()`).
    * - Its own property `thing`, too.
    * - Pinned by app's `SpellElement.browser.test.tsx`:  every member an element has is here.
@@ -1101,7 +1101,7 @@ export class TSWriter extends JSWriter {
    * A list says what it holds, from its `static instanceType = Card`:
    * `a deck is a list of cards` => `class Deck extends List<Card>`.
    * - So `core.getItemAt(deck, 1)` is a `Card | undefined`.
-   * - A drawable list too:  `class Pile extends DrawableList<Card>`.
+   * - A viewable list too:  `class Pile extends ViewableList<Card>`.
    */
   superTypeOf(node: P.ASTClassDeclaration): string {
     const name = super.superTypeOf(node)

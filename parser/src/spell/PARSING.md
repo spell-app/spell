@@ -355,15 +355,15 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - A type has to be declared before a mention of several words can find it:  no stubs for those.
   - Those rules:  `type`, `known_type`, `singular_type` ...
 - Spell's own two-word types are built in (epic `drawable-thing`, P2):
-  - `drawable thing`
-  - `drawable list`
-  - Their datatypes are `drawable` and `drawable list`.
+  - `view`
+  - `viewable list`
+  - Their datatypes are `view` and `viewable list`.
     `SP.TYPE_WORDS` maps the ways to write them.
-  - Their classes are ONE word each, not Type_Case:  `Drawable` and `DrawableList`.
+  - Their classes are ONE word each, not Type_Case:  `View` and `ViewableList`.
     - They're listed in `P.BUILT_IN_CLASS_NAMES`.
     - `P.classCase()` names every class, and keys `scope.types`.
-  - `a pile is a drawable list of cards` is `create_drawable_list_type`.
-    It's `create_list_type`, extending `DrawableList`.
+  - `a pile is a viewable list of cards` is `create_viewable_list_type`.
+    It's `create_list_type`, extending `ViewableList`.
 - The short name is `TypeScope.aka`.
   - `scope.types` finds a type by it too (the list's `aliasProp`), after every type's own name in that scope.
   - A mention by the short name compiles as the type's own name:  `account` => `Bank_Account`.
@@ -813,9 +813,9 @@ A kind that says so is saved in a file of its own.
     so `- score is 0` is the card's getter, not a variable (it warns:  "score is always 0 ...").
     Inside a getter or method there, `total is 0` still sets a local.
   - Without a subject, `- "x" is ...` is a property, as `its "x" is ...` is.
-    - The phrase's twin has no `is`.
+    - The alias's twin has no `is`.
     - `QuotedTypeExpression.isPropertyWithoutSubject()` steps aside for it:
-      the phrase's higher priority would otherwise take the quoted name alone.
+      the alias's higher priority would otherwise take the quoted name alone.
   - Outside a type's body, nothing changes:  `"rank" is a number` at the top level is an error.
 - Quoted names:  "quotes teach a new word".
   - `quoted_type`:  `a "card" is a thing`, in any type declaration
@@ -841,12 +841,12 @@ A kind that says so is saved in a file of its own.
   - Quoted names work in the sentence style too:  `a card has a "suit" as ...` (J3, option C).
   - `- it "rank" is ...` is refused, saying to write `its`.
     See `QuotedTypeExpression.isPropertySlip()`.
-- A phrase and nothing more is refused, saying to add a body (`QuotedTypeExpression.isBodiless()`, epic page I6).
+- An alias and nothing more is refused, saying to add a body (`QuotedTypeExpression.isBodiless()`, epic page I6).
   - e.g. `- it "can move"` or `a card "can fly"`
   - It has no `if`, `is` or `:`.
   - Why:  it'd compile to an empty method.
   - A dangling `if` is fine:  its body may be the indented lines below.
-  - A phrase true for every one of the type says so:  `- it "can move" always`.
+  - An alias true for every one of the type says so:  `- it "can move" always`.
     - `always` / `never` are constants, read as its body.
 
 ## Value kinds:  `"suits" as one of clubs, diamonds, hearts or spades`
@@ -912,7 +912,7 @@ A kind that says so is saved in a file of its own.
         That works though `color` wasn't declared yet when it parsed.
 - A list type whose item type is declared BELOW it (a stub when it parses) reads it when used:
   `static get instanceType() { return Card }` (`create_list_type`).
-- A property, alias or phrase on a type nobody declares is refused (`SpellStatement.refuseUnknownType()`).
+- A property or an alias on a type nobody declares is refused, as is reopening one (`SpellStatement.refuseUnknownType()`).
 
 ### The kind of a property's values:  `its "suit" is a card suit`
 
@@ -941,7 +941,7 @@ A kind that says so is saved in a file of its own.
   - An importer makes it again, from the property's declaration (`SpellDeclarations.loadPropertyKind()`), named in
     the language that declaration was written in;  picking a type with a property of the kind brings the type
     listing it.
-  - So a property or phrase ON it is refused (`SpellStatement.refusePropertyKind()`):  `the "value" of a card rank is ...`.
+  - So a property or alias ON it is refused (`SpellStatement.refusePropertyKind()`):  `the "value" of a card rank is ...`.
     A member read off one warns, saying the same (`MemberReadExpression.warnIfUndeclared()`).
   - The scope explorer leaves it out:  its values show on the type listing them.
 - A type declared with its name keeps it (`TypeDeclaration.declareType()`):  `a card suit is a thing` claims the record.
@@ -950,7 +950,7 @@ A kind that says so is saved in a file of its own.
   from the body lines `declaredPropertyKinds()` finds (the language's `propertyListDeclaration`):
   only lists with `one of` / `either`.
 
-## Inferred phrases:  `- it "is a (suit)"`
+## Inferred aliases:  `- it "is a (suit)"`
 
 - A `quoted_property_formula` with no `for its ...` INFERS what each blank reads.
   - In its `parse()`:  `inferPlaceholders()`.
@@ -959,10 +959,10 @@ A kind that says so is saved in a file of its own.
     - It names, by its singular, a property of the type with a list of values.
     - The list is its own (`as one of`), or a value kind's.
     - e.g. `is the (rank) of (suits)`:  sources `rank`, `suit`
-    - Where the phrase is USED, a blank takes any of its values, singular or plural, numbers as they are
+    - Where the alias is USED, a blank takes any of its values, singular or plural, numbers as they are
       (`placeholderForms()`, epic `spanish`):  `(suit)` reads `the 2 of clubs` and `the queen of spade`.
   - A bare word is always just a word (epic page J9).
-  - More after the phrase:  not ours, so `it "is face up" if ...` stays a `quoted_type_expression`.
+  - More after the alias:  not ours, so `it "is face up" if ...` stays a `quoted_type_expression`.
   - REFUSED, saying why:
     - no parens:  `it "is a suit"`
     - a blank naming no such property:  `it "is a (color)"`
@@ -971,24 +971,24 @@ A kind that says so is saved in a file of its own.
 - A value kind declared FURTHER DOWN (a stub here, e.g. the card above the deck):
   - its placeholder's syntax is `(expression:{constant}|{number})`
   - `QuotedPropertyRule` is specialized with `kinds: { suit: "Suit" }`
-  - its `parse()` checks the word against the kind's values WHERE THE PHRASE IS USED
+  - its `parse()` checks the word against the kind's values WHERE THE ALIAS IS USED
     - That's `kindValue()`, into `data.kindArgs`.
-- A phrase ON a value kind:  `a rank "is a face card" if ...`.
+- An alias ON a value kind:  `a rank "is a face card" if ...`.
   - `QuotedTypeExpression.processSignature()` sets `signature.valueKindOf`.
   - It compiles to the kind's static method:  `static is_a_face_card(rank)`.
   - Its `MethodPostfixRule` compiles to `Rank.is_a_face_card(card.rank)`.
     See its `staticOf`.
-  - Postfix phrases only.
-- A phrase on a SUB-type of another of the project's types (a joker's `it "is the (color) joker"`)
+  - Postfix aliases only.
+- An alias on a SUB-type of another of the project's types (a joker's `it "is the (color) joker"`)
   is a STATIC method of its type, checking the type first (`QuotedPropertyFormulaBits.staticArg`, epic `spanish`):
   - `static isTheColorJoker(card, color) { return card instanceof Joker && card.color === color }`
   - every use calls it so, safe on any card:  `the card is the red joker` => `Joker.isTheColorJoker(card, "red")`
   - Why:  it's used on the super-type's values, which have no such instance method.
-  - A built-in super-type (`a card is a drawable thing`) doesn't count:  that phrase stays an instance method.
+  - A built-in super-type (`a card is a view`) doesn't count:  that alias stays an instance method.
 - A thing compared to one of its OWN listed values compares the property that lists it (`is_equal`, epic `spanish`):
   - `it is clubs`, in a card with `its "suit" is one of clubs ...` => `this.suit == "clubs"`
   - only when its type is known, the word is no variable, and ONE property lists it (`IsEqual.listedPropertyFor()`)
-- A user's phrase checks WHOSE it is.
+- A user's alias checks WHOSE it is.
   - `CompoundExpression` tells the first suffix after an operand what that operand is.
     - That's [`SuffixLeft`](rules/expressions/expressions.shared.ts):
       a side channel, set while that suffix parses, restored after.
@@ -1133,7 +1133,7 @@ A kind that says so is saved in a file of its own.
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`).
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
-    - Not yet:  a quoted phrase, `a card "is the (rank) of (suits)"`, used above its definition.
+    - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - `is a <type>` (`is_a`) names a KNOWN type:  built in, imported, declared or stubbed earlier.
     - Else it's a parse error, e.g. `is a crad`.
     - A type first mentioned in an `is a` above its own declaration is one too.
@@ -1744,7 +1744,7 @@ A kind that says so is saved in a file of its own.
     - each block is checked as a CSS document of the whole file, everything else blanked to spaces,
       so lines and characters match
   - spell's rule for it is `css_block`, in [CSSBlock.ts](rules/classes/CSSBlock.ts)
-    - only in a drawable type's outline
+    - only in a view type's outline
     - compiled to the class's `static css`
     - The tokenizer reads a `<css>` element's contents as raw text (`P.Tokenizer.rawTextTags`),
       so the CSS is never read as spell.

@@ -47,7 +47,7 @@ export type PageSpec = {
 }
 
 /** A started page:  `receive()` reads each state or patch the program sends. */
-export type Page = {
+export type StartedPage = {
   receive(state: unknown): void
   /** Its mirror:  each thing by its id. */
   mirror: StateMirror
@@ -70,7 +70,7 @@ function reading<T>(read: () => T): T {
 let current: { mirror: StateMirror; send: (message: PageMessage) => void } | undefined
 
 /** Start a page:  see the file's docs. */
-export function startPage({ modules, state, send }: PageSpec): Page {
+export function startPage({ modules, state, send }: PageSpec): StartedPage {
   const mirror = new StateMirror({ nameOf: javascriptName })
   current = { mirror, send }
   core.remote = REMOTE
@@ -197,7 +197,7 @@ export function connectPage({
   log?: boolean
 }): WebSocket {
   const socket = new WebSocket(url)
-  let page: Page | undefined
+  let page: StartedPage | undefined
   const send = (message: PageMessage) => {
     const text = JSON.stringify(message)
     if (log) logFrame("sent", message, text.length)

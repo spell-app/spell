@@ -169,7 +169,47 @@ describe("testing spell module classes", () => {
     })
   })
 
-  describe("a drawable type's own <css> (epic `drawable-thing`, P4)", () => {
+  describe("views, pages and two sided views (epic `elemental-spell` P1)", () => {
+    /** `lines` as one block:  its compiled code, and its parse errors. */
+    function parsed(name: string, lines: string[]) {
+      const block = spellParser.getScope(name).parse(lines.join("\n"), "block")!
+      return { code: `${block.compile()}`, errors: SP.Block.getParseErrors(block) ?? [] }
+    }
+
+    test("a view, a page and a two sided view each extend their own class", () => {
+      const { code, errors } = parsed("new-words", [
+        "a card is a two sided view",
+        "a home is a page",
+        "a pile is a viewable list of cards"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain("export class Card extends TwoSidedView {")
+      expect(code).toContain("export class Home extends Page {")
+      expect(code).toContain("export class Pile extends ViewableList {")
+    })
+
+    test("an old word is an error naming its new word, and the line still means the same", () => {
+      const { code, errors } = parsed("old-words", ["a card is a drawable thing", "a pile is a drawable list of cards"])
+      expect(errors.map((error) => error.message)).toEqual([
+        '"drawable thing" is now "view":  say "view" instead',
+        '"drawable list" is now "viewable list":  say "viewable list" instead'
+      ])
+      // what a quick fix puts in the old words' place, and where they are
+      expect(errors.map((error) => [error.inputText.trim(), error.data.replacement])).toEqual([
+        ["drawable thing", "view"],
+        ["drawable list", "viewable list"]
+      ])
+      expect(code).toContain("export class Card extends View {")
+      expect(code).toContain("export class Pile extends ViewableList {")
+    })
+
+    test("a plural old word's new word is plural too", () => {
+      const { errors } = parsed("old-plural", ["a deck is a list of drawable things"])
+      expect(errors.map((error) => error.data.replacement)).toEqual(["views"])
+    })
+  })
+
+  describe("a view type's own <css> (epic `drawable-thing`, P4)", () => {
     /** `lines` as one block:  its compiled lines, and its parse errors' messages. */
     function compiled(name: string, lines: string[]) {
       const block = spellParser.getScope(name).parse(lines.join("\n"), "block")!
@@ -179,7 +219,7 @@ describe("testing spell module classes", () => {
 
     test("in its outline, beside its properties:  the CSS as written, braces and all", () => {
       const { code, errors } = compiled("css-block", [
-        "a card is a drawable thing:",
+        "a card is a view:",
         "\t- it has a rank as a number",
         "\t<css>",
         "\t\t:host { display: inline-block }",
@@ -195,17 +235,10 @@ describe("testing spell module classes", () => {
     })
 
     test("anywhere else, an error that says where it goes", () => {
-      const notDrawable = compiled("css-not-drawable", [
-        "a note is a thing:",
-        "\t<css>",
-        "\t\tp { margin: 0 }",
-        "\t</css>"
-      ])
-      expect(notDrawable.errors).toEqual([
-        'Only a drawable type has its own <css>:  "Note" isn\'t drawable:  say "a ... is a drawable thing"'
-      ])
+      const notAView = compiled("css-not-a-view", ["a note is a thing:", "\t<css>", "\t\tp { margin: 0 }", "\t</css>"])
+      expect(notAView.errors).toEqual(['Only a view has its own <css>:  "Note" isn\'t a view:  say "a ... is a view"'])
       const loose = compiled("css-loose", ["<css>", "\tp { margin: 0 }", "</css>"])
-      expect(loose.errors).toEqual(["Only a drawable type has its own <css>:  put it in a type's outline"])
+      expect(loose.errors).toEqual(["Only a view has its own <css>:  put it in a type's outline"])
     })
   })
 })

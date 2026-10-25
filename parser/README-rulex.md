@@ -191,14 +191,14 @@ a word names every rule whose syntax starts with it.
 ## Your program writes Rulex too
 
 Spell's own rules aren't the only ones.
-When a program declares a phrase, Spell writes a Rulex syntax for it and registers it as a rule,
+When a program declares an alias, Spell writes a Rulex syntax for it and registers it as a rule,
 while it's still reading the file.
 
-The card on [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md) has four quoted phrases, and each becomes a rule.
+The card on [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md) has four quoted aliases, and each becomes a rule.
 Here are the lines behind two of them:
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "rank" is one of ace, 2 ... 10, jack, queen, king
 	- it "is a face card" if its rank is jack, queen or king
 	- it "is a (rank)"
@@ -255,12 +255,12 @@ core.console.log(card.isARank("queen"))
 
 </details>
 
-- A project writes its phrases' syntaxes down, so another project can register the same rules from data:
+- A project writes its aliases' syntaxes down, so another project can register the same rules from data:
   that example's are in
   [Solitaire.declarations.json5](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.declarations.json5).
-- The code that builds a phrase's syntax, word by word:
+- The code that builds an alias's syntax, word by word:
   [QuotedPropertyFormula.ts](src/spell/rules/classes/QuotedPropertyFormula.ts).
-- What phrases are, from the language's side:  [README-spell](README-spell.md).
+- What aliases are, from the language's side:  [README-spell](README-spell.md).
 
 </details>
 
@@ -311,7 +311,7 @@ read:
   and every syntax on Spell's parser compiles in about 13 ms, all together.
 - A `Sequence` class whose syntax compiles to one other rule wraps it;
   any other mismatch throws, naming the syntax and both classes ([Rule.ts](src/parser/rules/Rule.ts)).
-- Rules made WHILE parsing, like the card's phrases, compile their syntax the same way.
+- Rules made WHILE parsing, like the card's aliases, compile their syntax the same way.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -492,6 +492,6 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - [README-parser](README-parser.md):  the rule classes Rulex builds, and how to make them by hand
 - [README-markdown](README-markdown.md):  a second language's lines in Rulex, and the parts written in code
-- [README-spell](README-spell.md):  Spell's twenty rule modules, and the phrases a program declares
+- [README-spell](README-spell.md):  Spell's twenty rule modules, and the aliases a program declares
 - [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  `spell parse`, `spell explain` and the other language commands
 - [spell-parser's front page](README.md):  where Rulex sits in the pipeline, from a line of English to running code

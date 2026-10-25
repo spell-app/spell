@@ -247,7 +247,7 @@ export class ASTTemplateString extends ASTExpression {
 }
 
 /**
- * TaggedTemplate -- a template handed to a function, its `tag`, e.g. a drawable type's style sheet:
+ * TaggedTemplate -- a template handed to a function, its `tag`, e.g. a view type's style sheet:
  * `` css`.red { color: crimson }` `` (epic `drawable-thing`, P10).
  * - `tag` (required):  the function's name, e.g. `css`.
  * - `parts`:  as `ASTTemplateString`'s.

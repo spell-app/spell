@@ -112,12 +112,12 @@ export type QuotedPropertyFormulaBits = {
 }
 
 /**
- * Is `type` drawn as its own element:  made from `drawable` or `drawable list`, e.g. `a card is a drawable thing`?
+ * Is `type` drawn as its own element:  made from `view` or `viewable list`, e.g. `a card is a view`?
  * - Such a type defines its element, has its own styles, and is never saved inline.
  */
-export function isDrawableType(type: P.TypeScope): boolean {
-  return DRAWABLE_TYPES.some((base) => type.isA(base))
+export function isViewType(type: P.TypeScope): boolean {
+  return VIEW_TYPES.some((base) => type.isA(base))
 }
 
-/** The built-in types whose sub-types draw as their own elements -- see `isDrawableType()`. */
-const DRAWABLE_TYPES = ["drawable", "drawable list"]
+/** The built-in types whose sub-types draw as their own elements -- see `isViewType()`. */
+const VIEW_TYPES = ["view", "viewable list"]

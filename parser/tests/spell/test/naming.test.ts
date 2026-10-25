@@ -24,7 +24,7 @@ describe("a writer's naming map", () => {
     const naming = new P.Naming({ all: "snake_case" })
     expect(naming.nameOf("BankAccount", "type")).toBe("bank_account")
     expect(naming.nameOf("turn_face_up", "method")).toBe("turn_face_up")
-    expect(naming.nameOf("DrawableList", "type")).toBe("DrawableList")
+    expect(naming.nameOf("ViewableList", "type")).toBe("ViewableList")
   })
 
   /** Python's, PEP 8's (epic `python-target` P7). */

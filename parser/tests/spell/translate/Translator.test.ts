@@ -291,7 +291,7 @@ describe("TranslationNames", () => {
 
   test("a built-in type is the pack's own word", () => {
     expect(names.type("text")).toEqual({ name: "texto" })
-    expect(names.type("drawable thing")).toEqual({ name: "cosa dibujable" })
+    expect(names.type("view")).toEqual({ name: "vista" })
   })
 
   test("a word with no letters is itself;  a missing one is noted", () => {

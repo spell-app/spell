@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from spell_core import App, Core, Drawable, DrawableList, List, Thing, core, h, prop
+from spell_core import App, Core, List, Thing, View, ViewableList, core, h, prop
 from spell_core.drawing import Element, element_html
 from spell_core.run import main
 
@@ -158,19 +158,19 @@ def test_a_draw_that_fails_shows_a_stand_in(core: Core, capsys: pytest.CaptureFi
     assert capsys.readouterr().err == "Broken:  draw() failed ValueError('no rank')\n"
 
 
-def test_drawable_things_with_no_tag_draw_as_any_thing_and_a_drawable_list_as_its_slot(core: Core) -> None:
-    class Token(Drawable):
+def test_views_with_no_tag_draw_as_any_thing_and_a_viewable_list_as_its_slot(core: Core) -> None:
+    class Token(View):
         def draw(self) -> Element:
             return h("i", {"class": "token"})
 
     assert str(core.draw_thing(Token())) == '<i class="token"></i>'
-    assert str(core.draw_thing(DrawableList([Token()]))) == "<slot></slot>"
+    assert str(core.draw_thing(ViewableList([Token()]))) == "<slot></slot>"
 
 
-def test_an_empty_drawable_list_draws_its_placeholder_before_its_slot(core: Core) -> None:
-    """`to draw its placeholder`:  what a drawable list shows while it's empty (epic `outline-spell` P27)."""
+def test_an_empty_viewable_list_draws_its_placeholder_before_its_slot(core: Core) -> None:
+    """`to draw its placeholder`:  what a viewable list shows while it's empty (epic `outline-spell` P27)."""
 
-    class Spot(DrawableList):
+    class Spot(ViewableList):
         def draw_its_placeholder(self) -> Element:
             return h("b", "spot")
 
@@ -180,7 +180,7 @@ def test_an_empty_drawable_list_draws_its_placeholder_before_its_slot(core: Core
     assert str(core.draw_thing(spot)) == "<slot></slot>"
 
 
-class Chip(Drawable):
+class Chip(View):
     element_tag = "game-chip"
     value = prop(type="number")
 
@@ -188,21 +188,21 @@ class Chip(Drawable):
         return h("i", {"class": "chip"}, self.value)
 
 
-class Stack(DrawableList):
+class Stack(ViewableList):
     element_tag = "game-stack"
 
     def draw(self) -> Element:
         return h("div", {"class": "stack"}, h("slot", {"name": "label"}), h("b", "top"), h("slot"))
 
 
-def test_a_drawable_thing_with_a_tag_draws_as_its_element_its_drawing_inside(core: Core) -> None:
+def test_a_view_with_a_tag_draws_as_its_element_its_drawing_inside(core: Core) -> None:
     assert core.element_tag_of(Chip()) == "game-chip"
     assert core.element_tag_of(Card()) is None
     assert str(core.draw_thing(Chip(value=5))) == '<game-chip><i class="chip">5</i></game-chip>'
 
 
-def test_a_drawable_lists_items_show_in_its_drawings_slot_as_the_page_shows_them(core: Core) -> None:
-    class Plain(DrawableList):
+def test_a_viewable_lists_items_show_in_its_drawings_slot_as_the_page_shows_them(core: Core) -> None:
+    class Plain(ViewableList):
         element_tag = "game-plain"
 
     assert str(core.draw_thing(Plain([Chip(value=1), 2]))) == (
@@ -214,12 +214,12 @@ def test_a_drawable_lists_items_show_in_its_drawings_slot_as_the_page_shows_them
     assert str(core.draw_thing(Plain())) == "<game-plain></game-plain>"
 
 
-def test_a_drawable_lists_items_draw_as_themselves_or_their_text_or_in_its_own_wrapper(core: Core) -> None:
-    class Spots(DrawableList):
+def test_a_viewable_lists_items_draw_as_themselves_or_their_text_or_in_its_own_wrapper(core: Core) -> None:
+    class Spots(ViewableList):
         def draw_each_item(self, item: object) -> Element:
             return h("div", {"class": "spot"}, core.draw_thing(item))
 
-    heap = DrawableList([Card(rank="ace"), 7])
+    heap = ViewableList([Card(rank="ace"), 7])
     assert [str(drawn) for drawn in core.draw_items(heap) or []] == ['<div class="card">ace</div>', "7"]
     spots = Spots([Card(rank=2)])
     assert [str(drawn) for drawn in core.draw_items(spots) or []] == [

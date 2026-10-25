@@ -103,16 +103,16 @@ spell explain carta --in @spell/examples/Solitario
 
 ```text
 ...Carta.es.spell:4
-tipo Carta, subtipo de Drawable
+plantilla Carta, subplantilla de View
 
 La carta dice cuáles son sus palos, rangos y colores:  un mazo, una pila o un juego solo los leen.
-Una cosa dibujable:  cada carta es un elemento propio en la página, p. ej. <solitario-carta>.
+Una vista:  cada carta es un elemento propio en la página, p. ej. <solitario-carta>.
 
 propiedades:  rango, valor, palo, color, nombre, dirección, imagen, símbolo, estado, pila
 enumeraciones:  Rangos, Palos, Direcciones
 declarado en Carta.es.spell:4
 
-export class Carta extends Drawable {
+export class Carta extends View {
   static elementTag = core.defineElement(this, "Solitario")
 }
 ```
@@ -120,7 +120,7 @@ export class Carta extends Drawable {
 </details>
 
 The labels are the language server's, in the file's language:  `propiedades`, `declarado en`.
-`Drawable` is the runtime's own name, and stays English.
+`View` is the runtime's own name, and stays English.
 
 **See what it compiles to.**
 
@@ -199,7 +199,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 - Each language present gets its own words file, `<Project>.es.js` beside `<Project>.en.js`,
   which maps each compiled name back to the words that declared it.
 - **The catch:**  a plural English name in a Spanish file is made singular by SPANISH's rules.
-  `players` finds `Player`, but `una lista de cards` looks for a type named `Cards`:
+  `players` finds `Player`, but `una lista de cards` looks for a template named `Cards`:
   to Spanish, one syllable ending in `-s` is already singular, as `mes` is.
 
 ## What works in Spanish
@@ -208,7 +208,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 
 | What | In Spanish |
 | --- | --- |
-| the grammar | every rule of all 19 rule modules:  types, phrases, actions, lists, math, drawing, events, tests, async |
+| the grammar | every rule of all 19 rule modules:  templates, aliases, actions, lists, math, drawing, events, tests, async |
 | articles | `un / una / unos / unas`, `el / la / los / las`, and the contractions `del` and `al` |
 | plurals | Spanish's own:  `corazón / corazones`, and words that don't change, `lunes` |
 | "is" | `es` and `está` both mean "is";  `no es` and `no está` its negation |
@@ -217,7 +217,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | the parser's messages | `No entiendo "..."`, and its warnings with Spanish examples:  `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"` |
 | a test's lines | `▶️ Ejecutando`, `✅ Como se esperaba`, `❌ Inesperado`, in JavaScript and in Python |
 | Spell UI | every component has a Spanish tag:  `<es-boton>`, `<es-menu>`, `<es-cuadricula columnas="7">` |
-| drawing | a Spanish drawable gets its tag from its Spanish names, `<solitario-carta>` |
+| drawing | a Spanish view gets its tag from its Spanish names, `<solitario-carta>` |
 | the editor | its menus and panes, on a Spanish page;  colouring, completion and hover in each file's language |
 | translating | `spell translate <project> --to es`:  an English project written again in Spanish (below) |
 
@@ -358,7 +358,7 @@ about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
 It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
    - First from the Spanish glossary, a list shared by every project:  `carta` is `carta` in every program.
-   - The rest by Claude, the types first, then the other names in a few calls at once.
+   - The rest by Claude, the templates first, then the other names in a few calls at once.
    - They land in a dictionary beside the project, `<Project>.es.names.json5`, for a person to review
      (with `--out`, in that folder, with the rest of what the run writes).
 2. **Lines:**  each line read in English, then written again with the SAME rule's Spanish words,
@@ -428,7 +428,7 @@ it's a first draft that runs, for a Spanish speaker to review.
 Spell UI's Spanish, the runtime's messages and the editor's words are first drafts, not yet reviewed by a native speaker.
 
 **Still English:**
-- the runtime's own names:  `Drawable`, `core.includes`
+- the runtime's own names:  `View`, `core.includes`
 - what a developer reads at run time:  assertions, thrown errors, type checks
 - the project-level compile errors (imports, exports, targets), and a few lines of the editor's Program Output
   (`Compiling`, `Started afresh`)

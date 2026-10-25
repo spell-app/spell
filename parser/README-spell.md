@@ -1,7 +1,7 @@
 # Spell:  what the language can say
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "suit" is one of clubs, diamonds, hearts or spades
 	- its "color" is:
 		red if its suit is diamonds or hearts
@@ -17,7 +17,7 @@ _The card from [the kit's front page](https://github.com/spell-app/spell/blob/ma
 It lints clean, and every output on this page is the compiler's own, from a real run._
 
 Ten lines, and the language is bigger than it was.
-Each quoted bullet is a new phrase, and from the next line on Spell reads it like one of its own:
+Each quoted bullet teaches Spell new words, and from the next line on Spell reads them like its own:
 
 ```sh
 spell parse --in ./solitaire 'the card is a new card whose rank is 7 and suit is hearts
@@ -38,9 +38,9 @@ core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
 
 </details>
 
-The match tree names the rules that read those two phrases, `is_a_face_card` and `is_a_$rank`.
+The match tree names the rules that read those two aliases, `is_a_face_card` and `is_a_$rank`.
 Nobody wrote them:  the card's bullets made them, a moment before.
-The `not` came free;  a phrase that starts with `is` reads `is not` and `isn't` too.
+The `not` came free;  an alias that starts with `is` reads `is not` and `isn't` too.
 
 If you've grown a grammar for a parser generator, that's the part to notice.
 There, a new phrase is an edit to the grammar file and a rebuild;
@@ -73,9 +73,9 @@ spell compile ./solitaire --stdout
 
 ```text
 ✓ @local/try/solitaire
-import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList } from "@spell/core"
 
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 ...
 ```
@@ -85,7 +85,7 @@ export class Card extends Drawable {
 - `{}` is a whole project file (below, "The compiler").
 - `--stdout` prints the code and writes nothing;  without it, the code goes to the build folder (below, "The compiler").
 - `--target ts/solid` prints the TypeScript, `--target py` the Python.
-- The element's tag is the project's name, then the type's:  `<solitaire-card>`.
+- The element's tag is the app's name, then the template's:  `<solitaire-card>`.
 - Look for `2 ... 10`:  it became the nine numbers between, and the choice of words a list on the class, `Card.Suits`.
 - The whole of all three, JavaScript, TypeScript and Python, is folded under the card on
   [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md);  the three side by side, a line of Spell at a time, are in
@@ -111,11 +111,11 @@ a card "is the (rank) of (suits)" for its ranks and its suits
 _Seven lines in the sentence style, the way the Solitaire example's card was written before it was an outline._
 
 Compile both, and `diff` finds the same JavaScript, member for member, but for three things:
-- the outline's card is `drawable`, so it extends `Drawable` and gets an element of its own;
+- the outline's card is a `view`, so it extends `View` and gets an element of its own;
   the sentences' card is a plain `Thing`
 - each stored property's comment quotes the line that made it, bullet or sentence
 - `(suits)`, with an `s`, makes `isTheRankOfSuits`, where `(suit)` makes `isTheRankOfSuit`
-  (below, "Phrases become rules", says why that `s` matters)
+  (below, "Aliases become rules", says why that `s` matters)
 
 | The outline's bullet | The sentence | Both compile to |
 | --- | --- | --- |
@@ -124,7 +124,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 | `- it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
 | `- it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
-- In an outline, `it` and `its` mean the type its first line names, and a blank like `(rank)` finds its own list;
+- In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
   [Solitaire's file](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell) is outlines,
@@ -148,7 +148,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | properties | `the ... of ...`, `its ...`, object literals | 13 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for each`, `where` | 42 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
-| classes | types, properties, phrases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
+| classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
 | JSX | elements, fragments, `<markdown>` blocks | 8 | `<a/>` | `h("a")` |
@@ -157,11 +157,11 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | statements | statements with nothing else to say | 1 | `do nothing` | `core.doNothing()` |
 | events | firing and handling events | 3 | `on card click` | `on("card-click")` |
 | if | `if`, `otherwise`, a value `if ... otherwise` | 6 | `print 1 if bar else 2` | `core.console.log(bar ? 1 : 2)` |
-| methods | `to ...` actions, animations, quoted phrases | 17 | `to start the game` | `export function startTheGame() {}` |
+| methods | `to ...` actions, animations, quoted aliases | 17 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
 The weight is in `classes`:  52 of the 244 rule classes, and 95 of the 270 syntaxes, are ways to DECLARE
-something (a type, a property, a phrase, how a thing is saved).
+something (a template, a property, an alias, how a thing is saved).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
@@ -180,7 +180,7 @@ doing things is the smaller half.
 Each part below is one family of lines:  real lines, from the frozen test projects and the rules' own tests,
 and the JavaScript they become.
 
-### Types, choices and worked-out values
+### Templates, choices and worked-out values
 
 | Spell | JavaScript |
 | --- | --- |
@@ -196,18 +196,18 @@ and the JavaScript they become.
 
 - `Thing`, `List` and `App` are the runtime's base classes ([README-core](README-core.md)).
 - After `a card is a thing`, "card" is a word every line knows, in every file of the project:
-  each type a project declares is known before its first line is read, so a line may use one declared further down.
+  each template a project declares is known before its first line is read, so a line may use one declared further down.
 - A stored property is declared with its choices;  a worked-out one is a getter, read when you ask for it.
-- A property's choices are a kind of their own, named by the type, then the property:  a card's suits make `card suit`.
-  - Another type's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
+- A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
+  - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
   - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
-  - It holds plain text and numbers, so it has no properties or phrases of its own:  Spell says so if you give it one.
+  - It holds plain text and numbers, so it has no properties or aliases of its own:  Spell says so if you give it one.
   - Spanish puts the words in its own order:  `palo de carta`, plural `palos de carta`.
 - A card's value is its rank's position, so an ace is 1 and a queen is 12:  the Solitaire example's card test checks the queen.
 
-### Phrases become rules
+### Aliases become rules
 
-A phrase in quotes teaches Spell new words, as a rule of its own, from the next line on.
+An alias in quotes teaches Spell new words, as a rule of its own, from the next line on.
 That's where the card's `is_a_face_card` came from.
 
 ```mermaid
@@ -221,7 +221,7 @@ flowchart LR
 ```
 
 _A quoted bullet is parsed like any line, and parsing it adds a rule:
-every later line can use the phrase, in this project and in any project that imports it._
+every later line can use the alias, in this project and in any project that imports it._
 
 | Spell | Reads, after it | JavaScript |
 | --- | --- | --- |
@@ -229,21 +229,21 @@ every later line can use the phrase, in this project and in any project that imp
 | `a card "is a (suit)" for its suits` | `the card is a spade`, `the card is a heart` ... | `isASuit(suit) { return this.suit === suit }` |
 | `a card "is the (rank) of (suits)" for its ranks and its suits` | `the card is the queen of spades` | `isTheRankOfSuits(rank, suit)` |
 
-- A blank in brackets is one phrase per value of a list:  `(suit)` reads each suit, `(rank)` each rank.
+- A blank in brackets is one alias per value of a list:  `(suit)` reads each suit, `(rank)` each rank.
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
   the Solitaire example's card wrote `(suits)`, and answers to `the queen of spades`.
-- A phrase reaches every file of its project, e.g. from Solitaire's `Card.spell` to its `Solitaire.spell`:
-  `- it can give up a card if: the card is face up` reads a phrase the card made.
+- An alias reaches every file of its project, e.g. from Solitaire's `Card.spell` to its `Solitaire.spell`:
+  `- it can give up a card if: the card is face up` reads an alias the card made.
   - It travels with its project's declarations too, to a project that imports it.
 
-**The edge, and it's a sharp one:**  a phrase in the other form doesn't fail;  it reads as something else.
+**The edge, and it's a sharp one:**  an alias in the other form doesn't fail;  it reads as something else.
 Against the card at the top, `the card is the queen of spades` compiles to `card === "spades".queen`:
 `spell lint` passes it, and only a test catches it,
 `` `the card is the queen of spades` should be `yes` but is actually `false` ``.
 
-**Not yet:**  a quoted phrase used above the line that makes it.
-An action can be called before its definition (below);  a phrase can't, and `spell lint` says so at the line
+**Not yet:**  an alias used above the line that makes it.
+An action can be called before its definition (below);  an alias can't, and `spell lint` says so at the line
 ([why, in README-parser](README-parser.md#how-earlier-lines-teach-later-ones)).
 
 ### Actions, and waiting for them
@@ -258,7 +258,7 @@ Its first line is how you call it, with each blank's type in brackets:
 | `for each card in the deck`, then `move it to the stock` | `deck.forEach((card) => card.moveToPile(stock))` |
 | `wait for: move the card to the stock` | `await card.moveToPile(stock)` |
 
-- An action may be written in any file, yet be a method of a type another file declares:
+- An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spell` declares
     ([Solitaire.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell)).
@@ -286,7 +286,7 @@ Its first line is how you call it, with each blank's type in brackets:
 
 ### Drawing
 
-A drawable thing is a web component of its own, with its own styles:
+A view is a web component of its own, with its own styles:
 the card at the top draws as `<solitaire-card>`.
 
 ```spell
@@ -308,7 +308,7 @@ export class Tableau extends Pile {
   static css = css`...`
 ```
 
-- A tag's name is its project's, then its type's:  the tableau is `<solitaire-tableau>`.
+- A tag's name is its app's, then its template's:  the tableau is `<solitaire-tableau>`.
 - `to draw it` returns markup, with Spell inside its braces:
   `<ui-text class="Card" onClick={fire event card click with card = it}>...</ui-text>`,
   in [Solitaire's Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell).
@@ -320,17 +320,17 @@ export class Tableau extends Pile {
   ([Solitaire's Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell)).
   - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
     `- to draw it:` unquoted takes a method's body, which returns it.
-- A drawable list has three:
+- A viewable list has three:
   - its `to draw it` is the WRAPPER around its items, by default nothing but the place they show
   - its `to draw each item` is the wrapper each item is drawn in, by default just the item's own drawing:
     `core.drawItems()` draws each item with it, `drawEachItem(item)`
   - its `to draw its placeholder` is what it shows while it's empty, by default nothing:
     `drawItsPlaceholder()`, e.g. a stock pile's face-down card (Spanish:  `para dibujar su marcador`)
-- A drawable list's element numbers its items for CSS:  each one's `--index`, from 0, and its own `--count`,
+- A viewable list's element numbers its items for CSS:  each one's `--index`, from 0, and its own `--count`,
   so a pile can lay its cards out with no code
   ([Solitaire's styles.css](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/styles.css)).
 - A thing that moves from one list to another glides there on the page.
-- A drawable list's wrapper may have named places a child can fill,
+- A viewable list's wrapper may have named places a child can fill,
   `<children name="header"/>`, filled by a child written `<h3 in="header">`.
 
 ### Events
@@ -375,7 +375,7 @@ export function testCardSetup() {
     core.expect(card.isFaceUp, `the card is face up`, true, `yes`)
 ```
 
-- Each check keeps its words, so a failure says in English what was wrong, as the phrase edge above showed.
+- Each check keeps its words, so a failure says in English what was wrong, as the alias edge above showed.
 - A program runs its own tests the first time it loads, and never on a hot reload:
   `if (!core.isCarryingOver) testCardSetup()`.
 - `spell test` runs them.
@@ -422,7 +422,7 @@ Every thing has an `id`, built in:  nobody declares it.
 - Saved in its own file, each person is a file of their own;
   saved inline, a small thing stays inside what holds it ([people](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/people/People.spell)).
 
-One thing of a running program is named by its type, then its name or its place:
+One thing of a running program is named by its template, then its name or its place:
 
 | | By name | By place |
 | --- | --- | --- |
@@ -714,8 +714,8 @@ And what IS here, though you might look elsewhere:
 
 ## 🌱 Coming:  mixins, and Spell UI written in Spell
 
-Today a type has one parent:  a card is a drawable thing, or a thing.
-Next is "a card is a drawable, sortable thing", a type that takes its behaviour from several named sources,
+Today a template has one parent:  a card is a view, or a thing.
+Next is "a card is a sortable view", a template that takes its behaviour from several named sources,
 the way Spell UI's elements would compose too.
 After that, Spell UI's simpler elements written in Spell, and compiled ahead to the TypeScript Spell UI ships:
 divider, label, card, then form controls, with every attribute given a Spell phrase.
@@ -733,7 +733,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | thing | `id`;  `(a thing) belongs to one (list)`;  `draw (a thing)` |
 | list | `length`, `size`;  `item (n) of (a list)`;  `items in (a list) where`;  `add (a thing) to (a list)`;  `shuffle (a list)` |
 | app | `start (an app)` |
-| drawable, drawable list | what a thing or list that draws itself adds |
+| view, viewable list | what a thing or list that draws itself adds |
 | text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case` |
 | date | `year`, and its other parts |
 
@@ -771,7 +771,7 @@ for anyone working on the parser or the language:
 - tokens, then block, line, statement
 - when scope changes, and how projects share a parser
 - expressions and precedence, members, datatypes
-- outline bodies, value kinds, inferred phrases
+- outline bodies, value kinds, inferred aliases
 - projects on disk and their build folders
 - incremental parsing, and the language server's use of it
 
@@ -790,7 +790,7 @@ These guides need a checkout with the content folder beside it, and the page ser
 | Spell Syntax:  every rule, drawn from the syntax table | `/guides/spell-syntax/spell-syntax.html` |
 | Outline Spell | `/guides/outline-spell.html` |
 | People and Orgs:  ids, addresses, saving | `/guides/people-and-orgs.html` |
-| Drawable Things | `/guides/drawable-thing.html` |
+| Views | `/guides/drawable-thing.html` |
 
 </details>
 

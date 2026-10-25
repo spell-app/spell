@@ -22,7 +22,7 @@ import { SpellType } from "spell-parser/spell/rules/types/SpellType"
  *   - Either name finds the type afterwards, e.g. `the accounts`, `a new bank account`.
  *   - A name some other type already goes by is refused -- see `refuseTakenNames()`.
  *   - So is a type declared a second time (issue I13):  `a game:` adds to it -- see `reopen_type`.
- * - A DRAWABLE type (`a card is a drawable thing`, or a sub-type of one) defines its element as its class is declared:
+ * - A VIEW type (`a card is a view`, or a sub-type of one) defines its element as its class is declared:
  *   a static field, `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
  */
 export class TypeDeclaration<
@@ -123,7 +123,7 @@ export class TypeDeclaration<
   }
 
   /**
-   * Name of the project `scope` is in, which a drawable type's element is named after, e.g. `Solitaire` --
+   * Name of the project `scope` is in, which a view type's element is named after, e.g. `Solitaire` --
    * `""` outside a project.  Call it WHILE PARSING:  it looks up scope.
    */
   static projectNameOf(scope: P.Scope): string {
@@ -134,8 +134,8 @@ export class TypeDeclaration<
   }
 
   /**
-   * The member that defines a drawable type's element as its class is declared, in project `project` --
-   * `undefined` for a type that isn't drawable (no `project`).
+   * The member that defines a view type's element as its class is declared, in project `project` --
+   * `undefined` for a type that isn't a view (no `project`).
    * - `static elementTag = core.defineElement(this, "Solitaire")`:  a static field runs as the class is made,
    *   so before the program draws anything.  See `core.defineElement()`, in core's `elements.ts`.
    */

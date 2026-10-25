@@ -90,5 +90,8 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   cosa: "feminine",
   aplicación: "feminine",
   aplicacion: "feminine",
+  vista: "feminine",
+  página: "feminine",
+  pagina: "feminine",
   dibujable: "masculine"
 }

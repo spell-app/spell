@@ -12,7 +12,7 @@ import { type MethodBody } from "./classes.shared"
  * - Epic `outline-spell` P28.
  *
  * ```spell
- * a "pile" is a drawable list of cards where:
+ * a "pile" is a viewable list of cards where:
  * 	- it can be dropped on
  * 	- while a card is dragged over it:
  * 		set its hint to "drop here"

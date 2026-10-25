@@ -14,13 +14,19 @@ describe("testing spell module classes, in Spanish", () => {
     return { code, errors: code.split("\n").filter((line) => line.includes("PARSE ERROR")) }
   }
 
+  test("an old word is an error naming its new word:  `cosa dibujable` is now `vista` (epic `elemental-spell` P1)", () => {
+    const block = SP.spanish.parser.getScope("old-words").parse("una carta es una cosa dibujable", "block")!
+    const errors = SP.Block.getParseErrors(block) ?? []
+    expect(errors.map((error) => [error.message, error.data.replacement])).toEqual([
+      ['"cosa dibujable" ahora es "vista":  di "vista"', "vista"]
+    ])
+    expect(`${block.compile()}`).toContain("export class Carta extends View {")
+  })
+
   describe("drawing:  ONE `para dibujarlo`, and a list's `para dibujar cada elemento` (`draw_method`, P20)", () => {
     test('`para "dibujarla":` + markup is `draw()`;  `dibujarlo` and `dibujar eso` say it too', () => {
       for (const words of ['"dibujarla"', '"dibujarlo"', '"dibujar eso"']) {
-        const { code, errors } = compiled("draw-it", [
-          "una carta es una cosa dibujable:",
-          `\t- para ${words}: <div>carta</div>`
-        ])
+        const { code, errors } = compiled("draw-it", ["una carta es una vista:", `\t- para ${words}: <div>carta</div>`])
         expect(errors).toEqual([])
         expect(code).toMatch(/draw\(\) \{\s+return h\("div", "carta"\)/)
       }
@@ -28,7 +34,7 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`para dibujarla:` unquoted is a method's body, which returns it:  `draw()`, never `dibujarla()`", () => {
       const { code, errors } = compiled("draw-it-method", [
-        "una carta es una cosa dibujable:",
+        "una carta es una vista:",
         "\t- para dibujarla:",
         "\t\tdevolver <div>carta</div>"
       ])
@@ -37,15 +43,15 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).not.toContain("dibujarla()")
     })
 
-    test("a drawable list:  `para dibujarla` is its wrapper, `para dibujar cada elemento` the one around each item", () => {
+    test("a viewable list:  `para dibujarla` is its wrapper, `para dibujar cada elemento` the one around each item", () => {
       const { code, errors } = compiled("draw-each-item", [
-        "una carta es una cosa dibujable",
-        "una pila es una lista dibujable de cartas:",
+        "una carta es una vista",
+        "una pila es una lista visible de cartas:",
         "\t- para dibujarla:",
         '\t\tdevolver <div class="pila"><hijos/></div>',
         "\t- para dibujar cada elemento:",
         '\t\tdevolver <div class="hueco">{dibujar la carta}</div>',
-        "un mazo es una lista dibujable de cartas:",
+        "un mazo es una lista visible de cartas:",
         '\t- para "dibujar cada elemento": <b>{dibujar el elemento}</b>'
       ])
       expect(errors).toEqual([])
@@ -54,10 +60,10 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toContain('return h("b", () => core.drawThing(item))')
     })
 
-    test("a drawable list:  `para dibujar su marcador` is what it shows while it's empty, `drawItsPlaceholder()` (outline-spell P27)", () => {
+    test("a viewable list:  `para dibujar su marcador` is what it shows while it's empty, `drawItsPlaceholder()` (outline-spell P27)", () => {
       const { code, errors } = compiled("draw-its-placeholder", [
-        "una carta es una cosa dibujable",
-        "una pila es una lista dibujable de cartas:",
+        "una carta es una vista",
+        "una pila es una lista visible de cartas:",
         "\t- para dibujar su marcador:",
         '\t\tdevolver <div part="marcador"/>'
       ])
@@ -68,9 +74,9 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`- se puede arrastrar`, `- se puede soltar encima`:  English's `can be dragged`, `can be dropped on` (outline-spell P28)", () => {
       const { code, errors } = compiled("drag-and-drop", [
-        "una carta es una cosa dibujable:",
+        "una carta es una vista:",
         "\t- se puede arrastrar",
-        "una pila es una lista dibujable de cartas:",
+        "una pila es una lista visible de cartas:",
         "\t- se puede soltar encima"
       ])
       expect(errors).toEqual([])
@@ -81,9 +87,9 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`es arrastrable`, `no es soltable`:  the same flags, as adjectives (outline-spell P28)", () => {
       const { code, errors } = compiled("draggable", [
-        "una carta es una cosa dibujable:",
+        "una carta es una vista:",
         "\t- es arrastrable",
-        "una pila es una lista dibujable de cartas:",
+        "una pila es una lista visible de cartas:",
         "\t- no es soltable"
       ])
       expect(errors).toEqual([])
@@ -93,8 +99,8 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`cuando una carta se suelta sobre ella`:  English's `when a card is dropped on it` (outline-spell P28)", () => {
       const { code, errors } = compiled("drag-handler", [
-        "una carta es una cosa dibujable",
-        "una pila es una lista dibujable de cartas:",
+        "una carta es una vista",
+        "una pila es una lista visible de cartas:",
         "\t- cuando una carta se arrastra sobre ella:",
         "\t\timprimir 1",
         "\t- cuando una carta se arrastra fuera de ella:",
@@ -110,8 +116,8 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`mientras una carta se arrastra sobre ella`, `cuando algo se suelta sobre ella`:  English's `while ...`, `something` (outline-spell P28)", () => {
       const { code, errors } = compiled("drag-while", [
-        "una carta es una cosa dibujable",
-        "una pila es una lista dibujable de cartas:",
+        "una carta es una vista",
+        "una pila es una lista visible de cartas:",
         "\t- mientras una carta se arrastra sobre ella:",
         "\t\timprimir la carta",
         "\t- mientras algo se arrastra sobre ella:",
@@ -127,10 +133,10 @@ describe("testing spell module classes, in Spanish", () => {
 
     test("`- sus elementos se pueden reordenar (después de 1 segundo)`:  English's `its items can be reordered` (outline-spell P30)", () => {
       const { code, errors } = compiled("reorder", [
-        "una tarea es una cosa dibujable",
-        "una agenda es una lista dibujable de tareas:",
+        "una tarea es una vista",
+        "una agenda es una lista visible de tareas:",
         "\t- sus elementos se pueden reordenar después de 1 segundo",
-        "una cola es una lista dibujable de tareas:",
+        "una cola es una lista visible de tareas:",
         "\t- sus elementos se pueden reordenar de inmediato"
       ])
       expect(errors).toEqual([])
@@ -139,10 +145,7 @@ describe("testing spell module classes, in Spanish", () => {
     })
 
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
-      const { errors } = compiled("no-sides", [
-        "una carta es una cosa dibujable:",
-        '\t- para "dibujar su frente": <b/>'
-      ])
+      const { errors } = compiled("no-sides", ["una carta es una vista:", '\t- para "dibujar su frente": <b/>'])
       expect(errors).toHaveLength(1)
     })
   })

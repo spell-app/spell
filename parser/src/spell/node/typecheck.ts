@@ -51,7 +51,7 @@ function installedPackage(name: string, sub = ""): string | undefined {
  * - Solid's JSX, read as `app` reads its own (`jsx: "preserve"`, `jsxImportSource: "@solidjs/web"`).
  *   - `<ui-*>` tags are typed as `app` types them:  Spell UI's exact types (`UI_JSX_TYPES`).
  * - Standard decorators (`@prop`, `@drawn`), never `experimentalDecorators`.
- * - A drawable type's element class (epic `drawable-thing` P10), `class CardElement extends SpellElement<Card>`:
+ * - A view type's element class (epic `drawable-thing` P10), `class CardElement extends SpellElement<Card>`:
  *   - checked against app's `SpellElement` and Spell UI's declarations (`spell-ui`'s, epic `repo-split` I12)
  *   - as `@spell/elements` is app's `spellElements.ts`
  *   - With the 2023 javascript library, which Spell UI's own files use (`toReversed()`, `findLast()`).

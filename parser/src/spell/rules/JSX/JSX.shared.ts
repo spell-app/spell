@@ -5,7 +5,7 @@ import { Wording } from "spell-parser/spell/rules/expressions"
 /**
  * Spell's own tag words in JSX, in ENGLISH, by the web's tag each becomes:  for the editor's completions.
  * - The rules never read it:  they ask the language's word rule, `spell_jsx_tag` (`webWordFor()`).
- * - `<children/>` => `<slot/>`:  where a drawable list's items show, in its `to draw`
+ * - `<children/>` => `<slot/>`:  where a viewable list's items show, in its `to draw`
  * - `<children name="header"/>` => `<slot name="header"/>`:
  *   a second, named place, filled by a child written `in="header"` (`spell_jsx_attribute`)
  * - The web's own `<slot/>` keeps working.

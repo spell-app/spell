@@ -9,7 +9,7 @@ import { BlockScope } from "./BlockScope"
  */
 export class RootScope extends BlockScope {
   /**
-   * Named `TypeScope`s known in this scope, keyed by class name (`P.classCase()`), e.g. `Card`, `DrawableList`.
+   * Named `TypeScope`s known in this scope, keyed by class name (`P.classCase()`), e.g. `Card`, `ViewableList`.
    * - A type's short name finds it too:  `account` for `a bank account aka account` -- see `TypeScope.aka`.
    * - New entries get wrapped in `TypeScope` and parented here.
    */

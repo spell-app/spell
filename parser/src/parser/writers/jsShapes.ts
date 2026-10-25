@@ -152,7 +152,7 @@ export const EVENTS = new Set(["on", "off", "once", "trigger"])
 /** `core` helpers worth importing by name, e.g. `positionOf(Card.Ranks, this.rank)`. */
 export const IMPORTED_HELPERS = new Set(["positionOf"])
 
-/** `@spell/core`'s template tags, imported by name, e.g. `css` for a drawable type's style sheet. */
+/** `@spell/core`'s template tags, imported by name, e.g. `css` for a view type's style sheet. */
 export const TEMPLATE_TAGS = new Set(["css"])
 
 ////////////////
@@ -216,7 +216,7 @@ export function importedClasses(code: string): Map<string, [string, string]> {
 }
 
 /**
- * The project drawable class `node` is in, as its `static elementTag = core.defineElement(this, "Solitaire")`
+ * The project view class `node` is in, as its `static elementTag = core.defineElement(this, "Solitaire")`
  * names it, e.g. `Solitaire` -- `undefined` for a class that isn't drawable (epic `drawable-thing` P10).
  */
 export function elementProjectOf(node: P.ASTClassDeclaration): string | undefined {
@@ -228,7 +228,7 @@ export function elementProjectOf(node: P.ASTClassDeclaration): string | undefine
 }
 
 /**
- * The project `member` names, when it's a drawable class's `static elementTag = core.defineElement(this, "...")`:
+ * The project `member` names, when it's a view class's `static elementTag = core.defineElement(this, "...")`:
  * the line the page defines the type's element from -- `undefined` for any other member.
  * - Javascript's own, written as it is:  a target with no page of its own leaves it out (Python's program side).
  */
@@ -238,5 +238,5 @@ export function elementTagProject(member: P.ASTNode): string | undefined {
   return found ? (JSON.parse(found[1]!) as string) : undefined
 }
 
-/** What a drawable class's `elementTag` is:  `core.defineElement(this, "<project>")`. */
+/** What a view class's `elementTag` is:  `core.defineElement(this, "<project>")`. */
 const DEFINE_ELEMENT = /^core\.defineElement\(this, ("(?:[^"\\]|\\.)*")\)$/

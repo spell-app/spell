@@ -102,6 +102,15 @@ export const spanishWords: SP.LanguageWords = {
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
 
+  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
+  retiredTypeWords: {
+    dibujable: "vista",
+    "cosa dibujable": "vista",
+    "cosa-dibujable": "vista",
+    "lista dibujable": "lista visible",
+    "lista-dibujable": "lista visible"
+  },
+
   /**
    * The kind of a property's values, by Spanish's word order:  `palo de carta`, from a carta's `su "palo" es uno de ...`.
    * - Its plural is its first word's, `palos de carta`, as for any name with `de` in it.
@@ -195,11 +204,20 @@ export const spanishTypeWords: P.TypeWords = {
   cosa: "thing",
   aplicación: "app",
   aplicacion: "app",
-  dibujable: "drawable",
-  "cosa dibujable": "drawable",
-  "cosa-dibujable": "drawable",
-  "lista dibujable": "drawable list",
-  "lista-dibujable": "drawable list",
+  vista: "view",
+  "lista visible": "viewable list",
+  "lista-visible": "viewable list",
+  página: "page",
+  pagina: "page",
+  // a view with a front and a back:  `de` and `a` are grammar words, so not `vista de dos caras`
+  "vista reversible": "two sided view",
+  "vista-reversible": "two sided view",
+  // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
+  dibujable: "view",
+  "cosa dibujable": "view",
+  "cosa-dibujable": "view",
+  "lista dibujable": "viewable list",
+  "lista-dibujable": "viewable list",
   nada: "nothing",
   indefinido: "nothing",
   nulo: "nothing"

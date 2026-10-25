@@ -23,8 +23,6 @@ import { resolve } from "path"
 import {
   App,
   css,
-  Drawable,
-  DrawableList,
   h,
   List,
   off,
@@ -32,7 +30,11 @@ import {
   once,
   positionOf,
   core,
+  Page,
   Thing,
+  TwoSidedView,
+  View,
+  ViewableList,
   trigger
 } from "spell-parser/core"
 import { coreMethods } from "./core"
@@ -86,8 +88,10 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   Thing: { value: Thing, module: "classes/Thing" },
   List: { value: List, module: "classes/List" },
   App: { value: App, module: "classes/App" },
-  Drawable: { value: Drawable, module: "classes/Drawable" },
-  DrawableList: { value: DrawableList, module: "classes/DrawableList" },
+  View: { value: View, module: "classes/View" },
+  Page: { value: Page, module: "classes/Page" },
+  TwoSidedView: { value: TwoSidedView, module: "classes/TwoSidedView" },
+  ViewableList: { value: ViewableList, module: "classes/ViewableList" },
   h: { value: h, module: "drawing" },
   css: { value: css, module: "elements" },
   positionOf: { value: positionOf, module: "collection-core" },

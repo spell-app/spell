@@ -9,7 +9,7 @@
 - Standard library only:  nothing to install besides it.
 """
 
-from spell_core.apps import App, Drawable, DrawableList
+from spell_core.apps import App, Page, TwoSidedView, View, ViewableList
 from spell_core.console import SpellConsole
 from spell_core.core import Core, core
 from spell_core.drawing import h
@@ -22,10 +22,9 @@ from spell_core.things import Thing, prop
 __all__ = [
     "App",
     "Core",
-    "Drawable",
-    "DrawableList",
     "List",
     "Loader",
+    "Page",
     "Saved",
     "SavedRef",
     "Saver",
@@ -33,6 +32,9 @@ __all__ = [
     "StateMirror",
     "StateWriter",
     "Thing",
+    "TwoSidedView",
+    "View",
+    "ViewableList",
     "core",
     "end_position",
     "h",

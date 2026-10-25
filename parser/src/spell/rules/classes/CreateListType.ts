@@ -20,7 +20,7 @@ export class CreateListType extends TypeDeclaration<
   { itemTypeBelow?: boolean; elementProject?: string }
 > {
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type", detail: "instanceType" }
-  /** Built-in list type it extends:  `list`, or `drawable list` -- see `CreateDrawableListType`. */
+  /** Built-in list type it extends:  `list`, or `viewable list` -- see `CreateViewableListType`. */
   @proto static listType: P.Datatype = "list"
   declare listType: P.Datatype
 
@@ -36,7 +36,7 @@ export class CreateListType extends TypeDeclaration<
     if (!match) return undefined
     const { scopeType } = (match.groups.instanceType as P.Match<P.MatchGroups, { scopeType?: unknown }>).data
     if (scopeType instanceof P.TypeScope && scopeType.stub) match.data.itemTypeBelow = true
-    // a drawable list defines its element -- see `TypeDeclaration.elementMember()`
+    // a viewable list defines its element -- see `TypeDeclaration.elementMember()`
     if (this.listType !== "list") match.data.elementProject = TypeDeclaration.projectNameOf(scope)
     return this.refuseTakenNames(match)
   }

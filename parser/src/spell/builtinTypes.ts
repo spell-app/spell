@@ -387,17 +387,16 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     ]
   },
   {
-    name: "drawable",
+    name: "view",
     superType: "thing",
     docstring: md(
-      "A thing drawn as its own custom element -- `a card is a drawable thing` makes a card that is one.",
+      "A thing drawn as its own custom element -- `a card is a view` makes a card that is one.",
       "- Everything a thing has.",
       "- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.",
-      "- `a drawable thing` and `a drawable` both say it.",
       "- ONE drawing, its `to draw it`:  a card face down checks its own direction there.",
       "",
       "```spell",
-      "a card is a drawable thing where:",
+      "a card is a view where:",
       "  - its rank is a number",
       '  - to "draw it": <div>{its rank}</div>',
       "```"
@@ -406,24 +405,58 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     members: []
   },
   {
-    name: "drawable list",
+    name: "page",
+    superType: "view",
+    docstring: md(
+      "A view people reach by its own address -- `a home is a page` makes one.",
+      "- Everything a view has.",
+      "- Its address, and moving between pages, aren't built yet:  for now it draws as any view does.",
+      "",
+      "```spell",
+      "a home is a page where:",
+      '  - to "draw it": <h1>Welcome</h1>',
+      "```"
+    ),
+    rules: ["create_type", "draw_it"],
+    members: []
+  },
+  {
+    name: "two sided view",
+    superType: "view",
+    docstring: md(
+      "A view with a front and a back, face up or face down -- `a card is a two sided view`.",
+      "- Everything a view has.",
+      "- Its own words (`its direction`, `it is face up`, `turn it over`) and its front and back, as parts to draw,",
+      "  are still to come:  until then, a card says them itself, as any view does.",
+      "",
+      "```spell",
+      "a card is a two sided view where:",
+      "  - its direction is up or down",
+      '  - to "draw it": <div>{its direction}</div>',
+      "```"
+    ),
+    rules: ["create_type", "draw_it"],
+    members: []
+  },
+  {
+    name: "viewable list",
     superType: "list",
     docstring: md(
-      "A list drawn as its own custom element, its items inside it -- `a pile is a drawable list of cards`.",
+      "A list drawn as its own custom element, its items inside it -- `a pile is a viewable list of cards`.",
       "- Everything a list has.",
       "- Its `to draw it` is the WRAPPER around its items:  by default nothing but the place they show, `<children/>`.",
       "- Its `to draw each item` is the wrapper each item is drawn in:  by default just the item's own drawing.",
       "- A drawing that fails shows a small stand-in instead;  the rest keeps drawing.",
       "",
       "```spell",
-      "a pile is a drawable list of cards where:",
+      "a pile is a viewable list of cards where:",
       "  - to draw it:",
       '    return <div class="pile"><children/></div>',
       "  - to draw each item:",
       '    return <div class="spot">{draw the card}</div>',
       "```"
     ),
-    rules: ["create_drawable_list_type", "draw_it"],
+    rules: ["create_viewable_list_type", "draw_it"],
     members: [
       {
         words: "selection",
@@ -561,12 +594,20 @@ export const TYPE_WORDS: P.TypeWords = {
   array: "list",
   thing: "thing",
   app: "app",
-  // two words, so `a card is a drawable thing` leaves none over -- see `P.BUILT_IN_CLASS_NAMES`
-  drawable: "drawable",
-  "drawable thing": "drawable",
-  "drawable-thing": "drawable",
-  "drawable list": "drawable list",
-  "drawable-list": "drawable list",
+  view: "view",
+  // several words, so `a pile is a viewable list` leaves none over -- see `P.BUILT_IN_CLASS_NAMES`
+  "viewable list": "viewable list",
+  "viewable-list": "viewable list",
+  page: "page",
+  "two sided view": "two sided view",
+  "two-sided view": "two sided view",
+  "two-sided-view": "two sided view",
+  // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
+  drawable: "view",
+  "drawable thing": "view",
+  "drawable-thing": "view",
+  "drawable list": "viewable list",
+  "drawable-list": "viewable list",
   nothing: "nothing",
   undefined: "nothing",
   null: "nothing"

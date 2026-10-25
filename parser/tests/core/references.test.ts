@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, Thing, List, Drawable } from "spell-parser/core"
+import { core, Thing, List, View } from "spell-parser/core"
 
 /** Thing references:  `Tableau#T1`, `Pile#T1`, `Tableau#1` (epic `drawable-thing` P18). */
 describe("thing references", () => {
@@ -78,8 +78,8 @@ describe("thing references", () => {
 
   describe("elementIdFor():  the id of an element the program draws (J43)", () => {
     /** A card whose name follows its rank and suit, as Drawable Solitaire's does. */
-    class Card extends Drawable {
-      static elementTag = core.defineElement(this, "Drawable Deck")
+    class Card extends View {
+      static elementTag = core.defineElement(this, "View Deck")
       get rank(): string | undefined {
         return this.getProp("rank") as string | undefined
       }
@@ -91,8 +91,8 @@ describe("thing references", () => {
       }
     }
     /** A sign with a name of its own, which may have spaces. */
-    class Sign extends Drawable {
-      static elementTag = core.defineElement(this, "Drawable Deck")
+    class Sign extends View {
+      static elementTag = core.defineElement(this, "View Deck")
       get name() {
         return this.getProp("name")
       }
@@ -125,7 +125,7 @@ describe("thing references", () => {
       expect(core.elementIdFor(3)).toBeUndefined()
     })
 
-    test("only drawable things count:  a pile named like a card leaves the card its plain id", () => {
+    test("only views count:  a pile named like a card leaves the card its plain id", () => {
       const pile = new Pile({ name: "ace-of-spades" })
       const card = new Card({ rank: "ace" })
       expect(core.elementIdFor(card)).toBe("ace-of-spades")

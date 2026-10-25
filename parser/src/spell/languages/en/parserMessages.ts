@@ -77,25 +77,25 @@ export const PARSER_MESSAGES = {
   "cant-retype-built-in-member":
     "Can't add {property} to {type} as {datatype}:  every {on} has one, built in, as {builtInType}",
   /**
-   * A property or phrase on the kind of a property's values, `the "value" of a card rank is ...` (epic `spanish` P22):
+   * A property or alias on the kind of a property's values, `the "value" of a card rank is ...` (epic `spanish` P22):
    * it has no class to hold one.
    */
   "no-members-on-property-kind":
-    "{AKind} is one of the values {aType} lists:  it can't have properties or phrases of its own",
+    "{AKind} is one of the values {aType} lists:  it can't have properties or aliases of its own",
   /** A line adding to a type nobody declares:  `{example}` is `example-type`. */
   "no-such-type": 'There\'s no type "{type}":  declare it, e.g. "{example}"',
   /** A type's declaration, as an example writes it. */
   "example-type": "a {type} is a thing",
   /** A list type's declaration, as an example writes it. */
   "example-list-type": "a {list} is a list of {items}",
-  /** `it "is face up" is ...`:  a property, written as a phrase. */
+  /** `it "is face up" is ...`:  a property, written as an alias. */
   "property-starts-its": 'A property starts "its":  write its "{name}" is ...',
-  /** A quoted phrase with nothing after it, `it "can move"`. */
+  /** A quoted alias with nothing after it, `it "can move"`. */
   "phrase-without-body": "{phrase} has no body:  write {phrase} always, or {phrase} if ...",
-  /** A quoted phrase with no blank, `it "is red" for its suits`. */
+  /** A quoted alias with no blank, `it "is red" for its suits`. */
   "phrase-without-blank":
     '"{phrase}" has no blank:  put the word that varies in parens, e.g. "is a (suit)", or say when it\'s true, "{phrase}" if ...',
-  /** A phrase's blank naming no property with a list of values. */
+  /** An alias's blank naming no property with a list of values. */
   "blank-without-values":
     '"({word})" names no property of a {type} with a list of values, e.g. its "suit" is one of clubs, diamonds, hearts or spades',
   /** `for its x`, where `x` has no list of values. */
@@ -126,11 +126,12 @@ export const PARSER_MESSAGES = {
   /** A `<markdown>` block outside a type's outline. */
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
+  /** An old word for a built-in type, `a card is a drawable thing`:  `{replacement}` is its new word. */
+  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead',
   /** A `<css>` block in a type that doesn't draw. */
-  "css-not-drawable":
-    'Only a drawable type has its own <css>:  "{type}" isn\'t drawable:  say "a ... is a drawable thing"',
+  "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */
-  "css-outside-outline": "Only a drawable type has its own <css>:  put it in a type's outline",
+  "css-outside-outline": "Only a view has its own <css>:  put it in a type's outline",
   /** `red if ...` outside a getter. */
   "value-line-outside-getter": 'A line of a getter\'s body:  put it under one, e.g. "the color of a card is:"',
   /** `set the length of the name to 3`:  `{what}` is `the-property` or `the-property-of-a-type`. */

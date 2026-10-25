@@ -65,7 +65,7 @@ const NAMES: NamesData = {
 }
 
 /** A card that draws itself with Spell UI's tags. */
-const CARD = `a "card" is a drawable thing where:
+const CARD = `a "card" is a view where:
 	- its "picture" is a text
 	- its "color" is one of red or black
 	- to draw it:
@@ -96,7 +96,7 @@ describe("ElementNames:  the elements a project draws with, in the other languag
   })
 
   test("a form control's `name` binds a property:  its name in the other language, as code names it", () => {
-    const source = `a "card" is a drawable thing where:
+    const source = `a "card" is a view where:
 	- its "picture" is a text
 	- its "pictureColor" is a text
 	- to draw it:

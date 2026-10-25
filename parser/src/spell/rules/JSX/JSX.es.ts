@@ -238,7 +238,7 @@ JSXEs.addRule(SpellJSX, {
         scope.variables?.add("card")
       },
       tests: [
-        // where a drawable list's items show
+        // where a viewable list's items show
         [`<hijos/>`, 'h("slot")', "<slot />"],
         // a named place
         [`<hijos name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],
@@ -298,7 +298,7 @@ JSXEs.addRule(SpellJSX, {
           'h("es-tarjeta", { "prop:discontinuo": () => card.rank }, "Pila")',
           "<es-tarjeta prop:discontinuo={card.rank}>Pila</es-tarjeta>"
         ],
-        // spell's own words inside one:  where a drawable list's items show, and a child's named place
+        // spell's own words inside one:  where a viewable list's items show, and a child's named place
         [
           `<es-tarjeta><h3 en="header">Pila</h3><hijos/></es-tarjeta>`,
           ['h("es-tarjeta",', '  h("h3", { slot: "header" }, "Pila"),', '  h("slot")', ")"],

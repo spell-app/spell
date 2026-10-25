@@ -29,7 +29,7 @@ import type { PropRule } from "spell/util"
 export const SPELL_CORE_MODULE = "@spell/core"
 
 /**
- * Where compiled TypeScript imports the base class of each drawable type's element from, as a module name:
+ * Where compiled TypeScript imports the base class of each view type's element from, as a module name:
  * `import { E, SpellElement } from "@spell/elements"` (epic `drawable-thing` P10, J41).
  * - A name of its own, since core never imports Spell UI:  app's `SpellElement` is behind it.
  * - Resolved in three places:
@@ -43,7 +43,7 @@ export const SPELL_ELEMENTS_MODULE = "@spell/elements"
  * Spell's own classes, from `core/classes`:  what a project's types are made from, e.g. `a card is a thing`.
  * - What a Type Explorer lists as built in -- see `LSP.ScopeExplorer`.
  */
-export const SPELL_CLASSES = ["Thing", "List", "App", "Drawable", "DrawableList"]
+export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "ViewableList"]
 
 /** Names every compiled project imports from `SPELL_CORE_MODULE`:  `core`, and spell's classes. */
 export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]

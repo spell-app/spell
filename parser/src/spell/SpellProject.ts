@@ -991,7 +991,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * `import`s leading our compiled output:  spell's runtime, then what we import from other projects.
    * - e.g.
-   *   `import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"`
+   *   `import { core, Thing, List, App, View, ViewableList } from "@spell/core"`
    *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/owen@spell/cards"`
    * - Why:  compiled spell reaches everything it didn't declare through `import`s -- NO globals.
    * - A runner rewrites each specifier onto the module it means:

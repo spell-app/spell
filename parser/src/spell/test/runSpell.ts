@@ -3,8 +3,10 @@ import {
   Thing,
   List,
   App,
-  Drawable,
-  DrawableList,
+  View,
+  Page,
+  TwoSidedView,
+  ViewableList,
   h,
   css,
   on,
@@ -60,10 +62,10 @@ export function runSpellFiles(
       .map((name) => `${name}: ${P.JSWriter.instance.nameOf(name)}`)
     const body = `${code}\nreturn { ${named.join(", ")} }`
     // `@spell/core`'s helpers it imports by name, e.g. `trigger()`, as the import it lost would give them
-    // and a drawable type's classes, drawing and `<css>`:  `Drawable`, `h()`, `css`
+    // and a view type's classes, drawing and `<css>`:  `View`, `h()`, `css`
     const imported = {
       ...{ on, off, once, trigger, positionOf, position, spellPosition, endPosition, withSpellPositions },
-      ...{ Drawable, DrawableList, h, css }
+      ...{ View, Page, TwoSidedView, ViewableList, h, css }
     }
     // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test
     const fn = new Function("core", "Thing", "List", "App", ...Object.keys(imported), body)

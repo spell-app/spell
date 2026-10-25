@@ -383,6 +383,14 @@ export type LanguageWords = {
    * - None:  the English words.
    */
   builtInMembers?: Record<string, string[]>
+  /**
+   * Words for built-in types the language no longer takes, each with the words that replaced it (epic `elemental-spell`):
+   * English's `{ "view": "view" }`.
+   * - Still read, so the line keeps its meaning;  but each is a parse error naming its replacement,
+   *   which a quick fix can put in its place -- see `SpellType.retiredWordErrorsIn()`.
+   * - None:  nothing retired.
+   */
+  retiredTypeWords?: Record<string, string>
 }
 
 /**

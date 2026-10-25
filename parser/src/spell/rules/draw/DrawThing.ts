@@ -8,7 +8,7 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * `draw_thing` rule:  draw a single thing, e.g. `draw the card`.
  * - `core.drawThing(card)`, its drawing in its own error boundary, in javascript and TypeScript alike.
  *   Its `draw()` re-runs when what it read changes:  the card's node is drawn again, nothing else.
- *   - A drawable thing draws as its element, e.g. `<solitaire-card>`:  so never a bare `card.draw()` (epic `spanish`
+ *   - A view draws as its element, e.g. `<solitaire-card>`:  so never a bare `card.draw()` (epic `spanish`
  *     J100).
  *   - TypeScript's `@drawn` `draw()` brings its own boundary:  `core.drawThing()` calls it straight.
  */

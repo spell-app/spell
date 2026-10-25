@@ -44,8 +44,8 @@ export type Datatype = string
  * - Their members, e.g. `the length of the name`, are spell's:
  *   in its `BUILT_IN_TYPE_TABLE`, loaded into these `TypeScope`s.
  *   The parser only knows their names.
- * - NOTE: `list`, `thing`, `app`, `drawable` and `drawable list` are runtime classes too (`List`, `Thing` ...),
- *   which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
+ * - NOTE: `list`, `thing`, `app`, `view`, `viewable list`, `page` and `two sided view` are runtime classes too
+ *   (`List`, `Thing` ...), which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
  */
 export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,
@@ -58,34 +58,41 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   list: undefined,
   thing: undefined,
   app: "thing",
-  // a thing drawn as its own custom element -- `a card is a drawable thing` (epic `drawable-thing`)
-  drawable: "thing",
-  "drawable list": "list",
+  // a thing drawn as its own custom element -- `a card is a view` (epic `drawable-thing`, renamed in `elemental-spell`)
+  view: "thing",
+  "viewable list": "list",
+  // a view people reach by its own address -- `a home is a page`
+  page: "view",
+  // a view with a front and a back, face up or face down -- `a card is a two sided view`
+  "two sided view": "view",
   nothing: undefined
 }
 
 /**
  * Built-in types which are classes at runtime, by datatype:  the name compiled code gives each, e.g. `extends List`.
  * - Every other built-in is a plain javascript value, named in spell's words, e.g. `isOfType(x, 'text')`.
- * - A name of two words is one class, NOT one word per part:  `drawable list` => `DrawableList` -- see `classCase()`.
+ * - A name of several words is one class, NOT one word per part:
+ *   `viewable list` => `ViewableList` -- see `classCase()`.
  */
 export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   list: "List",
   thing: "Thing",
   app: "App",
-  drawable: "Drawable",
-  "drawable list": "DrawableList"
+  view: "View",
+  "viewable list": "ViewableList",
+  page: "Page",
+  "two sided view": "TwoSidedView"
 }
 
 /** Built-in types which are classes at runtime -- see `BUILT_IN_CLASS_NAMES`. */
 export const BUILT_IN_CLASSES: Datatype[] = Object.keys(BUILT_IN_CLASS_NAMES)
 
-/** The class names in `BUILT_IN_CLASS_NAMES`, e.g. `DrawableList`. */
+/** The class names in `BUILT_IN_CLASS_NAMES`, e.g. `ViewableList`. */
 const BUILT_IN_CLASS_NAME_SET = new Set(Object.values(BUILT_IN_CLASS_NAMES))
 
 /**
  * Name of the class for type `name`, as compiled code and `scope.types` name it.
- * - a built-in class by its datatype, e.g. `drawable list` => `DrawableList`;  its class name stays as it is
+ * - a built-in class by its datatype, e.g. `viewable list` => `ViewableList`;  its class name stays as it is
  * - anything else in PascalCase (`typeCase()`), e.g. `bank-accounts` => `BankAccount`
  */
 export function classCase(name: string): string {

@@ -118,6 +118,15 @@ export const englishWords: SP.LanguageWords = {
   /** The word between a list and what it holds:  `list of cards`. */
   listOfWord: "of",
 
+  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
+  retiredTypeWords: {
+    drawable: "view",
+    "drawable thing": "view",
+    "drawable-thing": "view",
+    "drawable list": "viewable list",
+    "drawable-list": "viewable list"
+  },
+
   /** The kind of a property's values:  `card suit`, from a card's `its "suit" is one of ...`. */
   propertyKindName: "{type} {property}",
 

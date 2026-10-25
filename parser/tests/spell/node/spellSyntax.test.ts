@@ -110,7 +110,7 @@ describe("the spell syntax table, spellSyntax.json", () => {
   })
 
   test("no comments in the examples, nor in what the writers write, but in the comment rule's own", () => {
-    const pile = rows.find((row) => row.className === "CreateDrawableListType")!.syntaxes[0]!.outputs!.ts
+    const pile = rows.find((row) => row.className === "CreateViewableListType")!.syntaxes[0]!.outputs!.ts
     expect("code" in pile && pile.code).toContain("class PileElement")
     const commented = rows
       .filter((row) => row.className !== "CommentLine")

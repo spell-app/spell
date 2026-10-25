@@ -1,6 +1,6 @@
 /**
- * A drawable thing's own custom element:  `a card is a drawable thing` in a solitaire app is `<solitaire-card>`.
- * - A drawable class defines its element as it's declared, in a static field spell writes in it:
+ * A view's own custom element:  `a card is a view` in a solitaire app is `<solitaire-card>`.
+ * - A view class defines its element as it's declared, in a static field spell writes in it:
  *   `static elementTag = core.defineElement(this, "Solitaire")` -- so before the program draws anything.
  * - Core only names the tag and keeps it on the class.
  *   - The element itself is Spell UI's, made by the page running the program.
@@ -17,14 +17,14 @@ import { elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core, programThings, recordingSettings } from "./core"
 import { defineCoreModule } from "./core.types"
-import { Drawable } from "./classes/Drawable"
-import { DrawableList } from "./classes/DrawableList"
+import { View } from "./classes/View"
+import { ViewableList } from "./classes/ViewableList"
 import { List } from "./classes/List"
 
-/** `core`'s methods for drawable things' elements. */
+/** `core`'s methods for views' elements. */
 export const elementsMethods = defineCoreModule({
   /**
-   * How the page defines the element for a drawable class -- `undefined` until the page running programs sets it.
+   * How the page defines the element for a view class -- `undefined` until the page running programs sets it.
    * - app's `SpellElement.tsx` sets it, for every runner:  it builds a Spell UI component for the tag.
    * - Called once per class `defineElement()` is handed.
    */
@@ -96,19 +96,19 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
-   * Name the element of drawable class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag.
-   * - What a drawable class's static field calls as it's declared:
+   * Name the element of view class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag.
+   * - What a view class's static field calls as it's declared:
    *   `static elementTag = core.defineElement(this, "Solitaire")`.
    * - The page's `elementDefiner` hears of it once its class is whole:
    *   when one of its things is first drawn (`elementFor()`), else in a microtask.
    *   Not now:  the class's later statics, e.g. its `css`, aren't set yet.
-   * - `undefined`, doing nothing, for a class that isn't drawable.
+   * - `undefined`, doing nothing, for a class that isn't a view.
    * - SIDE EFFECT:  the class keeps its tag (`elementTagOf()`).
    * - SIDE EFFECT:  the program's things know the class now (`core.things`), before any of its things is made:
    *   so a card's element finds its pile's class on a page that only mirrors the program (`elementApiOf()`).
    */
   defineElement(Class: unknown, project: string): string | undefined {
-    if (!isDrawableClass(Class)) return undefined
+    if (!isViewClass(Class)) return undefined
     const tag = elementTagFor(project, Class.name)
     Object.defineProperty(Class, ELEMENT_TAG, { value: tag, configurable: true })
     programThings()?.addClasses({ [Class.name]: Class })
@@ -117,7 +117,7 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
-   * Hand the page `ElementClass`, the element class compiled TypeScript writes for drawable class `Class`
+   * Hand the page `ElementClass`, the element class compiled TypeScript writes for view class `Class`
    * (epic `drawable-thing` P10, J41):
    * `core.useElement(Card, CardElement)`, right after `class CardElement extends SpellElement<Card>`.
    * - The page's `elementDefiner` builds `Class`'s tag on it, instead of on a bare element of its own.
@@ -126,16 +126,16 @@ export const elementsMethods = defineCoreModule({
    *   a microtask after `defineElement()`, or the first draw.
    * - No definer (no page, e.g. `spell run`, the core contract):
    *   only kept, so the run prints what the same program compiled to javascript prints.
-   * - Nothing, for a class that isn't drawable.
+   * - Nothing, for a class that isn't a view.
    * - SIDE EFFECT:  `Class` keeps it, as its own -- see `elementClassOf()`.
    */
   useElement(Class: unknown, ElementClass: Function): void {
-    if (!isDrawableClass(Class)) return
+    if (!isViewClass(Class)) return
     Object.defineProperty(Class, ELEMENT_CLASS, { value: ElementClass, configurable: true })
   },
 
   /**
-   * The element class handed for drawable class `Class` (`useElement()`) -- `undefined` if none was.
+   * The element class handed for view class `Class` (`useElement()`) -- `undefined` if none was.
    * - `Class`'s OWN:  a sub-class with none of its own, e.g. a javascript `Tableau` below a TypeScript `Pile`,
    *   doesn't take its super-class's.
    */
@@ -158,22 +158,22 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
-   * What drawable class `Class` shows on the outside of its element (epic `drawable-thing` P8):
+   * What view class `Class` shows on the outside of its element (epic `drawable-thing` P8):
    * - `properties`:  each property it declares (`a card has a rank as a number`), its own and its super-types',
    *   with its declared type, e.g. `{ name: "rank", type: "number" }`
    *   - a list it makes for itself, e.g. `a hand has cards as a list of cards`, is `type: "list"`
    *   - then each list it belongs to, the list holding it (P18) -- see `ownerPropertiesOf()`:
    *     `a card belongs to one pile` is `{ name: "pile", type: "Pile", owner: true }`
-   *   - down to `Drawable` / `DrawableList`:  NOT what every thing has built in, its `id`,
+   *   - down to `View` / `ViewableList`:  NOT what every thing has built in, its `id`,
    *     which would clash with the element's own `id`, the name a page's layout finds a thing by (`thingFor()`)
-   * - `methods`:  each method it has, its own and its super-types', down to `Drawable` / `DrawableList`,
+   * - `methods`:  each method it has, its own and its super-types', down to `View` / `ViewableList`,
    *   e.g. `turn_over` -- NOT `draw()`, nor a method of several words with values in them (`is_a_$suit`)
    * - Names as compiled:  the page names them as it likes, e.g. `turnOver()`.
    */
   elementApiOf(Class: Function): ElementApi {
     const properties: ElementApi["properties"] = []
     const seen = new Set<string>()
-    const baseSchemas = [schemaOf(Drawable), schemaOf(DrawableList)]
+    const baseSchemas = [schemaOf(View), schemaOf(ViewableList)]
     for (let schema = schemaOf(Class) as Schema | undefined; schema; schema = schema.parent) {
       if (baseSchemas.includes(schema)) break
       for (const [name, info] of schema.declared) {
@@ -221,14 +221,14 @@ export const elementsMethods = defineCoreModule({
 })
 Object.assign(core, elementsMethods)
 
-// where every side names a drawable type's tag alike:  core, app's `SpellElement`, the TypeScript writer
+// where every side names a view type's tag alike:  core, app's `SpellElement`, the TypeScript writer
 export { elementTagFor }
 
 /**
- * A drawable type's style sheet, as TEXT:  what its `<css>` block compiles to (epic `drawable-thing`, P10, J14).
+ * A view type's style sheet, as TEXT:  what its `<css>` block compiles to (epic `drawable-thing`, P10, J14).
  *
  * ```ts
- * export class Card extends Drawable {
+ * export class Card extends View {
  *   static css = css`
  *     :host { display: inline-block }
  *     .red { color: crimson }
@@ -254,7 +254,7 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 }
 
 /**
- * What a drawable class shows on the outside of its element -- see `core.elementApiOf()`.
+ * What a view class shows on the outside of its element -- see `core.elementApiOf()`.
  */
 export type ElementApi = {
   /**
@@ -284,7 +284,7 @@ export type ElementApi = {
  *   - read by a getter on `Class`'s things, named as spell names it:  `pile`
  * - Only the list classes the program's registry knows of so far (`core.things.knownClasses()`):
  *   a class is known once one of its things is made, or the program has run.
- *   - A drawable class's element asks once the program's code has run, so in practice they're all known.
+ *   - A view class's element asks once the program's code has run, so in practice they're all known.
  */
 function ownerPropertiesOf(Class: Function): ElementApi["properties"] {
   const owners: ElementApi["properties"] = []
@@ -309,8 +309,8 @@ function hasGetter(prototype: object, name: string): boolean {
   return false
 }
 
-/** Where `elementApiOf()` stops looking for methods:  spell's own drawable classes, and what they're built on. */
-const BASE_PROTOTYPES: object[] = [Drawable.prototype, DrawableList.prototype, Object.prototype]
+/** Where `elementApiOf()` stops looking for methods:  spell's own view classes, and what they're built on. */
+const BASE_PROTOTYPES: object[] = [View.prototype, ViewableList.prototype, Object.prototype]
 
 /** Methods that aren't a type's own API:  its drawing, and the class's own. */
 const NOT_METHODS = new Set(["constructor", "draw"])
@@ -318,30 +318,30 @@ const NOT_METHODS = new Set(["constructor", "draw"])
 /** The classes whose element the page's `elementDefiner` has heard of. */
 const DEFINED = new WeakSet<Function>()
 
-/** Tell the page's `elementDefiner` of drawable class `Class`, as tag `tag` -- once. */
+/** Tell the page's `elementDefiner` of view class `Class`, as tag `tag` -- once. */
 function tellDefiner(Class: Function, tag: string): void {
   if (DEFINED.has(Class) || !core.elementDefiner) return
   DEFINED.add(Class)
   core.elementDefiner(tag, Class)
 }
 
-/** Is `value` a class of drawable things:  `Drawable`, `DrawableList`, or below them? */
-function isDrawableClass(value: unknown): value is Function {
+/** Is `value` a class of views:  `View`, `ViewableList`, or below them? */
+function isViewClass(value: unknown): value is Function {
   if (typeof value !== "function" || !value.name) return false
   const { prototype } = value as { prototype?: unknown }
-  return prototype instanceof Drawable || prototype instanceof DrawableList
+  return prototype instanceof View || prototype instanceof ViewableList
 }
 
 /**
- * How the page defines the element for drawable class `Class`, as tag `tag` -- see `core.elementDefiner`.
+ * How the page defines the element for view class `Class`, as tag `tag` -- see `core.elementDefiner`.
  * - Called again for the same tag when a program runs again:  the new class takes the tag over.
  */
 export type ElementDefiner = (tag: string, Class: Function) => void
 
-/** Where a drawable class keeps its tag. */
+/** Where a view class keeps its tag. */
 const ELEMENT_TAG = Symbol.for("spell-parser:element-tag")
 
-/** Where a drawable class keeps the element class compiled TypeScript handed for it -- see `useElement()`. */
+/** Where a view class keeps the element class compiled TypeScript handed for it -- see `useElement()`. */
 const ELEMENT_CLASS = Symbol.for("spell-parser:element-class")
 
 /**

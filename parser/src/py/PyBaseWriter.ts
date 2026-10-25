@@ -841,9 +841,9 @@ export class PyBaseWriter extends P.ProgramWriter {
   }
 
   /**
-   * A drawable class's element tag, in its body:  `element_tag = "solitaire-card"`, from project `project`.
+   * A view class's element tag, in its body:  `element_tag = "solitaire-card"`, from project `project`.
    * - Javascript's `static elementTag = core.defineElement(this, "Solitaire")`, named the same way (`elementTagFor()`):
-   *   so the page Python prints draws each drawable thing as its element, as javascript's does (`core.draw_thing()`).
+   *   so the page Python prints draws each view as its element, as javascript's does (`core.draw_thing()`).
    * - Named here, as text:  Python's class body can't hand the class to the core as it's made.
    * - The page that draws a Python program defines the element itself, from its javascript (`PY.ElementsWriter`).
    */
@@ -1030,7 +1030,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   /**
    * Text with values in it:  an f-string, `f"{self.rank}-of-{self.suit}"`.
    * - Its text parts are as written, escapes and all (`\n`):  read first, so Python quotes the text itself.
-   * - A drawable type's style sheet, javascript's `` css`...` `` (epic `drawable-thing` P10), is its text:  a plain string.
+   * - A view type's style sheet, javascript's `` css`...` `` (epic `drawable-thing` P10), is its text:  a plain string.
    */
   ASTTemplateString(node: P.ASTTemplateString): string {
     return this.fString(node.parts.map((part) => (typeof part === "string" ? unescaped(part) : { value: part })))

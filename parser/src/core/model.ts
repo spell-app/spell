@@ -3,7 +3,7 @@
  * e.g. the server holding a `Person` (epic `people-and-orgs` P3).
  * - What a compiled LIBRARY imports, e.g. `people.lib.ts`:  the `ts/lib` target, `P.LibraryWriter`.
  * - The same `core`, `Thing` and `List` as the barrel, assembled from the same modules, minus:
- *   - drawing (`drawing.ts`, `elements.ts`, `Drawable`, `DrawableList`):  they load Solid
+ *   - drawing (`drawing.ts`, `elements.ts`, `View`, `ViewableList`):  they load Solid
  *   - the registry of a running program's things, `core.things` (`things.ts`):
  *     a thing made here belongs to no program, so it registers nowhere -- see `registerThing()`
  *   - what reads that registry:  carrying a program over a recompile (`carry.ts`)

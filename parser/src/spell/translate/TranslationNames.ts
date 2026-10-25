@@ -319,7 +319,7 @@ export class TranslationNames {
     const singular = this.from.inflector.singularize(words)
     const meaning = this.from.typeWords[words] ?? this.from.typeWords[singular] ?? builtInMeaning(words)
     if (!meaning) return undefined
-    // the word for it of as many words as ours:  `drawable thing` => `cosa dibujable`
+    // the word for it of as many words as ours:  `view` => `vista`
     const theirs = Object.entries(this.to.typeWords)
       .filter(([, each]) => each === meaning)
       .map(([word]) => word)

@@ -21,7 +21,7 @@ import { Wording } from "spell-parser/spell/rules/expressions"
 import { BelongsToOne } from "./BelongsToOne"
 import { CanBelongToMany } from "./CanBelongToMany"
 import { ClassMember } from "./ClassMember"
-import { CreateDrawableListType } from "./CreateDrawableListType"
+import { CreateViewableListType } from "./CreateViewableListType"
 import { CreateListType } from "./CreateListType"
 import { CreateOneOfAKind } from "./CreateOneOfAKind"
 import { CreateThing } from "./CreateThing"
@@ -97,15 +97,15 @@ const OF = "(de|del)"
 /** `is`, and `are`, in an outline body:  `- "palo" es ...`, `- fundaciones son ...`, `- sus "comodines" son ...`. */
 const IS_OR_ARE = "(es|son)"
 
-/** What a drawable type's element writes, after its class:  see English's `create_type` tests. */
-function drawableElement(type: string, tag: string, setup: string[] = []): string[] {
+/** What a view type's element writes, after its class:  see English's `create_type` tests. */
+function viewElement(type: string, tag: string, setup: string[] = []): string[] {
   return [
     "",
     "/**",
     ` * \`<test-classes-${tag}>\`:  a ${tag}, drawn in its own element, e.g. by \`draw the ${tag}\`.`,
     " * - The page defines its tag with this class:  `core.useElement()`, below.",
     ` * - Its attributes are its ${tag}'s properties;  its methods call its ${tag}'s.`,
-    ` * - What every drawable thing's element does, e.g. drawing its ${tag}, is \`SpellElement\`'s.`,
+    ` * - What every view's element does, e.g. drawing its ${tag}, is \`SpellElement\`'s.`,
     " */",
     `export class ${type}Element extends SpellElement<${type}> {`,
     `  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-${tag}", "${tag}", [])`,
@@ -115,8 +115,8 @@ function drawableElement(type: string, tag: string, setup: string[] = []): strin
   ]
 }
 
-/** A drawable type's class, `class Card extends Drawable` with its element tag;  `members` inside it. */
-function drawableClass(type: string, superType: string, members: string[] = []): string[] {
+/** A view type's class, `class Card extends View` with its element tag;  `members` inside it. */
+function viewClass(type: string, superType: string, members: string[] = []): string[] {
   return [
     `export class ${type} extends ${superType} {`,
     ...members,
@@ -212,25 +212,30 @@ classesEs.addRule(CreateType, {
         ["una bank account es una cosa", "export class BankAccount extends Thing {}"],
         ["una bank account alias account es una cosa", "export class BankAccount extends Thing {}"],
         [
-          "una card es una cosa dibujable",
-          drawableClass("Card", "Drawable"),
-          [...drawableClass("Card", "Drawable"), ...drawableElement("Card", "card")]
+          "una card es una vista",
+          viewClass("Card", "View"),
+          [...viewClass("Card", "View"), ...viewElement("Card", "card")]
         ],
         // a Spanish name:  its element is named from it, `<test-classes-carta>`, as English's `<test-classes-card>`
         [
-          "una carta es una cosa dibujable",
-          drawableClass("Carta", "Drawable"),
-          [...drawableClass("Carta", "Drawable"), ...drawableElement("Carta", "carta")]
+          "una carta es una vista",
+          viewClass("Carta", "View"),
+          [...viewClass("Carta", "View"), ...viewElement("Carta", "carta")]
         ],
         [
-          "una card es un dibujable",
-          drawableClass("Card", "Drawable"),
-          [...drawableClass("Card", "Drawable"), ...drawableElement("Card", "card")]
+          "una card es una vista reversible",
+          viewClass("Card", "TwoSidedView"),
+          [...viewClass("Card", "TwoSidedView"), ...viewElement("Card", "card")]
         ],
         [
-          "una pile es una lista dibujable",
-          drawableClass("Pile", "DrawableList"),
-          [...drawableClass("Pile", "DrawableList"), ...drawableElement("Pile", "pile")]
+          "una home es una página",
+          viewClass("Home", "Page"),
+          [...viewClass("Home", "Page"), ...viewElement("Home", "home")]
+        ],
+        [
+          "una pile es una lista visible",
+          viewClass("Pile", "ViewableList"),
+          [...viewClass("Pile", "ViewableList"), ...viewElement("Pile", "pile")]
         ]
       ]
     },
@@ -358,18 +363,18 @@ classesEs.addRule(ReopenType, {
   syntax: `${A} {type} {with_nested_statements}`
 })
 
-classesEs.addRule(CreateDrawableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista dibujable ${OF} {instanceType:type} {with_nested_statements}?`,
+classesEs.addRule(CreateViewableListType, {
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
       tests: [
         [
-          "una pile es una lista dibujable de cartas",
-          drawableClass("Pile", "DrawableList", ["  static instanceType = Carta"]),
+          "una pile es una lista visible de cartas",
+          viewClass("Pile", "ViewableList", ["  static instanceType = Carta"]),
           [
-            ...drawableClass("Pile", "DrawableList<Carta>", ["  static instanceType = Carta"]),
-            ...drawableElement("Pile", "pile")
+            ...viewClass("Pile", "ViewableList<Carta>", ["  static instanceType = Carta"]),
+            ...viewElement("Pile", "pile")
           ]
         ]
       ]
@@ -378,11 +383,11 @@ classesEs.addRule(CreateDrawableListType, {
       compileAs: "block",
       tests: [
         [
-          "una pile es una lista dibujable de cartas con:",
-          drawableClass("Pile", "DrawableList", ["  static instanceType = Carta"]),
+          "una pile es una lista visible de cartas con:",
+          viewClass("Pile", "ViewableList", ["  static instanceType = Carta"]),
           [
-            ...drawableClass("Pile", "DrawableList<Carta>", ["  static instanceType = Carta"]),
-            ...drawableElement("Pile", "pile")
+            ...viewClass("Pile", "ViewableList<Carta>", ["  static instanceType = Carta"]),
+            ...viewElement("Pile", "pile")
           ]
         ]
       ]
@@ -390,9 +395,9 @@ classesEs.addRule(CreateDrawableListType, {
   ]
 })
 
-// ... with its name quoted, as an outline names it:  `una "pila" es una lista dibujable de cartas donde:`
-classesEs.addRule(CreateDrawableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista dibujable ${OF} {instanceType:type} {with_nested_statements}?`
+// ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
+classesEs.addRule(CreateViewableListType, {
+  syntax: `${A} {type:quoted_type} es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {
@@ -401,9 +406,9 @@ classesEs.addRule(CSSBlock, {
       compileAs: "block",
       tests: [
         [
-          ["una card es una cosa dibujable:", "\t<css>", "\t\t.red { color: crimson }", "\t</css>"],
+          ["una card es una vista:", "\t<css>", "\t\t.red { color: crimson }", "\t</css>"],
           [
-            "export class Card extends Drawable {",
+            "export class Card extends View {",
             '  static elementTag = core.defineElement(this, "test_classes")',
             "",
             "  static css = css`",
@@ -412,7 +417,7 @@ classesEs.addRule(CSSBlock, {
             "}"
           ],
           [
-            "export class Card extends Drawable {",
+            "export class Card extends View {",
             '  static elementTag = core.defineElement(this, "test_classes")',
             "",
             "  static css = css`",
@@ -424,7 +429,7 @@ classesEs.addRule(CSSBlock, {
             " * `<test-classes-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
             " * - The page defines its tag with this class:  `core.useElement()`, below.",
             " * - Its attributes are its card's properties;  its methods call its card's.",
-            " * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
             " */",
             "export class CardElement extends SpellElement<Card> {",
             '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-card", "card", [])',
@@ -542,10 +547,7 @@ classesEs.addRule(DragAndDrop, {
     {
       compileAs: "block",
       beforeEach(scope: P.Scope) {
-        scope.parse(
-          ["una carta es una cosa dibujable", "una pila es una lista dibujable de cartas"].join("\n"),
-          "block"
-        )
+        scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
         ["una carta se puede arrastrar", "Carta.canBeDragged = true"],
@@ -562,10 +564,7 @@ classesEs.addRule(DragAndDrop, {
     {
       compileAs: "block",
       beforeEach(scope: P.Scope) {
-        scope.parse(
-          ["una carta es una cosa dibujable", "una pila es una lista dibujable de cartas"].join("\n"),
-          "block"
-        )
+        scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
         ["una carta es arrastrable", "Carta.canBeDragged = true"],
@@ -601,12 +600,12 @@ classesEs.addRule(SavedInline, {
     {
       compileAs: "block",
       beforeEach(scope: P.Scope) {
-        scope.parse(["un dated-event es una cosa", "una card es una cosa dibujable"].join("\n"), "block")
+        scope.parse(["un dated-event es una cosa", "una card es una vista"].join("\n"), "block")
       },
       tests: [
         ["un dated-event se guarda dentro", "DatedEvent.savedInline = true"],
         {
-          title: "a drawable thing too:  saved inside, as every thing is by default",
+          title: "a view too:  saved inside, as every thing is by default",
           input: "una card se guarda dentro",
           js: "Card.savedInline = true"
         },

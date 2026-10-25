@@ -53,7 +53,7 @@ export { itemOf } from "./deprecated"
 // Compiled JavaScript has none.
 export { prop, state, derived, thing } from "spell/util"
 export { drawn } from "./drawing"
-// The tag a drawable type's `<css>` block compiles to:  its style sheet, as text (epic `drawable-thing` P10).
+// The tag a view type's `<css>` block compiles to:  its style sheet, as text (epic `drawable-thing` P10).
 export { elementTagFor, css, type ElementDefiner, type ElementApi } from "./elements"
 // A program's state as JSON by id, for a page that mirrors it (epic `python-target` P17):  see `state.ts`.
 export { StateWriter, StateMirror, ID_KEY } from "./state"
@@ -85,7 +85,7 @@ export {
   logFrame,
   logError,
   ERROR_KEY,
-  type Page,
+  type StartedPage,
   type PageMessage,
   type PageSpec
 } from "./page"

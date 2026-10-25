@@ -24,7 +24,7 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * - Spanish:  `una carta se puede arrastrar`, `una pila se puede soltar encima`;  `es arrastrable`, `no es soltable`.
  * - Compiles to a flag on the class, `false` for `is not`:
  *   `Card.canBeDragged = true`, `Pile.canBeDroppedOn = true`, `Task.canBeSelected = true`.
- *   - The runtime's drawable classes say `false`;  a sub-type inherits its super-type's.
+ *   - The runtime's view classes say `false`;  a sub-type inherits its super-type's.
  */
 export class DragAndDrop extends SpellStatement<"type|what|is?"> {
   @proto static priority = Priority.declaration

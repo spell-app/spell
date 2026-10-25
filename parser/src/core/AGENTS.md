@@ -55,7 +55,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `h()` returns a thunk:  the error boundary makes it, once, and a throw while it's made shows the stand-in.
     - `core.element()`, what it called before, is gone (epic `output-targets` P22):
       every committed example is recompiled, and a program compiled before P20 no longer draws.
-- A drawable thing's own element, e.g. `<solitaire-card>`:
+- A view's own element, e.g. `<solitaire-card>`:
   - [elements.ts](elements.ts) names its tag.
   - The page makes the element, through `core.elementDefiner`:
     app's [SpellElement.tsx](../../../spell-app/src/app/runner/SpellElement.tsx) sets it.
@@ -70,7 +70,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A name finds a sub-type's thing too:  `Pile#T1` is the tableau T1.
   - A place counts the type's own things, in the order they were made.
   - Where they show up:
-    - a drawable element's attribute:  `pile="Tableau#T1"`
+    - a view element's attribute:  `pile="Tableau#T1"`
     - spell's words for one thing:  `tableau T1`, `the first tableau`
   - [references.ts](references.ts) reads and writes them:
     - `thingForReference()`

@@ -36,8 +36,8 @@ In ANTLR or PEG.js, you write a grammar, run the generator, and import the parse
 By the time the first token is read, the grammar is frozen.
 
 Here a rule is a plain class, and a rule can register new rules in the middle of a parse.
-- In Spell, `it "is a face card" if its rank is jack, queen or king` declares a phrase,
-  and every line after it can say `the card is a face card`:  the phrase became a rule.
+- In Spell, `it "is a face card" if its rank is jack, queen or king` declares an alias,
+  and every line after it can say `the card is a face card`:  the alias became a rule.
 - So a program teaches the parser its own words, a line at a time
   ([below](#how-earlier-lines-teach-later-ones)).
 - The class says what a rule IS and what it builds;  its syntax says how it's WRITTEN.
@@ -400,14 +400,14 @@ A `Choice` tries EVERY alternative, then keeps:
 
 ### How earlier lines teach later ones
 
-Scope is what the program has declared so far:  its types, properties, variables and phrases.
+Scope is what the program has declared so far:  its types, properties, variables and aliases.
 A line that declares something records it, so the lines after it can use the new words.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart TB
   root["root scope:  the built-in types, text, number, list, thing, date ..."] --> imports["import scope:  what the project imports, if it imports"]
-  imports --> project["project scope:  the project's types, phrases and constants"]
+  imports --> project["project scope:  the project's types, aliases and constants"]
   project --> file["file scope:  one per file"]
   file --> type["a type's scope:  its properties and methods"]
   file --> method["a method's scope:  its arguments and variables"]
@@ -460,7 +460,7 @@ core.console.log(card.isFaceUp)
 
 </details>
 
-- The third line's quoted phrase became a rule while it parsed, and the comment above `isFaceUp` shows its syntax,
+- The third line's alias became a rule while it parsed, and the comment above `isFaceUp` shows its syntax,
   written by Spell in Rulex:  `{operator:is_or_is_not} face up`.
   `{operator:is_or_is_not}` takes `is not` and `isn't` too, so `the card is not face up` reads as well
   ([more syntaxes Spell writes](README-rulex.md#your-program-writes-rulex-too)).
@@ -476,8 +476,8 @@ core.console.log(card.isFaceUp)
 Order still matters, though not for everything.
 A line can name a type, or call a method, declared further down,
 because every type and method a project declares is stubbed before its files parse.
-A phrase can't be used above its definition yet.
-Move `print the card is face up` above the line that makes the phrase, and `spell lint` says so:
+An alias can't be used above its definition yet.
+Move `print the card is face up` above the line that makes the alias, and `spell lint` says so:
 
 ```text
 Card.spell:4:16  Don't understand "is face up"
@@ -789,7 +789,7 @@ Spell's recipe for that, step by step, with a whole rule to copy from:  [README-
 ## What it costs
 
 Parsing is nearly the whole bill.
-Measured warm on a laptop, Drawable Solitaire's four files (510 lines) parse in about 70 ms,
+Measured warm on a laptop, Solitaire's four files (510 lines) parse in about 70 ms,
 and compile to JavaScript in under 10 ms;  its card file alone, 154 lines, parses in about 17 ms.
 - Why:  every `Choice` parses every alternative before it picks one.
 - What keeps that affordable:  a `Sequence` checks its fixed words where they must fall,
