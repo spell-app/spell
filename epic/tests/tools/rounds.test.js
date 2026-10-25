@@ -87,7 +87,7 @@ test("ask round:  ONE page, the new round on top, the round before folded below 
   const [label] = roundLabels(page)
   expect(label).toMatch(/^Round 1 · \d+\/\d+ · what you sent$/)
   const folded = document.querySelector("ui-section[data-round]")
-  expect(folded.hasAttribute("collapsed")).toBe(true)
+  expect(folded.getAttribute("open")).toBe("false")
   expect(folded.textContent).toContain("Asked about Rename ui-open?")
   expect(folded.textContent).toContain("Rename ui-open?:  A · Yes")
   expect(folded.textContent).toContain("Notes:  showing, not folding")

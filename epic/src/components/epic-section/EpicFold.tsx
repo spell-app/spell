@@ -368,7 +368,9 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
           part={this.partForName("section" as never)}
           sticky=""
           collapsible=""
-          collapsed={!this.isOpen || this.isVeiled ? "" : undefined}
+          // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default).
+          // The JSX types take only a boolean, hence the cast.
+          open={(this.isOpen && !this.isVeiled ? undefined : "false") as unknown as boolean}
           loading={this.body.isBusy ? "" : undefined}
           offset={this.offset}
           badge={pieces.badge?.() || undefined}

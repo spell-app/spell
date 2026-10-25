@@ -139,7 +139,14 @@
   function pill(action, icon, words, tip, primary = false) {
     const button = el(
       "ui-button",
-      { "data-goals": action, circular: "", size: "tiny", [primary ? "primary" : "basic"]: "", icon, title: tip },
+      {
+        "data-goals": action,
+        appearance: primary ? "circular" : "circular basic",
+        ...(primary ? { color: "primary" } : {}),
+        size: "tiny",
+        icon,
+        title: tip
+      },
       ...words
     )
     titleInside(button)
@@ -150,8 +157,7 @@
   function circle(action, icon, label, tip) {
     const button = el("ui-button", {
       "data-goals": action,
-      circular: "",
-      basic: "",
+      appearance: "circular basic",
       size: "mini",
       icon,
       title: tip,

@@ -380,7 +380,7 @@ export class ChoicesForm {
   static expandAll(document: Document): boolean {
     const sections = ChoicesForm.sectionsOf(document)
     const isAllOpen = ChoicesForm.isAllOpen(document)
-    for (const section of sections) section.collapsed = isAllOpen
+    for (const section of sections) section.open = !isAllOpen
     const key = `${FOLD_KEY_PREFIX}${document.location.pathname}`
     const saved = PrefStore.getAt(key)
     const folds = (saved && typeof saved === "object" ? saved : {}) as Record<string, boolean>
@@ -391,13 +391,13 @@ export class ChoicesForm {
 
   /** Is every section holding rows in `document` open? */
   static isAllOpen(document: Document): boolean {
-    return ChoicesForm.sectionsOf(document).every((section) => !section.collapsed)
+    return ChoicesForm.sectionsOf(document).every((section) => section.open)
   }
 
   /** The `<ui-section>`s holding rows (`<epic-choice-rows>`). */
-  private static sectionsOf(document: Document): Array<Element & { collapsed: boolean; id: string }> {
+  private static sectionsOf(document: Document): Array<Element & { open: boolean; id: string }> {
     return [...document.querySelectorAll("ui-section:has(> epic-choice-rows)")] as Array<
-      Element & { collapsed: boolean; id: string }
+      Element & { open: boolean; id: string }
     >
   }
 

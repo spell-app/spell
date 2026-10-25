@@ -28,9 +28,7 @@
             - `new` fills the title, lede, "Asked by", the date and the "Where we are" box;  everything else stays.
           -->
           <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-            <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html"
-              >Docs</ui-breadcrumb
-            >
+            <ui-breadcrumb link="../pages/index.html" target="src-packages-docs-index-html">Docs</ui-breadcrumb>
             <ui-breadcrumb selected>Short Title</ui-breadcrumb>
           </ui-breadcrumbs>
           <ui-sticky class="spell-h1"
@@ -49,7 +47,7 @@
             <epic-field label="This decides">what changes for you once you press Do it.</epic-field>
           </ui-message>
 
-          <ui-section id="how" label="How to answer" sticky collapsible dividing collapsed>
+          <ui-section id="how" label="How to answer" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="circle question"></ui-icon>
             <ul>
               <li>
@@ -71,7 +69,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="q1" label="Q1 · Short question" sticky collapsible dividing collapsed>
+          <ui-section id="q1" label="Q1 · Short question" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="list check"></ui-icon>
             <p class="spell-choices-rule">Which question this answers, and the recommended rule.</p>
             <epic-choice-rows>

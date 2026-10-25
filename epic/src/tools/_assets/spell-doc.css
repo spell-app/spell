@@ -425,11 +425,11 @@ body.spell-one-line-head .spell-page-head > h1 {
   margin: 0;
 }
 /* the page's own crumb, emptied (the title after it says its words):  only the divider before it, at phone width none */
-.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[active]::part(divider) {
+.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[selected]::part(divider) {
   margin-inline-start: 8px;
 }
 @media (max-width: 720px) {
-  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[active]::part(divider) {
+  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[selected]::part(divider) {
     display: none;
   }
 }
@@ -639,7 +639,7 @@ ui-button.spell-fold {
   --ui-section-content-padding: 6px 0 0;
 }
 /* a folded nested section doesn't need its room:  the next one follows right under it */
-.spell-doc-main ui-section ui-section[collapsed] {
+.spell-doc-main ui-section ui-section:state(collapsed) {
   --ui-section-margin: 6px;
 }
 /*
@@ -1088,10 +1088,10 @@ ui-tab > pre {
   display: block;
   height: 100%;
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-label[attached="top"] {
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"] {
   --ui-label-background: var(--ui-surface-strong, var(--spell-code-bg));
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-label[attached="top"]::part(label) {
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"]::part(label) {
   position: static;
   display: block;
   width: auto;
@@ -1104,7 +1104,7 @@ ui-tab > pre {
 .spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(p, ul, ol, pre, ui-code, ui-accordion, ui-message) {
   margin-block: 8px;
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(ui-label[attached="top"] + *, :first-child) {
+.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(ui-label[attach="top"] + *, :first-child) {
   margin-top: 0;
 }
 .spell-doc-main ui-grid.spell-pros-cons ui-segment > :last-child {

@@ -110,7 +110,7 @@ function family(each, prefix) {
     each.intro ? el("p", {}, ...withCode(each.intro)) : "",
     el(
       "ui-table",
-      { celled: "", compact: "", striped: "", unstackable: "" },
+      { celled: "", padding: "compact", appearance: "striped", unstackable: "" },
       el("table", {}, el("thead", {}, head), el("tbody", {}, ...(each.rows ?? []).map((row) => operation(each, row))))
     )
   )

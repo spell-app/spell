@@ -125,7 +125,7 @@ export function roundSection(document, { round, asked, lede, sent, typed }) {
   return make(
     document,
     "ui-section",
-    { id: `round-${round}`, [ROUND]: round, label, ...SECTION_FLAGS, collapsed: true },
+    { id: `round-${round}`, [ROUND]: round, label, ...SECTION_FLAGS, open: "false" },
     [
       make(document, "ui-icon", { slot: "icon", name: "history" }),
       ...(lede ? [make(document, "p", {}, [make(document, "b", {}, ["Asked:  "]), lede])] : []),

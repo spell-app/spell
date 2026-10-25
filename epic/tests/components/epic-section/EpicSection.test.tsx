@@ -82,7 +82,7 @@ describe("<epic-section>", () => {
     expect(titleText(questions)).toBe("2. Questions")
     expect(inner(questions).hasAttribute("info")).toBe(false)
     expect(host.matches(":state(open)")).toBe(false)
-    expect(inner(host).hasAttribute("collapsed")).toBe(true)
+    expect(inner(host).getAttribute("open")).toBe("false")
     const style = getComputedStyle(host)
     expect({ rule: style.borderBottomWidth, gap: style.marginBottom }).toEqual({ rule: "1px", gap: "0px" })
   })
@@ -103,7 +103,7 @@ describe("<epic-section>", () => {
     await ElementFixture.tick()
     expect(opens).toEqual([true, true])
     expect(host.matches(":state(open)")).toBe(true)
-    expect(inner(host).hasAttribute("collapsed")).toBe(false)
+    expect(inner(host).getAttribute("open")).not.toBe("false")
     const style = getComputedStyle(host)
     expect({ rule: style.borderBottomStyle, gap: style.marginBottom }).toEqual({ rule: "none", gap: "28px" })
     await expectAccessible(host)
@@ -141,7 +141,7 @@ describe("<epic-section>", () => {
     expect(host.querySelector(":scope > p.body")!.textContent).toBe("A body, from its part file.")
     expect(loads).toEqual([`${FIXTURES}/part.html`])
     expect(host.matches(":state(loaded)")).toBe(true)
-    expect(inner(host).hasAttribute("collapsed")).toBe(false)
+    expect(inner(host).getAttribute("open")).not.toBe("false")
   })
 
   test("a part that can't load says so, in place of the body", async () => {

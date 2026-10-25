@@ -140,11 +140,10 @@ function moduleSection(module, statements, missing, prefix) {
   const path = `spell-parser/src/core/${file}`
   const source = el("ui-button", {
     slot: "actions",
-    circular: "",
-    basic: "",
+    appearance: "circular basic",
     size: "tiny",
     icon: "code",
-    href: sourceHref(file),
+    link: sourceHref(file),
     target: `src-${slug(path)}`,
     title: path,
     "aria-label": `Open ${file.split("/").pop()}`
@@ -167,13 +166,13 @@ function moduleSection(module, statements, missing, prefix) {
       sticky: "",
       collapsible: "",
       dividing: "",
-      collapsed: "",
+      open: "false",
       "data-core-module": ""
     },
     source,
     el(
       "ui-table",
-      { celled: "", compact: "", striped: "", unstackable: "" },
+      { celled: "", padding: "compact", appearance: "striped", unstackable: "" },
       el("table", {}, el("thead", {}, el("tr", {}, ...COLUMNS.map((label) => el("th", {}, label)))), ...bodies)
     )
   )
@@ -243,7 +242,7 @@ function notPortedList(statements, notPorted) {
   if (!notPorted)
     return el(
       "ui-message",
-      { state: "warning", header: "No list of what Python lacks" },
+      { state: "warning", heading: "No list of what Python lacks" },
       el("p", {}, "This checkout has no ", el("code", {}, "spell-parser/src/py/core/not_ported_yet.json5"), ".")
     )
   const byName = new Map(statements.map((statement) => [jsName(statement), statement]))

@@ -192,7 +192,7 @@ describe("migratePages", () => {
       "guides/x/x.html": guide,
       "guides/own/own.html": `<main><table><tr><td>a</td></tr></table></main><script>document.querySelector("main > table")</script>`,
       // its own script:  its tables stay where they are, but an attribute moves nothing
-      "guides/drawn/drawn.html": `<main><ui-table compact><table><tr><td>a</td></tr></table></ui-table></main><script src="x.js"></script>`,
+      "guides/drawn/drawn.html": `<main><ui-table padding="compact"><table><tr><td>a</td></tr></table></ui-table></main><script src="x.js"></script>`,
       "templates/durable.html": `<main>\n  ${table}\n</main>`
     })
     const pages = pagesFor(root)
@@ -231,7 +231,7 @@ describe("migratePages", () => {
     expect(html).toContain("<ui-table celled unstackable><table><tr><td>kept</td></tr></table></ui-table>")
     expect(html).toContain('<ui-table celled stack-by="container"><table>')
     expect(readFileSync(join(root, "guides/drawn/drawn.html"), "utf8")).toContain(
-      "<ui-table compact unstackable><table>"
+      '<ui-table padding="compact" unstackable><table>'
     )
     expect(html).toContain('<table class="ui very basic table">')
     expect(html).toContain(

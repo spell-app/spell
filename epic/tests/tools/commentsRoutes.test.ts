@@ -27,7 +27,7 @@ const PAGE = `<!doctype html>
   <body>
     <main class="spell-doc-main">
       <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>Page</h1></header></ui-sticky>
-      <ui-section id="model" label="1. The model" sticky collapsible dividing collapsed>
+      <ui-section id="model" label="1. The model" sticky collapsible dividing open="false">
         <p>Body.</p>
       </ui-section>
     </main>

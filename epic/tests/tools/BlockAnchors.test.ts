@@ -175,8 +175,8 @@ describe("targetOf()", () => {
 describe("a component set's page (Epic UI's, in Spell UI's page shape)", () => {
   /** An Epic UI page's `main`:  its masthead, then its body's article of sections, a table and live examples. */
   const SITE = `<main id="main" class="site-main">
-    <ui-segment vertical class="site-masthead"><ui-container>
-      <ui-menu class="site-page-links"><ui-item href="x">Code</ui-item></ui-menu>
+    <ui-segment appearance="vertical" class="site-masthead"><ui-container>
+      <ui-menu class="site-page-links"><ui-item link="x">Code</ui-item></ui-menu>
       <ui-header level="1" class="site-title">&lt;epic-item&gt;<ui-header>One item</ui-header></ui-header>
     </ui-container></ui-segment>
     <ui-container class="site-body"><article class="site-article">

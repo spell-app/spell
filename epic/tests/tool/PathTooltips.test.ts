@@ -98,11 +98,11 @@ describe("IncomingHtml.nodes()", () => {
     const { document } = parseHTML("<!doctype html><html><body></body></html>")
     const nodes = IncomingHtml.nodes(
       document as unknown as Document,
-      "<ui-table compact celled><table><tr><td>a</td></tr></table></ui-table>" +
+      '<ui-table padding="compact" celled><table><tr><td>a</td></tr></table></ui-table>' +
         '<ui-table stackable="tablet"><table><tr><td>b</td></tr></table></ui-table>'
     )
     expect(nodes.map((node) => (node as Element).outerHTML.split("<table>")[0])).toEqual([
-      '<ui-table compact="" celled="" unstackable="">',
+      '<ui-table padding="compact" celled="" unstackable="">',
       '<ui-table stackable="tablet">'
     ])
   })

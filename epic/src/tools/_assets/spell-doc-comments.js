@@ -661,8 +661,8 @@ class PageComments {
     if (!bullhorn) {
       bullhorn = el(
         "ui-item",
-        { class: "spell-toolbar-item spell-toolbar-waiting", link: true, icon: "bullhorn", hidden: true },
-        el("ui-label", { class: "spell-toolbar-count replied", circular: true, size: "mini" })
+        { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
+        el("ui-label", { class: "spell-toolbar-count replied", appearance: "circular", size: "mini" })
       )
       bullhorn.addEventListener("click", () => this.nextWaiting())
     }
@@ -1676,7 +1676,7 @@ const UNDO_MS = 6000
  * - `size`:  another size (Send's pill:  `tiny`, as the New epic pill)
  */
 export function iconButton(icon, tip, { size = "mini" } = {}) {
-  const button = el("ui-button", { circular: true, basic: true, size, icon, title: tip, "aria-label": tip })
+  const button = el("ui-button", { appearance: "circular basic", size, icon, title: tip, "aria-label": tip })
   titleInside(button)
   return button
 }

@@ -149,7 +149,7 @@ export class ProseRewrite {
   /** `<epic-note state title>` from a hand-written UPDATE / DONE note;  a phase's bare UPDATE:  `<epic-update>`. */
   private note(message: Element) {
     const shape = ProseShapes.note(message)
-    if (!shape) return this.owner.keep(ProseCounted.keptNote, message, `"${message.getAttribute("header")}"`)
+    if (!shape) return this.owner.keep(ProseCounted.keptNote, message, `"${message.getAttribute("heading")}"`)
     const { state, title, phase } = shape
     const children = PlanMarkup.takeChildren(message)
     if (phase) {

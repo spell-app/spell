@@ -75,7 +75,7 @@
             >.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
 
             <epic-prompt>
@@ -99,7 +99,7 @@
             <p>Click "Kickoff prompt" to unfold it. The start of this epic's own prompt.</p>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
 
             <ui-accordion class="spell-code" appearance="styled">
@@ -123,10 +123,10 @@
             </p>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="compass"></ui-icon>
 
-            <ui-section id="epic-prompt-parents" label="Its parents" sticky collapsible dividing collapsed>
+            <ui-section id="epic-prompt-parents" label="Its parents" sticky collapsible dividing open="false">
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
@@ -153,7 +153,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-prompt-children" label="Its children" sticky collapsible dividing collapsed>
+            <ui-section id="epic-prompt-children" label="Its children" sticky collapsible dividing open="false">
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
@@ -177,10 +177,10 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <p>None: it takes no attributes.</p>
-            <ui-section id="epic-prompt-slots" label="Slots" sticky collapsible dividing collapsed>
+            <ui-section id="epic-prompt-slots" label="Slots" sticky collapsible dividing open="false">
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -200,7 +200,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-prompt-parts" label="Parts" sticky collapsible dividing collapsed>
+            <ui-section id="epic-prompt-parts" label="Parts" sticky collapsible dividing open="false">
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -229,7 +229,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -247,7 +247,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed>
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>

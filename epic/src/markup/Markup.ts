@@ -40,7 +40,7 @@ export class Markup {
   /**
    * A new PLAIN element in `document`, not an epic one (`<table>`, `<ui-section>`, `<code>`):  for a tool writing a
    * page's other markup as nodes, never as an HTML string (`epic loc`'s tables).
-   * - `attributes`:  as given;  `true` is a bare attribute (`collapsed`), `false` / `undefined` left out
+   * - `attributes`:  as given;  `true` is a bare attribute (`sticky`), `false` / `undefined` left out
    * - `children`:  appended in order;  strings are TEXT, never parsed as markup (unlike `append()`)
    * - checks nothing:  a `<ui-*>` or native tag is the page's to get right
    */

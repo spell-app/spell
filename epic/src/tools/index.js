@@ -119,7 +119,7 @@ const GROUP_COUNTS = {
 }
 
 /** The "Writing docs" notes, on the Templates page (the home had them before P5). */
-const WRITING_DOCS = `<ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing collapsed>
+const WRITING_DOCS = `<ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing open="false">
 <ui-icon slot="icon" name="pen to square"></ui-icon>
 <ul>
 <li>Start from a template:  <code>epic pages create durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
@@ -136,7 +136,7 @@ prints the folder).  How the pages work:  <a href="../guides/spell-docs/spell-do
  * - a function:  `GOALS` is checked as the page is made
  */
 const sagaNotes =
-  () => `<ui-section id="${existsSync(GOALS) ? "parked" : "changing"}" label="${existsSync(GOALS) ? "Parked sagas" : "Changing the list"}" sticky collapsible dividing collapsed>
+  () => `<ui-section id="${existsSync(GOALS) ? "parked" : "changing"}" label="${existsSync(GOALS) ? "Parked sagas" : "Changing the list"}" sticky collapsible dividing open="false">
 <ui-icon slot="icon" name="folder"></ui-icon>
 <ul>
 ${
@@ -150,7 +150,7 @@ saga sets</a>, read only (epic <code>epic-goals</code> rebuilds them).</li>\n`
 </ui-section>`
 
 /** The Brand page's notes:  the files beside its pages. */
-const BRAND_NOTES = `<ui-section id="files" label="Files" sticky collapsible dividing collapsed>
+const BRAND_NOTES = `<ui-section id="files" label="Files" sticky collapsible dividing open="false">
 <ui-icon slot="icon" name="folder"></ui-icon>
 <ul>
 <li><code>brand/design-system.json</code>:  the design system's push record (<code>spell design pushed</code>).</li>
@@ -659,7 +659,7 @@ export function homeSkeleton() {
 ${HOME_START}
 ${HOME_END}
 
-<ui-section id="about" label="About these docs" sticky collapsible dividing collapsed>
+<ui-section id="about" label="About these docs" sticky collapsible dividing open="false">
 <ui-icon slot="icon" name="circle info"></ui-icon>
 <ul>
 <li>Served by the epic server (<code>epic hub ensure</code>), which every repo using spell-epic shares.</li>
@@ -798,7 +798,7 @@ ${list.extra ?? ""}
  *   its cards itself;  each card starred as `favorites` says (the starred epics' names) and naming its saga (`sagas`:
  *   the list, `readSagas()`);  the page server adds the running epics' cards between its markers
  * - Guides:  a section per saga, then Misc (`guideSections()`);  Sagas:  a card per saga (`sagaSection()`)
- * - open, not `collapsed`:  the list IS the page
+ * - open, not `open="false"`:  the list IS the page
  */
 export function listSection(list, pages, favorites = readFavorites(), sagas = readSagas()) {
   const epics = list.id === "epics"

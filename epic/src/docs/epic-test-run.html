@@ -53,7 +53,7 @@
             what it reads from the page: <a href="../../spell-epic/src/components/epic-test-run/TestRun.ts" target="src-spell-epic-src-components-epic-test-run-testrun-ts"><code title="spell-epic/src/components/epic-test-run/TestRun.ts">TestRun.ts</code></a>.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>
               A run over a sample page's two tests, the first in the new shape, the second an older one (prose only).
@@ -97,7 +97,7 @@
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               Nobody writes it in a doc: <a href="epic-page.html" target="src-spell-epic-src-docs-epic-page-html"><code>&lt;epic-page&gt;</code></a> draws it over its blocks in TEST MODE, which starts from:
@@ -130,7 +130,7 @@
             </ui-table>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="compass"></ui-icon>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -145,7 +145,7 @@
             <p>It has no children. Its tests are the open ones of the <code>&lt;epic-page&gt;</code> around it, in page order, the deferred ones last.</p>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -157,7 +157,7 @@
                 </tbody>
               </table>
             </ui-table>
-            <ui-section id="epic-test-run-answers" label="The answers" sticky collapsible dividing collapsed>
+            <ui-section id="epic-test-run-answers" label="The answers" sticky collapsible dividing open="false">
               <p>Each a review mark on the test, <code>{ action: "test", result, note?, shot? }</code>, sent with Send like any mark, or by leaving the run. Not one by one as given: each send wakes a waiting session, so a run of 17 tests would wake it 17 times.</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -180,7 +180,7 @@
               </p>
               <p>← and → move;  Esc leaves, sending the answers.  An answered test shows its answer, dashed until sent, outlined once sent, and takes another.</p>
             </ui-section>
-            <ui-section id="epic-test-run-parts" label="Parts" sticky collapsible dividing collapsed>
+            <ui-section id="epic-test-run-parts" label="Parts" sticky collapsible dividing open="false">
               <p>Pieces of what it draws.</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -201,7 +201,7 @@
               </table>
             </ui-table>
             </ui-section>
-            <ui-section id="epic-test-run-events" label="Events" sticky collapsible dividing collapsed>
+            <ui-section id="epic-test-run-events" label="Events" sticky collapsible dividing open="false">
               <p>What it tells its owner.</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -216,7 +216,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>Side bar first: at 390px the answers sit two by two; on a wide card, four in a row.</li>

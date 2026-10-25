@@ -289,7 +289,7 @@ export async function fetchFile(url, { format = "text" } = {}) {
 /** Show `message` (its `` `code` `` as code) in a warning headed `header`, first in `holder` (else `main`). */
 export function dataNotice(holder, header, message) {
   ;(holder ?? document.querySelector("main"))?.prepend(
-    el("ui-message", { state: "warning", header }, el("p", {}, ...withCode(message)))
+    el("ui-message", { state: "warning", heading: header }, el("p", {}, ...withCode(message)))
   )
 }
 
