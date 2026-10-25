@@ -342,9 +342,9 @@ export type FoldButtonOptions = {
 
 /** A fold button's tooltips, from its card's vocabulary. */
 export type FoldTips = {
-  /** while open:  `Fold this reply` */
+  /** while open:  `Close this reply` */
   fold: string
-  /** while folded:  `Unfold this reply` */
+  /** while folded:  `Open this reply` */
   unfold: string
 }
 

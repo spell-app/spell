@@ -64,7 +64,7 @@ describe("<epic-thread>", () => {
     }).toEqual({
       id: "M3",
       headline: "“2. Context”",
-      tip: "Comment M3, on “2. Context”\n(Unfold this thread)",
+      tip: "Comment M3, on “2. Context”\n(Open this thread)",
       expanded: "false",
       body: false
     })

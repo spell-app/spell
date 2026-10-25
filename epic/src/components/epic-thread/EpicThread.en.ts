@@ -128,8 +128,8 @@ export const epicThreadVocabulary = {
   ],
   states: [],
   texts: [
-    { key: "foldTip", text: "Fold this thread", description: "After the fold's tooltip while open." },
-    { key: "unfoldTip", text: "Unfold this thread", description: "After the fold's tooltip while folded." },
+    { key: "foldTip", text: "Close this thread", description: "After the fold's tooltip while open." },
+    { key: "unfoldTip", text: "Open this thread", description: "After the fold's tooltip while folded." },
     { key: "editTitle", text: "Edit your last words", description: "The pen's tooltip." },
     {
       key: "editLabel",
