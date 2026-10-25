@@ -256,10 +256,13 @@ What `/coherence sweep` reads, an agent each.
 ### The page server, from an epic page
 
 - **It is:**  `ServerLink` (`spell-epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,
-  and `watch()`:  polling while the page is visible, and hearing the page server's file events
-- **Use it when:**  an epic element or form reads or writes through the page server.
+  and every read, write and poll
+  - `isServed()`, `canRead()`, `get()` (on `$fetch()`), `post()`, `forPage()`
+  - the static `watch(window, files, refresh, { every, polls })`, with a path test:
+    polling while the page is visible, and hearing the page server's file events
+- **Use it when:**  an epic element, form or docs page reads or writes through the page server.
 - **Flag:**  `SPELL_SERVER\?\.token|protocol !== "file:"`
-- **Copies:**  three writes, about a dozen reads, about ten "is this page served?" tests (sweep 1, epic-pages #1, #6)
+- **Copies:**  `--` since epic `coherence` P9;  only the parked `goals-live.js` keeps its own
 
 ## Errors and logging
 
@@ -349,6 +352,13 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `field-sizing|growField`
 - **Copies:**  six (sweep 1, epic-pages #7)
 
+### A draft that saves itself
+
+- **It is:**  `DraftSaver` (`spell-epic/src/answers/DraftSaver.ts`), handed the save call, the wait and the key:
+  saves as you type, says "saved 14:04", retries a failed save every 3s
+- **Flag:**  `draft saved|saveDraft`
+- **Copies:**  `--` since epic `coherence` P9 (the seven forms)
+
 ### The same program in two forms
 
 - **It is:**  the translator (`spell-parser/src/spell/translate/Translator.ts`), rule by rule over the match tree;
@@ -421,11 +431,10 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 Mechanisms with several copies and no shared one yet:  each a fix for a later phase, or for the epic that owns the
 code (epic `coherence`, Q4 and Q5).
 
-- **A draft that saves itself:**  seven in the epic pages.
 - **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
 - **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
-  - The epic pages already have one:  `ServerLink.watch()` (above);  their copies should use it first.
+  - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
 - **Waiting until something is true** (node):  `waitUntil(read, { timeout, every })`:
   `spell-epic/src/tools/details.js` (`waitForAnswer`), `spell-epic/src/tools/agents.ts` (`waitForRedirects`) and
   `spell-epic/src/demo/check-test-run.mjs` (`waitFor`);  sweep 1 added eight more, the kit's `PidFile` and
