@@ -234,11 +234,11 @@ export type PropertySchema = {
 
 /** A `CustomEvent` the component dispatches (`bubbles: true, composed: true`). */
 export type EventSpec = {
-  /** Canonical lowercase kebab name, e.g. `ui-change`. */
+  /** Canonical lowercase kebab name, e.g. `ui-changed`. */
   name: string
   /** Shape of `event.detail`, as a type description for docs, e.g. `"{ value: string, originalEvent?: Event }"`. */
   detail: string
-  /** `preventDefault()` vetoes the transition, e.g. `ui-close`. */
+  /** `preventDefault()` vetoes the transition, e.g. `ui-closing`. */
   cancelable?: boolean
   /** When it fires and what it means, for docs and the custom-elements manifest. */
   description: string
@@ -461,7 +461,7 @@ export type NameMap = Readonly<Record<string, string>>
  * A translation of the vocabulary, e.g. Spanish, so `<es-tarjeta color="rojo">` ~== `<ui-card color="red">`.
  * - Keys are ALWAYS canonical English names;  values are the localized names.
  * - Anything missing falls back to canonical, so the English identity dictionary is just `{ lang: "en" }`.
- * - Tags and events are keyed by their full canonical name (`ui-card`, `ui-change`)
+ * - Tags and events are keyed by their full canonical name (`ui-card`, `ui-changed`)
  *   and map to a localized STEM (`tarjeta`, `cambio`):
  *   `Vocabulary.define(prefix, dictionary)` adds the prefix (`es-tarjeta`).
  * - Attribute, slot and part names map name to name (`header` => `encabezado`).
@@ -480,7 +480,7 @@ export type Dictionary = {
   attributes?: NameMap
   /** Per shared value set, canonical value => localized, e.g. `{ hues: { red: "rojo" } }`. */
   values?: Readonly<Partial<Record<ValueSetName, NameMap>>>
-  /** Canonical event name => localized stem, e.g. `{ "ui-change": "cambio" }`. */
+  /** Canonical event name => localized stem, e.g. `{ "ui-changed": "cambio" }`. */
   events?: NameMap
   /** Canonical slot name => localized. */
   slots?: NameMap
@@ -548,7 +548,7 @@ export type ComponentDictionary = {
 /**
  * One tag's names in one language, in a file of its own beside its vocabulary:  `UIButton.es.ts`.
  * - What a `Dictionary` holds for the tag:  its name in `tags`, the rest in `components[tag]`.
- * - Names its tag shares with others (`size`, `color`, `ui-change`) are the language's own file's:
+ * - Names its tag shares with others (`size`, `color`, `ui-changed`) are the language's own file's:
  *   Spell UI's `components.es.ts`.
  */
 export type TagDictionary = ComponentDictionary & {

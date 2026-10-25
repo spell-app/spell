@@ -16,6 +16,18 @@ The coherence agent reads it too, for every sweep and plan review (epic `coheren
   A copy that's fine as it is goes under "Fine as it is", with why, so no sweep flags it again.
 - The words:  [words.md](words.md).
 
+## Areas
+
+What `/coherence sweep` reads, an agent each.
+
+| Area | Folders |
+| --- | --- |
+| `ui-components` | `spell-ui/src/components/`, `spell-ui/src/elements/`, `spell-ui/src/runtime/`, `spell-ui/src/styles/` |
+| `ui-docs-tools` | `spell-ui/src/docs-components/`, `spell-ui/src/tools/`, `spell-ui/site/`, `spell-ui/scripts/` |
+| `epic-pages` | `spell-epic/src/components/`, `spell-epic/src/tools/_assets/` (hand-written only), `spell-epic/src/answers/`, `spell-epic/src/review/` |
+| `epic-tools-kit` | `spell-epic/src/` (the rest), `spell-epic/hooks/`, the kit's `src/`, `tools/`, `scripts/` |
+| `parser-app` | `spell-parser/src/`, `spell-app/src/`, `spell-brand/src/`, `spell-brand/scripts/` |
+
 ## Reading text
 
 ### A new syntax

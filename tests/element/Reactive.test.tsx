@@ -379,7 +379,7 @@ const VOCABULARY = {
     { name: "open", kind: "boolean", description: "Open?" },
     { name: "size", kind: "size", description: "Size." }
   ],
-  events: [{ name: "ui-change", detail: "{ open: boolean }", description: "Open changed.", cancelable: true }],
+  events: [{ name: "ui-changed", detail: "{ open: boolean }", description: "Open changed.", cancelable: true }],
   slots: [],
   parts: [{ name: "box", description: "The box." }],
   states: [{ name: "open", description: "Open." }],
@@ -446,7 +446,7 @@ class ReactiveTest extends E.UIComponent<typeof VOCABULARY> {
   /** A user toggle, through `requestChange()`. */
   toggle(): boolean {
     const next = !this.isOpen
-    return this.requestChange("isOpen", next, () => this.send("ui-change", { open: next }))
+    return this.requestChange("isOpen", next, () => this.send("ui-changed", { open: next }))
   }
 
   render(): JSX.Element {
@@ -518,14 +518,14 @@ describe("Reactive:  components", () => {
     expect(host.open).toBe(true)
     expect(component.isOpen).toBe(true)
     expect(host.hasAttribute("open")).toBe(true)
-    host.addEventListener("ui-change", (event) => event.preventDefault(), { once: true })
+    host.addEventListener("ui-changed", (event) => event.preventDefault(), { once: true })
     expect(component.toggle()).toBe(false)
     expect(component.isOpen).toBe(true)
   })
 
   it("requestChange():  a host re-setting the property during the event wins", async () => {
     const { host, component } = await reactive(`<x-reactive></x-reactive>`)
-    host.addEventListener("ui-change", () => (host.open = false), { once: true })
+    host.addEventListener("ui-changed", () => (host.open = false), { once: true })
     expect(component.toggle()).toBe(false)
     expect(component.isOpen).toBe(false)
   })

@@ -164,7 +164,7 @@ export class ElementDefinition {
     return this.byName.get(name)?.attribute ?? name
   }
 
-  /** Localized event name, e.g. `ui-change` => `es-cambio`. */
+  /** Localized event name, e.g. `ui-changed` => `es-cambio`. */
   event(name: string): string {
     return this.localized.names.events.get(name) ?? name
   }

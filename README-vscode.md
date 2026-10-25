@@ -277,13 +277,16 @@ spell-app marks both unwanted, and pins its formatter to Oxc for each language.
 ## What it does for a `.spell` file
 
 The colours start in the grammar inside the `.vsix`;  everything else comes from your checkout, as it is on disk.
+A `.spellx` file, Spell's tag-shaped form, gets all of it too, plus one view of its own:
+[its page](https://github.com/spell-app/spell-parser/blob/main/README-spellx.md) says what the tags mean.
 
 - **Colours.**  Spell's grammar,
   with the `<css>` and `<markdown>` blocks inside a template coloured as CSS and Markdown.
   - Comments are Markdown:  `#` headings and `**bold**` come out bold;  `*italic*`, links and `~~struck~~` too.
   - A `` css`...` `` template in a JavaScript or TypeScript file is coloured as CSS:
     that's how compiled Spell writes a view's style sheet.
-  - `.spell` files indent with tabs.
+  - `.spell` and `.spellx` files indent with tabs.
+  - A `.spellx` file's tag heads (`<property "suit">`) are coloured as the Spell they read as.
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.
@@ -291,6 +294,8 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
     JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
+- **Show as Code Spell**, first in a `.spellx` file's title bar:  the same file written as plain Spell,
+  beside it and read-only.
 - **▶ Run Project:**  the project, running in a panel beside its code ("Run Solitaire").
   - It's the runner Spell's editor uses in the browser,
     so a game in progress survives your change:  only the panel's Restart starts afresh.
@@ -334,13 +339,14 @@ The edges:
 
 | Command | Title | Where |
 | --- | --- | --- |
-| `spell.showCompiledTypeScript` | Show Compiled TypeScript | the editor's title bar, first |
+| `spell.showCodeSpell` | Show as Code Spell | the editor's title bar, first, in a `.spellx` file only |
+| `spell.showCompiledTypeScript` | Show Compiled TypeScript | the editor's title bar, first in a `.spell` file |
 | `spell.showCompiled` | Show Compiled JavaScript | the title bar |
 | `spell.showCompiledPython` | Show Compiled Python | the title bar |
 | `spell.runProject` | Run Project | the title bar, last (▶) |
 | `spell.showLineTree` | Show Tree for This Line | the right-click menu:  nothing behind it yet |
 
-- Every one is in the command palette's "Spell" category, and works only in a `.spell` file.
+- Every one is in the command palette's "Spell" category, and works only in a `.spell` or `.spellx` file.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -351,12 +357,13 @@ The settings it sets for you:
 
 | Setting | Value |
 | --- | --- |
-| `[spell]` `editor.insertSpaces`, `editor.detectIndentation` | both `false`:  tabs, always |
+| `[spell]` and `[spellx]` `editor.insertSpaces`, `editor.detectIndentation` | both `false`:  tabs, always |
+| `[spell]` and `[spellx]` `editor.formatOnType` | `true`:  a Spanish word gets its accents as you type it (`accion` => `acción`) |
 | `editor.semanticTokenColorCustomizations` | the Markdown in comments:  headings 1 to 4 and bold in bold, italic, links underlined, strikethrough |
 | `editor.tokenColorCustomizations` | a `#` heading comment in bold from the grammar too |
 
 - Its id is `spell-language` (publisher `spell-app`), shown as "Spell", version 0.8.0.
-- It starts on a window's first `.spell`, `.tsx` or `.jsx` file (`activationEvents`);
+- It starts on a window's first `.spell`, `.spellx`, `.tsx` or `.jsx` file (`activationEvents`);
   the language server waits for the first `.spell` file.
 - It hands VS Code the HTML and CSS data (`contributes.html.customData`, `contributes.css.customData`),
   copies in its `out/data/`.

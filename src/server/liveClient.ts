@@ -71,7 +71,7 @@ export type ServerConfig = {
 export type PageSource = { html: string; etag?: string }
 
 /**
- * `detail` of `spell-server:change`, the event `liveClient()` fires on `window` when the page's OWN file changed.
+ * `detail` of `spell-server:reloading`, the event `liveClient()` fires on `window` when the page's OWN file changed.
  * - `html` / `etag`:  the new version, already fetched (`readPage()`)
  * - `reload()`:  reload, keeping the scroll position:  for a page that took the change, then can't patch after all
  * - the event is cancelable:
@@ -81,7 +81,7 @@ export type PageSource = { html: string; etag?: string }
 export type PageChange = { path: string; html: string; etag?: string; reload: () => void }
 
 /**
- * `detail` of `spell-server:file`, the event `liveClient()` fires on `window` when ANOTHER file changed:
+ * `detail` of `spell-server:changed`, the event `liveClient()` fires on `window` when ANOTHER file changed:
  * not the page's own, not a stylesheet, not a script (`liveAction()`).  Nothing reloads:  the page decides.
  * - `path`:  its URL path, each segment URI-encoded, e.g. `/epics/x/parts/q2.html`
  * - e.g. a body the page loaded from a file (`<ui-section source>`):  the docs runtime re-fetches it in place
@@ -90,7 +90,7 @@ export type PageChange = { path: string; html: string; etag?: string; reload: ()
 export type FileChange = { path: string }
 
 /**
- * `detail` of `spell-server:scripts`, the CANCELABLE event `liveClient()` fires on `window` before a hot reload:
+ * `detail` of `spell-server:scripts-reloading`, the CANCELABLE event `liveClient()` fires on `window` before a hot reload:
  * the scripts the page loaded that changed (`liveAction()`), once they've been quiet half a second.
  * - `paths`:  their URL paths, as `FileChange`'s
  * - a page that runs the new code of EVERY one itself calls `preventDefault()`:  no reload
@@ -123,12 +123,12 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
 /**
  * Start live reload in this page, and add `SPELL_SERVER.editPage()`.
  * - the page's own file changed:
- *   fetches the new version and offers it to the page (`spell-server:change`, `PageChange`)
+ *   fetches the new version and offers it to the page (`spell-server:reloading`, `PageChange`)
  *   - a page that takes it updates itself in place, else it reloads
  * - a stylesheet the page uses (linked, or `@import`ed by one it links) changed:  swapped in place, no reload
  * - a script the page loaded, or one beside it, changed (`liveAction()`):  HOT RELOAD, so the page runs the new code
  *   - e.g. a merge rebuilt `spell-ui.js` and its lazy chunks, or `epics.pack.js`
- *   - first OFFERED to the page (`spell-server:scripts`, `ScriptsChange`):  a page that runs every changed script's
+ *   - first OFFERED to the page (`spell-server:scripts-reloading`, `ScriptsChange`):  a page that runs every changed script's
  *     new code itself takes it, and doesn't reload (a rebuilt component pack swapped in place, epic `epic-engine` I116)
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
@@ -138,12 +138,12 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  *   - any other `.js` (a repo tool) is none of the page's business
  * - the server restarted (its socket says `hello` from another `run`):
  *   reloads the same way, for the new `/api/server/live.js` and write token
- * - any other file changed:  says so (`spell-server:file`, `FileChange`), and does nothing else
+ * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
  *   the docs runtime keeps its folds and comment drafts itself (`localStorage`)
  * - in a frame (VS Code's "Epic Docs" and "Review" views, spell-epic's `vscode/src/DocView.ts`):
- *   - posts its place to the parent:  on every load and hash change, and on `spell-doc:place`
+ *   - posts its place to the parent:  on every load and hash change, and on `spell-doc:scrolled-to`
  *     (the docs runtime moved the address with `history.replaceState()`, which fires no `hashchange`)
  *   - runs `history.go()` when the parent posts `{ spell: "history", go: -1 | 1 }`
  *   - runs an edit key when the parent posts `{ spell: "edit", command, text? }` (`edit()`)
@@ -217,7 +217,7 @@ export function liveClient(): void {
     reportPlace()
     addEventListener("pageshow", reportPlace)
     addEventListener("hashchange", reportPlace)
-    addEventListener("spell-doc:place", reportPlace)
+    addEventListener("spell-doc:scrolled-to", reportPlace)
     addEventListener("message", (event) => {
       const data = event.data as { spell?: string; go?: number; command?: string; text?: string; image?: string } | null
       if (event.source !== window.parent) return
@@ -286,7 +286,7 @@ export function liveClient(): void {
       changedScripts.add(path)
       gate.request()
     } else if (action === "file")
-      dispatchEvent(new CustomEvent("spell-server:file", { detail: { path } satisfies FileChange }))
+      dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path } satisfies FileChange }))
   }
 
   /**
@@ -338,14 +338,14 @@ export function liveClient(): void {
   /** reload, keeping the scroll position */
   /**
    * The scripts changed (or the server restarted):  offer the changed scripts to the page first
-   * (`spell-server:scripts`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
+   * (`spell-server:scripts-reloading`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
    * itself, else it reloads.
    * - a server restart always reloads:  the page needs the new client and write token
    */
   function hotReload() {
     const paths = [...changedScripts]
     changedScripts.clear()
-    const offer = new CustomEvent("spell-server:scripts", {
+    const offer = new CustomEvent("spell-server:scripts-reloading", {
       cancelable: true,
       detail: { paths } satisfies ScriptsChange
     })
@@ -364,14 +364,14 @@ export function liveClient(): void {
   }
 
   /**
-   * The page's file changed:  fetch it and offer it to the page (`spell-server:change`);  reload unless taken.
+   * The page's file changed:  fetch it and offer it to the page (`spell-server:reloading`);  reload unless taken.
    * - taken:  `etag` (and `SPELL_SERVER.etag`) move to the new version, so the next edit isn't refused as stale
    */
   async function updatePage() {
     const server = config as ServerConfig
     const page = await readPage()
     const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, reload }
-    const change = new CustomEvent("spell-server:change", { cancelable: true, detail })
+    const change = new CustomEvent("spell-server:reloading", { cancelable: true, detail })
     if (dispatchEvent(change)) return reload()
     etag = page.etag
     server.etag = page.etag
@@ -968,7 +968,7 @@ export type KeyPlace = { apple: boolean; field?: "text" | "rich" }
  *   (a rebuilt bundle's lazy chunks get new names):  HOT RELOAD
  *   - never for the server's own scripts, under `/api/` (the live client)
  * - `"ignore"`:  any other script (a repo tool)
- * - `"file"`:  anything else:  the page decides (`spell-server:file`)
+ * - `"file"`:  anything else:  the page decides (`spell-server:changed`)
  * - `path` and `scripts` are served paths (`servedPath()`)
  * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
  */

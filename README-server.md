@@ -334,7 +334,7 @@ sequenceDiagram
   else a script it loaded
     page->>page: reloaded, keeping the scroll
   else anything else
-    page->>page: a spell-server:file event, for the page to decide
+    page->>page: a spell-server:changed event, for the page to decide
   end
 ```
 
@@ -982,7 +982,7 @@ What's left is a handful of facts the reference doesn't explain:
 - A stylesheet the page uses:  swapped in place, no reload;  in VS Code's side bar views too.
 - A script it loaded:  reloaded, keeping the scroll.
   Its `<script src>` tags, and lazily loaded chunks, packs and bundles found in the browser's resource list.
-- Anything else:  a `spell-server:file` event, and the page decides.
+- Anything else:  a `spell-server:changed` event, and the page decides.
 - Reloads go through one gate:  one reload, 500 ms after the last change;
   while a field has focus, an "Updated:  reload" pill waits instead.
 - Each socket opens with `hello` and the server's run id:
