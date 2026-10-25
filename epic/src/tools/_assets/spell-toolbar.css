@@ -238,16 +238,23 @@
   margin: calc(5px * var(--ui-bar-tracked, 0)) calc(var(--_out, 16px) * var(--ui-bar-tracked, 0));
   padding: var(--ui-bar-track-padding, 3px calc(var(--_out, 16px) - 7px));
 }
+/*
+ * each title shrinks, ending in "…", until `fitTitles()` takes them away:
+ * the longest first, down to one width (`--spell-toolbar-title-max`)
+ */
 .spell-toolbar-titled > ui-item::part(item) {
   flex: 0 1 auto;
   min-width: 0;
   gap: 10px;
 }
-/* a `<ui-toolbar>` scrolls instead:  every title whole, the `‹` / `›` buttons showing what's past either end */
-ui-toolbar.spell-toolbar-titled > ui-item::part(item) {
+/*
+ * a `<ui-toolbar>` scrolls instead (`fitsTitles()`):  every title whole, `‹` / `›` showing what's past either end;
+ * but not Epic UI's band, which fits its titles as above (epic `epic-engine` I132:  its row ran off the page's right)
+ */
+ui-toolbar.spell-toolbar-titled:is(.spell-toolbar-segmented, :not(.spell-site-toolbar > *)) > ui-item::part(item) {
   flex: none;
 }
-ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
+ui-toolbar.spell-toolbar-titled:is(.spell-toolbar-segmented, :not(.spell-site-toolbar > *)) .spell-toolbar-label {
   overflow: visible;
 }
 /* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
@@ -258,6 +265,7 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
 }
 .spell-toolbar-label {
   min-width: 0;
+  max-width: var(--spell-toolbar-title-max, none);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -437,9 +445,13 @@ ui-sticky.spell-site-toolbar::part(sticky) {
     0 1px 0 var(--spell-rail-edge);
   backdrop-filter: var(--ui-bar-filter, none);
 }
-/* a `<ui-toolbar>`'s own box fills the band (the menu's host has a box of its own already) */
+/*
+ * a `<ui-toolbar>`'s own box fills the band (the menu's host has a box of its own already),
+ * out to the right edge too:  its own `max-width: 100%` stopped it the gutter short (epic `epic-engine` I132)
+ */
 .spell-site-toolbar > ui-toolbar.spell-toolbar {
   display: block;
+  max-width: none;
 }
 @media (max-width: 991.98px) {
   .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {

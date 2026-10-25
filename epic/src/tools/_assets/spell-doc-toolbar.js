@@ -22,6 +22,12 @@ import { ThreadFacts } from "spell-epic/comments"
 /** Below this many px for each title, a titled toolbar shows its buttons' marks only (`fitTitles()`). */
 const MIN_TITLE_PX = 50
 
+/** The widest a titled toolbar's title may be while they shrink (`fitTitles()`), set on the toolbar. */
+const TITLE_MAX = "--spell-toolbar-title-max"
+
+/** Epic UI's page bar, which holds its toolbar (`spell-comments.js`;  the site's `PAGE_BAR`). */
+const SITE_BAR = ".spell-site-toolbar"
+
 /**
  * A TITLED toolbar's items (a guide's, a details page's, Epic UI's):  one per top-level section, its mark and title.
  * - `groups`:  `{ element, id, label, glyph }` each, the outline's top-level entries
@@ -286,14 +292,17 @@ export function removeToolbar() {
  * get less than 50px").
  * - each title's share:  the row's room, less every button's mark, badge and padding, and what else the row holds (the
  *   bullhorn, the spell syntax guide's Expand all), split evenly
+ * - shrinking, the longest titles give way first, down to one width (`--spell-toolbar-title-max`, `titleCap()`):
+ *   so no short title is cut to its first letter while a long one stays whole
  * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
+ * - which toolbars:  `fitsTitles()`
  */
 export function fitTitles(toolbar) {
   const row = toolbarRow(toolbar)
   const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
   toolbar.classList.remove("spell-toolbar-icons")
-  // a `<ui-toolbar>` keeps its titles and scrolls, its `‹` / `›` buttons showing what's past either end
-  if (!row || !items.length || toolbar.localName === "ui-toolbar") return
+  toolbar.style.removeProperty(TITLE_MAX)
+  if (!row || !items.length || !fitsTitles(toolbar)) return
   const style = getComputedStyle(row)
   const others = [...toolbar.children]
     .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)
@@ -304,11 +313,42 @@ export function fitTitles(toolbar) {
     parseFloat(style.paddingRight) -
     (parseFloat(style.columnGap) || 0) * (toolbar.children.length - 1) -
     others
-  const fixed = items.reduce(
-    (sum, item) => sum + boxOf(item).width - (item.querySelector(".spell-toolbar-label")?.offsetWidth ?? 0),
-    0
+  const labels = items.map((item) => item.querySelector(".spell-toolbar-label"))
+  const fixed = items.reduce((sum, item, index) => sum + boxOf(item).width - (labels[index]?.offsetWidth ?? 0), 0)
+  if ((room - fixed) / items.length < MIN_TITLE_PX) return void toolbar.classList.add("spell-toolbar-icons")
+  const cap = titleCap(
+    labels.map((label) => label?.scrollWidth ?? 0),
+    room - fixed
   )
-  if ((room - fixed) / items.length < MIN_TITLE_PX) toolbar.classList.add("spell-toolbar-icons")
+  if (cap !== undefined) toolbar.style.setProperty(TITLE_MAX, `${cap}px`)
+}
+
+/**
+ * Does `fitTitles()` fit `toolbar`'s titles, or does it keep them whole and scroll?
+ * - a `<ui-menu>` (a page without Spell UI's toolbar):  fits
+ * - a `<ui-toolbar>`:  keeps them whole, scrolling, its `‹` / `›` buttons showing what's past either end (epic `debut`)
+ *   - EXCEPT Epic UI's page bar (`.spell-site-toolbar`), as the docs pages' rule says (Owen, epic `epic-engine` I132:
+ *     its row ran off the page's right at the side bar's width);  scrolling only once even the marks don't fit
+ *   - but not a SEGMENTED one there, under a page's tabs:  its track is only as wide as its buttons
+ */
+function fitsTitles(toolbar) {
+  if (toolbar.localName !== "ui-toolbar") return true
+  return !!toolbar.closest(SITE_BAR) && !toolbar.classList.contains("spell-toolbar-segmented")
+}
+
+/**
+ * The widest a title may be so `widths` fit in `room`, the longest giving way first;  `undefined`:  all fit whole.
+ * - e.g. `[30, 80, 120]` in 200px:  90 (30 + 80 + 90)
+ */
+export function titleCap(widths, room) {
+  const sorted = [...widths].sort((a, b) => a - b)
+  let left = room
+  for (const [index, width] of sorted.entries()) {
+    const share = left / (sorted.length - index)
+    if (width > share) return Math.max(0, Math.floor(share))
+    left -= width
+  }
+  return undefined
 }
 
 /**
