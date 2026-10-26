@@ -94,6 +94,8 @@ export type BrowserSupports = {
   interpolateSize: boolean
   /** `container-type: anchored` + `@container anchored(...)` -- style a positioned box by the fallback it landed on */
   anchoredQueries: boolean
+  /** `field-sizing: content` -- a textarea that grows with its text by itself (`<ui-textarea grow>`;  else it measures) */
+  fieldSizing: boolean
 }
 
 ////////////////

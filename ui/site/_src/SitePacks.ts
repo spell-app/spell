@@ -33,6 +33,7 @@ import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
 import * as uiCore from "spell-ui/core"
 import * as uiForms from "spell-ui/forms"
+import * as imageZoom from "spell-ui/components/ui-zoom/ImageZoom"
 import type { ComponentPack } from "spell-ui/components/ui-components/UIComponents.types"
 import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
 import { PackHotSwap } from "spell-ui/hot"
@@ -52,7 +53,9 @@ const packModules: Record<string, unknown> = {
   "@solidjs/h": solidH,
   "spell/element": uiCore,
   "spell-ui/core": uiCore,
-  "spell-ui/forms": uiForms
+  "spell-ui/forms": uiForms,
+  // the page's zoom for its screenshots:  plain DOM, no element (epic `ui-gaps` P14)
+  "spell-ui/components/ui-zoom/ImageZoom": imageZoom
 }
 
 /**

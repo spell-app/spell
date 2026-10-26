@@ -467,6 +467,83 @@ describe("<ui-textarea>", () => {
   })
 })
 
+// epic `ui-gaps` P14 (epic `epic-engine` Q24:  opt in;  Owen's standing rule:  every "tell me more" field grows)
+describe("<ui-textarea grow>", () => {
+  /** A growing textarea in a 300px column:  its DOM element, its native control, and typing `text` into it. */
+  async function growing(attributes = "") {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="width: 300px"><ui-textarea grow fluid aria-label="Notes" ${attributes}></ui-textarea></div>`
+    )
+    await ElementFixture.settle()
+    const host = wrapper.querySelector<Input>("ui-textarea")!
+    const control = host.shadowRoot!.querySelector<HTMLTextAreaElement>("textarea")!
+    /** The control's height, after `text` is set as its value. */
+    const heightFor = async (text: string) => {
+      host.value = text
+      await ElementFixture.settle()
+      return control.getBoundingClientRect().height
+    }
+    /** One line of the field, in px. */
+    const line = parseFloat(getComputedStyle(control).lineHeight)
+    return { host, control, heightFor, line }
+  }
+
+  /** `count` lines of text. */
+  const lines = (count: number) => Array.from({ length: count }, (_, index) => `line ${index + 1}`).join("\n")
+
+  /** Run `test` twice:  with the browser's `field-sizing`, and measuring, as a browser without it does. */
+  const bothWays = (name: string, test: (args: Awaited<ReturnType<typeof growing>>) => Promise<void>) => {
+    it.each([["field-sizing"], ["measuring"]])(`${name} (%s)`, async (way) => {
+      const { UI } = await import("spell-ui/core")
+      const supports = UI.browser.supports
+      const had = supports.fieldSizing
+      if (way === "measuring") supports.fieldSizing = false
+      onTestFinished(() => {
+        supports.fieldSizing = had
+      })
+      const field = await growing()
+      if (way === "measuring") field.control.style.setProperty("field-sizing", "fixed")
+      await test(field)
+    })
+  }
+
+  bothWays("starts one line tall, grows with its text, and shrinks again", async ({ heightFor, line }) => {
+    const one = await heightFor("")
+    const three = await heightFor(lines(3))
+    expect(Math.round(three - one)).toBe(Math.round(2 * line))
+    expect(await heightFor("")).toBe(one)
+  })
+
+  bothWays("stops at a third of the window, then scrolls", async ({ heightFor, control }) => {
+    const tall = await heightFor(lines(200))
+    // `33vh`
+    expect(Math.abs(tall - innerHeight * 0.33)).toBeLessThan(1)
+    expect(control.scrollHeight).toBeGreaterThan(control.clientHeight)
+  })
+
+  it("`max-rows`:  stops there;  `rows`:  starts there", async () => {
+    const { heightFor, line, control } = await growing(`rows="2" max-rows="4"`)
+    const two = await heightFor("")
+    expect(control.rows).toBe(2)
+    const four = await heightFor(lines(4))
+    expect(Math.round(four - two)).toBe(Math.round(2 * line))
+    expect(await heightFor(lines(20))).toBeCloseTo(four, 0)
+  })
+
+  it("a plain textarea keeps its fixed height:  no `grow`, no growing", async () => {
+    const host = await ElementFixture.render<Input>(`<ui-textarea aria-label="Bio"></ui-textarea>`)
+    await ElementFixture.settle()
+    const control = host.shadowRoot!.querySelector<HTMLTextAreaElement>("textarea")!
+    const before = control.getBoundingClientRect().height
+    host.value = lines(30)
+    await ElementFixture.settle()
+    expect([
+      control.getBoundingClientRect().height,
+      getComputedStyle(control).getPropertyValue("field-sizing")
+    ]).toEqual([before, "fixed"])
+  })
+})
+
 ////////////////
 // ## Tokens from outside
 ////////////////

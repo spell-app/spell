@@ -120,7 +120,8 @@ export class Browser {
       viewTransitions: dom && "startViewTransition" in document,
       temporal: "Temporal" in globalThis,
       interpolateSize: css && probe(() => CSS.supports("interpolate-size: allow-keywords")),
-      anchoredQueries: css && probe(() => CSS.supports("container-type: anchored"))
+      anchoredQueries: css && probe(() => CSS.supports("container-type: anchored")),
+      fieldSizing: css && probe(() => CSS.supports("field-sizing: content"))
     }
 
     /** Run a feature probe;  `false` if it throws. */

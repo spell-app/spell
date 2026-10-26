@@ -583,6 +583,11 @@
       "title": "Visibility",
       "summary": "Visibility provides a set of callbacks for when content appears in the viewport.",
       "status": "done"
+    },
+    "ui-zoom": {
+      "title": "Zoom",
+      "summary": "A zoom shows something small in the page, and full size over it on a click.",
+      "status": "done"
     }
   },
   "themes": {

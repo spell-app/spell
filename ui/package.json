@@ -382,6 +382,11 @@
       "types": "./dist-types/src/components/ui-visibility/index.d.ts",
       "default": "./src/components/ui-visibility/index.ts"
     },
+    "./components/ui-zoom": {
+      "spell-ui-source": "./src/components/ui-zoom/index.ts",
+      "types": "./dist-types/src/components/ui-zoom/index.d.ts",
+      "default": "./src/components/ui-zoom/index.ts"
+    },
     "./docs-components": {
       "spell-ui-source": "./src/docs-components/index.ts",
       "types": "./dist-types/src/docs-components/index.d.ts",

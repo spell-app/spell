@@ -27,6 +27,10 @@ import imageCSS from "./UIImage.css?inline"
  *   no wider than the picture.
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, the image (or its link) inert, `aria-disabled`;  a link also loses its link.
+ * - `zoom` (epic `ui-gaps` P14):  a plain click, or Enter / Space, shows it full size in the page's `<ui-zoom>`
+ *   (`ImageZoom.show()`, loaded on the first one).
+ *   - without `link`, the image is a button for it:  focusable, named "<alt>:  show full size"
+ *   - with `link`, a click with a modifier key still follows the link
  ****************/
 export class UIImage extends E.UIComponent<typeof imageVocabulary> {
   @E.proto static vocabulary = imageVocabulary
@@ -66,6 +70,7 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
           part={this.partForName("image")}
           href={this.disabled ? undefined : this.link}
           aria-disabled={this.disabled ? "true" : undefined}
+          onClick={this.onZoomClick}
         >
           {this.image("img")}
         </a>
@@ -75,6 +80,7 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
 
   /** The `<img>`:  the root (part `image`, with the classes), or the link's child (part `img`). */
   private image(part: "image" | "img"): JSX.Element {
+    const isButton = () => part === "image" && this.isZoomButton
     return (
       <img
         class={part === "image" ? this.rootClass : undefined}
@@ -84,8 +90,54 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
         width={this.width}
         height={this.height}
         loading={this.loading as "eager" | "lazy" | undefined}
+        role={isButton() ? "button" : undefined}
+        tabindex={isButton() ? 0 : undefined}
+        aria-label={isButton() ? this.zoomLabel : undefined}
+        aria-haspopup={isButton() ? "dialog" : undefined}
+        onClick={part === "image" ? this.onZoomClick : undefined}
+        onKeyDown={part === "image" ? this.onZoomKey : undefined}
       />
     )
+  }
+
+  ////////////////
+  // ## Zoom
+  ////////////////
+
+  /** `zoom`, with no link:  the image itself is the button that shows it full size. */
+  get isZoomButton(): boolean {
+    return !!this.zoom && !this.link && !this.disabled
+  }
+
+  /** The zoom button's name:  its alt text, then what it does. */
+  get zoomLabel(): string {
+    return this.alt ? this.translationForKey("zoom", { alt: this.alt }) : this.translationForKey("zoomUntitled")
+  }
+
+  /** A plain click on it (or its link), with `zoom`:  shown full size, the link not followed. */
+  @E.untracked
+  private readonly onZoomClick = (event: MouseEvent) => {
+    if (!this.zoom || this.disabled || event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    this.showFullSize()
+  }
+
+  /** Enter or Space on the zoom button. */
+  @E.untracked
+  private readonly onZoomKey = (event: KeyboardEvent) => {
+    if (!this.isZoomButton || (event.key !== "Enter" && event.key !== " ")) return
+    event.preventDefault()
+    this.showFullSize()
+  }
+
+  /** In the page's `<ui-zoom>`:  its family (and `ImageZoom`) loaded on the first one, so an image without `zoom` never pays for it. */
+  private showFullSize() {
+    const image = this.domElement.shadowRoot?.querySelector("img")
+    if (!image) return
+    void import("spell-ui/components/ui-zoom")
+      .then(({ ImageZoom }) => ImageZoom.show(image))
+      .catch((error) => console.error(error))
   }
 }
 

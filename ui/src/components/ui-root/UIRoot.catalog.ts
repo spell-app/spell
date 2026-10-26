@@ -583,6 +583,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "width",
       "height",
       "loading",
+      "zoom",
       "link"
     ]
   },
@@ -1427,6 +1428,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "minlength",
       "maxlength",
       "rows",
+      "grow",
+      "max-rows",
       "autocomplete",
       "rules"
     ],
@@ -1501,5 +1504,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-video",
     attributes: ["src", "autoplay", "muted", "loop", "poster", "controls", "captions", "ratio"]
   },
-  "ui-visibility": { folder: "ui-visibility", attributes: ["once", "continuous", "offset", "type", "duration"] }
+  "ui-visibility": { folder: "ui-visibility", attributes: ["once", "continuous", "offset", "type", "duration"] },
+  "ui-zoom": { folder: "ui-zoom", attributes: ["max-width", "max-height", "shrink", "open", "src", "alt"] }
 }
