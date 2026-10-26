@@ -125,8 +125,9 @@ export class EpicTools {
    *   (a pipe on macOS takes writes asynchronously, and the program exits at once)
    * - loaded on first use (a dynamic `import()`):  the other verbs don't pay for linkedom and oxfmt
    * - gives the tool an epic's RUNNING sessions (`Sessions.ofEpic()`), for `migrate --notify`
+   * - `root`:  the checkout whose pages and repos it works on, default the nearest (`EpicCheckout.nearest()`)
    */
-  static async planDoc(argv: string[]): Promise<number> {
+  static async planDoc(argv: string[], root = EpicCheckout.nearest()): Promise<number> {
     const [{ PlanDocCommands }, { PlanDocFiles }] = (await Promise.all([import(COMMANDS), import(FILES)])) as [
       {
         PlanDocCommands: new (props: { files: unknown; sessionsOf: typeof sessionsOf }) => {
@@ -135,7 +136,7 @@ export class EpicTools {
       },
       { PlanDocFiles: new (props: { root: string }) => unknown }
     ]
-    const files = new PlanDocFiles({ root: EpicCheckout.nearest() })
+    const files = new PlanDocFiles({ root })
     const exitCode = await new PlanDocCommands({ files, sessionsOf }).run(argv)
     await flushed()
     return exitCode
@@ -144,10 +145,11 @@ export class EpicTools {
   /**
    * Run `epic <verb> <args...>` through the `epic` tool:  each command `planDocArgs()` makes, stopping at a failure.
    * - throws `EpicCommandError` for a target the verb can't take (`planDocArgs()`)
+   * - `root`:  `planDoc()`'s
    */
-  static async runPlanDoc([verb, ...args]: string[]): Promise<number> {
+  static async runPlanDoc([verb, ...args]: string[], root?: string): Promise<number> {
     for (const argv of planDocArgs(verb!, args)) {
-      const exitCode = await EpicTools.planDoc(argv)
+      const exitCode = await EpicTools.planDoc(argv, root)
       if (exitCode !== EXIT.OK) return exitCode
     }
     return EXIT.OK

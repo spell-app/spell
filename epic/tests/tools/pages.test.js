@@ -10,6 +10,8 @@ import { fileURLToPath } from "node:url"
 import { expect, test } from "vite-plus/test"
 
 import { EPIC_UI } from "spell-epic/server/server.types.ts"
+import { fakeMainCheckout } from "spell/server/test/checkouts"
+
 import { CONTENT, EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath, runPagePath } from "spell-epic/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
@@ -212,5 +214,48 @@ test("the content folder holds the pages:  areas, page paths, files and URLs fro
     )
   } finally {
     rmSync(top, { recursive: true, force: true })
+  }
+})
+
+// epic `epic-engine` I136:  `epic pages link /worktrees/<w>/components/ui/x.html` (a page as served) was refused
+test("a SERVED path is the file it serves:  a set's address, a worktree's, the content folder's", () => {
+  const checkout = fakeMainCheckout(realpathSync(mkdtempSync(join(tmpdir(), "served-"))))
+  try {
+    const sets = { ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" } }
+    mkdirSync(join(checkout, ".epic"))
+    writeFileSync(join(checkout, ".epic", "config.json5"), '{ "contentFolder": "content", "worktreesFolder": "wt" }\n')
+    for (const root of [checkout, join(checkout, "wt", "seo")]) {
+      mkdirSync(join(root, "ui", "docs"), { recursive: true })
+      writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: { componentSets: sets } }))
+      writeFileSync(join(root, "ui", "docs", "ui-button.html"), "<title>Button</title>\n")
+    }
+    mkdirSync(join(checkout, "content", "epics", "x"), { recursive: true })
+    writeFileSync(join(checkout, "content", "epics", "x", "x.plan.html"), "<title>X</title>\n")
+    const script = `
+      import * as P from ${JSON.stringify(PAGES_JS)}
+      console.log(JSON.stringify([
+        "/components/ui/ui-button.html",
+        "/worktrees/seo/components/ui/ui-button.html",
+        "/worktrees/seo/package.json",
+        "/worktrees/seo/epics/x/x.plan.html",
+        "/epics/x/x.plan.html",
+        "/worktrees/nope/components/ui/ui-button.html",
+        "/components/ui/nope.html"
+      ].map((path) => P.pageFile(path))))`
+    const out = execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+      encoding: "utf8",
+      env: { ...process.env, EPIC_CHECKOUT: checkout }
+    })
+    expect(JSON.parse(out.trim().split("\n").at(-1))).toEqual([
+      join(checkout, "ui", "docs", "ui-button.html"),
+      join(checkout, "wt", "seo", "ui", "docs", "ui-button.html"),
+      join(checkout, "wt", "seo", "package.json"),
+      join(checkout, "content", "epics", "x", "x.plan.html"),
+      join(checkout, "content", "epics", "x", "x.plan.html"),
+      "/worktrees/nope/components/ui/ui-button.html",
+      "/components/ui/nope.html"
+    ])
+  } finally {
+    rmSync(checkout, { recursive: true, force: true })
   }
 })

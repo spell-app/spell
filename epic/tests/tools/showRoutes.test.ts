@@ -11,7 +11,7 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import showRoutes, { pickWindow, type WindowEntry } from "spell-epic/tools/showRoutes"
+import showRoutes, { pageFile, pickWindow, type WindowEntry } from "spell-epic/tools/showRoutes"
 
 let root: string
 let server: PageServer
@@ -23,6 +23,11 @@ beforeAll(async () => {
   mkdirSync(join(root, "guides"), { recursive: true })
   writeFileSync(join(root, "guides/page.html"), "<!doctype html><title>x</title>")
   writeFileSync(join(root, "guides/data.json"), "{}")
+  // a component set, served at its address (epic `epic-engine` I136)
+  mkdirSync(join(root, "ui/docs"), { recursive: true })
+  writeFileSync(join(root, "ui/docs/ui-button.html"), "<!doctype html><title>Button</title>")
+  const componentSets = { ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" } }
+  writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: { componentSets } }))
   process.env.SPELL_WINDOWS_DIR = join(root, "no-windows")
   process.env.SPELL_EPIC_WINDOWS_DIR = join(root, "no-windows")
   server = new PageServer({ root })
@@ -73,4 +78,9 @@ test("picks the window by pid, else the one holding the file deepest, else any",
   expect(pickWindow(99, "/repo/.claude/worktrees/w/packages/docs/x.html", entries)?.pid).toBe(2)
   expect(pickWindow(99, "/elsewhere/x.html", entries)?.pid).toBe(1)
   expect(pickWindow(99, "/x.html", new Map())).toBeUndefined()
+})
+
+// epic `epic-engine` I136:  the side bar shows a set's page by the address `epic pages link` prints
+test("a component set's address is its page's file", () => {
+  expect(pageFile(server.web.files, "/components/ui/ui-button.html")).toBe(join(root, "ui/docs/ui-button.html"))
 })
