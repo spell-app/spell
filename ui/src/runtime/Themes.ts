@@ -27,6 +27,13 @@ import type { Styles } from "./Styles"
  *   `theme` slot, so switching themes replaces its text in place.
  ****************/
 export class Themes {
+  /**
+   * Old theme name => its name now, for a theme remembered under the old one (`ThemePreference`, `SavedTheme`).
+   * - `studio` became `merlot`, and `spell-brand` folded into `spell` (epic `debut` P17, J94).
+   * - A remembered name in neither `own` nor here (`classic`, a Fomantic theme):  the place's own default.
+   */
+  static readonly RENAMED: Readonly<Record<string, string>> = { studio: "merlot", "spell-brand": "spell" }
+
   /** the base sheet every Fomantic theme is applied on top of */
   readonly base = BASE
 
