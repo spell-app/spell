@@ -27,7 +27,15 @@
 import { relative, resolve, sep } from "node:path"
 
 import { SRV } from "spell/server"
-import { DEFAULT_PORT, PageServer, kitRootOf, pageServerRoot, pruneReport, pruneServers } from "spell/server/page"
+import {
+  DEFAULT_PORT,
+  PageServer,
+  componentSetAddressOf,
+  kitRootOf,
+  pageServerRoot,
+  pruneReport,
+  pruneServers
+} from "spell/server/page"
 
 await main(process.argv.slice(2))
 
@@ -81,7 +89,10 @@ async function main(args: string[]): Promise<void> {
       if (main) return console.log(main)
       const running = await PageServer.ensure(root, port)
       const path = relative(root, absolute)
-      const served = SRV.contentPathOf(absolute, running) ?? `/${path.split(sep).map(encodeURIComponent).join("/")}`
+      const served =
+        SRV.contentPathOf(absolute, running) ??
+        componentSetAddressOf(root, absolute) ??
+        `/${path.split(sep).map(encodeURIComponent).join("/")}`
       return console.log(`${running.base}${served}`)
     }
     case "prune": {

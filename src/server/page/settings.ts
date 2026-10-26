@@ -217,6 +217,51 @@ export function componentSets(settings: PageServerSettings): ComponentSet[] {
 }
 
 /**
+ * Page `file`'s ADDRESS, when it's in a component set's folder of checkout `root`:  `/components/ui/ui-button.html`
+ * for `<root>/spell-ui/docs/ui-button.html`;  `undefined` for any other file.
+ * - what every link to a set's page must name:  served from its folder's own path (`/spell-ui/docs/ui-button.html`),
+ *   the page loads none of the `_assets/` it finds beside its address, and shows as unstyled text (epic `epic-engine`
+ *   I136)
+ * - each segment URL-encoded;  a worktree's page is this under `/worktrees/<w>` (`mainServerUrl()`)
+ * - `sets`:  `root`'s, from its settings, unless given
+ */
+export function componentSetAddressOf(
+  root: string,
+  file: string,
+  sets: readonly ComponentSet[] = componentSets(pageServerSettings(root))
+): string | undefined {
+  const path = relative(resolve(root), resolve(file)).split(sep).join("/")
+  const set = sets.find((each) => path.startsWith(`${each.dir}/`))
+  if (!set) return undefined
+  const inside = path
+    .slice(set.dir.length + 1)
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")
+  return `${set.prefix}/${inside}`
+}
+
+/**
+ * The file component-set ADDRESS `address` names in checkout `root` (`componentSetAddressOf()` turned round):
+ * `<root>/spell-ui/docs/ui-button.html` for `/components/ui/ui-button.html`;  `undefined` for any other path.
+ * - `address`:  a URL path, encoded or not
+ */
+export function componentSetFileOf(
+  root: string,
+  address: string,
+  sets: readonly ComponentSet[] = componentSets(pageServerSettings(root))
+): string | undefined {
+  const set = sets.find((each) => address.startsWith(`${each.prefix}/`))
+  if (!set) return undefined
+  const inside = address
+    .slice(set.prefix.length + 1)
+    .split("/")
+    .filter(Boolean)
+    .map(decodeURIComponent)
+  return join(resolve(root), set.dir, ...inside)
+}
+
+/**
  * The engine routes `settings` name (`"engineRoutes"`), each as a URL prefix and the URL path its folder is served at
  * (`folderUrl()`), both ending `/`:  `"/_epic/pack/": "x/__pack"` => `["/_epic/pack/", "/x/__pack/"]`;
  * `"../spell-epic/src/tools/_assets"` => `"/_beside/spell-epic/src/tools/_assets/"`.

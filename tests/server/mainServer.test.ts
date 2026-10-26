@@ -122,4 +122,25 @@ describe("mainServerUrl()", () => {
       }
     })
   })
+
+  // epic `epic-engine` I136:  by its folder's path (`/worktrees/seo/ui/docs/...`) it loaded none of its `_assets/`
+  it("gives a worktree's component set page its address, under the worktree's", async () => {
+    const root = fakeMainCheckout(mkdtempSync(join(tmpdir(), "srv-sets-")))
+    const worktree = fakeWorktree(root, join(root, ".claude", "worktrees", "seo"))
+    const set = { pageServer: { componentSets: { ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" } } } }
+    writeFileSync(join(root, "package.json"), "{}")
+    writeFileSync(join(worktree, "package.json"), JSON.stringify(set))
+    const server = await new PageServer({ root }).start({ port: 0, routes: false })
+    try {
+      server.web.router.get(SRV.RUNNING_EPICS_API, (_request, reply) => reply.json([]))
+      const base = `http://127.0.0.1:${server.info.port}/worktrees/seo`
+      expect(await SRV.mainServerUrl(join(worktree, "ui", "docs", "ui-button.html"))).toBe(
+        `${base}/components/ui/ui-button.html`
+      )
+      expect(await SRV.mainServerUrl(join(worktree, "ui", "x.html"))).toBe(`${base}/ui/x.html`)
+    } finally {
+      await server.stop()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
 })
