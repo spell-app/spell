@@ -122,6 +122,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - "P7" is its place, worked out as it's drawn or printed:  never written, never its id.
     - Every number WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
       moving a phase renumbers the to-do phases after it, and the tool's `PhaseNumbers` rewrites what names them.
+      - bare numbers too (I137):  `P18`, `P17-P20`, `P20's`, `epic-engine P46`, in phases, items and Update blocks,
+        mapped all at once, so P18 => P19 never chains on to P20
+      - left as said:  another epic's (`ui-gaps P6`), the log, an Original Discussion, commits, quotes (`<q>`,
+        `<blockquote>`, the kickoff prompt)
       - P39's DECIMAL phases (`<epic-phase number="11.1">`) are made whole by the migration `whole-phase-numbers`;
         one not migrated yet still reads as its own number (`decimalOf()`).
     - Finding a phase as people name it (`7`, `P7`, its id, name or slug), and an old `#p7` landing on P7.

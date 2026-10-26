@@ -55,6 +55,7 @@ import { StrayFiles } from "./StrayFiles"
  *     - a multi-repo top (epic `epic-engine` P10):  each repo whose branch `<epic>` has commits (`mergeEach()`)
  *     - stray files in a main checkout (`StrayFiles`):  generated ones moved aside by themselves;  `--ditch`, once Owen
  *       says so, the few others too
+ *     - then the merged commits onto the epic page (`recordMerged()`, epic `epic-engine` I135)
  ****************/
 export class Requests {
   /** the checkout it runs for:  STATIC for the object's life */
@@ -96,15 +97,16 @@ export class Requests {
         const { commits } = merged[0]!
         out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
         for (const commit of commits) out(`  ${commit}`)
-        return EXIT.OK
+      } else {
+        // a multi-repo top:  each repo whose branch has commits
+        const moved = merged.filter(({ commits }) => commits.length)
+        if (!moved.length) out(`nothing to merge:  every repo's main already has ${named}`)
+        for (const { repo, base, commits } of moved) {
+          out(`${repo}:  ${base} fast-forwarded to ${named}:`)
+          for (const commit of commits) out(`  ${commit}`)
+        }
       }
-      // a multi-repo top:  each repo whose branch has commits
-      const moved = merged.filter(({ commits }) => commits.length)
-      if (!moved.length) out(`nothing to merge:  every repo's main already has ${named}`)
-      for (const { repo, base, commits } of moved) {
-        out(`${repo}:  ${base} fast-forwarded to ${named}:`)
-        for (const commit of commits) out(`  ${commit}`)
-      }
+      await Requests.recordMerged(named, merged)
       return EXIT.OK
     }
     if (verb === "home") {
@@ -500,6 +502,38 @@ export class Requests {
   }
 
   /**
+   * The commits `epic merge` just brought onto `main`, onto the epic's page (epic `epic-engine` I135):
+   * each one whose subject names the epic or its ids (`PlanCommits.parseCommitSubject()`), under its phases and
+   * items.
+   * - `epic commits <epic> --backfill`, for only those commits (`--merged`):  every repo of a kit's, each
+   *   `<epic-commit>` linking to its own repo's GitHub page;  one already listed isn't added again
+   * - on the MAIN checkout's pages (the top's, for a kit), whose repos now hold every merged commit:  `cwd` is
+   *   anywhere in it, a worktree or a child repo included
+   * - nothing merged, or no epic page:  nothing to do
+   * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
+   * - `record`:  runs the `epic` tool's command line on a checkout (default `EpicTools.runPlanDoc()`);  a test's
+   *   gives its own
+   */
+  static async recordMerged(
+    epic: string,
+    merged: MergeResult[],
+    { cwd = process.cwd(), record = EpicTools.runPlanDoc }: RecordMergedOptions = {}
+  ): Promise<void> {
+    try {
+      const shas = merged.flatMap(({ commits }) => commits.map((line) => line.split(" ")[0]!)).filter(Boolean)
+      if (!shas.length) return
+      const main = Git.mainRoot(cwd)
+      const root = new EpicConfig(main).top?.main ?? main
+      if (!existsSync(join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`))) return
+      const exitCode = await record(["commits", epic, "--backfill", "--merged", shas.join(",")], root)
+      if (exitCode !== EXIT.OK) out(`merged, but its commits aren't on the epic page:  epic commits ${epic} --backfill`)
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error)
+      out(`merged, but its commits aren't on the epic page (${why}):  epic commits ${epic} --backfill`)
+    }
+  }
+
+  /**
    * The next free request id in `dir`:  `r1`, then one more than the highest there.
    * - static:  any folder
    */
@@ -601,6 +635,9 @@ export class Requests {
 
 /** What `new Requests()` takes:  see its constructor. */
 export type RequestsProps = { root?: string; sessions?: Sessions }
+
+/** `Requests.recordMerged()`'s options:  see it. */
+export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root: string) => Promise<number> }
 
 /** The verbs, for errors. */
 const VERBS = "send, requests, file, home or merge"

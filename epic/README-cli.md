@@ -318,7 +318,7 @@ so links and comments stay on the phase they meant.
 | `epic phase <epic>#P3 todo \| active \| done` | sets a phase's status;  `done --done "<ul>...</ul>"` writes what was built, and clears its UPDATE labels;  `done` writes how long Claude really worked on it too (`took`, from the transcripts, never the time waiting on you);  it brings the page forward in VS Code, unless `--no-open` |
 | `epic phase <epic>#P3 took [--dry-run]` | works out again how long a phase done before took, from its log's `active` to its `done` |
 | `epic commit <epic>#P3 <sha> "what it did"` | lists a commit under a phase, or an item (`<epic>#J3`), replacing its entry there |
-| `epic commits <epic> --backfill` | finds every commit in the history whose subject names a phase or an item (`P3:  ...`, `seo I3:  ...`), and lists each one where it belongs, once |
+| `epic commits <epic> --backfill` | finds every commit in the history whose subject names a phase or an item (`P3:  ...`, `seo I3:  ...`), and lists each one where it belongs, once;  `epic phase ... done` and `epic merge` do it by themselves |
 
 <details>
 <summary>Everything <code>update</code> sets</summary>

@@ -71,10 +71,19 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return new Set(this.shown.split(/\s+/).filter((state) => present.includes(state)))
   }
 
-  /** How many items are marked in this pass:  the blue badge's count;  0, no badge. */
+  /**
+   * The ONE blue badge's count:  everything handed to Claude, whatever its kind -- the items marked in this pass, and
+   * the items he's working on (`progress`);  0, no badge (Owen, 2026-10-25:  "just need one blue badge for all things
+   * submitted, no matter the type";  a blue `progress` chip beside it before)
+   */
   get markedCount(): number {
-    const marked = Number(this.marked ?? 0)
-    return marked > 0 ? marked : 0
+    const marked = Math.max(0, Number(this.marked ?? 0))
+    return marked + (this.stateCounts.get(SUBMITTED_STATE) ?? 0)
+  }
+
+  /** The chips drawn:  every state present but `progress`, which counts in the blue badge. */
+  get chips(): readonly FilterState[] {
+    return this.present.filter((it) => it.state !== SUBMITTED_STATE)
   }
 
   ////////////////
@@ -83,7 +92,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   render(): JSX.Element {
     return (
-      <Show when={this.present.length || this.markedCount}>
+      <Show when={this.chips.length || this.markedCount}>
         <span
           class={FILTER}
           part={this.partForName("base")}
@@ -106,7 +115,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
               )
             }}
           </Show>
-          <For each={this.present}>
+          <For each={this.chips}>
             {(state) => {
               const words = () => this.chipWords(state)
               return (
@@ -144,10 +153,16 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   @E.untracked
   private pick(state: string) {
     const present = this.present.map((it) => it.state as string)
-    const shown = StateFilter.nextShown(present, [...this.showing], state)
+    const next = StateFilter.nextShown(present, [...this.showing], state)
+    // what's handed to Claude has no chip of its own:  it never hides behind one
+    const shown =
+      present.includes(SUBMITTED_STATE) && !next.includes(SUBMITTED_STATE) ? [...next, SUBMITTED_STATE] : next
     this.send(STATE_PICK, { state, shown } satisfies StatePickDetail)
   }
 }
+
+/** The state of what Claude is working on:  it counts in the blue badge, with the marked items. */
+const SUBMITTED_STATE = "progress"
 
 /** Class of the blue badge, the items marked in this pass (P43). */
 const MARKED = "marked"

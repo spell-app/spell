@@ -13,7 +13,9 @@
  * - `--review`:  the side bar link (and `--show`) uses the side bar's "Review" tab, not its "Epic Docs" tab.
  * - `--show`:  also show it in this session's side bar now (`Window.show()`), so Owen needn't click at all.
  * - `<page>`:  absolute, from the checkout's root, or from an area (`pages.js` `pageFile()`:  `solid/solid-2.html` is a
- *   guide).
+ *   guide);  or as SERVED (`/components/ui/x.html`, `/worktrees/<w>/...`:  `servedFile()`)
+ *   - a component set's page is linked at its address, `/components/<set>/...`, never its folder's path:  only
+ *     there does it find its `_assets/` (`componentSetAddressOf()`, `spell/server/page`;  epic `epic-engine` I136)
  * - `--text`:  the link's text (`P2 · Page Template`);  default:  the page's `<title>`.
  * - `<page>` may be a SHORT ADDRESS (epic `epic-workflow` P15):  `SAGA:/drawable-spell/python-target#T1` is the epic
  *   page, landing on T1 (its `--hash`);  its text, by default, the short form and the item's title

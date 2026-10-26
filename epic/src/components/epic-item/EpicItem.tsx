@@ -161,6 +161,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /** Its view of the page's review inbox:  its chip, its state, where its review controls show. */
   readonly reviewState = new ReviewState(() => this.id)
 
+  /**
+   * Owen marked it in this pass, not applied yet (epic `epic-engine` P43):  its id chip ringed in the blue badge's blue
+   * (Owen, 2026-10-25:  "the T1 should be blue outline")
+   */
+  readonly isMarkedInPass = (): boolean => !!this.reviewState.mark()
+
   /** Its line, once drawn:  folding keeps it where it is on screen (`keepLinePut()`). */
   private lineBox: HTMLElement | undefined
 
@@ -537,6 +543,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
                 href={`#${this.id ?? ""}`}
                 data-color={this.chipMark()?.color}
                 data-fill={this.chipMark()?.fill}
+                data-marked={this.isMarkedInPass() ? "" : undefined}
                 title={this.chipTip()}
               >
                 {this.label()}
@@ -549,6 +556,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               part={this.partForName("id")}
               data-color={this.chipMark()?.color}
               data-fill={this.chipMark()?.fill}
+              data-marked={this.isMarkedInPass() ? "" : undefined}
               aria-pressed={this.itemState() === "attention" ? "true" : "false"}
               data-unsent={this.reviewState.urgency()?.sent === false ? "" : undefined}
               title={this.chipTip()}

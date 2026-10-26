@@ -25,7 +25,9 @@ describe("<epic-state-filter>", () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="recent:3 attention:1 old:0 progress:2"></epic-state-filter>`
     )
-    expect(chips(host)).toEqual(["progress:2+", "attention:1+", "recent:3+"])
+    // `progress` has no chip:  it counts in the one blue badge (Owen, 2026-10-25:  "just need one blue badge for all things submitted")
+    expect(chips(host)).toEqual(["attention:1+", "recent:3+"])
+    expect(host.shadowRoot!.querySelector(".marked")!.textContent).toBe("2")
     expect(chip(host, "attention").dataset.color).toBe("red")
     expect(chip(host, "attention").title).toBe("1 needs attention:  show only these")
     expect(host.shadowRoot!.querySelector('[part~="base"]')!.getAttribute("role")).toBe("group")
@@ -71,7 +73,7 @@ describe("<epic-state-filter>", () => {
     const badge = host.shadowRoot!.querySelector<HTMLElement>('[part~="marked"]')!
     expect(badge.localName).toBe("span")
     expect(badge.parentElement!.firstElementChild).toBe(badge)
-    expect([badge.textContent, badge.title]).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect([badge.textContent, badge.title]).toEqual(["3", "3 with Claude:  marked in this pass, or being worked on"])
     expect(getComputedStyle(badge).borderTopStyle).toBe("solid")
     expect(getComputedStyle(badge).color).toBe("rgb(255, 255, 255)")
     expect(chips(host)).toEqual(["open:2", "recent:1+"])

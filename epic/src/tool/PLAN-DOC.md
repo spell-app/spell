@@ -70,6 +70,10 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - `bedtime="P3-P6"`:  a `/bedtime` run is on (`bedtime <name> start | done`).
   - `repo`:  the GitHub page every `<epic-commit sha>` links through.
     Written by `commit`, and by `commits --backfill`.
+- Its `<epic-commit>`s land by themselves (epic `epic-engine` I135):
+  - `phase <name> <N> done`:  every commit in the history not listed yet, as `commits --backfill`
+  - `epic merge <name>`:  the commits it just fast-forwarded onto `main`, every repo's (`commits --backfill --merged`)
+  - neither lists one twice, nor fails its command when it can't:  it says so in one line
 - Sections are fixed:  each `kind` once, in that order, with its id.
   - `questions` keeps the id `#decisions`.
   - Drawn:  their titles, icons, notes, counts and the progress bar.
@@ -139,6 +143,10 @@ As `plan-doc.md`, "Ids":
     Epics list page) and as the tool prints.
     - Always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
       moving a phase renumbers the to-do phases after it, and the tool rewrites what names them.
+      - bare numbers too (I137):  `P18`, `P17-P20`, `P20's`, `epic-engine P46`, in phases, items and Update blocks,
+        mapped all at once, so P18 => P19 never chains on to P20
+      - left as said:  another epic's (`ui-gaps P6`), the log, an Original Discussion, commits, quotes (`<q>`,
+        `<blockquote>`, the kickoff prompt)
     - P39 wrote DECIMAL phases (`<epic-phase number="11.1">`);  the migration `whole-phase-numbers` makes each one
       whole by its place.  One not migrated yet still reads as its own number, the rest counted without it.
   - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, its id, its name
