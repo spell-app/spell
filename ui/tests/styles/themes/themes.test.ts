@@ -832,6 +832,6 @@ describe("merlot.css", () => {
 
 /**
  * The least luminance ratio between a theme's page and its panels, for the step to show:  1.2:1.
- * - Studio's was 1.13:1 in light (`#e9e5ff` / `#f6f4ff`);  Merlot's is 1.32:1 light, 1.29:1 dark.
+ * - Studio's was 1.13:1 in light (`#e9e5ff` / `#f6f4ff`);  Merlot's is 1.32:1 light, 1.30:1 dark.
  */
 const PANEL_STEP = 1.2
