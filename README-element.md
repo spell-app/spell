@@ -474,7 +474,8 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   So a pack leaves the shared modules out, and borrows the page's copies, by their npm names:
 
   ```ts
-  PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell-ui/core", "spell-ui/forms"]
+  PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell-ui/core", "spell-ui/forms",
+    "spell-ui/components/ui-zoom/ImageZoom"]
   ```
 
   - The page offers them under those same names, in `SpellUI.packModules`;
