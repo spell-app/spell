@@ -226,6 +226,31 @@ describe("a spellx notebook", () => {
       expect(chunk.code).toMatch(/\n}$/)
     })
 
+    test("an `<html>` block inside markup:  its markup, as an expression (P18)", () => {
+      const text = [
+        '<spell-notebook "api notebook">',
+        '\t<segment label="Slots">',
+        "\t\t<html>",
+        '\t\t\t<ui-docs-api tag="ui-avatar" only="slots"></ui-docs-api>',
+        "\t\t</html>",
+        "\t</segment>",
+        "</spell-notebook>",
+        ""
+      ].join("\n")
+      const project = incrementalSpellProject([{ path: "/API.spellx", contents: text }])
+      const start = text.indexOf("<html>")
+      const end = text.indexOf("</html>") + "</html>".length
+      const chunk = SP.SpellProject.compileChunk({
+        into: project,
+        path: "/API.spellx",
+        text,
+        span: { start, end },
+        kind: "drawing"
+      })
+      expect(chunk.errors).toEqual([])
+      expect(chunk.code).toContain('h("ui-docs-api", { tag: "ui-avatar", only: "slots" })')
+    })
+
     test("a broken one:  its errors, on its lines", () => {
       const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
       const text = COUNTER.replace("<counter/>", "<countr/>")

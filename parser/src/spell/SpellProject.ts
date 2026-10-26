@@ -778,11 +778,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return { code: classCode, errors, className }
   }
 
-  /** The element match in drawing `match` starting at `offset`, its children's and attributes' too. */
+  /**
+   * The element match in drawing `match` starting at `offset`, its children's and attributes' too.
+   * - Not a fragment, but an `<html>` block, which is one (P18):  `<section label="Slots"><html>...</html>`.
+   */
   private static elementAt(match: P.Match, offset: number): P.Match | undefined {
-    const data = match.data as { children?: unknown[]; attributes?: unknown[] }
-    if (match.start === offset && match.AST instanceof P.ASTJSXElement && !(match.AST instanceof P.ASTJSXFragment))
-      return match
+    const data = match.data as { children?: unknown[]; attributes?: unknown[]; htmlBlock?: boolean }
+    const isElement = !(match.AST instanceof P.ASTJSXFragment) || data.htmlBlock
+    if (match.start === offset && match.AST instanceof P.ASTJSXElement && isElement) return match
     for (const inner of [...match.matched, ...(data.children ?? []), ...(data.attributes ?? [])]) {
       if (!(inner instanceof P.Match)) continue
       const { start } = inner
