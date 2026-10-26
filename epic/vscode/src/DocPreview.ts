@@ -33,7 +33,7 @@ import * as vscode from "vscode"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
 import { mainServerUrl } from "spell/server/mainServer"
-import { pageServerRoot } from "spell/server/page/settings"
+import { componentSetAddressOf, pageServerRoot } from "spell/server/page/settings"
 import { PidFile } from "spell/server/PidFile"
 import { WebServer } from "spell/server/WebServer"
 
@@ -113,7 +113,8 @@ export class DocPreview {
     const main = await mainServerUrl(file)
     if (main) return main
     const root = pageServerRoot(dirname(file))
-    const inRoot = file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
+    // a component set's page at its address, where it finds its `_assets/` (epic `epic-engine` I136)
+    const inRoot = componentSetAddressOf(root, file) ?? file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
     const running = await new PidFile(root).status()
     const base = running?.base ?? (await DocPreview.serverFor(root)).url
     return `${base}${inRoot}`
