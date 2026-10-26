@@ -8,6 +8,7 @@
  *     sheet's text follow the import too (`DesignTokens`).
  * - What it adds:  the wallpaper behind the page, three blurred colour washes,
  *   lavender, pink and sky in light;  plum, wine and navy in dark.
+ *   - and what the wallpaper asks of the bars over it:  pill tracks, title bands that hide it in dark
  *   - Each wash a `light-dark()` colour, so the gradient follows the scheme.
  *   - Drawn by Glass's page rule (`--glass-wallpaper`), over its solid `--ui-background`,
  *     and under the bars that stick at a page's top (`--ui-bar-wallpaper`).
@@ -22,5 +23,16 @@
       radial-gradient(at 12% 18%, light-dark(#c8b6ff, #4b2f8f) 0, transparent 46%),
       radial-gradient(at 88% 10%, light-dark(#ffd6e7, #6b2950) 0, transparent 42%),
       radial-gradient(at 72% 92%, light-dark(#b8e4ff, #1f4d7a) 0, transparent 46%);
+    /*
+     * a titled toolbar's track and its keys:  pills, as every Fruity tab bar
+     * (Owen, 2026-10-23:  "All should be fully rounded pills");  a key's corners follow the track's (`glass.css`)
+     */
+    --ui-bar-track-radius: var(--ui-radius-pill);
+    /*
+     * dark:  the wallpaper under a section title, in place or stuck, mostly covered
+     * - its wine and plum washes, under Glass's 50%, drew a red / purple seam along every title band
+     * - only over the wallpaper:  the editor's top bar keeps Glass's 50% at rest (`--ui-bar-rest-background`)
+     */
+    --ui-bar-wallpaper-tint: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.85));
   }
 }

@@ -34288,8 +34288,8 @@
             },
             {
               "name": "--ui-theme-menu-button-size",
-              "default": "2.25em",
-              "description": "Diameter of the round buttons: 36px at 16px, the brand's icon button."
+              "default": "1.75em",
+              "description": "Diameter of the round buttons: 28px at 16px, a page header's other icon buttons."
             },
             {
               "name": "--ui-theme-menu-overlay-width",
@@ -35195,6 +35195,10 @@
             {
               "name": "--ui-toolbar-button-color",
               "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-toolbar-button-radius",
+              "default": "50%"
             }
           ]
         }

@@ -14,6 +14,7 @@
  * | `--ui-toolbar-button-background` | a button at rest | `transparent` |
  * | `--ui-toolbar-button-hover-background` | a button under the pointer | a faint ink |
  * | `--ui-toolbar-button-color` | its chevron | `--ui-text-muted` |
+ * | `--ui-toolbar-button-radius` | its corners | a circle;  on a segmented track, the track's corner less its inset |
  */
 
 @layer ui.components.toolbar.types, ui.components.toolbar.states;
@@ -35,6 +36,7 @@
       oklch(from var(--ui-ink) l c h / 0.08)
     );
     --_ui-toolbar-button-color: var(--ui-toolbar-button-color, var(--ui-text-muted));
+    --_ui-toolbar-button-radius: var(--ui-toolbar-button-radius, 50%);
     display: flex;
     align-items: center;
     gap: var(--_ui-toolbar-gap);
@@ -80,6 +82,28 @@
   }
   .ui.toolbar > .ui.menu::-webkit-scrollbar {
     display: none;
+  }
+  /*
+   * a segmented track hugs its items, as a segmented menu does (`alignment="fluid"` spreads it):
+   * it shrinks and scrolls once they don't fit (Owen:  "second tab group doesn't need to be full width")
+   */
+  .ui.toolbar > .ui.segmented.menu:not([class*="fluid aligned"]) {
+    flex: 0 1 auto;
+  }
+  /*
+   * on a segmented track, a key's corners nest inside the track's (its radius less its border and padding),
+   * as an end option's do:  a circle in a less round track was rounder than the corner it sits in
+   * (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits");  a pill track's stays a disc
+   */
+  .ui.toolbar:has(> .ui.segmented.menu) {
+    --_ui-toolbar-button-radius: var(
+      --ui-toolbar-button-radius,
+      max(
+        0px,
+        var(--ui-menu-segmented-radius, var(--ui-menu-radius, var(--ui-radius))) - var(--ui-border-width) -
+          var(--ui-menu-segmented-padding, 0px)
+      )
+    );
   }
 
   /*
@@ -134,7 +158,7 @@
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 50%;
+    border-radius: var(--_ui-toolbar-button-radius);
     font: inherit;
     color: var(--_ui-toolbar-button-color);
     background: var(--_ui-toolbar-button-background);

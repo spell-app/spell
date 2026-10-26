@@ -207,6 +207,8 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   /**
    * Scroll the current page's link into view, a third of the way down its scroll container (the panel's list);
    * nothing if it's already in view, or nothing scrolls (never the page itself).
+   * - In view is below the group's band stuck at the list's top:  a row half under it isn't.
+   * - And no row is left half under that band:  the one it cuts moves down, whole, below it.
    * - Script API (`DOMDocsNavElement`).
    * - The link in the main list, not its copy in Favourites;  none in a shut fold.
    */
@@ -220,8 +222,14 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     if (!scroller) return
     const box = item.getBoundingClientRect()
     const port = scroller.getBoundingClientRect()
-    if (box.top >= port.top && box.bottom <= port.bottom) return
+    if (box.top >= UIDocsNav.bandEndIn(scroller) && box.bottom <= port.bottom) return
     scroller.scrollTop += box.top - port.top - port.height * REVEAL_FRACTION
+    const bandEnd = UIDocsNav.bandEndIn(scroller)
+    const cut = [...scroller.querySelectorAll(`.${ROW}`)].find((row) => {
+      const { top, bottom } = row.getBoundingClientRect()
+      return top < bandEnd && bottom > bandEnd
+    })
+    if (cut) scroller.scrollTop -= bandEnd - cut.getBoundingClientRect().top
   }
 
   ////////////////
@@ -852,6 +860,18 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
       }
     }
     return undefined
+  }
+
+  /**
+   * Where `scroller`'s visible rows start, in the viewport:  the bottom of the group's band stuck at its top,
+   * else its own top.
+   */
+  private static bandEndIn(scroller: HTMLElement): number {
+    const { top } = scroller.getBoundingClientRect()
+    const stuck = [...scroller.querySelectorAll(`.${GROUP} > .${HEADING}`)]
+      .map((heading) => heading.getBoundingClientRect())
+      .find((band) => Math.abs(band.top - top) < 1)
+    return stuck?.bottom ?? top
   }
 
   /**

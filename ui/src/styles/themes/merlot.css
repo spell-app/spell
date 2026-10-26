@@ -149,13 +149,28 @@
     --ui-bar-background: var(--merlot-panel);
     --ui-input-background: var(--merlot-inset);
     --ui-input-border-color: var(--merlot-border);
+    /*
+     * a select the same well as an input, as Glass's
+     * - a select's own default is the surface:  in the Inspector, which wears the Spell theme's tokens
+     *   (`UI.themes.scopedTokens()`), that is Spell's surface, aubergine in dark, beside Merlot's inputs
+     */
+    --ui-select-background: var(--ui-input-background);
+    --ui-select-border-color: var(--ui-input-border-color);
     --ui-menu-active-background: var(--merlot-accent-wash);
     --ui-menu-active-color: var(--ui-text-color);
+    /*
+     * tab bars:  the chosen tab fills its track's corner, 2px in, its corners the track's less that inset
+     * (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits"):
+     * 8px outside;  inside, 8 - 1 (the border) - 2 = 5px, and 6px where a bar draws no border (the editor's modes)
+     */
     --ui-menu-segmented-background: var(--merlot-inset);
     --ui-menu-segmented-radius: var(--ui-radius-m);
-    --ui-menu-segmented-item-radius: var(--ui-radius-s);
+    --ui-menu-segmented-padding: 2px;
+    --ui-menu-segmented-item-radius: calc(var(--ui-radius-m) - 3px);
     --ui-menu-segmented-active-background: var(--merlot-accent);
     --ui-menu-segmented-active-color: var(--merlot-on-accent);
+    /* a toolbar's ‹ / › at the end of its 8px track:  a rounded square inside it, not a circle */
+    --ui-toolbar-button-radius: var(--ui-radius-s);
   }
 
   /* page only:  `:root` matches nothing inside a shadow root */

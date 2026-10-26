@@ -106,6 +106,8 @@
     border-radius: var(--_ui-docs-search-radius);
     background: var(--_ui-docs-search-background);
     cursor: text;
+    /* its width decides whether the placeholder shows (below) */
+    container: ui-docs-search-field / inline-size;
   }
   .field > .glyph {
     flex: none;
@@ -130,6 +132,16 @@
   input::placeholder {
     color: var(--_ui-docs-search-subtle-color);
     opacity: 1;
+  }
+  /*
+   * a pill too narrow for its whole placeholder beside the icon and the keys (a side column's, beside its view
+   * switch):  none, rather than the start of it ("Se", "Sea");  the icon and the keys say what it is
+   * - the pill's width inside its padding:  "Search" needs about 7.2em of it, its icon and keys beside it
+   */
+  @container ui-docs-search-field (width < 7.5em) {
+    input::placeholder {
+      color: transparent;
+    }
   }
   /* the clear button is ours (and Escape):  no native one */
   input::-webkit-search-cancel-button,

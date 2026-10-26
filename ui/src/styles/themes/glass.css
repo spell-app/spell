@@ -46,6 +46,8 @@
     --glass-edge: light-dark(rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.12));
     --glass-hairline: light-dark(rgb(60 60 67 / 0.12), rgb(255 255 255 / 0.08));
     --glass-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
+    /* the track solid, as a Mac's on a bar:  the grey under tabs and toolbars, and the "or" between two buttons */
+    --glass-track-solid: light-dark(#e9e9ee, #3a3846);
     --glass-blur: blur(28px) saturate(1.7);
     /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
     --glass-bar: light-dark(rgb(255 255 255 / 0.95), rgb(30 28 38 / 0.95));
@@ -190,12 +192,13 @@
      */
     --ui-toolbar-button-background: light-dark(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.12));
     /*
-     * the "or" between two buttons:  an opaque disc, the buttons meeting under it
-     * (as glass, it let the green button show through its text, with a notch of wallpaper round it)
+     * the "or" between two buttons:  an opaque disc, the track's grey, a tone apart from the white key beside it
+     * (white, it vanished into Cancel;  as glass, it let the green button show through its text),
+     * a little room between the buttons under it
      */
-    --ui-button-or-background: light-dark(#ffffff, #2c2a36);
+    --ui-button-or-background: var(--glass-track-solid);
     --ui-button-or-color: var(--ui-text-muted);
-    --ui-button-or-gap: 0px;
+    --ui-button-or-gap: 0.25em;
     /* a text menu's chosen item (text tabs):  semibold as well as coloured, never colour alone */
     --ui-menu-text-active-weight: 600;
     --ui-bar-wallpaper-color: var(--ui-background);
@@ -205,12 +208,14 @@
     --ui-bar-wallpaper-tint: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;
-    --ui-bar-track: light-dark(#e9e9ee, #3a3846);
+    --ui-bar-track: var(--glass-track-solid);
     --ui-bar-track-radius: 9px;
+    /* the track hugs its keys (Owen:  "second tab group doesn't need to be full width") */
     --ui-bar-track-width: fit-content;
     --ui-bar-track-padding: 2px;
     --ui-bar-item-padding: 0 1.1em;
-    --ui-bar-item-radius: 7px;
+    /* every corner of a key the track's, less its padding:  nested, never as round as the track */
+    --ui-bar-item-radius: calc(var(--ui-bar-track-radius) - var(--ui-bar-track-padding));
     --ui-bar-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
     --ui-bar-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-bar-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
@@ -302,7 +307,7 @@
      * Segmented menus (tab bars):  a grey track, solid as a Mac one (it sits on bars),
      * the chosen segment a raised white key, no dividers
      */
-    --ui-menu-segmented-background: light-dark(#e9e9ee, #3a3846);
+    --ui-menu-segmented-background: var(--glass-track-solid);
     --ui-menu-segmented-border: none;
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;

@@ -34,6 +34,8 @@ export class DOMCodeElement extends E.DOMLoadableElement<UICode> {
  * - Its shadow DOM:
  *   `<div class="ui [numbered] [wrapping] code" part="box">`
  *   around an optional copy `<button>` and `<pre><code class="hljs language-x">`, one `<span class="line">` per line.
+ * - The copy button is an icon (a check for a moment once it has copied);  its words ("Copy", "Copied")
+ *   are its name and tooltip.
  * - The text:  the element's own (`<script type="text/plain">` keeps `<` and `&` exact),
  *   or a `source` file (see `LoadableComponent`).
  * - The colours come from highlight.js, loaded with the first highlight
@@ -136,10 +138,21 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   /** The copy button's copy:  "Copied" for a moment after. */
   readonly clipboard = new E.ClipboardCopy()
 
-  /** The copy button just copied:  it says "Copied".  `:state(copied)`. */
+  /** The copy button just copied:  it says "Copied", with a check.  `:state(copied)`. */
   @E.cssState("copied")
   get wasJustCopied(): boolean {
     return this.clipboard.isCopied
+  }
+
+  /** The copy button's icon:  a copy, a check for a moment once it has copied;  none without the button. */
+  readonly copyGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.copy ? (this.wasJustCopied ? CHECK_ICON : COPY_ICON) : undefined)
+  })
+
+  /** The copy button's name and tooltip:  "Copy", or "Copied" for a moment. */
+  private get copyLabel(): string {
+    return this.wasJustCopied ? this.translationForKey("codeCopied") : this.translationForKey("codeCopy")
   }
 
   /** The copy button:  the code to the clipboard, `ui-copied`, "Copied" for a moment. */
@@ -156,8 +169,15 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
     return (
       <div class={this.rootClass} part={this.partForName("box")}>
         <Show when={this.copy}>
-          <button type="button" class={COPY_CLASS} part={this.partForName("copy")} onClick={this.onCopy}>
-            {this.wasJustCopied ? this.translationForKey("codeCopied") : this.translationForKey("codeCopy")}
+          <button
+            type="button"
+            class={COPY_CLASS}
+            part={this.partForName("copy")}
+            aria-label={this.copyLabel}
+            title={this.copyLabel}
+            onClick={this.onCopy}
+          >
+            {this.copyGlyph.svg}
           </button>
         </Show>
         <pre
@@ -191,3 +211,9 @@ const HLJS_CLASS = "hljs"
 
 /** Class of the copy button. */
 const COPY_CLASS = "copy"
+
+/** The copy button's icon. */
+const COPY_ICON = "copy outline"
+
+/** The copy button's icon for a moment once it has copied. */
+const CHECK_ICON = "check"

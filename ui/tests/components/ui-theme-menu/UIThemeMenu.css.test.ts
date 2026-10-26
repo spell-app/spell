@@ -51,15 +51,20 @@ describe("UIThemeMenu.css source", () => {
 })
 
 describe("UIThemeMenu.css look", () => {
-  it("lays the controls in one row:  36px round buttons, --ui-theme-menu-gap / -button-size set them", () => {
+  it("lays the controls in one row:  28px round buttons, --ui-theme-menu-gap / -button-size set them", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
     const shadow = host.shadowRoot!
     const controls = shadow.querySelector<HTMLElement>("[part~=controls]")!
     const scheme = shadow.querySelector<HTMLElement>("[part~=scheme]")!
     expect(getComputedStyle(controls).display).toBe("inline-flex")
     expect(getComputedStyle(controls).columnGap).toBe("4px")
-    expect([getComputedStyle(scheme).width, getComputedStyle(scheme).height]).toEqual(["36px", "36px"])
+    expect([getComputedStyle(scheme).width, getComputedStyle(scheme).height]).toEqual(["28px", "28px"])
     expect(getComputedStyle(scheme).borderRadius).toBe("50%")
+    // quiet at rest, as a page header's other icons:  no fill, no ring
+    expect([getComputedStyle(scheme).backgroundColor, getComputedStyle(scheme).boxShadow]).toEqual([
+      "rgba(0, 0, 0, 0)",
+      "none"
+    ])
     host.style.setProperty("--ui-theme-menu-gap", "20px")
     host.style.setProperty("--ui-theme-menu-button-size", "40px")
     expect(getComputedStyle(controls).columnGap).toBe("20px")
@@ -99,6 +104,6 @@ describe("UIThemeMenu.css look", () => {
       ...foundationCSS,
       themesCSS
     ])
-    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=scheme]")!).width).toBe("31.5px")
+    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=scheme]")!).width).toBe("24.5px")
   })
 })

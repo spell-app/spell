@@ -375,6 +375,13 @@
               Components
     *******************************/
 
+    /*
+     * a bar over scrolling content (a page's top bar, its sticky strips, an epic page's toolbar):  Spell's own page,
+     * its cool grey-blue, and its ink;  without them a page fell back to an ivory band (`--ui-brown-background`)
+     */
+    --ui-bar-background: var(--ui-background);
+    --ui-bar-color: var(--ui-text-color);
+
     /* Buttons:  the brand's UI weight (500);  the default button a quiet grey-blue fill, aubergine text */
     --ui-button-font-weight: 500;
     /*
@@ -569,8 +576,9 @@
     --ui-menu-segmented-item-padding: 0.58em 1.08em;
     --ui-menu-segmented-item-color: var(--spell-text-muted);
     --ui-menu-segmented-item-radius: var(--ui-radius-pill);
-    --ui-menu-segmented-active-background: var(--ui-surface);
-    --ui-menu-segmented-active-hover-background: var(--ui-surface);
+    /* dark:  the lilac tint, a step lighter than the track (the aubergine card barely showed on the page) */
+    --ui-menu-segmented-active-background: light-dark(var(--ui-surface), var(--spell-lilac-soft));
+    --ui-menu-segmented-active-hover-background: var(--ui-menu-segmented-active-background);
     --ui-menu-segmented-active-color: var(--spell-text-strong);
     --ui-menu-segmented-active-shadow: var(--spell-shadow-sm);
 

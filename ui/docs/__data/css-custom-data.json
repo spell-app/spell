@@ -9343,7 +9343,7 @@
       "name": "--ui-theme-menu-button-size",
       "description": {
         "kind": "markdown",
-        "value": "Diameter of the round buttons: 36px at 16px, the brand's icon button.\n\n`<ui-theme-menu>`'s token.  Default:  `2.25em`"
+        "value": "Diameter of the round buttons: 28px at 16px, a page header's other icon buttons.\n\n`<ui-theme-menu>`'s token.  Default:  `1.75em`"
       }
     },
     {
@@ -9603,6 +9603,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-text-muted)`"
+      }
+    },
+    {
+      "name": "--ui-toolbar-button-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `50%`"
       }
     },
     {
