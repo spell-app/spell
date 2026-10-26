@@ -61,8 +61,7 @@ export class EpicUISite {
       components: tags,
       docs: [],
       families: Object.fromEntries(tags.map((tag) => [tag.tag, this.family(tag)])),
-      foundation: [],
-      themes: []
+      foundation: []
     }
     return SiteDataBuilder.forSet(data, pages)
   }
