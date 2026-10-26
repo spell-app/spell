@@ -103,8 +103,8 @@ function titleWithKey(title, letter) {
 
 /**
  * THE TOOLBAR, every page's (epic `epic-engine` P3:  Owen, 2026-10-19, "Why are we not using <ui-xxxx> or <epic-xxx>
- * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, a `<nav>` landmark of
- * `<ui-item>` links (`toolbarItem()`), its look `spell-toolbar.css`'s, through the menu's tokens.
+ * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`,
+ * a `<nav>` landmark of `<ui-item>` links (`toolbarItem()`), its look `spell-toolbar.css`'s, through the menu's tokens.
  * - the current item `selected` (scroll-follow), which the menu draws, and says (`aria-current`)
  * - `titled`:  a guide's (and Epic UI's), each item its mark and its title (`spell-toolbar-titled`);  else an epic
  *   page's, marks only, every item the same width
@@ -123,7 +123,9 @@ export function toolbarMenu(items, { titled, segmented = false }) {
     class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"]
       .filter(Boolean)
       .join(" "),
-    ...(segmented ? { appearance: "segmented" } : { secondary: true }),
+    // `appearance`, never `secondary`:  that old name does nothing since epic `ui-gaps` P13,
+    // and drew a plain bordered menu
+    ...(segmented ? { appearance: "segmented" } : { appearance: "secondary" }),
     "aria-label": "Sections",
     "data-spell-added": true
   })

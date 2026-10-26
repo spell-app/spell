@@ -92,6 +92,8 @@
 }
 :is(ui-menu, ui-toolbar).spell-toolbar-titled:not(.spell-toolbar-segmented)::part(menu) {
   width: var(--ui-bar-track-width, auto);
+  /* the track hugs its items (a theme's `fit-content`), shrinking only to scroll:  a toolbar's menu grows to its row */
+  flex: 0 1 auto;
   max-width: 100%;
   box-sizing: border-box;
   background: var(--ui-bar-track, none);
