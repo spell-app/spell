@@ -221,6 +221,11 @@
   button.chip:hover {
     filter: brightness(1.1);
   }
+  /* marked in this pass, not applied yet:  a ring in the one blue badge's blue, round its state's colour (epic `epic-engine` P43) */
+  .chip[data-marked] {
+    outline: 1.5px solid var(--ui-blue, #2185d0);
+    outline-offset: 1.5px;
+  }
   /* its urgency changed, not sent yet:  a dashed ring, as a queued review button's */
   button.chip[data-unsent] {
     outline: 1.5px dashed var(--_epic-state);
