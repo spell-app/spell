@@ -646,7 +646,8 @@
       height: var(--epic-control-size, 28px);
       padding-inline-start: 6px;
       background: var(--epic-toolbar-fill);
-      box-shadow: -10px 0 8px -2px var(--spell-rail-bg, var(--epic-warm));
+      /* the fade into it:  the header's own ground (the docs' old ivory rail drew a peach band on a phone) */
+      box-shadow: -10px 0 8px -2px var(--epic-toolbar-fill);
     }
     .meta {
       font-size: 14px;

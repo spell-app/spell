@@ -257,7 +257,8 @@
   .reply.owen {
     --_epic-who-initial: "O";
     --_epic-who-mark: var(--ui-violet, #6550ca);
-    --_epic-card-fill: color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, Canvas));
+    /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
+    --_epic-card-fill: color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, var(--ui-background, Canvas)));
     --_epic-card-rule: color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent);
     --_epic-card-accent: var(--ui-violet-text, var(--ui-violet, #6550ca));
   }

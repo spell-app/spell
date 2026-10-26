@@ -122,9 +122,16 @@ body.plan-doc {
   --spell-site-header-rule: transparent;
   --spell-site-header-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
 }
+/*
+ * the page's ground:  the theme's colour on the root, and the body see-through, so what a theme lays on the root shows
+ * (Fruity's wallpaper, `--glass-wallpaper`):  the body's own fill painted over it
+ */
+html {
+  background-color: var(--spell-bg);
+}
 body {
   margin: 0;
-  background: var(--spell-bg);
+  background: transparent;
   color: var(--spell-ink);
   font: 16px/1.6 var(--spell-sans);
   /* UI's own headings (section titles, cards) in the page's heading face */

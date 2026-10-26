@@ -153,8 +153,9 @@ header {
   display: flex; align-items: center; gap: 12px; padding: 0 16px;
   font: 500 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: light-dark(#1d1d22, #ececf1);
-  background: var(--spell-site-header-fill, light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86)));
-  backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  background: var(--ui-bar-background, var(--spell-site-header-fill, light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86))));
+  backdrop-filter: var(--ui-bar-filter, saturate(1.4) blur(10px));
+  -webkit-backdrop-filter: var(--ui-bar-filter, saturate(1.4) blur(10px));
   border-bottom: 1px solid var(--spell-site-header-rule, light-dark(#e3e0d8, #34343b));
   box-shadow: var(--spell-site-header-shadow, none);
 }
@@ -163,8 +164,11 @@ a { color: inherit; text-decoration: none; }
 .brand svg { display: block; height: 26px; width: auto; }
 nav { display: flex; gap: 2px; }
 .tab { padding: 7px 10px; border-radius: 999px; color: light-dark(#55555f, #a9a9b6); white-space: nowrap; }
-.tab:hover { background: light-dark(#f0eef8, #2c2a38); color: inherit; }
-.tab[aria-current="page"] { background: light-dark(#e9e4ff, #33295e); color: light-dark(#3d2a9e, #d9d0ff); }
+.tab:hover { background: var(--ui-menu-hover-background, light-dark(#f0eef8, #2c2a38)); color: inherit; }
+.tab[aria-current="page"] {
+  background: var(--ui-primary-background, light-dark(#e9e4ff, #33295e));
+  color: var(--ui-primary-text, light-dark(#3d2a9e, #d9d0ff));
+}
 .spacer { flex: 1; }
 .badge { flex: none; padding: 4px 9px; border-radius: 999px; font-size: 12px; background: light-dark(#eef0f3, #2a2d33); }
 .badge.worktree { background: light-dark(#fff1d6, #4a3610); color: light-dark(#7a4c00, #ffd48a); }
@@ -172,13 +176,19 @@ nav { display: flex; gap: 2px; }
   flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0;
   border: 0; border-radius: 999px; background: none; color: light-dark(#55555f, #a9a9b6); cursor: pointer;
 }
-.tool:hover { background: light-dark(#f0eef8, #2c2a38); color: inherit; }
-.tool.on { background: light-dark(#e9e4ff, #33295e); color: light-dark(#3d2a9e, #d9d0ff); }
+.tool:hover { background: var(--ui-menu-hover-background, light-dark(#f0eef8, #2c2a38)); color: inherit; }
+.tool.on {
+  background: var(--ui-primary-background, light-dark(#e9e4ff, #33295e));
+  color: var(--ui-primary-text, light-dark(#3d2a9e, #d9d0ff));
+}
 /* the page's theme control, at the bar's end */
 ::slotted([slot="${FR}"]) { flex: none; display: inline-flex; align-items: center; }
 /* the icons take no pointer:  it lands on the titled link or button, so Electron shows its tooltip (I43) */
 .brand svg, .tool svg { pointer-events: none; }
-.tool:focus-visible, .tab:focus-visible, .brand:focus-visible { outline: 2px solid light-dark(#5b3fd0, #b3a2ff); outline-offset: 2px; }
+.tool:focus-visible, .tab:focus-visible, .brand:focus-visible {
+  outline: 2px solid var(--ui-focus-color, light-dark(#5b3fd0, #b3a2ff));
+  outline-offset: 2px;
+}
 /* docked:  a compact row in the page's own chrome */
 :host([docked]) header {
   position: static; height: auto; flex-wrap: wrap; gap: 4px 6px; padding: 0;
