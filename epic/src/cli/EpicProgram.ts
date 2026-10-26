@@ -283,9 +283,9 @@ export class EpicProgram {
     ).usage('<epic>#P3 | <epic>#J3  <sha> "what it did"')
     this.page(
       epic.command("commits"),
-      "every phase and item commit in the page's history, into their lists",
+      "every phase and item commit in the page's history, into their lists (phase ... done and merge do it too)",
       "epic commits seo --backfill"
-    ).usage("<epic> --backfill")
+    ).usage("<epic> --backfill [--merged <sha,...>]")
 
     ////////////////
     // ## Epic page:  items
