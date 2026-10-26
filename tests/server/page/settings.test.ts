@@ -4,6 +4,8 @@ import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import {
+  componentSetAddressOf,
+  componentSetFileOf,
   componentSets,
   kitOf,
   kitRootOf,
@@ -136,5 +138,29 @@ describe("pageServerRoot()", () => {
     expect(pageServerRoot(join(repo, "src"))).toBe(repo)
     expect(kitOf(repo)).toBeUndefined()
     rmSync(repo, { recursive: true, force: true })
+  })
+})
+
+// epic `epic-engine` I136:  a set's page linked by its folder's path loaded none of its `_assets/`
+describe("componentSetAddressOf() / componentSetFileOf()", () => {
+  const root = kit()
+  afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+  test("a set's page is its address, `/components/<set>/...`, encoded;  any other file `undefined`", () => {
+    expect(componentSetAddressOf(root, join(root, "ui/docs/ui-button.html"))).toBe("/components/ui/ui-button.html")
+    expect(componentSetAddressOf(root, join(root, "node_modules/epic/src/docs/a b.html"))).toBe(
+      "/components/epics/a%20b.html"
+    )
+    expect(componentSetAddressOf(root, join(root, "ui/site/x.html"))).toBeUndefined()
+    expect(componentSetAddressOf(root, join(root, "ui/docs"))).toBeUndefined()
+  })
+
+  test("turned round:  an address is its set's file;  any other path `undefined`", () => {
+    expect(componentSetFileOf(root, "/components/ui/ui-button.html")).toBe(join(root, "ui/docs/ui-button.html"))
+    expect(componentSetFileOf(root, "/components/epics/a%20b.html")).toBe(
+      join(root, "node_modules/epic/src/docs/a b.html")
+    )
+    expect(componentSetFileOf(root, "/components/app/x.html")).toBeUndefined()
+    expect(componentSetFileOf(root, "/epics/x.html")).toBeUndefined()
   })
 })

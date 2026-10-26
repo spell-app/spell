@@ -111,6 +111,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `ensure` started the new one while the old one held the port, so the new one took another port,
         and pages on the old one found the server down (epic `airplane`, 2026-10-10).
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
+    - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
+      `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
     - A file of the shared content folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
       its path there, `/epics/...` (epic `epic-eject` I20).

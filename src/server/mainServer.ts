@@ -17,7 +17,7 @@ import { dirname, join, relative, resolve, sep } from "node:path"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { checkoutOf } from "./checkout"
-import { kitOf } from "./page/settings"
+import { componentSetAddressOf, kitOf } from "./page/settings"
 import { PidFile } from "./PidFile"
 import { RealPath } from "./RealPath"
 import { isInside } from "./safePath"
@@ -53,9 +53,13 @@ export async function mainServerUrl(file: string, from?: string): Promise<string
   const content = contentPathOf(file, (await liveInfo(running.base)) ?? running)
   if (content) return `${running.base}${content}`
   if (!at) return undefined
+  const worktree = `${running.base}/worktrees/${encodeURIComponent(at.worktree)}`
+  // a component set's page at its address, where it finds its `_assets/` (I136)
+  const address = componentSetAddressOf(at.root, file)
+  if (address) return `${worktree}${address}`
   const path = at.path.map(encodeURIComponent).join("/")
   if (isShared(at)) return `${running.base}/${path}`
-  return `${running.base}/worktrees/${encodeURIComponent(at.worktree)}/${path}`
+  return `${worktree}/${path}`
 }
 
 /**
