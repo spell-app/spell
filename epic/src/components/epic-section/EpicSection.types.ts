@@ -276,8 +276,9 @@ export const FILTER_TEXTS = [
   },
   {
     key: "markedWords",
-    text: "{count} marked in this pass, waiting for Claude",
-    description: "The blue badge's name and tooltip:  how many items Owen marked in this pass (epic `epic-engine` P43)."
+    text: "{count} with Claude:  marked in this pass, or being worked on",
+    description:
+      "The ONE blue badge's name and tooltip:  how many items are with Claude, whatever their kind -- marked in this pass, or being worked on (epic `epic-engine` P43)."
   },
   { key: "showAll", text: "show everything", description: "A state chip's click:  every state shows again." },
   { key: "chipOnly", text: "show only these", description: "A state chip's click:  only its state shows." },

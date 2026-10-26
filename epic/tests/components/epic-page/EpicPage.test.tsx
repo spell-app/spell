@@ -853,9 +853,9 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1"]))
-    expect(markedBadge(host)).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect(markedBadge(host)).toEqual(["3", "3 with Claude:  marked in this pass, or being worked on"])
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
-    expect(markedBadge(questions)).toEqual(["2", "2 marked in this pass, waiting for Claude"])
+    expect(markedBadge(questions)).toEqual(["2", "2 with Claude:  marked in this pass, or being worked on"])
     // a section whose items are all marked keeps its badge alone
     expect(chipsOf(todos).map((chip) => chip.dataset.state)).toEqual(["recent"])
     expect(markedBadge(todos)?.[0]).toBe("1")
