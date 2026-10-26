@@ -27,6 +27,7 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
 1. **Ready:**  from the checkout's root.
    - `spell map status`:  a stale or missing map, `spell map build`.  No graphify:  go on;  the agent searches.
    - `agents/coherence/` missing:  say so in one line, and go on with the search alone.
+   - A sweep:  `spell coherence score --json` first, to compare with at the end (step 6).
 2. **Agents:**  each named and listed (the root `CLAUDE.md`, "Delegated work"):  `epic agents add <name> "<task>"`.
    - A sweep:  one `coherence` agent per area, `<epic>-sweep-<area>`, up to 5 at once.
      Its prompt:  the area's folders (the catalog's "Areas"), the checkout, and "sweep:  find the mechanisms this
@@ -58,6 +59,10 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
      BEFORE "Saves" (Owen, 2026-10-25), its places and evidence in a folded `<epic-code>`.
 6. **Reply:**  one line per finding, where it landed, with its link (`epic pages link ... --hash <id>`);  the
    "Considered, left out" line.
+   - A sweep:  then `spell coherence score --compare last --save`, and one line with its change, in words:
+     "Coherence 81 → 83, 2% better (score up);  copies 233 → 220, 6% better (fewer copies)" (procedures.md,
+     "The score").
+   - A plan review:  "this plan adds N copies" per mechanism, where the agent could tell.
 7. **Learn,** whenever Owen gives a verdict on a finding (here or on the page):
    - agreed, and the mechanism exists:  its entry in the catalog gets the copies;  a new one:  a new entry
    - a word settled:  the word list gets it, with where it was decided
