@@ -139,6 +139,9 @@ const ICONS = {
   "solid/table-columns": ["table columns"],
   "solid/sun": ["sun"],
   "solid/moon": ["moon"], // dark mode
+  // the theme menu in the site header (`<ui-theme-menu>`, epic `debut` P17):  its light scheme;  palette, moon, adjust
+  // and check are listed for other uses
+  "regular/sun": ["sun outline"],
   // an epic page's bedtime label (`<epic-page bedtime>`):  a /bedtime run is on
   "solid/bed": ["bed"],
   // status:  not done / in progress / done (epic pages)

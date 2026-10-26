@@ -27,20 +27,25 @@
  *     here:  that rule keeps a library's bundles from pinning all of Solid, but this map exists so a pack can use any
  *     export, which no tree-shaker can know ahead.  So the whole of `solid-js` / `@solidjs/web` stays in this bundle
  *     (`ui`'s own code never holds such a map).
- * - The look:  UI's `spell` theme (the Spell brand as Claude Design drew it), on every page but an epic page,
- *   applied as soon as the bundle runs (epic `design-system`, P9;  the Spell Brand theme, `spell-brand`, folded into
- *   `spell` in epic `debut` P17).
- *   Its sheet is inlined like every other `import()`, so it registers a few microtasks after the bundle runs, not
- *   a network round trip later.  It ships no font files:  its serif is an installed Palatino, else `serif`.
- *   - it adds the brand's roles (`--spell-surface-warm`, `--spell-type-lede` ...), which `spell-doc.css` and the
- *     other docs sheets read for eyebrows, ledes, asides and panels
- *   - an epic page draws in `fruity` instead, the editor's glass look (Owen, 2026-10-24;  `THEME`):
- *     the brand's roles are missing there, and every sheet that reads one has a fallback
+ * - The theme:  the one the viewer picked, remembered per place (`ThemePreference`, as the editor's;  epic `debut` P17,
+ *   J87, J94), applied as soon as the bundle runs.
+ *   - an epic page (an `<epic-page>` in it):  Fruity until the viewer picks another, kept under its own key
+ *     (`EPIC_PAGES`), the editor's glass look (Owen, 2026-10-24)
+ *   - every other page (the guides):  Spell UI's pages' own, Spell by default, under their key
+ *   - light / dark:  ONE choice for every Spell site (`ColorScheme`)
+ *   - a theme remembered under an old name comes back as its new one (`studio` as `merlot`)
+ *   - Spell's sheet adds the brand's roles (`--spell-surface-warm`, `--spell-type-lede` ...), which `spell-doc.css` and
+ *     the other docs sheets read for eyebrows, ledes, asides and panels;  in another theme they're missing, and every
+ *     sheet that reads one has a fallback
+ *   - each sheet is inlined like every other `import()`, so it registers a few microtasks after the bundle runs, not
+ *     a network round trip later;  none ships font files
+ * - The theme menu (`<ui-theme-menu>`) goes in the site header's `theme` slot, in place of its light / dark button
+ *   (Q30):  the header names no menu, it only gives the page's own a place (`addThemeMenu()`).
  */
 
 import "spell-ui:icons"
 import "spell-ui:emoji"
-import { UI } from "spell-ui"
+import { UI, ThemePreference } from "spell-ui"
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
@@ -90,12 +95,28 @@ export const packModules = Object.freeze({
 })
 
 /**
- * The theme this page draws in:  `fruity` on an epic page (an `<epic-page>` in it), `spell` on every other.
- * - Read as the bundle runs, from the end of `<body>`:  the page's markup is all there.
+ * An epic page's own theme settings:  Fruity until the viewer picks another, remembered apart from the guides'.
+ * - Every other page takes `ThemePreference`'s own:  Spell, under Spell UI's pages' key.
  */
-const THEME = document.querySelector("epic-page") ? "fruity" : "spell"
+const EPIC_PAGES = Object.freeze({ defaultTheme: "fruity", themeKey: "spell-epic:theme" })
 
-void UI.load()
-  .then((ui) => ui.themes.apply(THEME))
-  .catch((error) => console.error(`spell-ui:  the ${THEME} theme`, error))
+/**
+ * Put the theme menu in the site header's `theme` slot, where its light / dark button was (Q30).
+ * - Read as the bundle runs, from the end of `<body>`:  the page's markup is all there.
+ * - A header DOCKED in a page's own chrome:  none, the page has its own control.
+ * - Before `defineSite()`:  the header draws first time without its light / dark button.
+ */
+function addThemeMenu() {
+  const header = document.querySelector("spell-site-header:not([docked])")
+  if (!header || header.querySelector(":scope > ui-theme-menu")) return
+  const menu = document.createElement("ui-theme-menu")
+  menu.slot = "theme"
+  menu.setAttribute("size", "small")
+  header.append(menu)
+}
+
+// an epic page:  read before the first read of the pair (`restore()`, the menu)
+if (document.querySelector("epic-page")) ThemePreference.site(EPIC_PAGES)
+void ThemePreference.restore().catch((error) => console.error("spell-ui:  the page's theme", error))
+addThemeMenu()
 defineSite()
