@@ -136,7 +136,8 @@ export class CodeSpellWriter {
     P.Tokenizer.forEachToken(tokens, (token) => {
       if (!(token instanceof P.JSXElementToken)) return
       const { tagName } = token
-      const tag = BARE_NAME.test(tagName) ? this.componentTag(tagName, token.start) : undefined
+      const isComponent = BARE_NAME.test(tagName) && !SPELL_BLOCK_TAGS.has(tagName)
+      const tag = isComponent ? this.componentTag(tagName, token.start) : undefined
       const name = tag ?? tagName
       if (tag) edits.push({ start: token.start + 1, end: token.start + 1 + tagName.length, text: tag })
       const closer = token.isUnaryTag ? undefined : token.raw?.match(/<\/[^>]*>$/)?.[0]
@@ -178,6 +179,12 @@ export class CodeSpellWriter {
 
 /** A component's bare name in spellx markup (`<text>`, `<botón>`):  lowercase letters only, as `SpellJSX` reads it. */
 const BARE_NAME = /^\p{Ll}+$/u
+
+/**
+ * Spell's own blocks in a drawing, the same words in code spell:  never a pack's component (`<ui-markdown>`).
+ * - `<markdown>`:  raw text, drawn as markdown;  `<html>`:  markup as written (P18)
+ */
+const SPELL_BLOCK_TAGS: ReadonlySet<string> = new Set(["markdown", "html"])
 
 /** Options for `CodeSpellWriter.write()`. */
 export type CodeSpellWriteOptions = {

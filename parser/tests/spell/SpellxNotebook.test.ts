@@ -129,10 +129,13 @@ describe("a spellx notebook", () => {
     ])
   })
 
-  test("an `<html>` block inside markup:  drawn in its place, `<img>` the web's;  its twin compiles the same (P18)", () => {
+  test("`<html>` and `<markdown>` blocks inside markup:  drawn in place, `<img>` the web's;  the twin compiles the same", () => {
     const text = [
       '<spell-notebook "avatar notebook">',
       '\t<segment label="Image">',
+      "\t\t<markdown>",
+      "\t\t\tSlot your own `<img>`.",
+      "\t\t</markdown>",
       '\t\t<example description="A slotted image.">',
       "\t\t\t<html>",
       '\t\t\t\t<ui-avatar><img src="joe.jpg" alt="Joe" /></ui-avatar>',
