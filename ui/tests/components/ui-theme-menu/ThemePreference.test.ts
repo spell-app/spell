@@ -105,6 +105,19 @@ describe("ThemePreference.site()", () => {
     expect(localStorage.getItem("test-site:theme")).toBeNull()
     localStorage.removeItem("test-site:theme")
   })
+
+  test("a pair read FIRST (a menu Spell UI defined before the place said its own) is read again, and subscribers told", () => {
+    ThemePreference.reset()
+    expect(ThemePreference.chosen.theme).toBe(DEFAULT_THEME)
+    const heard = vi.fn()
+    const unsubscribe = ThemePreference.subscribe(heard)
+    localStorage.setItem("test-site:theme", "merlot")
+    ThemePreference.site({ defaultTheme: "fruity", themeKey: "test-site:theme" })
+    expect(ThemePreference.chosen.theme).toBe("merlot")
+    expect(heard).toHaveBeenCalledWith(expect.objectContaining({ theme: "merlot" }))
+    unsubscribe()
+    localStorage.removeItem("test-site:theme")
+  })
 })
 
 describe("ThemePreference.applyScheme()", () => {

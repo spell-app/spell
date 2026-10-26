@@ -1,13 +1,14 @@
 /*
  * Spell theme:  the Spell brand (`brand/spell-design-system/`) as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  in `UI.themes.own`, listed apart from `UI.themes.names`.  Applied like
- *   one, ON TOP of `classic.css`, so every classic token a brand value replaces is restated here:  type, the size
- *   ladder, radii, ink, borders, shadows, the whole palette, the message colours, links, focus, highlight.
+ * - One of Spell's own themes, the set `UI.themes.own` lists.
+ *   Applied ON TOP of `classic.css`, so every classic token a brand value replaces is restated here:
+ *   type, the size ladder, radii, ink, borders, shadows, the whole palette, the message colours, links, focus,
+ *   highlight.
  * - The ONE Spell theme (epic `debut` P17, J88):  the Spell Brand theme (`spell-brand.css`, which imported this
  *   sheet and added to it) folded in.
  *   - A theme remembered as `spell-brand` comes back as `spell` (`Themes.RENAMED`).
  *   - Its facelift is epic `debut` P18.
- * - The default look of Spell UI's docs site and the guides (`ThemePreference`).
+ * - The default theme of Spell UI's pages and the guides (`ThemePreference`).
  * - Besides the `--ui-*` tokens, the brand's own roles that no `--ui-*` token covers ("Brand roles", below),
  *   as `--spell-*` `light-dark()` pairs:
  *   - surfaces:  `--spell-surface-tint` (lavender wash:  asides, sidebars), `-warm` (ivory:  anything "alive"),

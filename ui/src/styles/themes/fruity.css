@@ -1,7 +1,7 @@
 /*
  * Fruity theme:  the Glass theme on a soft pastel wallpaper, as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.
- *   Applied like one, ON TOP of `classic.css`.
+ * - One of Spell's own themes, the set `UI.themes.own` lists.
+ *   Applied ON TOP of `classic.css`.
  * - Glass (`glass.css`) with what Fruity adds ON TOP (epic `debut` P17, J88):  it imports it, then keeps only that.
  *   - A fix to the glass is made once, in `glass.css`.
  *   - Vite inlines the import, so the theme is still ONE sheet (`UI.themes`);  the build-time tools that read the

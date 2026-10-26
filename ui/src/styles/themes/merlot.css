@@ -1,7 +1,7 @@
 /*
  * Merlot theme:  a code studio in wine reds, as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.
- *   Applied like one, ON TOP of `classic.css`,
+ * - One of Spell's own themes, the set `UI.themes.own` lists.
+ *   Applied ON TOP of `classic.css`,
  *   so every classic token it replaces is restated here.
  * - Was Studio (`studio.css`, Shades of Purple's colours), moved from purple toward maroon
  *   (epic `debut` P17;  Owen:  "Shift toward maroon rather than purple", "Change name to merlot").

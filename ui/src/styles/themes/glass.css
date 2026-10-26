@@ -1,7 +1,7 @@
 /*
  * Glass theme:  the look of macOS today, as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.
- *   Applied like one, ON TOP of `classic.css`,
+ * - One of Spell's own themes, the set `UI.themes.own` lists.
+ *   Applied ON TOP of `classic.css`,
  *   so every classic token it replaces is restated here.
  * - The base of the glass themes (epic `debut` P17, J88;  Owen:  "glass is the base, fruity the exceptions"):
  *   - Glass:  this sheet, on a SOLID page, one colour in light and one in dark

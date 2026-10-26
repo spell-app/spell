@@ -57,12 +57,15 @@ export class ThemePreference {
 
   /**
    * Make this page another place's:  its own default theme, and its own key for the chosen theme.
-   * - Call BEFORE the first read (`restore()`, a menu):  a theme read before stays in memory.
+   * - Call before `restore()`.
+   * - A menu that read the pair first (it connected as Spell UI defined it) follows the place's own:
+   *   the pair is read again under the new key, and subscribers told.
    * - e.g. the editor app:  `ThemePreference.site({ defaultTheme: "fruity", themeKey: "spell-app:theme" })`
    */
   static site({ defaultTheme, themeKey }: ThemeSite): void {
     ThemePreference.defaultTheme = defaultTheme
     ThemePreference.themeKey = themeKey
+    if (ThemePreference.current) ThemePreference.update(ThemePreference.read())
   }
 
   /**
