@@ -19,7 +19,8 @@ import exampleCSS from "./UIDocsExample.css?inline"
  *   - `<div class="frame">`:
  *     - the code `<ui-button part="toggle">`, over the frame's top right corner
  *     - `<ui-segment part="demo">` around the default slot (the live example:  the element's own children)
- *     - while `code` is on, `<ui-segment part="code">`, with the markup in a `<ui-code>`.
+ *     - while `code` is on, `<ui-segment part="code">`, with the markup in a `<ui-code>`;
+ *       or what the `source` slot holds instead (an editor:  spell-app's notebook examples)
  * - The markup shown is read ONCE, on first connect (`ExampleSource.of()`):
  *   - a `<template>` child
  *   - else the page snapshot the site entry took before any family loaded
@@ -33,7 +34,8 @@ import exampleCSS from "./UIDocsExample.css?inline"
  *   which its barrel imports.
  ****************/
 export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
-  @E.proto static vocabulary = docsExampleVocabulary
+  // widened, as `UICode`'s is:  a subclass (spell-app's `<spell-example>`) brings its own tag
+  @E.proto static vocabulary: E.ComponentVocabulary = docsExampleVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { "docs-example": exampleCSS },
     delegatesFocus: false
@@ -69,6 +71,14 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   @E.state
   accessor isCodeShown = false
 
+  /**
+   * The code was open from the start (`code` in markup, or a page drawing the example again, open):
+   * it shows at once, without rolling open;  the code button rolls it from then on.
+   */
+  @E.cssState("open-at-start")
+  @E.state
+  accessor isOpenAtStart = this.isCodeOpen
+
   /** Drawn at once as it opens;  as it closes, once its roll (`CLOSE_SECONDS`) is done, unless it opened again. */
   @E.onChange("isCodeOpen")
   protected onCodeOpenChanged(isOpen: boolean) {
@@ -88,6 +98,7 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
 
   /** Open or close the code pane, as the viewer did with `event`:  then `ui-opened` / `ui-closed`. */
   toggle(event?: Event): void {
+    this.isOpenAtStart = false
     if (this.disclosure.toggle(event)) this.disclosure.sendAfter(this.isCodeOpen, event)
   }
 
@@ -169,12 +180,14 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
               attach={this.bare ? undefined : UIT.BOTTOM}
               appearance="secondary"
             >
-              <ui-code
-                part={this.partForName("source")}
-                language={this.language || DEFAULT_LANGUAGE}
-                copy=""
-                content={this.sourceMarkup}
-              />
+              <slot name={this.slotForName("source")}>
+                <ui-code
+                  part={this.partForName("source")}
+                  language={this.language || DEFAULT_LANGUAGE}
+                  copy=""
+                  content={this.sourceMarkup}
+                />
+              </slot>
             </ui-segment>
           </Show>
         </div>

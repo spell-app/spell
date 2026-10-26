@@ -128,6 +128,8 @@
     /* one width at every size, so the code's copy button can sit centred under it */
     box-sizing: border-box;
     width: 28px;
+    /* round at every size:  a theme with short tiny buttons drew it as a pill (the notebook page's, 20px tall) */
+    min-height: 28px;
     min-width: 0;
     padding-inline: 0;
     justify-content: center;
@@ -269,6 +271,10 @@
     .ui.example:not(.bare) [part~="code"]::part(segment) {
       height: 0;
     }
+  }
+  /* open from the start:  shown at once, no roll (a page drawing the example again, its code open) */
+  :host(:state(open-at-start)) .ui.example:not(.bare) [part~="code"]::part(segment) {
+    transition: none;
   }
   /* rolling closed:  still drawn (`:state(code-shown)`) while its height eases back to 0 */
   :host(:not(:state(open))) .ui.example:not(.bare) [part~="code"]::part(segment) {

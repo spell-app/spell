@@ -85,7 +85,13 @@ export const docsExampleVocabulary = {
         "The example itself, shown live;  its markup is the code shown.  A `<template>` child instead:  stamped out " +
         "live, and its markup shown EXACTLY as written."
     },
-    { name: "description", description: "Rich description, in place of the `description` attribute." }
+    { name: "description", description: "Rich description, in place of the `description` attribute." },
+    {
+      name: "source",
+      description:
+        "What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while " +
+        "the code is open, as the markup is."
+    }
   ],
   parts: [
     { name: "example", description: "The whole block (`<section>`)." },
@@ -98,7 +104,11 @@ export const docsExampleVocabulary = {
   ],
   states: [
     { name: "open", description: "The code pane is open." },
-    { name: "code-shown", description: "The code pane is drawn:  open, or still rolling closed." }
+    { name: "code-shown", description: "The code pane is drawn:  open, or still rolling closed." },
+    {
+      name: "open-at-start",
+      description: "The code was open from the start:  it showed at once, without rolling open."
+    }
   ],
   texts: [
     { key: "showCode", text: "Show code", description: "The code button's label while the code is hidden." },
