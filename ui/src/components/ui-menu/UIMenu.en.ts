@@ -16,6 +16,8 @@
  *   old names (`replaces`, epic `ui-gaps` P4), and draw the same class words.
  * - Item layout:  `align` (`UIT.ItemAlignments`;  its old name `alignment`) places the items, `equal` sizes them alike
  *   from the items themselves;  `items="3"` / `items="equal"` stay as the older count-based aliases.
+ * - `shrinkable` fits the items' titles to the row (`TitleFit`, epic `ui-gaps` P13):  cut, then icons only, then one
+ *   overflow button;  its slot, parts, states and text are its own.
  */
 
 import type { E } from "spell-ui/core"
@@ -183,6 +185,18 @@ export const menuVocabulary = {
         '`three item`);  `items="equal"` => `equal width` (Fomantic\'s, ~== `equal alignment="fluid"`).'
     },
     {
+      name: "shrinkable",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, " +
+        "each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, " +
+        "each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button " +
+        "would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all " +
+        "(`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button " +
+        "showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
+    },
+    {
       name: "interactive",
       group: "behaviour",
       kind: "boolean",
@@ -202,12 +216,35 @@ export const menuVocabulary = {
         "selects the item and unselects the rest:  `preventDefault()` keeps the old choice."
     }
   ],
-  slots: [{ name: "", description: "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content." }],
-  parts: [{ name: "menu", description: "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`." }],
+  slots: [
+    { name: "", description: "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content." },
+    {
+      name: "overflow",
+      description: '`shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.'
+    }
+  ],
+  parts: [
+    { name: "menu", description: "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`." },
+    {
+      name: "overflow",
+      description:
+        "`shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+    },
+    { name: "overflow-menu", description: "`shrinkable`:  the overflow button's menu, every item in a row." }
+  ],
   states: [
     { name: "interactive", description: "A menubar (`interactive`)." },
-    { name: "vertical", description: 'Items stacked (`direction="vertical"`).' }
+    { name: "vertical", description: 'Items stacked (`direction="vertical"`).' },
+    { name: "icons-only", description: "`shrinkable`:  the titles are gone, the icons only." },
+    { name: "overflow", description: "`shrinkable`:  every item folded into the overflow button." },
+    { name: "dropdown", description: "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown." }
   ],
-  texts: [],
+  texts: [
+    {
+      key: "more",
+      text: "More",
+      description: "`shrinkable`:  the overflow button's accessible name and tooltip, and its menu's name."
+    }
+  ],
   ownsParts: ["item", "menu", "header"]
 } as const satisfies E.ComponentVocabulary

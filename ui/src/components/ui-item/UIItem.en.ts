@@ -129,12 +129,23 @@ export const itemVocabulary = {
       name: "",
       description: "Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu."
     },
-    { name: "icon", description: "List / menu:  replaces the `icon` shorthand's glyph." }
+    { name: "icon", description: "List / menu:  replaces the `icon` shorthand's glyph." },
+    {
+      name: "badge",
+      description:
+        "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
+    }
   ],
   parts: [
     { name: "item", description: "List / menu:  the item box (`<a>`, `<button>` or `<div>`)." },
     { name: "icon", description: "List / menu:  the icon box of the `icon` shorthand." },
-    { name: "image", description: "List / menu:  the `<img>` of the `image` shorthand." }
+    { name: "image", description: "List / menu:  the `<img>` of the `image` shorthand." },
+    {
+      name: "title",
+      description:
+        "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+    },
+    { name: "badge", description: "Menu:  the box around the `badge` slot." }
   ],
   states: [
     { name: "selected", description: "Chosen (`selected` or `active`)." },

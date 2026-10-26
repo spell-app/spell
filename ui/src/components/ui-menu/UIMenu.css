@@ -91,6 +91,8 @@
  * | `--ui-menu-header-padding` / `-font-family` / `-weight` / `-letter-spacing` | header item box and type (the item's padding, inherited family, bold) | -- |
  * | `--ui-menu-disabled-color`          | disabled item text                    | inverted                             |
  * | `--ui-menu-icon-*`                  | an item's icon margin / opacity / size / display | vertical, icon, labeled icon |
+ * | `--ui-menu-title-min`               | `shrinkable`:  the narrowest a title is cut before the row goes to icons only (`50px`) | -- |
+ * | `--ui-menu-item-min`                | `shrinkable`:  the smallest an item's button gets before the items fold into the `…` menu (`34px`) | -- |
  *
  * - Colour:  the menu's DOM element resets the generic colour tokens (`--ui-color*`),
  *   so only its OWN `color` (the `.ui.red` remap on its root)
@@ -223,6 +225,8 @@
     --_ui-menu-icon-size: var(--ui-menu-icon-size, 1em);
     --_ui-menu-icon-display: var(--ui-menu-icon-display, inline-flex);
     --_ui-menu-icon-float: var(--ui-menu-icon-float, none);
+    --_ui-menu-title-min: var(--ui-menu-title-min, 50px);
+    --_ui-menu-item-min: var(--ui-menu-item-min, 34px);
 
     box-sizing: border-box;
     display: flex;
@@ -267,7 +271,9 @@
   .ui.menu:first-child {
     --_menu-margin-top: 0;
   }
-  .ui.menu:last-child {
+  .ui.menu:last-child,
+  /* a shrinkable one's overflow menu comes after its box, out of the flow:  still the last box */
+  .ui.menu:has(+ .overflow-menu:last-child) {
     --_menu-margin-bottom: 0;
   }
   /*
@@ -1420,5 +1426,217 @@
     background-color: transparent;
     cursor: default;
     pointer-events: none;
+  }
+}
+
+/*******************************
+           Shrinkable
+*******************************/
+
+/*
+ * `<ui-menu shrinkable>`:  its items' titles fit the row (`TitleFit`, epic `ui-gaps` P13).
+ * - `TitleFit` writes the stage on the menu's box, `--_menu-fit`:  `whole`, `cut`, `icons` or `overflow`;
+ *   its items inherit it, and their rules below query it.
+ *   - While `cut`, `--_menu-title-max` too:  the widest a title may be.
+ *   - Nothing written (no `shrinkable`, a server's render):  the titles draw as they always have.
+ * - An item draws its title in `<span class="title" part="title">` while its menu is shrinkable,
+ *   and an item with no icon its first letter in `<span class="icon letter">`, shown with the icons only.
+ * - Icons only:  the title box is squeezed to nothing and clipped, NOT removed,
+ *   so it still names the item for a screen reader;  the gap after the icon goes too.
+ * - Overflow:  the items with titles go, and the overflow button shows, first in the box:
+ *   `<button class="item overflow" part="overflow">`, drawn as an item;  its menu
+ *   `<div class="overflow-menu" role="menu" popover part="overflow-menu">` hangs from it in the top layer.
+ */
+@layer ui.components.menu.states {
+  @container style(--_menu-fit: whole) or style(--_menu-fit: cut) or style(--_menu-fit: icons) {
+    :host(:state(in-menu)) > .item > .title {
+      min-width: 0;
+      max-width: var(--_menu-title-max, none);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  /* the first letter, an item's icon when it has none:  only with the icons only */
+  :host(:state(in-menu)) > .item > .icon.letter {
+    display: none;
+  }
+  @container style(--_menu-fit: icons) {
+    :host(:state(in-menu)) > .item > .title {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    :host(:state(in-menu)) > .item > .icon {
+      margin: 0;
+    }
+    :host(:state(in-menu)) > .item > .icon.letter {
+      display: inline-flex;
+      min-width: 1em;
+      font-weight: var(--ui-font-weight-bold);
+      line-height: 1;
+    }
+  }
+  @container style(--_menu-fit: overflow) {
+    :host(:state(in-menu)) > .item:has(> .title) {
+      display: none;
+    }
+  }
+  /* `--ui-menu-icon-margin` spaces an item's icon from its title:  alone, the `…` sits in the middle */
+  .ui.menu > .overflow.item:not(:has(> .title)) > .icon {
+    margin: 0;
+  }
+}
+
+@layer ui.components.menu.content {
+  /* an item's counts (`slot="badge"`), after its title:  they stay while the title is cut or gone */
+  :host(:state(in-menu)) > .item > .badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.25em;
+    margin-inline-start: 0.5em;
+  }
+}
+
+@layer ui.components.menu.types {
+  /* the overflow button:  an item of the menu's own, shown once the items fold into it */
+  .ui.menu > .overflow.item {
+    display: none;
+    font-family: inherit;
+    letter-spacing: inherit;
+    appearance: none;
+    cursor: pointer;
+  }
+  @container style(--_menu-fit: overflow) {
+    .ui.menu > .overflow.item {
+      display: flex;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+  }
+  .ui.menu > .overflow.item svg,
+  .overflow-menu svg {
+    width: auto;
+    height: 1em;
+    fill: currentColor;
+  }
+  /* a dot while an item inside has a count (epic `epic-engine` Q37):  over the `…`'s top right */
+  .ui.menu > .overflow.item > .dot {
+    position: absolute;
+    top: 0.35em;
+    right: 0.35em;
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    background: var(--ui-red);
+  }
+  /* a segmented one's dropdown:  the chosen item's icon and title, cut with `…` if need be, and its caret */
+  .ui.menu > .overflow.item > .title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui.menu > .overflow.item > .caret {
+    display: inline-flex;
+    flex: none;
+    margin-inline-start: 0.5em;
+    opacity: 0.8;
+  }
+
+  /* the overflow button's menu:  a raised panel under the button (above it, without the room), a row per item */
+  .overflow-menu {
+    display: none;
+  }
+  .overflow-menu[popover]:popover-open {
+    /* outside the menu's box, so its own alias of the menu's corners */
+    --_ui-menu-radius: var(--ui-menu-radius, var(--ui-radius));
+    position: fixed;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline;
+    position-try-order: most-block-size;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-width: max(anchor-size(width), 10em);
+    /* never past the window's edge:  `100%` is the room its `position-area` gives it;  a long title is cut */
+    max-width: 100%;
+    max-height: calc(100% - 0.5em);
+    margin: 0.25em 0;
+    padding: 0.25em 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    font-family: var(--ui-menu-font-family, var(--ui-font-family));
+    font-size: calc(var(--ui-font-size) * sqrt(var(--ui-scale, 1)));
+    line-height: normal;
+    color: var(--ui-text-color);
+    background: var(--ui-surface);
+    border: var(--ui-border-width) solid var(--ui-border-color);
+    border-radius: var(--_ui-menu-radius);
+    box-shadow: var(--ui-shadow-raised);
+  }
+  .overflow-menu > .row {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.6em 1em;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    white-space: nowrap;
+    background: none;
+    border: 0;
+    appearance: none;
+    cursor: pointer;
+  }
+  .overflow-menu > .row:hover,
+  .overflow-menu > .row:focus-visible {
+    background: oklch(from var(--ui-ink) l c h / 0.05);
+  }
+  .overflow-menu > .row:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(var(--ui-focus-width) * -1);
+  }
+  .overflow-menu > .row.selected {
+    font-weight: var(--ui-font-weight-bold);
+  }
+  /* the chosen row ticked, at its end */
+  .overflow-menu > .row.selected::after {
+    content: "✓" / "";
+    margin-inline-start: auto;
+    padding-inline-start: 1em;
+  }
+  .overflow-menu > .row.disabled {
+    color: var(--ui-text-disabled);
+    cursor: default;
+  }
+  .overflow-menu > .row > .icon {
+    display: inline-flex;
+    flex: none;
+    justify-content: center;
+    min-width: 1.25em;
+  }
+  .overflow-menu > .row .letter {
+    font-weight: var(--ui-font-weight-bold);
+  }
+  .overflow-menu > .row > .title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .overflow-menu > .row > .badge {
+    display: inline-flex;
+    gap: 0.25em;
+    margin-inline-start: 1em;
   }
 }

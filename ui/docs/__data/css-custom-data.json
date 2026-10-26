@@ -5630,6 +5630,20 @@
       }
     },
     {
+      "name": "--ui-menu-title-min",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `50px`"
+      }
+    },
+    {
+      "name": "--ui-menu-item-min",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `34px`"
+      }
+    },
+    {
       "name": "--ui-menu-vertical-item-display",
       "description": {
         "kind": "markdown",
@@ -9716,7 +9730,7 @@
       "name": "::part(badge)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-panel>`:  The badge pill.\n- `<ui-property-editor>`:  The badge pill.\n- `<ui-property-group>`:  The badge pill.\n- `<ui-section>`:  The badge pill."
+        "value": "Part of:\n\n- `<ui-action>`:  Menu:  the box around the `badge` slot.\n- `<ui-item>`:  Menu:  the box around the `badge` slot.\n- `<ui-panel>`:  The badge pill.\n- `<ui-property-editor>`:  The badge pill.\n- `<ui-property-group>`:  The badge pill.\n- `<ui-section>`:  The badge pill."
       }
     },
     {
@@ -10322,6 +10336,20 @@
       }
     },
     {
+      "name": "::part(overflow)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-menu>`:  `shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown).\n- `<ui-toolbar>`:  `shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+      }
+    },
+    {
+      "name": "::part(overflow-menu)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-menu>`:  `shrinkable`:  the overflow button's menu, every item in a row.\n- `<ui-toolbar>`:  `shrinkable`:  the overflow button's menu, every item in a row."
+      }
+    },
+    {
       "name": "::part(page)",
       "description": {
         "kind": "markdown",
@@ -10682,7 +10710,7 @@
       "name": "::part(title)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-accordion>`:  A panel's `<summary class=\"title\">`:  the control that opens and closes it.\n- `<ui-action>`:  The action's title, before its keys.\n- `<ui-calendar>`:  The title button:  goes up a level (days => months => years).\n- `<ui-panel>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-editor>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-group>`:  The title bar:  sticks with `sticky`.\n- `<ui-section>`:  The title bar:  sticks with `sticky`.\n- `<ui-step>`:  The `header` shorthand.\n- `<ui-title>`:  The title box.\n- `<ui-toolbar>`:  The `title` slot's box."
+        "value": "Part of:\n\n- `<ui-accordion>`:  A panel's `<summary class=\"title\">`:  the control that opens and closes it.\n- `<ui-action>`:  A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row.\n- `<ui-calendar>`:  The title button:  goes up a level (days => months => years).\n- `<ui-item>`:  A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row.\n- `<ui-panel>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-editor>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-group>`:  The title bar:  sticks with `sticky`.\n- `<ui-section>`:  The title bar:  sticks with `sticky`.\n- `<ui-step>`:  The `header` shorthand.\n- `<ui-title>`:  The title box.\n- `<ui-toolbar>`:  The `title` slot's box."
       }
     },
     {
@@ -10982,6 +11010,13 @@
       }
     },
     {
+      "name": ":state(dropdown)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-menu>`:  `shrinkable` and `segmented`:  one button showing the chosen item, a dropdown.\n- `<ui-toolbar>`:  `shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+      }
+    },
+    {
       "name": ":state(ellipsis)",
       "description": {
         "kind": "markdown",
@@ -11049,6 +11084,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-terms>`:  `direction=\"horizontal\"`."
+      }
+    },
+    {
+      "name": ":state(icons-only)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-menu>`:  `shrinkable`:  the titles are gone, the icons only.\n- `<ui-toolbar>`:  `shrinkable`:  the titles are gone, the icons only."
       }
     },
     {
@@ -11360,10 +11402,17 @@
       }
     },
     {
+      "name": ":state(overflow)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-menu>`:  `shrinkable`:  every item folded into the overflow button.\n- `<ui-toolbar>`:  `shrinkable`:  every item folded into the overflow button."
+      }
+    },
+    {
       "name": ":state(overflowing)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways."
+        "value": "Custom state of:\n\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
       }
     },
     {

@@ -593,6 +593,10 @@
             {
               "name": "icon",
               "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
             }
           ],
           "cssParts": [
@@ -610,7 +614,11 @@
             },
             {
               "name": "title",
-              "description": "The action's title, before its keys."
+              "description": "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  the box around the `badge` slot."
             },
             {
               "name": "shortcut",
@@ -13339,6 +13347,10 @@
             {
               "name": "icon",
               "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
             }
           ],
           "cssParts": [
@@ -13353,6 +13365,14 @@
             {
               "name": "image",
               "description": "List / menu:  the `<img>` of the `image` shorthand."
+            },
+            {
+              "name": "title",
+              "description": "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  the box around the `badge` slot."
             }
           ],
           "cssStates": [
@@ -16160,6 +16180,14 @@
               "fieldName": "items"
             },
             {
+              "name": "shrinkable",
+              "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "shrinkable"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
@@ -16254,12 +16282,24 @@
             {
               "name": "",
               "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name=\"bars\">`."
             }
           ],
           "cssParts": [
             {
               "name": "menu",
               "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+            },
+            {
+              "name": "overflow-menu",
+              "description": "`shrinkable`:  the overflow button's menu, every item in a row."
             }
           ],
           "cssStates": [
@@ -16270,6 +16310,18 @@
             {
               "name": "vertical",
               "description": "Items stacked (`direction=\"vertical\"`)."
+            },
+            {
+              "name": "icons-only",
+              "description": "`shrinkable`:  the titles are gone, the icons only."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  every item folded into the overflow button."
+            },
+            {
+              "name": "dropdown",
+              "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
             },
             {
               "name": "disabled",
@@ -16540,6 +16592,14 @@
             {
               "name": "--ui-menu-icon-float",
               "default": "none"
+            },
+            {
+              "name": "--ui-menu-title-min",
+              "default": "50px"
+            },
+            {
+              "name": "--ui-menu-item-min",
+              "default": "34px"
             },
             {
               "name": "--ui-menu-vertical-item-display",
@@ -34531,8 +34591,8 @@
           "name": "UIToolbar",
           "tagName": "ui-toolbar",
           "customElement": true,
-          "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.",
-          "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.",
+          "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.",
+          "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.",
           "attributes": [
             {
               "name": "size",
@@ -34695,6 +34755,14 @@
               "fieldName": "items"
             },
             {
+              "name": "shrinkable",
+              "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "shrinkable"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
@@ -34791,6 +34859,10 @@
               "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
             },
             {
+              "name": "overflow",
+              "description": "`shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name=\"bars\">`."
+            },
+            {
               "name": "icon",
               "description": "First, at the start:  an icon or an icon button (a menu button)."
             },
@@ -34811,6 +34883,14 @@
             {
               "name": "menu",
               "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+            },
+            {
+              "name": "overflow-menu",
+              "description": "`shrinkable`:  the overflow button's menu, every item in a row."
             },
             {
               "name": "icon",
@@ -34851,8 +34931,20 @@
               "description": "Items stacked (`direction=\"vertical\"`)."
             },
             {
+              "name": "icons-only",
+              "description": "`shrinkable`:  the titles are gone, the icons only."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  every item folded into the overflow button."
+            },
+            {
+              "name": "dropdown",
+              "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+            },
+            {
               "name": "overflowing",
-              "description": "Its items don't all fit:  they scroll sideways."
+              "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
             },
             {
               "name": "disabled",

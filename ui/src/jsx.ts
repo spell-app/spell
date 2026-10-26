@@ -16873,6 +16873,16 @@ export interface UIMenuAttributes {
     | "16"
     | (string & {})
   /**
+   * Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  shrinkable?: boolean | ""
+  /**
+   * `shrinkable`, as the DOM element's property.
+   * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrinkable"?: boolean | ""
+  /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
    */
@@ -33586,6 +33596,16 @@ export interface UIToolbarAttributes {
     | "16"
     | (string & {})
   /**
+   * Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  shrinkable?: boolean | ""
+  /**
+   * `shrinkable`, as the DOM element's property.
+   * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrinkable"?: boolean | ""
+  /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
    */
@@ -35051,6 +35071,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
+       *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
        */
       "ui-action": UIActionJSXAttributes
       /**
@@ -35393,6 +35414,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
+       *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
        */
       "ui-item": UIItemJSXAttributes
       /**
@@ -35456,6 +35478,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
        * - events:  `ui-choosing`
        */
       "ui-menu": UIMenuJSXAttributes
@@ -35892,10 +35915,11 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-toast": UIToastJSXAttributes
       /**
-       * `<ui-toolbar>`:  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.
+       * `<ui-toolbar>`:  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.
        * - also known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
        *   - `icon`:  First, at the start:  an icon or an icon button (a menu button).
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left:  e.g. a row of links.

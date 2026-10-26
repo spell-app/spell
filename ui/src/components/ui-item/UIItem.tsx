@@ -24,7 +24,12 @@ import itemCSS from "./UIItem.css?inline"
  *   - a `type="header"` item is a `<div class="item header">`, a `divider` a `<div class="divider" role="separator">`;
  *   - inside the box:
  *     the `image` shorthand's `<img class="ui avatar image" part="image" alt="">`,
- *     the icon box (the `icon` shorthand or the `icon` slot), then the default slot.
+ *     the icon box (the `icon` shorthand or the `icon` slot), then the default slot,
+ *     then the `badge` slot's box (`part="badge"`:  a count), while it has content.
+ *   - in a `shrinkable` menu (`ItemContext.shrinkable`) the default slot sits in a TITLE box,
+ *     `<span class="title" part="title">`, which the menu cuts with `…` or hides to fit its row (`TitleFit`);
+ *     an item with words but no icon draws its title's first letter as one, `<span class="icon letter">`,
+ *     shown only while the menu shows icons only.
  *
  * - Styles:  `UIItem.css` (the DOM element and generic resets),
  *   then the OWNER's sheets (its `elementSetup.styleSheets`),
@@ -34,7 +39,7 @@ import itemCSS from "./UIItem.css?inline"
  * - Semantics:
  *   - the DOM element's role comes from the owner (`listitem`), and so does the box's (`menuitem` in a menubar);
  *   - selected => `aria-current` (the owner's value, `page`, on a link;  `true` otherwise);
- *   - the DOM element's `aria-label` names the box (an icon-only item),
+ *   - the DOM element's `aria-label` names the box (an icon-only item;  its `label` too, with no words of its own),
  *     and its `aria-expanded` goes to a `<button>` box (a disclosure:  a menu item that opens a group below it).
  *
  * - `active` is an ALIAS of `selected` (Fomantic's word), read from the DOM element's attribute.
@@ -201,6 +206,106 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   ////////////////
+  // ## The title (a `shrinkable` menu's)
+  ////////////////
+
+  /**
+   * It draws its title in a box of its own (`part="title"`):  its menu is `shrinkable`, and it has words.
+   * - An item with only an icon (a menu's bullhorn) has none:  its menu leaves it as it is.
+   */
+  get hasTitleBox(): boolean {
+    return !!this.itemContext?.shrinkable && this.kind === UIT.ITEM && this.slots.hasContent("")
+  }
+
+  /** It has a title box, in a `shrinkable` menu:  one the menu fits. */
+  get isInShrinkableMenu(): boolean {
+    return !!this.itemContext?.shrinkable && this.hasTitleBox
+  }
+
+  /** What the title box shows while its slot is empty:  nothing;  `<ui-action>`'s, its action's title. */
+  protected get titleFallback(): string | undefined {
+    return undefined
+  }
+
+  /** The title box, while drawn:  what a `shrinkable` menu measures and cuts. */
+  get titleBox(): HTMLElement | undefined {
+    return this.hasTitleBox && this.titleElement?.isConnected ? this.titleElement : undefined
+  }
+  private titleElement: HTMLElement | undefined
+
+  /**
+   * The words of its default slot, read from its light DOM:  its text and its children's, but not a named slot's
+   * (an icon mark, a badge).
+   * - Read again whenever its children or their text change.
+   */
+  @E.watches({ childList: true, characterData: true, subtree: true, attributeFilter: ["slot"] })
+  get slottedText(): string {
+    let text = ""
+    for (const node of this.domElement.childNodes) {
+      if (node.nodeType === E.NodeType.text) text += node.textContent ?? ""
+      else if (node.nodeType === E.NodeType.element && !(node as Element).hasAttribute("slot")) {
+        text += node.textContent ?? ""
+      }
+    }
+    return text.replace(/\s+/g, " ").trim()
+  }
+
+  /**
+   * Its title, as a person reads it:  its `label`, else the words of its default slot, else the title box's fallback.
+   * - A `shrinkable` menu's tooltip while it shows icons only, and its row in the overflow menu.
+   */
+  get titleText(): string {
+    return this.label?.trim() || this.slottedText || this.titleFallback || ""
+  }
+
+  /**
+   * Its title's first letter, drawn as its icon when it has none (epic `ui-gaps` P13;  epic `epic-engine` Q32):
+   * `Questions` shows `Q`.
+   * - Only in a `shrinkable` menu, and only for an item with words and no icon or image of its own.
+   * - Never on a server:  the static render draws the titles whole.
+   */
+  get letterIcon(): string | undefined {
+    if (isServer || !this.isInShrinkableMenu || this.hasIcon || this.imageUrl) return undefined
+    return this.firstLetter
+  }
+
+  /** Its title's first letter or digit, upper case:  what stands for it with no icon (its first-letter icon, a row). */
+  get firstLetter(): string | undefined {
+    return LETTER_OR_DIGIT.exec(this.titleText)?.[0].toLocaleUpperCase()
+  }
+
+  /**
+   * The box's tooltip in a `shrinkable` menu:  the element's own `title` where the page wrote one (or `tooltip`;
+   * `title=""` for none), else its title while the menu shows icons only.
+   */
+  private get boxTooltip(): string | undefined {
+    if (!this.isInShrinkableMenu) return undefined
+    // the page's own wins, an empty one too:  it wants no tooltip there
+    const own = this.attributes.title
+    if (own !== null) return own || undefined
+    return this.itemContext?.iconsOnly ? this.titleText || undefined : undefined
+  }
+
+  /**
+   * The box's accessible name:  the element's `aria-label`;  else, for an item with no words of its own (an icon
+   * button), its `label`.
+   */
+  private get boxLabel(): string | undefined {
+    return this.attributes["aria-label"] ?? (this.slots.hasContent("") ? undefined : this.label?.trim() || undefined)
+  }
+
+  /** Light-DOM children in slot `name` (`icon`, `badge`):  what a `shrinkable` menu copies into its overflow menu. */
+  slotted(name: "icon" | "badge"): Element[] {
+    const slot = this.slotForName(name)
+    return [...this.domElement.children].filter((child) => child.getAttribute("slot") === slot)
+  }
+
+  /** Has something in its `badge` slot:  a count. */
+  get hasBadge(): boolean {
+    return this.slots.hasContent(this.slotForName("badge"))
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
@@ -255,7 +360,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}
         aria-disabled={this.isDisabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
         aria-current={this.ariaCurrent}
-        aria-label={this.attributes["aria-label"] ?? undefined}
+        aria-label={this.boxLabel}
+        title={this.boxTooltip}
         aria-expanded={
           this.rootTag === "button"
             ? ((this.attributes["aria-expanded"] ?? undefined) as "true" | "false" | undefined)
@@ -276,14 +382,42 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
           </span>
         </Show>
+        <Show when={this.letterIcon}>
+          {(letter) => (
+            <span class={`${UIT.ICON} ${LETTER}`} part={this.partForName("icon")} aria-hidden="true">
+              {letter()}
+            </span>
+          )}
+        </Show>
         {this.boxContent()}
       </Dynamic>
     )
   }
 
-  /** What the box holds after its image and icon:  the default slot;  `<ui-action>` adds its title and keys. */
+  /**
+   * What the box holds after its image and icon:  the default slot (in its title box, in a `shrinkable` menu),
+   * then the `badge` slot's box;  `<ui-action>` adds its keys.
+   */
   protected boxContent(): JSX.Element {
-    return <slot />
+    const badge = () => this.slotForName("badge")
+    return (
+      <>
+        <Show when={this.hasTitleBox} fallback={<slot />}>
+          <span
+            ref={(element: HTMLElement) => (this.titleElement = element)}
+            class={TITLE}
+            part={this.partForName("title")}
+          >
+            <slot>{this.titleFallback}</slot>
+          </span>
+        </Show>
+        <Show when={this.hasBadge}>
+          <span class={BADGE} part={this.partForName("badge")}>
+            <slot name={badge()} />
+          </span>
+        </Show>
+      </>
+    )
   }
 }
 
@@ -304,3 +438,15 @@ const LINK_LOOK = "link"
 
 /** Classes of the `image` shorthand, unless the owner says otherwise:  an avatar, as in Fomantic's list examples. */
 const IMAGE_CLASS = "ui avatar image"
+
+/** Class word and part of the title box, in a `shrinkable` menu. */
+const TITLE = "title"
+
+/** Class word of the `badge` slot's box. */
+const BADGE = "badge"
+
+/** Class word of the icon box that draws the title's first letter. */
+const LETTER = "letter"
+
+/** A letter or a digit:  what a first-letter icon shows. */
+const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u

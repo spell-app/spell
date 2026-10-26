@@ -1,0 +1,49 @@
+<!--
+  `<ui-toolbar shrinkable>`:  the same items at four widths;  it fits its titles instead of scrolling with `‹` / `›`.
+  - An item with no words (the bell, last) stays in the row at every width.
+-->
+<ui-stack spacing="lg">
+  <section>
+    <h4>Every title whole</h4>
+    <ui-toolbar shrinkable appearance="secondary" label="Whole toolbar demo" style="width: 560px">
+      <ui-item link="#types" icon="shapes" selected>Types</ui-item>
+      <ui-item link="#content" icon="font">Content</ui-item>
+      <ui-item link="#variations" icon="sliders">Variations</ui-item>
+      <ui-item link="#group-variations">Group variations</ui-item>
+      <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
+    </ui-toolbar>
+  </section>
+
+  <section>
+    <h4>The longest cut first</h4>
+    <ui-toolbar shrinkable appearance="secondary" label="Cut toolbar demo" style="width: 420px">
+      <ui-item link="#types" icon="shapes" selected>Types</ui-item>
+      <ui-item link="#content" icon="font">Content</ui-item>
+      <ui-item link="#variations" icon="sliders">Variations</ui-item>
+      <ui-item link="#group-variations">Group variations</ui-item>
+      <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
+    </ui-toolbar>
+  </section>
+
+  <section>
+    <h4>Icons only</h4>
+    <ui-toolbar shrinkable appearance="secondary" label="Icons toolbar demo" style="width: 260px">
+      <ui-item link="#types" icon="shapes" selected>Types</ui-item>
+      <ui-item link="#content" icon="font">Content</ui-item>
+      <ui-item link="#variations" icon="sliders">Variations</ui-item>
+      <ui-item link="#group-variations">Group variations</ui-item>
+      <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
+    </ui-toolbar>
+  </section>
+
+  <section>
+    <h4>Folded into its overflow button</h4>
+    <ui-toolbar shrinkable appearance="secondary" label="Overflow toolbar demo" style="width: 150px">
+      <ui-item link="#types" icon="shapes" selected>Types</ui-item>
+      <ui-item link="#content" icon="font">Content</ui-item>
+      <ui-item link="#variations" icon="sliders">Variations</ui-item>
+      <ui-item link="#group-variations">Group variations</ui-item>
+      <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
+    </ui-toolbar>
+  </section>
+</ui-stack>

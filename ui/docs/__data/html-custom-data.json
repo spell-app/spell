@@ -296,7 +296,7 @@
       "name": "ui-action",
       "description": {
         "kind": "markdown",
-        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`"
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`"
       },
       "attributes": [
         {
@@ -15747,7 +15747,7 @@
       "name": "ui-item",
       "description": {
         "kind": "markdown",
-        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`"
+        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`"
       },
       "attributes": [
         {
@@ -18860,7 +18860,7 @@
       "name": "ui-menu",
       "description": {
         "kind": "markdown",
-        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default\n\n**Events:**  `ui-choosing`"
+        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -19226,6 +19226,13 @@
               "name": "16"
             }
           ]
+        },
+        {
+          "name": "shrinkable",
+          "description": {
+            "kind": "markdown",
+            "value": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "interactive",
@@ -37621,7 +37628,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -37987,6 +37994,13 @@
               "name": "16"
             }
           ]
+        },
+        {
+          "name": "shrinkable",
+          "description": {
+            "kind": "markdown",
+            "value": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "interactive",
