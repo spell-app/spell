@@ -100,6 +100,8 @@ export type JSXMatchData = {
   condition?: P.Match
   /** (`jsxElement`) A chain branch inside an element, as it must be:  its element said so. */
   inMarkup?: boolean
+  /** (`jsxElement`) An `<html>` block inside a spellx drawing's markup:  its children alone (`SpellJSX.isHtmlBlock()`). */
+  htmlBlock?: boolean
   /** (`jsxElement`) A chain branch's error if it turns out to stand alone, outside any element. */
   aloneError?: P.Match
 }

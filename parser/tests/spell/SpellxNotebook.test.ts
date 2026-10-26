@@ -129,6 +129,50 @@ describe("a spellx notebook", () => {
     ])
   })
 
+  test("an `<html>` block inside markup:  drawn in its place, `<img>` the web's;  its twin compiles the same (P18)", () => {
+    const text = [
+      '<spell-notebook "avatar notebook">',
+      '\t<segment label="Image">',
+      '\t\t<example description="A slotted image.">',
+      "\t\t\t<html>",
+      '\t\t\t\t<ui-avatar><img src="joe.jpg" alt="Joe" /></ui-avatar>',
+      "\t\t\t\t<span>hi</span>",
+      "\t\t\t</html>",
+      "\t\t</example>",
+      "\t</segment>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const { code, errors } = compiled(text, "/Avatar.spellx")
+    expect(errors).toEqual([])
+    expect(code).toContain(
+      [
+        '      h("spell-example", { description: "A slotted image." },',
+        "        [",
+        '          h("ui-avatar", h("img", { src: "joe.jpg", alt: "Joe" })),',
+        '          h("span", "hi")',
+        "        ]"
+      ].join("\n")
+    )
+    expect(code).not.toContain('h("html"')
+    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellx" })
+    expect(compiled(written, "/Avatar.spell").code).toBe(code)
+  })
+
+  test("an attribute starting `on` is a handler only before a capital or a dash:  `only=` is text (P18)", () => {
+    const text = [
+      '<spell-notebook "api notebook">',
+      "\t<html>",
+      '\t\t<ui-docs-api tag="ui-avatar" only="attributes"></ui-docs-api>',
+      "\t</html>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const { code, errors } = compiled(text, "/API.spellx")
+    expect(errors).toEqual([])
+    expect(code).toContain('h("ui-docs-api", { tag: "ui-avatar", only: "attributes"')
+  })
+
   test("an edit re-parses as a fresh parse would", () => {
     const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
     for (const edit of [

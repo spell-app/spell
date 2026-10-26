@@ -63,6 +63,19 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!match) return undefined
     if (match.matched.length !== 1) throw new TypeError("Can only handle a single JSXElement at a time!")
     const [element] = match.matched as [P.JSXElementToken | P.JSXFragmentToken]
+    // an `<html>` block inside a spellx drawing's markup:  its markup as written, drawn in its place (P18)
+    if (SpellJSX.isHtmlBlock(element)) {
+      match.data.htmlBlock = true
+      codeSpellDepth++
+      try {
+        match.data.children = element.children?.map(
+          (child) => scope.parser?.parse(child, "jsxChild", scope) || scope.parser?.parse(child, "parse_error", scope)
+        )
+      } finally {
+        codeSpellDepth--
+      }
+      return match
+    }
     // in a spellx file's `<spell>` chunk, it and everything inside it is code spell (J83)
     const codeSpell = codeSpellDepth > 0 || SP.isCodeSpell(element)
     if (codeSpell) codeSpellDepth++
@@ -119,8 +132,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    // a chain branch alone, in no element (an error):  its children, drawn as they are
-    if (match.data.chain) return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
+    // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
+    if (match.data.chain || match.data.htmlBlock)
+      return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
     const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
     return new P.ASTJSXElement(match, {
@@ -128,6 +142,21 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       attrs: SpellJSX.clickableAttrs(match, attrs),
       children: this.childASTs(match)
     })
+  }
+
+  /**
+   * Is `element` an `<html>` block inside a spellx drawing's markup (epic `elemental-spell` P18)?
+   * - `<section label="Image"><html><ui-avatar><img src="..."/></ui-avatar></html></section>`
+   * - Its markup is the web's, as written:  `<img>`, `<span>`, `<ui-avatar>`, never a pack's bare name;  it draws in
+   *   the block's place, the `<html>` tag itself drawing nothing.
+   * - A block on a drawing's own lines is the tokenizer's (`SP.SpellxTokenizer`, `unwrapsHtml`):
+   *   this is the one an element holds, which the tokenizer reads as that element's markup.
+   * - The same in a `.spell` file, where its twin keeps it:  so the two compile the same.
+   * - Not in a spellx file's `<spell>` chunk, nor inside another block:  there `<html>` is the web's own tag.
+   */
+  static isHtmlBlock(element: P.JSXElementToken | P.JSXFragmentToken): boolean {
+    if (!(element instanceof P.JSXElementToken) || element.tagName !== HTML_BLOCK_TAG) return false
+    return codeSpellDepth === 0 && !SP.isCodeSpell(element)
   }
 
   /**
@@ -363,6 +392,9 @@ function projectScopeOf(scope: P.Scope): P.ProjectScope | undefined {
   for (let at: P.Scope | undefined = scope; at; at = at.parentScope) if (at instanceof P.ProjectScope) return at
   return undefined
 }
+
+/** An `<html>` block's tag:  the web's word, the same in every language (`SpellJSX.isHtmlBlock()`). */
+const HTML_BLOCK_TAG = "html"
 
 /** What a branch that isn't the one is:  hidden, and still found by find-in-page, as a folded section is. */
 const UNTIL_FOUND = "until-found"

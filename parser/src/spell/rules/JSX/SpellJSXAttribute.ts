@@ -47,8 +47,8 @@ export class SpellJSXAttribute extends SpellJSXContent {
       // a bare, un-braced attribute value is tokenized by `matchJSXAttributeValueIdentifier`, which sets a `Token`.
       // This rule only ever handles the braced / string form here, as it always has.
       const input = inputIsExpression ? (value.contents as string).trim().replace(/\n/g, " ") : value
-      // parse "onXXX" as an inline method with an `event` argument
-      if (match.data.attribute.startsWith("on")) {
+      // parse "onXXX" as an inline method with an `event` argument:  `onClick`, `on-click`, not `only` (P18)
+      if (HANDLER_ATTRIBUTE.test(match.data.attribute)) {
         const methodScopeProps: P.MethodScopeProps = {
           parentScope: scope,
           args: ["event"],
@@ -114,3 +114,6 @@ export class SpellJSXAttribute extends SpellJSXContent {
     })
   }
 }
+
+/** An event handler's attribute:  `on`, then a capital or a dash, `onClick`, `on-click`;  `only`, `one-of` aren't. */
+const HANDLER_ATTRIBUTE = /^on[\p{Lu}-]/u
