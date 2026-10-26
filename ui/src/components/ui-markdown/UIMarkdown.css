@@ -14,7 +14,7 @@
  * - Public tokens are NEVER declared here:  each is read through its private alias (`notes/theming.md`).
  * - Headings:  GitHub's look by default (sans 600, a rule under `h1` / `h2`).
  *   A theme or page restyles them with the `--ui-markdown-heading-*` / `-h1-size` ...
- *   `-h3-size` tokens (the brand's serif headings, `spell-brand.css`), since `::part(body)` can't reach the elements
+ *   `-h3-size` tokens (the brand's serif headings, `spell.css`), since `::part(body)` can't reach the elements
  *   inside the article.
  */
 
