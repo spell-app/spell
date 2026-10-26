@@ -13,7 +13,7 @@
  * - A constant ONE family reads stays in that family's types file;  it moves here once a second family needs it.
  */
 
-import type { E } from "spell-ui/core"
+import type { E, Themes } from "spell-ui/core"
 
 ////////////////
 // ## Button
@@ -1865,4 +1865,32 @@ export type ThemeChoices = {
   depth?: ThemeDepth
   /** a glass theme's see-through:  fruity's only */
   glass?: ThemeGlass
+}
+
+////////////////
+// ## Theme names
+////////////////
+
+/**
+ * A theme's names, ONE way for every place that shows or remembers one (epic `debut` P17, J94):
+ * the theme menu (`<ui-theme-menu>`, `ThemePreference`) and the theme editor (its Start from, `SavedTheme`).
+ * - Static and pure:  it reads only the name, and the theme list (`UI.themes`) it's handed.
+ */
+export class ThemeNames {
+  /** A theme's name for people:  `merlot` => `Merlot`, `my-theme` => `My Theme`. */
+  static titleOf(name: string): string {
+    return name
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  }
+
+  /**
+   * A remembered theme `name` as it's called NOW:  its new name when it was renamed (`Themes.RENAMED`,
+   * `studio` => `merlot`), else `name` itself.
+   * - `themes`:  `UI.themes`, once the runtime has loaded;  the list of renames is its class's.
+   */
+  static nameNow(themes: Themes, name: string): string {
+    return (themes.constructor as typeof Themes).RENAMED[name] ?? name
+  }
 }

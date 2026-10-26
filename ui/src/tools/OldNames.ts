@@ -17,9 +17,12 @@ import { SharedVocabulary } from "spell-ui/vocabulary"
  *     (`appearance`), each switch adds its word to the one attribute
  *   - written with the new name too, the new one wins, as in the browser:  the old one is dropped
  *   - a value it can't see (a JSX expression, `basic={x}`) is listed for a person, never guessed
- * - Two renames no vocabulary can say, made here:
+ * - Three renames no vocabulary can say, made here:
  *   - the breadcrumb tags (epic `ui-gaps` P5):  only on a page that still writes `<ui-breadcrumb-section>`,
  *     since the old box's name is now the step's
+ *   - a renamed tag (`RENAMED_TAGS`):  `<ui-docs-themes>` => `<ui-theme-menu>` (epic `debut` P17),
+ *     wherever the tag's name is written (markup, CSS selectors, its `--ui-docs-themes-*` tokens, query strings),
+ *     dropping the attributes the new tag no longer takes (`for`)
  *   - the button's old `label` (a joined badge) is `badge`, where the same button still writes `content`
  *     (the old text);  a `label` alone could be either, so it's listed for a person (judgement call J21)
  * - Node only:  it imports every vocabulary, as `yarn site:data` does.
@@ -61,13 +64,14 @@ export class OldNames {
    * - `renames`:  one line per rewrite, `<ui-button> primary => color="primary"`
    * - `manual`:  what it left for a person, and why
    * - `markupOnly`:  only tags a browser draws, never escaped markup (`&lt;ui-button primary&gt;`):  for a page that
-   *   QUOTES old names on purpose, a record of what was decided, say;  and no breadcrumb swap, which can't tell a
-   *   quoted tag from a drawn one
+   *   QUOTES old names on purpose, a record of what was decided, say;  and no breadcrumb swap or tag rename, which
+   *   can't tell a quoted tag from a drawn one
    */
   rewrite(text: string, { markupOnly = false }: OldNamesOptions = {}): OldNamesResult {
     const renames: string[] = []
     const manual: string[] = []
     let rewritten = OLD_BREADCRUMB_STEP.test(text) && !markupOnly ? OldNames.swapBreadcrumbs(text, renames) : text
+    if (!markupOnly) rewritten = OldNames.renameTags(rewritten, renames)
     const quoted = OldNames.quotedValues(rewritten)
     rewritten = rewritten.replace(
       START_TAG,
@@ -230,6 +234,36 @@ export class OldNames {
   }
 
   /**
+   * Every renamed tag (`RENAMED_TAGS`) under its new name, wherever its name is written:
+   * - its start tags first, as markup or escaped, without the attributes it no longer takes
+   * - then every other mention:  end tags, CSS selectors, its tokens (`--ui-docs-themes-gap`), quoted names
+   * - never a path (`docs-components/ui-docs-themes/`):  its family's files moved and were renamed, by hand
+   */
+  private static renameTags(text: string, renames: string[]): string {
+    let rewritten = text
+    for (const [old, { tag, dropped }] of Object.entries(RENAMED_TAGS)) {
+      const mention = new RegExp(`(?<![A-Za-z0-9.]|[\\w-]/)${old}(?![A-Za-z0-9/])`, "g")
+      if (!mention.test(rewritten)) continue
+      renames.push(`<${old}> => <${tag}>`)
+      rewritten = rewritten.replace(
+        START_TAG,
+        (whole, open: string, name: string, attributes: string, close: string) => {
+          if (name !== old) return whole
+          const escaped = open === ESCAPED_OPEN
+          const parsed = OldNames.parse(escaped ? attributes.replaceAll(ESCAPED_QUOTE, '"') : attributes)
+          if (!parsed) return whole
+          const kept = parsed.attributes.filter((attribute) => !dropped.includes(attribute.name))
+          if (kept.length < parsed.attributes.length) renames.push(`<${tag}> ${dropped.join(", ")} dropped`)
+          const text = OldNames.unparse({ attributes: kept, trailing: parsed.trailing })
+          return `${open}${name}${escaped ? text.replaceAll('"', ESCAPED_QUOTE) : text}${close}`
+        }
+      )
+      rewritten = rewritten.replace(mention, tag)
+    }
+    return rewritten
+  }
+
+  /**
    * A tag's attribute text as attributes, each keeping the space before it;  `undefined` when it isn't plain
    * attributes (a JSX spread, `{...props}`):  such a tag is left as it is.
    */
@@ -333,6 +367,15 @@ const BREADCRUMB_STEP = /(<\/?|&lt;\/?)ui-breadcrumb-section(?=[\s>/&])/g
 /** Holds the box's new name while the step takes its old one. */
 const BREADCRUMB_PLACEHOLDER = "\u0001breadcrumbs"
 
+/**
+ * Tags renamed:  old tag => its new name, and the attributes it no longer takes.
+ * - `<ui-docs-themes>`, the docs site's widget, became the real element `<ui-theme-menu>` (epic `debut` P17);
+ *   its `for` (a family's themes, Fomantic's per-page filter) went with Fomantic's themes.
+ */
+const RENAMED_TAGS: Readonly<Record<string, RenamedTag>> = {
+  "ui-docs-themes": { tag: "ui-theme-menu", dropped: ["for"] }
+}
+
 /** One old name of one tag, and what it becomes. */
 export type OldNameRule = {
   /** the old name:  `primary` */
@@ -366,6 +409,14 @@ export type OldNamesResult = {
   readonly renames: readonly string[]
   /** what it left for a person, and why */
   readonly manual: readonly string[]
+}
+
+/** A renamed tag's new name (`RENAMED_TAGS`). */
+type RenamedTag = {
+  /** its name now:  `ui-theme-menu` */
+  readonly tag: string
+  /** the attributes it no longer takes, dropped as it's renamed:  `for` */
+  readonly dropped: readonly string[]
 }
 
 /** One attribute of a tag being rewritten. */

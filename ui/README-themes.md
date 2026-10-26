@@ -12,8 +12,8 @@ That's the big switch, and you may never need it.
 Spell UI draws everything from CSS custom properties, the TOKENS,
 so theming is mostly setting a few of them:  say how your look differs from the default, and stop.
 
-You can also make a theme from your own colours, fonts and shapes, live, with `<ui-theme-editor>` (recipe 5).
-What you can't do yet is offer people a theme menu on your own page:  🌱 coming, at the end.
+You can also make a theme from your own colours, fonts and shapes, live, with `<ui-theme-editor>` (recipe 5),
+and offer people Spell's themes on your own page with `<ui-theme-menu>` (recipe 3).
 
 <details>
 <summary>The markup in every panel, and how the pictures were taken</summary>
@@ -137,18 +137,17 @@ So the scheme can change at any element, and everything below it follows, throug
 One name trips people up:  `theme` on `<ui-root>` is the colour SCHEME, `light` or `dark`.
 A look like `github` is applied with `UI.themes.apply()` (recipe 3).
 
-### The themes:  `classic`, 23 of Fomantic's, and Spell's own
+### The themes:  Spell's own four, on `classic`
 
 Each theme is one sheet in [the themes folder](src/styles/themes/), and there's no list of them anywhere else:
 the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
 - `classic`:  Fomantic UI's original look (Lato, 14px, its palette, 4px radii), and the base every Fomantic theme
   sits on.
   It names Lato but loads no font:  add it yourself, or the system font stands in.
-- 23 of Fomantic's own themes, ported, `amazon` to `twitter`:  every one, in a line, below.
-  - Each is a DELTA on `classic`, as Fomantic's were on its default look.
-  - The one left out, Lead By Example, is a GitHub look-alike with its own `theme.config`:  `github` stands in.
-  - Mind the names:  `classic` is Fomantic's DEFAULT look, while `fomantic-classic` is the Fomantic theme that
-    happens to be called "classic", Semantic UI 1.x's glossy gradients.
+- Fomantic's 23 themes (`amazon` to `twitter`), ported once, are ARCHIVED in
+  [the archive folder](src/styles/themes/archive/) (epic `debut` P17):
+  - in no bundle (the runtime globs only the themes folder's top level), no menu and no test
+  - kept only to copy from, the way they were ported (below)
 - Spell's own four, `themes.own`, the one set every place offers:
   - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
     pill buttons, an aubergine dark mode, and the brand's warm and inverse surfaces for Spell's own pages.
@@ -165,10 +164,8 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
 - Not a theme:  the dark sheet, a colour scheme you put on top of any of them (above).
   `classic` has no dark of its own, since Fomantic had none:  its dark colours are Fomantic's light hues.
 
-The cost:  each theme is its own lazy chunk, fetched the first time it's applied.
-Most are 0.2 to 2.3 kB gzipped (`classic` 1.6, `github` 2.3), and `spell` is 3.4, as `yarn measure` weighs them.
-The four that bring a font are 21.5 to 39.4 kB, because the font travels inside the chunk:
-`bookish` (Karma), `chubby` (Source Sans 3), `instagram` (Montserrat) and `material` (Roboto).
+The cost:  each theme is its own lazy chunk, fetched the first time it's applied
+(`classic` 1.6 kB gzipped, `spell` 3.4, as `yarn measure` weighed them).
 
 <details>
 <summary>Every theme, in a line</summary>
@@ -182,30 +179,7 @@ the last column is what a theme restyles on purpose.
 | `glass` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces on a solid page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
 | `fruity` | `glass` over a soft pastel wallpaper:  three blurred colour washes behind the page.  Page-wide. | as `glass` |
 | `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  an amber primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
-| `classic` | Fomantic's original look, and the base of every theme below:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
-| `amazon` | amazon.com circa 2015:  13px Arial, gradient buttons, an orange primary.  Page-wide. | button, header |
-| `basic` | Stripped back:  flat grey buttons, borderless cards, pill steps, no progress track. | button, card, progress, step, table |
-| `bookish` | Serif "book" headers in Karma. | header |
-| `bootstrap3` | Bootstrap 3's `.btn`:  white, a grey hairline, a small radius, Bootstrap's palette. | button |
-| `chubby` | Big, soft, padded controls. | accordion, button, comment, dropdown, form, input, menu, header |
-| `colored` | Checkboxes, radios and sliders chosen in the primary colour. | checkbox |
-| `duo` | A two-colour loader ring:  primary and secondary halves. | loader |
-| `fixed-width` | Narrower, fixed modal widths. | modal |
-| `flat` | A flatter, brighter site with underlined form fields.  Page-wide. | dropdown, form, input, header |
-| `fomantic-classic` | Fomantic's own theme named classic, Semantic UI 1.x's glossy look:  gradients and embossed edges.  Page-wide. | button, card, header, progress, table |
-| `github` | GitHub's look, circa 2015.  Page-wide. | breadcrumb, button, dropdown, form, grid, image, input, label, menu, message, header, popup, segment, step, table |
-| `gmail` | Compact grey notice bars, like Gmail's. | message |
-| `instagram` | Flat bordered cards in Montserrat, like Instagram's posts. | card |
-| `material` | Google's Material Design, circa 2016.  Page-wide. | button, dropdown, menu, modal, header |
-| `pulsar` | A primary-coloured loader that fades in, whirls and fades out. | loader |
-| `raised` | Buttons with a 3D bottom edge. | button |
-| `resetcss` | Eric Meyer's Reset CSS on the page, in place of normalize.  Page-wide;  the one theme in `ui.reset`, since a reset belongs under everything. | native page markup |
-| `round` | White, pill-shaped, uppercase outlined buttons. | button |
-| `rtl` | An Arabic-script font stack and a right-to-left page.  Page-wide. | everything, through the direction |
-| `striped` | Diagonal stripes on progress bars, marching while active. | progress |
-| `systemfont` | The platform's own UI font instead of Lato.  Page-wide. | everything, through the font |
-| `timeline` | A feed drawn as a timeline:  a line down the labels, round badges on it. | feed |
-| `twitter` | twitter.com circa 2015:  pale gradient buttons, a sky-blue primary. | button |
+| `classic` | Fomantic's original look, and the base of every theme above:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
 
 </details>
 
@@ -275,8 +249,8 @@ and adopts it into the page and every component's shadow root, the ones there no
 import { UI } from "spell-ui/core"
 
 const { themes } = await UI.load()
-themes.names // the 23 Fomantic themes, A-Z:  ["amazon", "basic", "bookish" ...]
-await themes.apply("github") // classic, then github
+themes.own // Spell's own themes:  ["spell", "glass", "fruity", "merlot"]
+await themes.apply("merlot") // classic, then merlot
 await themes.apply("classic") // classic alone
 await themes.apply("spell") // classic, then Spell's own look
 await themes.apply(undefined) // no theme:  the plain default look
@@ -286,8 +260,10 @@ await themes.apply(undefined) // no theme:  the plain default look
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
 - `themes.own` lists Spell UI's own four themes, `spell`, `glass`, `fruity` and `merlot`:
-  a picker shows them apart from `names`.
+  the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
+- To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's four themes and Light, Dark or Auto,
+  remembered for each viewer (`ThemePreference`);  every Spell place shows it.
   So does `apply("dark")`, since dark is a scheme (above):
 
   ```text
@@ -331,7 +307,7 @@ and the runtime mirrors it into every component's shadow root, adopted last:
 <details>
 <summary>Porting a Fomantic theme, in short</summary>
 
-All 24 of Fomantic's looks here, `classic` and the 23 themes, were ported the same way;
+All 24 of Fomantic's looks, `classic` and the 23 themes now archived, were ported the same way;
 the theming page on the docs site has the recipe step by step.
 
 1. Read the theme in Fomantic's source:  its `globals/site.variables` first, then each component's `.variables`
@@ -373,10 +349,8 @@ To make a look of your own, start from one of Spell UI's and change what you lik
 - It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.
 - Its docs page, with the editor live:  `/components/ui/ui-theme-editor.html`.
 
-## 🌱 Coming:  picking themes, and themes per component
+## 🌱 Coming:  themes per component
 
-- a theme picker for any page:  the docs site has one today, but as a docs-only element, `<ui-docs-themes>`
-  (one palette button:  a theme, and Light, Dark or Auto, remembered for each viewer)
 - theme files per component, so one page can mix looks family by family
 
 Today a page applies one theme at a time,

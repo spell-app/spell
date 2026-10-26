@@ -325,11 +325,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { width: "16em", height: "2.25em" },
     attributes: ["base", "page", "shortcuts", "placeholder", "size"]
   },
-  "ui-docs-themes": {
-    folder: "ui-docs-themes",
-    skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["for", "show", "size", "inverted", "compact"]
-  },
   "ui-docs-toc": {
     folder: "ui-docs-toc",
     skeleton: {
@@ -1432,6 +1427,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     formControl: true
   },
   "ui-theme-editor": { folder: "ui-theme-editor", skeleton: { height: "30em" }, attributes: ["base", "value"] },
+  "ui-theme-menu": {
+    folder: "ui-theme-menu",
+    skeleton: { display: "inline", width: "5em", height: "2.25em" },
+    attributes: ["show", "size", "inverted", "compact"]
+  },
   "ui-title": { folder: "ui-parts", attributes: ["link"] },
   "ui-toast": {
     folder: "ui-toast",

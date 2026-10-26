@@ -52,7 +52,7 @@
           <!--
             THEMING:  the old `theming.mdx` (tokens, layers, remaps, the app stylesheet, themes) in Fomantic's
             `usage/theming.html.eco` order (Preface, Using Themes, Composing a Component, Cascading Inheritance), plus a live
-            theme gallery (`<ui-docs-themes>` over sample components), the foundation's token tables (`<ui-docs-tokens global>`)
+            theme gallery (`<ui-theme-menu>` over sample components), the foundation's token tables (`<ui-docs-tokens global>`)
             and the porting recipe from `guides/ui/notes/theming.md`.
           -->
           <ui-section id="preface" label="Preface" sticky collapsible dividing>
@@ -65,8 +65,10 @@
 
                 - The default look is neutral: the platform's own UI font, a 16px base and an OKLCH palette that works in light
                   AND dark mode.
-                - **Classic** restores Fomantic's original look (Lato, 14px, Fomantic's palette), and every Fomantic theme is a
-                  delta on top of it.
+                - **Classic** restores Fomantic's original look (Lato, 14px, Fomantic's palette), and every theme is a delta on
+                  top of it:  Spell's own four, **Spell**, **Glass**, **Fruity** and **Merlot**.
+                - Fomantic's own themes were ported too, and are archived (`src/styles/themes/archive/`):  kept only to copy
+                  from, in no menu and no bundle.
                 - Everything lives in `src/styles/`; the design notes are in `guides/ui/notes/theming.md`.
               </script>
             </ui-markdown>
@@ -76,21 +78,17 @@
             <ui-markdown>
               <script type="text/markdown">
                 Pick a theme and a colour scheme: the whole page follows, these samples included, and the choice is remembered on
-                every page of this site (the header's picker is the same control). Each sample is a component some theme
-                restyles; the table below says which.
+                every page of this site (the header's theme menu is the same control). Each of Spell's four themes restyles
+                every sample through the shared tokens.
               </script>
             </ui-markdown>
             <ui-segment appearance="secondary">
-              <ui-docs-themes></ui-docs-themes>
+              <ui-theme-menu></ui-theme-menu>
             </ui-segment>
-            <ui-message size="small" class="site-not-ported"
-              >Not ported: Fomantic's "Lead By Example" (a separate GitHub look-alike project with its own
-              <code>theme.config</code>) -- its theme is <code>github</code> here: pick it above.</ui-message
-            >
 
             <ui-section id="theme-gallery-buttons" label="Buttons" sticky collapsible dividing>
               <ui-docs-example
-                description="Amazon, Basic, Bootstrap 3, Chubby, Fomantic classic, GitHub, Material, Raised, Round and Twitter restyle buttons."
+                description="Buttons, in the theme picked above."
               >
                 <ui-button color="primary">Primary</ui-button>
                 <ui-button color="secondary">Secondary</ui-button>
@@ -121,7 +119,7 @@
             </ui-section>
 
             <ui-section id="theme-gallery-headers" label="Headers" sticky collapsible dividing>
-              <ui-docs-example description="Every theme with a site font restyles headers;  Bookish is headers only.">
+              <ui-docs-example description="Headers, in the theme picked above:  each theme sets its own heading font.">
                 <ui-header level="2">
                   Account Settings
                   <ui-header>Manage your preferences</ui-header>
@@ -131,7 +129,7 @@
 
             <ui-section id="theme-gallery-form-controls" label="Form controls" sticky collapsible dividing>
               <ui-docs-example
-                description="Chubby, Flat and GitHub restyle inputs, dropdowns and forms;  Colored restyles checkboxes."
+                description="Inputs, dropdowns, checkboxes and a form, in the theme picked above."
               >
                 <ui-form>
                   <form>
@@ -167,7 +165,7 @@
             </ui-section>
 
             <ui-section id="theme-gallery-menus" label="Menus" sticky collapsible dividing>
-              <ui-docs-example description="Chubby, GitHub and Material restyle menus.">
+              <ui-docs-example description="Menus, in the theme picked above.">
                 <ui-menu aria-label="Gallery menu">
                   <ui-item link="#theme-gallery" selected>Editorials</ui-item>
                   <ui-item link="#theme-gallery">Reviews</ui-item>
@@ -189,7 +187,7 @@
               dividing
             >
               <ui-docs-example
-                description="GitHub restyles labels and breadcrumbs;  Gmail and GitHub restyle messages."
+                description="Labels, breadcrumbs and messages, in the theme picked above."
               >
                 <ui-breadcrumbs aria-label="Gallery breadcrumb">
                   <ui-breadcrumb link="#theme-gallery">Home</ui-breadcrumb>
@@ -209,7 +207,7 @@
 
             <ui-section id="theme-gallery-cards-and-comments" label="Cards and comments" sticky collapsible dividing>
               <ui-docs-example
-                description="Basic, Fomantic classic and Instagram restyle cards;  Chubby restyles comments."
+                description="Cards and comments, in the theme picked above."
               >
                 <ui-card>
                   <ui-content>
@@ -239,7 +237,7 @@
               dividing
             >
               <ui-docs-example
-                description="Basic, Fomantic classic and Striped restyle progress bars;  Basic and GitHub steps;  Duo and Pulsar loaders."
+                description="Progress bars, steps and loaders, in the theme picked above."
               >
                 <ui-progress value="62" bar-text="percent" color="primary" active aria-label="Upload"></ui-progress>
                 <ui-steps>
@@ -265,7 +263,7 @@
 
             <ui-section id="theme-gallery-tables-and-segments" label="Tables and segments" sticky collapsible dividing>
               <ui-docs-example
-                description="Basic, Fomantic classic and GitHub restyle tables;  GitHub restyles segments."
+                description="Tables and segments, in the theme picked above."
               >
                 <ui-table celled appearance="striped">
                   <table>
@@ -301,7 +299,7 @@
               collapsible
               dividing
             >
-              <ui-docs-example description="Chubby restyles the accordion, Timeline the feed.">
+              <ui-docs-example description="An accordion and a feed, in the theme picked above.">
                 <ui-accordion appearance="styled">
                   <ui-title>What is a dog?</ui-title>
                   <ui-content><p>A dog is a type of domesticated animal.</p></ui-content>
@@ -324,7 +322,7 @@
             </ui-section>
 
             <ui-section id="theme-gallery-popup-and-modal" label="Popup and modal" sticky collapsible dividing>
-              <ui-docs-example description="GitHub restyles popups;  Material and Fixed width restyle modals.">
+              <ui-docs-example description="A popup and a modal, in the theme picked above.">
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
                 <ui-popup label="Add users to your feed"></ui-popup>
                 <ui-button commandfor="theming-gallery-modal" command="--show">Show modal</ui-button>
@@ -343,9 +341,8 @@
             <ui-section id="theme-gallery-every-theme" label="Every theme" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Each Fomantic theme is a port of Fomantic's `src/themes/<name>/`, one sheet in `src/styles/themes/`. **Page-wide**
-                  themes also change the site's globals (font, size, palette), so every component shifts a little; the labels are
-                  the components a theme restyles on purpose.
+                  Each theme is one sheet in `src/styles/themes/`, on top of `classic`. **Page-wide** themes change the site's
+                  globals (font, size, palette), so every component follows.
                 </script>
               </ui-markdown>
               <ui-table celled padding="compact" appearance="striped">
@@ -361,236 +358,42 @@
                     <tr>
                       <td><code>spell</code></td>
                       <td>
-                        Our own look, from the Spell brand, on top of classic: Palatino-family serif headings with italic
-                        ledes, system sans body, Spell Purple, pill buttons, 16px cards, soft layered shadows, an aubergine
-                        dark mode. This site's default;  page-wide.
+                        Spell's own look, from the Spell brand: Palatino-family serif headings with italic ledes, a system sans
+                        body, Spell Purple, pill buttons, 16px cards, soft layered shadows, an aubergine dark mode. This site's
+                        default;  page-wide.
+                      </td>
+                      <td>everything, through the global tokens</td>
+                    </tr>
+                    <tr>
+                      <td><code>glass</code></td>
+                      <td>
+                        macOS today: the system font, rounded rectangles, Apple's system colours, and translucent glass surfaces
+                        that blur what's behind them, on a solid page. Page-wide.
+                      </td>
+                      <td>everything, through the global tokens</td>
+                    </tr>
+                    <tr>
+                      <td><code>fruity</code></td>
+                      <td>
+                        Glass over a soft pastel wallpaper:  three blurred colour washes behind the page. Page-wide.
+                      </td>
+                      <td>everything, through the global tokens</td>
+                    </tr>
+                    <tr>
+                      <td><code>merlot</code></td>
+                      <td>
+                        A code studio in wine reds: flat panels on hairlines a step off the page, no glass;  an amber primary on
+                        deep wine in dark, a maroon one on rose-grey in light. Page-wide.
                       </td>
                       <td>everything, through the global tokens</td>
                     </tr>
                     <tr>
                       <td><code>classic</code></td>
                       <td>
-                        Fomantic's original look, and the base of every theme below: Lato, 14px, Fomantic's palette and
-                        size ratios, 4px radii. Page-wide.
+                        Fomantic's original look, and the base of every theme above: Lato, 14px, Fomantic's palette and size
+                        ratios, 4px radii. Page-wide.
                       </td>
                       <td>everything, through the global tokens</td>
-                    </tr>
-                    <tr>
-                      <td><code>amazon</code></td>
-                      <td>amazon.com circa 2015: 13px Arial, gradient buttons, an orange primary. Page-wide.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>basic</code></td>
-                      <td>Stripped back: flat grey buttons, borderless cards, pill steps, no progress track.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-card.html">Card</ui-label
-                          ><ui-label link="ui-progress.html">Progress</ui-label
-                          ><ui-label link="ui-step.html">Step</ui-label
-                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>bookish</code></td>
-                      <td>Serif "book" headers in Karma.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-header.html">Header</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>bootstrap3</code></td>
-                      <td>
-                        Bootstrap 3's <code>.btn</code>: white, a grey hairline, a small radius, Bootstrap's palette.
-                      </td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>chubby</code></td>
-                      <td>Big, soft, padded controls.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-accordion.html">Accordion</ui-label
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-comment.html">Comment</ui-label
-                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label link="ui-form.html">Form</ui-label
-                          ><ui-label link="ui-input.html">Input</ui-label
-                          ><ui-label link="ui-menu.html">Menu</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>colored</code></td>
-                      <td>Checkboxes, radios and sliders chosen in the primary colour.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-checkbox.html">Checkbox</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>duo</code></td>
-                      <td>A two-colour loader ring: primary and secondary halves.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-loader.html">Loader</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>fixed-width</code></td>
-                      <td>Narrower, fixed modal widths.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-modal.html">Modal</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>flat</code></td>
-                      <td>A flatter, brighter site with underlined form fields. Page-wide.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label link="ui-form.html">Form</ui-label
-                          ><ui-label link="ui-input.html">Input</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>fomantic-classic</code></td>
-                      <td>
-                        Fomantic's own <code>classic</code> theme, Semantic UI 1.x's glossy look: gradients and embossed
-                        edges. Page-wide.
-                      </td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-card.html">Card</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label
-                          ><ui-label link="ui-progress.html">Progress</ui-label
-                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>github</code></td>
-                      <td>GitHub's look, circa 2015. Page-wide.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-breadcrumbs.html">Breadcrumb</ui-label
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label link="ui-form.html">Form</ui-label
-                          ><ui-label link="ui-grid.html">Grid</ui-label
-                          ><ui-label link="ui-image.html">Image</ui-label
-                          ><ui-label link="ui-input.html">Input</ui-label
-                          ><ui-label link="ui-label.html">Label</ui-label
-                          ><ui-label link="ui-menu.html">Menu</ui-label
-                          ><ui-label link="ui-message.html">Message</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label
-                          ><ui-label link="ui-popup.html">Popup</ui-label
-                          ><ui-label link="ui-segment.html">Segment</ui-label
-                          ><ui-label link="ui-step.html">Step</ui-label
-                          ><ui-label link="ui-table.html">Table</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>gmail</code></td>
-                      <td>Compact grey notice bars, like Gmail's.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-message.html">Message</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>instagram</code></td>
-                      <td>Flat bordered cards in Montserrat, like Instagram's posts.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-card.html">Card</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>material</code></td>
-                      <td>Google's Material Design, circa 2016. Page-wide.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-button.html">Button</ui-label
-                          ><ui-label link="ui-dropdown.html">Dropdown</ui-label
-                          ><ui-label link="ui-menu.html">Menu</ui-label
-                          ><ui-label link="ui-modal.html">Modal</ui-label
-                          ><ui-label link="ui-header.html">Header</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>pulsar</code></td>
-                      <td>A primary-coloured loader that fades in, whirls and fades out.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-loader.html">Loader</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>raised</code></td>
-                      <td>Buttons with a 3D bottom edge.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>resetcss</code></td>
-                      <td>Eric Meyer's Reset CSS on the page in place of normalize. Page-wide.</td>
-                      <td>native page markup</td>
-                    </tr>
-                    <tr>
-                      <td><code>round</code></td>
-                      <td>White, pill-shaped, uppercase outlined buttons.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>rtl</code></td>
-                      <td>An Arabic-script font stack and a right-to-left page. Page-wide.</td>
-                      <td>everything, through the direction</td>
-                    </tr>
-                    <tr>
-                      <td><code>striped</code></td>
-                      <td>Diagonal stripes on progress bars, marching while <code>active</code>.</td>
-                      <td>
-                        <ui-labels size="mini"
-                          ><ui-label link="ui-progress.html">Progress</ui-label></ui-labels
-                        >
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>systemfont</code></td>
-                      <td>The platform's own UI font instead of Lato. Page-wide.</td>
-                      <td>everything, through the font</td>
-                    </tr>
-                    <tr>
-                      <td><code>timeline</code></td>
-                      <td>A feed drawn as a timeline: a line down the labels, round badges on it.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-feed.html">Feed</ui-label></ui-labels>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>twitter</code></td>
-                      <td>twitter.com circa 2015: pale gradient buttons, a sky-blue primary.</td>
-                      <td>
-                        <ui-labels size="mini"><ui-label link="ui-button.html">Button</ui-label></ui-labels>
-                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -672,10 +475,9 @@
                   import { UI } from "spell-ui/core"
 
                   const { themes } = await UI.load() // `UI.themes` is there once the runtime has loaded
-                  themes.names // ["amazon", "basic", "bookish" ...]:  the Fomantic themes, A-Z
-                  themes.own // ["spell", "glass", "fruity", "merlot"]:  our own themes, also on top of classic
+                  themes.own // ["spell", "glass", "fruity", "merlot"]:  Spell's own themes, on top of classic
                   await themes.apply("spell") // classic + spell:  the Spell brand look
-                  await themes.apply("github") // classic + github, on the page and in every shadow root
+                  await themes.apply("merlot") // classic + merlot, on the page and in every shadow root
                   await themes.apply("classic") // classic alone
                   await themes.apply(undefined) // our own look
                 </script>
@@ -687,9 +489,8 @@
                     every shadow root, after the utilities and before the app stylesheet.
                   - A page without the runtime can still `<link>` `ui.css` + `themes/classic.css` + `themes/<name>.css`, but then
                     only the TOKEN half reaches components: the class-grammar overrides need the runtime's shadow adoption.
-                  - `<ui-docs-themes>` is this site's picker: a theme dropdown (Spell, the default;  Plain;  Classic;  then Fomantic's themes) and a
-                    light / dark / system switch, both remembered per viewer. Each component page has one listing only the themes
-                    that restyle that component, as Fomantic's pages do.
+                  - `<ui-theme-menu>` is the theme menu, on this site and every Spell page: Spell's four themes and a light / dark /
+                    system switch, both remembered per viewer ([its page](ui-theme-menu.html)).
                 </script>
               </ui-markdown>
               <ui-message size="small" class="site-not-ported"
@@ -802,7 +603,7 @@
                     </tr>
                     <tr>
                       <td><code>themes/&lt;name&gt;.css</code></td>
-                      <td>a Fomantic theme, on top of <code>classic</code></td>
+                      <td>one of Spell's own themes, on top of <code>classic</code></td>
                       <td><code>ui.theme</code></td>
                     </tr>
                     <tr>
@@ -1083,7 +884,7 @@
               <ui-step
                 icon="download"
                 heading="Packaged theme"
-                description="classic + a Fomantic theme:  ui.theme"
+                description="classic + one of Spell's themes:  ui.theme"
               ></ui-step>
               <ui-step icon="user" heading="Your site" description="tokens and the app stylesheet:  ui.app"></ui-step>
             </ui-steps>
@@ -1157,7 +958,8 @@
           <ui-section id="porting-a-fomantic-theme" label="Porting a Fomantic theme" sticky collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
-                Fomantic's themes are DELTAS on its default look, and ours of that look is `classic.css`, so a ported theme is
+                Fomantic's themes, ported this way, are archived now (`src/styles/themes/archive/`):  kept to copy from, in no
+                menu and no bundle. They're DELTAS on its default look, and ours of that look is `classic.css`, so a ported theme is
                 applied ON TOP of `classic`: both sheets, `classic` first, both in `@layer ui.theme`. A theme sheet never repeats
                 classic's tokens and has two halves:
 
@@ -1166,8 +968,8 @@
                 2. OVERRIDES: Fomantic's `.overrides`, and any variable with no token, as CLASS-GRAMMAR rules (`.ui.button`,
                    `.ui.menu .item`) for the markup our components render INSIDE their shadow roots.
 
-                References: `github.css` (16 components, tokens + overrides), `material.css` (fonts, palette, `-on` re-checks),
-                `fomantic-classic.css` (small, mostly overrides).
+                References, in the archive: `github.css` (16 components, tokens + overrides), `material.css` (fonts, palette,
+                `-on` re-checks), `fomantic-classic.css` (small, mostly overrides).
               </script>
             </ui-markdown>
             <ui-steps direction="vertical" ordered>

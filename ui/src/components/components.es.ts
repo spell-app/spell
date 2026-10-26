@@ -135,6 +135,7 @@ import { cellEs } from "spell-ui/components/ui-table/UICell.es"
 import { textEs } from "spell-ui/components/ui-text/UIText.es"
 import { linkEs } from "spell-ui/components/ui-text/UILink.es"
 import { themeEditorEs } from "spell-ui/components/ui-theme-editor/UIThemeEditor.es"
+import { themeMenuEs } from "spell-ui/components/ui-theme-menu/UIThemeMenu.es"
 import { toastEs } from "spell-ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell-ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell-ui/components/ui-transition/UITransition.es"
@@ -762,6 +763,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   textEs,
   linkEs,
   themeEditorEs,
+  themeMenuEs,
   toastEs,
   toolbarEs,
   transitionEs,

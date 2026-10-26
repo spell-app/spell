@@ -28,8 +28,7 @@ const DATA = {
     "ui-input": familyOf("ui-input"),
     "ui-checkbox": familyOf("ui-checkbox")
   },
-  foundation: [],
-  themes: []
+  foundation: []
 } as SiteDataFile
 
 describe("NavIndex.normalize()", () => {

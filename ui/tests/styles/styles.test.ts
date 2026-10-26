@@ -23,8 +23,8 @@ import darkThemeCSS from "spell-ui/styles/themes/dark.css?inline"
  *   the barrel's `?inline` sheets are only faithful once `css.lightningcss.targets` is modern (see `index.ts`).
  */
 
-/** Every `.css` file under `src/styles/`, as written. */
-const RAW_SHEETS = import.meta.glob<string>("./**/*.css", {
+/** Every `.css` file under `src/styles/`, as written;  not the archived themes, which nothing loads or tests. */
+const RAW_SHEETS = import.meta.glob<string>(["./**/*.css", "!./themes/archive/**"], {
   base: "/src/styles",
   query: "?raw",
   import: "default",

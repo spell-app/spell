@@ -2,6 +2,8 @@ import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { OldNames } from "spell-ui/tools/OldNames"
 
+// spell ui rename: leave this file (its cases are the old names)
+
 /** Every vocabulary's old names, read once. */
 let names: OldNames
 
@@ -62,6 +64,23 @@ describe("OldNames.rewrite()", () => {
       "the breadcrumb tags, on a page that still writes the old step",
       `<ui-breadcrumb><ui-breadcrumb-section href="/">Home</ui-breadcrumb-section></ui-breadcrumb>`,
       `<ui-breadcrumbs><ui-breadcrumb link="/">Home</ui-breadcrumb></ui-breadcrumbs>`
+    ],
+    [
+      "a renamed tag, its old filter dropped",
+      `<ui-docs-themes for="ui-button" show="theme" compact class="site-themes"></ui-docs-themes>`,
+      `<ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>`
+    ],
+    [
+      "a renamed tag in escaped markup, CSS, its tokens and a query",
+      `&lt;ui-docs-themes for="ui-button"&gt; ui-item ui-docs-themes::part(palette) { --ui-docs-themes-gap: 0; ` +
+        `width: var(--_ui-docs-themes-size) } querySelector("ui-docs-themes")`,
+      `&lt;ui-theme-menu&gt; ui-item ui-theme-menu::part(palette) { --ui-theme-menu-gap: 0; ` +
+        `width: var(--_ui-theme-menu-size) } querySelector("ui-theme-menu")`
+    ],
+    [
+      "never a renamed tag's old folder",
+      `import "spell-ui/docs-components/ui-docs-themes"`,
+      `import "spell-ui/docs-components/ui-docs-themes"`
     ]
   ])("%s", (_name, before, after) => {
     expect(rewrite(before)).toBe(after)

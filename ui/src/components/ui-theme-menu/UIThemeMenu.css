@@ -1,5 +1,5 @@
 /*
- * The style sheet of `<ui-docs-themes>`:  the docs site's look controls.
+ * The style sheet of `<ui-theme-menu>`:  a page's theme and light / dark.
  * Compact by default:  one round icon button, its overlay a small brand-styled panel
  * (the Spell design system's icon buttons, segmented controls and menus).
  * - It styles the component's shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`,
@@ -21,13 +21,13 @@
  *   the Spell theme into the brand.
  * - The overlay's box is `<ui-popup>`'s `::part(popup)`, restyled with plain properties
  *   (a sheet never declares another family's tokens).
- * - Public tokens (`--ui-docs-themes-*`) are never declared:  each is read through a private alias
+ * - Public tokens (`--ui-theme-menu-*`) are never declared:  each is read through a private alias
  *   (`notes/theming.md` "Component tokens").
  */
 
-@layer ui.components.docs-themes.types, ui.components.docs-themes.content, ui.components.docs-themes.variations, ui.components.docs-themes.states;
+@layer ui.components.theme-menu.types, ui.components.theme-menu.content, ui.components.theme-menu.variations, ui.components.theme-menu.states;
 
-@layer ui.components.docs-themes.types {
+@layer ui.components.theme-menu.types {
   :host {
     display: inline-block;
     vertical-align: middle;
@@ -35,29 +35,29 @@
 
   .ui.themes {
     /* Space between the controls. */
-    --_ui-docs-themes-gap: var(--ui-docs-themes-gap, 0.25em);
+    --_ui-theme-menu-gap: var(--ui-theme-menu-gap, 0.25em);
     /* Diameter of the round buttons:  36px at 16px, the brand's icon button. */
-    --_ui-docs-themes-button-size: var(--ui-docs-themes-button-size, 2.25em);
+    --_ui-theme-menu-button-size: var(--ui-theme-menu-button-size, 2.25em);
     /* Width of the palette's overlay. */
-    --_ui-docs-themes-overlay-width: var(--ui-docs-themes-overlay-width, 17em);
+    --_ui-theme-menu-overlay-width: var(--ui-theme-menu-overlay-width, 17em);
     /* Corner radius of the overlay;  its rows round to a bit less, so they nest. */
-    --_ui-docs-themes-overlay-radius: var(--ui-docs-themes-overlay-radius, 14px);
+    --_ui-theme-menu-overlay-radius: var(--ui-theme-menu-overlay-radius, 14px);
     /* How long the sun / moon swap takes. */
-    --_ui-docs-themes-swap-duration: var(--ui-docs-themes-swap-duration, 280ms);
+    --_ui-theme-menu-swap-duration: var(--ui-theme-menu-swap-duration, 280ms);
     /* The chosen scheme's raised key in the segmented control:  its drop shadow. */
-    --_ui-docs-themes-choice-shadow: var(--ui-docs-themes-choice-shadow, 0 1px 2px oklch(0 0 0 / 0.16));
+    --_ui-theme-menu-choice-shadow: var(--ui-theme-menu-choice-shadow, 0 1px 2px oklch(0 0 0 / 0.16));
     /* Ink of the `inverted` buttons (for dark backgrounds):  their fill, ring and icon are it, translucent. */
-    --_ui-docs-themes-inverted-ink: var(--ui-docs-themes-inverted-ink, oklch(1 0 0));
+    --_ui-theme-menu-inverted-ink: var(--ui-theme-menu-inverted-ink, oklch(1 0 0));
 
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--_ui-docs-themes-gap);
+    gap: var(--_ui-theme-menu-gap);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
   }
 }
 
-@layer ui.components.docs-themes.content {
+@layer ui.components.theme-menu.content {
   /* The dropdown takes what's left on a narrow row. */
   [part~="theme"] {
     flex: 0 1 auto;
@@ -72,8 +72,8 @@
     flex: none;
     place-items: center;
     box-sizing: border-box;
-    width: var(--_ui-docs-themes-button-size);
-    height: var(--_ui-docs-themes-button-size);
+    width: var(--_ui-theme-menu-button-size);
+    height: var(--_ui-theme-menu-button-size);
     margin: 0;
     padding: 0;
     border: 0;
@@ -125,11 +125,11 @@
 
   .overlay::part(popup) {
     box-sizing: border-box;
-    width: var(--_ui-docs-themes-overlay-width);
+    width: var(--_ui-theme-menu-overlay-width);
     max-width: calc(100vw - 16px);
     padding: 0.375em;
     border: 1px solid var(--ui-border-color);
-    border-radius: var(--_ui-docs-themes-overlay-radius);
+    border-radius: var(--_ui-theme-menu-overlay-radius);
     background: var(--ui-surface);
     box-shadow: var(--ui-shadow-floating);
     color: var(--ui-text-color);
@@ -182,7 +182,7 @@
     margin: 0;
     padding: 0.5em 0.625em;
     border: 0;
-    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em);
+    border-radius: calc(var(--_ui-theme-menu-overlay-radius) - 0.375em);
     background: transparent;
     color: inherit;
     font: inherit;
@@ -209,7 +209,7 @@
     gap: 2px;
     margin: 0.25em 0.25em 0.125em;
     padding: 2px;
-    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em);
+    border-radius: calc(var(--_ui-theme-menu-overlay-radius) - 0.375em);
     background: var(--ui-surface-strong);
   }
   .choice {
@@ -222,7 +222,7 @@
     margin: 0;
     padding: 0.4em 0.375em;
     border: 0;
-    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em - 2px);
+    border-radius: calc(var(--_ui-theme-menu-overlay-radius) - 0.375em - 2px);
     background: transparent;
     color: var(--ui-text-muted);
     font: inherit;
@@ -249,7 +249,7 @@
     margin: 0;
     padding: 0.5em 0.625em;
     border: 0;
-    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em);
+    border-radius: calc(var(--_ui-theme-menu-overlay-radius) - 0.375em);
     background: transparent;
     color: inherit;
     font: inherit;
@@ -300,21 +300,21 @@
   }
 }
 
-@layer ui.components.docs-themes.variations {
+@layer ui.components.theme-menu.variations {
   /* For dark backgrounds:  translucent white buttons. */
   .ui.inverted.themes .button {
-    background: oklch(from var(--_ui-docs-themes-inverted-ink) l c h / 0.08);
-    box-shadow: inset 0 0 0 1px oklch(from var(--_ui-docs-themes-inverted-ink) l c h / 0.16);
-    color: oklch(from var(--_ui-docs-themes-inverted-ink) l c h / 0.8);
+    background: oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.08);
+    box-shadow: inset 0 0 0 1px oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.16);
+    color: oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.8);
   }
   .ui.inverted.themes .button:hover {
-    background: oklch(from var(--_ui-docs-themes-inverted-ink) l c h / 0.14);
-    box-shadow: inset 0 0 0 1px oklch(from var(--_ui-docs-themes-inverted-ink) l c h / 0.28);
-    color: var(--_ui-docs-themes-inverted-ink);
+    background: oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.14);
+    box-shadow: inset 0 0 0 1px oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.28);
+    color: var(--_ui-theme-menu-inverted-ink);
   }
 }
 
-@layer ui.components.docs-themes.states {
+@layer ui.components.theme-menu.states {
   .option.checked {
     background: color-mix(in oklch, var(--ui-primary) 10%, transparent);
   }
@@ -330,7 +330,7 @@
   .choice.checked {
     background: var(--ui-surface);
     box-shadow:
-      var(--_ui-docs-themes-choice-shadow),
+      var(--_ui-theme-menu-choice-shadow),
       inset 0 0 0 1px var(--ui-border-color);
     color: var(--ui-text-color);
   }
@@ -348,9 +348,9 @@
   @media (prefers-reduced-motion: no-preference) {
     .scheme .glyph {
       transition:
-        opacity var(--_ui-docs-themes-swap-duration) var(--ui-ease-out, ease-out),
-        scale var(--_ui-docs-themes-swap-duration) var(--ui-ease-out, ease-out),
-        filter var(--_ui-docs-themes-swap-duration) var(--ui-ease-out, ease-out) !important;
+        opacity var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out),
+        scale var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out),
+        filter var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out) !important;
     }
     .button {
       transition:
@@ -376,7 +376,7 @@
  * the quiet round icon button of a masthead's row:  no caret, no fill until hovered
  * - The dropdown's box is a button (`UIButton.css`), so it takes the button's tokens.
  */
-@layer ui.components.docs-themes.variations {
+@layer ui.components.theme-menu.variations {
   [part~="theme"].compact {
     --ui-button-background: transparent;
     --ui-button-background-hover: color-mix(in oklab, currentColor 10%, transparent);

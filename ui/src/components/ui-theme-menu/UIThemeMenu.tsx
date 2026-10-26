@@ -2,30 +2,28 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
-import {
-  DOCS_PLAIN_THEME,
-  DocsSchemes,
-  type DocsLook,
-  type DocsScheme,
-  type DocsShownScheme,
-  type SiteDataFile
-} from "spell-ui/docs-components/docs-components.types"
-import { SiteData } from "spell-ui/docs-components/SiteData"
-import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import { ThemeMenu } from "./ThemeMenu"
+import { ThemePreference } from "./ThemePreference"
 import {
-  type DocsThemesChange,
-  type DocsThemesShow,
-  type DocsThemesText,
-  type DocsThemesVocabulary
-} from "./UIDocsThemes.types"
-import { docsThemesVocabulary } from "./UIDocsThemes.en"
+  DEFAULT_THEME,
+  SchemeChoices,
+  type SchemeChoice,
+  type ShownScheme,
+  type ThemeAndScheme,
+  type ThemeMenuChange,
+  type ThemeMenuShow,
+  type ThemeMenuText,
+  type ThemeMenuVocabulary
+} from "./UIThemeMenu.types"
+import { themeMenuVocabulary } from "./UIThemeMenu.en"
 
-import themesCSS from "./UIDocsThemes.css?inline"
+import themeMenuCSS from "./UIThemeMenu.css?inline"
 
 /****************
- * ### `UIDocsThemes`
- * The component behind `<ui-docs-themes>`:  the docs site's look controls.
+ * ### `<ui-theme-menu>`
+ * The component behind `<ui-theme-menu>`:  a page's theme and light / dark, picked from Spell's own themes.
+ * - Every place shows the same menu (epic `debut` P17):  the editor, the epic pages and guides, Spell UI's pages.
+ *   Each place keeps its own default theme and remembered pick (`ThemePreference.site()`).
  *
  * - Its shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`, holding by `show`:
  *   - `both` (the default):  ONE round icon button, compact enough for a side column or a phone's top bar
@@ -33,7 +31,7 @@ import themesCSS from "./UIDocsThemes.css?inline"
  *       - Light | Dark | Auto, a segmented control (`role=radiogroup` of `radio`s, `part="schemes"`):
  *         the scheme the viewer CHOSE, Auto while it follows the OS
  *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
- *         Spell, Spell Brand, Fruity, Studio, Plain, Classic, then Fomantic's
+ *         Spell's own themes (`UI.themes.own`), each with its one-line description (`ThemeMenu`)
  *       - the `end` slot's rows, the page's own, under a divider (the Spell editor's "Edit theme...")
  *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
@@ -42,69 +40,52 @@ import themesCSS from "./UIDocsThemes.css?inline"
  *     a sun on a light page, a moon on a dark one (the scheme the page SHOWS:  the OS's, while following it).
  *     - A click flips it and stores it (no longer following the OS).
  *     - The icons cross-fade:  the new one grows from a quarter, un-blurring;  the old one the reverse.
- *   - `theme`:  a theme `<ui-dropdown part="theme" floating scrolling button>`, for a components page's masthead.
- *     - With `for="ui-x"`, it lists only the themes touching that family,
- *       and says `N themes` (Fomantic's per-page dropdown).
+ *   - `theme`:  a theme `<ui-dropdown part="theme" floating scrolling button>`, for a page's masthead.
  *     - Its rows are `<ui-item>` children;  its text goes in its `trigger` slot.
- * - The look itself is `ThemePreference`'s
- *   (one per page, remembered per viewer, the scheme shared with every doc site's header).
+ * - The theme and scheme themselves are `ThemePreference`'s
+ *   (one pair per page, remembered per viewer, the scheme shared with every Spell site's header).
  *   - Picking calls `ThemePreference.setTheme()` / `setScheme()` / `flipScheme()`,
  *     then fires ONE `ui-changed` (the dropdown's own is stopped).
- *   - Every picker on the page follows any picker's change, and the OS's while following it
+ *   - Every menu on the page follows any menu's change, and the OS's while following it
  *     (`subscribe()`, while connected).
  * - Keyboard, in the overlay:  focus moves to the chosen theme as it opens.
  *   - In the theme list:  arrows / Home / End move (one tab stop, a roving `tabindex`);
  *     Enter / Space / a click pick (the overlay stays open, to compare)
  *   - Shift+Tab reaches the scheme control:  arrows move AND choose, as in any radio group (one tab stop)
  *   - Escape closes the overlay, and focus goes back to the palette button (`UI.overlays`).
- * - A doc-only element (`src/docs-components/`):
- *   its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>` and `<ui-item>`, which its barrel imports.
+ * - Its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>` and `<ui-item>`, which its barrel imports.
+ * - Reads the themes and their titles from Spell UI's theme list (`UI.themes`), never a site's data:
+ *   so it works on any page.
  ****************/
-export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
-  @E.proto static vocabulary = docsThemesVocabulary
+export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
+  @E.proto static vocabulary = themeMenuVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "docs-themes": themesCSS },
+    styleSheets: { "theme-menu": themeMenuCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
-  constructor(...args: ConstructorParameters<typeof E.UIComponent>) {
-    super(...args)
-    if (isServer) return
-    // a promise callback writes it
-    SiteData.load().then(
-      (data) => (this.siteData = data),
-      () => undefined // no data:  the menu stays unfiltered, titled from sheet names
-    )
-  }
-
   ////////////////
-  // ## The look
+  // ## The theme and scheme chosen
   ////////////////
 
   /**
-   * The page's look, as last chosen by any picker.
-   * - A copy of `ThemePreference.look`, kept in step by `follow()`:  that one isn't reactive.
+   * The page's theme and scheme, as last chosen by any menu.
+   * - A copy of `ThemePreference.chosen`, kept in step by `follow()`:  that one isn't reactive.
    */
-  @E.state accessor look: DocsLook = isServer ? SERVER_LOOK : ThemePreference.look
+  @E.state accessor chosen: ThemeAndScheme = isServer ? SERVER_CHOICE : ThemePreference.chosen
 
-  /** The scheme the OS asks for:  what the page shows while following it;  a copy, as `look`. */
-  @E.state accessor osScheme: DocsShownScheme = isServer ? "light" : ThemePreference.osScheme()
+  /** The scheme the OS asks for:  what the page shows while following it;  a copy, as `chosen`. */
+  @E.state accessor osScheme: ShownScheme = isServer ? "light" : ThemePreference.osScheme()
 
   /** The scheme the page shows:  the chosen one, or the OS's while following it. */
-  get shownScheme(): DocsShownScheme {
-    const { scheme } = this.look
+  get shownScheme(): ShownScheme {
+    const { scheme } = this.chosen
     return scheme === "system" ? this.osScheme : scheme
   }
 
-  /** The chosen theme's menu value (`DOCS_PLAIN_THEME`:  our own look). */
+  /** The chosen theme's name. */
   get chosenTheme(): string {
-    return this.look.theme ?? DOCS_PLAIN_THEME
-  }
-
-  /** A theme other than our own look is applied:  `:state(themed)`. */
-  @E.cssState("themed")
-  get isThemed(): boolean {
-    return this.look.theme !== undefined
+    return this.chosen.theme
   }
 
   /** The page shows the dark scheme:  `:state(dark)`. */
@@ -116,23 +97,23 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   /** The scheme follows the OS:  `:state(following)`. */
   @E.cssState("following")
   get followsSystem(): boolean {
-    return this.look.scheme === "system"
+    return this.chosen.scheme === "system"
   }
 
   /**
    * Follow `ThemePreference` while connected:
-   * catch up on connect (another picker, or the OS, may have changed the look meanwhile),
+   * catch up on connect (another menu, or the OS, may have changed them meanwhile),
    * unsubscribe on disconnect.
    */
   @E.whileConnected
   protected followPreference() {
-    this.follow(ThemePreference.look)
-    return ThemePreference.subscribe((look) => this.follow(look))
+    this.follow(ThemePreference.chosen)
+    return ThemePreference.subscribe((chosen) => this.follow(chosen))
   }
 
-  /** Take `look`, and the OS's scheme now. */
-  private follow(look: DocsLook): void {
-    this.look = look
+  /** Take `chosen`, and the OS's scheme now. */
+  private follow(chosen: ThemeAndScheme): void {
+    this.chosen = chosen
     this.osScheme = ThemePreference.osScheme()
   }
 
@@ -140,8 +121,8 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   // ## Choosing
   ////////////////
 
-  /** Choose theme `name` (`undefined`:  our own look), as the viewer did with `event`. */
-  async chooseTheme(name: string | undefined, event?: Event): Promise<void> {
+  /** Choose theme `name`, as the viewer did with `event`. */
+  async chooseTheme(name: string, event?: Event): Promise<void> {
     const applied = ThemePreference.setTheme(name)
     this.emitChange(event)
     await applied
@@ -154,18 +135,18 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   }
 
   /** Choose scheme `scheme` (`system`:  follow the OS), as the viewer did with `event`;  the same one again:  nothing. */
-  chooseScheme(scheme: DocsScheme, event?: Event): void {
-    if (scheme === ThemePreference.look.scheme) return
+  chooseScheme(scheme: SchemeChoice, event?: Event): void {
+    if (scheme === ThemePreference.chosen.scheme) return
     ThemePreference.setScheme(scheme)
     this.emitChange(event)
   }
 
-  /** Fire `ui-changed` with the look now:  no `theme` key for our own look. */
+  /** Fire `ui-changed` with the theme and scheme now. */
   private emitChange(originalEvent?: Event): void {
-    const look = ThemePreference.look
-    const detail: DocsThemesChange = {
-      ...(look.theme !== undefined && { theme: look.theme }),
-      scheme: look.scheme,
+    const { theme, scheme } = ThemePreference.chosen
+    const detail: ThemeMenuChange = {
+      theme,
+      scheme,
       shown: ThemePreference.shownScheme(),
       originalEvent
     }
@@ -176,32 +157,24 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   // ## The theme menu
   ////////////////
 
-  /** The site data, once loaded:  titles and `for`'s families.  `undefined` before, or if it failed. */
-  @E.state accessor siteData: SiteDataFile | undefined = undefined
-
   /** `translationForKey()` as a plain function, for `ThemeMenu`. */
-  readonly texts: DocsThemesText = (key, params) => this.translationForKey(key, params)
+  readonly texts: ThemeMenuText = (key, params) => this.translationForKey(key, params)
 
   /**
-   * What the list / dropdown shows, for `for`.
+   * What the list / dropdown shows:  Spell's own themes (`UI.themes.own`).
    * - Read only once the runtime has loaded (`render()` waits for it):  `UI.themes` exists only then.
    */
   @E.derived
   get themeMenu(): ThemeMenu {
-    return new ThemeMenu({ names: UI.themes.names, data: this.siteData, forTag: this.for, text: this.texts })
-  }
-
-  /** Display title of theme `theme` (`undefined`:  our own look, `Plain`). */
-  private titleFor(theme: string | undefined): string {
-    return theme === undefined ? this.translationForKey("default") : this.themeMenu.titleFor(theme)
+    return new ThemeMenu({ themes: UI.themes.own, text: this.texts })
   }
 
   /**
    * Which controls show:  `show`, else `both`.
    * - Not `this.show` alone:  an empty or unknown `show` converts to `undefined`, which shows `both`.
    */
-  private get shownControls(): DocsThemesShow {
-    return (this.show as DocsThemesShow | undefined) ?? "both"
+  private get shownControls(): ThemeMenuShow {
+    return (this.show as ThemeMenuShow | undefined) ?? "both"
   }
 
   ////////////////
@@ -254,8 +227,8 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   private palette(): JSX.Element {
     const label = () =>
       this.translationForKey("palette", {
-        title: this.titleFor(this.look.theme),
-        scheme: this.translationForKey(SCHEME_TEXTS[this.look.scheme])
+        title: this.themeMenu.titleFor(this.chosenTheme),
+        scheme: this.translationForKey(SCHEME_TEXTS[this.chosen.scheme])
       })
     return (
       <>
@@ -321,9 +294,9 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         aria-label={this.translationForKey("schemeName")}
         onKeyDown={(event) => this.onSchemeKey(event)}
       >
-        <For each={DocsSchemes}>
+        <For each={SchemeChoices}>
           {(scheme) => {
-            const isChosen = () => this.look.scheme === scheme
+            const isChosen = () => this.chosen.scheme === scheme
             return (
               <button
                 type="button"
@@ -350,15 +323,15 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
     const step = SCHEME_KEYS[event.key]
     if (step === undefined) return
     event.preventDefault()
-    const at = DocsSchemes.indexOf(this.look.scheme)
-    const next = DocsSchemes[(at + step + DocsSchemes.length) % DocsSchemes.length]!
+    const at = SchemeChoices.indexOf(this.chosen.scheme)
+    const next = SchemeChoices[(at + step + SchemeChoices.length) % SchemeChoices.length]!
     this.chooseScheme(next, event)
     this.domElement.shadowRoot
       ?.querySelector<HTMLButtonElement>(`[role="${SCHEME_ROLES.item}"][value="${next}"]`)
       ?.focus()
   }
 
-  /** One row of the overlay's list:  a theme, a divider or a header. */
+  /** One row of the overlay's list:  a theme (or a divider or a header, which `ThemeMenu` lists none of today). */
   private entry(entry: E.MenuEntry): JSX.Element {
     if ("type" in entry) {
       return entry.type === "divider" ? (
@@ -392,11 +365,11 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 
   /**
    * The theme `<ui-dropdown>` (`show="theme"`).
-   * - `compact`:  an icon-only palette button, its text (`3 themes`) its tooltip and name
+   * - `compact`:  an icon-only palette button, its text (`Spell theme`) its tooltip and name
    *   (Owen, 2026-10-23:  "'1 theme' button should be palette icon")
    */
   private dropdown(): JSX.Element {
-    const label = () => this.themeMenu.labelFor(this.look.theme)
+    const label = () => this.themeMenu.labelFor(this.chosenTheme)
     return (
       <ui-dropdown
         part={this.partForName("theme")}
@@ -439,7 +412,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
   private onDropdownChange(event: Event): void {
     event.stopPropagation()
     const { value } = (event as CustomEvent<{ value: string }>).detail
-    void this.chooseTheme(value === DOCS_PLAIN_THEME ? undefined : value, event)
+    void this.chooseTheme(value, event)
   }
 
   ////////////////
@@ -458,13 +431,12 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 
   /**
    * A theme row's click (or Enter / Space):  choose it, keep the tab stop on it;  the overlay stays open.
-   * - Compared with `ThemePreference.look`, never `chosenTheme`:
+   * - Compared with `ThemePreference.chosen`, never `chosenTheme`:
    *   a click right after another reads that one's value before the write lands.
    */
   private onOptionClick(value: string, event: Event): void {
     this.tabStopTheme = value
-    const theme = value === DOCS_PLAIN_THEME ? undefined : value
-    if (theme !== ThemePreference.look.theme) void this.chooseTheme(theme, event)
+    if (value !== ThemePreference.chosen.theme) void this.chooseTheme(value, event)
   }
 
   /** Arrow keys, Home and End in the theme list:  move focus (and the tab stop) between rows. */
@@ -512,26 +484,26 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
-export interface UIDocsThemes extends E.AttributeValues<DocsThemesVocabulary> {}
+export interface UIThemeMenu extends E.AttributeValues<ThemeMenuVocabulary> {}
 
 /** The schemes a page shows, in the button's glyph order:  each glyph is a class word and a `SCHEME_ICONS` key. */
-const ShownSchemes = ["light", "dark"] as const satisfies readonly DocsShownScheme[]
+const ShownSchemes = ["light", "dark"] as const satisfies readonly ShownScheme[]
 
 /**
  * Icon the scheme button shows for the scheme the page SHOWS (`fomantic` pack).
  * - the OUTLINE sun:  the solid one reads as a cog at 14px
  */
-const SCHEME_ICONS: Readonly<Record<DocsShownScheme, string>> = { light: "sun outline", dark: "moon" }
+const SCHEME_ICONS: Readonly<Record<ShownScheme, string>> = { light: "sun outline", dark: "moon" }
 
 /** Icon of each choice in the overlay's scheme control (`fomantic` pack):  Auto a half-filled circle. */
-const SCHEME_CHOICE_ICONS: Readonly<Record<DocsScheme, string>> = {
+const SCHEME_CHOICE_ICONS: Readonly<Record<SchemeChoice, string>> = {
   light: "sun outline",
   dark: "moon",
   system: "adjust"
 }
 
 /** Text key naming each scheme:  the control's choices, and the palette's name. */
-const SCHEME_TEXTS = { light: "light", dark: "dark", system: "auto" } as const satisfies Record<DocsScheme, string>
+const SCHEME_TEXTS = { light: "light", dark: "dark", system: "auto" } as const satisfies Record<SchemeChoice, string>
 
 /** Icon of the button opening the overlay (`fomantic` pack). */
 const PALETTE_ICON = "palette"
@@ -539,8 +511,8 @@ const PALETTE_ICON = "palette"
 /** Icon marking the chosen theme in the overlay's list (`fomantic` pack). */
 const CHECK_ICON = "check"
 
-/** The look a server render shows:  no storage there. */
-const SERVER_LOOK: DocsLook = { theme: undefined, scheme: "system" }
+/** What a server render shows:  no storage there. */
+const SERVER_CHOICE: ThemeAndScheme = { theme: DEFAULT_THEME, scheme: "system" }
 
 /** Shadow-root ids:  the palette button (its tooltip's `for`) and the overlay's header (its list's name). */
 const IDS = { palette: "palette", heading: "themes-heading" } as const

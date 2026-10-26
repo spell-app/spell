@@ -66,7 +66,7 @@
           </ui-markdown>
           <ui-sticky class="site-sticky-bar">
             <ui-segment appearance="secondary">
-              <ui-docs-themes></ui-docs-themes>
+              <ui-theme-menu></ui-theme-menu>
             </ui-segment>
           </ui-sticky>
 
@@ -2467,6 +2467,24 @@
                   <a href="ui-theme-editor.html">Theme Editor page</a>
                 </p>
                 <ui-theme-editor></ui-theme-editor>
+              </ui-docs-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-theme-menu" label="Theme Menu" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A theme menu picks the page&#39;s theme from Spell&#39;s own, and its light, dark or system colour scheme, and remembers both for the next page.
+                  <a href="ui-theme-menu.html">Theme Menu page</a>
+                </p>
+                <ui-segment inverted>
+                  <ui-theme-menu inverted size="small"></ui-theme-menu>
+                </ui-segment>
+              </ui-docs-example>
+              <ui-docs-example description="A theme dropdown">
+                <ui-theme-menu show="theme"></ui-theme-menu>
+              </ui-docs-example>
+              <ui-docs-example description="Light / dark only">
+                <ui-theme-menu show="scheme"></ui-theme-menu>
               </ui-docs-example>
             </ui-section>
           </ui-section>

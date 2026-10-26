@@ -775,7 +775,7 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
   - `{ equals }`, `{ ownedWrite }` when needed.
   - Replaces a `Cell` field and its `.get()` / `.set()`.
   - A value that CHANGES after it's made is `@E.state`, even where nothing reactive reads it yet.
-    The decorator says the intent (`ThemePreference`'s in-memory look, `RootSettings.generation`).
+    The decorator says the intent (`ThemePreference`'s in-memory theme and scheme, `RootSettings.generation`).
   - A value made once and kept:  `@E.lazy get x()`, or `@E.once` on a method (a loader's promise).
   - Handles to things the class started (a timer, an observer, an abort controller) stay plain fields:
     nobody should watch them (`UIDocsToc.queuedUpdate`, `ControlLabels.labelObserver`).

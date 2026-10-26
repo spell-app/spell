@@ -32732,6 +32732,236 @@ export interface UIThemeEditorJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeEditorEventMap>>, keyof UIThemeEditorAttributes>,
     UIThemeEditorAttributes {}
 
+/** `<ui-theme-menu>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIThemeMenuEventMap {
+  /**
+   * `ui-changed`:  The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.
+   * - `event.detail`:  `{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{
+    theme: string
+    scheme: "light" | "dark" | "system"
+    shown: "light" | "dark"
+    originalEvent?: Event
+  }>
+}
+
+/** `<ui-theme-menu>`'s own attributes, from its vocabulary. */
+export interface UIThemeMenuAttributes {
+  /**
+   * Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).
+   * - takes:  `both` · `theme` · `scheme`
+   * - default:  `both`
+   */
+  show?: "both" | "theme" | "scheme"
+  /**
+   * `show`, as the DOM element's property.
+   * @deprecated write `show` -- `prop:` stays only for compiled spell
+   */
+  "prop:show"?: "both" | "theme" | "scheme"
+  /**
+   * Size of the buttons (or the dropdown), `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown.
+   * - takes:  flag (present / absent)
+   */
+  inverted?: boolean | ""
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
+  "prop:inverted"?: boolean | ""
+  /**
+   * With `show="theme"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip and name, for a masthead's row of icon buttons.
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-changed`:  The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.
+   * - `event.detail`:  `{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIThemeMenuEventMap["ui-changed"]) => void
+}
+
+/** `<ui-theme-menu>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIThemeMenuJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeMenuEventMap>>, keyof UIThemeMenuAttributes>,
+    UIThemeMenuAttributes {}
+
 /** `<ui-title>`'s own attributes, from its vocabulary. */
 export interface UITitleAttributes {
   /**
@@ -35876,6 +36106,14 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-theme-editor": UIThemeEditorJSXAttributes
       /**
+       * `<ui-theme-menu>`:  A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page.
+       * - also known as:  theme picker, theme switcher, dark mode toggle, colour scheme, appearance, skin
+       * - slots:
+       *   - `end`:  At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys.
+       * - events:  `ui-changed`
+       */
+      "ui-theme-menu": UIThemeMenuJSXAttributes
+      /**
        * `<ui-title>`:  A title:  a step's, an accordion panel's, a search result's.
        * - also known as:  accordion title, summary, toggle header
        * - slots:
@@ -36113,6 +36351,7 @@ declare global {
     "ui-text": HTMLElement
     "ui-textarea": UIHTMLElement<UITextareaEventMap>
     "ui-theme-editor": UIHTMLElement<UIThemeEditorEventMap>
+    "ui-theme-menu": UIHTMLElement<UIThemeMenuEventMap>
     "ui-title": HTMLElement
     "ui-toast": UIHTMLElement<UIToastEventMap>
     "ui-toolbar": UIHTMLElement<UIToolbarEventMap>

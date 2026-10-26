@@ -160,6 +160,13 @@ describe("<ui-theme-editor> sheet", () => {
     expect(token("--ui-primary")).toBe(token("--ui-green"))
   })
 
+  it("a theme kept on a base under its old name opens on its new one:  Studio as Merlot", async () => {
+    SavedTheme.save({ name: "Kept", base: "studio", primary: "teal" }, "/* kept */")
+    expect(await SavedTheme.restore()).toBe(true)
+    expect(UI.themes.current).toBe("merlot")
+    expect(SavedTheme.choices?.base).toBe("merlot")
+  })
+
   it("Copy CSS copies the stylesheet, and sends `ui-copied`", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
     const host = await editor(`<ui-theme-editor value='{"depth": "flat"}'></ui-theme-editor>`)

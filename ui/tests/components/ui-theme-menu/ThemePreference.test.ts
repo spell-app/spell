@@ -3,13 +3,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
 import { UI } from "spell-ui/runtime"
 
-import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
-import {
-  DOCS_DEFAULT_THEME,
-  DOCS_LOOK_KEYS,
-  DOCS_SCHEME_SWITCHING
-} from "spell-ui/docs-components/docs-components.types"
-import { SPELL } from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
+import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
+import { DEFAULT_THEME, SCHEME_SWITCHING, THEME_KEYS } from "spell-ui/components/ui-theme-menu/UIThemeMenu.types"
 
 beforeEach(async () => {
   // the real OS's scheme never matters
@@ -23,9 +18,9 @@ afterEach(async () => {
   vi.restoreAllMocks()
 })
 
-describe("DOCS_LOOK_KEYS.scheme", () => {
+describe("THEME_KEYS.scheme", () => {
   test("ONE scheme key for every Spell site:  the kit's `ColorScheme`'s", () => {
-    expect(DOCS_LOOK_KEYS.scheme).toBe(COLOR_SCHEME_KEY)
+    expect(THEME_KEYS.scheme).toBe(COLOR_SCHEME_KEY)
   })
 })
 
@@ -36,50 +31,74 @@ describe("ThemePreference.reset()", () => {
   ])("moves an old key's scheme (%s) to the one key, once", (key, scheme) => {
     localStorage.setItem(key, scheme)
     ThemePreference.reset()
-    expect(ThemePreference.look.scheme).toBe(scheme)
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe(scheme)
+    expect(ThemePreference.chosen.scheme).toBe(scheme)
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe(scheme)
     for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
   })
 
   test("an old key never overrides the one key", () => {
-    localStorage.setItem(DOCS_LOOK_KEYS.scheme, "light")
+    localStorage.setItem(THEME_KEYS.scheme, "light")
     localStorage.setItem("spell-site:theme", "dark")
     ThemePreference.reset()
-    expect(ThemePreference.look.scheme).toBe("light")
+    expect(ThemePreference.chosen.scheme).toBe("light")
   })
 })
 
 describe("ThemePreference.restore()", () => {
   test("with nothing stored, restore() applies the Spell theme", async () => {
-    expect(DOCS_DEFAULT_THEME).toBe(SPELL)
+    expect(DEFAULT_THEME).toBe("spell")
     await ThemePreference.restore()
-    expect(UI.themes.current).toBe(SPELL)
+    expect(UI.themes.current).toBe("spell")
     expect(UI.styles.has(UI.themes.slots.theme)).toBe(true)
   })
 
   test("forgets a stored theme that no longer exists, for the default", async () => {
-    localStorage.setItem(DOCS_LOOK_KEYS.theme, "no-such-theme")
+    localStorage.setItem(THEME_KEYS.theme, "no-such-theme")
     ThemePreference.reset()
     await ThemePreference.restore()
-    expect(UI.themes.current).toBe(DOCS_DEFAULT_THEME)
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBeNull()
-    expect(ThemePreference.look.theme).toBe(DOCS_DEFAULT_THEME)
+    expect(UI.themes.current).toBe(DEFAULT_THEME)
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBeNull()
+    expect(ThemePreference.chosen.theme).toBe(DEFAULT_THEME)
+  })
+
+  test.each([
+    ["classic", "Classic, no longer in the menu"],
+    ["default", "Plain (stored as `default`), no longer in the menu"],
+    ["github", "a Fomantic theme, archived"]
+  ])("opens a stored theme no longer in the set (%s:  %s) as the default", async (stored) => {
+    localStorage.setItem(THEME_KEYS.theme, stored)
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(UI.themes.current).toBe(DEFAULT_THEME)
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBeNull()
+  })
+
+  test.each([
+    ["studio", "merlot"],
+    ["spell-brand", "spell"]
+  ])("opens a theme stored under its old name (%s) as its new one (%s)", async (stored, now) => {
+    localStorage.setItem(THEME_KEYS.theme, stored)
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(UI.themes.current).toBe(now)
+    expect(ThemePreference.chosen.theme).toBe(now)
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe(now === DEFAULT_THEME ? null : now)
   })
 })
 
 describe("ThemePreference.site()", () => {
-  afterEach(() => ThemePreference.site({ defaultTheme: DOCS_DEFAULT_THEME, themeKey: DOCS_LOOK_KEYS.theme }))
+  afterEach(() => ThemePreference.site({ defaultTheme: DEFAULT_THEME, themeKey: THEME_KEYS.theme }))
 
-  test("another site's own default theme and key:  the docs' theme key is left alone", async () => {
-    localStorage.setItem(DOCS_LOOK_KEYS.theme, "github")
+  test("another place's own default theme and key:  the docs' theme key is left alone", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "merlot")
     ThemePreference.site({ defaultTheme: "fruity", themeKey: "test-site:theme" })
     ThemePreference.reset()
     await ThemePreference.restore()
     expect(UI.themes.current).toBe("fruity")
 
-    await ThemePreference.setTheme("material")
-    expect(localStorage.getItem("test-site:theme")).toBe("material")
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBe("github")
+    await ThemePreference.setTheme("glass")
+    expect(localStorage.getItem("test-site:theme")).toBe("glass")
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
 
     // its default is stored as no key at all, as the docs' is
     await ThemePreference.setTheme("fruity")
@@ -89,34 +108,34 @@ describe("ThemePreference.site()", () => {
 })
 
 describe("ThemePreference.applyScheme()", () => {
-  test("a scheme switch turns transitions off for a frame (`DOCS_SCHEME_SWITCHING`)", async () => {
+  test("a scheme switch turns transitions off for a frame (`SCHEME_SWITCHING`)", async () => {
     const root = document.documentElement
     ThemePreference.applyScheme("dark")
-    expect(root.classList.contains(DOCS_SCHEME_SWITCHING)).toBe(true)
-    await vi.waitFor(() => expect(root.classList.contains(DOCS_SCHEME_SWITCHING)).toBe(false))
+    expect(root.classList.contains(SCHEME_SWITCHING)).toBe(true)
+    await vi.waitFor(() => expect(root.classList.contains(SCHEME_SWITCHING)).toBe(false))
   })
 })
 
 describe("ThemePreference.HEAD_SCRIPT", () => {
   test("applies the stored scheme (or an old key's) synchronously, and never throws", () => {
-    localStorage.setItem(DOCS_LOOK_KEYS.scheme, "dark")
+    localStorage.setItem(THEME_KEYS.scheme, "dark")
     runHeadScript()
     expect(htmlScheme()).toEqual({ light: false, dark: true, colorScheme: "dark" })
     ThemePreference.applyScheme("system")
-    localStorage.removeItem(DOCS_LOOK_KEYS.scheme)
+    localStorage.removeItem(THEME_KEYS.scheme)
     localStorage.setItem("spell-ui-site:scheme", "light")
     runHeadScript()
     expect(htmlScheme()).toEqual({ light: true, dark: false, colorScheme: "light" })
     ThemePreference.applyScheme("system")
-    localStorage.setItem(DOCS_LOOK_KEYS.scheme, "<junk>")
+    localStorage.setItem(THEME_KEYS.scheme, "<junk>")
     runHeadScript()
     expect(document.documentElement.className).not.toMatch(/ui-(light|dark)/)
   })
 })
 
-/** Back to no stored look (so the default theme, in memory), nothing applied, the system scheme. */
+/** Back to no stored theme (so the default theme, in memory), nothing applied, the system scheme. */
 async function clean() {
-  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
+  for (const key of [THEME_KEYS.theme, THEME_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
     localStorage.removeItem(key)
   }
   ThemePreference.reset()

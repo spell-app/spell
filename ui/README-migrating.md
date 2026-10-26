@@ -215,7 +215,7 @@ Four doors are open on purpose, and a Fomantic project's pieces each go through 
 | --- | --- |
 | `.variables` files, LESS variables | tokens:  CSS custom properties, which inherit into every shadow root (`--ui-primary`, `--ui-button-*`) |
 | `.overrides` files | the app stylesheet, `<style id="ui-app-stylesheet">`, nearly unchanged:  it's mirrored into every shadow root, where the class grammar it targets lives |
-| `theme.config`, a theme per component | ONE theme for the whole page, `UI.themes.apply("github")`;  mix looks with a component's own tokens |
+| `theme.config`, a theme per component | ONE theme for the whole page, `UI.themes.apply("merlot")`;  mix looks with a component's own tokens |
 | the gulp build, `semantic.json`, CDN links, the CSS, LESS and SASS distributions | one package and nothing to build:  import the root, and each family loads the first time the page uses it ([README.md](README.md));  themes are CSS files |
 
 Nothing in a Fomantic project maps to the other two doors, utility classes and `::part()`:
@@ -237,10 +237,10 @@ await themes.apply("classic")
   Add Lato yourself (from Google Fonts, say), or the page falls back to the system's font
   and looks ALMOST right, which is worse.
 
-Your Fomantic theme is probably here under its own name:  24 of Fomantic's 25 looks are ported.
-Two names changed:  Fomantic's `default` look is `classic` here, and its own `classic` theme is `fomantic-classic`.
-The one left out, Lead By Example, has `github` standing in;
-every theme, in a line, is on [README-themes.md](README-themes.md#the-themes--classic-23-of-fomantics-and-spells-own).
+Fomantic's `default` look is `classic` here, the base every theme sits on.
+Its other themes were ported too (24 of its 25 looks), and are archived now, kept only to copy from:
+a page picks one of Spell's own four instead,
+as [README-themes.md](README-themes.md#the-themes--spells-own-four-on-classic) says.
 
 ### jQuery calls become properties and events
 

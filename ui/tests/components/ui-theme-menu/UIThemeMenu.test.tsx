@@ -6,53 +6,38 @@ import { OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell-ui/runtime"
-import { SiteData } from "spell-ui/docs-components/SiteData"
-import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
+import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
 import {
-  DOCS_LOOK_KEYS,
-  DOCS_PLAIN_THEME,
-  type DocsScheme,
-  type DocsShownScheme
-} from "spell-ui/docs-components/docs-components.types"
+  THEME_KEYS,
+  type SchemeChoice,
+  type ShownScheme,
+  type ThemeMenuChange
+} from "spell-ui/components/ui-theme-menu/UIThemeMenu.types"
 
-import {
-  FRUITY,
-  SPELL,
-  SPELL_BRAND,
-  STUDIO,
-  type DocsThemesChange
-} from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
-
-import "spell-ui/docs-components/ui-docs-themes"
+import "spell-ui/components/ui-theme-menu"
 import "spell-ui/components/ui-button"
 
 ////////////////
 // ## Fixtures
 ////////////////
 
-/** The committed site data, served by Vite. */
-const REAL_DATA = Object.values(
-  import.meta.glob<string>("/docs/__data/components.json5", { query: "?url", import: "default", eager: true })
-)[0]!
-
 /** Element-markup examples, by path. */
-const EXAMPLES = import.meta.glob<string>("/src/docs-components/ui-docs-themes/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-theme-menu/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
 })
 
 /** The OS's scheme the tests pretend:  `osScheme()` is spied on, so the real OS never matters. */
-let os: DocsShownScheme = "light"
+let os: ShownScheme = "light"
 
 ////////////////
 // ## Helpers
 ////////////////
 
-/** Render `html` and wait for it, and for the site data to reach its menu. */
+/** Render `html` and wait for it. */
 async function render(html: string) {
   const host = await ElementFixture.render<HTMLElement>(html)
-  await SiteData.load()
   await ElementFixture.settle()
   return host
 }
@@ -69,7 +54,7 @@ function shownOf(host: Element) {
 }
 
 /** `host`'s overlay choice for scheme `scheme` (Light | Dark | Auto). */
-function choice(host: Element, scheme: DocsScheme) {
+function choice(host: Element, scheme: SchemeChoice) {
   return host.shadowRoot!.querySelector<HTMLButtonElement>(`[role=radio][value="${scheme}"]`)!
 }
 
@@ -124,9 +109,9 @@ function htmlScheme() {
   }
 }
 
-/** Back to no stored look (so the default theme, in memory), nothing applied, the system scheme. */
+/** Back to no stored theme (so the default theme, in memory), nothing applied, the system scheme. */
 async function clean() {
-  for (const key of [DOCS_LOOK_KEYS.theme, DOCS_LOOK_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
+  for (const key of [THEME_KEYS.theme, THEME_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
     localStorage.removeItem(key)
   }
   ThemePreference.reset()
@@ -137,7 +122,6 @@ async function clean() {
 beforeEach(async () => {
   os = "light"
   vi.spyOn(ThemePreference, "osScheme").mockImplementation(() => os)
-  SiteData.url = REAL_DATA
   await UI.load()
   // Escape through a keyboard binding rather than `CloseWatcher`, so the test can press it
   UI.overlays.useCloseWatcher = false
@@ -153,9 +137,9 @@ afterEach(async () => {
 // ## Markup and overlay
 ////////////////
 
-describe("<ui-docs-themes> markup", () => {
+describe("<ui-theme-menu> markup", () => {
   it("renders ONE palette button, its overlay holding Light | Dark | Auto (Auto chosen) and the theme list", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     expect(part(host, "controls").className).toBe("ui themes")
     expect(part(host, "palette").localName).toBe("button")
     expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Auto")
@@ -185,7 +169,7 @@ describe("<ui-docs-themes> markup", () => {
   })
 
   it('show="scheme":  the sun / moon button alone, showing the page\'s scheme', async () => {
-    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu show="scheme"></ui-theme-menu>`)
     const scheme = part(host, "scheme")
     expect(scheme.className).toBe("scheme button light")
     expect(scheme.getAttribute("aria-label")).toBe("Switch to dark")
@@ -201,14 +185,14 @@ describe("<ui-docs-themes> markup", () => {
 
   it("follows the OS's scheme while nothing is chosen:  a moon on a dark OS", async () => {
     os = "dark"
-    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu show="scheme"></ui-theme-menu>`)
     expect(shownOf(host)).toBe("dark")
     expect(part(host, "scheme").getAttribute("aria-label")).toBe("Switch to light")
     expect(host.matches(":state(dark)")).toBe(true)
   })
 
   it("switches its icon when the OS switches scheme, while following it", async () => {
-    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu show="scheme"></ui-theme-menu>`)
     os = "dark"
     ThemePreference.osChanged()
     await ElementFixture.settle()
@@ -221,15 +205,15 @@ describe("<ui-docs-themes> markup", () => {
     ["theme", ["theme"], ["palette", "overlay", "schemes", "scheme"]],
     ["scheme", ["scheme"], ["palette", "overlay", "schemes", "theme"]]
   ])("show=%s", async (show, present, absent) => {
-    const host = await render(`<ui-docs-themes show="${show}"></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu show="${show}"></ui-theme-menu>`)
     for (const name of present) expect(part(host, name), name).not.toBeNull()
     for (const name of absent) expect(part(host, name), name).toBeNull()
   })
 
   it("passes size and inverted on", async () => {
-    const host = await render(`<ui-docs-themes size="small" inverted></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu size="small" inverted></ui-theme-menu>`)
     expect(part(host, "controls").className).toBe("ui small inverted themes")
-    const dropdown = await render(`<ui-docs-themes size="small" inverted show="theme"></ui-docs-themes>`)
+    const dropdown = await render(`<ui-theme-menu size="small" inverted show="theme"></ui-theme-menu>`)
     expect(part(dropdown, "theme").getAttribute("size")).toBe("small")
     expect(part(dropdown, "theme").hasAttribute("inverted")).toBe(true)
   })
@@ -237,58 +221,46 @@ describe("<ui-docs-themes> markup", () => {
   it("renders every element example", async () => {
     for (const [path, html] of Object.entries(EXAMPLES)) {
       const wrapper = await ElementFixture.render<HTMLElement>(`<div>${html}</div>`)
-      for (const host of wrapper.querySelectorAll("ui-docs-themes")) {
+      for (const host of wrapper.querySelectorAll("ui-theme-menu")) {
         expect(host.shadowRoot!.querySelector("[part~=controls]"), path).not.toBeNull()
       }
     }
   })
 })
 
-describe("<ui-docs-themes> overlay", () => {
-  it("lists Spell (checked), Spell Brand, Fruity, Studio, Plain, Classic, then every Fomantic theme titled from the site data", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    const list = rows(host)
-    expect(list.slice(0, 6)).toEqual([
-      [SPELL, "Spell"],
-      [SPELL_BRAND, "Spell Brand"],
-      [FRUITY, "Fruity"],
-      [STUDIO, "Studio"],
-      [DOCS_PLAIN_THEME, "Plain"],
-      ["classic", "Classic"]
-    ])
-    expect(
-      list
-        .slice(6)
-        .map(([value]) => value)
-        .sort()
-    ).toEqual([...UI.themes.names].sort())
-    expect(list).toContainEqual(["github", "GitHub"])
-    expect(list.map(([value]) => value)).not.toContain("dark")
-    expect(row(host, SPELL).getAttribute("aria-checked")).toBe("true")
-    expect(row(host, SPELL).querySelector(".description")!.textContent).toBe("The Spell brand")
-    expect(host.shadowRoot!.querySelector(".menu > .header")!.textContent).toBe("Fomantic themes")
+describe("<ui-theme-menu> overlay", () => {
+  it("lists Spell's own themes (Spell checked), each with its description:  no Plain, no Classic, no Fomantic", async () => {
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
+    expect(rows(host).map(([value]) => value)).toEqual([...UI.themes.own])
+    expect(rows(host)).toContainEqual(["merlot", "Merlot"])
+    expect(rows(host).map(([value]) => value)).not.toContain("classic")
+    expect(rows(host).map(([value]) => value)).not.toContain("default")
+    expect(row(host, "spell").getAttribute("aria-checked")).toBe("true")
+    expect(row(host, "spell").querySelector(".description")!.textContent).toBe("The Spell brand")
+    expect(row(host, "merlot").querySelector(".description")!.textContent).toBe("A wine-dark studio")
+    expect(host.shadowRoot!.querySelector(".menu > .header")).toBeNull()
     // one tab stop:  the chosen theme
-    expect(rows(host).filter(([value]) => row(host, value).tabIndex === 0)).toEqual([[SPELL, "Spell"]])
+    expect(rows(host).filter(([value]) => row(host, value).tabIndex === 0)).toEqual([["spell", "Spell"]])
   })
 
   it("opens on the palette button, focuses the chosen theme;  arrows move;  Escape closes back to the button", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     const palette = part(host, "palette")
     const focused = () => host.shadowRoot!.activeElement
     palette.focus()
     await userEvent.keyboard("{Enter}")
     await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
-    await vi.waitFor(() => expect(focused()).toBe(row(host, SPELL)))
+    await vi.waitFor(() => expect(focused()).toBe(row(host, "spell")))
     await ElementFixture.settle()
     expect(host.matches(":state(open)")).toBe(true)
     expect(host.shadowRoot!.querySelectorAll("[part~=tip]")[0]!.classList.contains("muted")).toBe(true)
 
     await userEvent.keyboard("{ArrowDown}")
-    expect(focused()).toBe(row(host, SPELL_BRAND))
+    expect(focused()).toBe(row(host, UI.themes.own[1]!))
     await userEvent.keyboard("{ArrowUp}{ArrowUp}")
     expect(focused()).toBe(row(host, rows(host).at(-1)![0]))
     await userEvent.keyboard("{Home}")
-    expect(focused()).toBe(row(host, SPELL))
+    expect(focused()).toBe(row(host, "spell"))
     await userEvent.keyboard("{End}")
     await ElementFixture.settle()
     expect(row(host, rows(host).at(-1)![0]).tabIndex).toBe(0)
@@ -301,37 +273,25 @@ describe("<ui-docs-themes> overlay", () => {
   })
 
   it("a theme row picks it:  classic + the theme, on the page and in shadow roots;  one ui-changed;  stays open", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     const probe = await ElementFixture.render<HTMLElement>(`<ui-button>Probe</ui-button>`)
-    const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
-    row(host, "github").click()
+    const changes: ThemeMenuChange[] = []
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
+    row(host, "merlot").click()
     await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.theme)).toBe(true))
-    expect(UI.themes.current).toBe("github")
+    expect(UI.themes.current).toBe("merlot")
     const base = UI.styles.sheet(UI.themes.slots.base)!
     const theme = UI.styles.sheet(UI.themes.slots.theme)!
     expect(document.adoptedStyleSheets).toEqual(expect.arrayContaining([base, theme]))
     expect(probe.shadowRoot!.adoptedStyleSheets).toEqual(expect.arrayContaining([base, theme]))
-    expect(changes).toMatchObject([{ theme: "github", scheme: "system", shown: "light" }])
+    expect(changes).toMatchObject([{ theme: "merlot", scheme: "system", shown: "light" }])
     await ElementFixture.settle()
-    expect(row(host, "github").getAttribute("aria-checked")).toBe("true")
-    expect(row(host, SPELL).getAttribute("aria-checked")).toBe("false")
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  GitHub, Auto")
-    expect(host.matches(":state(themed)")).toBe(true)
+    expect(row(host, "merlot").getAttribute("aria-checked")).toBe("true")
+    expect(row(host, "spell").getAttribute("aria-checked")).toBe("false")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Merlot, Auto")
     // picking it again changes nothing
-    row(host, "github").click()
+    row(host, "merlot").click()
     expect(changes).toHaveLength(1)
-  })
-
-  it("Plain:  no sheet at all", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    row(host, "classic").click()
-    await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.base)).toBe(true))
-    expect(UI.styles.has(UI.themes.slots.theme)).toBe(false)
-    row(host, DOCS_PLAIN_THEME).click()
-    await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.base)).toBe(false))
-    expect(UI.themes.current).toBeUndefined()
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Plain, Auto")
   })
 })
 
@@ -339,15 +299,15 @@ describe("<ui-docs-themes> overlay", () => {
 // ## Scheme
 ////////////////
 
-describe("<ui-docs-themes> scheme", () => {
+describe("<ui-theme-menu> scheme", () => {
   it('show="scheme":  a click flips the shown scheme and stores it:  ui-dark / ui-light + color-scheme on <html>', async () => {
-    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
-    const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    const host = await render(`<ui-theme-menu show="scheme"></ui-theme-menu>`)
+    const changes: ThemeMenuChange[] = []
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
     part(host, "scheme").click()
     await ElementFixture.settle()
     expect(htmlScheme()).toEqual({ light: false, dark: true, colorScheme: "dark" })
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("dark")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
     expect(shownOf(host)).toBe("dark")
     expect(part(host, "scheme").getAttribute("aria-label")).toBe("Switch to light")
     expect(host.matches(":state(dark)")).toBe(true)
@@ -355,7 +315,7 @@ describe("<ui-docs-themes> scheme", () => {
     part(host, "scheme").click()
     await ElementFixture.settle()
     expect(htmlScheme()).toEqual({ light: true, dark: false, colorScheme: "light" })
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("light")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("light")
     expect(changes.map(({ scheme, shown }) => [scheme, shown])).toEqual([
       ["dark", "dark"],
       ["light", "light"]
@@ -364,12 +324,12 @@ describe("<ui-docs-themes> scheme", () => {
 
   it("Dark and Light store the scheme;  Auto drops it, and the OS's shows;  one ui-changed each", async () => {
     os = "dark"
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    const changes: DocsThemesChange[] = []
-    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
+    const changes: ThemeMenuChange[] = []
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
     choice(host, "light").click()
     await ElementFixture.settle()
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("light")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("light")
     expect(htmlScheme()).toEqual({ light: true, dark: false, colorScheme: "light" })
     expect(choices(host).map(([value, , checked]) => [value, checked])).toEqual([
       ["light", "true"],
@@ -379,12 +339,12 @@ describe("<ui-docs-themes> scheme", () => {
     expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Light")
     choice(host, "dark").click()
     await ElementFixture.settle()
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("dark")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
     expect(htmlScheme().dark).toBe(true)
     expect(host.matches(":state(dark)")).toBe(true)
     choice(host, "system").click()
     await ElementFixture.settle()
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBeNull()
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBeNull()
     expect(htmlScheme()).toEqual({ light: false, dark: false, colorScheme: "" })
     expect(host.matches(":state(following)")).toBe(true)
     expect(host.matches(":state(dark)")).toBe(true) // the OS's
@@ -398,18 +358,18 @@ describe("<ui-docs-themes> scheme", () => {
   })
 
   it("Light | Dark | Auto is a radio group:  one tab stop, the chosen one;  arrows move AND choose, wrapping", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     const focused = () => host.shadowRoot!.activeElement
     part(host, "palette").click()
     await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
     // Shift+Tab from the theme list reaches the scheme control's one tab stop:  the chosen scheme
-    await vi.waitFor(() => expect(focused()).toBe(row(host, SPELL)))
+    await vi.waitFor(() => expect(focused()).toBe(row(host, "spell")))
     await userEvent.keyboard("{Shift>}{Tab}{/Shift}")
     expect(focused()).toBe(choice(host, "system"))
     await userEvent.keyboard("{ArrowRight}")
     await ElementFixture.settle()
     expect(focused()).toBe(choice(host, "light"))
-    expect(ThemePreference.look.scheme).toBe("light")
+    expect(ThemePreference.chosen.scheme).toBe("light")
     expect(choices(host).map(([value, , , tabIndex]) => [value, tabIndex])).toEqual([
       ["light", 0],
       ["dark", -1],
@@ -422,20 +382,19 @@ describe("<ui-docs-themes> scheme", () => {
     await userEvent.keyboard("{ArrowLeft}{ArrowUp}")
     await ElementFixture.settle()
     expect(focused()).toBe(choice(host, "system"))
-    expect(ThemePreference.look.scheme).toBe("system")
+    expect(ThemePreference.chosen.scheme).toBe("system")
   })
 
-  it("every picker on the page follows a change made in another", async () => {
+  it("every menu on the page follows a change made in another", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div><ui-docs-themes></ui-docs-themes><ui-docs-themes for="ui-button" show="theme"></ui-docs-themes></div>`
+      `<div><ui-theme-menu></ui-theme-menu><ui-theme-menu show="theme"></ui-theme-menu></div>`
     )
-    await SiteData.load()
-    const [first, second] = wrapper.querySelectorAll("ui-docs-themes")
+    const [first, second] = wrapper.querySelectorAll("ui-theme-menu")
     choice(first!, "dark").click()
-    row(first!, "github").click()
-    await vi.waitFor(() => expect(UI.themes.current).toBe("github"))
+    row(first!, "merlot").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
     await ElementFixture.settle()
-    expect(part(second!, "theme").getAttribute("value")).toBe("github")
+    expect(part(second!, "theme").getAttribute("value")).toBe("merlot")
     expect(second!.matches(":state(dark)")).toBe(true)
   })
 })
@@ -444,34 +403,28 @@ describe("<ui-docs-themes> scheme", () => {
 // ## Dropdown
 ////////////////
 
-describe("<ui-docs-themes> dropdown (show=theme)", () => {
-  it('for="ui-button":  only the themes touching the button family, and how many', async () => {
-    const data = await SiteData.load()
-    const buttons = data.themes.filter((theme) => theme.families.includes("ui-button")).map((theme) => theme.name)
-    const host = await render(`<ui-docs-themes for="ui-button" show="theme"></ui-docs-themes>`)
-    const listed = dropdownRows(host)
-      .slice(6)
-      .map(([value]) => value)
-    expect(listed.sort()).toEqual(buttons.filter((name) => UI.themes.names.includes(name)).sort())
-    expect(listed).toContain("github")
-    expect(listed).not.toContain("gmail")
-    expect(labelOf(host)).toBe(`${listed.length} themes`)
+describe("<ui-theme-menu> dropdown (show=theme)", () => {
+  it("lists Spell's own themes, its text the chosen one's", async () => {
+    const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
+    expect(dropdownRows(host).map(([value]) => value)).toEqual([...UI.themes.own])
+    expect(dropdownRows(host)).toContainEqual(["glass", "Glass"])
+    expect(labelOf(host)).toBe("Spell theme")
   })
 
   it("a pick applies it and fires one ui-changed (the dropdown's own is stopped)", async () => {
-    const host = await render(`<ui-docs-themes show="theme"></ui-docs-themes>`)
+    const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     const inner: Event[] = []
-    const changes: DocsThemesChange[] = []
+    const changes: ThemeMenuChange[] = []
     document.body.addEventListener("ui-changed", (event) => {
-      if (event.target === host) changes.push((event as CustomEvent<DocsThemesChange>).detail)
+      if (event.target === host) changes.push((event as CustomEvent<ThemeMenuChange>).detail)
       else inner.push(event)
     })
-    pick(host, "material")
-    await vi.waitFor(() => expect(UI.themes.current).toBe("material"))
-    expect(changes).toMatchObject([{ theme: "material" }])
+    pick(host, "merlot")
+    await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
+    expect(changes).toMatchObject([{ theme: "merlot" }])
     expect(inner).toEqual([])
     await ElementFixture.settle()
-    expect(labelOf(host)).toBe("Material theme")
+    expect(labelOf(host)).toBe("Merlot theme")
   })
 })
 
@@ -479,14 +432,14 @@ describe("<ui-docs-themes> dropdown (show=theme)", () => {
 // ## Persistence
 ////////////////
 
-describe("<ui-docs-themes> persistence", () => {
-  it("stores the look, and restore() re-applies it on the next page", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+describe("<ui-theme-menu> persistence", () => {
+  it("stores the theme and scheme, and restore() re-applies them on the next page", async () => {
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     choice(host, "dark").click()
-    row(host, "material").click()
-    await vi.waitFor(() => expect(UI.themes.current).toBe("material"))
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBe("material")
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("dark")
+    row(host, "merlot").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
 
     // "the next page":  nothing applied, nothing in memory
     ThemePreference.reset()
@@ -494,28 +447,23 @@ describe("<ui-docs-themes> persistence", () => {
     await UI.themes.apply(undefined)
     await ThemePreference.restore()
     expect(htmlScheme().dark).toBe(true)
-    expect(UI.themes.current).toBe("material")
-    const next = await render(`<ui-docs-themes></ui-docs-themes>`)
-    expect(row(next, "material").getAttribute("aria-checked")).toBe("true")
+    expect(UI.themes.current).toBe("merlot")
+    const next = await render(`<ui-theme-menu></ui-theme-menu>`)
+    expect(row(next, "merlot").getAttribute("aria-checked")).toBe("true")
     expect(choice(next, "dark").getAttribute("aria-checked")).toBe("true")
   })
 
-  it("system and Spell (the default) are stored as absent keys;  Plain as its own value", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+  it("system and Spell (the default) are stored as absent keys", async () => {
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     choice(host, "dark").click()
     await ElementFixture.settle()
     choice(host, "system").click()
-    row(host, "github").click()
-    row(host, SPELL).click()
-    await vi.waitFor(() => expect(UI.themes.current).toBe(SPELL))
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBeNull()
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBeNull()
-    row(host, DOCS_PLAIN_THEME).click()
-    await vi.waitFor(() => expect(UI.themes.current).toBeUndefined())
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBe(DOCS_PLAIN_THEME)
-    // the next page keeps Plain
-    ThemePreference.reset()
-    expect(ThemePreference.look.theme).toBeUndefined()
+    row(host, "merlot").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
+    row(host, "spell").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("spell"))
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBeNull()
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBeNull()
   })
 
   it("works for the page when storage throws", async () => {
@@ -523,11 +471,11 @@ describe("<ui-docs-themes> persistence", () => {
       throw new DOMException("blocked", "SecurityError")
     })
     try {
-      const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+      const host = await render(`<ui-theme-menu></ui-theme-menu>`)
       choice(host, "dark").click()
       await ElementFixture.settle()
       expect(htmlScheme().dark).toBe(true)
-      expect(ThemePreference.look.scheme).toBe("dark")
+      expect(ThemePreference.chosen.scheme).toBe("dark")
     } finally {
       spy.mockRestore()
     }

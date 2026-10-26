@@ -24,7 +24,7 @@
  *   6. `SiteShell.mount()`:  the page's `main` into the ONE layout, `__parts/layout.html` (fetched)
  *   7. THEN `<ui-root>` (`import()`):  defined only once the layout AND the theme's sheet are in, so its
  *      `display="when-ready"` shows the whole page at once, already themed;  every OTHER family, `<ui-docs-*>`
- *      included, is a lazy chunk it imports on first use
+ *      and `<ui-theme-menu>` included, is a lazy chunk it imports on first use
  *   8. `SiteRouter`:  links to other pages swap only the `main`, the layout stays;
  *      `SitePatch`:  an edit to the shown page's file shows in place, no reload (epic `epic-engine` P40)
  * - The root's module joins `SpellUI.packModules` here, once imported (`SitePacks`)
@@ -43,7 +43,7 @@ import "./site.css"
 import { E, UI } from "spell-ui/core"
 import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
+import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
 import { LOGO_MARK, defineSite } from "spell/server/site"
 import { SitePatch } from "./SitePatch"
 import { SiteRouter } from "./SiteRouter"
@@ -65,9 +65,9 @@ SiteData.url ??= `${ASSETS}../__data/components.json5`
 DocsFamilies.add()
 Object.assign(globalThis, { UI, SiteData })
 
-// the viewer's theme + scheme (`<ui-docs-themes>`):  started NOW, beside the layout's fetch;  `<ui-root>` waits for it
+// the viewer's theme + scheme (`<ui-theme-menu>`):  started NOW, beside the layout's fetch;  `<ui-root>` waits for it
 const theme = ThemePreference.restore().catch((error: unknown) =>
-  E.Warnings.warn("Spell UI site", "the theme didn't load;  showing the default look", error)
+  E.Warnings.warn("Spell UI site", "the theme didn't load;  showing the page without it", error)
 )
 
 defineSite()

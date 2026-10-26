@@ -4,8 +4,8 @@ import { foundationCSS } from "spell-ui/styles"
 
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import themesCSS from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.css?inline"
-import themesRaw from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.css?raw"
+import themesCSS from "spell-ui/components/ui-theme-menu/UIThemeMenu.css?inline"
+import themesRaw from "spell-ui/components/ui-theme-menu/UIThemeMenu.css?raw"
 
 /** The scheme button and the overlay's rows, as the element renders them (the shadow markup contract). */
 const MARKUP = `<div class="ui themes" part="controls">
@@ -21,17 +21,17 @@ const MARKUP = `<div class="ui themes" part="controls">
     </div>
     <div class="menu">
       <button class="option checked" role="menuitemradio"><span class="check">C</span><span class="name">Spell</span></button>
-      <button class="option" role="menuitemradio"><span class="check">C</span><span class="name">Plain</span></button>
+      <button class="option" role="menuitemradio"><span class="check">C</span><span class="name">Merlot</span></button>
     </div>
   </div>
 </div>`
 
 /**
- * `UIDocsThemes.css`:  the sheet's source rules, and its look on the shadow markup contract.
+ * `UIThemeMenu.css`:  the sheet's source rules, and its look on the shadow markup contract.
  * - The overlay box and the dropdown are other families' (`<ui-popup>`, `<ui-dropdown>`), tested there;
  *   a stand-in host with the contract's markup is enough for the rest.
  */
-describe("UIDocsThemes.css source", () => {
+describe("UIThemeMenu.css source", () => {
   it("never uses rem;  its one !important is the documented sun / moon swap", () => {
     const text = Sheets.withoutComments(themesRaw)
     expect(text).not.toMatch(/\d(\.\d+)?rem\b/)
@@ -41,17 +41,17 @@ describe("UIDocsThemes.css source", () => {
 
   it("declares its sublayer order before any rule", () => {
     const text = Sheets.withoutComments(themesRaw).trim()
-    expect(text.replace(/\s+/g, " ").startsWith(Sheets.layers("docs-themes"))).toBe(true)
+    expect(text.replace(/\s+/g, " ").startsWith(Sheets.layers("theme-menu"))).toBe(true)
   })
 
   it("declares no public token of its own:  private aliases only", () => {
-    const declared = [...Sheets.withoutComments(themesRaw).matchAll(/(--ui-docs-themes-[\w-]+)\s*:/g)]
+    const declared = [...Sheets.withoutComments(themesRaw).matchAll(/(--ui-theme-menu-[\w-]+)\s*:/g)]
     expect(declared.map((match) => match[1])).toEqual([])
   })
 })
 
-describe("UIDocsThemes.css look", () => {
-  it("lays the controls in one row:  36px round buttons, --ui-docs-themes-gap / -button-size set them", () => {
+describe("UIThemeMenu.css look", () => {
+  it("lays the controls in one row:  36px round buttons, --ui-theme-menu-gap / -button-size set them", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
     const shadow = host.shadowRoot!
     const controls = shadow.querySelector<HTMLElement>("[part~=controls]")!
@@ -60,8 +60,8 @@ describe("UIDocsThemes.css look", () => {
     expect(getComputedStyle(controls).columnGap).toBe("4px")
     expect([getComputedStyle(scheme).width, getComputedStyle(scheme).height]).toEqual(["36px", "36px"])
     expect(getComputedStyle(scheme).borderRadius).toBe("50%")
-    host.style.setProperty("--ui-docs-themes-gap", "20px")
-    host.style.setProperty("--ui-docs-themes-button-size", "40px")
+    host.style.setProperty("--ui-theme-menu-gap", "20px")
+    host.style.setProperty("--ui-theme-menu-button-size", "40px")
     expect(getComputedStyle(controls).columnGap).toBe("20px")
     expect(getComputedStyle(scheme).width).toBe("40px")
   })

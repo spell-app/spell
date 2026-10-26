@@ -1,5 +1,5 @@
 {
-  "$comment": "Hand-kept facts per family (title, summary, status, mainTag, `pages`:  sub-tags with a page of their own, token-table overrides) and per theme sheet (`themes`:  title), read by `yarn site:data`.  Shape:  `SitePagesFile` in src/docs-components/docs-components.types.ts.  Edit by hand;  a new family is added (seeded) by `yarn site:data`.",
+  "$comment": "Hand-kept facts per family (title, summary, status, mainTag, `pages`:  sub-tags with a page of their own, token-table overrides) read by `yarn site:data`.  Shape:  `SitePagesFile` in src/docs-components/docs-components.types.ts.  Edit by hand;  a new family is added (seeded) by `yarn site:data`.",
   "families": {
     "ui-accordion": {
       "title": "Accordion",
@@ -118,11 +118,6 @@
     "ui-docs-search": {
       "title": "Docs search",
       "summary": "A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere.",
-      "status": "done"
-    },
-    "ui-docs-themes": {
-      "title": "Docs themes",
-      "summary": "Theme controls pick the page's theme and its light, dark or system colour scheme, and remember both for the next page.",
       "status": "done"
     },
     "ui-docs-toc": {
@@ -547,6 +542,11 @@
       "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
       "status": "in-progress"
     },
+    "ui-theme-menu": {
+      "title": "Theme Menu",
+      "summary": "A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.",
+      "status": "done"
+    },
     "ui-toast": {
       "title": "Toast",
       "summary": "A toast allows users to receive a short, non-blocking notification.",
@@ -583,95 +583,6 @@
       "title": "Visibility",
       "summary": "Visibility provides a set of callbacks for when content appears in the viewport.",
       "status": "done"
-    }
-  },
-  "themes": {
-    "amazon": {
-      "title": "Amazon"
-    },
-    "basic": {
-      "title": "Basic"
-    },
-    "bookish": {
-      "title": "Bookish"
-    },
-    "bootstrap3": {
-      "title": "Bootstrap 3"
-    },
-    "chubby": {
-      "title": "Chubby"
-    },
-    "classic": {
-      "title": "Classic"
-    },
-    "colored": {
-      "title": "Colored"
-    },
-    "dark": {
-      "title": "Dark"
-    },
-    "duo": {
-      "title": "Duo"
-    },
-    "fixed-width": {
-      "title": "Fixed width"
-    },
-    "flat": {
-      "title": "Flat"
-    },
-    "fomantic-classic": {
-      "title": "Fomantic classic"
-    },
-    "fruity": {
-      "title": "Fruity"
-    },
-    "github": {
-      "title": "GitHub"
-    },
-    "gmail": {
-      "title": "Gmail"
-    },
-    "instagram": {
-      "title": "Instagram"
-    },
-    "material": {
-      "title": "Material"
-    },
-    "pulsar": {
-      "title": "Pulsar"
-    },
-    "raised": {
-      "title": "Raised"
-    },
-    "resetcss": {
-      "title": "Reset CSS"
-    },
-    "round": {
-      "title": "Round"
-    },
-    "rtl": {
-      "title": "RTL"
-    },
-    "spell": {
-      "title": "Spell"
-    },
-    "spell-brand": {
-      "title": "Spell Brand"
-    },
-    "striped": {
-      "title": "Striped"
-    },
-    "studio": {
-      "title": "Studio"
-    },
-    "systemfont": {
-      "title": "System font"
-    },
-    "timeline": {
-      "title": "Timeline"
-    },
-    "twitter": {
-      "title": "Twitter"
     }
   }
 }

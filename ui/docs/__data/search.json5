@@ -150,7 +150,8 @@
         {"id":"spell-ui-s-own-root","title":"Root","parent":61},
         {"id":"spell-ui-s-own-section","title":"Section","parent":61},
         {"id":"spell-ui-s-own-stack","title":"Stack","parent":61},
-        {"id":"spell-ui-s-own-theme-editor","title":"Theme Editor","parent":61}
+        {"id":"spell-ui-s-own-theme-editor","title":"Theme Editor","parent":61},
+        {"id":"spell-ui-s-own-theme-menu","title":"Theme Menu","parent":61}
       ]
     },
     {
@@ -3396,6 +3397,32 @@
         {"id":"api-attributes","title":"Attributes","tab":"api"},
         {"id":"api-properties","title":"Properties","tab":"api"},
         {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
+      "path": "ui-theme-menu.html",
+      "title": "Theme Menu",
+      "summary": "A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.",
+      "tag": "ui-theme-menu",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-palette","title":"Palette","parent":0},
+        {"id":"examples-types-theme-dropdown","title":"Theme dropdown","parent":0},
+        {"id":"examples-types-light-dark-only","title":"Light / dark only","parent":0},
+        {"id":"examples-variations","title":"Variations","tab":"examples"},
+        {"id":"examples-variations-inverted","title":"Inverted","parent":4},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
         {"id":"api-parts","title":"Parts","tab":"api"},
         {"id":"api-states","title":"States","tab":"api"},
         {"id":"api-texts","title":"Texts","tab":"api"},

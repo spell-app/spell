@@ -46,6 +46,18 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-progress-margin": "the same",
     "--ui-message-margin": "the same",
     "--ui-message-icon-size": "the sample's message is one short line:  its icon sized to the text, not to a paragraph"
+  },
+  "ui-theme-menu/UIThemeMenu.css": {
+    "--ui-button-background":
+      "its `compact` theme dropdown is a quiet round icon button:  it themes the dropdown's button box",
+    "--ui-button-background-hover": "the same",
+    "--ui-button-background-down": "the same",
+    "--ui-button-color": "the same",
+    "--ui-button-color-hover": "the same",
+    "--ui-button-padding-block": "the same",
+    "--ui-button-padding-inline": "the same",
+    "--ui-button-radius": "the same",
+    "--ui-button-box-shadow": "the same"
   }
 }
 

@@ -58,7 +58,8 @@ and a page needs nothing else of Spell's to use it.
   The tests run axe, the accessibility checker, in a real browser,
   on every example of every family that has examples:  68 of the 72.
 - **Themeable:**  everything draws from CSS tokens, in OKLCH colours that work in light and dark.
-  Set a few, or switch the whole look to one of 28 themes with one call, `UI.themes.apply("github")`.
+  Set a few, or switch the whole look to one of Spell's four themes with one call, `UI.themes.apply("merlot")`,
+  or let people pick with `<ui-theme-menu>`.
 - **Loaded on demand:**  a page pays for the families it uses, 5.7 kB each on average, gzipped.
 - **From plain HTML or any framework:**  written on Solid 2 inside, but a plain custom element to your page,
   so React, Vue, Svelte, Solid or no framework at all use it the same way.
@@ -604,8 +605,8 @@ whose declarations `yarn smoke` checks an app could resolve;  it isn't published
 
 The rest is on the page that owns each one:
 - a tool that moves a Semantic UI page over:  [README-migrating.md](README-migrating.md#-coming--the-migration-tool)
-- a theme picker for any page, and themes per component:
-  [README-themes.md](README-themes.md#-coming--picking-themes-and-themes-per-component)
+- themes per component:
+  [README-themes.md](README-themes.md#-coming--themes-per-component)
 - icon sets installed by name, Lucide and Material Symbols among them:
   [README-runtime.md](README-runtime.md#-coming--named-icon-sets)
 - rendering `ui-*` pages from a Python app as it answers:
@@ -619,7 +620,7 @@ The rest is on the page that owns each one:
 | [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 72 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 npm</li></ul> |
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  eighteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
-| [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and 28 themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>🌱 a theme picker for any page</li></ul> |
+| [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and Spell's four themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>the theme menu, `<ui-theme-menu>`</li><li>🌱 themes per component</li></ul> |
 | [README-frameworks.md](README-frameworks.md) | <ul><li>the contract:  four rules every element keeps, and who decides the value</li><li>plain JavaScript, React 19, Vue 3 and Solid 2, each checked by a page that runs;  Svelte, Angular, Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today with an import map;  what the smoke pages prove, and what they don't</li></ul> |
 | [README-migrating.md](README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React:  your classes moved inside</li><li>a whole card, three ways;  every class word becomes an attribute</li><li>what changes under the words:  your CSS, jQuery calls, a few words</li><li>from Semantic UI React, no wrappers;  moving a page by hand;  🌱 the migration tool</li></ul> |
 | [README-site.md](README-site.md) | <ul><li>the docs site, 84 pages and 1,740 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |

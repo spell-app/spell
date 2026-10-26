@@ -258,7 +258,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 this.choose({ base: String(event.detail.value) })
               }
             >
-              <For each={this.bases}>{(base) => <ui-item value={base}>{UIThemeEditor.titleOf(base)}</ui-item>}</For>
+              <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
             </ui-select>
           </ui-property>
           <ui-panel label={t("color")} description={t("colorTip")} collapsible="">
@@ -575,18 +575,6 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         </ui-code>
       </ui-section>
     )
-  }
-
-  ////////////////
-  // ## Statics
-  ////////////////
-
-  /** A theme's name for people:  `spell-brand` => `Spell Brand`. */
-  static titleOf(name: string): string {
-    return name
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
   }
 }
 

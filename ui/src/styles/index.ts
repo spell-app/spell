@@ -19,7 +19,7 @@
  *   `yarn tokens:alias`, the docs site's token tables).  Import its leaf file.
  * - NOTE: no namespace:  sheet names carry a `CSS` suffix and the vocabulary exports are data.
  * - NOTE: the THEMES (`themes/*.css`) are not here:  the runtime loads them lazily, one chunk per sheet, and applies
- *   one (`UI.themes.apply("material")`, `src/runtime/Themes.ts`).
+ *   one (`UI.themes.apply("merlot")`, `src/runtime/Themes.ts`).
  */
 
 import layersCSS from "./layers.css?inline"

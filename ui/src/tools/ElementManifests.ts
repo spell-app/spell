@@ -500,7 +500,8 @@ export class ElementManifests {
     const type = ElementManifests.typeText(attribute)
     if (type === "number") return "number | `${number}`"
     // on by default (`<ui-section open>`):  `"false"` is how markup turns it off (Solid writes `false` as no attribute)
-    if (type.startsWith("boolean") && attribute.default === true) return type.replace(/^boolean/, 'boolean | "" | "false"')
+    if (type.startsWith("boolean") && attribute.default === true)
+      return type.replace(/^boolean/, 'boolean | "" | "false"')
     if (type.startsWith("boolean")) return type.replace(/^boolean/, 'boolean | ""')
     return type.endsWith(" | string") ? type.replace(/ \| string$/, " | (string & {})") : type
   }
