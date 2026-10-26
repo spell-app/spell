@@ -329,8 +329,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** Its draft's save:  saved (`at`, when), failed (`ok: false`), or nothing to say. */
   @E.state accessor saved: SaveState | undefined = this.startingSave()
 
-  /** The note's `<textarea>`, once drawn. */
-  private noteInput: HTMLTextAreaElement | undefined
+  /** The note's field, once drawn:  a `<ui-textarea grow>`, its live text its `value`. */
+  private noteInput: NoteField | undefined
 
   /**
    * The note's saves (epic `coherence` C10):  `DRAFT_SAVE_MS` after the last key, one at a time, retried every 3s
@@ -345,7 +345,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /**
    * The note box (Owen, 2026-10-06, Q8):  Owen's voice, on ivory.
-   * - a note that grows as it's typed in, a small Saved mark in its corner
+   * - a note that grows as it's typed in (a `<ui-textarea grow>`, epic `ui-gaps` P14), a small Saved mark in its
+   *   corner
    * - two round buttons stacked at its right:
    *   - Revisit Later (blue:  revisit soon, the line's Revisit icon)
    *   - the x (grey:  skip this, nothing to do;
@@ -373,9 +374,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         data-sent={mark() && this.review.isSent() ? "" : undefined}
       >
         <span class={NOTE_TEXT}>
-          <textarea
-            ref={this.onNoteDrawn}
+          <ui-textarea
+            ref={(element: HTMLElement) => this.onNoteDrawn(element as NoteField)}
             class={NOTE_INPUT}
+            grow=""
             rows="2"
             placeholder={this.translationForKey("notePlaceholder")}
             aria-label={this.translationForKey("noteLabel", { id: this.name })}
@@ -417,9 +419,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     )
   }
 
-  /** The note's `<textarea>`, as it's drawn:  kept, and given what's typed so far. */
+  /** The note's field, as it's drawn:  kept, and given what's typed so far. */
   @E.untracked
-  private readonly onNoteDrawn = (note: HTMLTextAreaElement) => {
+  private readonly onNoteDrawn = (note: NoteField) => {
     this.noteInput = note
     note.value = this.review.typed()
   }
@@ -471,7 +473,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     if (event.key !== "Escape") return
     event.stopPropagation()
     this.flush()
-    this.noteInput!.blur()
+    EpicReview.nativeField(this.noteInput)?.blur()
     this.leaveNote()
   }
 
@@ -640,16 +642,36 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     note.value = text
     this.onInput()
     this.flush()
-    note.select()
+    EpicReview.selectAll(note)
   }
 
   /** The note took the focus holding just "do it" (`DO_IT_NOTE`):  selected, so typing replaces it. */
   @E.untracked
   private selectDoIt() {
     const note = this.noteInput
-    if (note?.value === DO_IT_NOTE) note.select()
+    if (note?.value === DO_IT_NOTE) EpicReview.selectAll(note)
+  }
+
+  /** The native `<textarea>` inside the note's `<ui-textarea>`:  what selects its text and loses the focus. */
+  private static nativeField(note: NoteField | undefined): HTMLTextAreaElement | null | undefined {
+    return note?.shadowRoot?.querySelector("textarea")
+  }
+
+  /**
+   * Every word of the note selected, so the first key typed replaces them.
+   * - SIDE EFFECT:  hands its native `<textarea>` the note's text first:  the `<ui-textarea>` shows a new value only
+   *   once its own effect runs, which would put the cursor back at the end
+   */
+  private static selectAll(note: NoteField) {
+    const field = EpicReview.nativeField(note)
+    if (!field) return
+    if (field.value !== note.value) field.value = note.value
+    field.select()
   }
 }
+
+/** The note's field:  a `<ui-textarea>`'s DOM element, its live text its `value` (as a native `<textarea>`'s). */
+type NoteField = HTMLElement & { value: string }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicReview extends E.AttributeValues<EpicReviewVocabulary> {}

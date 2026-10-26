@@ -107,8 +107,20 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     return Array.from(this.domElement.parentElement?.children ?? []).filter((each) => each.localName === ROW_TAG)
   }
 
-  /** Its box, as drawn. */
-  private box: HTMLTextAreaElement | undefined
+  /** Its box, as drawn:  a `<ui-textarea grow>` (epic `ui-gaps` P14), its live text its `value`. */
+  private box: BoxElement | undefined
+
+  /** Its box, drawn:  kept, and given its text. */
+  private holdBox(element: BoxElement) {
+    this.box = element
+    element.value = this.value
+  }
+
+  /** Its text changed (a draft or an answer back, the reset, the copy):  the box shows it. */
+  @E.onChange("value")
+  protected onValueChanged(value: string) {
+    if (this.box && this.box.value !== value) this.box.value = value
+  }
 
   /** The page's form, while it's registered there. */
   private form: ChoicesForm | undefined
@@ -214,15 +226,14 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   private field(label: string): JSX.Element {
     return (
       <div class={FIELD}>
-        <textarea
-          ref={(element) => (this.box = element)}
+        <ui-textarea
+          ref={(element: HTMLElement) => this.holdBox(element as BoxElement)}
           class={BOX}
           part={this.partForName("box")}
-          rows="1"
-          spellcheck={false}
+          grow=""
+          spellcheck="false"
           autocomplete="off"
           aria-label={label}
-          value={this.value}
           onInput={this.onInput}
           onKeyDown={this.onKeyDown}
         />
@@ -319,7 +330,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
 
   /** A keystroke in the box:  one line of text (a pasted line break goes);  the form told. */
   private readonly onInput = (event: InputEvent) => {
-    const box = event.currentTarget as HTMLTextAreaElement
+    const box = event.currentTarget as BoxElement
     if (/\n/.test(box.value)) box.value = box.value.replace(/\s*\n\s*/g, " ")
     this.typed = box.value
     this.form?.changed()
@@ -353,7 +364,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     this.form?.changed()
     E.beforeNextPaint(() => {
       this.box?.focus()
-      this.box?.setSelectionRange(text.length, text.length)
+      this.box?.shadowRoot?.querySelector("textarea")?.setSelectionRange(text.length, text.length)
     })
   }
 
@@ -403,3 +414,6 @@ const COPY = "copy"
 const FIELD = "field"
 const BOX = "box"
 const RESET = "reset"
+
+/** Its box's DOM element:  a `<ui-textarea>`, its live text a property, as a native `<textarea>`'s. */
+type BoxElement = HTMLElement & { value: string }

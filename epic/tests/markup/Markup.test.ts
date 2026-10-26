@@ -92,7 +92,6 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-aside": { title: "where it stood at kickoff" },
   "epic-code": { title: "design.ts · 12 lines", language: "ts", open: true },
   "epic-link": { saga: "drawable-spell", epic: "python-target", item: "M1" },
-  "epic-zoom": { src: "shots/before.png", alt: "Before:  segmented" },
   "epic-mark": { item: "i126", link: true },
   "epic-actions": { headRow: true },
   "epic-change": { id: "ch3", item: "q16", at: "2026-10-24 15:10", answer: "One list", accepted: "2026-10-24 19:02" },

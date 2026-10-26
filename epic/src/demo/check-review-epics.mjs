@@ -182,10 +182,13 @@ async function run() {
   await context.addInitScript(() => {
     window.rootOf = (id) => {
       const root = document.getElementById(id).shadowRoot
-      const roots = () => [
-        root,
-        ...Array.from(root.querySelectorAll("epic-review, epic-new-item"), (inner) => inner.shadowRoot).filter(Boolean)
-      ]
+      // the review controls' shadow roots, and their note's `<ui-textarea>`'s, where its native textarea is
+      const inner = (parent) =>
+        Array.from(parent.querySelectorAll("epic-review, epic-new-item, ui-textarea"), (it) => it.shadowRoot).filter(Boolean)
+      const roots = () => {
+        const controls = inner(root)
+        return [root, ...controls, ...controls.flatMap(inner)]
+      }
       return {
         querySelector: (selector) =>
           roots()
@@ -194,8 +197,9 @@ async function run() {
         querySelectorAll: (selector) => roots().flatMap((it) => Array.from(it.querySelectorAll(selector))),
         // the focused element, inside the review control that holds the focus
         get activeElement() {
-          const active = root.activeElement
-          return active?.shadowRoot?.activeElement ?? active
+          let active = root.activeElement
+          while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+          return active
         }
       }
     }

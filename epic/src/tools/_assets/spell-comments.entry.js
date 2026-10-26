@@ -38,7 +38,7 @@
 import { nextFrame } from "spell/util/dom"
 import { wireComments } from "./spell-doc-comments.js"
 import { el } from "./spell-doc-helpers.js"
-import { fitTitles, keepFitted, markCurrent, titledItems, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
+import { markCurrent, titledItems, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
 
 /** The page's own content box, as the site names it (`PAGE_MAIN`, `packages/ui/site/_src/site.types.ts`). */
 const PAGE_MAIN = "main#main"
@@ -93,7 +93,7 @@ async function wire() {
   const main = document.querySelector(PAGE_MAIN)
   if (!main || signal.aborted) return
   wireToolbar(main, { signal })
-  await wireComments(main, { signal, go, fitToolbar: fitTitles })
+  await wireComments(main, { signal, go })
 }
 
 /**
@@ -163,7 +163,6 @@ function drawToolbar(sections, { signal }) {
   const article = sections[0].parentElement
   article.prepend(bar)
   toolbar.addEventListener("click", glideTo, { signal })
-  keepFitted(toolbar, { signal })
   // the site re-measures its sticky lines on a resize:  now the bar is in, and once it has drawn
   const remeasure = () => !signal.aborted && dispatchEvent(new Event("resize"))
   void Promise.all(["ui-sticky", "ui-menu", "ui-item"].map((tag) => customElements.whenDefined(tag)))

@@ -239,8 +239,9 @@
   padding: var(--ui-bar-track-padding, 3px calc(var(--_out, 16px) - 7px));
 }
 /*
- * each title shrinks, ending in "…", until `fitTitles()` takes them away:
- * the longest first, down to one width (`--spell-toolbar-title-max`)
+ * each title fits the row:  `<ui-toolbar shrinkable>` (`toolbarMenu()`;  Spell UI's fitting, epic `ui-gaps` P13) cuts
+ * the longest first, ending in "…";  once one would be cut under 50px, the marks only (`:state(icons-only)`);
+ * narrower still, one "…" button whose menu holds every section (`:state(overflow)`)
  */
 .spell-toolbar-titled > ui-item::part(item) {
   flex: 0 1 auto;
@@ -248,30 +249,31 @@
   gap: 10px;
 }
 /*
- * a SEGMENTED toolbar, under a page's tabs (Spell UI's components pages), scrolls instead (`fitsTitles()`):  every
- * title whole, `‹` / `›` showing what's past either end;  a guide's and Epic UI's band fit theirs as above (epic
+ * a SEGMENTED toolbar, under a page's tabs (Spell UI's components pages), isn't shrinkable:  it scrolls, every title
+ * whole, `‹` / `›` showing what's past either end;  a guide's and Epic UI's band fit theirs as above (epic
  * `epic-engine` I132, I133:  their rows ran off the page's right, or scrolled)
  */
 .spell-toolbar-titled.spell-toolbar-segmented > ui-item::part(item) {
   flex: none;
 }
-.spell-toolbar-titled.spell-toolbar-segmented .spell-toolbar-label {
-  overflow: visible;
-}
 /* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
-.spell-toolbar-icons > ui-item::part(item) {
+.spell-toolbar:state(icons-only) > ui-item::part(item) {
   flex: none;
   width: 34px;
   padding: 0;
 }
-.spell-toolbar-label {
-  min-width: 0;
-  max-width: var(--spell-toolbar-title-max, none);
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* the counts after the title, as close as before the menu had a box for them */
+.spell-toolbar > ui-item::part(badge) {
+  gap: 0;
+  margin: 0;
 }
-.spell-toolbar-icons .spell-toolbar-label {
-  display: none;
+/* the "…" button the sections fold into:  one of the band's pills */
+.spell-toolbar::part(overflow) {
+  box-sizing: border-box;
+  height: 30px;
+  min-width: 34px;
+  justify-content: center;
+  font: inherit;
 }
 /*
  * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, its tab's own text colour, no underline
@@ -322,11 +324,11 @@
   font: 700 11px/1.4 var(--spell-sans);
   text-align: center;
 }
-.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item > b.spell-toolbar-letter {
+.spell-toolbar-titled:not(:state(icons-only)) > ui-item > b.spell-toolbar-letter {
   display: none;
 }
 /* its icon box too, while the letter mark is all it would hold:  else the title sits off centre in its button */
-.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item:has(> b.spell-toolbar-letter)::part(icon) {
+.spell-toolbar-titled:not(:state(icons-only)) > ui-item:has(> b.spell-toolbar-letter)::part(icon) {
   display: none;
 }
 .spell-toolbar > ui-item > b[slot="icon"] {

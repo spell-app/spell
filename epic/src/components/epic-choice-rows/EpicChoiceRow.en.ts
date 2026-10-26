@@ -66,7 +66,12 @@ export const epicChoiceRowVocabulary = {
     { name: "current", description: "The Current cell:  today's text, as code." },
     { name: "copy", description: "With `blank`:  today's text over the box, a button that copies it into the box." },
     { name: "pick", description: "The Recommended cell:  the box, and the reset button once it differs." },
-    { name: "box", description: "The `<textarea>`:  one line of text, wrapping and growing;  Enter adds no line." },
+    {
+      name: "box",
+      description:
+        "The `<ui-textarea grow>`:  one line of text, wrapping and growing;  Enter adds no line.  Its own `control` " +
+        "part is the native `<textarea>`."
+    },
     { name: "reset", description: "The round button putting the recommendation back." }
   ],
   states: [

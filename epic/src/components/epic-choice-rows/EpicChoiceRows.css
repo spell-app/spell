@@ -171,10 +171,20 @@
     align-items: flex-start;
     gap: 4px;
   }
+  /* a `<ui-textarea grow>` (epic `ui-gaps` P14):  this look on its native textarea, its `control` part */
   .box {
+    display: flex;
     flex: 1 1 auto;
     min-width: 0;
-    field-sizing: content;
+  }
+  .box::part(input) {
+    flex: 1 1 auto;
+    font: inherit;
+  }
+  .box::part(control) {
+    min-block-size: calc(1lh + 8px);
+    margin: 0;
+    box-sizing: border-box;
     resize: none;
     overflow-wrap: anywhere;
     padding: 3px 6px;
@@ -184,7 +194,7 @@
     color: var(--ui-text-color, CanvasText);
     font: 0.85em / 1.4 var(--ui-font-family-mono, ui-monospace, monospace);
   }
-  .box:focus-visible {
+  .box::part(control):focus-visible {
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: -1px;
   }
@@ -220,7 +230,7 @@
 }
 
 @layer ui.components.epic-choice-rows.states {
-  :host(epic-choice-row:state(changed)) .box {
+  :host(epic-choice-row:state(changed)) .box::part(control) {
     border-color: var(--_epic-choice-changed);
     background: var(--ui-orange-background, light-dark(#fff3e8, #3a2a1c));
   }

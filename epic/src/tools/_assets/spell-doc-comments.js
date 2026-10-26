@@ -197,16 +197,14 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  * - options:
  *   - `go(id)`:  lands on an id as a link to it does (the runtime's `wireAnchors()`);
  *     without it, the browser's `scrollIntoView()`
- *   - `fitToolbar(toolbar)`:  fits the toolbar's titles again (the runtime's `fitTitles()`),
- *     once its bullhorn shows or hides
  *   - `signal`:  an `AbortSignal` that takes it all down again
  *     - for Epic UI's pages, whose `main` the site's router swaps for the next page's (`spell-comments.entry.js`)
  *     - every listener, observer and timer, the floating bullhorn
  *     - what's typed and not saved yet is sent first, as on leaving the page
  */
-export async function wireComments(main, { go, fitToolbar, signal } = {}) {
+export async function wireComments(main, { go, signal } = {}) {
   if (!ServerLink.isServed()) return
-  const comments = new PageComments(main, { go, fitToolbar, signal })
+  const comments = new PageComments(main, { go, signal })
   if (!(await comments.load()) || signal?.aborted) return
   pageComments = comments
   comments.draw()
@@ -266,15 +264,13 @@ class PageComments {
   /**
    * - `main`:  the page's `main`, where the blocks are
    * - `go(id)`:  lands on the element with `id` as a link to it does (`wireAnchors()`), resolving once landed
-   * - `fitToolbar(toolbar)`, `signal`:  as `wireComments()` takes them
+   * - `signal`:  as `wireComments()` takes it
    */
-  constructor(main, { go, fitToolbar, signal } = {}) {
+  constructor(main, { go, signal } = {}) {
     /** the page's `main` */
     this.main = main
     /** lands on an id as a link does */
     this.go = go
-    /** fits the toolbar's titles again, once its bullhorn shows or hides */
-    this.fitToolbar = fitToolbar
     /** takes it all down again (`stop()`):  every listener added with it */
     this.signal = signal
     /** what `watchContent()` watches the page's content with */
@@ -662,7 +658,7 @@ class PageComments {
       bullhorn = el(
         "ui-item",
         { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
-        el("ui-label", { class: "spell-toolbar-count replied", appearance: "circular", size: "mini" })
+        el("ui-label", { class: "spell-toolbar-count replied", slot: "badge", appearance: "circular", size: "mini" })
       )
       bullhorn.addEventListener("click", () => this.nextWaiting())
     }
@@ -673,10 +669,8 @@ class PageComments {
     bullhorn.title = tip
     bullhorn.setAttribute("aria-label", tip)
     titleInside(bullhorn, "item")
-    if (bullhorn.hidden === !count) return
+    // a guide's titles share the row with it:  its menu fits them again (`<ui-toolbar shrinkable>`)
     bullhorn.hidden = !count
-    // a guide's titles share the row with it:  fitted again
-    if (home.classList.contains("spell-toolbar-titled")) this.fitToolbar?.(home)
   }
 
   /**

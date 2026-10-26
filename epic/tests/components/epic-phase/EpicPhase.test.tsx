@@ -12,6 +12,8 @@ import "spell-epic/components/epic-update"
 import "spell-epic/components/epic-item"
 import "spell-epic/components/epic-mark"
 import "spell-ui/components/ui-modal"
+// what a request's thumbnail opens in:  `<ui-root>` loads it on a page
+import "spell-ui/components/ui-zoom"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -279,7 +281,7 @@ describe("<epic-field> requests", () => {
     ])
   })
 
-  test("its screenshot is a thumbnail;  a click shows it full size in the page's <epic-zoom>, not its link;  Escape closes it", async () => {
+  test("its screenshot is a thumbnail;  a click shows it full size in the page's <ui-zoom>, not its link;  Escape closes it", async () => {
     const request = await renderRequest()
     request.setAttribute("open", "")
     await ElementFixture.tick()
@@ -297,7 +299,7 @@ describe("<epic-field> requests", () => {
     // the link isn't followed:  the click's default is prevented
     expect(followed).toHaveReturnedWith(true)
     // the page's ONE zoom (`ImageZoom`), made at the end of `<body>`
-    const zoom = document.querySelector<E.DOMElement>("body > epic-zoom")!
+    const zoom = document.querySelector<E.DOMElement>("body > ui-zoom")!
     await zoom.ready
     const modal = zoom.shadowRoot!.querySelector<E.DOMElement>('[part~="base"]')!
     await modal.ready

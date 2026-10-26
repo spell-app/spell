@@ -3,7 +3,9 @@
  * - The look of the epic page's note boxes (`<epic-agents>`' redirect box):  the page's ground, a quiet rule,
  *   6px corners;  the focus ring the page's.
  * - Its margin sets it apart on a page;  a `note` has none:  the frame its element draws round it is its margin.
- * - Grows with its text (`field-sizing`), up to a third of the window (or its `max-height`), then scrolls.
+ * - Its field is a `<ui-textarea grow>` (epic `ui-gaps` P14):  it grows with its text, up to a third of the window
+ *   (or its `max-height`, through `--ui-input-textarea-grow-max-height`), then scrolls.
+ *   - this box's look on its native `<textarea>`, its `control` part:  these rules win over its own sheet's
  * - A notes box's KEPT text (P18), above its field:  the page changed under Owen, a warning, so an ORANGE edge and
  *   title;  the texts are his own words, so his IVORY (`templates/epics/plan-doc.md`, "Colours").
  * - Public tokens (`--epic-text-box-*`) are never declared here:  read through private aliases.
@@ -26,12 +28,17 @@
     margin: 0;
   }
   .field {
-    display: block;
-    box-sizing: border-box;
+    display: flex;
     width: 100%;
+  }
+  /* the page's type, not Spell UI's input's */
+  .field::part(input) {
+    font: inherit;
+  }
+  .field::part(control) {
+    box-sizing: border-box;
     min-height: 2.4em;
-    max-height: 33vh;
-    field-sizing: content;
+    margin: 0;
     padding: 6px 8px;
     border: 1px solid var(--_epic-text-box-rule);
     border-radius: 6px;
@@ -41,10 +48,10 @@
     line-height: 1.45;
     resize: vertical;
   }
-  .field::placeholder {
+  .field::part(control)::placeholder {
     color: var(--ui-text-muted, GrayText);
   }
-  .field:focus-visible {
+  .field::part(control):focus-visible {
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: 0;
   }

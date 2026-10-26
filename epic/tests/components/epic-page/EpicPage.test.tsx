@@ -23,6 +23,8 @@ import "spell-epic/components/epic-commit"
 import "spell-epic/components/epic-item"
 import "spell-epic/components/epic-answer"
 import "spell-epic/components/epic-aside"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 /** A page with phases in `statuses`, and `attributes` on the page. */
 function page(attributes: string, statuses: string[], extra = ""): string {
@@ -979,7 +981,7 @@ function noteBox(host: Element, name: string) {
   return {
     row,
     box,
-    note: box.shadowRoot!.querySelector("textarea")!,
+    note: box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!,
     send: row.querySelector<HTMLElement>("ui-button")!
   }
 }
@@ -1067,7 +1069,9 @@ describe("<epic-page> Agents running", () => {
     expect(noteBox(host, "demo-aaa").note).toBe(note)
     expect(note.value).toBe("Half typed")
     expect(agentsRoot(host).activeElement).toBe(box)
-    expect(box.shadowRoot!.activeElement).toBe(note)
+    // focus in the box's `<ui-textarea>`, on its native textarea
+    const field = box.shadowRoot!.activeElement!
+    expect([field.localName, field.shadowRoot!.activeElement]).toEqual(["ui-textarea", note])
     expect(agentsRoot(host).querySelector(".agents-button")!.getAttribute("aria-label")).toBe("3 agents running")
   })
 
