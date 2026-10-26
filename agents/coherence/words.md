@@ -7,6 +7,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - **Say:**  the word, and its forms (events, attributes, states)
   - **Not:**  the words it replaces
   - **Decided:**  where, and by whom
+  - **Score:**  the replaced words as a search, for `spell coherence score`'s count of them still in the code
+    (the catalog's header says how a **Score:** line reads);  an entry about prose has none
 - Only words already decided.  A word still open is a question under "Open", for Owen.
 - The rules WWOD already has about words are linked, not copied:  §3 "Naming", §6 "Writing for people".
 - The mechanisms:  [catalog.md](catalog.md).
@@ -24,6 +26,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  fold, unfold, expand, collapse, toggle, reveal, show, hide, dismiss.
   - `toggle()` stays as a METHOD that opens or closes, as `<details>` has a `toggle` event:  never an event name of
     ours.
+- **Score:**  `"ui-(folded|unfolded|fold|unfold|expand(ed|ing)?|collapse[ds]?|collapsing|show(n|ing)?|hid(e|den|ing)|dismiss(ed|ing)?)"|\bcollapsed=|\[collapsed\]|"collapsed"`
+  · not `spell-ui/src/jsx.ts`
 - **Decided:**  epic `elemental-spell`, 2026-10-24, its event-name rounds:  Q65 (A:  an `open` attribute opens and
   closes) and Q68 (A:  overlays open and close too;  Owen:  "Use for tabs, transitions, edit panel as well").
   - Owen, round 2:  "folding is a programmer concept, showing and hiding are people concepts ... better to reuse
@@ -45,6 +49,7 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 - **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
 - **Not:**  reader, person.
+- **Score:**  `\b(reader|person)\b` · in `spell-ui/src/docs-components/`
 - **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
   - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10;
     P14 made them "viewer" (Spell UI's docs components).
@@ -64,6 +69,7 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Say:**  epic page, saga page, details page, review page, choice page, run page, guide, cheatsheet, commands
   page, components page, components guide, brand page, home page, list page, changelog, template.
 - **Not:**  plan doc, epic doc (the epic page);  durable doc (the guide);  docs index (the home page);  goal (a saga).
+- **Score:**  `(?i)\b(plan doc|epic doc|durable doc|docs index)\b`
 - **Decided:**  the kit's `AGENTS.md`, "Words" (Owen, 2026-10-14, epic `epic-workflow` P14).
 
 ## Open

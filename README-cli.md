@@ -225,6 +225,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
 | `spell publish [--dry-run]` | builds, packs and checks every repo's npm package, installs them in a scratch project, then publishes them, lowest first;  `--dry-run` stops before publishing |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
+| `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -351,6 +352,60 @@ A new syntax is a third subclass, not a new parser.
   id, and takes an id in the name's place.
 - The maps are in the kit's `graphify-out/`, `code.json` and `docs.json`, and each repo's own `graphify-out/`:
   git-ignored, everywhere.
+
+### Scoring coherence
+
+The map says what already does something.
+`spell coherence score` says how often the code does it some other way:
+
+```sh
+spell coherence score --compare last
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+Coherence score:  81 / 100  (users from the code map)
+
+Compared with 20261025-1354-68972f4:
+Mechanism                                       Copies then  Now  Improvement  Score
+Running git, finding a checkout, a real path             44    9          80%     84
+Fetching                                                 40   22          45%     31
+Timing                                                   89   76          15%     16
+A headless page check                                    30    2          93%     78
+...
+Total                                                   517  233          55%     81
+
+Copies:  517 → 233, 55% better (fewer copies)
+Score:  61 → 81, 33% better (score up)
+```
+
+</details>
+
+Before the first fixes, the code ran git its own way 44 times.
+After them, 9 places still do;  46 files use the shared `Git` instead.
+
+| Option | What it does |
+| --- | --- |
+| `spell coherence score` | each mechanism's copies, users and score, then the code's;  the words still to replace;  each repo's tests |
+| `--compare <snapshot \| last>` | each row then and now, its improvement, and every file with new copies |
+| `--save` | saves a snapshot of the run, so the next run can compare |
+| `--at <revision \| time>` | the code as it was:  `--at "main@{2026-10-25 14:00}"` reads each repo's `main` then |
+| `--json` | the snapshot, or the comparison, as JSON |
+
+- **A mechanism** is an entry of the kit's catalog of what Spell already has, `agents/coherence/catalog.md`.
+  Each one's **Score:** line is the search it counts by:  copies only, never the mechanism's own home.
+- **Copies** are lines of code its search finds;  **users** are files that use its home, from the code map.
+  - No code map (graphify is optional), or an older revision:  users come from a search for what the home exports,
+    and the first line says so.
+- **The score** is every mechanism's users over its users and copies, added up:  big mechanisms weigh more.
+- **Code only:**  each repo's `src/`.  Tests, their helpers, bundles and generated files never count,
+  and neither do comment lines.
+  - Tests are counted instead:  each repo's `it()` and `test()` calls, on the last line.
+- **Snapshots** are saved in the shared content folder, `epics/coherence/details/scores/`, named by when the code was.
+- A change reads as an improvement:  "55% better (fewer copies)", or "12% worse";
+  a table's Improvement column holds the bare percent, a worse one `−12%`.
 
 ## spell-parser
 

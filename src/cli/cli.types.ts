@@ -99,6 +99,21 @@ export type MapOptions = GlobalOptions & {
 }
 
 /**
+ * `spell coherence score` flags (epic `coherence` P15).
+ * - `json`:  print the snapshot, or the comparison, as JSON
+ * - `save`:  write a snapshot to the shared content's `epics/coherence/details/scores/`
+ * - `compare`:  a snapshot to compare with:  its file name, or `last`
+ * - `at`:  count the code as it was:  a revision each repo reads (`main@{2026-10-25 14:00}`), a commit of the kit,
+ *   or a time (`2026-10-25 14:00`)
+ */
+export type CoherenceOptions = GlobalOptions & {
+  json?: boolean
+  save?: boolean
+  compare?: string
+  at?: string
+}
+
+/**
  * `spell pony` flags.
  * - `gallop`:  her legs gallop (epic `property-editor` P8)
  */
