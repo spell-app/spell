@@ -1,0 +1,144 @@
+/*
+ * The look of a docs page's section titles:  its `<ui-section sticky collapsible dividing>`s, nested,
+ * as Spell UI's component pages draw them (a rounded bar with a slight shadow, a step further in each level).
+ * - Shared by Spell UI's docs site (`site/_src/site.css` imports it, for `.site-main`)
+ *   and any other page drawn like a component page:  `class="ui-docs-sections"` on what holds its sections
+ *   (spell-app's notebook page).
+ * - How far a title's bar reaches out past its column, each side:
+ *   `--ui-docs-section-reach-start` / `-end`;  unset, the docs site's (its gutter and its side columns' margin).
+ *   - the title's text stays where it was:  its padding gives the reach back
+ * - Lifted out of `site.css` as it was (epic `elemental-spell` P16):  every quote below is Owen's, about the site.
+ * - In `@layer ui.app`, the page's own layer, as `site.css` is.
+ */
+
+@import "../styles/media.css";
+
+@layer ui.app {
+  :is(.site-main, .ui-docs-sections) {
+    --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky] {
+    --_ui-docs-reach-start: var(
+      --ui-docs-section-reach-start,
+      calc(var(--site-gutter, 3em) + var(--_site-band-start, 0px))
+    );
+    --_ui-docs-reach-end: var(--ui-docs-section-reach-end, calc(var(--site-gutter, 3em) + var(--_site-band-end, 0px)));
+  }
+  /*
+   * every title's fold chevron in ONE cell, a fixed width, and the same gap after it:
+   * the chevrons' points line up, and so do the titles' text, top-level and nested
+   * (Owen, 2026-10-23:  "Points of the down arrows and left of the text edge should match up vertically")
+   * - a bigger heading's chevron is bigger, centred in the same cell
+   */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky] {
+    --ui-section-title-gap: 10px;
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]::part(fold-icon) {
+    width: 20px;
+    justify-content: center;
+  }
+  /*
+   * a title's fill:  set HERE in both states, as a colour (`background-color`), so the switch as it sticks eases
+   * (Owen, 2026-10-23:  "50% opaque white when non-sticky, animated transition ... when sticky")
+   * - left to the section's own sheet when stuck,
+   *   the switch was between two different properties' values, and never eased
+   */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]::part(title) {
+    /*
+     * a rounded bar with a slight shadow, as an epic page's phases, stuck or not (Owen, 2026-10-25:  "rounded w/shadows
+     * like in epic page, add horizontal margins, more for each heading level";  "don't go back to bleed when sticky")
+     * - in from the band's edges by `--_ui-docs-title-inset`, its words where they were:  the padding gives back the
+     *   margin
+     */
+    margin-inline: calc(var(--_ui-docs-title-inset) - var(--_ui-docs-reach-start))
+      calc(var(--_ui-docs-title-inset) - var(--_ui-docs-reach-end));
+    padding-inline: calc(var(--_ui-docs-reach-start) - var(--_ui-docs-title-inset))
+      calc(var(--_ui-docs-reach-end) - var(--_ui-docs-title-inset));
+    border-radius: var(--ui-radius-m, 8px);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+    padding-block: 0.4em;
+    /*
+     * stuck:  a theme's wallpaper, fixed as the page's is, under its white tint
+     * (`--ui-bar-wallpaper`, `--ui-bar-wallpaper-tint`);  else the stuck titles' colour
+     * - the bar reads as the page, with the tint it has in place, but hides what scrolls under it
+     *   (Owen, 2026-10-23:  stuck titles as solid white bars "look bad")
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-section-sticky-background));
+    background-image:
+      linear-gradient(var(--ui-bar-wallpaper-tint, transparent), var(--ui-bar-wallpaper-tint, transparent)),
+      var(--ui-bar-wallpaper, none);
+    background-attachment: scroll, fixed;
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
+    transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:not(:state(stuck))::part(title) {
+    /*
+     * its fill laid over the page's own ground (a theme's wallpaper, fixed as the page's is):  it looks see-through,
+     * but hides what scrolls under it while its section's end pushes it up, not yet stuck (Owen, 2026-10-25:  "Need
+     * more opacity on "Read only"")
+     * - a theme with no bar fill of its own:  a faint tint, so the bar's shape reads
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-background));
+    background-image:
+      linear-gradient(
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent)),
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent))
+      ),
+      var(--ui-bar-wallpaper, none);
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
+  }
+  /*
+   * a section's first nested title tucks under its parent's, square at its top;  the parent's stays round
+   * (Owen, 2026-10-25:  "top header should have round bottom");  so does any nested title while stuck under it
+   * ("should NOT be rounded on top when stuck")
+   */
+  :is(.site-main, .ui-docs-sections) ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(title),
+  :is(.site-main, .ui-docs-sections) ui-section ui-section[sticky]:state(stuck)::part(title) {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+  /* each heading level a step further in */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky] {
+    --_ui-docs-title-inset: 12px;
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] {
+    --_ui-docs-title-inset: 28px;
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+    --_ui-docs-title-inset: 44px;
+  }
+  /* phones:  the gutter is narrow, so smaller steps */
+  @media (--ui-mobile) {
+    :is(.site-main, .ui-docs-sections) ui-section[sticky] {
+      --_ui-docs-title-inset: 4px;
+    }
+    :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] {
+      --_ui-docs-title-inset: 8px;
+    }
+    :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+      --_ui-docs-title-inset: 12px;
+    }
+  }
+  /*
+   * a section's first nested title sits right under its own, open:  no gap
+   * (Owen, 2026-10-23:  "No space between header and first section when expanded")
+   * - only when it's the first thing in its section:  after a paragraph, its title keeps the usual gap above
+   *   (`:first-of-type` also took it from a title after a paragraph, a third of the gap under it)
+   */
+  :is(.site-main, .ui-docs-sections) ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(section) {
+    margin-block-start: 0;
+  }
+  /* ... nor the parent body's own top padding, when that nested section is the first thing in it */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:has(> ui-section[sticky]:not(:not([slot]) ~ *))::part(content) {
+    padding-block-start: 0;
+  }
+  /*
+   * a FOLDED section keeps no space below its title:  the next title sits right under it, as a list of folded rows
+   * (Owen, 2026-10-23:  "No space between types and content when types is collapsed")
+   * - the dividing look's 1.5em margins, its own below and the next one's above, stood between them
+   */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed)::part(section),
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed) + ui-section[sticky]::part(section) {
+    margin-block: 0;
+  }
+}
