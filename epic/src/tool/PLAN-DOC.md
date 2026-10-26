@@ -143,6 +143,10 @@ As `plan-doc.md`, "Ids":
     Epics list page) and as the tool prints.
     - Always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
       moving a phase renumbers the to-do phases after it, and the tool rewrites what names them.
+      - bare numbers too (I137):  `P18`, `P17-P20`, `P20's`, `epic-engine P46`, in phases, items and Update blocks,
+        mapped all at once, so P18 => P19 never chains on to P20
+      - left as said:  another epic's (`ui-gaps P6`), the log, an Original Discussion, commits, quotes (`<q>`,
+        `<blockquote>`, the kickoff prompt)
     - P39 wrote DECIMAL phases (`<epic-phase number="11.1">`);  the migration `whole-phase-numbers` makes each one
       whole by its place.  One not migrated yet still reads as its own number, the rest counted without it.
   - The tool takes a phase as people name it, wherever it takes one:  `7`, `P7`, `seo#P7`, `#p7`, its id, its name

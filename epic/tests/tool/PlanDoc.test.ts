@@ -297,6 +297,45 @@ describe("PlanDoc phases", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // epic `epic-engine` I137:  debut's --after 17 left "goes to P18", "P17-P20" and "P20's" saying the old numbers
+  test("--after and move:  bare P<n> in phases, items and Update blocks follow;  the log and another epic's stay", () => {
+    const plan = freshPlan()
+    for (let n = 1; n <= 5; n++)
+      plan.addPhase(`Phase ${n}`, { plan: n < 5 ? `<p>before P${n + 1}</p>` : "<p>last</p>" })
+    plan.addPhaseUpdate(5, "<p>P4 first</p>", { summary: "Waits for P4" })
+    const item = plan.addItem("todo", "for P3's row", { details: "<p>P2-P5, P4's tint, ui-gaps P4, demo P3</p>" })
+    plan
+      .findSection("log")!
+      .insertAdjacentHTML("beforeend", `<epic-event at="2026-10-01 09:05">queued for P4</epic-event>`)
+    const field = (n: number) => el(plan, `p${n}`).querySelector('epic-field[name="plan"]')?.textContent
+    plan.addPhase("Inserted", { after: 2 })
+    expect([1, 2, 3, 4, 5, 6].map(field)).toEqual([
+      "before P2",
+      "before P4",
+      undefined,
+      "before P5",
+      "before P6",
+      "last"
+    ])
+    expect(el(plan, item).getAttribute("title")).toBe("for P4's row")
+    expect(el(plan, item).querySelector("p")!.textContent).toBe("P2-P6, P5's tint, ui-gaps P4, demo P4")
+    expect(el(plan, "p6").querySelector("epic-update")!.getAttribute("summary")).toBe("Waits for P5")
+    expect(plan.findSection("log")!.textContent).toContain("queued for P4")
+    // the last to place 3:  6 => 3, 3 => 4, 4 => 5, 5 => 6 in one pass
+    plan.movePhase(6, 3)
+    expect([1, 2, 3, 4, 5, 6].map(field)).toEqual([
+      "before P2",
+      "before P5",
+      "last",
+      undefined,
+      "before P6",
+      "before P3"
+    ])
+    expect(el(plan, item).getAttribute("title")).toBe("for P5's row")
+    expect(el(plan, item).querySelector("p")!.textContent).toBe("P2-P3, P6's tint, ui-gaps P4, demo P5")
+    expect(problems(plan)).toEqual([])
+  })
+
   test("a started Doc Review:  the new phase goes just BEFORE it, the Doc Review moving down, to do again", () => {
     const plan = freshPlan()
     for (const name of ["Build", "Polish", "Doc Review"]) plan.addPhase(name)
