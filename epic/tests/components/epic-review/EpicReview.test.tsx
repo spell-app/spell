@@ -302,7 +302,7 @@ describe("<epic-item> review controls", () => {
     expect(actions(done).map((action) => button(done, action).dataset.fill)).toEqual(["none", "none", "none"])
   })
 
-  test("a mark in flight:  the id chip keeps its STATE's colour, with the mark's fill;  no mark, solid;  light and dark", async () => {
+  test("a mark in flight:  the id chip ONE 2px dotted blue ring, red letters, whatever the mark;  no mark, solid;  light and dark", async () => {
     const before = new Date(Date.now() - 60_000).toISOString()
     routes.inbox.marks.m2 = { action: "approve", at: new Date().toISOString() }
     routes.inbox.marks.j8 = { action: "revisit", when: "soon", note: "why?", at: before }
@@ -319,15 +319,18 @@ describe("<epic-item> review controls", () => {
     }
     const approved = await look(`<epic-item id="m2" title="Picked" status="open" state="open"></epic-item>`)
     // Owen, 2026-10-11 (J3 of epic-workflow):  the chip keeps the state the section's counts count, not the button's colour
-    expect([approved.fill, approved.color, approved.border]).toEqual(["dashed", undefined, "dashed"])
+    // marked in this pass (epic `epic-engine` P43;  Owen, 2026-10-25:  "red text, single blue 2px dotted"):  the mark's
+    // fill stays in the data, but the chip draws one dotted ring in the badge's blue
+    expect([approved.fill, approved.color, approved.border]).toEqual(["dashed", undefined, "dotted"])
+    expect(approved.chip.hasAttribute("data-marked")).toBe(true)
     expect([approved.button?.dataset.fill, approved.button?.dataset.color]).toEqual(["dashed", "green"])
     expect(approved.chip.title).toMatch(/you chose Approve · not sent yet/)
     const revisited = await look(`<epic-item id="j8" title="Talk" status="open" state="attention"></epic-item>`)
-    expect([revisited.fill, revisited.color, revisited.border]).toEqual(["outline", undefined, "solid"])
-    // a red item marked Revisit stays red:  its outline is the state's colour
-    const red = getComputedStyle(revisited.chip).borderTopColor
+    expect([revisited.fill, revisited.color, revisited.border]).toEqual(["outline", undefined, "dotted"])
+    // the ring the same blue whatever the item's state;  an unmarked chip keeps its solid state colour
     const solid = await look(`<epic-item id="j99" title="Unmarked" status="open" state="attention"></epic-item>`)
-    expect(red).toBe(getComputedStyle(solid.chip).backgroundColor)
+    expect(getComputedStyle(revisited.chip).borderTopColor).toBe(getComputedStyle(approved.chip).borderTopColor)
+    expect(solid.chip.hasAttribute("data-marked")).toBe(false)
     const picked = await look(`<epic-item id="q9" title="Which?" status="open" state="attention"></epic-item>`)
     expect([picked.fill, picked.color, picked.chip.title]).toEqual([
       "outline",
