@@ -27,9 +27,9 @@
  *     here:  that rule keeps a library's bundles from pinning all of Solid, but this map exists so a pack can use any
  *     export, which no tree-shaker can know ahead.  So the whole of `solid-js` / `@solidjs/web` stays in this bundle
  *     (`ui`'s own code never holds such a map).
- * - The look:  UI's `spell-brand` theme (the Spell brand as Claude Design drew it), on every page but an epic page,
- *   applied as soon as the bundle runs (epic `design-system`, P9;  `spell` before, which stays as it is for everything
- *   else).
+ * - The look:  UI's `spell` theme (the Spell brand as Claude Design drew it), on every page but an epic page,
+ *   applied as soon as the bundle runs (epic `design-system`, P9;  the Spell Brand theme, `spell-brand`, folded into
+ *   `spell` in epic `debut` P17).
  *   Its sheet is inlined like every other `import()`, so it registers a few microtasks after the bundle runs, not
  *   a network round trip later.  It ships no font files:  its serif is an installed Palatino, else `serif`.
  *   - it adds the brand's roles (`--spell-surface-warm`, `--spell-type-lede` ...), which `spell-doc.css` and the
@@ -90,10 +90,10 @@ export const packModules = Object.freeze({
 })
 
 /**
- * The theme this page draws in:  `fruity` on an epic page (an `<epic-page>` in it), `spell-brand` on every other.
+ * The theme this page draws in:  `fruity` on an epic page (an `<epic-page>` in it), `spell` on every other.
  * - Read as the bundle runs, from the end of `<body>`:  the page's markup is all there.
  */
-const THEME = document.querySelector("epic-page") ? "fruity" : "spell-brand"
+const THEME = document.querySelector("epic-page") ? "fruity" : "spell"
 
 void UI.load()
   .then((ui) => ui.themes.apply(THEME))
