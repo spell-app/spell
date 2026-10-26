@@ -26,9 +26,13 @@ import { worktreeHref } from "spell/server/liveClient"
  *   - "open in VS Code":  a `vscode://file/...` link to the page's source
  *   - edit mode (pages the page server serves):  hover a section, edit its source in place -- `<spell-section-editor>`
  *   - neither in a FRAME (VS Code's side bar):  they do nothing there
- *   - light / dark:  ONE button showing the scheme the page shows (sun / moon);  a click flips it
+ *   - the page's own theme control, when it puts one in the bar (`slot="theme"`):
+ *     e.g. the docs bundle's theme menu, on the epic pages and guides (epic `debut` P17, Q30)
+ *     - this element names no such control:  it only gives it a place, at the bar's end
+ *     - with one there, no light / dark button:  the page's control picks the scheme too
+ *   - else light / dark, the SCHEME:  ONE button showing the scheme the page shows (sun / moon);  a click flips it
  *     - until the first click, it follows the OS
- *     - flipping BACK to the OS's own scheme follows the OS again, so two clicks always undo one (`flipTheme()`)
+ *     - flipping BACK to the OS's own scheme follows the OS again, so two clicks always undo one (`flipScheme()`)
  *     - kept, shown and followed by `ColorScheme` (`spell/util/persist`):
  *       the one choice every Spell site shares, Spell UI's `ThemePreference` too
  *       - shown as `ui-light` / `ui-dark` on `<html>` (UI's tokens, `--ui-scheme`)
@@ -38,17 +42,19 @@ import { worktreeHref } from "spell/server/liveClient"
  *     (toggles `ui-light` / `ui-dark`, as Spell App's pill does) re-draws it too,
  *     through a `MutationObserver` on `<html>`'s class;  a click then flips from what the page shows
  * - Self-contained:  its own shadow DOM and CSS, no UI elements, so it looks the same on every property.
- * - Tooltips:  the browser's own, a `title` on each link and button (the logo, the pencil, `<>`, the theme)
+ * - Tooltips:  the browser's own, a `title` on each link and button (the logo, the pencil, `<>`, the scheme)
  *   - its icon takes no pointer (`pointer-events: none`):  the pointer lands on the titled element ITSELF
  *   - why:  VS Code's side bar (Electron 38 and up, on macOS) shows a `title` only on the element under the pointer,
  *     not on its parent (electron/electron#49843;  epic `epic-engine` I43)
  * - `docked`:  a compact row in place, not a fixed bar, inside the page's own chrome
  *   (the Spell UI site's side column and top bar)
  *   - no light / dark button (the page has its own)
+ *   - a `theme` child shows all the same
  *   - no room kept on the page (`--spell-site-header-height` is 0)
  * - `no-tools`:  no edit button and no "open in VS Code" link,
  *   for a page whose own chrome has no use for them (the Spell UI site's)
  *   - edit mode stays off there too (`readEdit()`)
+ * - Slots:  `theme`, the page's own theme control, at the bar's end (above).
  * - Parts, for a page that docks it:
  *   - `bar`:  the row
  *   - `nav`:  its links;  the Spell UI site's top bar keeps them on one line, scrolling sideways
@@ -86,12 +92,20 @@ export class SiteHeader extends HTMLElement {
   private stopWatchingScheme?: () => void
 
   /** the scheme the icon shows now, so `<html>` class changes that keep it re-draw nothing */
-  private drawnTheme?: ColorSchemeName
+  private drawnScheme?: ColorSchemeName
 
   /** watches `<html>`'s class while connected:  a page that switches its own scheme */
   private readonly pageScheme = new MutationObserver(() => {
-    if (ColorScheme.shown() !== this.drawnTheme) this.render()
+    if (ColorScheme.shown() !== this.drawnScheme) this.render()
   })
+
+  /** watches this element's children while connected:  a theme control put in, or taken out, re-draws */
+  private readonly ownChildren = new MutationObserver(() => {
+    if (this.hasThemeControl !== this.drawnWithThemeControl) this.render()
+  })
+
+  /** whether the bar was drawn around the page's theme control, without the light / dark button */
+  private drawnWithThemeControl?: boolean
 
   connectedCallback(): void {
     ColorScheme.apply(ColorScheme.chosen())
@@ -103,6 +117,7 @@ export class SiteHeader extends HTMLElement {
     document.addEventListener(SiteHeader.PAGE_EVENT, this.onPage)
     this.stopWatchingScheme ??= ColorScheme.watch(() => this.render())
     this.pageScheme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
+    this.ownChildren.observe(this, { childList: true })
     if (!this.info && location.protocol.startsWith("http")) void this.ping()
   }
 
@@ -111,11 +126,17 @@ export class SiteHeader extends HTMLElement {
     this.stopWatchingScheme?.()
     this.stopWatchingScheme = undefined
     this.pageScheme.disconnect()
+    this.ownChildren.disconnect()
   }
 
   /** a compact row inside the page's own chrome, not the fixed bar (the `docked` attribute) */
   get docked(): boolean {
     return this.hasAttribute("docked")
+  }
+
+  /** The page put its own theme control in the bar:  a child in the `theme` slot (`<ui-theme-menu slot="theme">`). */
+  get hasThemeControl(): boolean {
+    return [...this.children].some((child) => child.slot === THEME_SLOT)
   }
 
   /** The tabs this page shows, in order:  its server's (`SPELL_SERVER.siteTabs`);  none off the server. */
@@ -185,33 +206,39 @@ export class SiteHeader extends HTMLElement {
       ? `<button class="tool${editing ? " on" : ""}" data-action="edit" aria-pressed="${editing}" title="Edit sections in place" aria-label="Edit sections in place">${ICONS.pencil}</button>`
       : ""
     const shown = ColorScheme.shown()
-    this.drawnTheme = shown
-    const themeLabel = this.themeLabel()
+    this.drawnScheme = shown
+    this.drawnWithThemeControl = this.hasThemeControl
+    const schemeLabel = this.schemeLabel()
+    // the light / dark button:  not docked (the page has its own), nor beside the page's theme control
+    const scheme =
+      this.docked || this.drawnWithThemeControl
+        ? ""
+        : `<button class="tool" data-action="scheme" title="${schemeLabel}" aria-label="${schemeLabel}">${ICONS[shown]}</button>`
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
   <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
   <nav part="nav" aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
-  ${this.docked ? "" : `<button class="tool" data-action="theme" title="${themeLabel}" aria-label="${themeLabel}">${ICONS[shown]}</button>`}
+  <slot name="${THEME_SLOT}"></slot>${scheme}
 </header>`
-    const themeButton = shadow.querySelector<HTMLButtonElement>(`[data-action="theme"]`)
-    if (themeButton) themeButton.onclick = () => this.flipTheme()
+    const schemeButton = shadow.querySelector<HTMLButtonElement>(`[data-action="scheme"]`)
+    if (schemeButton) schemeButton.onclick = () => this.flipScheme()
     const editButton = shadow.querySelector<HTMLButtonElement>(`[data-action="edit"]`)
     if (editButton) editButton.onclick = () => this.toggleEdit()
   }
 
   /**
-   * The theme button's name:  what the page shows, and what a click does.
-   * - `Dark, as the OS (click:  light)` while following the OS
-   * - `Light (click:  dark, as the OS)` when a click goes back to following it
+   * The light / dark button's name:  the scheme the page shows, and what a click does.
+   * - `Dark scheme, as the OS (click:  light)` while following the OS
+   * - `Light scheme (click:  dark, as the OS)` when a click goes back to following it
    */
-  private themeLabel(): string {
+  private schemeLabel(): string {
     const chosen = ColorScheme.chosen()
     const os = ColorScheme.osScheme()
     const shown = ColorScheme.shown()
     const next = shown === "dark" ? "light" : "dark"
-    const name = { light: "Light", dark: "Dark" }[shown]
+    const name = { light: "Light scheme", dark: "Dark scheme" }[shown]
     if (!chosen && shown === os) return `${name}, as the OS (click:  ${next})`
     return `${name} (click:  ${next}${next === os ? ", as the OS" : ""})`
   }
@@ -223,7 +250,7 @@ export class SiteHeader extends HTMLElement {
    *   - a bar has no room for Spell UI's "Match system" switch
    *   - a third "auto" state on one button makes every other click look like it did nothing
    */
-  private flipTheme(): void {
+  private flipScheme(): void {
     const next: ColorSchemeName = ColorScheme.shown() === "dark" ? "light" : "dark"
     ColorScheme.choose(next === ColorScheme.osScheme() ? undefined : next)
     this.render()
@@ -251,6 +278,9 @@ export class SiteHeader extends HTMLElement {
     }
   }
 }
+
+/** The slot a page puts its own theme control in:  `<ui-theme-menu slot="theme">`, inside `<spell-site-header>`. */
+const THEME_SLOT = "theme"
 
 /** This tab's preferences:  edit mode, `spell-site:edit`. */
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
@@ -348,6 +378,8 @@ nav { display: flex; gap: 2px; }
 }
 .tool:hover { background: light-dark(#f0eef8, #2c2a38); color: inherit; }
 .tool.on { background: light-dark(#e9e4ff, #33295e); color: light-dark(#3d2a9e, #d9d0ff); }
+/* the page's theme control, at the bar's end */
+::slotted([slot="${THEME_SLOT}"]) { flex: none; display: inline-flex; align-items: center; }
 /* the icons take no pointer:  it lands on the titled link or button, so Electron shows its tooltip (I43) */
 .brand svg, .tool svg { pointer-events: none; }
 .tool:focus-visible, .tab:focus-visible, .brand:focus-visible { outline: 2px solid light-dark(#5b3fd0, #b3a2ff); outline-offset: 2px; }

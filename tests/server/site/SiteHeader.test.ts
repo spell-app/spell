@@ -33,13 +33,14 @@ const worktrees = `${main}.worktrees`
 /**
  * A page loading the header, at `file`, with a root link to the checkout's code (epic `epic-engine` P46).
  * - `site`:  the header's script, as the page loads it
+ * - `inHeader`:  the header's children, e.g. the page's own theme control
  */
-function put(file: string, site = "/site.js"): void {
+function put(file: string, site = "/site.js", inHeader = ""): void {
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(
     file,
     `<!doctype html><html><head><title>T</title><script src="${site}"></script></head>` +
-      `<body><spell-site-header></spell-site-header><p>page <a id="code" href="/docs/own.html">code</a> ` +
+      `<body><spell-site-header>${inHeader}</spell-site-header><p>page <a id="code" href="/docs/own.html">code</a> ` +
       `<a id="api" href="/api/server">api</a></p></body></html>\n`
   )
 }
@@ -64,6 +65,7 @@ beforeAll(async () => {
   })
   put(join(main, "docs", "own.html"))
   put(join(content, "guides", "guide.html"))
+  put(join(content, "guides", "menu.html"), "/site.js", `<button id="menu" slot="theme">Themes</button>`)
   put(join(worktrees, "w1", "docs", "own.html"))
   // the Kit tab's component set, served:  a tab naming only sets the server doesn't serve is left out
   const componentSets = { kit: { name: "Kit", dir: "docs", assets: "docs" } }
@@ -139,6 +141,36 @@ describe("<spell-site-header>'s icon buttons (I43)", () => {
       expect.stringMatching(/^(Light|Dark)/)
     ])
     for (const button of buttons) expect(button, button.title).toMatchObject({ under: "itself", page: true })
+    await page.close()
+  })
+})
+
+// epic `debut` P17, Q30:  the page's theme menu takes the light / dark button's place
+describe("<spell-site-header>'s theme slot", () => {
+  it("shows the page's own theme control at the bar's end, and no light / dark button beside it", async () => {
+    const page = await opened("/guides/menu.html")
+    const bar = await page.evaluate(() => {
+      const shadow = document.querySelector("spell-site-header")!.shadowRoot!
+      const slot = shadow.querySelector<HTMLSlotElement>(`slot[name="theme"]`)
+      return {
+        slotted: slot?.assignedElements().map((element) => element.id),
+        scheme: !!shadow.querySelector(`[data-action="scheme"]`),
+        shown: (document.getElementById("menu")?.getBoundingClientRect().width ?? 0) > 0
+      }
+    })
+    expect(bar).toEqual({ slotted: ["menu"], scheme: false, shown: true })
+    await page.close()
+  })
+
+  it("without one:  the light / dark button, named for the scheme", async () => {
+    const page = await opened("/guides/guide.html")
+    const title = await page.evaluate(() =>
+      document
+        .querySelector("spell-site-header")!
+        .shadowRoot!.querySelector(`[data-action="scheme"]`)
+        ?.getAttribute("title")
+    )
+    expect(title).toMatch(/^(Light|Dark) scheme/)
     await page.close()
   })
 })

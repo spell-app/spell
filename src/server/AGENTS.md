@@ -291,6 +291,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the content repo's part (`page-server.json5`)
         - a tab whose home is a component set's address, none of whose `sets` is served, is left out:
           no App/UI tab without spell-app
+      - its `theme` SLOT:  a page's own theme control, at the bar's end, in place of its light / dark button
+        (epic `debut` P17, Q30)
+        - it names no control:  spell-epic's docs bundle puts Spell UI's `<ui-theme-menu>` there
+        - without one, the button flips the scheme, light / dark (`flipScheme()`)
     - Spell's favicon, `favicon.ts`:
       - GENERATED from the hat mark, by `yarn favicon` ([favicon.ts](../../scripts/favicon.ts), in `scripts/`)
       - `WebServer` serves it at the root, after the static files (a folder's own icons win):

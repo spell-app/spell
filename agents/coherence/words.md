@@ -66,6 +66,43 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  plan doc, epic doc (the epic page);  durable doc (the guide);  docs index (the home page);  goal (a saga).
 - **Decided:**  the kit's `AGENTS.md`, "Words" (Owen, 2026-10-14, epic `epic-workflow` P14).
 
+## Themes
+
+One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 2026-10-25:  "One word each").
+
+### theme
+
+- **Say:**  theme, for the whole of how a page looks:  Spell, Glass, Fruity, Merlot (Spell UI's `UI.themes`).
+  - Its menu is `<ui-theme-menu>`;  where a place keeps the one a viewer picked, `ThemePreference`.
+  - The editor marks the one it wears by its name:  `<html data-spell-theme="glass">`.
+- **Not:**  look (retired below), skin, style.
+
+### scheme
+
+- **Say:**  scheme, for light or dark (and `system`, following the OS):  the CSS word, `color-scheme`.
+  - `ThemePreference.setScheme()`, `flipScheme()`;  the kit's `ColorScheme`;
+    the site header's light / dark button, `flipScheme()`.
+- **Not:**  mode, theme ("dark theme"), look.
+
+### primary
+
+- **Say:**  primary, for the colour a theme leads with, the one a tint replaces (`--ui-primary`).
+- **Not:**  accent, brand colour, main colour.
+
+### accent
+
+- **Say:**  accent, ONLY for Spell UI's `accent` hue (Polished Ivory, the Spell theme's `--ui-accent`).
+- **Not:**  for the primary colour.
+  - A theme's own primitives may still say it inside its sheet (`--glass-accent-light`):  they're private to it.
+
+### look (retired)
+
+- **Was:**  the editor's word for its three chrome shapes (`EditorTheme.LOOKS`, `data-spell-look`), and for the
+  pair a docs page kept (`ThemePreference.look`, `DocsLook`).
+- **Say instead:**  theme, or theme and scheme (`ThemePreference.chosen`, `ThemeAndScheme`).
+- **Decided:**  epic `debut` P17, Q29.
+  - A table of how a thing is drawn (`TAB_LOOKS`:  its icon and its text) is another idea, and keeps its name.
+
 ## Open
 
 Words a sweep found more than one of, still to decide.
