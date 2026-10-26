@@ -1,11 +1,10 @@
 /**
  * `epic-phase` family barrel:  defines `<epic-phase>`, `<epic-field>`, `<epic-updated>` (SIDE EFFECT),
  * and exports their classes.
- * - Defines the family `<epic-phase>` draws in its shadow root first:  `<epic-review>`;
- *   and `<epic-zoom>`, which a request's thumbnails open in.
+ * - Defines the family `<epic-phase>` draws in its shadow root first:  `<epic-review>`.
+ * - A request's thumbnails open in Spell UI's `<ui-zoom>`, which `<ui-root>` loads like any Spell UI tag.
  */
 import "spell-epic/components/epic-review"
-import "spell-epic/components/epic-zoom"
 
 import { EpicPhase } from "./EpicPhase"
 import { EpicField } from "./EpicField"

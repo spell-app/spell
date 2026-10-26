@@ -854,7 +854,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
 
   /** The note box's field, focused. */
   private focusNote() {
-    this.noteBox?.shadowRoot?.querySelector("textarea")?.focus({ preventScroll: true })
+    this.noteBox?.shadowRoot?.querySelector<HTMLElement>("ui-textarea")?.focus({ preventScroll: true })
   }
 
   /** A keystroke in test `id`'s comment:  kept, and saved once the typing stops. */

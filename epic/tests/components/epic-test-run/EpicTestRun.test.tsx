@@ -20,6 +20,8 @@ import "spell-epic/components/epic-section"
 import "spell-epic/components/epic-phase"
 import "spell-epic/components/epic-item"
 import "spell-epic/components/epic-test-run"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## The page and its routes
@@ -272,7 +274,7 @@ describe("<epic-test-run>", () => {
     const box = frame.querySelector<HTMLElement & { value: string }>("epic-text-box")!
     const sides = () => {
       const outer = frame.getBoundingClientRect()
-      const inner = box.shadowRoot!.querySelector("textarea")!.getBoundingClientRect()
+      const inner = box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!.getBoundingClientRect()
       const rule = parseFloat(getComputedStyle(frame).borderTopWidth)
       return [
         inner.top - outer.top - rule,
@@ -294,7 +296,7 @@ describe("<epic-test-run>", () => {
     await settle(host)
     expect(routes.inbox.marks.m1).toMatchObject({ action: "test", result: "failed" })
     const box = runOf(host)!.querySelector<HTMLElement & { value: string }>(".comment epic-text-box")!
-    const field = box.shadowRoot!.querySelector("textarea")!
+    const field = box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "Still cut short"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     field.dispatchEvent(new FocusEvent("focusout", { bubbles: true, composed: true }))
@@ -332,7 +334,7 @@ describe("<epic-test-run>", () => {
   test("a COMMENT on every card:  a draft before an answer, then with whichever answer;  the summary lists it", async () => {
     await adoptClient(routes)
     const host = await render()
-    const field = () => runOf(host)!.querySelector(".comment epic-text-box")!.shadowRoot!.querySelector("textarea")!
+    const field = () => runOf(host)!.querySelector(".comment epic-text-box")!.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     expect(field().placeholder).toBe("Comment (optional)")
     field().value = "Only the first half worked"
     field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))

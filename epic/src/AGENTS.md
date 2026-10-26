@@ -71,10 +71,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - a list's RUNS (rounded ends) and its filter's hidden items:  one page sheet, by position
       (`EpicSection.runs.css`;  Owen:  "generic CSS, using sibling selectors ... rather than with explicit ids"),
       the filter marking what it hides `data-epic-filtered`
-  - `<epic-zoom>` (epic `epic-engine` I129):  a screenshot full size over the page, ONE per page, made at the end of
-    `<body>` by `ImageZoom` (`spell-epic/components/epic-zoom/ImageZoom`), never written in a page.
+  - A screenshot opens full size over the page (epic `epic-engine` I129) in Spell UI's `<ui-zoom>`
+    (the epics pack's `<epic-zoom>` until epic `ui-gaps` P14):  ONE per page, made at the end of `<body>` by
+    `ImageZoom` (`spell-ui/components/ui-zoom/ImageZoom`), never written in a page.
     - `ImageZoom` is plain DOM:  the docs runtime imports that leaf alone (the barrel would bundle the element), and
       `<epic-field>`'s request thumbnails call it;  its docstring has the rule for which images open.
+    - The pointer over one marks it `data-ui-zoom`:  the docs' sheet draws the zoom-in cursor.
     - Each family that draws one imports its barrel first,
       so it's defined wherever they are.
     - Unless it can't be a tag.

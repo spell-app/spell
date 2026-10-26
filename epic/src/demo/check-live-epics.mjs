@@ -285,7 +285,7 @@ function watchBlinks(id) {
   const root = document.getElementById(id).shadowRoot
   // the note box is an `<epic-review>` in the item's shadow root, its textarea in its own
   const box = root.querySelector("[part~='note-box']")
-  const note = box?.shadowRoot?.querySelector("textarea")
+  const note = box?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")
   const look = (when) => {
     const details = root.getElementById("details")
     if (!details || details.hasAttribute("hidden")) blinks.add(`details hidden (${when})`)
@@ -337,13 +337,13 @@ function placeNow() {
 /** In the page:  take the focus away from item `id`'s note box, as a click elsewhere would. */
 function blurNote(id) {
   const box = document.getElementById(id).shadowRoot.querySelector("[part~='note-box']")
-  box.shadowRoot.querySelector("textarea").blur()
+  box.shadowRoot.querySelector("ui-textarea").shadowRoot.querySelector("textarea").blur()
 }
 
 /** In the page:  what item `id`'s note box holds, `null` without one. */
 function noteOf(id) {
   const root = document.getElementById(id)?.shadowRoot
-  const typed = root?.querySelector("[part~='note-box']")?.shadowRoot?.querySelector("textarea")?.value
+  const typed = root?.querySelector("[part~='note-box']")?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")?.value
   // saved as the item's mark (epic `epic-engine` P20):  its marked note, over the box
   const said = root?.querySelector("[part~='said']")?.shadowRoot?.textContent ?? ""
   return typed || said.replace(/\s+/g, " ").trim() || (typed ?? null)
@@ -353,7 +353,7 @@ function noteOf(id) {
 function stateNow(id) {
   const item = document.getElementById(id)
   const box = item?.shadowRoot?.querySelector("[part~='note-box']")
-  const note = box?.shadowRoot?.querySelector("textarea")
+  const note = box?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")
   return {
     marker: window.__checkLive === true,
     same: {
@@ -437,7 +437,7 @@ async function openByHand(page, noteId) {
       const top = document.getElementById(last).getBoundingClientRect().top
       scrollTo({ top: scrollY + top - innerHeight / 3, behavior: "instant" })
       const box = document.getElementById(noteId).shadowRoot.querySelector("[part~='note-box']")
-      box.shadowRoot.querySelector("textarea").focus({ preventScroll: true })
+      box.shadowRoot.querySelector("ui-textarea").shadowRoot.querySelector("textarea").focus({ preventScroll: true })
     },
     { last: items[1], noteId }
   )

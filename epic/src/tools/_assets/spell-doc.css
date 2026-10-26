@@ -1568,6 +1568,6 @@ main > ui-sticky.spell-h1 + * {
 
 /* a screenshot that opens full size on a click (`ImageZoom`, the runtime's `wireImageZoom()`):  marked as the pointer
    comes over it (epic `epic-engine` I129) */
-img[data-epic-zoom] {
+img[data-ui-zoom] {
   cursor: zoom-in;
 }

@@ -15,6 +15,8 @@ import "spell-epic/components/epic-section"
 import "spell-epic/components/epic-phase"
 import "spell-epic/components/epic-summary"
 import "spell-epic/components/epic-overview"
+// the note is a `<ui-textarea grow>`:  `<ui-root>` loads it on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fakes
@@ -123,7 +125,7 @@ function queryAll(roots: ParentNode[], selector: string): Element[] {
 
 /**
  * Queries over `host`'s review controls (`rootsOf()`), its own shadow root first:
- * `[part~='note-box'] >>> textarea` is the textarea in its note box's shadow root.
+ * `[part~='note-box'] >>> ui-textarea >>> textarea` is the textarea in its note box's shadow root.
  */
 function deep(host: Element) {
   return {
@@ -262,9 +264,9 @@ describe("<epic-item> review controls", () => {
       ["soon", "blue"],
       ["drop", "grey"]
     ])
-    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     note.value = "after the merge"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     deep(host).querySelector<HTMLButtonElement>('button[data-how="next"]')!.click()
     await settle()
     expect(routes.inbox.marks.t5).toMatchObject({ action: "next", note: "after the merge" })
@@ -273,9 +275,9 @@ describe("<epic-item> review controls", () => {
     )
     // the line's x, with words in the box:  they go along
     const other = await render(`<epic-item id="t6" title="Another" status="open" open><p>Text</p></epic-item>`)
-    const box = deep(other).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const box = deep(other).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     box.value = "moot since P3"
-    box.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     button(other, "drop").click()
     await settle()
     expect(routes.inbox.marks.t6).toMatchObject({ action: "drop", note: "moot since P3" })
@@ -375,9 +377,9 @@ describe("<epic-item> review controls", () => {
     expect(x.querySelector("ui-icon")!.getAttribute("name")).toBe("xmark")
     // the line keeps its Make Todo
     expect(actions(host)).toEqual(["todo", "revisit", "approve"])
-    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     note.value = "covered by P3"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     x.click()
     await settle()
     expect(routes.inbox.marks.j9).toMatchObject({ action: "skip", note: "covered by P3" })
@@ -394,16 +396,16 @@ describe("<epic-item> review controls", () => {
     const host = await render(`<epic-item id="j2" title="A bare call" status="open"></epic-item>`)
     button(host, "revisit").click()
     await settle()
-    const note = deep(host).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> textarea")!
+    const note = deep(host).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> ui-textarea >>> textarea")!
     note.value = "why not reuse it?"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     deep(host).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
     await settle()
     expect(routes.inbox.marks.j2).toMatchObject({ action: "revisit", when: "soon", note: "why not reuse it?" })
     const said = deep(host).querySelector("[part~='said'] >>> [part~='base']")!
     expect(said.textContent).toContain("revisit soon · not sent yet")
     expect(said.textContent).toContain("why not reuse it?")
-    expect(deep(host).querySelector(".under-line [part~='note-box'] >>> textarea")).toBeNull()
+    expect(deep(host).querySelector(".under-line [part~='note-box'] >>> ui-textarea >>> textarea")).toBeNull()
   })
 
   // Owen, 2026-10-22 (epic `epic-engine` P20):  "turn revision on, add 'do it' and focus the text in the field"
@@ -414,7 +416,7 @@ describe("<epic-item> review controls", () => {
     const [call, todo] = Array.from(host.querySelectorAll("epic-item"))
     // a call with details:  its docked box
     button(call!, "revisit").click()
-    const note = deep(call!).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const note = deep(call!).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     await vi.waitFor(() => expect(note.value).toBe("do it"))
     // selected, so his first key replaces it
     expect([note.matches(":focus"), note.selectionStart, note.selectionEnd]).toEqual([true, 0, 5])
@@ -430,7 +432,7 @@ describe("<epic-item> review controls", () => {
     // a todo without details:  its box under its line;  Later makes it the mark's note
     button(todo!, "revisit").click()
     await settle()
-    const bare = deep(todo!).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> textarea")!
+    const bare = deep(todo!).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> ui-textarea >>> textarea")!
     await vi.waitFor(() => expect(bare.value).toBe("do it"))
     await vi.waitFor(() => expect(routes.inbox.marks.t9?.note).toBe("do it"))
     deep(todo!).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
@@ -448,7 +450,7 @@ describe("<epic-item> review controls", () => {
       <epic-item id="i6" title="An issue" status="open" open><p>Text</p></epic-item></div>`)
     const [call, todo, question, issue] = Array.from(host.querySelectorAll("epic-item"))
     const box = (item: Element) =>
-      deep(item).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+      deep(item).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     // one at a time:  each Revisit holds the focus until its box has it
     for (const item of [call!, todo!, question!, issue!]) {
       button(item, "revisit").click()
@@ -495,22 +497,22 @@ describe("<epic-item> review controls", () => {
   test("a note box LAST in its details:  typing turns Revisit on at once, the box staying, its words kept;  still there once approved", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="q1" title="A question" status="open" open><p>Text</p></epic-item>`)
-    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     note.focus()
     note.value = "h"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     // the first key:  Revisit on, saved at once, with no wait for the typing to stop
     await vi.waitFor(() => expect(routes.inbox.marks.q1).toMatchObject({ action: "revisit", when: "soon", note: "h" }))
     await vi.waitFor(() => expect(button(host, "revisit").dataset.fill).toBe("dashed"))
     note.value = "half a thought"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
-    note.dispatchEvent(new FocusEvent("focusout", { bubbles: true }))
-    note.dispatchEvent(new FocusEvent("blur"))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    note.dispatchEvent(new FocusEvent("focusout", { bubbles: true, composed: true }))
+    note.dispatchEvent(new FocusEvent("blur", { composed: true }))
     await settle()
     await vi.waitFor(() => expect(routes.inbox.marks.q1?.note).toBe("half a thought"))
     expect(routes.inbox.drafts.q1).toBeUndefined()
     // the box is still there, his words in it, and no marked note is drawn over it
-    expect(deep(host).querySelector("[part~='details'] [part~='note-box'] >>> textarea")).toBe(note)
+    expect(deep(host).querySelector("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")).toBe(note)
     expect(note.value).toBe("half a thought")
     expect(deep(host).querySelector("[part~='said']")).toBeNull()
     button(host, "approve").click()
@@ -543,7 +545,7 @@ describe("<epic-item> review controls", () => {
       [undefined, false, true]
     ])
     // every button and the note box stay:  a new mark can follow
-    expect(deep(approved).querySelector("[part~='details'] [part~='note-box'] >>> textarea")).not.toBeNull()
+    expect(deep(approved).querySelector("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
   })
 
   test("answered, the work still due (Owen, 2026-10-10):  the chip OUTLINED -- green queued, blue Claude on it;  done, solid", async () => {
@@ -662,9 +664,9 @@ describe("<epic-item> review controls", () => {
     await adoptClient()
     const host = await render(`<epic-item id="q1" title="A question" status="open" open><p>Text</p></epic-item>`)
     button(host, "revisit").click()
-    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    const note = deep(host).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea")!
     note.value = "half a thought"
-    note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await settle()
     expect(host.open).toBe(true)
     // a mark pressed again clears it:  nothing chosen, it stays open
@@ -708,7 +710,7 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
       `<epic-section id="o1" kind="overview-part" title="What changes" open><p>Prose</p></epic-section>`
     )
     expect(actions(host)).toEqual(["todo", "revisit"])
-    expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
+    expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
     await settle()
@@ -732,7 +734,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
     expect(actions(host)).toEqual(["todo", "revisit"])
-    expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull()
+    expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
     await settle()
@@ -765,9 +767,9 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(host.querySelector("epic-summary")!.shadowRoot!.querySelector("epic-review")).toBeNull()
     button(host, "revisit").click()
     await settle()
-    await vi.waitFor(() => expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull())
+    await vi.waitFor(() => expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull())
     expect(host.matches(":state(open)")).toBe(true)
-    const textarea = deep(host).querySelector("[part~='note-box'] >>> textarea")!
+    const textarea = deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")!
     expect(textarea.getAttribute("aria-label")).toBe("the Overview:  your note")
     // under the title row, above the summary
     const box = host.shadowRoot!.querySelector("[part~='note-box']")!
