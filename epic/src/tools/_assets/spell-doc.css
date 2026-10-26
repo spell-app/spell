@@ -1282,7 +1282,8 @@ ui-accordion.spell-aside::part(content) {
  *   but none above"):  out of `<main>`'s inline padding to the column's edges (`--spell-doc-pad-inline`), square, the
  *   band's rule under it as the header's bottom edge (the header's own rule and bottom padding give way to it)
  * - each button its mark and its title, the titles shrinking with `...` when they don't all fit;
- *   `.spell-toolbar-icons` (a title would be cut under 50px):  the marks only
+ *   `:state(icons-only)` (a title would be cut under 50px):  the marks only;  narrower still, one `...` button
+ *   (`<ui-toolbar shrinkable>`, Spell UI's fitting)
  */
 .spell-toolbar.spell-toolbar-titled {
   --_out: var(--spell-doc-pad-inline, 16px);

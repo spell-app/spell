@@ -1099,16 +1099,20 @@ In `tools/`:
       Epic UI's pages' (`spell-doc-toolbar.js`, epic `epic-engine` T11).
     - Each button:  the section's icon and its title.
       - the current one a deeper ivory (scroll-follow:  the item's `selected`)
-      - a red badge counting what needs Owen (a `<ui-label>`)
+      - a red badge counting what needs Owen (a `<ui-label slot="badge">`:  it stays while the title is cut or gone)
       - its icon centred by the menu:  measured 0px off (the old `<ui-icon>` cells sat 1.8px left of centre)
       - icons only:  every button the same width
     - Give every top-level section an icon:  without one, the button shows its number.
-    - Titles that don't all fit end in `...`, the longest giving way first (`titleFit()`).
-      - When one would be cut under 50px, they all go:  icons only, the title as the button's tooltip (`fitTitles()`).
+    - Its titles fit the row:  Spell UI does it, `<ui-toolbar shrinkable>` (epic `ui-gaps` P13);  the runtime only
+      writes `shrinkable` (`toolbarMenu()`), and has no fitting code of its own.
+      - Titles that don't all fit end in `...`, the longest giving way first.
+      - When one would be cut under 50px, they all go:  icons only (`:state(icons-only)`), the title as the button's
+        tooltip.
         - So never a stub like "6 W..." (epic `epic-engine` I133).
-      - The row scrolls sideways if even that doesn't fit, never the page.
+      - Narrower still, every button folds into one `...` button, whose menu holds them all;  the bullhorn stays.
       - Guides, details pages and Epic UI's band all fit their titles so (I132, I133);
         only the segmented toolbar under Spell UI's page tabs keeps its titles whole and scrolls (epic `debut`).
+      - The menu watches its own row:  nothing refits it by hand (the bullhorn showing, the fonts loading).
     - The spell syntax guide adds Expand all and Collapse all at the band's right (`spell-syntax.js`, Owen 2026-10-12):
       appended to the menu, after its items, which scroll under them;  kept when the toolbar is built anew.
     - A page without a sticky page header:  the last row of its filter bar.

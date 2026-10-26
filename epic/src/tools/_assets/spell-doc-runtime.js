@@ -97,8 +97,6 @@ import {
   writeJSON
 } from "./spell-doc-helpers.js"
 import {
-  fitTitles,
-  keepFitted,
   removeToolbar,
   shortLabel,
   titledItems,
@@ -330,7 +328,7 @@ async function start() {
   land(landing, jump, follow)
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
-  void wireComments(main, { go, fitToolbar: fitTitles })
+  void wireComments(main, { go })
   wireNewEpic(main)
   wireEpicSort(main)
   // the docs index tool rewrites this page after a new epic:  its header comes back without the pill and the sort
@@ -1842,10 +1840,10 @@ function buildNavigation(main, outline, counts) {
  *   - the mark:  an item's number, an icon, a number or a letter
  *     (`titledItems()`, `spell-doc-toolbar.js`, which Epic UI's pages build theirs with too)
  *   - a red badge:  how many of its items need Owen (`counts`, `attention`);  none, none
- * - titles too long for the row end in `...`
- *   - when one would be cut under 50px, they go (`fitTitles()`):
- *     the buttons show their marks only, the title as their tooltip
- *   - still too wide, the row scrolls sideways
+ * - its titles fit the row, as Spell UI's `<ui-toolbar shrinkable>` fits them (`toolbarMenu()`):
+ *   - too long for the row, the longest end in `...` first
+ *   - when one would be cut under 50px, they go:  the buttons show their marks only, the title as their tooltip
+ *   - narrower still, every button folds into one `...` button, whose menu holds them all
  * - where:  the last row of the sticky page header (`ui-sticky.spell-h1 > header.spell-page-head`),
  *   so it sticks with it and the titles stick below it
  *   - a page without one (the saga pages, a cheat sheet):  the last row of its filter bar (`.spell-filter`),
@@ -1875,8 +1873,6 @@ function buildPageToolbar(main, outline, counts) {
     const first = groups[0].element
     ;(outline.sections ? first : (headingSection(first) ?? first)).before(toolbar)
   }
-  // fitted again as the window changes width, as the items draw and the fonts load
-  keepFitted(toolbar)
   return toolbar
 }
 
