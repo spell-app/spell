@@ -318,7 +318,7 @@ What a component, or a page built on Spell UI, reaches for first.
   - Fine:  `UICalendar`'s grid and the icon picker's, on purpose:  they step by rows of a grid.
   - Fine:  the dropdown's and the search's arrows move a highlight, not focus ("The highlighted option", below);
     the slider's change its value.
-  - Not swept yet:  the docs' search and themes (`UIDocsSearch`, `UIDocsThemes`), the brand's `BrandColorSet`.
+  - Not swept yet:  the docs' search and the theme menu (`UIDocsSearch`, `UIThemeMenu`), the brand's `BrandColorSet`.
 
 ### The highlighted option of a list
 

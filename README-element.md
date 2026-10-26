@@ -518,7 +518,7 @@ Spell UI owns the CSS every set's elements draw with, and leaves four ways in:
 - Tokens, the `--ui-*` custom properties, which inherit into every shadow root:
   colours in OKLCH, sizes in `em` from one `--ui-font-size`.
 - `::part()`, for the inner boxes a vocabulary names as its parts:  `ui-button::part(button)`.
-- A theme, applied page-wide and into every shadow root:  `UI.themes.apply("github")`.
+- A theme, applied page-wide and into every shadow root:  `UI.themes.apply("merlot")`.
   Dark is a colour scheme (`<ui-root theme="dark">`).
 - The app stylesheet, below:  your site's own rules, inside every component.
 
