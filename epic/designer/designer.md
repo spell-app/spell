@@ -166,6 +166,17 @@ Sources, short names used below:
 - Owen:  "inversion surround should be darker"
 - Source:  debut late.
 
+#### T68 · Outer rings rounder than inner bits
+- Look for:  a round button, pill group or field inside a box whose corners are as round as the box's, or rounder:
+  the gap swells at the corner, or the inner piece pokes past the curve.
+- Fix:  the inner piece's radius = the outer radius minus the gap between them, and never more
+  (a 12px box, a 1px border and 6px of padding:  a 5px field).
+  - A pill at the end of a row:  square its END to that radius, its other end stays a pill.
+  - Craft says it too:  C22 ("Nested corners are concentric").
+- Owen:  "rounding of outer rings needs to be greater than rounding of inner bits"
+- Source:  epic `debut`, its theme review (`epics/debut/details/theme-looks.html`), 2026-10-26;
+  epic `epic-engine` I138.
+
 ### Glass
 
 #### T13 · Glass is light, CSS only, not overdone
