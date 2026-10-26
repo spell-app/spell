@@ -3,27 +3,32 @@ import type { Styles } from "./Styles"
 /****************
  * ### `Themes`
  * The theme sheets (`src/styles/themes/*.css`), loaded on demand, and the one switch that applies them, as
- * `UI.themes`:  `await UI.load()`, then `UI.themes.apply("github")`.
+ * `UI.themes`:  `await UI.load()`, then `UI.themes.apply("merlot")`.
  * - In the runtime's lazy chunk (`UIRuntime` builds it), beside `UI.styles`, the registry it applies into.  Never in
  *   `spell-ui/styles`, which stays pure data:  code there needed Rolldown's helpers in a chunk `core` doesn't load, so
  *   every page fetched a `rolldown-runtime-<hash>.js` (epic `wwod-spell-ui`, I13).
  * - Registry:  a LITERAL `import.meta.glob()` of the themes folder (`THEME_LOADERS`), so a new `<name>.css` there is a
  *   theme with no edit anywhere.  Lazy:  each sheet is its own chunk, loaded the first time it's applied.
- * - Fomantic's themes are DELTAS on Fomantic's default look, which is our `classic.css`.  So applying a Fomantic
- *   theme registers TWO sheets, `classic` then the theme, both `@layer ui.theme`:  the theme wins ties by order.
+ *   - The folder's TOP level only:  Fomantic's 23 themes and their fonts are archived in `themes/archive/`
+ *     (epic `debut` P17), in no bundle and no test, kept only to copy from.
+ * - Every theme is a DELTA on Fomantic's default look, which is our `classic.css`.  So applying a theme
+ *   registers TWO sheets, `classic` then the theme, both `@layer ui.theme`:  the theme wins ties by order.
  * - Both go on the page AND into every component shadow root (`UI.styles.register(..., { page, shadow })`):
  *   - tokens on `:root` reach components by inheritance either way
  *   - the theme's class-grammar overrides (`.ui.button { ... }`) only reach component markup from INSIDE the root
- * - Sheets in the folder that are NOT Fomantic themes, so left out of `names`:
+ * - Sheets in the folder that are NOT themes a menu lists:
  *   - `classic`:  the base every Fomantic theme sits on;  `apply("classic")` applies it alone
  *   - `dark`:  a colour SCHEME, not a look;  switch it with `color-scheme` / `ui-dark` / `<ui-root theme>`, on top
  *     of any theme.  `apply("dark")` throws.
- *   - `spell`, `spell-brand`, `fruity` and `studio`:  OUR OWN themes (`own`):
- *     - `spell`:  the Spell brand;  `spell-brand`:  a copy converging on Claude Design's pages (epic `design-system`)
- *     - `fruity`:  macOS's look today, translucent glass surfaces (epic `debut`)
- *     - `studio`:  a code studio in Shades of Purple's colours, flat panels (epic `debut`)
+ *   - `spell`, `glass`, `fruity` and `merlot`:  OUR OWN themes (`own`), the ONE set every place lists
+ *     (epic `debut` P17):
+ *     - `spell`:  the Spell brand, as Claude Design draws it
+ *     - `glass`:  macOS's look today, translucent glass surfaces on a solid page
+ *     - `fruity`:  Glass on a pastel wallpaper (its sheet imports `glass.css`)
+ *     - `merlot`:  a code studio in wine reds, flat panels a step off the page
  *     - applied exactly like a Fomantic theme (on `classic`), but a picker lists them apart
- * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current Fomantic theme).  ONE
+ *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
+ * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current theme).  ONE
  *   `theme` slot, so switching themes replaces its text in place.
  ****************/
 export class Themes {
@@ -37,19 +42,14 @@ export class Themes {
   /** the base sheet every Fomantic theme is applied on top of */
   readonly base = BASE
 
-  /** our own themes (not Fomantic ports):  applied like one, listed apart from `names` */
-  readonly own: readonly string[] = ["spell", "spell-brand", "fruity", "studio"]
+  /** our own themes (not Fomantic ports), in a picker's order:  applied like one */
+  readonly own: readonly string[] = ["spell", "glass", "fruity", "merlot"]
 
   /** `UI.styles` names:  base slot and theme slot */
   readonly slots = { base: BASE, theme: "theme" } as const
 
   /** every sheet in the folder, `classic` and `dark` included, A-Z */
   readonly sheets: readonly string[] = Object.keys(THEME_LOADERS).sort()
-
-  /** the Fomantic themes:  every sheet but `classic`, `dark` and `own`, A-Z */
-  readonly names: readonly string[] = this.sheets.filter(
-    (name) => !NOT_THEMES.includes(name) && !this.own.includes(name)
-  )
 
   /** name last passed to `apply()`, `undefined` for our own look */
   current: string | undefined
@@ -84,7 +84,7 @@ export class Themes {
 
   /**
    * Apply theme `name` page-wide, on the page and in every component shadow root.
-   * - A Fomantic theme (`names`) or one of `own`:  `classic` + the theme.
+   * - One of `own` (or any other sheet of the folder):  `classic` + the theme.
    * - `"classic"`:  `classic` alone.
    * - `undefined` (or `""`):  neither, our own look.
    * - Concurrent calls:  the LAST one wins, even if an earlier theme's chunk arrives after it.
@@ -94,7 +94,7 @@ export class Themes {
     if (name === "") name = undefined
     if (name !== undefined && (!this.has(name) || name === DARK)) {
       throw new TypeError(
-        `Themes.apply():  \`${name}\` isn't a theme;  pick \`${BASE}\`, one of \`own\` or one of:  ${this.names.join(", ")}`
+        `Themes.apply():  \`${name}\` isn't a theme;  pick \`${BASE}\` or one of:  ${this.own.join(", ")}`
       )
     }
     const call = ++this.calls
@@ -179,11 +179,8 @@ const BASE = "classic"
 /** The colour-scheme sheet:  in the folder, but no theme (`apply()` refuses it). */
 const DARK = "dark"
 
-/** Sheets in the folder that are not themes you pick from a list. */
-const NOT_THEMES: readonly string[] = [BASE, DARK]
-
 /**
- * Sheet name (`github`) => loader of its CSS text (`?inline`:  Lightning CSS-processed, minified in builds).
+ * Sheet name (`merlot`) => loader of its CSS text (`?inline`:  Lightning CSS-processed, minified in builds).
  * - NOTE: `import.meta.glob()` MUST stay a literal call:  Vite rewrites it at build time.
  * - RELATIVE, the one `../` in `ui`'s source:  a glob takes no tsconfig alias, and a root-absolute one
  *   (`/src/...`) breaks in a build rooted elsewhere (`brand`'s).

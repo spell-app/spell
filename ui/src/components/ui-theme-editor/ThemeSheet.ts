@@ -1,5 +1,5 @@
 import { UI, type UIT } from "spell-ui/core"
-import { EDITS_SHEET, type ThemeEditorText } from "./UIThemeEditor.types"
+import { EDITS_SHEET, GLASS_THEMES, WALLPAPER_THEME, type ThemeEditorText } from "./UIThemeEditor.types"
 
 /****************
  * ### `ThemeSheet`
@@ -14,8 +14,9 @@ import { EDITS_SHEET, type ThemeEditorText } from "./UIThemeEditor.types"
  *   each choice left out keeps the base's own;  the sheet's first comment names the base to apply first.
  * - Every colour is a `light-dark()` pair, or worked out from one with relative colours (`oklch(from ...)`),
  *   so one sheet serves both schemes, and a `ui-dark` subtree shows its dark side.
- * - A few tokens belong to one base:  fruity's glass (`--fruity-glass*`) and wallpaper (`--fruity-wallpaper`),
- *   written only when the base is fruity (`GLASS_BASES`).
+ * - A few tokens belong to some bases:
+ *   - the glass (`--glass-surface*`, `--glass-blur`), written only on a glass theme (`GLASS_THEMES`)
+ *   - the wallpaper (`--glass-wallpaper`), written only on Fruity (`WALLPAPER_THEME`)
  * - Pure but for `applyToPage()` / `putOnPage()`, which go through the runtime (`UI.styles`, `UI.themes`).
  ****************/
 export class ThemeSheet {
@@ -100,7 +101,7 @@ export class ThemeSheet {
         `light-dark(oklch(from var(--ui-${background}-on-light) 0.965 min(c, 0.025) h), ` +
           `oklch(from var(--ui-${background}-on-dark) 0.17 min(c, 0.03) h))`
       ])
-      if (GLASS_BASES.includes(base)) declarations.push(["--fruity-wallpaper", ThemeSheet.wallpaper(background)])
+      if (base === WALLPAPER_THEME) declarations.push(["--glass-wallpaper", ThemeSheet.wallpaper(background)])
     }
     return declarations
   }
@@ -143,9 +144,9 @@ export class ThemeSheet {
         ["--ui-segment-shadow", "var(--ui-shadow-raised)"]
       )
     }
-    if (glass && GLASS_BASES.includes(base)) {
+    if (glass && GLASS_THEMES.includes(base)) {
       const [surface, strong, blur] = GLASS[glass]
-      declarations.push(["--fruity-glass", surface], ["--fruity-glass-strong", strong], ["--fruity-blur", blur])
+      declarations.push(["--glass-surface", surface], ["--glass-surface-strong", strong], ["--glass-blur", blur])
     }
     return declarations
   }
@@ -230,9 +231,6 @@ export type ThemeSheetGroup = {
 /** One custom property:  `[name, value]`. */
 type Declaration = readonly [string, string]
 
-/** The bases with glass and a wallpaper of their own (`--fruity-*`). */
-const GLASS_BASES: readonly string[] = ["fruity"]
-
 /** The primary colour's text:  `colors.css`' recipe (a theme may have replaced it with a fixed colour). */
 const PRIMARY_TEXT =
   "light-dark(oklch(from var(--ui-primary) min(l, 0.5) c h), oklch(from var(--ui-primary) max(l, 0.78) c h))"
@@ -306,7 +304,7 @@ const SHADOWS: Readonly<Record<UIT.ThemeDepth, readonly [string, string]>> = {
   ]
 }
 
-/** Each glass choice:  `[surface, strong surface, what's behind it]`;  `frosted` is fruity's own. */
+/** Each glass choice:  `[surface, strong surface, what's behind it]`;  `frosted` is the glass themes' own. */
 const GLASS: Readonly<Record<UIT.ThemeGlass, readonly [string, string, string]>> = {
   clear: [
     "light-dark(rgb(255 255 255 / 0.25), rgb(38 36 48 / 0.28))",

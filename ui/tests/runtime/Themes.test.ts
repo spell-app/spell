@@ -1,6 +1,6 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI, type Themes } from "spell-ui/runtime"
 import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
 
 import "spell-ui/components/ui-button"
@@ -9,21 +9,22 @@ import "spell-ui/components/ui-button"
 // ## The sheets
 ////////////////
 
-describe("UI.themes.sheets / names", () => {
-  test("lists every sheet in the folder;  names are the Fomantic themes (no classic, no dark)", async () => {
+describe("UI.themes.sheets", () => {
+  test("lists every sheet of the folder's top level:  classic, dark and our own;  none of the archived ones", async () => {
     await UI.load()
     expect(UI.themes.sheets).toContain("classic")
     expect(UI.themes.sheets).toContain("dark")
-    expect(UI.themes.names).not.toContain("classic")
-    expect(UI.themes.names).not.toContain("dark")
-    for (const name of UI.themes.names) expect(UI.themes.sheets).toContain(name)
+    for (const name of UI.themes.own) expect(UI.themes.sheets).toContain(name)
+    // Fomantic's, archived in `themes/archive/` (epic `debut` P17):  in no bundle
+    expect(UI.themes.sheets).not.toContain("github")
+    expect(UI.themes.has("material")).toBe(false)
   })
 })
 
 describe("UI.themes.scopedTokens()", () => {
   test("one part of the page wears another theme's tokens, the rest keeps the page's", async () => {
     await UI.load()
-    const css = await UI.themes.scopedTokens("spell-brand", ".scoped")
+    const css = await UI.themes.scopedTokens("spell", ".scoped")
     expect(css).toContain(":root .scoped {")
     const style = document.head.appendChild(document.createElement("style"))
     style.textContent = css
@@ -33,9 +34,22 @@ describe("UI.themes.scopedTokens()", () => {
       inside.remove()
     })
     const token = (element: Element) => getComputedStyle(element).getPropertyValue("--ui-font-family-heading")
-    // the brand's headings are its serif;  the page's (no theme) aren't
+    // Spell's headings are its serif;  the page's (no theme) aren't
     expect(token(inside)).toContain("Spell Serif")
     expect(token(document.body)).not.toContain("Spell Serif")
+  })
+})
+
+describe("Themes.RENAMED", () => {
+  test("every old name comes back as a theme of the set, and names no sheet of its own", async () => {
+    await UI.load()
+    // a static on the runtime's lazy class:  reached through the instance, as the remembered themes read it (`UIT`)
+    const { RENAMED } = UI.themes.constructor as typeof Themes
+    for (const [old, now] of Object.entries(RENAMED)) {
+      expect(UI.themes.own, old).toContain(now)
+      expect(UI.themes.has(old), old).toBe(false)
+    }
+    expect(RENAMED).toEqual({ studio: "merlot", "spell-brand": "spell" })
   })
 })
 
@@ -65,9 +79,7 @@ describe("UI.themes.load()", () => {
 describe("UI.themes.apply()", () => {
   test("registers classic + the theme on the page and in shadow roots, in that order;  undefined clears", async () => {
     const { host } = await ThemeHarness.inner(`<ui-button>Probe</ui-button>`, ".ui.button")
-    const theme = UI.themes.names[0]
-    if (!theme) return // no Fomantic theme ported yet
-    await ThemeHarness.use(theme)
+    await ThemeHarness.use(UI.themes.own[0]!)
     const base = UI.styles.sheet(UI.themes.slots.base)!
     const sheet = UI.styles.sheet(UI.themes.slots.theme)!
     expect(document.adoptedStyleSheets).toContain(base)
@@ -96,8 +108,7 @@ describe("UI.themes.apply()", () => {
 
   test("the last apply() wins", async () => {
     await UI.load()
-    const [first, second] = UI.themes.names
-    if (!first || !second) return
+    const [first, second] = UI.themes.own as [string, string]
     onTestFinished(() => UI.themes.apply(undefined))
     await Promise.all([UI.themes.apply(first), UI.themes.apply(second)])
     expect(UI.themes.current).toBe(second)

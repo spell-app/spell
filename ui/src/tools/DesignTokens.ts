@@ -7,12 +7,12 @@ import type { DesignSkip, DesignTokenRow, DesignTokensFile, DesignTypeStyle, The
 
 /****************
  * ### `DesignTokens`
- * The design system's `tokens.json` (claude.ai's Design System format, LIST shape), from the `spell-brand` theme as
+ * The design system's `tokens.json` (claude.ai's Design System format, LIST shape), from the `spell` theme as
  * it ships:  every `:root` custom property of the foundation sheets, then `themes/classic.css`, then
- * `themes/spell.css` and `themes/spell-brand.css`, which sits on it (the order `UI.themes.apply("spell-brand")`
- * stacks them), each resolved for a light and a dark theme.
- * - Why `spell-brand`, not `spell`:  it's the brand (epic `claude-design`, P11):  the docs wear it, the design bundle
- *   applies it, and the `<ui-brand-*>` cards read its brand roles (`--spell-surface-warm` ...).
+ * `themes/spell.css` (the order `UI.themes.apply("spell")` stacks them), each resolved for a light and a dark theme.
+ * - The `spell` theme is the brand (epic `claude-design`, P11;  the Spell Brand theme folded into it, epic `debut` P17):
+ *   the guides wear it, the design bundle applies it, and the `<ui-brand-*>` cards read its brand roles
+ *   (`--spell-surface-warm` ...).
  * - Colours:  `light-dark()` picks the theme;  a value that's just `var(--x)` of another exported colour becomes the
  *   alias `{x}`;  hex / `rgb()` / `oklch()` of numbers stay as written;  anything computed (relative `oklch(from ...)`,
  *   `color-mix()`) is worked out (`DesignColor`) and written as hex
@@ -407,7 +407,7 @@ export class DesignTokens {
       const token = group.tokens.find((entry) => entry.name === name)
       if (token?.description) return `${lead}:  ${token.description}`
     }
-    if (name.startsWith("--spell-")) return `${lead}:  a Spell palette step or brand role (\`themes/spell-brand.css\`).`
+    if (name.startsWith("--spell-")) return `${lead}:  a Spell palette step or brand role (\`themes/spell.css\`).`
     return lead
   }
 
@@ -523,14 +523,6 @@ export type Theme = (typeof THEMES)[number]
 const THEMES = ["light", "dark"] as const
 
 /**
- * The sheets `UI.themes.apply("spell-brand")` stacks, in cascade order (later wins), relative to `src/styles/`.
- * - `themes/spell.css`:  what `spell-brand.css` imports first, read as its own sheet (an `@import` declares nothing)
+ * The sheets `UI.themes.apply("spell")` stacks, in cascade order (later wins), relative to `src/styles/`.
  */
-const SHEETS = [
-  "tokens.css",
-  "sizes.css",
-  "colors.css",
-  "themes/classic.css",
-  "themes/spell.css",
-  "themes/spell-brand.css"
-] as const
+const SHEETS = ["tokens.css", "sizes.css", "colors.css", "themes/classic.css", "themes/spell.css"] as const

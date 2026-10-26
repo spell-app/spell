@@ -1,0 +1,165 @@
+/*
+ * Merlot theme:  a code studio in wine reds, as a `spell-ui` theme, `@layer ui.theme`.
+ * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.
+ *   Applied like one, ON TOP of `classic.css`,
+ *   so every classic token it replaces is restated here.
+ * - Was Studio (`studio.css`, Shades of Purple's colours), moved from purple toward maroon
+ *   (epic `debut` P17;  Owen:  "Shift toward maroon rather than purple", "Change name to merlot").
+ *   - A theme remembered as `studio` comes back as `merlot` (`Themes.RENAMED`).
+ * - What makes it Merlot:
+ *   - flat panels joined by hairlines, no glass, no wallpaper
+ *   - the page and the panels on it a VISIBLE step apart, in both schemes (Studio's were nearly one colour)
+ *   - dark:  a deep wine page, panels a clear step lighter, a warm amber primary that reads on both
+ *   - light:  a pale rose-grey page, near-white panels, a maroon primary
+ *   - the system font, 8px controls and 12px panels
+ *   - Apple's system colours for the hues (`palettes/apple.css`, Glass's too):  classic's fail AA in places
+ * - Tokens only, so far:  the families keep classic's shapes.
+ * - The code keeps its own colours (Monaco's Purple) under every theme:  not this sheet's.
+ * - NO font files ship:  every face is the platform's own.
+ */
+
+@import "./palettes/apple.css";
+
+@layer ui.theme {
+  :root {
+    /*******************************
+                Primitives
+    *******************************/
+
+    --merlot-page: light-dark(#e8dade, #1a0c13);
+    --merlot-panel: light-dark(#fefcfd, #3d1f2d);
+    --merlot-inset: light-dark(#f4ecef, #2b1520);
+    --merlot-code: light-dark(#ffffff, #3d1f2d);
+    --merlot-border: light-dark(#d9c3cb, #573244);
+    --merlot-accent: light-dark(#8c1d40, #f4a65f);
+    --merlot-on-accent: light-dark(#ffffff, #1a0c13);
+    --merlot-accent-wash: light-dark(rgb(140 29 64 / 0.1), rgb(244 166 95 / 0.15));
+
+    /*******************************
+                 Type
+    *******************************/
+
+    --ui-font-size: 15px;
+    --ui-font-family:
+      system-ui, -apple-system, "Segoe UI", "Noto Sans", Cantarell, Ubuntu, "Helvetica Neue", Arial, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    --ui-font-family-heading: var(--ui-font-family);
+    --ui-font-family-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    /*******************************
+                 Shape
+    *******************************/
+
+    --ui-radius-s: 6px;
+    --ui-radius-m: 8px;
+    --ui-radius-l: 12px;
+    --ui-button-radius: var(--ui-radius-m);
+    --ui-input-radius: var(--ui-radius-m);
+    --ui-dropdown-radius: var(--ui-radius-m);
+    --ui-menu-radius: var(--ui-radius-m);
+    --ui-card-radius: var(--ui-radius-l);
+    --ui-segment-radius: var(--ui-radius-l);
+    --ui-popup-radius: var(--ui-radius-m);
+    --ui-modal-radius: var(--ui-radius-l);
+
+    /*******************************
+            Ink, text, surfaces
+    *******************************/
+
+    --ui-ink-on-light: #2a1019;
+    --ui-ink-on-dark: #f6e9ee;
+    --ui-text-color: light-dark(#3a1824, #f3e3e9);
+    --ui-text-dark: light-dark(#240a14, #ffffff);
+    --ui-text-muted: light-dark(#6d4555, #cfacb9);
+    --ui-text-light: light-dark(#7a5262, #bc98a6);
+
+    /* the page, and the panels a clear step off it */
+    --ui-background: var(--merlot-page);
+    --ui-surface: var(--merlot-panel);
+    --ui-surface-muted: var(--merlot-inset);
+    --ui-surface-strong: var(--merlot-code);
+    --ui-highlight: var(--merlot-accent-wash);
+
+    --ui-border-color: var(--merlot-border);
+    --ui-border-color-internal: var(--merlot-border);
+    --ui-border-color-strong: light-dark(#c9a9b5, #6b3e52);
+
+    --ui-code-background: var(--merlot-inset);
+
+    /*
+     * Hue text on the rose-grey page:  a shade darker than `colors.css`' recipe (`min(l, 0.5)`), which reads only
+     * 4.15 to 4.47:1 there;  dark as the recipe (epic `debut` P17, J76)
+     */
+    --ui-yellow-text: light-dark(
+      oklch(from var(--ui-yellow) min(l, 0.46) c h),
+      oklch(from var(--ui-yellow) max(l, 0.78) c h)
+    );
+    --ui-olive-text: light-dark(
+      oklch(from var(--ui-olive) min(l, 0.46) c h),
+      oklch(from var(--ui-olive) max(l, 0.78) c h)
+    );
+    --ui-green-text: light-dark(
+      oklch(from var(--ui-green) min(l, 0.46) c h),
+      oklch(from var(--ui-green) max(l, 0.78) c h)
+    );
+    --ui-teal-text: light-dark(
+      oklch(from var(--ui-teal) min(l, 0.46) c h),
+      oklch(from var(--ui-teal) max(l, 0.78) c h)
+    );
+    --ui-brown-text: light-dark(
+      oklch(from var(--ui-brown) min(l, 0.46) c h),
+      oklch(from var(--ui-brown) max(l, 0.78) c h)
+    );
+    --ui-grey-text: light-dark(
+      oklch(from var(--ui-grey) min(l, 0.46) c h),
+      oklch(from var(--ui-grey) max(l, 0.78) c h)
+    );
+    --ui-info-text: light-dark(oklch(0.46 0.079 222.9), oklch(from var(--ui-info) 0.85 calc(c * 0.6) h));
+    --ui-yellow-border: light-dark(
+      oklch(from var(--ui-yellow) min(l, 0.56) c h),
+      oklch(from var(--ui-yellow) max(l, 0.7) c h)
+    );
+
+    /* Primary:  the accent, maroon in light (white on it), amber in dark (wine ink on it) */
+    --ui-primary: var(--merlot-accent);
+    --ui-primary-inverted: var(--merlot-accent);
+    --ui-primary-on: var(--merlot-on-accent);
+    --ui-primary-inverted-on: var(--merlot-on-accent);
+    --ui-primary-text: var(--merlot-accent);
+    --ui-primary-background: var(--merlot-accent-wash);
+
+    --ui-link: light-dark(#a3214c, #ffaec4);
+    --ui-link-hover: light-dark(#7a1638, #ffd3df);
+    --ui-focus-color: var(--merlot-accent);
+
+    /*******************************
+                Shadows
+    *******************************/
+
+    /* flat:  panels are joined by hairlines;  only what floats casts one */
+    --ui-shadow-ink: light-dark(rgb(58 24 36), rgb(0 0 0));
+    --ui-shadow-subtle: none;
+    --ui-shadow-raised: 0 1px 2px light-dark(rgb(58 24 36 / 0.08), rgb(0 0 0 / 0.3));
+
+    /*******************************
+              Components
+    *******************************/
+
+    /* bars over scrolling content (a page's top bar, sticky titles):  the panels' colour */
+    --ui-bar-background: var(--merlot-panel);
+    --ui-input-background: var(--merlot-inset);
+    --ui-input-border-color: var(--merlot-border);
+    --ui-menu-active-background: var(--merlot-accent-wash);
+    --ui-menu-active-color: var(--ui-text-color);
+    --ui-menu-segmented-background: var(--merlot-inset);
+    --ui-menu-segmented-radius: var(--ui-radius-m);
+    --ui-menu-segmented-item-radius: var(--ui-radius-s);
+    --ui-menu-segmented-active-background: var(--merlot-accent);
+    --ui-menu-segmented-active-color: var(--merlot-on-accent);
+  }
+
+  /* page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+}

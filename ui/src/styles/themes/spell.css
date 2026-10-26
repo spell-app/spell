@@ -1,10 +1,24 @@
 /*
  * Spell theme:  the Spell brand (`brand/spell-design-system/`) as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  `ThemeSheets.OWN`, listed apart from `ThemeSheets.names`.  Applied like
+ * - OUR OWN theme, not a Fomantic port:  in `UI.themes.own`, listed apart from `UI.themes.names`.  Applied like
  *   one, ON TOP of `classic.css`, so every classic token a brand value replaces is restated here:  type, the size
  *   ladder, radii, ink, borders, shadows, the whole palette, the message colours, links, focus, highlight.
- * - The default look of every doc site:  Spell UI's docs site (`ThemePreference`) and the docs pages
- *   (`spell-ui.entry.js`).
+ * - The ONE Spell theme (epic `debut` P17, J88):  the Spell Brand theme (`spell-brand.css`, which imported this
+ *   sheet and added to it) folded in.
+ *   - A theme remembered as `spell-brand` comes back as `spell` (`Themes.RENAMED`).
+ *   - Its facelift is epic `debut` P18.
+ * - The default look of Spell UI's docs site and the guides (`ThemePreference`).
+ * - Besides the `--ui-*` tokens, the brand's own roles that no `--ui-*` token covers ("Brand roles", below),
+ *   as `--spell-*` `light-dark()` pairs:
+ *   - surfaces:  `--spell-surface-tint` (lavender wash:  asides, sidebars), `-warm` (ivory:  anything "alive"),
+ *     `-selected`, `-code`, `-inverse` (aubergine panels)
+ *   - text:  `--spell-text-strong` ... `-inverse`;  accent:  `--spell-accent`, `-hover`, `-press`, `-soft`, `-ring`
+ *   - borders, status (`--spell-success` / `-soft` ...), art (`--spell-blob`, `-blob-2`, `--spell-line-flourish`)
+ *   - shadows `--spell-shadow-xs` ... `-lg`, and the type roles (`--spell-type-eyebrow`, `-lede`, `-spell` ...)
+ *   - the Polished Ivory ladder (`--spell-accent-25` ... `-800`)
+ *   - spell-brand's `<brand-*>` elements and the `.spell.html` pages read these;  plain `<ui-*>` elements never do.
+ * - And the brand's own components ("Components:  the brand's own"):
+ *   checkbox, slider, tooltips, fold chevron, menus, segmented controls, Markdown;  and the `accent` hue (the end).
  * - Source of each value:  the brand's `tokens/palette.css` (17-step OKLCH ladders, as hex), `tokens/theme.css`
  *   (what each step MEANS, light and dark), `tokens/typography.css`, `tokens/spacing.css`, `components.css`.
  *   - primary:  Spell Purple, `violet-600` light / lilac `violet-300` dark, aubergine text on lilac
@@ -401,6 +415,183 @@
     /* Page:  smooth glyphs (the brand renders antialiased) */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /*******************************
+              Brand roles
+    *******************************/
+
+    /* Polished Ivory:  the warm accent ladder (`palette.css` `accent-*`) */
+    --spell-accent-25: #fffdf8;
+    --spell-accent-50: #fdf9f1;
+    --spell-accent-75: #faf5ea;
+    --spell-accent-100: #f7efe2;
+    --spell-accent-150: #f1e7d4;
+    --spell-accent-200: #eaddc4;
+    --spell-accent-300: #d7c5a2;
+    --spell-accent-800: #534323;
+    --spell-violet-75: #f1f1ff;
+    --spell-brand-500: #8e96b5;
+    --spell-brand-800: #454a5f;
+
+    /* Surfaces (`tokens/theme.css`):  tint = lavender wash, warm = ivory, inverse = aubergine panels */
+    --spell-surface-tint: light-dark(var(--spell-brand-50), rgb(200 206 231 / 0.07));
+    --spell-surface-selected: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
+    --spell-surface-warm: light-dark(var(--spell-accent-75), #2c2152);
+    --spell-surface-code: light-dark(var(--spell-brand-75), var(--spell-violet-975));
+    --spell-surface-inverse: light-dark(var(--spell-violet-900), var(--spell-violet-50));
+
+    /* Text */
+    --spell-text-strong: light-dark(var(--spell-violet-900), var(--spell-violet-25));
+    --spell-text-body: light-dark(var(--spell-brand-900), var(--spell-brand-100));
+    --spell-text-muted: light-dark(var(--spell-brand-700), var(--spell-brand-300));
+    --spell-text-subtle: light-dark(var(--spell-brand-500), var(--spell-brand-400));
+    --spell-text-accent: light-dark(var(--spell-violet-600), var(--spell-violet-300));
+    --spell-text-on-accent: light-dark(#fff, var(--spell-violet-950));
+    --spell-text-inverse: light-dark(#fff, var(--spell-violet-900));
+
+    /* Accent:  Spell Purple light, lilac dark */
+    --spell-accent: light-dark(var(--spell-violet-600), var(--spell-violet-300));
+    --spell-accent-hover: light-dark(var(--spell-violet-700), var(--spell-violet-200));
+    --spell-accent-press: light-dark(var(--spell-violet-800), var(--spell-violet-400));
+    --spell-accent-soft: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
+    --spell-accent-soft-hover: light-dark(var(--spell-violet-150), rgb(184 180 255 / 0.26));
+    --spell-accent-ring: light-dark(rgb(101 80 202 / 0.28), rgb(184 180 255 / 0.4));
+
+    /* Borders */
+    --spell-border-subtle: light-dark(var(--spell-brand-100), var(--spell-hairline-subtle));
+    --spell-border-default: light-dark(var(--spell-brand-150), var(--spell-hairline));
+    --spell-border-strong: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
+    --spell-border-accent: var(--spell-violet-400);
+
+    /* Status */
+    --spell-success: light-dark(#00853a, #8ef6a5);
+    --spell-success-soft: light-dark(#e7ffea, rgb(110 231 160 / 0.14));
+    --spell-warning: light-dark(#a66900, #ffe0bd);
+    --spell-warning-soft: light-dark(#fff8f1, rgb(252 200 90 / 0.14));
+    --spell-danger: light-dark(#d90021, #ffada6);
+    --spell-danger-soft: light-dark(#fff0ee, rgb(255 140 150 / 0.14));
+    --spell-spark: #ffc075;
+
+    /* Art:  blobs and flourish lines (page art, `<ui-brand-blob>` / `<ui-brand-flourish>`) */
+    --spell-blob: light-dark(var(--spell-violet-150), var(--spell-lilac-soft));
+    --spell-blob-2: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.08));
+    --spell-line-flourish: var(--spell-violet-400);
+
+    /* Shadows `xs` ... `lg`:  the brand's steps, both schemes in one list (as `--ui-shadow-*` below) */
+    --spell-shadow-xs: var(--ui-shadow-subtle);
+    --spell-shadow-sm: var(--ui-shadow-raised);
+    --spell-shadow-md: var(--ui-shadow-floating);
+    --spell-shadow-lg: var(--ui-shadow-floating-hover);
+    --spell-shadow-focus: 0 0 0 3px var(--spell-accent-ring);
+
+    /* Type roles (`typography.css`):  serif headlines and spells, sans UI, mono eyebrows and code */
+    --spell-font-serif: var(--ui-font-family-heading);
+    --spell-font-sans: var(--ui-font-family);
+    --spell-font-mono: var(--ui-font-family-mono);
+    --spell-tracking-display: -0.022em;
+    --spell-tracking-heading: -0.012em;
+    --spell-tracking-eyebrow: 0.14em;
+    --spell-type-display: 700 64px/1.08 var(--spell-font-serif);
+    --spell-type-h1: 700 48px/1.08 var(--spell-font-serif);
+    --spell-type-h2: 700 30px/1.25 var(--spell-font-serif);
+    --spell-type-h3: 400 24px/1.25 var(--spell-font-serif);
+    --spell-type-h4: 600 17px/1.25 var(--spell-font-sans);
+    --spell-type-lede: italic 400 20px/1.25 var(--spell-font-serif);
+    --spell-type-body: 400 15px/1.5 var(--spell-font-sans);
+    --spell-type-ui: 500 13px/1.3 var(--spell-font-sans);
+    --spell-type-spell: 400 17px/1.5 var(--spell-font-serif);
+    --spell-type-code: 400 13px/1.6 var(--spell-font-mono);
+    --spell-type-eyebrow: 500 12px/1 var(--spell-font-mono);
+
+    /* Shape and motion (`spacing.css`) */
+    --spell-radius-xl: 22px;
+    --spell-radius-2xl: 28px;
+    --spell-control-h-sm: 30px;
+    --spell-control-h-md: 36px;
+    --spell-control-h-lg: 44px;
+    --spell-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --spell-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+    --spell-dur-fast: 120ms;
+    --spell-dur-base: 200ms;
+    --spell-dur-slow: 360ms;
+
+    /*******************************
+       Components:  the brand's own
+    *******************************/
+
+    /* the brand's done to-do, a FILLED purple circle with a white check (issue I1) */
+    --ui-checkbox-checked-background: var(--ui-primary);
+    --ui-checkbox-checked-border-color: var(--ui-primary);
+    --ui-checkbox-checked-mark-color: var(--ui-primary-on);
+    /* the brand's range (Color Set Chooser):  a thin pill track in Spell Purple, an 18px thumb set off
+       by a soft shadow, never a white ring;  compact, so a field's label row sits right above it (issue I2) */
+    --ui-slider-height: 1.125em;
+    --ui-slider-padding-block: 0.375em;
+    --ui-slider-padding-inline: 0.5625em;
+    --ui-slider-track-height: 0.25em;
+    --ui-slider-track-radius: var(--ui-radius-pill);
+    --ui-slider-track-color: light-dark(var(--spell-brand-150), var(--spell-hairline));
+    --ui-slider-fill-color: var(--ui-primary);
+    --ui-slider-fill-color-focus: var(--ui-primary-hover);
+    --ui-slider-thumb-background: light-dark(oklch(1 0 0), var(--spell-violet-50));
+    --ui-slider-thumb-background-hover: light-dark(var(--spell-violet-25), oklch(1 0 0));
+    --ui-slider-thumb-shadow:
+      0 1px 3px light-dark(rgb(43 47 63 / 0.28), rgb(6 3 20 / 0.6)),
+      0 0 0 0.5px light-dark(rgb(43 47 63 / 0.12), transparent);
+    --ui-slider-tick-color: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
+    /* `<ui-section info>` (and so `<ui-panel>`'s bands) and `<ui-field description>`:  the brand's tooltip, an
+       aubergine bubble */
+    --ui-section-tip-background: var(--spell-surface-inverse);
+    --ui-section-tip-color: var(--spell-text-inverse);
+    --ui-field-tip-background: var(--spell-surface-inverse);
+    --ui-field-tip-color: var(--spell-text-inverse);
+    /* the brand's fold chevron (Theme Creator, Color Set Chooser):  UP while open, DOWN while folded */
+    --ui-section-fold-icon-rotate: 180deg;
+    --ui-section-fold-icon-folded-rotate: 0deg;
+
+    /* a `secondary` menu (the brand's side nav):  `spell`'s menu hover and active colours, which its own tokens
+       never take from the generic `:root` ones */
+    --ui-menu-secondary-hover-background: light-dark(var(--spell-brand-50), rgb(200 206 231 / 0.07));
+    --ui-menu-secondary-active-background: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
+    --ui-menu-secondary-active-color: light-dark(var(--spell-violet-700), var(--spell-violet-200));
+    /*
+     * Segmented controls (`appearance="segmented"`, menus and tab sets):  the brand's `.sp-seg`, a pill track in
+     * the lavender tint with an inset hairline, 3px around and 2px between the options;  the chosen one a raised
+     * card-coloured thumb, strong text, `--shadow-sm`;  the others muted.  28px options at 13px:  `0.58em` padding.
+     */
+    --ui-menu-segmented-background: var(--spell-surface-tint);
+    --ui-menu-segmented-border: 1px solid var(--spell-border-subtle);
+    --ui-menu-segmented-radius: var(--ui-radius-pill);
+    --ui-menu-segmented-padding: 2px;
+    --ui-menu-segmented-gap: 2px;
+    --ui-menu-segmented-divider: transparent;
+    --ui-menu-segmented-item-padding: 0.58em 1.08em;
+    --ui-menu-segmented-item-color: var(--spell-text-muted);
+    --ui-menu-segmented-item-radius: var(--ui-radius-pill);
+    --ui-menu-segmented-active-background: var(--ui-surface);
+    --ui-menu-segmented-active-hover-background: var(--ui-surface);
+    --ui-menu-segmented-active-color: var(--spell-text-strong);
+    --ui-menu-segmented-active-shadow: var(--spell-shadow-sm);
+
+    /*
+     * Markdown:  the Design Guide's prose (`Design Guide.dc.html`):  bold serif headings in the strong ink, no rule
+     * under them (`##` 28px, `###` 19px of its 15px text), a hairline `hr`, bold text and inline code in the strong ink
+     */
+    --ui-markdown-heading-color: var(--spell-text-strong);
+    --ui-markdown-heading-font-family: var(--ui-font-family-heading);
+    --ui-markdown-heading-weight: var(--ui-font-weight-bold);
+    --ui-markdown-heading-line-height: 1.2;
+    --ui-markdown-heading-margin: 1.1em 0.43em;
+    --ui-markdown-heading-rule: none;
+    --ui-markdown-heading-rule-gap: 0;
+    --ui-markdown-heading-scroll-margin: 24px; /* below the site header, which `scroll-padding-top` already clears */
+    --ui-markdown-h2-size: calc(28em / 15);
+    --ui-markdown-h3-size: calc(19em / 15);
+    --ui-markdown-hr-height: 1px;
+    --ui-markdown-rule-color: var(--spell-border-subtle);
+    --ui-markdown-strong-color: var(--spell-text-strong);
+    --ui-markdown-code-color: var(--spell-text-strong);
+    --ui-markdown-code-background: var(--spell-surface-code);
   }
 
   /*******************************
@@ -524,5 +715,49 @@
     ::after {
       transition: none !important;
     }
+  }
+}
+
+/*
+ * The `accent` hue, Polished Ivory (the brand's warm accent, `palette.css` `accent-*`), beside Fomantic's.
+ * - Tokens as every hue's (`colors.css`):  base, text, header, border, background, inverted, on, inverted-on, and the
+ *   remap `.ui.accent` / `.ui-accent` onto the generic `--ui-color*`, so `color="accent"` tints any element that takes
+ *   a `color` while this theme is on.
+ * - The NAME is added to the `hues` value set by the brand bundle (spell-brand's `hues.ts`):  a theme sheet can't.
+ *   Elsewhere the attribute is refused;  under another theme, accepted but untinted.
+ * - `<ui-panel color="accent">`:  the Color Set Chooser's ivory panel.
+ */
+@layer ui.theme {
+  :root {
+    --ui-accent-on-light: #867044; /* accent-600 */
+    --ui-accent-on-dark: #baa479; /* accent-400 */
+    --ui-accent: light-dark(var(--ui-accent-on-light), var(--ui-accent-on-dark));
+    --ui-accent-hover: oklch(from var(--ui-accent) calc(l - 0.05) calc(c * 1.1) h);
+    --ui-accent-focus: oklch(from var(--ui-accent) calc(l - 0.08) calc(c * 1.2) h);
+    --ui-accent-down: oklch(from var(--ui-accent) calc(l - 0.1) c h);
+    --ui-accent-active: oklch(from var(--ui-accent) calc(l - 0.05) calc(c * 1.15) h);
+    --ui-accent-text: light-dark(var(--spell-accent-800), var(--spell-accent-200)); /* accent-800 / 200 */
+    --ui-accent-header: light-dark(var(--spell-violet-900), var(--spell-accent-100));
+    --ui-accent-border: light-dark(var(--spell-accent-300), rgb(234 221 196 / 0.3));
+    --ui-accent-background: light-dark(var(--spell-accent-100), #2c2152); /* ivory;  dark:  the brand's warm surface */
+    --ui-accent-inverted: var(--ui-accent-on-dark);
+    --ui-accent-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-accent-inverted-on: var(--ui-ink-on-light);
+  }
+
+  .ui.accent,
+  .ui-accent {
+    --ui-color: var(--ui-accent);
+    --ui-color-hover: var(--ui-accent-hover);
+    --ui-color-focus: var(--ui-accent-focus);
+    --ui-color-down: var(--ui-accent-down);
+    --ui-color-active: var(--ui-accent-active);
+    --ui-color-text: var(--ui-accent-text);
+    --ui-color-header: var(--ui-accent-header);
+    --ui-color-border: var(--ui-accent-border);
+    --ui-color-background: var(--ui-accent-background);
+    --ui-color-inverted: var(--ui-accent-inverted);
+    --ui-color-on: var(--ui-accent-on);
+    --ui-color-inverted-on: var(--ui-accent-inverted-on);
   }
 }

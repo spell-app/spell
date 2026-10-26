@@ -149,17 +149,19 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   - The one left out, Lead By Example, is a GitHub look-alike with its own `theme.config`:  `github` stands in.
   - Mind the names:  `classic` is Fomantic's DEFAULT look, while `fomantic-classic` is the Fomantic theme that
     happens to be called "classic", Semantic UI 1.x's glossy gradients.
-- `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
-  pill buttons, an aubergine dark mode.
-  It ships no font either:  the serif is whichever Palatino the system has.
-- a third of Spell's own, `spell` with warm and inverse surfaces added, for Spell's own pages:  `themes.own` names it.
-- `fruity`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
-  and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, over a soft wallpaper.
-  - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
-- `studio`:  a code studio in the colours of Shades of Purple, the VS Code theme:  flat panels on hairlines, no glass,
-  navy and yellow in dark, pale lavender and violet in light.
-  It's tokens only so far:  every family keeps `classic`'s shapes.
-- Spell's editor offers three of Spell's own as its looks:  its Glass is `fruity`, its Studio is `studio`.
+- Spell's own four, `themes.own`, the one set every place offers:
+  - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
+    pill buttons, an aubergine dark mode, and the brand's warm and inverse surfaces for Spell's own pages.
+    It ships no font either:  the serif is whichever Palatino the system has.
+  - `glass`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
+    and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, on a solid page.
+    - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
+  - `fruity`:  `glass` over a soft pastel wallpaper, three colour washes:  its sheet imports `glass.css`.
+  - `merlot`:  a code studio in wine reds:  flat panels on hairlines a step off the page, no glass,
+    an amber primary on deep wine in dark, a maroon one on rose-grey in light.
+    It's tokens only so far:  every family keeps `classic`'s shapes.
+  - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
+    `studio` as `merlot`, `spell-brand` as `spell`.
 - Not a theme:  the dark sheet, a colour scheme you put on top of any of them (above).
   `classic` has no dark of its own, since Fomantic had none:  its dark colours are Fomantic's light hues.
 
@@ -177,8 +179,9 @@ the last column is what a theme restyles on purpose.
 | Theme | Look | Restyles |
 | --- | --- | --- |
 | `spell` | Spell's own:  Palatino-family serif headings with italic ledes, a system sans body, Spell Purple, pill buttons, 16px cards, soft layered shadows, an aubergine dark mode.  Page-wide;  the docs site's default. | everything, through the global tokens |
-| `fruity` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces that blur a soft wallpaper behind the page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
-| `studio` | A code studio in Shades of Purple's colours:  the system font, flat panels joined by hairlines, no glass;  Shades of Purple's navy and yellow in dark, pale lavender and a deep violet in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
+| `glass` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces on a solid page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
+| `fruity` | `glass` over a soft pastel wallpaper:  three blurred colour washes behind the page.  Page-wide. | as `glass` |
+| `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  an amber primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
 | `classic` | Fomantic's original look, and the base of every theme below:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
 | `amazon` | amazon.com circa 2015:  13px Arial, gradient buttons, an orange primary.  Page-wide. | button, header |
 | `basic` | Stripped back:  flat grey buttons, borderless cards, pill steps, no progress track. | button, card, progress, step, table |
@@ -282,7 +285,7 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Both sheets sit in `ui.theme`, `classic` first, so the theme wins every tie by coming second.
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
-- `themes.own` lists Spell UI's own four themes, `spell`, `fruity` and `studio` among them:
+- `themes.own` lists Spell UI's own four themes, `spell`, `glass`, `fruity` and `merlot`:
   a picker shows them apart from `names`.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
   So does `apply("dark")`, since dark is a scheme (above):

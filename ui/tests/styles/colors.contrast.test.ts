@@ -1,9 +1,12 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { clipped, contrast, CONTRAST_LARGE, CONTRAST_TEXT, oklchToRgb, type Oklch } from "spell/util/color"
+import { clipped, CONTRAST_LARGE, CONTRAST_TEXT, oklchToRgb } from "spell/util/color"
+import { UI } from "spell-ui/runtime"
 import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell-ui/styles"
 
+import { A11y } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
+import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
 
 import layersRaw from "spell-ui/styles/layers.css?raw"
 import tokensRaw from "spell-ui/styles/tokens.css?raw"
@@ -12,11 +15,15 @@ import sizesRaw from "spell-ui/styles/sizes.css?raw"
 import utilitiesRaw from "spell-ui/styles/utilities.css?raw"
 
 /**
- * WCAG contrast of the GENERATED palette, per colour and per scheme.
- * - Colours are read back from the browser (`getComputedStyle`), so what's measured is what `colors.css`
- *   resolves to -- `light-dark()`, relative-colour roles and remaps included -- not the vocabulary's numbers.
- * - Ratios via the kit's `contrast()` (`spell/util/color`:  clipped to sRGB, as axe does), so a pass here is a pass in the axe tests.
- * - Raw sheets, so `light-dark()` survives whatever the Lightning CSS targets (see `styles.test.ts`).
+ * WCAG contrast of the palette and the text, per colour and per scheme, with no theme and in each theme of Spell's
+ * own set (`UI.themes.own`;  epic `debut` P17, J76).
+ * - Colours are read back from the browser (`getComputedStyle`), so what's measured is what the sheets resolve to --
+ *   `light-dark()`, relative-colour roles, remaps and a theme's own values included -- not the vocabulary's numbers.
+ * - Read AS PAINTED (`A11y.contrast()`:  the canvas resolves any CSS colour, hex and `rgb()` as well as `oklch()`),
+ *   each over the page's own background, so a see-through colour (a glass panel, a tinted wash) is measured as it shows.
+ * - Ratios via the kit's `contrast()` (clipped to sRGB, as axe does), so a pass here is a pass in the axe tests.
+ * - Raw foundation sheets, so `light-dark()` survives whatever the Lightning CSS targets (see `styles.test.ts`);
+ *   a theme is applied as a page applies it (`ThemeHarness.use()`).
  */
 
 /** Every colour name a component accepts:  hues, aliases, semantic colours and their aliases. */
@@ -52,46 +59,96 @@ describe("the kit's colour maths", () => {
   })
 })
 
-describe("colors.css contrast (WCAG AA)", () => {
-  it.each(SCHEMES)("puts readable text on every solid colour and state (%s)", (scheme) => {
-    adoptFoundation()
-    const failures: string[] = []
-    for (const name of NAMES) {
-      const probe = renderProbe(scheme, name)
-      for (const solid of SOLIDS) failures.push(...check(probe, name, "--ui-color-on", solid, CONTRAST_TEXT))
-      failures.push(...check(probe, name, "--ui-color-inverted-on", "--ui-color-inverted", CONTRAST_TEXT))
-    }
-    expect(failures).toEqual([])
-  })
-
-  it.each(SCHEMES)("keeps the text roles readable on the page and the tinted background (%s)", (scheme) => {
-    adoptFoundation()
-    const failures: string[] = []
-    for (const name of NAMES) {
-      const probe = renderProbe(scheme, name)
-      for (const role of ["--ui-color-text", "--ui-color-header"]) {
-        failures.push(...check(probe, name, role, "--ui-background", CONTRAST_TEXT))
-        failures.push(...check(probe, name, role, "--ui-color-background", CONTRAST_TEXT))
-      }
-      // the `-inverted` colour is TEXT on a dark surface too (inverted labels, icons, basic buttons)
-      if (scheme === "ui-dark") {
-        failures.push(...check(probe, name, "--ui-color-inverted", "--ui-background", CONTRAST_TEXT))
-      }
-      // NOTE: semantic borders are decorative (a message's edge), so only hue borders -- button / label
-      // outlines -- need the 3:1 of a UI component boundary
-      if (HUE_NAMES.has(name)) {
-        failures.push(...check(probe, name, "--ui-color-border", "--ui-background", CONTRAST_LARGE))
-      }
-    }
-    expect(failures).toEqual([])
-  })
-})
+/** The themes it's measured in:  none (Spell UI's own look), then each theme of the set. */
+const THEMES: readonly (string | undefined)[] = [undefined, ...(await UI.load()).themes.own]
 
 /**
- * Adopt the raw foundation into the document for the current test.
+ * What fails in the Spell theme today, pinned so the test still guards the rest:  its facelift, epic `debut` P18,
+ * fixes them, and empties this list (its item T).
+ */
+const SPELL_FAILURES_FOR_P18: Readonly<Record<Check, readonly string[]>> = {
+  solids: [
+    "ui-light orange: --ui-color-on on --ui-color-down is 4.25:1 < 4.5",
+    "ui-light olive: --ui-color-on on --ui-color-down is 4.32:1 < 4.5",
+    "ui-light secondary: --ui-color-on on --ui-color-focus is 4.23:1 < 4.5",
+    "ui-light secondary: --ui-color-on on --ui-color-down is 3.90:1 < 4.5",
+    "ui-light info: --ui-color-on on --ui-color-focus is 4.44:1 < 4.5",
+    "ui-light info: --ui-color-on on --ui-color-down is 4.16:1 < 4.5",
+    "ui-dark purple: --ui-color-on on --ui-color-down is 4.43:1 < 4.5"
+  ],
+  roles: ["ui-light primary: --ui-color-border on --ui-background is 2.80:1 < 3"],
+  text: []
+}
+
+/** Which of the checks below a failure is pinned under. */
+type Check = "solids" | "roles" | "text"
+
+for (const theme of THEMES) {
+  describe(`contrast (WCAG AA), ${theme ?? "no theme"}`, () => {
+    it.each(SCHEMES)("puts readable text on every solid colour and state (%s)", async (scheme) => {
+      await adoptFoundation(theme)
+      const failures: string[] = []
+      for (const name of NAMES) {
+        const probe = renderProbe(scheme, name)
+        for (const solid of SOLIDS) failures.push(...check(probe, name, "--ui-color-on", [solid], CONTRAST_TEXT))
+        failures.push(...check(probe, name, "--ui-color-inverted-on", ["--ui-color-inverted"], CONTRAST_TEXT))
+      }
+      expectFailures(theme, scheme, "solids", failures)
+    })
+
+    it.each(SCHEMES)("keeps the text roles readable on the page and the tinted background (%s)", async (scheme) => {
+      await adoptFoundation(theme)
+      const failures: string[] = []
+      for (const name of NAMES) {
+        const probe = renderProbe(scheme, name)
+        for (const role of ["--ui-color-text", "--ui-color-header"]) {
+          failures.push(...check(probe, name, role, [], CONTRAST_TEXT))
+          failures.push(...check(probe, name, role, ["--ui-color-background"], CONTRAST_TEXT))
+        }
+        // the `-inverted` colour is TEXT on a dark surface too (inverted labels, icons, basic buttons)
+        if (scheme === "ui-dark") failures.push(...check(probe, name, "--ui-color-inverted", [], CONTRAST_TEXT))
+        // NOTE: semantic borders are decorative (a message's edge), so only hue borders -- button / label
+        // outlines -- need the 3:1 of a UI component boundary
+        if (HUE_NAMES.has(name)) failures.push(...check(probe, name, "--ui-color-border", [], CONTRAST_LARGE))
+      }
+      expectFailures(theme, scheme, "roles", failures)
+    })
+
+    it.each(SCHEMES)("keeps text and muted text readable on the page and on its panels (%s)", async (scheme) => {
+      await adoptFoundation(theme)
+      const probe = renderProbe(scheme, "")
+      const failures: string[] = []
+      for (const text of ["--ui-text-color", "--ui-text-muted"]) {
+        for (const surface of TEXT_GROUNDS) failures.push(...check(probe, "text", text, surface, CONTRAST_TEXT))
+      }
+      expectFailures(theme, scheme, "text", failures)
+    })
+  })
+}
+
+/**
+ * What text is read on, over the page's own background (`--ui-background`):  the page itself, then each panel.
+ * - A see-through panel (a glass theme's) is measured over the plain page:  the most a wallpaper changes is a tint.
+ */
+const TEXT_GROUNDS: readonly (readonly string[])[] = [
+  [],
+  ["--ui-surface"],
+  ["--ui-surface-muted"],
+  ["--ui-surface-strong"]
+]
+
+/** `failures` are exactly what's pinned for `theme` and `kind`:  none, but the Spell theme's for P18. */
+function expectFailures(theme: string | undefined, scheme: string, kind: Check, failures: string[]) {
+  const pinned =
+    theme === "spell" ? SPELL_FAILURES_FOR_P18[kind].filter((failure) => failure.startsWith(`${scheme} `)) : []
+  expect(failures.map((failure) => `${scheme} ${failure}`)).toEqual(pinned)
+}
+
+/**
+ * Adopt the raw foundation into the document for the current test, and theme `theme` (none:  our own look).
  * - SIDE EFFECT:  appended to `document.adoptedStyleSheets`, removed when the test finishes.
  */
-function adoptFoundation() {
+async function adoptFoundation(theme: string | undefined) {
   const sheets = [layersRaw, tokensRaw, colorsRaw, sizesRaw, utilitiesRaw].map((css) => {
     const sheet = new CSSStyleSheet()
     sheet.replaceSync(css)
@@ -101,6 +158,7 @@ function adoptFoundation() {
   onTestFinished(() => {
     document.adoptedStyleSheets = document.adoptedStyleSheets.filter((sheet) => !sheets.includes(sheet))
   })
+  if (theme) await ThemeHarness.use(theme)
 }
 
 /** A `.ui.<name>` span inside a `scheme` wrapper:  the element whose remapped tokens get measured. */
@@ -109,21 +167,28 @@ function renderProbe(scheme: string, name: string): HTMLElement {
     .firstElementChild as HTMLElement
 }
 
-/** `[]` if `foreground` on `background` (both tokens, resolved on `probe`) reaches `minimum`, else the failure. */
-function check(probe: HTMLElement, name: string, foreground: string, background: string, minimum: number): string[] {
-  const ratio = contrast(resolve(probe, foreground), resolve(probe, background))
-  return ratio >= minimum ? [] : [`${name}: ${foreground} on ${background} is ${ratio.toFixed(2)}:1 < ${minimum}`]
+/**
+ * `[]` if `foreground` on `grounds` (tokens resolved on `probe`, painted over the page's background, bottom first)
+ * reaches `minimum`, else the failure.
+ */
+function check(
+  probe: HTMLElement,
+  name: string,
+  foreground: string,
+  grounds: readonly string[],
+  minimum: number
+): string[] {
+  const layers = ["--ui-background", ...grounds].map((token) => resolve(probe, token))
+  const ratio = A11y.contrast(resolve(probe, foreground), layers)
+  const on = grounds.at(-1) ?? "--ui-background"
+  return ratio >= minimum ? [] : [`${name}: ${foreground} on ${on} is ${ratio.toFixed(2)}:1 < ${minimum}`]
 }
 
 /**
- * Token `name` resolved on `probe`, as OKLCH.
+ * Token `name` resolved on `probe`:  the colour the browser computes, any notation.
  * - SIDE EFFECT:  sets `probe`'s inline `color`.
- * - Throws on anything but an opaque `oklch()`:  the palette is all OKLCH, and alpha would need a backdrop.
  */
-function resolve(probe: HTMLElement, name: string): Oklch {
+function resolve(probe: HTMLElement, name: string): string {
   probe.style.color = `var(${name})`
-  const value = getComputedStyle(probe).color
-  const match = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+|none)\)$/.exec(value)
-  if (!match) throw new Error(`${name} resolved to ${value}, not an opaque oklch()`)
-  return { l: Number(match[1]), c: Number(match[2]), h: match[3] === "none" ? 0 : Number(match[3]) }
+  return getComputedStyle(probe).color
 }

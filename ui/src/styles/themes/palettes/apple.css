@@ -1,0 +1,122 @@
+/*
+ * Apple's system colours, as a palette a theme imports (`@import "./palettes/apple.css"`), `@layer ui.theme`.
+ * - Not a theme:  `UI.themes` reads only the themes folder's top level, so this folder lists in no menu.
+ * - Its themes:  Glass (and so Fruity), Merlot (epic `debut` P17).
+ * - Every hue's base, its text on it (`-on`), its text colour (`-text`), its colour on dark surfaces (`-inverted`),
+ *   and how a solid colour moves when hovered or pressed:  all checked at WCAG AA in both schemes
+ *   (`colors.contrast.test.ts`, J76).
+ * - A theme on it picks its own primary and secondary, and its own surfaces.
+ */
+
+@layer ui.theme {
+  :root {
+    /*
+     * Apple's system colours:
+     * - light uses their higher-contrast shades, so white reads on them;  dark, their dark-mode shades, which take ink
+     * - `-on` restated for each:  `colors.css` picked it for classic's bases, not these
+     */
+    --ui-red-on-light: #d70015;
+    --ui-red-on-dark: #ff453a;
+    --ui-orange-on-light: #c93400;
+    --ui-orange-on-dark: #ff9f0a;
+    --ui-yellow-on-light: #ffcc00; /* ink on it, both schemes */
+    --ui-yellow-on-dark: #ffd60a;
+    --ui-olive-on-light: #5a7d00;
+    --ui-olive-on-dark: #a8e05f;
+    /* a shade under Apple's #248a3d, which takes white at 4.40:1;  this one 4.81:1 (epic `debut` P17, J76) */
+    --ui-green-on-light: #1f8338;
+    --ui-green-on-dark: #30d158;
+    --ui-teal-on-light: #0071a4;
+    --ui-teal-on-dark: #40c8e0;
+    --ui-blue-on-light: #0066d6;
+    --ui-blue-on-dark: #0a84ff;
+    --ui-violet-on-light: #6a3fd6;
+    /* dark:  a saturated violet with white on it, as macOS keeps its accent;  the lilac is for text and focus */
+    --ui-violet-on-dark: #7c55e6;
+    --ui-purple-on-light: #8944ab;
+    --ui-purple-on-dark: #bf5af2;
+    --ui-pink-on-light: #d30f45;
+    --ui-pink-on-dark: #ff375f;
+    --ui-brown-on-light: #7f6545;
+    --ui-brown-on-dark: #ac8e68;
+    --ui-grey-on-light: #6e6e73;
+    --ui-grey-on-dark: #636366;
+    --ui-black-on-light: #1d1d1f;
+    --ui-black-on-dark: #3a3a3c;
+    --ui-info-on-light: #0066d6;
+    --ui-info-on-dark: #64d2ff;
+    --ui-warning-on-light: #c93400;
+    --ui-warning-on-dark: #ff9f0a;
+
+    --ui-red-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-orange-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-yellow-on: var(--ui-ink-on-light);
+    --ui-olive-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-green-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-teal-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-blue-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-violet-on: oklch(1 0 0);
+    --ui-purple-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-pink-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-brown-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-grey-on: oklch(1 0 0);
+    --ui-black-on: oklch(1 0 0);
+    --ui-info-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-warning-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+
+    /*
+     * The violet and the grey on dark surfaces (`-inverted`):  read as TEXT on the dark page too, so the lilac accent
+     * and Apple's secondary label grey, with ink on them (their dark bases, `#7c55e6` / `#636366`, read 3.77:1 /
+     * 3.07:1 on the page;  epic `debut` P17, J76)
+     */
+    --ui-violet-inverted: #b79bff;
+    --ui-violet-inverted-on: var(--ui-ink-on-light);
+    --ui-grey-inverted: #a1a1a6;
+    --ui-grey-inverted-on: var(--ui-ink-on-light);
+
+    /* Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal) */
+    --ui-yellow-text: light-dark(
+      oklch(from var(--ui-yellow) min(l, 0.5) c h),
+      oklch(from var(--ui-yellow) max(l, 0.78) c h)
+    );
+    --ui-olive-text: light-dark(
+      oklch(from var(--ui-olive) min(l, 0.5) c h),
+      oklch(from var(--ui-olive) max(l, 0.78) c h)
+    );
+    --ui-green-text: light-dark(
+      oklch(from var(--ui-green) min(l, 0.5) c h),
+      oklch(from var(--ui-green) max(l, 0.78) c h)
+    );
+    --ui-teal-text: light-dark(oklch(from var(--ui-teal) min(l, 0.5) c h), oklch(from var(--ui-teal) max(l, 0.78) c h));
+  }
+
+  /*******************************
+       Pressed and hovered colours
+  *******************************/
+
+  /*
+   * A solid colour's states move AWAY from the text on it, so the text keeps 4.5:1 (epic `debut` P17, J76):
+   * - dark:  ink on these hues, so their states LIGHTEN (`colors.css` darkens them in both schemes);  light, as there
+   */
+  .ui:is(.red, .orange, .yellow, .olive, .green, .teal, .blue, .purple, .pink, .brown),
+  .ui:is(.positive, .negative, .info, .warning, .success, .error),
+  :is(.ui-red, .ui-orange, .ui-yellow, .ui-olive, .ui-green, .ui-teal, .ui-blue, .ui-purple, .ui-pink, .ui-brown),
+  :is(.ui-positive, .ui-negative, .ui-info, .ui-warning, .ui-success, .ui-error) {
+    --ui-color-hover: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.1) h),
+      oklch(from var(--ui-color) calc(l + 0.05) calc(c * 1.1) h)
+    );
+    --ui-color-focus: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.08) calc(c * 1.2) h),
+      oklch(from var(--ui-color) calc(l + 0.08) calc(c * 1.2) h)
+    );
+    --ui-color-down: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.1) c h),
+      oklch(from var(--ui-color) calc(l + 0.1) c h)
+    );
+    --ui-color-active: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.15) h),
+      oklch(from var(--ui-color) calc(l + 0.05) calc(c * 1.15) h)
+    );
+  }
+}
