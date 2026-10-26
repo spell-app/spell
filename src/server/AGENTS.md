@@ -264,6 +264,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - the other sets had their own build (its `sets/`), until epic `epic-engine`
         - the rest is the set's own folder:  its pages, `__parts/`, `__data/`
       - The same at `/worktrees/<w>/components/<set>/`.
+        - with that worktree's own site bundle (epic `epic-engine` r35):
+          - a page there that loads a set's address by its root path (`/components/ui/_assets/site.js`)
+            has it laid under the worktree's address as it's served (`withWorktreeLoads()`)
+          - a relative load (`_assets/site.js`, every page's) resolves there already
+        - NOT the engine's:  `/_epic/assets/` and the epics pack (`/_epic/pack/`) are ONE copy, this checkout's,
+          under every address;  a worktree changing the engine sees it on its own server
       - `<prefix>` redirects to `<prefix>/`:  the one redirect left.
       - Live reload watches each set's folder and its bundle, reporting their changes at the set's address.
       - Settings that name no sets:  no sets served.
@@ -272,6 +278,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - and again whenever their sources change while it runs (`BundleBuild.watch()`), once quiet 3s:  a merge into
         the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
       - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
+      - A worktree's too, seen through this server (`worktreeBuildFor()`, r35):  built by the worktree's own `spell`
+        at the first request at its sets' addresses, then watched;  while it builds, those requests wait, pages too
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
       - [ProjectBuild](../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
