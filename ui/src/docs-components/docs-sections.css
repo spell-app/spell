@@ -4,6 +4,8 @@
  * - Shared by Spell UI's docs site (`site/_src/site.css` imports it, for `.site-main`)
  *   and any other page drawn like a component page:  `class="ui-docs-sections"` on what holds its sections
  *   (spell-app's notebook page).
+ * - How round a title's bar is:  `--ui-docs-section-radius`;  unset, the theme's medium radius
+ *   (the notebook page sets it to the theme's segmented-menu radius, a pill in a pill-shaped theme)
  * - How far a title's bar reaches out past its column, each side:
  *   `--ui-docs-section-reach-start` / `-end`;  unset, the docs site's (its gutter and its side columns' margin).
  *   - the title's text stays where it was:  its padding gives the reach back
@@ -54,7 +56,7 @@
       calc(var(--_ui-docs-title-inset) - var(--_ui-docs-reach-end));
     padding-inline: calc(var(--_ui-docs-reach-start) - var(--_ui-docs-title-inset))
       calc(var(--_ui-docs-reach-end) - var(--_ui-docs-title-inset));
-    border-radius: var(--ui-radius-m, 8px);
+    border-radius: var(--ui-docs-section-radius, var(--ui-radius-m, 8px));
     box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
     padding-block: 0.4em;
     /*
