@@ -11,9 +11,9 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 - Every page saves to this laptop's page server.
 - `/airplane` gets the laptop ready before;  `/airplane land` works through what he left, after.
 
-- The repo actions are `epic airplane ...` ([airplane.ts](${CLAUDE_PLUGIN_ROOT}/src/tools/airplane.ts));
+- The repo actions are `epic airplane ...` ([airplane.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/airplane.ts));
   this skill holds the dialog.
-- The switch:  `~/.spell/airplane.json`, read by [`AirplaneMode`](${CLAUDE_PLUGIN_ROOT}/src/tools/AirplaneMode.ts).
+- The switch:  `~/.spell/airplane.json`, read by [`AirplaneMode`](https://github.com/spell-app/spell/blob/main/epic/src/tools/AirplaneMode.ts).
   - While it's on, the page server tells every page.
   - Then the review controls say "queued for when you land", instead of "start `/epic review`".
 - Works from ANY session, a worktree's too.
@@ -37,7 +37,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
      Anything else remote it names:  fix the page by hand, or tell Owen which pages will look plain.
    - `extension`, too old:  spell-epic's VS Code extension, rebuilt and installed
      as [its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md) says.
-     - From spell-epic's main checkout, never a branch behind it:  it installs into VS Code.
+     - From the kit's main checkout, never a branch behind it:  it installs into VS Code.
      - Then ask Owen to reload the window (Developer:  Reload Window).
    - `waiting`:  marks already in the inboxes from before:  say which epics;  they'll be gathered at landing too
 2. Running sessions:  `epic worktree list`.

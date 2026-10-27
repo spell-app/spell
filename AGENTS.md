@@ -67,7 +67,7 @@ and suggest where it belongs before building it (below, "Commands").
     `"pageServer"`, `"spellPack"`, `"spellTypes"`, `"spellPublish"`), and its dependencies at the kit's versions,
     plus `spell` itself (`workspace:*`, for the bins).
   - No `exports`:  the kit's hold every folder's names.
-    (epic's keeps its own only as a temporary `spell-epic/...` alias, until epic `epic-engine` P49.)
+    (epic's kept a temporary `spell-epic/...` alias until epic `epic-engine` P49.)
 - `yarn install` runs HERE, at the root, never in a folder:  ONE `yarn.lock`.
   - One copy of each package version (`nmHoistingLimits: none`), above all Solid:  pinned by `resolutions`.
   - Tool versions are bumped here (below, "Toolchain:  Vite+").
@@ -151,8 +151,10 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - `spell-ui`:  Spell UI's Vite library build, the element code inside (Q63)
   - `spell-epic`:  the epic plugin, its parts at its root, depending on `spell` (Q64)
   - spell-parser and spell-app are held names, not published again (Q65).
-  - [marketplace.json](.claude-plugin/marketplace.json), at the root:  marketplace `spell`, plugin `epic` from
-    `spell-epic` (`/plugin install epic@spell`);  Owen's own machine keeps loading the plugin in place.
+  - [marketplace.json](.claude-plugin/marketplace.json), at the root, the ONE marketplace file:  marketplace `spell`,
+    plugin `epic` (`/plugin install epic@spell`), its source `./epic` until `spell publish` turns it to `spell-epic`.
+    Owen's machine loads the plugin in place, from the kit's `epic/`:  `epic plugin install` sets it up
+    (epic `epic-engine`'s P49).
 - The READMEs (the root's and every big folder's `README.md` and `README-*.md`):
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
@@ -265,8 +267,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   `spell/app/spaces/...`.
   - Inside a folder too:  no `$/`, no `#`, no `../`.
   - Spell UI's short names:  `spell/ui/ui-button`;  the `spell-ui` bundle's (`spell-ui/ui-button`) are for outside.
-  - The epic folder's old name, `spell-epic/...`, still resolves (its folder manifest's `exports`) until epic
-    `epic-engine` P49:  the plugin's hooks.
+  - The epic folder's old name, `spell-epic/...`, is gone since epic `epic-engine` P49:  write `spell/epic/...`.
 - The kit's `package.json` `exports`:  one wildcard entry per folder (`./ui/*` => `./ui/src/*`), in three conditions:
   - `spell-source`:  TypeScript reads the SOURCE (every program's `customConditions`)
   - `types`:  built declarations (`dist-types/`, `spell-types`), for the app's node program and for spell-brand
@@ -483,6 +484,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - It reports snapshot entries with a value NEITHER side had:
     new behaviour nobody reviewed;  show them to Owen.
   - Then it renames the old Spell UI names the branch still writes (`<ui-docs-toc>` => `<ui-toc>`):
+    <!-- spell ui rename: leave this file (the line above quotes an old name on purpose) -->
     `spell ui rename --write` over the branch's files, once every repo is merged (epic `epic-engine` I143).
     - The branch's files:  what the merged branch differs from `main` in;  `main`'s own were renamed on `main`.
     - Each repo's run is the WORKTREE's kit (`node bin/spell.mjs`), never main's.

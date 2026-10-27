@@ -129,6 +129,8 @@ export class EpicTools {
    * - `serve`:  every web server, `epic server start --all`:  the kit's `spell` its install resolves, which
    *   `EpicProgram` runs as `spell server start all` (spell-app's own `scripts/serve.mjs` until epic `repo-split` P13)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
+   *   - `pages shots`:  the designer review's screenshots, in the caller's folder (`node src/tools/designer-shots.js`
+   *     until epic `epic-engine` P49:  the plugin's npm package ships no code, so its skills name a command)
    *   (`runPages()`;  spell-app's `spell dev docs <verb>` until epic `repo-split` P13)
    *   - at the caller's checkout's root (spell-app's `yarn workspace` ran them in `packages/epics` before epic
    *     `epic-eject`'s switch-over), or the caller's folder for those that take paths from there
@@ -152,7 +154,8 @@ export class EpicTools {
     "pages link": { tool: "src/tools/link.ts", tsx: "tsconfig.json", cwd: "." },
     "pages fuss": { tool: "src/tools/fuss.ts", tsx: "tsconfig.json" },
     "pages voice": { tool: "src/tools/voice.ts", tsx: "tsconfig.json", cwd: "." },
-    "pages offline": { tool: "src/tools/offline.ts", tsx: "tsconfig.json" }
+    "pages offline": { tool: "src/tools/offline.ts", tsx: "tsconfig.json" },
+    "pages shots": { tool: "src/tools/designer-shots.js", tsx: "tsconfig.json" }
   } satisfies Record<string, ToolSpec>
 
   /**

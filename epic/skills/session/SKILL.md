@@ -9,7 +9,7 @@ argument-hint: "[<words> | <id> | name [<title>]]"
 The command:  `epic session <verb>`, run from the session's folder.
 - It lists THAT repo's sessions:  main checkout, worktrees and package folders together.
 - `spell help dev` lists the verbs.
-- The logic:  [Sessions.ts](${CLAUDE_PLUGIN_ROOT}/src/command/Sessions.ts).
+- The logic:  [Sessions.ts](https://github.com/spell-app/spell/blob/main/epic/src/command/Sessions.ts).
 - History:  moved into the repo from `~/.claude/skills/session` on 2026-10-03,
   its python ported to `epic session`.
   Naming split out as `/title` on 2026-10-04.

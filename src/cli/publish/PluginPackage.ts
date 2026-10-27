@@ -1,18 +1,33 @@
-import { chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync
+} from "node:fs"
 import { dirname, join } from "node:path"
 
 import { DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage, type PublishCheck } from "spell/cli/publish"
 
 /****************
  * ### PluginPackage
- * The `spell-epic` package (epic `repo-split` Q64):  the epic plugin for Claude Code, its parts at the package's root,
- * its code in the `spell` it depends on.
+ * The `spell-epic` package (epic `repo-split` Q64, epic `epic-engine` Q43):  the epic plugin for Claude Code, its parts
+ * at the package's root, its code in the `spell` it depends on.
  * - What ships:  the plugin's manifest (`.claude-plugin/plugin.json`, named `epic`:  installed as `epic@spell`,
  *   Q58), its skills, hooks, monitors and agents, the templates and voices, the docs the skills read, and `bin/epic`.
+ *   - and every file its skills, hooks, monitors and agents name by `${CLAUDE_PLUGIN_ROOT}/...` (`namedFiles()`):
+ *     the designer's and coherence's rules, `src/AGENTS.md`, `README-vscode.md` ...
+ *   - a skill names the plugin's own CODE by its GitHub address instead (`https://github.com/spell-app/spell/...`),
+ *     never `${CLAUDE_PLUGIN_ROOT}/src/<file>.ts`:  no code ships here, and a code file named so fails its checks
  * - NOT its code:  `bin/epic` runs `spell`'s built `dist/epic/cli/epicMain.js`, and the hooks import
  *   `spell/epic/...`, which `spell` answers.  So `npm install spell-epic` brings both, and one copy of the code.
- * - NOT the folder's own marketplace file (`.claude-plugin/marketplace.json`):  Owen's machine loads the plugin in
- *   place from it;  the repo's root marketplace, `spell`, names this package as the plugin's npm source.
+ * - The ONE marketplace file is the repo's root, `.claude-plugin/marketplace.json` (`spell`, epic `epic-engine` Q42):
+ *   its `epic` entry's source is `./epic`, the checkout's folder, until the first publish;  publishing turns it to
+ *   this package (`sourceToNpm()`), for `/plugin marketplace add spell-app/spell`.
  * - From the epic folder's `package.json`:  its `"spellPublish": { "files" }`, and the agents its plugin manifest names.
  ****************/
 export class PluginPackage extends PublishedPackage {
@@ -28,7 +43,6 @@ export class PluginPackage extends PublishedPackage {
       cpSync(from, join(this.stageDir, path), { recursive: true })
       copied++
     }
-    rmSync(join(this.stageDir, ".claude-plugin", "marketplace.json"), { force: true })
     const pluginFile = join(this.stageDir, ".claude-plugin", "plugin.json")
     const plugin = JSON.parse(readFileSync(pluginFile, "utf8")) as Record<string, unknown>
     writeFileSync(pluginFile, `${JSON.stringify({ ...plugin, name: PLUGIN_NAME, version: this.version }, null, 2)}\n`)
@@ -51,7 +65,8 @@ export class PluginPackage extends PublishedPackage {
     return {
       name: source.name,
       version: this.version,
-      description: "The epic plugin for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command",
+      description:
+        "The epic plugin for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command",
       license: source.license,
       type: "module",
       bin: { epic: "./bin/epic" },
@@ -60,12 +75,18 @@ export class PluginPackage extends PublishedPackage {
     }
   }
 
-  /** The base checks, and its own:  a plugin manifest named `epic`, and no code but the bin. */
+  /**
+   * The base checks, and its own:  a plugin manifest named `epic`, no code but the bin, and every file the skills,
+   * hooks, monitors and agents name packed.
+   */
   override checks(packed: PackedPackage): PublishCheck[] {
     const plugin = JSON.parse(readFileSync(join(this.stageDir, ".claude-plugin", "plugin.json"), "utf8")) as {
       name?: string
     }
     const code = packed.files.filter((file) => /\.(tsx?|jsx?)$/.test(file) && !file.startsWith("skills/"))
+    const unpacked = PluginPackage.namedFiles(this.repo.root).filter(
+      (path) => !packed.files.some((file) => file === path || file.startsWith(`${path.replace(/\/$/, "")}/`))
+    )
     return [
       ...super.checks(packed),
       {
@@ -79,19 +100,80 @@ export class PluginPackage extends PublishedPackage {
         check: "no code of its own:  the plugin's code is spell's",
         ok: !code.length,
         ...(code.length && { detail: code.slice(0, 5).join(", ") })
+      },
+      {
+        pkg: this.name,
+        check: "every file its skills, hooks and agents name (${CLAUDE_PLUGIN_ROOT}/...) is packed",
+        ok: !unpacked.length,
+        ...(unpacked.length && { detail: unpacked.slice(0, 5).join(", ") })
       }
     ]
   }
 
-  /** What ships, from the folder's root:  its docs, its `"spellPublish": { "files" }`, the agents its plugin names. */
-  private parts(): string[] {
+  /**
+   * What ships, from the folder's root:  its docs, its `"spellPublish": { "files" }`, the agents its plugin names,
+   * and the files those name (`namedFiles()`).
+   */
+  parts(): string[] {
     const docs = readdirSync(this.repo.root).filter((file) => DOC_FILES.test(file))
     const plugin = JSON.parse(readFileSync(join(this.repo.root, ".claude-plugin", "plugin.json"), "utf8")) as {
       agents?: string[]
     }
     const agents = (plugin.agents ?? []).map((file) => file.replace(/^\.\//, ""))
-    return [...docs, ...(this.repo.settings.files ?? []), ...agents]
+    const named = PluginPackage.namedFiles(this.repo.root).map((path) => path.replace(/\/$/, ""))
+    return [...new Set([...docs, ...(this.repo.settings.files ?? []), ...agents, ...named])]
   }
+
+  /**
+   * Every file or folder (`designer/`) the plugin's own text names by `${CLAUDE_PLUGIN_ROOT}/<path>`, sorted:  what
+   * its skills, hooks, monitors and agents read or run, so what the package must ship.
+   * - read from `skills/`, `hooks/`, `monitors/` and the agents' folders (`plugin.json`'s `agents`), every text file
+   */
+  static namedFiles(root: string): string[] {
+    const plugin = JSON.parse(readFileSync(join(root, ".claude-plugin", "plugin.json"), "utf8")) as {
+      agents?: string[]
+    }
+    const folders = ["skills", "hooks", "monitors", ...(plugin.agents ?? []).map((file) => dirname(file))]
+    const named = new Set<string>()
+    for (const folder of new Set(folders.map((each) => each.replace(/^\.\//, "")))) {
+      for (const file of filesUnder(join(root, folder))) {
+        for (const [, path] of readFileSync(file, "utf8").matchAll(NAMED)) named.add(path!.replace(/\.+$/, ""))
+      }
+    }
+    return [...named].sort()
+  }
+
+  /**
+   * Turn the repo's ONE marketplace file's `epic` entry to the npm package, from `./epic`:  run by `spell publish`
+   * once the package is out, so `/plugin marketplace add spell-app/spell` installs it from npm (epic `epic-engine`
+   * Q42).  Whether it changed the file.
+   * - `kit`:  the repo's root, which holds `.claude-plugin/marketplace.json`
+   * - SIDE EFFECT:  rewrites the file, which the publish's commit takes;  Owen's machine then runs
+   *   `epic plugin install` again, which links the cache back to his checkout
+   */
+  static sourceToNpm(kit: string, packageName = "spell-epic"): boolean {
+    const file = join(kit, ".claude-plugin", "marketplace.json")
+    if (!existsSync(file)) return false
+    const marketplace = JSON.parse(readFileSync(file, "utf8")) as { plugins?: { name: string; source: unknown }[] }
+    const entry = marketplace.plugins?.find((each) => each.name === PLUGIN_NAME)
+    const npm = { source: "npm", package: packageName }
+    if (!entry || JSON.stringify(entry.source) === JSON.stringify(npm)) return false
+    entry.source = npm
+    writeFileSync(file, `${JSON.stringify(marketplace, null, 2)}\n`)
+    return true
+  }
+}
+
+/** A path the plugin's text names:  `${CLAUDE_PLUGIN_ROOT}/designer/craft.md`. */
+const NAMED = /\$\{CLAUDE_PLUGIN_ROOT\}\/([\w./-]+)/g
+
+/** Every file under `folder`, or `[]` for none. */
+function filesUnder(folder: string): string[] {
+  if (!existsSync(folder)) return []
+  if (!statSync(folder).isDirectory()) return [folder]
+  return readdirSync(folder, { recursive: true, encoding: "utf8" })
+    .map((file) => join(folder, file))
+    .filter((file) => statSync(file).isFile())
 }
 
 /** The plugin's name in Claude Code:  `/plugin install epic@spell` (Owen, 2026-10-26, Q58). */

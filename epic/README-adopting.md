@@ -103,11 +103,21 @@ And a Spell checkout:  today `spell-epic` installs only inside one.
 
 ### 1. The plugin, and `epic` on your PATH
 
-Four commands, once per machine, the same as for Spell's own repos:
-[the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) lists them and says what each does.
-- They install the plugin for the whole machine, straight from `spell/epic`'s folder.
-- They link its skills in, for a bare `/epic`.
-- They put `epic` on your terminal's `PATH`.
+One command, once per machine, the same as for Spell's own repos, from the kit's checkout:
+
+```sh
+node epic/bin/epic plugin install
+```
+
+[The kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) says what
+each of its steps does.
+- It installs the plugin for the whole machine as `epic@spell`, straight from `spell/epic`'s folder.
+- It links its skills in, for a bare `/epic`.
+- It puts `epic` on your terminal's `PATH`.
+- Run again, it changes nothing;  `--dry-run` says what it would change.
+- The plugin's marketplace is the kit repo's root `.claude-plugin/marketplace.json`, `spell`:
+  its `epic` entry's source is the `epic/` folder until the plugin is published, then the npm package `spell-epic`
+  (`spell publish` turns it).  Once it's out:  `/plugin marketplace add spell-app/spell`, `/plugin install epic@spell`.
 
 Then check that `epic` answers:
 

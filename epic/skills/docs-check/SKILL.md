@@ -13,7 +13,7 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
 - Two passes, in that order:
   1. each doc against the epic page's DECISIONS:  a statement that contradicts what was chosen or built is fixed
   2. all the epic's docs read TOGETHER:  names, commands, flags, behaviours, numbers made to agree
-- Its lists come from `epic` ([`EpicDocs`](${CLAUDE_PLUGIN_ROOT}/src/tool/EpicDocs.ts)):
+- Its lists come from `epic` ([`EpicDocs`](https://github.com/spell-app/spell/blob/main/epic/src/tool/EpicDocs.ts)):
   - `epic docs <name> [--json]`:  the docs, each with why it's listed, in four groups
     - `wrote`:
       - its guide (`<a slot="durable">`) and the pages in its folder
@@ -124,7 +124,7 @@ From `decisions --json`, later beats earlier:
 8. Write in place.  Stage NOTHING, commit NOTHING.
    - Tracked docs (`AGENTS.md`, `README.md`, skills):  the diff waits in Source Control.
    - Templates:  spell-epic's, in its own `templates/` (`epic pages template` prints the folder):
-     tracked there, so the diff waits in spell-epic's Source Control.
+     tracked there, so the diff waits in the kit's Source Control.
    - Shared docs (`guides/`, `ui/`, `agents/wwod/`):  edit at the REAL path
      (the root `AGENTS.md`, "Shared content").
      - the path:  `<content>/<path>`

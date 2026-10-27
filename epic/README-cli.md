@@ -591,16 +591,18 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages fuss <path> ... \| --branch` | checks the writing of pages and comments against the house rules |
 | `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
+| `epic pages shots <page \| URL>` | the designer review's screenshots (`/designer`):  desk, mid and phone width, light and dark, and the states asked for (`--full`, `--scroll`, `--hover`, `--click`);  a JSON summary last |
 
 ### The repo's settings
 
-Two verbs:  `init` sets a repo up, and `config` says what it set.
+Two verbs:  `init` sets a repo up, and `config` says what it set;  `plugin install` sets Claude Code up.
 Every key of the config file, and what `epic init` writes:  [README-adopting.md](README-adopting.md).
 
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
+| `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins` |
 | `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 
 ### Pages you answer on, agents, airplane mode

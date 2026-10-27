@@ -404,11 +404,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (`sawHooks()`), so a session whose hooks aren't loaded (started before a fix) is known too
       - refused:  `handoff` exits 1, saying why, the fix, and `epic window launch <name>`
         - `launch --move` starts a NEW session in the epic's window instead, and says why
+      - the plugin's names:  `epic` from its manifest, `spell` from the repo's root marketplace (`pluginNames()`);
+        the fix it names is `epic plugin install`
       - `missedMove()`:  a move's record still waiting when the session's next prompt comes
         (the hook renames it the moment it runs) is said to Owen and Claude, and set aside as `<session id>.missed.json`
         - the window script's worktree commands say it too when the hook can't run, since then the prompt hook can't
           either
       - plain `node` loads it by path
+    - `PluginInstall`:  `epic plugin install`, the plugin installed in Claude Code as `epic@spell`, in place from the
+      kit's `epic/` (epic `epic-engine` P49, Q45):  Claude Code's three lists, the cache link, the skill links,
+      `~/.local/bin/epic`, the old `spell-epic@spell-epic` taken out;  writes the files itself, safe to run again
     - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
       (`CODE_ROOT`);  `mustGit()`, a git run whose failure is the verb's own error
       - running git is the kit's `Git` (`spell/server/Git`), a checkout's main checkout without a git run its

@@ -467,7 +467,7 @@ than just being able to move on").
          stuff ... put them in code blocks with exactly what I need to type"):
          - it names the app, the window and the menu or keys:  "In VS Code's `⎇ repo-split` window, View > Output (⇧⌘U),
            pick `Spell` in its list", never "the Output panel" (his:  "What is the output panel?")
-         - everything to type in a code block, `cd` included:  `<pre><code>cd spell-ui</code></pre>`, or in plain text a
+         - everything to type in a code block, `cd` included:  `<pre><code>cd ui</code></pre>`, or in plain text a
            fenced block;  the run shows each with a Copy button
          - a new terminal in a worktree's window asks which folder:  the step says which to pick, or `cd`s first
          - a wait or a look between commands is a step of its own, between their blocks
@@ -1127,7 +1127,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
      - a rough size
    - one question per HIGH-LEVEL open choice (what, where, how far, when):  options side by side, one recommended.
      Not the small ones:  those are the plan's.
-   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, from spell-epic's root
+   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, from the kit's root
      ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
    - Then `epic ask show <name>/analysis --wait`:  Bash, in the background.
      It opens in the side bar's Review tab.

@@ -4,6 +4,7 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Markup } from "spell/epic/markup"
 import { PageStages } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
@@ -18,6 +19,7 @@ import {
   type PlanSummary
 } from "./planDoc.types"
 
+import { CommitRemap } from "./CommitRemap"
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
 import { EpicOwners, type PathOwners } from "./EpicOwners"
 import { EpicParts } from "./EpicParts"
@@ -151,6 +153,8 @@ export class PlanDocCommands {
     if (command === "saga") return this.sagas.run(positional.slice(1), flags)
     if (command === "split" && flags.done) return this.splitDone(flags)
     if (command === "test" && flags.all) return this.tests.all(flags)
+    // `commits remap <map...> --repo <old repo>`:  every epic page's commits, not one page's (epic-engine's P49)
+    if (command === "commits" && name === "remap") return this.remapCommits(rest, flags)
     if (!command || !name) return this.usage()
     if (command === "summaries") return this.printSummaries(positional.slice(1))
     if (command === "owns")
@@ -638,6 +642,44 @@ export class PlanDocCommands {
     }
     const count = `${added.length} commit${added.length === 1 ? "" : "s"} added`
     this.print(only ? `${count} (${only.length} merged)` : `${count} (${history.log.length} in the doc's history)`)
+  }
+
+  /**
+   * `commits remap <map...> --repo <old repo>[,<old name>...] [--to <repo>] [--dry-run]`:  every `<epic-commit>` of
+   * the old repo, over the WHOLE content folder, pointed at its new id in the merged repo (`CommitRemap`;
+   * epic-engine's P49, after repo-split's P20 · One Repo).
+   * - several maps:  one lookup, the first map's id winning (`tools/one-repo/commit-map-ui.txt` and
+   *   `commit-map-ui-elemental-spell.txt` together)
+   * - `--repo`:  the old repo, and any older name of it, comma-separated (`spell-parser,spell-lang`)
+   * - `--to`:  the new repo;  default this checkout's own (`git remote get-url origin`)
+   * - prints each file's count, the ids not in the map, then the totals;  `--dry-run` writes nothing
+   */
+  private remapCommits(maps: string[], flags: Flags): void {
+    // a bare `--dry-run` before a map took it as its value:  it's a map
+    if (typeof flags.dryRun === "string") maps = [flags.dryRun, ...maps]
+    const dryRun = Boolean(flags.dryRun)
+    const repos = stringFlag(flags.repo)?.split(",").filter(Boolean) ?? []
+    if (!maps.length || !repos.length)
+      throw new PlanDocError("commits remap <map> [<map> ...] --repo <old repo>  [--to <repo>] [--dry-run]")
+    const to =
+      stringFlag(flags.to) ?? PlanCommits.githubBase(PlanDocFiles.gitIn(this.files.root, "remote", "get-url", "origin"))
+    if (!to) throw new PlanDocError("commits remap:  this checkout's remote isn't GitHub:  --to <repo>")
+    const remap = new CommitRemap({
+      ids: CommitRemap.readMap(maps.map((map) => resolve(map))),
+      from: repos,
+      to,
+      renamed: EpicConfig.of(this.files.root).renamedRepos
+    })
+    const report = remap.run(this.files.content, { dryRun })
+    for (const { file, found, remapped } of report.files)
+      this.print(`  ${file}  ${remapped} of ${found}${remapped < found ? `, ${found - remapped} not in the map` : ""}`)
+    for (const { sha, file } of report.missing) this.print(`  not in the map:  ${sha.slice(0, 12)}  ${file}`)
+    const pages = report.pages ? `;  ${report.pages} ${report.pages === 1 ? "page's" : "pages'"} own repo moved` : ""
+    this.print(
+      `${remap.from.join(", ")} -> ${remap.to}:  ${report.found} commits found, ${report.remapped} remapped, ` +
+        `${report.missing.length} not in the map, in ${report.files.length} files${pages}` +
+        (dryRun ? "  (dry run:  nothing written)" : "")
+    )
   }
 
   /**
