@@ -104,9 +104,6 @@ export const FOLD_TEXTS = [
 // ## Fold (`EpicFold`)
 ////////////////
 
-/** The folding elements:  what a link landing inside one opens first. */
-export const FOLD_TAGS = "epic-overview, epic-section, epic-phase, epic-item"
-
 /** The custom property every folding element sets around its children:  the bottom of the stuck titles, px. */
 export const STACK_PROPERTY = "--epic-stack"
 
@@ -233,6 +230,7 @@ export const NOTE = "note"
 /**
  * Statuses that DON'T count as open:  finished (`done`), made moot (`canceled`), answered (`decided`);  a phase's
  * `done`.  The old runtime's `CLOSED`, and the tool's.
+ * - an item's too:  a closed one's Choose pills show only while it's revisited (`<epic-option>`)
  */
 export const CLOSED_STATUSES = ["done", "decided", "canceled"] as const
 

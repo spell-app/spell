@@ -10,7 +10,7 @@ import { Fold, type FoldTips } from "spell-epic/components/epic-item/Fold"
 import type { EpicItem } from "spell-epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
 import "spell-epic/components/epic-text-box"
-import { CLOSED_STATUSES } from "spell-epic/components/epic-item/EpicItem.types"
+import { CLOSED_STATUSES } from "spell-epic/components/epic-section/EpicSection.types"
 
 import { epicOptionVocabulary } from "./EpicOption.en"
 import { EpicChoices } from "./EpicChoices"

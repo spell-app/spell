@@ -5,7 +5,7 @@ import { E } from "spell-ui/core"
 
 import type { RunAnswer, RunColumn, RunOutcome, RunRow } from "spell/server/runs/runs.types"
 
-import { PlanDates } from "spell-epic/dates"
+import { clockOf } from "spell-epic/review"
 
 import { epicRunRowVocabulary } from "./EpicRunRow.en"
 import { RUN_ANSWER, type RunAnswerDetail } from "./EpicRunRow.types"
@@ -170,7 +170,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
           <span
             class={TAKEN}
             part={this.partForName("taken")}
-            title={this.translationForKey("takenTip", { time: PlanDates.clock(new Date(this.taken!)) })}
+            title={this.translationForKey("takenTip", { time: clockOf(this.taken) })}
           >
             <ui-icon name="check" />
             {this.translationForKey("taken")}

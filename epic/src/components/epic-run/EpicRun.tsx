@@ -5,7 +5,7 @@ import { E } from "spell-ui/core"
 
 import type { RunAnswers, RunColumn, RunEffortChoice, RunPass, RunProgress, RunRow } from "spell/server/runs/runs.types"
 
-import { PlanDates } from "spell-epic/dates"
+import { clockOf } from "spell-epic/review"
 import { RunForm, type SendFill } from "spell-epic/answers"
 import { RUN_ANSWER, type RunAnswerDetail } from "spell-epic/components/epic-run-row/EpicRunRow.types"
 import {
@@ -356,7 +356,7 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return (
       <>
         <time class={TIME} datetime={line.at}>
-          {PlanDates.clock(new Date(line.at))}
+          {clockOf(line.at)}
         </time>{" "}
         {line.text}
       </>

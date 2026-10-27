@@ -7,13 +7,13 @@ import { PhaseIds } from "spell-epic/phases"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
+import { SHOW_NOTE, stopIfOwn } from "spell-epic/components/epic-review/EpicReview.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
 import { Fold, expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
 
 import {
   BODY,
   FILE_PROTOCOL,
-  FOLD_TAGS,
   NOTE,
   STACK_PROPERTY,
   type ContentsEntry,
@@ -69,9 +69,8 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   - into the DOM element's LIGHT children, replacing any placeholder;  `ui-loaded` then
  *   - the inner section stays folded while the part is on its way (`isVeiled`), so it opens on the body
  *   - from `file://` it can't load:  the `Loads from parts/x.html when opened (needs the page server)` note, as today
- * - Links:  the page's `#hash` naming it, an element inside it, or an id in its `part-ids`
- *   opens it (loading its part), then lands there, below the stuck titles --
- *   unless a deeper folding element holds the target, which lands it itself.
+ * - Links:  the page's `#hash` naming it, an element inside it, or an id in its `part-ids` opens it (loading its
+ *   part);  the page lands there, once, below the stuck titles (the docs runtime, on Spell UI's `HashLanding`).
  * - The page's own buttons for its title (`slot="actions"`, `Fold.types.ts`):  first at the title's end, before its
  *   own tools (the badge, a phase's estimate, stays just after the title, where `<ui-section>` draws it).
  *   A click on one never folds:  `<ui-section>`'s actions never do.
@@ -249,6 +248,16 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     }
     event.preventDefault()
     this.toggle(detail.originalEvent)
+  }
+
+  /**
+   * Revisit or Edit, pressed on its own review controls (`<epic-review>`):  unfolded, its part loaded, to show the
+   * note box.
+   * - the Overview's, a section's, a phase's:  each draws its review controls in its shadow root
+   */
+  @E.on(SHOW_NOTE, { target: "renderRoot" })
+  protected onShowNote(event: Event) {
+    if (stopIfOwn(event)) void this.reveal()
   }
 
   ////////////////
@@ -443,7 +452,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   // ## Links
   ////////////////
 
-  /** The address's own `#hash` was followed:  a fold that moves doesn't land there again as it reconnects. */
+  /** The address's own `#hash` was followed:  a fold that moves doesn't open for it again as it reconnects. */
   private hasFollowedHash = false
 
   /** While connected, follow links (`hashchange`);  the first time, the address's own `#hash` too.  Returns the undo. */
@@ -459,54 +468,22 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   }
 
   /**
-   * The page's `#hash` names this element, an element inside it, or an id in its `part-ids`:
-   * open it, loading its part, then land there -- unless a deeper folding element holds the target (it lands it).
+   * The page's `#hash` names this element, an element inside it, or an id in its `part-ids`:  open it, loading its
+   * part.
+   * - it never scrolls:  the page lands the link, once, by its own rules (the docs runtime, on Spell UI's
+   *   `HashLanding`), which open the folds around it too;  opening here serves a page whose lander doesn't know epic
+   *   folds (Epic UI's pages, the site's `SiteSections`)
    */
   @E.untracked
   private readonly followHash = () => {
-    // an old phase address (`#p7`, from before stable ids) lands on the 7th phase (`PhaseIds.landing()`)
+    // an old phase address (`#p7`, from before stable ids) is the 7th phase (`PhaseIds.landing()`)
     const id = PhaseIds.landing(document, decodeURIComponent(location.hash.slice(1)))
     if (!id) return
     const partIds = (this.foldAttrs.partIds ?? "").split(/\s+/)
     const element = document.getElementById(id)
     const inside = !!element && element !== this.domElement && this.domElement.contains(element)
     if (element !== this.domElement && !inside && !partIds.includes(id)) return
-    void this.reveal().then(() => this.land(id))
-  }
-
-  /**
-   * Scroll `id`'s element to just below the titles stuck over it, if this is the folding element holding it.
-   * - the folds above it may still be opening (Spell UI animates them):
-   *   it follows the target until it stays put, for `LAND_MAX_FRAMES` at most
-   * - "stays put":  for `LAND_STILL_FRAMES`, it's at its line, or as near as the page lets it get
-   *   (a target near the page's end can't scroll up to its line)
-   * - stops at once when the reader does anything (`READER_INPUT`):  a click to fold, a wheel, a key
-   * - why (I7 of epic `airplane`):  it used to follow such a target for its whole second,
-   *   scrolling it back every frame, so a fold or a scroll in that second fought it, and the page jumped
-   */
-  private land(id: string) {
-    const target = document.getElementById(id)
-    if (!target) return
-    const holder = target === this.domElement ? this.domElement : target.parentElement?.closest(FOLD_TAGS)
-    if (holder !== this.domElement) return
-    const reader = new AbortController()
-    for (const type of READER_INPUT)
-      window.addEventListener(type, () => reader.abort(), { once: true, passive: true, signal: reader.signal })
-    let frames = 0
-    let still = 0
-    const step = () => {
-      if (reader.signal.aborted) return
-      const line = target === this.domElement ? (this.inner?.stickTop ?? this.offset) : this.stack + LAND_GAP
-      const off = target.getBoundingClientRect().top - line
-      const before = window.scrollY
-      if (Math.abs(off) >= 1) window.scrollTo({ top: before + off, behavior: "instant" })
-      // in place, or as near as the page lets it get (the scroll went nowhere)
-      const put = Math.abs(off) < 1 || Math.abs(window.scrollY - before) < 1
-      still = put ? still + 1 : 0
-      if (still < LAND_STILL_FRAMES && ++frames < LAND_MAX_FRAMES) E.beforeNextPaint(step)
-      else reader.abort()
-    }
-    E.beforeNextPaint(step)
+    void this.reveal()
   }
 }
 
@@ -533,15 +510,3 @@ const EXPAND_ROUNDS = 6
 
 /** The attribute naming a fold's or an item's part file. */
 const SOURCE = "source"
-
-/** Space between the stuck titles and an element a link lands on, px. */
-const LAND_GAP = 8
-
-/** Frames a landing target must stay put before landing stops. */
-const LAND_STILL_FRAMES = 3
-
-/** Frames landing follows its target at most (~1s):  folds animating open above it. */
-const LAND_MAX_FRAMES = 60
-
-/** What the reader does that stops a landing:  he's moving on, from wherever it got to. */
-const READER_INPUT = ["pointerdown", "wheel", "touchstart", "keydown"] as const

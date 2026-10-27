@@ -1,6 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { clamp } from "spell/util/number"
 import { E } from "spell/element"
 
 import { epicCommentPaneVocabulary } from "./EpicCommentPane.en"
@@ -120,12 +121,15 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
     this.isPlaced = true
   }
 
-  /** Put it at (`left`, `top`) on the screen, inside the window's edges, 8px in. */
+  /**
+   * Put it at (`left`, `top`) on the screen, inside the window's edges, 8px in.
+   * - bigger than the window:  its top left corner stays in, so its header (what drags it) is never out of reach
+   */
   private moveTo(left: number, top: number) {
     const { width, height } = this.domElement.getBoundingClientRect()
     const style = this.domElement.style
-    style.left = `${Math.max(GAP, Math.min(left, innerWidth - width - GAP))}px`
-    style.top = `${Math.max(GAP, Math.min(top, innerHeight - height - GAP))}px`
+    style.left = `${clamp(left, GAP, Math.max(GAP, innerWidth - width - GAP))}px`
+    style.top = `${clamp(top, GAP, Math.max(GAP, innerHeight - height - GAP))}px`
   }
 
   ////////////////

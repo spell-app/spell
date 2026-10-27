@@ -1,8 +1,7 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { StoragePlace } from "spell/util/persist/StoragePlace"
-import { clockTime } from "spell/util/time"
-import { storageNow, type ServerLink, type StorageFinder } from "spell-epic/review"
+import { clockOf, storageNow, type ServerLink, type StorageFinder } from "spell-epic/review"
 
 import { ANSWER_RETRY_MS, type DraftState } from "./answers.types"
 
@@ -190,7 +189,7 @@ export class DraftSaver {
       case "saving":
         return "saving…"
       case "saved":
-        return `saved ${clockTime(new Date(state.at))}`
+        return `saved ${clockOf(state.at)}`
       case "told":
         return state.text
       case "off server":

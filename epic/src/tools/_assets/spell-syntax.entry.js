@@ -51,12 +51,11 @@
  *   - while its comment waits for Claude, the wand is blue, and a click does nothing more
  * - BUNDLED (epic `coherence` C12):  `node src/tools/bundle-spell-ui.js --data-pages` builds it into `spell-syntax.js`,
  *   a classic script with NO Spell UI in it;  edit THIS, never the bundle.  It imports what exists:  the docs helpers'
- *   `el()`, `titleInside()` and start, `ChoicesForm`'s file links, `ServerLink`, `DraftSaver`, the kit's `slug()` and
- *   `clockTime()`.
+ *   `el()`, `titleInside()` and start, `ChoicesForm`'s file links, `ServerLink`, `DraftSaver`, the kit's `slug()`, and
+ *   `clockOf()`, the review's one time of day.
  */
 import { slug } from "spell/util/string"
-import { clockTime } from "spell/util/time"
-import { ServerLink } from "spell-epic/review"
+import { ServerLink, clockOf } from "spell-epic/review"
 import { CHOICES_API, ChoicesForm, DraftSaver } from "spell-epic/answers"
 
 import { dataNotice, drawThenBoot, el, fetchFile, sectionNumber, titleInside, withCode } from "./spell-doc-helpers.js"
@@ -505,7 +504,7 @@ async function send() {
     const { answer } = await post(CHOICES_API, "answer")
     // sent:  the draft is done with, its browser copy too
     drafts.done()
-    drafts.tell(`saved ${time(answer.answered)}`)
+    drafts.tell(`saved ${clockOf(answer.answered)}`)
     showSent(answer)
   } catch (error) {
     showError(`Not sent:  ${error.message}`)
@@ -566,7 +565,7 @@ async function restore() {
       bar.feedback.value = last.feedback ?? ""
       count()
     }
-    if (draft?.draft) drafts.tell(`saved ${time(draft.draft.saved)}`)
+    if (draft?.draft) drafts.tell(`saved ${clockOf(draft.draft.saved)}`)
     if (answer?.answer) showSent(answer.answer)
     // not on the server yet:  saved now
     if (isLocalNewer) drafts.changed()
@@ -606,8 +605,8 @@ function showSent(answer, { isStale = false } = {}) {
   const changes = Object.keys(answer.values ?? {}).length
   const again = answer.changes ? ` (sent ${answer.changes + 1} times)` : ""
   const words = isStale
-    ? `Sent at ${time(answer.answered)}${again};  changed since:  press Send again to send the new ones.`
-    : `Sent to Claude at ${time(answer.answered)}${again}:  ${changes} ${changes === 1 ? "box" : "boxes"}.  Change anything and press Send again to resend.`
+    ? `Sent at ${clockOf(answer.answered)}${again};  changed since:  press Send again to send the new ones.`
+    : `Sent to Claude at ${clockOf(answer.answered)}${again}:  ${changes} ${changes === 1 ? "box" : "boxes"}.  Change anything and press Send again to resend.`
   bar.done.setAttribute("state", isStale ? "warning" : "positive")
   bar.done.replaceChildren(el("p", {}, words))
   bar.done.hidden = false
@@ -721,9 +720,4 @@ function squash(text) {
   return String(text ?? "")
     .replace(/\s+/g, " ")
     .trim()
-}
-
-/** `iso`'s time of day, 24-hour, `14:04`:  never the locale's `2:42 PM` (P6's `clockTime()`). */
-function time(iso) {
-  return clockTime(new Date(iso))
 }

@@ -12,6 +12,7 @@ import {
   REVIEW_BUTTONS,
   SHOW_NOTE,
   TODO_BUTTONS,
+  stopIfOwn,
   type ReviewShows
 } from "spell-epic/components/epic-review/EpicReview.types"
 
@@ -711,19 +712,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /** Revisit or Edit, pressed on its own review controls:  unfolded to show the note box, if it has details. */
   @E.on(SHOW_NOTE, { target: "renderRoot" })
   protected onShowNote(event: Event) {
-    // its own controls' only:  a nested item's come through here too
-    if ((event.target as Node).getRootNode() !== event.currentTarget) return
-    event.stopPropagation()
-    this.reveal()
+    if (stopIfOwn(event)) this.reveal()
   }
 
   /** Owen chose an action on its own review controls (a review button, a note box button):  it folds. */
   @E.on(CHOSEN, { target: "renderRoot" })
   protected onChosen(event: Event) {
-    // its own controls' only:  a nested item's come through here too
-    if ((event.target as Node).getRootNode() !== event.currentTarget) return
-    event.stopPropagation()
-    this.foldAfterAction()
+    if (stopIfOwn(event)) this.foldAfterAction()
   }
 
   ////////////////
@@ -908,24 +903,17 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * The page's `#hash` names this item, an id in its `part-ids`, or an element inside it:  open it;
-   * a part id lands once the part is in.
+   * The page's `#hash` names this item, an id in its `part-ids`, or an element inside it:  open it (its part loads as
+   * it opens).
+   * - it never scrolls:  the page lands the link, once (the docs runtime, on Spell UI's `HashLanding`), as `EpicFold`
    */
   @E.untracked
   private readonly followHash = () => {
     const target = decodeURIComponent(location.hash.slice(1))
     if (!target) return
     const partIds = (this.partIds ?? "").split(/\s+/)
-    if (partIds.includes(target)) {
-      this.reveal()
-      this.body
-        .load()
-        .then(() => document.getElementById(target)?.scrollIntoView())
-        .catch(() => undefined)
-      return
-    }
     const element = target === this.domElement.id ? this.domElement : document.getElementById(target)
-    if (element && this.domElement.contains(element)) this.reveal()
+    if (partIds.includes(target) || (element && this.domElement.contains(element))) this.reveal()
   }
 
   ////////////////
