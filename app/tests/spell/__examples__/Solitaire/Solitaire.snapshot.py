@@ -80,6 +80,10 @@ class Card(TwoSidedView):
         direction = "↑" if self.is_face_direction("up") else "↓"
         return f"{rank}{self.symbol}{direction}"
 
+    def draw(self) -> list:
+        """Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns"""
+        return [self.draw_front(), self.draw_back()]
+
     @property
     def picture(self) -> str | None:
         """Its face:  https://www.compart.com/en/unicode/block/U+1F0A0"""
@@ -568,7 +572,8 @@ class Solitaire(App):
                 self.reset_the_stock()
             it = self.stock.last_item
             it.turn_face_up()
-            await core.pause_for(50, "msec")
+            # as long as its flip takes (styles.css), so it turns over before it moves
+            await core.pause_for(300, "msec")
             self.discards.append(it)
         finally:
             core.stop_process("play_from_the_stock")
@@ -586,10 +591,12 @@ class Solitaire(App):
                     self.stock.append(card)
                     await core.pause_for(50, "msec")
             self.stock.randomize()
+            # each row's first card lands face down, then turns up where it lies
             for row in range(1, 8):
-                self.stock.last_item.turn_face_up()
                 for column in core.get_range(row, 7):
                     core.get_item_at(core.every_thing(Tableau), position(column)).append(self.stock.last_item)
+                    if column == row:
+                        core.get_item_at(core.every_thing(Tableau), position(column)).last_item.turn_face_up()
                     await core.pause_for(50, "msec")
             await self.play_from_the_stock()
         finally:
@@ -934,6 +941,43 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   background: #fff;
   background-clip: content-box;
   border-radius: 0.035em;
+}
+
+/****************
+ * Turning over:  a card draws both its sides (Card.spellx), and shows the one it's turned to
+ * - As its direction changes it turns about its middle, edge-on halfway, where the other side takes over:
+ *   --card-flip runs 0 (face up) to 1 (face down), and its angle is 90° at 0.5, none at either end.
+ * - A card that's drawn already turned shows that side at once:  only a change turns it.
+ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellx), so it turns over before it moves.
+ ****************/
+
+@property --card-flip {
+  syntax: "<number>";
+  /* its sides read it too */
+  inherits: true;
+  initial-value: 0;
+}
+[layout] > * {
+  --card-flip: 0;
+  transform: perspective(3em) rotateY(calc(90deg * (1 - max(1 - 2 * var(--card-flip), 2 * var(--card-flip) - 1))));
+  transition: --card-flip 0.3s ease-in-out;
+  /* both sides on one line, so the one drawn sits at the card's top */
+  white-space: nowrap;
+}
+[layout] > :not([direction="up"]) {
+  --card-flip: 1;
+}
+/* each side is drawn only while the card is turned its way:  the other shrinks to nothing as it passes edge-on */
+[layout] > *::part(front) {
+  font-size: calc(1em * clamp(0, (0.5 - var(--card-flip)) * 1000, 1));
+}
+[layout] > *::part(back) {
+  font-size: calc(1em * clamp(0, (var(--card-flip) - 0.5) * 1000, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  [layout] > * {
+    transition: none;
+  }
 }
 
 /* An empty pile's placeholder:  a faint card in the page's text colour, so it shows on a dark page too */

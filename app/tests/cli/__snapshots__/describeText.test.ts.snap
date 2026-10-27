@@ -6,7 +6,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
   template Card  is a TwoSidedView
     Properties  rank, value, suit, color, symbol, name, state, picture, pile
     Actions     is a (rank), is a face card, is a number card, is a (suit), is the (rank) of (suit),
-                play a card, put a card on a pile, count the points for a card on a pile
+                draw it, play a card, put a card on a pile, count the points for a card on a pile
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
                 Colors (red, black)
   function test card setup"
@@ -41,7 +41,7 @@ Card.spellx:6
 
 Properties  rank, value, suit, color, symbol, name, state, picture, pile
 Actions     is a (rank), is a face card, is a number card, is a (suit), is the (rank) of (suit),
-            play a card, put a card on a pile, count the points for a card on a pile
+            draw it, play a card, put a card on a pile, count the points for a card on a pile
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
             Colors (red, black)
 
@@ -81,6 +81,10 @@ Spell
     </spell>
   
     <group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
+    <draw description="Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns">
+      <draw "front" />
+      <draw "back" />
+    </draw>
     <property "picture" description="Its face:  https://www.compart.com/en/unicode/block/U+1F0A0">
       set column to its value
       if it is a club

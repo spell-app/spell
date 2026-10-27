@@ -188,4 +188,13 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     expect(pressCommand("z").defaultPrevented).toBe(true)
     expect(game.card.faceUp).toBe(true)
   })
+
+  test("a shortcut draws as the key it presses:  spell's `meta+D` is Spell UI's `mod+D`, ⌘ D on a Mac, Ctrl D elsewhere", async () => {
+    const { app } = await mountedGame()
+    const menuBar = app.shadowRoot!.querySelector("[part~=menu-bar]")!
+    await expect.poll(() => menuBar.querySelector("ui-action")).toBeTruthy()
+    expect(menuBar.querySelector("ui-action")!.getAttribute("shortcut")).toBe("mod+D")
+    expect(ActionMenus.shortcutForUI("meta+shift+Z")).toBe("mod+shift+Z")
+    expect(ActionMenus.shortcutForUI("F2")).toBe("F2")
+  })
 })

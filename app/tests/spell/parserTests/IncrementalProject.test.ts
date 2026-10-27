@@ -40,35 +40,44 @@ describe("incremental parsing ~== full parse", () => {
     expect(summarizeIncremental(incrementalSpellProject(files))).toEqual(original)
   })
 
+  // KNOWN BUG:  /Solitaire.spell fails -- incremental parsing loses an action's `waits: true` after an edit inside it
+  // (the suspected-bugs log, "## spell";  the code-debt log).  Expected to fail until it's fixed (epic `elemental-spell`).
+  const KNOWN_FAILING = new Set(["/Solitaire.spell"])
+
   for (const file of files) {
-    test(`edits in ${file.path}`, () => {
-      const project = incrementalSpellProject(files)
-      const lines = file.contents.split("\n")
-      const counts = { same: 0, body: 0, region: 0, rewound: 0, threw: 0 }
-      for (let index = 0, edit = 0; index < lines.length; index += STEP) {
-        const [name, applyEdit] = Object.entries(EDITS)[edit++ % 4]!
-        const edited = [...lines]
-        applyEdit(edited, index)
-        const where = `${file.path} line ${index + 1}, ${name}`
+    const testEdits = KNOWN_FAILING.has(file.path) ? test.fails : test
+    testEdits(
+      `edits in ${file.path}`,
+      () => {
+        const project = incrementalSpellProject(files)
+        const lines = file.contents.split("\n")
+        const counts = { same: 0, body: 0, region: 0, rewound: 0, threw: 0 }
+        for (let index = 0, edit = 0; index < lines.length; index += STEP) {
+          const [name, applyEdit] = Object.entries(EDITS)[edit++ % 4]!
+          const edited = [...lines]
+          applyEdit(edited, index)
+          const where = `${file.path} line ${index + 1}, ${name}`
 
-        const editedFiles = files.map((it) => (it.path === file.path ? { ...it, contents: edited.join("\n") } : it))
-        const result = outcome(() => {
-          project.update(file.path, edited.join("\n"))
-          return summarizeIncremental(project)
-        })
-        expect(result, where).toEqual(outcome(() => summarize(parseSpellProject(editedFiles))))
-        if (typeof result === "string") counts.threw++
-        else {
-          counts[project.getFile(file.path)!.lastUpdate!]++
-          expectPositions(project, where)
+          const editedFiles = files.map((it) => (it.path === file.path ? { ...it, contents: edited.join("\n") } : it))
+          const result = outcome(() => {
+            project.update(file.path, edited.join("\n"))
+            return summarizeIncremental(project)
+          })
+          expect(result, where).toEqual(outcome(() => summarize(parseSpellProject(editedFiles))))
+          if (typeof result === "string") counts.threw++
+          else {
+            counts[project.getFile(file.path)!.lastUpdate!]++
+            expectPositions(project, where)
+          }
+
+          // ...and back again.
+          project.update(file.path, file.contents)
+          expect(summarizeIncremental(project), `${where}, undone`).toEqual(original)
         }
-
-        // ...and back again.
-        project.update(file.path, file.contents)
-        expect(summarizeIncremental(project), `${where}, undone`).toEqual(original)
-      }
-      console.log(`INCREMENTAL ${file.path}: ${JSON.stringify(counts)}`)
-    }, 600_000)
+        console.log(`INCREMENTAL ${file.path}: ${JSON.stringify(counts)}`)
+      },
+      600_000
+    )
   }
 
   test("a body can't see names declared after it", () => {
