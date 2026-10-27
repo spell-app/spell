@@ -130,7 +130,7 @@ Names people choose keep their accents.
    - The guard test only catches reads:
      [noEnglishInRules.test.ts](../../../../tests/spell/languages/noEnglishInRules.test.ts).
 7. Tests for a module, as the English one's:
-   a file of their own, calling the Spanish parser (`SP` from `spell-parser/spell`):
+   a file of their own, calling the Spanish parser (`SP` from `spell/parser/spell`):
 
    ```text
    tests/spell/rules/es/<module>/<module>.test.ts

@@ -8,9 +8,9 @@
  *   with meaningful names for debugging.
  */
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { Parser } from "spell-parser/parser/Parser"
+import { Parser } from "spell/parser/parser/Parser"
 import { RulexParser, type RulexInterval } from "./RulexParser"
 
 /**
@@ -21,7 +21,7 @@ import { RulexParser, type RulexInterval } from "./RulexParser"
 export const rulex = new RulexParser({ module: "rulex" })
 
 // Register `rulex` on `Parser` base class -- SIDE EFFECT: this is the whole reason files import this module;
-// see `spell-parser/parser/rulex/index.ts` and `Parser.rulexParser`.
+// see `spell/parser/parser/rulex/index.ts` and `Parser.rulexParser`.
 Parser.rulexParser = rulex
 
 ////////////////

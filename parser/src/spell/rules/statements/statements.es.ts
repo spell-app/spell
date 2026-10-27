@@ -5,7 +5,7 @@
  * - Registered in the same order as `statements.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { DoNothing } from "./DoNothing"
 import { SpellxCloser } from "./SpellxCloser"

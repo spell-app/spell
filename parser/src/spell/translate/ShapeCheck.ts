@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { bodiesIn } from "./Translator"
 import type { SourceFile } from "./translate.types"
 

@@ -1,5 +1,5 @@
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
 

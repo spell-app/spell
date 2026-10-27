@@ -9,7 +9,7 @@
  */
 import { core } from "./core"
 // Import directly, never through the barrel:
-// `spell-parser/core/model` loads this file, and must not load drawing (Solid)
+// `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
 import { List } from "./classes/List"
 import { defineCoreModule } from "./core.types"

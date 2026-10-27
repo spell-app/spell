@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { SP, spellParser } from "spell-parser/spell"
-import { describeParseErrors, describeWarnings } from "spell-parser/spell/test"
+import { SP, spellParser } from "spell/parser/spell"
+import { describeParseErrors, describeWarnings } from "spell/parser/spell/test"
 
 /** `text` parsed as a block, in a fresh scope called `scopeName`. */
 function parse(text: string, scopeName: string) {

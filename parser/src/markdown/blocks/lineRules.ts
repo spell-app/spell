@@ -6,9 +6,9 @@
  *   `- {3,}` lets the dashes space.
  * - Leaf rules rulex can't say (`any`, `digits`) are built in code, at the top.
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { MarkdownParser } from "spell-parser/markdown/MarkdownParser"
+import { MarkdownParser } from "spell/parser/markdown/MarkdownParser"
 
 /** The line-kind rules. */
 export const lineRules = new MarkdownParser({ module: "lines" })

@@ -1,6 +1,6 @@
 import { describe, test, expect, afterEach } from "vite-plus/test"
 
-import { core, Thing, View, ViewableList, css, elementTagFor } from "spell-parser/core"
+import { core, Thing, View, ViewableList, css, elementTagFor } from "spell/parser/core"
 
 /** A view class's element:  its tag, named here, defined by the page's `elementDefiner`. */
 describe("views' elements", () => {

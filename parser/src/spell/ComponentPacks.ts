@@ -4,7 +4,7 @@
  * - spellx has no native HTML (Q46, C1):  every tag in a drawing is a spell word, one of the project's own views, or a
  *   pack's component.
  * - Registered by whoever can read a pack's names:  spell-parser never imports Spell UI, so spell-app registers it,
- *   from Spell UI's catalog and dictionaries (`spell-app/spaces`, as it registers spell's project groups).
+ *   from Spell UI's catalog and dictionaries (`spell/app/spaces`, as it registers spell's project groups).
  * - Which packs a project draws with:  its project file's `packs` (`ProjectManifestJSON5.packs`), else `DEFAULT`;
  *   the first pack that has a name wins.
  */

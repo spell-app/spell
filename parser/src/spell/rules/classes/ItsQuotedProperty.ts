@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `its_quoted_property` rule:  `its "color"` in an outline body -- the third `type_property` spelling.

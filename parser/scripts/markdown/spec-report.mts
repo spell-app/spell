@@ -3,11 +3,11 @@
  * - Run from spell-parser's root:  `yarn tsx scripts/markdown/spec-report.mts [section...]`
  * - With section names (or substrings), also prints each failing example:  input, expected, got.
  */
-import { MD, type SpecExample } from "spell-parser/markdown"
+import { MD, type SpecExample } from "spell/parser/markdown"
 
-import { comparableHTML, specOptions } from "spell-parser/markdown/spec/spec.types"
+import { comparableHTML, specOptions } from "spell/parser/markdown/spec/spec.types"
 
-import spec from "spell-parser/markdown/spec/gfm-spec.json" with { type: "json" }
+import spec from "spell/parser/markdown/spec/gfm-spec.json" with { type: "json" }
 
 const wanted = process.argv.slice(2)
 const examples = (spec.examples as SpecExample[]).filter((example) => example.extension !== "disabled")

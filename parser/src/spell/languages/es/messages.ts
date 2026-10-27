@@ -5,7 +5,7 @@
  *   which the runner hands the core.
  * - Words from the glossary (`GLOSSARY.md`):  `verdadero` for true, `sí` for yes, `dibujar` for draw.
  */
-import type { CoreMessages } from "spell-parser/core/core.types"
+import type { CoreMessages } from "spell/parser/core/core.types"
 
 /** Spanish's messages, by the core's keys. */
 export const spanishMessages: CoreMessages = {

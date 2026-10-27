@@ -1,10 +1,10 @@
-import { P } from "spell-parser/parser"
-// Import directly, NOT through the `spell-parser/core` barrel:  the parser MUST NOT load `core` itself.
+import { P } from "spell/parser/parser"
+// Import directly, NOT through the `spell/parser/core` barrel:  the parser MUST NOT load `core` itself.
 // Each runner runs its own copy:  see `spellRuntime.ts`.
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
-import "spell-parser/parser/rulex"
+import "spell/parser/parser/rulex"
 
 /**
  * The words of an if-chain's tags in markup, every language's:  `<if ...>`, `<otherwise if ...>`, `<otherwise>`

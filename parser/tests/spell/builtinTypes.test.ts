@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { core, ViewableList, List, Thing } from "spell-parser/core"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { core, ViewableList, List, Thing } from "spell/parser/core"
+import { SP } from "spell/parser/spell"
 
 /**
  * `SP.BUILT_IN_TYPE_TABLE` -- spell's built-in types' members, as data.

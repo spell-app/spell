@@ -90,7 +90,7 @@ export class Inflector {
     const active = Inflector.current ?? Inflector.fallback
     if (!active) {
       throw new TypeError(
-        "Inflector.active:  no language is loaded;  import a language pack (spell's English is `spell-parser/spell`) first"
+        "Inflector.active:  no language is loaded;  import a language pack (spell's English is `spell/parser/spell`) first"
       )
     }
     return active

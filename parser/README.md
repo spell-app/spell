@@ -14,7 +14,7 @@ to play fizzbuzz
 play fizzbuzz
 ```
 
-_FizzBuzz, all eight lines of it, from [the frozen test projects](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)._
+_FizzBuzz, all eight lines of it, from [the frozen test projects](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)._
 
 You've probably written FizzBuzz for an interviewer, in a language with braces.
 This time it's English, and it runs.
@@ -85,14 +85,14 @@ and each language has a writer of its own, which turns that tree into code the w
 
 Ask a model for FizzBuzz in Python, and you'll get a good one, a little different each time you ask.
 These eight lines give the same JavaScript and the same Python every time, character for character:
-a test holds them to their snapshots, [the JavaScript](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
-and [the Python](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py), and fails the day they differ.
+a test holds them to their snapshots, [the JavaScript](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
+and [the Python](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py), and fails the day they differ.
 
 Everything that just happened lives in this repo, `spell-parser`:
 the parser that read those eight lines, the grammar it read them with, the writers that wrote both columns
 (and a third, for TypeScript), and `core`, the runtime the JavaScript calls.
 That's all of Spell the language.
-The editor that runs a program as you type it is [spell-app](https://github.com/spell-app/spell-app/blob/main/README.md)'s,
+The editor that runs a program as you type it is [spell-app](https://github.com/spell-app/spell/blob/main/app/README.md)'s,
 and the checkout every repo is cloned into is [the kit](https://github.com/spell-app/spell/blob/main/README.md)'s.
 
 Why English, now that models write the code?
@@ -244,7 +244,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx),
+  the tableau's rule in [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -341,7 +341,7 @@ Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
 
 ```sh
 mkdir -p try
-cp -R ~/www/spell/spell-app/spaces/@spell/test/fizzbuzz try/fizzbuzz
+cp -R ~/www/spell/app/spaces/@spell/test/fizzbuzz try/fizzbuzz
 spell run try/fizzbuzz
 ```
 
@@ -421,7 +421,7 @@ What each does, every option, with examples:
 
 **Their work is spell-app's, for now.**
 The names live here, and each command hands its work to spell-app's `language` hook
-([hooks.ts](https://github.com/spell-app/spell-app/blob/main/src/cli/hooks.ts)), so the command line and the editor can't disagree:
+([hooks.ts](https://github.com/spell-app/spell/blob/main/app/src/cli/hooks.ts)), so the command line and the editor can't disagree:
 - it finds projects the app's way:  by address (`@spell/examples/Solitaire`), group, `@here`,
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
@@ -441,7 +441,7 @@ The names live here, and each command hands its work to spell-app's `language` h
 | [cli/NamesReview.ts](src/cli/NamesReview.ts) | `spell translate --review`:  the names drafted, on a page in the Review tab, and the answers back into the dictionary and the glossary |
 | [cli/claudeRunners.ts](src/cli/claudeRunners.ts) | how the translator asks Claude:  the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`;  `--effort`'s tiers |
 | [cli/translateTimes.ts](src/cli/translateTimes.ts) | `spell translate speedtest`:  scratch copies, runs, and the table |
-| [cli/index.ts](src/cli/index.ts) | `spell-parser/cli`:  the types, for spell-app |
+| [cli/index.ts](src/cli/index.ts) | `spell/parser/cli`:  the types, for spell-app |
 
 </details>
 
@@ -463,7 +463,7 @@ What each one needs:
   - `speedtest`:  finds Spell by its package, not through spaces
   - `compile`, `lint`, `run`:  the loader, plus spell-app's hooks above
 - And the progress lists and screens they draw, which are spell-app's today:
-  [its Ink screens](https://github.com/spell-app/spell-app/tree/main/src/cli/ui).
+  [its Ink screens](https://github.com/spell-app/spell/tree/main/app/src/cli/ui).
 
 </details>
 
@@ -471,20 +471,20 @@ What each one needs:
 
 `spell-parser` is ONE npm package, its code in six folders under [src/](src/).
 A file's import name is the package's name, then its path under `src/`, with no extension:
-`spell-parser/parser` is a folder's barrel, its `index.ts`, and `spell-parser/parser/rules/Rule` is one file.
+`spell/parser/parser` is a folder's barrel, its `index.ts`, and `spell/parser/parser/rules/Rule` is one file.
 The name is the same inside this repo as from every other, so there's no alias table, and no `../` to count.
 
 | Folder | Import name | What it is | Its page, and what's on it |
 | --- | --- | --- | --- |
-| [parser/](src/parser/) | `spell-parser/parser` | the parser that knows no language:  tokens, rules, matches, scope, the Spell tree, the writers | [README-parser](README-parser.md) <ul><li>rules as classes:  what moves if you've used a parser generator</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled;  how earlier lines teach later ones</li><li>parsers for other languages, with a dates language in 23 lines;  testing rules;  what it costs</li></ul> |
-| [parser/rulex/](src/parser/rulex/) | `spell-parser/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
-| [markdown/](src/markdown/) | `spell-parser/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
-| [spell/](src/spell/) | `spell-parser/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
-| [spellx/](src/spellx/) | `spell-parser/spellx` | Spellx, Spell in tags:  the tree a `.spellx` file reads into;  Spell's own parser compiles it | [README-spellx](README-spellx.md) <ul><li>a card in tags, its plain Spell twin, and the tree it reads to</li><li>a closed vocabulary, not HTML's open one;  English and Spanish</li><li>how it reads:  tag tokens, twins, prose, markup, closers</li><li>using it;  the tree's nodes;  the edges</li></ul> |
-| [spell/languages/](src/spell/languages/) | `spell-parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
-| [core/](src/core/) | `spell-parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>a run keeps an undo history, and what the person chose last time</li><li>who may import it:  one copy per running app</li></ul> |
-| [py/](src/py/) | `spell-parser/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
-| [cli/](src/cli/) | `spell-parser/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser) |
+| [parser/](src/parser/) | `spell/parser/parser` | the parser that knows no language:  tokens, rules, matches, scope, the Spell tree, the writers | [README-parser](README-parser.md) <ul><li>rules as classes:  what moves if you've used a parser generator</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled;  how earlier lines teach later ones</li><li>parsers for other languages, with a dates language in 23 lines;  testing rules;  what it costs</li></ul> |
+| [parser/rulex/](src/parser/rulex/) | `spell/parser/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
+| [markdown/](src/markdown/) | `spell/parser/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
+| [spell/](src/spell/) | `spell/parser/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [spellx/](src/spellx/) | `spell/parser/spellx` | Spellx, Spell in tags:  the tree a `.spellx` file reads into;  Spell's own parser compiles it | [README-spellx](README-spellx.md) <ul><li>a card in tags, its plain Spell twin, and the tree it reads to</li><li>a closed vocabulary, not HTML's open one;  English and Spanish</li><li>how it reads:  tag tokens, twins, prose, markup, closers</li><li>using it;  the tree's nodes;  the edges</li></ul> |
+| [spell/languages/](src/spell/languages/) | `spell/parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
+| [core/](src/core/) | `spell/parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>a run keeps an undo history, and what the person chose last time</li><li>who may import it:  one copy per running app</li></ul> |
+| [py/](src/py/) | `spell/parser/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
+| [cli/](src/cli/) | `spell/parser/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser) |
 
 - It stands only on [the kit](https://github.com/spell-app/spell/blob/main/README.md):  its shared helpers, `spell/util`, and its toolchain.
 - Inside, the arrows point one way:
@@ -498,15 +498,15 @@ The name is the same inside this repo as from every other, so there's no alias t
 ### What's NOT here
 
 `spell-parser` is the language alone.
-The tools people use it in live in [spell-app](https://github.com/spell-app/spell-app/blob/main/README.md), the repo above it,
+The tools people use it in live in [spell-app](https://github.com/spell-app/spell/blob/main/app/README.md), the repo above it,
 and the command line's base is the kit's:
 
 | What | Where |
 | --- | --- |
-| the editor and the runner:  `<spell-viewer>`, `<spell-editor>`, the live loop | spell-app's [src/app/](https://github.com/spell-app/spell-app/tree/main/src/app), [README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md) |
-| the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](https://github.com/spell-app/spell-app/tree/main/src/lsp) and [vscode/](https://github.com/spell-app/spell-app/tree/main/vscode), [README-lsp](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) |
-| projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](https://github.com/spell-app/spell-app/tree/main/src/spaces), [README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) |
-| the example projects people open and edit | spell-app's [spaces/@spell/examples/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples), [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md) |
+| the editor and the runner:  `<spell-viewer>`, `<spell-editor>`, the live loop | spell-app's [src/app/](https://github.com/spell-app/spell/tree/main/app/src/app), [README-app](https://github.com/spell-app/spell/blob/main/app/README-app.md) |
+| the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](https://github.com/spell-app/spell/tree/main/app/src/lsp) and [vscode/](https://github.com/spell-app/spell/tree/main/app/vscode), [README-lsp](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) |
+| projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](https://github.com/spell-app/spell/tree/main/app/src/spaces), [README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) |
+| the example projects people open and edit | spell-app's [spaces/@spell/examples/](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples), [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
 | the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](https://github.com/spell-app/spell/tree/main/src/cli), [README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#each-repo-brings-its-own-commands) |
 
 The language's own commands are this repo's (above):  the command line finds them here.
@@ -526,7 +526,7 @@ una "carta" es una cosa dibujable donde:
 	- "es una figura" si su rango es jota, dama o rey			// "la carta es una figura"
 ```
 
-_The top of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Carta.es.spell),
+_The top of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
 from Solitario, the Solitaire example in Spanish, line for line._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice,
@@ -597,7 +597,7 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
   tests/parser/rules/Rule.test.ts    tests    src/parser/rules/Rule.ts
   ```
 
-- The frozen test projects, spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/),
+- The frozen test projects, spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/),
   pin every target's output, and their tests are spell-app's:  [README-spell](README-spell.md#the-frozen-test-projects).
 - The folders' own scripts, each named for its folder:
 

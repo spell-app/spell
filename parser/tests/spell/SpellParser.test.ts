@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 describe("SpellParser's tokenizer", () => {
   // an if-chain inside markup (epic `elemental-spell`, Owen 2026-10-25):  every language's own words for its tags

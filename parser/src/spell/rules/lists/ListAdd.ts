@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 /**
  * `list_add` rule:  add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.

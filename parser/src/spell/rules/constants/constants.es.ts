@@ -5,8 +5,8 @@
  * - Registered in the same order as `constants.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { Constant } from "./Constant"
 import { KnownConstant } from "./KnownConstant"

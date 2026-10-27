@@ -9,7 +9,7 @@ import {
   runClaude,
   SPEED_UP,
   type ApiRequest
-} from "spell-parser/cli/claudeRunners"
+} from "spell/parser/cli/claudeRunners"
 
 /**
  * The two ways `spell translate` asks Claude (epic `spanish` P27):  the Claude API, straight, and `claude -p`.

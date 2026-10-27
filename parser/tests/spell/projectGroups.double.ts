@@ -1,5 +1,5 @@
-import { SpellSetup } from "spell-parser/spell/SpellSetup"
-import type { SP } from "spell-parser/spell"
+import { SpellSetup } from "spell/parser/spell/SpellSetup"
+import type { SP } from "spell/parser/spell"
 
 /**
  * A TEST DOUBLE of spell-app's project groups (spaces' `models/projectGroups.ts`):  the groups a spell address can

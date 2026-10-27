@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /****************
  * ### `WriterProject`

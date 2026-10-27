@@ -2,9 +2,9 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { BUILT_IN_TEMPLATE_DECLARATIONS } from "spell-parser/spell/builtInTemplates.generated"
-import { compiledTemplates } from "spell-parser/spell/node/builtInTemplateFiles"
+import { SP } from "spell/parser/spell"
+import { BUILT_IN_TEMPLATE_DECLARATIONS } from "spell/parser/spell/builtInTemplates.generated"
+import { compiledTemplates } from "spell/parser/spell/node/builtInTemplateFiles"
 
 /** spell-parser's root, where the generated files' paths start. */
 const PACKAGE_ROOT = resolve(import.meta.dirname, "../../..")

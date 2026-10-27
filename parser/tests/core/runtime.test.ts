@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vite-plus/test"
 
-import { core, Thing, on, off, once, trigger } from "spell-parser/core"
+import { core, Thing, on, off, once, trigger } from "spell/parser/core"
 
 /** `a card is a thing`:  what an event brings, e.g. `trigger card-click with the card`. */
 class Card extends Thing {}

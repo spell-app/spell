@@ -1,5 +1,5 @@
 import { assert, proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `text` rule:  literal `text` string.

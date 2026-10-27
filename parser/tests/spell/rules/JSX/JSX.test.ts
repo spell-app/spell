@@ -1,10 +1,10 @@
 import { describe, test, expect } from "vite-plus/test"
-import { parseSpellProject, unitTestModuleRules } from "spell-parser/spell/test"
-import { P } from "spell-parser/parser"
-import { PY } from "spell-parser/py"
-import { SP, spellParser } from "spell-parser/spell"
-import { core } from "spell-parser/core"
-import type { JSXMatchData } from "spell-parser/spell/rules/JSX/JSX.shared"
+import { parseSpellProject, unitTestModuleRules } from "spell/parser/spell/test"
+import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
+import { SP, spellParser } from "spell/parser/spell"
+import { core } from "spell/parser/core"
+import type { JSXMatchData } from "spell/parser/spell/rules/JSX/JSX.shared"
 
 describe("testing spell module JSX", () => {
   unitTestModuleRules(spellParser, "JSX", core.resetRuntime)

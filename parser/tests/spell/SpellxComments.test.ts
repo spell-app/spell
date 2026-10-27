@@ -1,9 +1,9 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, registerTestComponentPack } from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
 
 /**
  * COMMENTS in spellx, `<!-- ... -->` (epic `elemental-spell`, Owen 2026-10-26:  "`<!-- ... -->` (Recommended)").

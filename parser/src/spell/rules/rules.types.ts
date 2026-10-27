@@ -5,7 +5,7 @@
  * - What only ONE module uses stays in that module, below the rule it serves.
  */
 
-import type { P } from "spell-parser/parser"
+import type { P } from "spell/parser/parser"
 
 ////////////////
 // ## Priority

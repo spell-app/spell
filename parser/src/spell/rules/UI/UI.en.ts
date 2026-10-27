@@ -4,7 +4,7 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `UI.<lang>.ts` (epic `spanish`).
  */
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { UI } from "./UI.parser"
 import { Alert } from "./Alert"

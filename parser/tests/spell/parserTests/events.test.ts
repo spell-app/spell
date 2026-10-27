@@ -4,8 +4,8 @@
  */
 import { describe, test, expect, beforeEach } from "vite-plus/test"
 
-import { core } from "spell-parser/core"
-import { parseSpellProject, runSpell } from "spell-parser/spell/test"
+import { core } from "spell/parser/core"
+import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
 /** `lines` compiled as one file, its comments and blank lines left out. */
 function compile(lines: string[]): string {

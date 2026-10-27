@@ -3,7 +3,7 @@
  * - Each language pack has its own, of the same shape:  `SP.LanguageWords`.
  * - Rules read the language in play, `SP.Language.active.words`, never these directly.
  */
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 
 /** English's words:  see `SP.LanguageWords` for what each list is for. */
 export const englishWords: SP.LanguageWords = {

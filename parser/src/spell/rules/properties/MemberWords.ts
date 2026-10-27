@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { longestNameIn, namesWithGrammarWords } from "spell-parser/spell/rules/rules.types"
-import { SpellType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
+import { SpellType } from "spell/parser/spell/rules/types"
 
 /**
  * `member_words` rule:  1..N words naming a member, e.g. `short rank`, `short-rank`, `rank`.

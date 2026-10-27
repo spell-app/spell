@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
-import { describeWarnings, unitTestModuleRules } from "spell-parser/spell/test"
-import { SP, spellParser } from "spell-parser/spell"
-import { core } from "spell-parser/core"
+import { describeWarnings, unitTestModuleRules } from "spell/parser/spell/test"
+import { SP, spellParser } from "spell/parser/spell"
+import { core } from "spell/parser/core"
 
 describe("testing spell module classes", () => {
   unitTestModuleRules(spellParser, "classes", core.resetRuntime)

@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SpellType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SpellType } from "spell/parser/spell/rules/types"
 import { BareTypeArg } from "./BareTypeArg"
 import { MethodKeyword } from "./MethodKeyword"
 import type { MethodArgData, MethodSignatureData } from "./methods.shared"

@@ -1,10 +1,10 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt } from "spell-parser/spell/rules/classes"
+import { DrawIt } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `drawn_markup` rule:  in a drawing's body, a line of markup IS what it draws -- no `return`

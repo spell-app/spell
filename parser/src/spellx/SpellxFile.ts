@@ -1,5 +1,5 @@
-import type { SP } from "spell-parser/spell"
-import type { SX } from "spell-parser/spellx"
+import type { SP } from "spell/parser/spell"
+import type { SX } from "spell/parser/spellx"
 
 /**
  * A `.spellx` file, read:  its CHUNK TREE, what's wrong in it, and where things are (epic `elemental-spell` P3).

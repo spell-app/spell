@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { ProgramWriter } from "./ProgramWriter"
 import * as jsText from "./jsText"

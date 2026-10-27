@@ -8,8 +8,8 @@
  *   - A longer `if` still wins, e.g. `si no hay una carta`:  only the `if` reads it all.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { BackwardsIf } from "./BackwardsIf"
 import { Else } from "./Else"

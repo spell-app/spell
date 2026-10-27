@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP, type SpellHighlightSpan } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP, type SpellHighlightSpan } from "spell/parser/spell"
 
 /****************
  * ### `SpellHighlighter`

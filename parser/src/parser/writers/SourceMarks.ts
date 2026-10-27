@@ -1,4 +1,4 @@
-import type { P } from "spell-parser/parser"
+import type { P } from "spell/parser/parser"
 
 /**
  * One place in a source file a mark points at:  its file's path, its line and column, both from 0.

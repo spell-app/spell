@@ -4,7 +4,7 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `if.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 import { _if_ } from "./if.parser"
 import { BackwardsIf } from "./BackwardsIf"

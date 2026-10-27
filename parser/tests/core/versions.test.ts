@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { checkEntry, Loader, Saver, Thing, upgradeEntry, versionOf } from "spell-parser/core"
+import { checkEntry, Loader, Saver, Thing, upgradeEntry, versionOf } from "spell/parser/core"
 
 /**
  * A saved thing's VERSION, and bringing an older file up to its type's (`saving.ts`, epic `people-and-orgs` P6).

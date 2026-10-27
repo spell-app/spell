@@ -1,4 +1,4 @@
-import { core } from "spell-parser/core/core"
+import { core } from "spell/parser/core/core"
 // Import directly to avoid circular import
 import { View } from "./View"
 

@@ -6,8 +6,8 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  *   A person's own names stay as English's tests have them (`rank`, `card`, `bar`), so the javascript does too.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { BodyMemberWords } from "./BodyMemberWords"
 import { ItsKnownProperty } from "./ItsKnownProperty"

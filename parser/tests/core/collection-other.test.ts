@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from "vite-plus/test"
-import { core, assert, List } from "spell-parser/core"
+import { core, assert, List } from "spell/parser/core"
 
 /** `a pile is a list`. */
 class Pile extends List {}

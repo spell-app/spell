@@ -6,7 +6,7 @@ import type * as SP from "./spell.types"
  * - An address is a group's, then a project, then a file, one slash between each (epic `people-and-orgs` P4):
  *   `@spell/examples/solitaire/Card.spell`.
  *   See `SpellLocation` for how one breaks down into its pieces.
- * - It starts EMPTY:  the groups are spaces' (`spell-app/spaces`, `SPACES.PROJECT_GROUPS`),
+ * - It starts EMPTY:  the groups are spaces' (`spell/app/spaces`, `SPACES.PROJECT_GROUPS`),
  *   which registers them with `addProjectRoot()` as it loads (epic `people-and-orgs` P15).
  *   - So every program that reads an address loads spaces' groups first:
  *     the editor, `<spell-viewer>`, the language server, the `spell` command, the routes, the tests.

@@ -1,8 +1,8 @@
 import { decodeHTMLStrict } from "entities"
 
 import { dedent, proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { type FillInParts, fillInsAST, parseFillIns } from "spell-parser/spell/rules/core"
+import { P } from "spell/parser/parser"
+import { type FillInParts, fillInsAST, parseFillIns } from "spell/parser/spell/rules/core"
 
 /**
  * `jsxText` rule:  match literal text between JSX tags (`jsxChild`).  Blank text yields no AST node -- see below.

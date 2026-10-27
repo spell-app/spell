@@ -4,7 +4,7 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `async.<lang>.ts` (epic `spanish`).
  */
-import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
+import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
 import { Await } from "./Await"

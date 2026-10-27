@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly:  the barrel's `camelCaseOf` would be read as the module loads
 import { camelCaseOf } from "./WriterProject"
 

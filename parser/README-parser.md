@@ -1,8 +1,8 @@
 # The parser:  rules as classes, for any language
 
 ```ts
-import { P } from "spell-parser/parser"
-import "spell-parser/parser/rulex" // opt in:  rules written with `syntax` need it
+import { P } from "spell/parser/parser"
+import "spell/parser/parser/rulex" // opt in:  rules written with `syntax` need it
 
 const parser = new P.Parser({ module: "pets" })
 class pet extends P.Sequence {}
@@ -22,7 +22,7 @@ That's a language, with its autocomplete.
 There's no grammar file in it, no generator to run, and no generated parser to check in:
 the two classes ARE the rules, registered while the program runs.
 
-`spell-parser/parser` is a parser that knows no language.
+`spell/parser/parser` is a parser that knows no language.
 You hand it rules, each a class with a syntax string, and it hands back a tree of matches,
 each knowing its rule, the tokens it took and its named parts.
 [Spell](README-spell.md) is written on it, and so is [GitHub markdown](README-markdown.md),

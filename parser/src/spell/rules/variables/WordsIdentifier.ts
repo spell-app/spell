@@ -1,8 +1,8 @@
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { longestNameIn, namesWithGrammarWords } from "spell-parser/spell/rules/rules.types"
-import { SpellType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
+import { SpellType } from "spell/parser/spell/rules/types"
 import { SpellIdentifier } from "./SpellIdentifier"
 
 /** Most words a name may have:  `cards still to move` would be 4. */

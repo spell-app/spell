@@ -1,6 +1,6 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 
 /**
  * `range_between_expression` rule:  range expression:

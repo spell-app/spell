@@ -1,8 +1,8 @@
 /**
  * Base classes for spell.
  */
-import { core } from "spell-parser/core/core"
-import { describedMethods } from "spell-parser/core/described"
+import { core } from "spell/parser/core/core"
+import { describedMethods } from "spell/parser/core/described"
 // Import directly to avoid circular import
 import { View } from "./View"
 

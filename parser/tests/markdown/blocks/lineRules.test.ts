@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { lineRules } from "spell-parser/markdown/blocks/lineRules"
+import { lineRules } from "spell/parser/markdown/blocks/lineRules"
 
 /** Does rule `name` take ALL of `line`? */
 function is(name: string, line: string) {

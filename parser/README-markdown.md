@@ -1,7 +1,7 @@
 # Markdown on Spell's parser
 
 ```ts
-import { MD } from "spell-parser/markdown"
+import { MD } from "spell/parser/markdown"
 
 MD.toHTML("# Hello\n\n- one **bold**\n- [x] done")
 ```
@@ -18,7 +18,7 @@ The parser knows no language until rules are registered on it;  this engine regi
 and never imports Spell.
 It passes all 670 of 670 examples of GitHub's markdown spec.
 
-`spell-parser/markdown` is the second language on [the parser](README-parser.md), after Spell itself.
+`spell/parser/markdown` is the second language on [the parser](README-parser.md), after Spell itself.
 It's no demo:  the editor's docstrings, the `<spell-markdown>` element and the language server all draw with it.
 It isn't the fastest or the smallest, either:  about 1.6 times marked's time, and seven times its bytes
 ([the numbers](#exact-and-slower-and-bigger-than-marked)).
@@ -280,11 +280,11 @@ spell-app's `<spell-markdown>` extends it and swaps this engine in, because the 
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart TB
   spmd["spell-markdown<br/>spell-app's element"] -- extends --> uimd["ui-markdown<br/>Spell UI's element"]
-  spmd -- "draws with" --> md["spell-parser/markdown"]
+  spmd -- "draws with" --> md["spell/parser/markdown"]
   docs["the editor's docstrings"] --> md
   lsp["the language server"] -- "inline parser only" --> md
   uimd --> marked["marked"]
-  md --> parser["spell-parser/parser"]
+  md --> parser["spell/parser/parser"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
@@ -293,9 +293,9 @@ _Every arrow points down, to what it uses:  Spell UI never reaches this engine, 
 
 | Who | What for |
 | --- | --- |
-| spell-app's `<spell-markdown>` ([MDEngine.ts](https://github.com/spell-app/spell-app/blob/main/src/app/components/spell-markdown/MDEngine.ts)) | a `<ui-markdown>` in every way, plain or `editable`, but drawn by this engine in `ui-*` tags;  the engine loads in a chunk of its own on the first render |
-| the editor's docstrings ([Markdown.tsx](https://github.com/spell-app/spell-app/blob/main/src/app/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML;  the engine loads on first use, so a runner page carries no parser until it shows a docstring |
-| the language server ([SpellLanguageService.ts](https://github.com/spell-app/spell-app/blob/main/src/lsp/SpellLanguageService.ts)) | `**bold**`, `*italic*`, `~~struck~~` and links inside a comment keep its colour with a modifier;  a `` `code` `` span is coloured as a string |
+| spell-app's `<spell-markdown>` ([MDEngine.ts](https://github.com/spell-app/spell/blob/main/app/src/app/components/spell-markdown/MDEngine.ts)) | a `<ui-markdown>` in every way, plain or `editable`, but drawn by this engine in `ui-*` tags;  the engine loads in a chunk of its own on the first render |
+| the editor's docstrings ([Markdown.tsx](https://github.com/spell-app/spell/blob/main/app/src/app/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML;  the engine loads on first use, so a runner page carries no parser until it shows a docstring |
+| the language server ([SpellLanguageService.ts](https://github.com/spell-app/spell/blob/main/app/src/lsp/SpellLanguageService.ts)) | `**bold**`, `*italic*`, `~~struck~~` and links inside a comment keep its colour with a modifier;  a `` `code` `` span is coloured as a string |
 
 The cost lands on the page:  its first `<spell-markdown>` loads the engine when it first renders, parser and all.
 
@@ -384,5 +384,5 @@ These guides need a checkout with the content folder beside it, and the page ser
   a parser for a language of your own, with this engine as the worked example
 - [README-rulex](README-rulex.md):  every construct the line rules use, counts and `{spaces}` included
 - [README-spell](README-spell.md):  the other language on the same parser, Spell itself
-- [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  `<spell-markdown>` and the editor that draws with this
+- [spell-app's README-app](https://github.com/spell-app/spell/blob/main/app/README-app.md):  `<spell-markdown>` and the editor that draws with this
 - [spell-parser's front page](README.md):  the language, its pipeline, and every page of the repo

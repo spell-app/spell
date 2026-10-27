@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { core, Thing, View } from "spell-parser/core"
+import { core, Thing, View } from "spell/parser/core"
 
 /**
  * `core.describeAction()` / `describeEvent()` (epic `elemental-spell` P5):  what a template says about its actions

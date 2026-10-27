@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { ElementNames } from "spell-parser/spell/translate/ElementNames"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import { Translator } from "spell-parser/spell/translate/Translator"
-import type { NamesData, UIVocabulary } from "spell-parser/spell/translate/translate.types"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { ElementNames } from "spell/parser/spell/translate/ElementNames"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import { Translator } from "spell/parser/spell/translate/Translator"
+import type { NamesData, UIVocabulary } from "spell/parser/spell/translate/translate.types"
 
 /**
  * The elements a project draws with, in Spanish (epic `spanish` P25):  `<ui-*>` tags through Spell UI's names,

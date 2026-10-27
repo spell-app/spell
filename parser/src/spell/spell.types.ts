@@ -3,11 +3,11 @@
  * - `import type` only, per `AGENTS.md`.
  * - NOTE: `rules/Statement.ts` imports `BODY_KEYWORDS` from here directly,
  *   so this MUST stay free of runtime imports.
- * - The `spell-parser/parser/rulex` registration is in `SpellParser.ts`, which every rule module imports anyway.
+ * - The `spell/parser/parser/rulex` registration is in `SpellParser.ts`, which every rule module imports anyway.
  */
 
 import type { PropRule } from "spell/util"
-import type { P } from "spell-parser/parser"
+import type { P } from "spell/parser/parser"
 import type { SpellLocation } from "./SpellLocation"
 import type { SpellFile } from "./SpellFile"
 import type { SpellJSFile } from "./SpellJSFile"
@@ -32,7 +32,7 @@ export type SpellForm = "spell" | "spellx"
 /**
  * Name of the file in a project's folder saying what it is and what it imports, e.g. its title, imports and targets.
  * - Its folder IS the project, e.g. for `locationForDiskPath()`.
- * - Its shape:  `ProjectFileJSON`, in `spell-app/spaces/server/node/projects/server.types`.
+ * - Its shape:  `ProjectFileJSON`, in `spell/app/spaces/server/node/projects/server.types`.
  * - JSON5, a comment kept when spell saves it.
  * - One of spaces' own `__` names, so no file list shows it (epic `people-and-orgs` P12, Q33).
  * - It was `project.json` before:  read still, never written (`OLD_PROJECT_FILES`).
@@ -72,7 +72,7 @@ export function isSpellSourceName(name: string | undefined): boolean {
  * End of a project's compiled output file's name, e.g. `Solitaire.spell.js` -- see `SpellProject.outputFile`.
  * - NEVER one of a project's own files:  the server leaves it out of the manifest.
  * - In the project's build folder, `build/` at the repo root, not beside its source:
- *   `buildFolderFor()`, in `spell-app/spaces/server/node/projects/project-utils`.
+ *   `buildFolderFor()`, in `spell/app/spaces/server/node/projects/project-utils`.
  * - It was `.compiled.js` until epic `people-and-orgs` P11.
  *   The server leaves those out of the manifest too:  `isManifestFile()`, in the same file.
  */
@@ -157,7 +157,7 @@ export function wordsSuffixFor(lang = "en"): string {
  * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/owen@spell/cards`.
  * - A runner fetches that project's compiled JS from the server, at its file's URL,
  *   `/spaces/<project>/<Project>.spell.js` (`SpellUrls.fileUrl()`), and points the specifier at it.
- * - See `runCompiled()` in `spell-app/app/runner/runCompiled`.
+ * - See `runCompiled()` in `spell/app/app/runner/runCompiled`.
  */
 export const SPELL_PROJECT_MODULE = "@spell/project/"
 

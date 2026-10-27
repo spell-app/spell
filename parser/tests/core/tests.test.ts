@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { core } from "spell-parser/core"
+import { core } from "spell/parser/core"
 
 /**
  * How tests report what they found:  `core.testResults()`, each check with the spell it was written as,

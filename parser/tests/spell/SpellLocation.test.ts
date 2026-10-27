@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { SpellLocation } from "spell-parser/spell/SpellLocation"
+import { SpellLocation } from "spell/parser/spell/SpellLocation"
 
 // spell's project groups are spaces' (spell-app's):  a test double of them, registered as it loads (epic `repo-split` C11)
 import "./projectGroups.double"

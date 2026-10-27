@@ -15,7 +15,7 @@
  *   - Nor when the edit changed the program's start, the file that starts its app (P17).
  *   - Nor when one of its things can't come over (`carryProblems()`).
  *   - Either way the program starts afresh too.
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 import { getProps, schemaOf, setProp, withoutCreate, type PropInfo } from "spell/util"
 

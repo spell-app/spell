@@ -1,6 +1,6 @@
 import type { PropRule } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 // Import directly to avoid circular import
 import { RuleSuggestion } from "./RuleSuggestion"
 

@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * The tokens only a SPELLX file has, spell's tag-shaped form (epic `elemental-spell` P6):  see `SP.SpellxTokenizer`.

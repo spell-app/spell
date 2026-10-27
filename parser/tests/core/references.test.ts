@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, Thing, List, View } from "spell-parser/core"
+import { core, Thing, List, View } from "spell/parser/core"
 
 /** Thing references:  `Tableau#T1`, `Pile#T1`, `Tableau#1` (epic `drawable-thing` P18). */
 describe("thing references", () => {

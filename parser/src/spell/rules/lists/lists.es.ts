@@ -10,10 +10,10 @@
  * - Keywords with a written accent are accepted without it too:  `(posición|posicion)`, `(después|despues)`.
  */
 import { withoutAccents } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 
 import { BracketedList } from "./BracketedList"
 import { CanGiveUp } from "./CanGiveUp"

@@ -1,12 +1,12 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 import {
   InfixOperatorSuffix,
   Precedence,
   SuffixLeft,
   type SpellExpressionProps
-} from "spell-parser/spell/rules/expressions"
+} from "spell/parser/spell/rules/expressions"
 import { placeholderData, placeholderValueIndex, type QuotedPropertyFormulaBits } from "./classes.shared"
 
 /**

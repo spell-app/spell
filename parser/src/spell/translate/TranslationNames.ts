@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import type { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 import type {
   DeclarationStatement,
   MissingName,

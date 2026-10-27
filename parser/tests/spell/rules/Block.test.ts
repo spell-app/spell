@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP, spellParser } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP, spellParser } from "spell/parser/spell"
 
 /** Docstrings `getDocComments()` finds in `text`, by the text of the statement each documents. */
 function docsOf(text: string): Record<string, string[]> {

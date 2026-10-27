@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
-import { parseSpellProject, unitTestModuleRules } from "spell-parser/spell/test"
-import { SP } from "spell-parser/spell"
-import { core } from "spell-parser/core"
+import { parseSpellProject, unitTestModuleRules } from "spell/parser/spell/test"
+import { SP } from "spell/parser/spell"
+import { core } from "spell/parser/core"
 
 describe("testing spell module methods, in Spanish", () => {
   unitTestModuleRules(SP.spanish.parser, "methods", core.resetRuntime)

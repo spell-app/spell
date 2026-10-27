@@ -1,7 +1,7 @@
 import { Command } from "commander"
 import { describe, expect, test } from "vite-plus/test"
 
-import languageCommands from "spell-parser/cli/commands"
+import languageCommands from "spell/parser/cli/commands"
 
 describe("the language's spell commands (epic repo-split P13)", () => {
   const spell = new Command("spell")

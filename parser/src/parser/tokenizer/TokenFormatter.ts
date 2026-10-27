@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * Re-lays out source text from its tokens, changing ONLY whitespace:  indentation, gaps between tokens, blank lines.

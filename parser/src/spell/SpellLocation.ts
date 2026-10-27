@@ -1,4 +1,4 @@
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 /**
  * IMPORTANT: this file MUST NOT import from anything other than `SpellSetup`

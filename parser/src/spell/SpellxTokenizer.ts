@@ -1,6 +1,6 @@
 import { suggest } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * Spell's tokenizer for a SPELLX file, spell's tag-shaped form (epic `elemental-spell` P6):  `Card.spellx`.

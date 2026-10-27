@@ -2,8 +2,8 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { core } from "spell-parser/core"
-import { CORE_MESSAGES } from "spell-parser/core/core.types"
+import { core } from "spell/parser/core"
+import { CORE_MESSAGES } from "spell/parser/core/core.types"
 
 /**
  * The core's messages in English.

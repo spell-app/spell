@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { unitTestModuleRules } from "spell-parser/parser/test"
-import { rulex, RulexTokenizer } from "spell-parser/parser/rulex"
+import { P } from "spell/parser/parser"
+import { unitTestModuleRules } from "spell/parser/parser/test"
+import { rulex, RulexTokenizer } from "spell/parser/parser/rulex"
 
 describe("testing language rulex", () => {
   unitTestModuleRules(rulex, "rulex")

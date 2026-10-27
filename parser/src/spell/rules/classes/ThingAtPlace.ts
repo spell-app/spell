@@ -1,6 +1,6 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 
 /**
  * `thing_at_place` rule:  one thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).

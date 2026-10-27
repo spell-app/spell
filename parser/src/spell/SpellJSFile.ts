@@ -1,5 +1,5 @@
 import { TextFile } from "spell/util"
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 /**
  * JS / JSX file as part of `SpellProject`.

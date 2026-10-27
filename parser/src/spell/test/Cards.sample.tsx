@@ -5,7 +5,7 @@
  *   - `typecheck()` (spell-app's `typescript.test.ts`)
  *   - building it (`buildTsx.test.ts`)
  *   - running it (`cli`'s `runCommand.test.ts`)
- * - Read with `solidSample()` (`spell-parser/spell/test`).
+ * - Read with `solidSample()` (`spell/parser/spell/test`).
  * - NOT part of spell's own `tsc`:  it imports `@spell/core`, as compiled spell does,
  *   which only those resolve (`tsconfig.json`'s `exclude`).
  */

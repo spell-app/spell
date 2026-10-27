@@ -1,13 +1,13 @@
 import { proto, upperFirst } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { getKnownType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { getKnownType } from "spell/parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
-import { DefinePropertyHas } from "spell-parser/spell/rules/classes"
+import { DefinePropertyHas } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { BlockLine } from "spell-parser/spell/rules/BlockLine"
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { BlockLine } from "spell/parser/spell/rules/BlockLine"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
 /** The words for a literal's type, by its rule, e.g. `a number` for `0` -- see `warnIfAlwaysTheSame()`. */

@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { BUILT_IN_TEMPLATE_DECLARATIONS } from "./builtInTemplates.generated"
 
 /**

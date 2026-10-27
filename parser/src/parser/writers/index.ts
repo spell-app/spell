@@ -3,12 +3,12 @@
  * - `Writer` is the base:  one method per kind of node.
  *   - `ProgramWriter`:  what every writer of a program shares, whatever its language
  *   - `JSWriter` writes javascript;  `TSWriter`, on it, TypeScript
- *   - Python's writers are `spell-parser/py`'s (`PY.PyWriter`, on `ProgramWriter`)
+ *   - Python's writers are `spell/parser/py`'s (`PY.PyWriter`, on `ProgramWriter`)
  *   - `TreeWriter`:  boxes for a diagram
  * - `jsText` stays a namespace (`P.jsText.InParens`):
  *   its generic names (`Block`, `SPACE` ...) would collide flattened.
  * - `jsShapes`, the shapes every program writer reads (`P.jsShapes.unwrapped()`):
- *   a namespace too, for `spell-parser/py`'s.
+ *   a namespace too, for `spell/parser/py`'s.
  */
 
 export * from "./writers.types"

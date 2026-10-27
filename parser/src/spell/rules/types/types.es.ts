@@ -7,8 +7,8 @@
  *   - Except where a test is about singular and plural:  there the names are Spanish (`carta`, `cartas`),
  *     so Spanish's inflector can tell them apart, and the type's name follows (`Carta`).
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { KindName } from "./KindName"
 import { KnownType } from "./KnownType"

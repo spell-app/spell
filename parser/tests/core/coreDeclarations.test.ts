@@ -2,8 +2,8 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { core } from "spell-parser/core"
-import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "spell-parser/core/coreDeclarations"
+import { core } from "spell/parser/core"
+import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "spell/parser/core/coreDeclarations"
 
 /** Where `yarn core:gen:declarations` writes the core's method list. */
 const DECLARATIONS_FILE = resolve(import.meta.dirname, "../../src/core/core.declarations.json5")

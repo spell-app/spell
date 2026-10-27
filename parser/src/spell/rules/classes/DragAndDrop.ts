@@ -1,9 +1,9 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `drag_and_drop` rule:  which things a page lets people drag and select, and which lists they may drop them on.

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { Loader, Saver, type List, type Thing } from "spell-parser/core"
-import { runSpell } from "spell-parser/spell/test"
+import { Loader, Saver, type List, type Thing } from "spell/parser/core"
+import { runSpell } from "spell/parser/spell/test"
 
 /**
  * Saving by id END TO END:  spell compiled, run, its things saved and loaded back (epic `people-and-orgs`, P2).

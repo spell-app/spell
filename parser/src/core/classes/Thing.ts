@@ -2,12 +2,12 @@
  * Base classes for spell.
  */
 import { Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
-import { registerThing, noteSetting, core } from "spell-parser/core/core"
-import type { Drawing } from "spell-parser/core/drawing"
-import { Eventful } from "spell-parser/core/SpellEvent"
-import type { PropCheck } from "spell-parser/core/core.types"
-import { rememberedStartFor, rememberSetting } from "spell-parser/core/remembered"
-import { declareAction, type ActionInfo } from "spell-parser/core/undoing"
+import { registerThing, noteSetting, core } from "spell/parser/core/core"
+import type { Drawing } from "spell/parser/core/drawing"
+import { Eventful } from "spell/parser/core/SpellEvent"
+import type { PropCheck } from "spell/parser/core/core.types"
+import { rememberedStartFor, rememberSetting } from "spell/parser/core/remembered"
+import { declareAction, type ActionInfo } from "spell/parser/core/undoing"
 
 import { hasChosenId, ID_PROP } from "./ids"
 

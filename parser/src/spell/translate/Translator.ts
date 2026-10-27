@@ -1,18 +1,18 @@
 import { clamp, escapeRegExp, withoutAccents } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { BODY_KEYWORDS } from "spell-parser/spell/spell.types"
-import { NumberLiteral, TextLiteral } from "spell-parser/spell/rules/core"
-import { CompoundExpression, Wording } from "spell-parser/spell/rules/expressions"
-import { SubjectIt, SubjectRule } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { BODY_KEYWORDS } from "spell/parser/spell/spell.types"
+import { NumberLiteral, TextLiteral } from "spell/parser/spell/rules/core"
+import { CompoundExpression, Wording } from "spell/parser/spell/rules/expressions"
+import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 import {
   CreateHook,
   MethodSignature,
   QuotedMethodSignature,
   QuotedSignatureWords,
   WithPropsArg
-} from "spell-parser/spell/rules/methods"
-import { SpellJSX, SpellJSXExpression, SpellJSXText } from "spell-parser/spell/rules/JSX"
+} from "spell/parser/spell/rules/methods"
+import { SpellJSX, SpellJSXExpression, SpellJSXText } from "spell/parser/spell/rules/JSX"
 import type { ElementNames } from "./ElementNames"
 import type { TranslationNames } from "./TranslationNames"
 import type { DeclarationStatement, ImportedProject, MissingName, SourceFile, TranslatedFile } from "./translate.types"
