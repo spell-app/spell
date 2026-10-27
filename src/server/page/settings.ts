@@ -4,20 +4,22 @@ import { dirname, join, posix, relative, resolve, sep } from "node:path"
 import JSON5 from "json5"
 
 import { contentFolderOf } from "spell/server/contentFolder"
+import { kitFolders } from "spell/server/kitFolders"
 import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server/page"
 
 /**
- * The page server's settings for checkout `root`:  every installed repo's `"pageServer"` part, merged
- * (epic `repo-split` P16);  `{}` without any.
- * - Each repo declares ITS OWN part, in its own `package.json`, the way it declares its `"spell": { "commands" }`:
+ * The page server's settings for checkout `root`:  every part's `"pageServer"`, merged (epic `repo-split` P16, P20);
+ * `{}` without any.
+ * - Each part declares ITS OWN settings, in its own `package.json`, the way it declares its `"spell": { "commands" }`:
  *   the route modules, folders, component sets ... it adds to the page server.
- * - Which repos:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
- *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each child repo its `repos.json5` lists that's
- *   installed, in that order (`settingsParts()`);  outside a kit, `root`'s own.
- * - Every path in a part is relative to ITS repo's folder;  here they come back relative to `root`
- *   (`spell-ui`'s `"docs"` is `ui/docs` from the kit, `../ui/docs` from spell-app).
- * - How the parts merge (`mergeSettings()`):  the lists end to end, in repo order;  the maps (`componentSets`,
- *   `engineRoutes`, `localCopies`) entry by entry, a later repo's entry winning.
+ * - Which parts:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
+ *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each of the kit's folders (its `package.json`'s
+ *   `workspaces`, lowest first), then each project beside it its checkout names (`LOCAL_SETTINGS`), in that order
+ *   (`settingsParts()`);  outside a kit, `root`'s own.
+ * - Every path in a part is relative to ITS folder;  here they come back relative to `root`
+ *   (Spell UI's `"docs"` is `ui/docs` from the kit, `../ui/docs` from the app's folder).
+ * - How the parts merge (`mergeSettings()`):  the lists end to end, in that order;  the maps (`componentSets`,
+ *   `engineRoutes`, `localCopies`) entry by entry, a later part's entry winning.
  * - Read fresh on each call:  a server reads it once as it starts, the tools as they need it.
  * - NOTE: plain `node` loads this file by path (spell-epic's tools, through `page.types.ts`):
  *   node built-ins, `json5` and type imports only
@@ -35,12 +37,12 @@ export type SettingsPart = { readonly dir: string; readonly settings: PageServer
 /**
  * The parts of the page server's settings for checkout `root`, in merge order:
  * - in a kit (`kitOf()`):  the kit's own part, then the content repo's (`CONTENT_SETTINGS`, in the content folder
- *   `contentFolderOf()` names), then each child repo's that `REPOS_FILE` lists, lowest first
- *   - a child repo is where it's cloned (`<kit>/<name>/`), else where it's installed (`<kit>/node_modules/<name>/`);
- *     one that's neither is left out:  the server runs with whatever is installed
- *   - names no repo of its own:  the list is the kit's data
+ *   `contentFolderOf()` names), then each of the kit's folders (`kitFolders()`:  `parser/`, `ui/`, `epic/`, `app/`),
+ *   then each project beside the kit its checkout names (`localProjects()`:  spell-brand)
+ *   - names no folder or project of its own:  the lists are the kit's data and the checkout's
+ *   - a project that isn't there is left out:  the server runs with whatever is there
  * - outside a kit:  `root`'s own part, when it has one
- * - a repo whose `package.json` has no `"pageServer"`:  no part
+ * - a folder whose `package.json` has no `"pageServer"`:  no part
  */
 export function settingsParts(root: string): SettingsPart[] {
   const kit = kitOf(root)
@@ -52,9 +54,33 @@ export function settingsParts(root: string): SettingsPart[] {
   const parts = [
     { dir: kit, settings: repoSettings(kit) },
     { dir: content ?? kit, settings: content ? contentSettings(content) : undefined },
-    ...childRepos(kit).map((dir) => ({ dir, settings: repoSettings(dir) }))
+    ...[...kitFolders(kit), ...localProjects(kit)].map((dir) => ({ dir, settings: repoSettings(dir) }))
   ]
   return parts.flatMap(({ dir, settings }) => (settings ? [{ dir, settings }] : []))
+}
+
+/**
+ * The checkout's own file naming the projects BESIDE the kit whose page server parts it serves (epic `repo-split`
+ * P20:  spell-brand, a project of its own that uses `spell` as any other would):
+ * `{ projects: ["../spell-brand"] }`, each folder from the kit's.
+ * - Git-ignored, each checkout's own:  where a project sits is a fact of the machine (`~/www/spell-brand` beside the
+ *   main checkout, `~/www/spell-brand.worktrees/<epic>/` for an epic's worktree), not of the branch.
+ */
+export const LOCAL_SETTINGS = "page-server.local.json5"
+
+/** The projects `LOCAL_SETTINGS` names that are there, absolute;  none without the file. */
+export function localProjects(kit: string): string[] {
+  let projects: unknown
+  try {
+    projects = (JSON5.parse(readFileSync(join(kit, LOCAL_SETTINGS), "utf8")) as { projects?: unknown }).projects
+  } catch {
+    return []
+  }
+  if (!Array.isArray(projects)) return []
+  return projects
+    .filter((project): project is string => typeof project === "string")
+    .map((project) => resolve(kit, project.replace(/^~(?=\/)/, process.env.HOME ?? "~")))
+    .filter((dir) => existsSync(join(dir, "package.json")))
 }
 
 /**
@@ -117,7 +143,7 @@ export function mergeSettings(root: string, parts: readonly SettingsPart[]): Pag
 /** The settings' lists, which `mergeSettings()` lays end to end. */
 type ListKey = "routes" | "watch" | "writable" | "gone" | "bundles" | "pageScripts" | "siteTabs"
 
-/** The kit's own file at its root, listing the child repos, lowest first:  what marks a folder as a kit. */
+/** The kit's own file at its root, listing the repos beside it:  what marks a folder as a kit. */
 export const REPOS_FILE = "repos.json5"
 
 /**
@@ -162,21 +188,6 @@ export function findRoot(start: string): string | undefined {
     if (existsSync(join(dir, ".git"))) return dir
     if (dirname(dir) === dir) return undefined
   }
-}
-
-/** The child repos of `kit` that are there, lowest first:  each one `REPOS_FILE` lists, by its folder. */
-function childRepos(kit: string): string[] {
-  let names: string[]
-  try {
-    const text = readFileSync(join(kit, REPOS_FILE), "utf8")
-    names = (JSON5.parse(text) as { repos?: { name: string }[] }).repos?.map((repo) => repo.name) ?? []
-  } catch {
-    return []
-  }
-  return names.flatMap(
-    (name) =>
-      [join(kit, name), join(kit, "node_modules", name)].find((dir) => existsSync(join(dir, "package.json"))) ?? []
-  )
 }
 
 /**

@@ -108,6 +108,11 @@
       "types": "./dist-types/src/server/contentFolder.d.ts",
       "default": "./src/server/contentFolder.ts"
     },
+    "./server/kitFolders": {
+      "spell-source": "./src/server/kitFolders.ts",
+      "types": "./dist-types/src/server/kitFolders.d.ts",
+      "default": "./src/server/kitFolders.ts"
+    },
     "./util/node/json5": {
       "spell-source": "./src/util/node/json5.ts",
       "types": "./dist-types/src/util/node/json5.d.ts",

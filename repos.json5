@@ -1,26 +1,13 @@
-// The child repos `yarn clone` puts inside the kit `spell` (checked out at `~/www/spell`), each its own git repo
-// (epic `repo-split` P7, Q15-Q17).
-// - The kit itself is the bottom of every list, and always there:  every repo uses it (`spell/util`,
-//   `spell/element` ...), so no `needs` names it (epic `repo-split` P9:  spell-util, spell-server and spell-element
-//   are its folders now).
-// - Lowest first:  a repo only ever uses the ones above it in this list ("Every arrow points down").
-// - `needs`:  the repos its CODE uses, directly:  `yarn clone <repo>` clones those too, and theirs, and so on.
-// - `runs`:  repos it runs by its settings, never imports (spell-app's page server runs spell-epic's route modules):
-//   cloned with it too, but no arrow in the layout's picture.
-// - `url`:  where `yarn clone` clones it from;  over SSH, falling back to HTTPS (GitHub's login, `gh auth`) when SSH is
-//   refused.
-// - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, and the checks over every repo).
+// The repos BESIDE the kit `spell` (checked out at `~/www/spell`):  projects of their own that use `spell` as any
+// other project would (epic `repo-split` P20).
+// - The kit's own folders -- `src/`, then `parser/`, `ui/`, `epic/` and `app/` -- are ONE repo and ONE package now:
+//   they're its `package.json`'s `workspaces`, lowest first, not listed here.
+// - Each repo here is its own git repo with its own install (spell-brand:  private, never published), at `path` from
+//   the kit's folder:  `~/www/spell-brand`, beside `~/www/spell`.
+// - `url`:  where `yarn clone <name>` clones it from;  over SSH, falling back to HTTPS (GitHub's login, `gh auth`).
+// - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, `yarn repos`) and `spell rename imports`;
+//   the page server finds a project beside the kit by the checkout's own `page-server.local.json5`, not by this list.
+// - This file also marks a folder as a kit (`KIT_MARKER`).
 {
-  "repos": [
-    { "name": "spell-parser", "url": "git@github.com:spell-app/spell-parser.git", "needs": [] },
-    { "name": "spell-ui", "url": "git@github.com:spell-app/spell-ui.git", "needs": [] },
-    { "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "needs": ["spell-ui"] },
-    { "name": "spell-epic", "url": "git@github.com:spell-app/spell-epic.git", "needs": ["spell-ui"] },
-    {
-      "name": "spell-app",
-      "url": "git@github.com:spell-app/spell-app.git",
-      "needs": ["spell-parser", "spell-brand", "spell-ui"],
-      "runs": ["spell-epic"]
-    }
-  ]
+  "repos": [{ "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "path": "../spell-brand" }]
 }

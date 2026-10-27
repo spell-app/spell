@@ -7,24 +7,22 @@
 // - Written in P7 for P9:  the folders are this layout's;  the keys marked GUESS are P9's to settle.
 // - A key left out takes its default (`EpicConfig.DEFAULTS`);  `epic config [key]` prints what's in force.
 {
-  // The child repos (their list:  `repos.json5`, beside `package.json`).
-  // - Naming it switches spell-epic's MULTI-REPO mode on (epic `epic-engine` P10):
-  //   an epic's worktree is one of `spell`, with one of every child repo inside it.
-  "repos": "repos.json5",
+  // No "repos":  ONE repo since epic `repo-split` P20, so an epic's worktree is ONE worktree of `spell` (spell-epic's
+  // single-repo mode).  Until then it named `repos.json5`, the child repos, each with a worktree inside the kit's.
+  // - spell-brand, a project beside the kit, gets its own worktrees:  epic `epic-engine` P49 (its Q49).
 
   // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
   // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main
   //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
 
-  // The branch worktrees start from and merge into:  every child repo's is `main` too.
+  // The branch worktrees start from and merge into.
   "baseBranch": "main",
 
-  // Where an epic's worktree goes:  a worktree of `spell`, with a worktree of each child repo inside it (layout 2.5).
-  // GUESS:  P9 decides which child repos get one (every repo, or only those the epic changes).
+  // Where an epic's worktree goes:  one worktree of `spell`.
   "worktreesFolder": "../spell.worktrees",
 
-  // What makes a new worktree ready to run, from its root:  the ONE install, over every child repo there.
+  // What makes a new worktree ready to run, from its root:  the ONE install, over the kit and its folders.
   "installCommand": "yarn install",
   // The worktree hook runs it BEFORE the window opens, within "installTimeout" seconds (600 left out).
   "installOnCreate": true,
