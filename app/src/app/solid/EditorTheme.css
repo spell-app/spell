@@ -1,5 +1,6 @@
 /*
- * Look of the editor's chrome in every theme of the set (`EditorTheme.tsx`):  Spell, Glass, Fruity and Merlot.
+ * Look of the editor's chrome in every theme of the set (`EditorTheme.tsx`):  Spell, Glass, Fruity, Merlot, Paper,
+ * Midnight, Crisp and Pop.
  * - The shape every theme shares (below, "Every theme"):  a floating top bar, panels with gaps and rounded corners,
  *   each panel's menu a plain header over a hairline.
  * - Its colours, corners, shadows and blur are the THEME's own bar and panel tokens (epic `debut` P17, J89),
@@ -12,7 +13,9 @@
  *   - Glass and Fruity:  the glass chrome, frosted panels clearer than their headers, the top bar a pill
  *   - Spell:  the bar has no box, on the brand's pale page
  *   - Merlot:  flat panels joined by hairlines, edge to edge
- *   - Glass, Fruity and Merlot:  the code see-through, on its panel
+ *   - every theme:  the code see-through, on its panel
+ *   - Paper, Midnight, Crisp and Pop (epic `debut` P20) need nothing of their own:  their bar and panel tokens say it
+ *     (Crisp's 2px ring, Pop's sticker)
  * - Each sets only its values (`--spell-*`);  the colours come from tokens, so light / dark follow by themselves.
  * - Before `EditorTheme` marks the theme (its first paint), none of this applies.
  * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
@@ -56,9 +59,20 @@
   /* a panel's header a wash of the theme's purple:  the frosted glass draws its top edge whiter than the rest
      (the blur reaches past the panel), so a see-through header stood out near-white (Owen, epic `elemental-spell` C39) */
   --spell-header-background: color-mix(in oklab, var(--glass-accent-wash) 50%, transparent);
+  /*
+   * the running app's pane clearer still:  the same white an epic page's open drawer lays over the page
+   * (spell-epic's `--epic-drawer-fill`;  Owen, epic `debut`:  "this amount of opacity ... that's what I want e.g. under
+   * the running app"), so the wallpaper shows through as it does there
+   */
+  --spell-app-background: light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02));
   /* the top bar a full pill:  its ends follow the round avatar 9px inside them, at any height the bar takes
      (Owen's pick, epic `debut` P17, Q5:  its 14px corners were less round than the 28px avatar inside) */
   --spell-bar-radius: 999px;
+}
+
+/* ... the running app's pane its own, clearer fill (above) */
+:root:is([data-spell-theme="glass"], [data-spell-theme="fruity"]) .SplitPanel > .SplitPanelPane:has(> .AppPane) {
+  background: var(--spell-app-background);
 }
 
 /*
@@ -67,14 +81,9 @@
  * - Merlot too:  the code on its wine panel, not a navy block in dark (Owen's pick, epic `debut` P17, Q4);
  *   the code's colours stay Purple's, only its background goes
  * - Spell too (its facelift, epic `debut` P19):  dark, the code on the aubergine panel, not Purple's navy block
+ * - every theme since P20:  a navy block sat on Paper's lamplit brown, and in every new theme
  */
-:root:is(
-    [data-spell-theme="spell"],
-    [data-spell-theme="glass"],
-    [data-spell-theme="fruity"],
-    [data-spell-theme="merlot"]
-  )
-  .monaco-editor {
+:root[data-spell-theme] .monaco-editor {
   --vscode-editor-background: transparent;
   --vscode-editorGutter-background: transparent;
   /* the lines stuck at the top while scrolling keep Purple's own page (`ShadesOfPurple`):  the code scrolls under them */

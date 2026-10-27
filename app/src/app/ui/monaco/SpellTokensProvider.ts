@@ -14,14 +14,14 @@ import { monaco } from "./monaco"
  *     `its "rank" is one of ...`, so `"rank"` is a string and `ace` a word.
  *   - The tag's own words, which its twin never holds:  `property` a keyword, `one-of` an attribute name,
  *     and `<`, `>`, `/>`, `</>` punctuation.
- *   - A line of prose, or a note's, is a comment.
+ *   - A line of prose, or a note's, is a comment;  so is each line of a `<!-- ... -->` comment.
  * - Blocks of another language are coloured as that language, by Monaco's own colouring (`EMBEDDED_BLOCKS`):
  *   - a type's `<css>` block as CSS -- see `LSP.SpellCSS`
  *   - a `<markdown>` block as markdown, in a drawing or a type's outline -- see spell's `markdown_block`
  * - Markup, `<ui-card>`, `<avatar src="...">`, as html, by Monaco's html colouring:  a drawing's lines, a notebook
  *   example's code (`markupTokens()`).
  * - The only state carried between lines is which block we're in, if any (`SPELL_LINE`, `CSS_LINE` ...),
- *   and in spellx, the tags open (`SpellxLineState`).
+ *   and in spellx, the tags open and whether a `<!-- ... -->` comment is (`SpellxLineState`).
  * - A block's lines are each coloured on their own too,
  *   so a CSS comment or a fenced code block over several lines colours its first line only.
  * - NEVER throws:  a line the tokenizer chokes on just goes uncoloured.
@@ -109,13 +109,13 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   private spellxTokens(parser: SP.SpellParser, line: string, state: SpellxLineState): monaco.languages.ILineTokens {
     try {
       const tokenizer = parser.tokenizer as SP.SpellxTokenizer
-      const { tokens, open } = tokenizer.tokenizeLine(line, state.open)
+      const { tokens, open, inComment } = tokenizer.tokenizeLine(line, state.open, state.inComment)
       const pieces: Piece[] = []
       for (const token of tokens) {
         if (token instanceof SP.SpellxTagToken) pieces.push(...this.spellxTagPieces(parser, tokens, token))
         else if (token instanceof SP.SpellxCloserToken)
           pieces.push({ start: token.start, end: token.end, scopes: "delimiter" })
-        else if (token instanceof SP.SpellxProseToken)
+        else if (token instanceof SP.SpellxProseToken || token instanceof P.JSXCommentToken)
           pieces.push({ start: token.start, end: token.end, scopes: "comment" })
         else if (token instanceof P.JSXToken) {
           const markup = this.markupTokens(line, token.start, token.end)
@@ -128,7 +128,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
           if (scopes) pieces.push({ start: token.start, end: token.end, scopes })
         }
       }
-      return { tokens: this.piecesToTokens(pieces), endState: new SpellxLineState(open) }
+      return { tokens: this.piecesToTokens(pieces), endState: new SpellxLineState(open, inComment) }
     } catch (error) {
       console.warn("SpellTokensProvider.tokenize():  couldn't tokenize spellx", { line, error })
       return { tokens: [], endState: state }
@@ -299,15 +299,20 @@ type EmbeddedBlock = {
 type Piece = { start: number; end: number; scopes: string }
 
 /**
- * State after a line of spellx:  the tags open after it, which the next line is read with.
- * - Two states are equal when the same tags are open, at the same indents:  so Monaco stops re-colouring
- *   the lines below an edit once they'd start the same as before.
+ * State after a line of spellx:  the tags open after it, which the next line is read with, and whether it left a
+ * comment open (`<!--` with no `-->` yet).
+ * - Two states are equal when the same tags are open, at the same indents, and both or neither are in a comment:
+ *   so Monaco stops re-colouring the lines below an edit once they'd start the same as before.
  */
 class SpellxLineState implements monaco.languages.IState {
   /** No tag open:  a file's start. */
   static NONE_OPEN = new SpellxLineState([])
 
-  constructor(readonly open: readonly SP.SpellxOpenTag[]) {}
+  constructor(
+    readonly open: readonly SP.SpellxOpenTag[],
+    /** Is a `<!-- ... -->` comment still open? */
+    readonly inComment = false
+  ) {}
 
   /** Never changed, so it's its own clone. */
   clone(): monaco.languages.IState {
@@ -316,6 +321,7 @@ class SpellxLineState implements monaco.languages.IState {
 
   equals(other: monaco.languages.IState): boolean {
     if (!(other instanceof SpellxLineState) || other.open.length !== this.open.length) return false
+    if (other.inComment !== this.inComment) return false
     return this.open.every((tag, index) => {
       const theirs = other.open[index]!
       return tag.indent === theirs.indent && tag.kind === theirs.kind && tag.chain === theirs.chain

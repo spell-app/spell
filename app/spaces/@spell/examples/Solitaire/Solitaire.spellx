@@ -42,7 +42,8 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				wait for: reset the stock
 			get the last card of its stock
 			turn it face up
-			pause for 50 msec
+			// as long as its flip takes (styles.css), so it turns over before it moves
+			pause for 300 msec
 			add it to the discards of the solitaire
 		// gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
 		- animation deal the cards:
@@ -53,10 +54,12 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 					add the card to the stock of the solitaire
 					pause for 50 msec
 			shuffle its stock
+			// each row's first card lands face down, then turns up where it lies
 			for row from 1 to 7
-				turn the last card of its stock face up
 				for column from row to 7
 					add the last card of its stock to item column of the tableaus
+					if column is row
+						turn the last card of (item column of the tableaus) face up
 					pause for 50 msec
 			wait for: play from the stock
 	</spell>

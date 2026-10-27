@@ -90,11 +90,50 @@
   text-indent: -0.049em;
   user-select: none;
 }
-/* a card's letter is only its ink:  a white face, its corners rounded as the letter's are, hides the cards below */
+
+/****************
+ * Turning over:  a card draws both its sides (Card.spellx), back to back, and turns over in 3D
+ * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
+ *   Its back side is drawn already turned half round, so it faces you when the card does.
+ * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
+ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
+ *   card that cut its own content would draw flat, and its sides couldn't turn with it.
+ * - A card that's drawn already turned shows that side at once:  only a change turns it.
+ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellx), so it turns over before it moves.
+ ****************/
+
 [layout] > * {
+  /* its sides turn with it, in 3D */
+  transform-style: preserve-3d;
+  overflow: visible;
+  transform: perspective(3em) rotateY(0deg);
+  transition: transform 0.3s ease-in-out;
+}
+[layout] > :not([direction="up"]) {
+  transform: perspective(3em) rotateY(180deg);
+}
+/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
+   a <ui-text> draws no box of its own, so it's given one */
+[layout] > *::part(front),
+[layout] > *::part(back) {
+  display: block;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding-block: 0.008em;
+  overflow: hidden;
   background: #fff;
   background-clip: content-box;
   border-radius: 0.035em;
+  backface-visibility: hidden;
+}
+[layout] > *::part(back) {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  [layout] > * {
+    transition: none;
+  }
 }
 
 /* An empty pile's placeholder:  a faint card in the page's text colour, so it shows on a dark page too */

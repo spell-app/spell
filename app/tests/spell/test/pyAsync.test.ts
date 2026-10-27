@@ -31,7 +31,9 @@ describe("Python on asyncio", () => {
   // (a `create()` that waits was the deck's, which turned each card face down with a pause:  a two sided card
   // starts face down since the showcase, epic `elemental-spell`, so no fixture has one now)
   test("a handler that calls one that waits is `async def` too", () => {
-    expect(cards).toMatch(/\n {4}async def when_card_dropped_on\(self, card: Card\) -> None:\n {8}await card\.put_on_pile\(self\)\n/)
+    expect(cards).toMatch(
+      /\n {4}async def when_card_dropped_on\(self, card: Card\) -> None:\n {8}await card\.put_on_pile\(self\)\n/
+    )
   })
 
   test("the top level runs what waits with asyncio.run()", () => {

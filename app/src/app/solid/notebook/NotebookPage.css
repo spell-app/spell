@@ -224,6 +224,12 @@
   border-radius: var(--ui-radius-m, 0.5em);
 }
 
+/* the selected cell, the one last clicked (the pane header's ⋯ acts on it):  a faint ring a little out from it */
+.NotebookCell.selected:not(:empty) {
+  outline: 2px solid color-mix(in oklab, var(--ui-primary) 35%, transparent);
+  outline-offset: 4px;
+}
+
 /* a cell with nothing to show (a section's heading cell, its text shown as its example's description):  no room */
 .NotebookCell:empty {
   margin: 0;

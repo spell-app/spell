@@ -563,7 +563,13 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
   `suit = clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
 - The card is a `two sided view` ([Card.spellx](spaces/@spell/examples/Solitaire/Card.spellx)):
   its direction, face up or down, and `turn it over` come from that built-in template,
-  so the card draws only its `<draw "front">` and its `<draw "back">`.
+  and it says what its `<draw "front">` and its `<draw "back">` look like.
+- It draws both sides at once, one over the other (its own `<draw>`):
+  [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
+  and turns the card about its middle as its direction changes, the other side taking over halfway.
+  - A card drawn already turned shows that side at once:  only a change turns it.
+- The game pauses as long as that flip after turning the stock's card, `pause for 300 msec`,
+  so the card turns over, then goes to the discards.
 - A click on a card is its own handler, `<on click>`:  `play it`, and the game says where it goes.
 
 The deal is a loop with a pause in it, so you watch it happen:
@@ -577,10 +583,12 @@ The deal is a loop with a pause in it, so you watch it happen:
 			add the card to the stock of the solitaire
 			pause for 50 msec
 	shuffle its stock
+	// each row's first card lands face down, then turns up where it lies
 	for row from 1 to 7
-		turn the last card of its stock face up
 		for column from row to 7
 			add the last card of its stock to item column of the tableaus
+			if column is row
+				turn the last card of (item column of the tableaus) face up
 			pause for 50 msec
 	wait for: play from the stock
 ```

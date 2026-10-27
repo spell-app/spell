@@ -1,6 +1,7 @@
 import { createSignal, runWithOwner, type Accessor } from "solid-js"
 import { render } from "@solidjs/web"
 
+import { LoadableFile } from "spell/util"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { after, every } from "spell/element"
 import { P } from "spell-parser/parser"
@@ -8,6 +9,7 @@ import { SP } from "spell-parser/spell"
 import { SX } from "spell-parser/spellx"
 import { editor } from "spell-app/app/editor"
 import { isStaticBuild } from "spell-app/app/static/staticBuild"
+import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
 import type { SpellRuntime } from "spell-app/app/runner"
 import { NotebookCode, CODE_VIEWS, type CodeView } from "./NotebookCode"
 import { NotebookKeys } from "./NotebookKeys"
@@ -17,7 +19,8 @@ import { CellRunner, ChunkTreeAdapter } from "./NotebookPatch"
 
 /**
  * The controller of a notebook's page (epic `elemental-spell` P16):  its text, its cells and what each one draws;
- * every edit the page makes, saved cell by cell;  what the page says of saving;  the code view, the lock.
+ * every edit the page makes, saved cell by cell;  adding, moving and deleting cells;  what the page says of saving;
+ * the code view, the lock.
  * - The page is `<NotebookPage>`:  it draws what this says, and calls these methods from its clicks and editors.
  * - Its text is the notebook's `.spellx` file's:  an edit changes only its own cell's span (`NotebookPageCells`), and
  *   the file is saved 600ms after the last one, through the spaces API the editor saves with (`SP.SpellFile.save()`).
@@ -34,6 +37,9 @@ import { CellRunner, ChunkTreeAdapter } from "./NotebookPatch"
  *   - Locked (`<spell-notebook "..." locked>`):  NOTHING is ever saved, for anyone (Owen, 2026-10-26:  "If doc is
  *     locked, nothing is ever saved").  An edit is a try-out:  drawn, never saved, gone on reload, or put back by
  *     its example's Reset (`resetExample()`).  Unlocking it is how an admin saves again.
+ * - Each example's tools (Add below, Move up / down, Delete), and the pane header's ⋯ menu acting on the SELECTED
+ *   cell, the one last clicked (`selected()`):  ⌘Z undoes each;  locked, each is a try-out too, put back by ⌘Z, a
+ *   reload, or Reset (`resetTryOut()`).
  * - Plain TypeScript and Solid's signals:  made in `<NotebookPage>`'s body, so its signals are the page's.
  */
 export class NotebookController {
@@ -48,10 +54,12 @@ export class NotebookController {
     const text = file.contents ?? ""
     this.onDisk = text
     const model = NotebookPageCells.of(text, file.path)
-    this.now = { text, model, keys: model?.cells.map(() => NotebookKeys.next()) ?? [] }
+    this.now = { text, model, keys: model?.cells.map(() => NotebookKeys.next()) ?? [], selected: undefined }
+    this.onDiskKeys = this.now.keys
     ;[this.text, this.setText] = createSignal(text)
     ;[this.model, this.setModel] = createSignal<NotebookPageModel | undefined>(model)
     ;[this.keys, this.setKeys] = createSignal<string[]>(this.now.keys)
+    ;[this.selected, this.setSelected] = createSignal<string | undefined>(undefined)
     ;[this.saving, this.setSaving] = createSignal(false)
     ;[this.status, this.setStatus] = createSignal<SaveStatus | undefined>(undefined)
     ;[this.errors, this.setErrors] = createSignal<Record<string, string[]>>({})
@@ -77,11 +85,11 @@ export class NotebookController {
   ////////////////
 
   /**
-   * The text, its cells and their keys, as they are NOW:  what an edit reads.
+   * The text, its cells and their keys, and the selected cell, as they are NOW:  what an edit reads.
    * - Solid's signals below are what the page draws from;  a write to one is read back only once Solid has flushed,
    *   so two edits in a row would read the first one's old text.  This never lags.
    */
-  private now: { text: string; model: NotebookPageModel | undefined; keys: string[] }
+  private now: { text: string; model: NotebookPageModel | undefined; keys: string[]; selected: string | undefined }
 
   /** Set what's true now (`now`), and the signals the page draws from. */
   private setNow(now: Partial<NotebookController["now"]>) {
@@ -89,6 +97,7 @@ export class NotebookController {
     if ("text" in now) this.setText(this.now.text)
     if ("model" in now) this.setModel(this.now.model)
     if ("keys" in now) this.setKeys(this.now.keys)
+    if ("selected" in now) this.setSelected(this.now.selected)
   }
 
   /** Cell `key` as it is now (`now`):  for an edit. */
@@ -106,6 +115,9 @@ export class NotebookController {
   /** Each cell's key, in order:  what keeps its place (`NotebookKeys`). */
   readonly keys: Accessor<string[]>
   private readonly setKeys: (keys: string[]) => void
+  /** The selected cell's key, the one last clicked:  what the pane header's ⋯ menu acts on. */
+  readonly selected: Accessor<string | undefined>
+  private readonly setSelected: (key: string | undefined) => void
   /** Is a save on its way? */
   readonly saving: Accessor<boolean>
   private readonly setSaving: (saving: boolean) => void
@@ -174,6 +186,11 @@ export class NotebookController {
   ////////////////
   // ## Modes
   ////////////////
+
+  /** Select cell `key`, as it's clicked:  the pane header's ⋯ menu acts on it. */
+  select(key: string | undefined) {
+    if (key !== this.now.selected) this.setNow({ selected: key })
+  }
 
   /** Show every example's code as `view`, and remember it for this notebook. */
   setCodeView(view: CodeView) {
@@ -268,7 +285,8 @@ export class NotebookController {
     this.text()
     if (this.canSave()) return undefined
     const now = this.currentCell(key)?.examples?.[index]
-    const cellIndex = this.now.keys.indexOf(key)
+    // the same cell on disk, by its key:  a cell added, moved or deleted in the try-out moves the others
+    const cellIndex = this.onDiskKeys.indexOf(key)
     const onDisk = NotebookPageCells.of(this.onDisk, this.file.path)?.cells[cellIndex]?.examples?.[index]
     return now && onDisk && now.body.code !== onDisk.body.code ? onDisk.body.code : undefined
   }
@@ -282,6 +300,94 @@ export class NotebookController {
   }
 
   /**
+   * Can cell `key` move `direction`?  Not past the page's start or end, nor out of its section (`moved()`).
+   * - Reactive, on the page's text.
+   */
+  canMove(key: string, direction: "up" | "down"): boolean {
+    const text = this.text()
+    return this.movedText(key, direction, text) !== text
+  }
+
+  /** Move cell `key` up or down one:  a section written as a tag, past the one beside it.  ⌘Z puts it back. */
+  move(key: string, direction: "up" | "down") {
+    const text = this.movedText(key, direction, this.now.text)
+    if (text !== this.now.text) this.apply(text)
+  }
+
+  /** `text` with cell `key` moved `direction`:  as it is when it can't move. */
+  private movedText(key: string, direction: "up" | "down", text: string): string {
+    const { model, keys } = this.now
+    const index = keys.indexOf(key)
+    const cell = model?.cells[index]
+    if (!model || !cell || text !== this.now.text) return text
+    return cell.block
+      ? NotebookPageCells.sectionMoved(text, model, cell, direction)
+      : NotebookPageCells.moved(text, model.cells, index, direction)
+  }
+
+  /** Delete cell `key`, a section with what's in it:  ⌘Z brings it back. */
+  remove(key: string) {
+    const cell = this.currentCell(key)
+    if (!cell) return
+    this.apply(NotebookPageCells.deleted(this.now.text, cell))
+    if (this.now.selected === key) this.setNow({ selected: undefined })
+  }
+
+  /**
+   * Add a new cell of `kind` just below cell `key` (a section's title:  first in it), and select it.  ⌘Z takes it
+   * away.
+   * - Written as the notebook writes its own:  a section as a tag where its sections are tags, else `##`;
+   *   its words in the notebook's language.
+   */
+  add(key: string, kind: NewCellKind) {
+    const { model } = this.now
+    const after = this.currentCell(key)
+    if (!model || !after) return
+    const { text, start } = NotebookPageCells.inserted(this.now.text, model, after, this.newCell(kind))
+    this.apply(text)
+    const index = this.now.model?.cells.findIndex((cell) => cell.span.start === start) ?? -1
+    if (index >= 0) this.setNow({ selected: this.now.keys[index] })
+  }
+
+  /** A new cell of `kind`'s code, in the notebook's language. */
+  private newCell(kind: NewCellKind): string {
+    const spanish = this.now.model?.language === "es"
+    const name = (key: AppTextKey) => appTexts.text(key)
+    if (kind === "text") return name("notebookPageNewText")
+    if (kind === "section") {
+      const asTag = this.now.model?.cells.some((cell) => cell.block)
+      const label = name("notebookPageNewSection")
+      if (!asTag) return `## ${label}`
+      return spanish ? `<seccion etiqueta="${label}">\n</seccion>` : `<section label="${label}">\n</section>`
+    }
+    if (kind === "template") {
+      const view = name("notebookPageNewTemplate")
+      return spanish
+        ? `<encanto-vista "${view}">\n\t<dibujar><texto>${view}</texto></dibujar>\n</encanto-vista>`
+        : `<spell-view "${view}">\n\t<draw><text>${view}</text></draw>\n</spell-view>`
+    }
+    const example = name("notebookPageNewExample")
+    return spanish
+      ? `<ejemplo "${example}">\n\t<texto>Hola</texto>\n</ejemplo>`
+      : `<example "${example}">\n\t<text>Hello</text>\n</example>`
+  }
+
+  /**
+   * Has a try-out changed the page, as a locked notebook's edits do?  Then `resetTryOut()` puts it back.
+   * - Reactive, on the page's text.
+   */
+  isTriedOut(): boolean {
+    return !this.canSave() && this.text() !== this.onDisk
+  }
+
+  /** Put the whole page back as the file has it:  a locked notebook's try-out undone, every cell's key kept. */
+  resetTryOut() {
+    if (this.now.text === this.onDisk) return
+    this.apply(this.onDisk, { keys: this.onDiskKeys })
+    if (this.now.selected && !this.now.keys.includes(this.now.selected)) this.setNow({ selected: undefined })
+  }
+
+  /**
    * Lock the notebook, or unlock it:  its tag's `locked`, saved either way.
    * - Locked, nothing else is ever saved, for anyone;  unlocking it is how an admin saves again.
    */
@@ -290,11 +396,12 @@ export class NotebookController {
     if (model) this.apply(NotebookPageCells.withLock(this.now.text, model, locked), { save: "always" })
   }
 
-  /** Undo the last lock or unlock:  the text, its cells and their keys as they were. */
+  /** Undo the last add, move, delete, lock or unlock:  the text, its cells and their keys as they were. */
   undo(): boolean {
     const last = this.history.pop()
     if (!last) return false
     this.apply(last.text, { undoable: false, keys: last.keys })
+    if (this.now.selected && !this.now.keys.includes(this.now.selected)) this.setNow({ selected: undefined })
     return true
   }
 
@@ -305,7 +412,7 @@ export class NotebookController {
 
   /**
    * The text is now `text`:  its cells, their keys, what draws again, and a save.
-   * - `undoable`:  ⌘Z puts it back (a lock);  typing in an editor has the editor's own undo.
+   * - `undoable`:  ⌘Z puts it back (an add, move, delete, lock);  typing in an editor has the editor's own undo.
    * - `keys`:  the cells' keys, as an undo had them;  else carried over from the old cells (`NotebookKeys`).
    * - Locked:  a try-out, never saved (`canSave()`), unless `save` is `always` (the lock itself).
    */
@@ -356,6 +463,7 @@ export class NotebookController {
           await this.parsed(text)
           await this.file.save(undefined)
           this.onDisk = text
+          this.onDiskKeys = this.now.text === text ? this.now.keys : this.onDiskKeys
           // still the last edit's save:  no edit since
           if (!this.pendingSave) this.show("saved")
         } catch (error) {
@@ -442,6 +550,7 @@ export class NotebookController {
    * and hand a new text to `outsideChange()`.
    * - Never while a save of ours is on its way:  the file is about to be ours.
    * - Returns what stops it.
+   * - SEE:  the kit's coming `pollWhileVisible()` (coherence sweep 2, #12):  this poll moves onto it once it's there.
    */
   watchFile(): () => void {
     return every(FILE_POLL, () => {
@@ -450,15 +559,19 @@ export class NotebookController {
     })
   }
 
-  /** The file's text as it is on the server now:  someone else's, if it's not what we last read or saved. */
+  /**
+   * The file's text as it is on the server now:  someone else's, if it's not what we last read or saved.
+   * - Read as the editor reads every file (`LoadableFile.fetch()`):  the static preview's files too.
+   * - NEVER throws:  a failure is logged;  a file gone reads as unchanged (`defaultContents`).
+   */
   private async readFile() {
     try {
-      const response = await fetch(this.file.url, { cache: "no-store" })
-      if (!response.ok) return
-      const text = await response.text()
+      const params = { url: this.file.url, cache: "no-store" as const, defaultContents: this.onDisk }
+      const text = await LoadableFile.fetch<string>(params)
       if (text === this.onDisk || this.pendingSave || this.saving()) return
       this.onDisk = text
       this.outsideChange(text)
+      this.onDiskKeys = this.now.keys
     } catch (error) {
       console.error("NotebookController:  couldn't read the file", error)
     }
@@ -466,6 +579,8 @@ export class NotebookController {
 
   /** The file's text as we last read it or saved it. */
   private onDisk: string
+  /** Its cells' keys:  how a cell now is found on disk (`triedOutExample()`, `resetTryOut()`). */
+  private onDiskKeys: string[]
 
   ////////////////
   // ## Drawing cells
@@ -744,6 +859,10 @@ export class NotebookController {
 
 /** A cell and its key. */
 export type KeyedCell = { cell: PageCell; key: string }
+
+/** The kinds of cell the tools add:  Add below's menu, in order. */
+export const NEW_CELL_KINDS = ["example", "text", "section", "template"] as const
+export type NewCellKind = (typeof NEW_CELL_KINDS)[number]
 
 /** What the pane's header says of the last edit (`NotebookController.status()`). */
 export type SaveStatus = "saving" | "saved" | "locked"

@@ -359,7 +359,12 @@ function VSCodeRunnerToolbar(props: VSCodeRunnerToolbarProps) {
       </Show>
       <Show when={props.showConsole !== undefined}>
         <ui-menu position="right">
-          <ui-item appearance="link" class="console" selected={!!props.showConsole} onClick={() => props.onToggleConsole()}>
+          <ui-item
+            appearance="link"
+            class="console"
+            selected={!!props.showConsole}
+            onClick={() => props.onToggleConsole()}
+          >
             <ui-icon name="terminal" />
             {appTexts.text(props.showConsole ? "hideConsole" : "showConsole")}
           </ui-item>

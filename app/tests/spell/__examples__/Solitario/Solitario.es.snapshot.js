@@ -19,6 +19,7 @@ export const words = {
       voltearBocaAbajo: "voltearla boca abajo",
       voltear: "voltearla",
       imagen: "imagen",
+      cara: "cara",
       símbolo: "símbolo",
       estado: "estado",
       jugar: "jugar una carta",

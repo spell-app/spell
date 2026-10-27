@@ -19,6 +19,7 @@ import type { PageCell } from "./NotebookPageCells"
  *   example's frame (`<ExampleCode>`).
  * - `html`, `member`:  their code;  an `<html>` block's drawing under it.
  * - Its errors, from its last edit, under its code:  what's drawn stays the last good drawing.
+ * - Clicked, or tabbed into:  selected, ringed, what the pane header's ⋯ menu acts on.
  ****************/
 export function NotebookCell(props: {
   controller: NotebookController
@@ -28,7 +29,13 @@ export function NotebookCell(props: {
 }) {
   const { controller } = props
   return (
-    <div class={["NotebookCell", props.cell.kind]} data-cell-key={props.key}>
+    <div
+      class={["NotebookCell", props.cell.kind, { selected: controller.selected() === props.key }]}
+      data-cell-key={props.key}
+      // the one last clicked, or tabbed into:  the pane header's ⋯ menu acts on it
+      onPointerDown={() => controller.select(props.key)}
+      onFocusIn={() => controller.select(props.key)}
+    >
       <Show when={controller.held()[props.key] !== undefined}>
         <div class="NotebookHeld" role="status">
           <span>{appTexts.text("notebookPageChangedElsewhere")}</span>

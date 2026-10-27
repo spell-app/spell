@@ -93,7 +93,12 @@ export function YouPanel(props: YouPanelProps) {
                 </div>
               )}
             </For>
-            <ui-button icon="plus" appearance="basic" size="small" onClick={() => setDates([...dates(), { label: "", day: "" }])}>
+            <ui-button
+              icon="plus"
+              appearance="basic"
+              size="small"
+              onClick={() => setDates([...dates(), { label: "", day: "" }])}
+            >
               {appTexts.text("addDate")}
             </ui-button>
           </ui-field>

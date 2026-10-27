@@ -27,14 +27,16 @@
 	<frase "está boca (dirección)" />	// la carta está boca arriba
 
 	## voltear la carta
-	// cada una se detiene un momento, así `esperar a: voltear la carta boca arriba` se anima
+	// cada vuelta tarda lo que su giro en la página (styles.css), así `esperar a: voltear la carta` espera a que muestre su otro lado
 	<acción "voltearla boca arriba">
+		si está boca arriba devolver
 		poner su dirección a arriba
-		pausar 50 mseg
+		pausar 300 mseg
 	</acción>
 	<acción "voltearla boca abajo">
+		si está boca abajo devolver
 		poner su dirección a abajo
-		pausar 50 mseg
+		pausar 300 mseg
 	</acción>
 	<acción "voltearla">
 		si está boca arriba:
@@ -46,10 +48,16 @@
 
 	// Imagen de la carta:  dibujada con letras especiales del juego de caracteres unicode
 	// - MIRA:  https://www.compart.com/en/unicode/block/U+1F0A0
+	// - boca abajo, el dorso que comparten todas las cartas;  boca arriba, su cara
 	<propiedad "imagen">
 		si está boca abajo:
 			devolver "🂠"			// "Dorso de carta"
+		devolver su cara
+	</propiedad>
 
+	// Su cara:  la imagen de su lado de arriba, mire hacia donde mire
+	<propiedad "cara">
+		si es un comodín devolver "🃟"
 		columna = el valor de la carta
 		si es un trébol
 			devolver el elemento columna de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
@@ -61,19 +69,17 @@
 			devolver el elemento columna de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭","🂮"]
 	</propiedad>
 
-	## dibujarla:  su imagen boca arriba, boca abajo el dorso que comparten todas las cartas
+	## dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse
 	// en la página, una carta se puede arrastrar a otra pila:  las reglas de su pila dicen cuáles suelta
 	<encanto>
 		- se puede arrastrar
 		// una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 		- para dibujarla:
 			devolver
-				<es-texto
-					part="imagen"
-					color={su color si está boca arriba de lo contrario "azul" }
-					onClick={disparar evento clic-carta con carta = eso}>
-					{su imagen}
-				</es-texto>
+				<span part="lados" onClick={disparar evento clic-carta con carta = eso}>
+					<es-texto part="frente" color={su color}>{su cara}</es-texto>
+					<es-texto part="dorso" color="azul">🂠</es-texto>
+				</span>
 	</encanto>
 
 	<propiedad "símbolo">
