@@ -8,7 +8,7 @@
  *   - `app/<Name>.en.js`:  its words, for the Thing Explorer -- see `SP.SpellWords`
  *   - `app/<Import>.spell.js`:  each project it imports, from disk -- and its `.en.js`, if it has one
  *   - `element/...`:  `app`'s `dist-element/` bundle -- built first if it isn't there, see `ensureElementBuilt()`
- * - Serves until `Ctrl-C` -- see `serve.ts`.
+ * - Serves until `Ctrl-C`, on the kit's `SRV.serveRoutes()`.
  */
 import { spawn } from "child_process"
 import { existsSync } from "fs"
@@ -59,8 +59,8 @@ export async function runInBrowser(session: CLI.CliSession, project: SP.SpellPro
     })
   )
 
-  const element = CLI.folderRoute("/element/", ELEMENT_DIR)
-  const { url, server } = await CLI.serve((path) => {
+  const element = SRV.folderRoute("/element/", ELEMENT_DIR)
+  const { url, server } = await SRV.serveRoutes((path) => {
     if (path === "/") return { text: page(name), type: "text/html; charset=utf-8" }
     if (path === `/app/${name}${SP.COMPILED_JS_SUFFIX}`) return { text: compiled, type: "text/javascript" }
     if (sourceMap && path === `/app/${name}${SP.COMPILED_JS_SUFFIX}.map`)
