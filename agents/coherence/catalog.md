@@ -43,6 +43,16 @@ What `/coherence sweep` reads, an agent each.
 | `epic-pages` | `spell-epic/src/components/`, `spell-epic/src/tools/_assets/` (hand-written only), `spell-epic/src/answers/`, `spell-epic/src/review/` |
 | `epic-tools-kit` | `spell-epic/src/` (the rest), `spell-epic/hooks/`, the kit's `src/`, `tools/`, `scripts/` |
 | `parser-app` | `spell-parser/src/`, `spell-app/src/`, `spell-brand/src/`, `spell-brand/scripts/` |
+| `ui-shared` | `spell-ui/src/`'s other folders:  `cli/`, `icons/`, `property/`, `util/`, `vocabulary/`, its top-level files |
+| `vscode` | the two VS Code extensions:  `spell-app/vscode/`, `spell-epic/vscode/` |
+
+The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
+"did your coherence sweep include our CLI command surface?  What about agent files?").
+
+| Area | What |
+| --- | --- |
+| `commands` | every `spell` command, `epic` verb and yarn script, and the skills that run them:  one job one way, one verb and one flag per idea ([the commands guide](../../spell.epics/guides/dev/commands/commands.md)) |
+| `agent-files` | every `AGENTS.md` and `CLAUDE.md`, WWOD and its spokes, the skills, the agent definitions and their procedures, the epic templates:  a rule in ONE place, steps referenced not copied, one word per idea |
 
 ## Reading text
 
@@ -78,7 +88,18 @@ What `/coherence sweep` reads, an agent each.
 - **Flag:**  `lineStarts\.push|indexOf\("\\n"`
 - **Score:**  `lineStarts\.push|\b[lL]ineStarts\w* = \[0\]|slice\(0, [\w.]+\)\.split\("\\n"\)\.length`
   · home `spell-parser/src/parser/tokenizer/tokenizer.types.ts`
-- **Copies:**  `--`
+- **Copies:**  (epic `coherence` P16 moved spellx's writer onto it)
+  - `spell-parser/src/spell/languages/packs.ts`, `spell-parser/src/spell/node/spellSyntax.ts`:
+    a line by `slice(0, at).split("\n")`, once a match;  they move with the TypeScript reader (sweep 2's parser-app #1)
+
+### A phrase's end, a brace's close, in spell text
+
+- **It is:**  `P.Tokenizer`'s two scans:  `findPhraseEnd(text, start, end, { stop, lineEnds })`, the first `>` or `:`
+  outside strings and brackets;  `findMatchingDelimiter("{", "}", ...)`, where a brace closes:  `spell-parser/parser`
+- **Use it when:**  finding where a tag's phrase, a line's body colon or a hole ends, in spell or spellx text.
+  - Strings are skipped as the tokenizer reads them (spell's:  only `"`), so a quoted `}` or `>` never ends one.
+- **Flag:**  `inString|let depth = 0` in a new scan of spell text
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
 
 ### Comments in code
 
@@ -110,7 +131,7 @@ What `/coherence sweep` reads, an agent each.
 - **Use it when:**  "did you mean ...?" for an unknown name, attribute or word.
 - **Flag:**  `function (levenshtein|editDistance|distance)\(|[Dd]id you mean`
 - **Score:**  `function (levenshtein|editDistance|distance)\(` · home `src/util/string.ts`
-- **Copies:**  `--`
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's unknown words and attributes onto it)
 
 ## Files, folders and processes (node)
 
@@ -234,8 +255,9 @@ What `/coherence sweep` reads, an agent each.
 - **Use it when:**  any request from a page or a client.  Callers never check `response.ok`.
 - **Flag:**  `response\.ok|\.ok\)` after a `fetch(`
 - **Score:**  `\b(response|answer|res)\.ok\b(?!\()|\(await fetch\([^)]*\)\)\.ok` · home `src/util/spell/$fetch.ts`
-  · not `spell-ui/src/`
+  · not `spell-ui/src/`, `src/server/liveClient.ts`
 - **Copies:**
+  - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
   - `--` in the app since epic `coherence` P14:  its runner and `editor.ts` ask `$fetch()` for `cache: "no-cache"`
   - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
@@ -262,12 +284,23 @@ What `/coherence sweep` reads, an agent each.
 ### Timing
 
 - **It is:**  `after(seconds, fn)`, `every(seconds, fn)`, `soon()`, `beforeNextPaint()`, `afterSolidUpdate()`
-  (`spell/element`, `src/element/timing.ts`):  the name says WHEN, each can be cancelled
-- **Use it when:**  anything later or repeated, in a page or on a server.
+  (`spell/util/timing`, `src/util/timing.ts`;  re-exported by `spell/element`):  the name says WHEN, each can be
+  cancelled;  and waiting:  `waitUntil(read, { timeout, every })` (until something is true), `within(promise, seconds)`
+  (a wait with a time limit)
+  - util's since epic `coherence` P19 (`spell/element`'s before):  imports nothing, so the kit's server and command
+    line, the parser's core and plain `node` may use it
+- **Use it when:**  anything later or repeated, or a wait, in a page or on a server.
   Spell UI's lint already fails a raw timer in a component.
 - **Flag:**  `setInterval\(|setTimeout\(`
-- **Score:**  `\b(setInterval|setTimeout)\(` · home `src/element/timing.ts`
+- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`
+  · not `src/server/liveClient.ts`
 - **Copies:**  raw timers, outside Spell UI's components
+  - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
+  - Fine:  `spell-epic/src/tool/InboxPoller.mjs`:  node's built-ins only, to stay small
+  - the node waits and timers sweep 2 found (epic-tools-kit #3, parser-app #2), left for after epic `repo-split` P20:
+    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait, `run.ts`'s
+    drain, `TaskList`;  spell-epic's `details.js`, `comments.ts`, `agents.ts`, `Parking`, `InboxCommands`, the window
+    script, `showRoutes`, `CheckoutServers`, the demo checks;  spell-app's `serveCommand.ts`, `runTarget.ts`
   - `spell-epic/src/answers/AnswerForm.ts`, `spell-epic/src/answers/RunForm.ts`,
     `spell-epic/src/answers/ChoicesForm.ts`
   - `spell-epic/src/review/ServerLink.ts`, `spell-epic/src/review/SendCountdown.ts`
@@ -364,7 +397,9 @@ What a component, or a page built on Spell UI, reaches for first.
   - Fine:  `UICalendar`'s grid and the icon picker's, on purpose:  they step by rows of a grid.
   - Fine:  the dropdown's and the search's arrows move a highlight, not focus ("The highlighted option", below);
     the slider's change its value.
-  - Not swept yet:  the docs' search and the theme menu (`UIDocsSearch`, `UIThemeMenu`), the brand's `BrandColorSet`.
+  - Taking it since epic `coherence` P17:  the theme menu's scheme control and list
+    (`spell-ui/src/components/ui-theme-menu/`), a shrinkable menu's overflow menu (`UIMenu`).
+  - Not swept yet:  the docs' search (`UIDocsSearch`);  the brand's `BrandColorSet`, left for after repo-split P20.
 
 ### The highlighted option of a list
 
@@ -406,6 +441,18 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `new CustomEvent` in a `*.fallback.ts`
 - **Score:**  `new CustomEvent` · in `**.fallback.ts` · home `spell-ui/src/elements/NativeFallback.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Spell UI's nine fallbacks, the brand's two)
+
+### A fallback's form value and validity
+
+- **It is:**  `NativeFallback.syncForm({ value, control })` (`spell-ui/src/elements/NativeFallback.ts`;  epic `coherence`
+  P17):  the form value (none without a `name`, a `FormData` for several) and the native control's validity, anchored
+  on it;  the fallback's `sync()` hands it its own, run once attached and on each change.
+  `nameFromPlaceholder()` names a control by `placeholder`.
+- **Use it when:**  a form control's native fallback reports to its form.
+- **Flag:**  `setFormValue\(|setValidity\(` in a `*.fallback.ts`
+- **Score:**  `\.(setFormValue|setValidity)\(` · in `**.fallback.ts` · home `spell-ui/src/elements/NativeFallback.ts`
+  · not `spell-ui/src/components/ui-button/UIButton.fallback.ts`
+- **Copies:**  `--` since P17 (Spell UI's nine fallbacks, the brand's two;  the button's submit value is its own)
 
 ### A form control's attributes
 
@@ -453,13 +500,17 @@ What a component, or a page built on Spell UI, reaches for first.
   - a landing:  the page ready, its pane shown and folds opened, the scroll to its line, once more as it settles unless
     the reader moved;  one per document, a newer landing stops an older one
   - a page with stuck bars of its own lands its hashes itself, by its rules (`use()`):  the site's `SiteSections`, the
-    epic pages' runtime;  `<ui-docs-toc>` and `<ui-docs-api>` then leave them to it, so the page scrolls once
+    epic pages' runtime;  `<ui-toc>` and `<ui-docs-api>` then leave them to it, so the page scrolls once
 - **Use it when:**  following the scroll, turning an address's `#hash` into a section, or landing a link.
 - **Flag:**  `scrollIntoView\(|hasReaderMoved`
 - **Score:**  `hasReaderMoved|decodeURIComponent\((\w+\.)*location\.hash`
   · home `spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`, `spell-ui/src/docs-components/ui-docs-toc/HashLanding.ts`
 - **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime)
+  - Fine:  `spell-epic/src/components/epic-section/EpicFold.tsx`, `spell-epic/src/components/epic-item/EpicItem.tsx`:
+    since P18 they only open for a link (a page whose lander doesn't know epic folds), never scroll
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
+  - Left:  the runtime's `EPIC_LAND_GAP` still calls itself `EpicFold`'s `LAND_GAP`, gone (sweep 2, epic-pages #3):
+    the runtime waited for ui-gaps' merge, then for repo-split P20
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
 ### Copying, with VS Code's side bar
@@ -470,7 +521,7 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `navigator\.clipboard\.writeText`
 - **Score:**  `navigator\.clipboard\.writeText` · home `src/util/dom.ts`, `spell-ui/src/elements/ClipboardCopy.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Spell UI's code block and theme editor, the brand's colour picker and
-  swatch, the epic pages' `Clipboard`)
+  swatch, the epic pages' `Clipboard`);  Copy my answers (`<epic-choices-bar>`) on `ClipboardCopy` since P18
   - Left:  the parked goals page (`goals-live.js`), read only
 
 ### A toast
@@ -562,6 +613,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **It is:**  `clamp()`, `kb()` (one unit:  KB of 1024):  `src/util/number.ts`
 - **Flag:**  `Math\.min\(.*Math\.max\(|/ 1024`
 - **Score:**  `Math\.min\(.*Math\.max\(|Math\.max\(.*Math\.min\(|/ 1024\b` · home `src/util/number.ts`
+- **Copies:**  the docs pages' toolbar, runtime and comments entry, a clamp each (sweep 2, epic-pages #13):
+  left for after repo-split P20;  the comment pane's two on `clamp()` since P18
 
 ### Local dates and times
 
@@ -592,7 +645,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
   - a component holds one as a field, handed what differs:  where the state lives (a member, `kept`, its own),
     the event detail, what opening resets;  its public names stay its own (`collapsed`, `visible`, `open`)
   - on it:  Spell UI's `PopoverPanel` (`spell-ui/src/elements/PopoverPanel.ts`):  the popover, its `UI.overlays`
-    entry and its anchor, written inline, for the dropdown, calendar, search and icon picker
+    entry and its anchor, written inline, for the dropdown, calendar, search and icon picker, and a shrinkable menu's
+    overflow menu (in `spell-ui/core` since P17:  a menu has no value)
   - on it:  spell-epic's `Fold` (`spell-epic/src/components/epic-item/Fold.tsx`):  a box an epic element folds by
     itself, and THE fold button (`fold.button()`):  every card's band and every panel's title;
     fold-all and open-all (`foldAllUnder()`, `expandAllUnder()`) close and open each block's
@@ -600,8 +654,9 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **Flag:**  `requestChange\("is(Open|Visible|Collapsed)|"ui-opening"|beforematch|aria-expanded=\{this\.is`
 - **Score:**  `requestChange\("is(Open|Visible|Collapsed)"|addEventListener\("beforematch"|aria-expanded=\{this\.isOpen`
   · home `src/element/Disclosure.ts`
-- **Copies:**  taking it today:  the four popovers, the six overlays (the dialog's two, dimmer, popup, sidebar,
-  nag, toast), `<ui-section>`, `<ui-docs-example>`, spell-epic's `EpicFold`, `EpicItem` and `Fold`.  Left:
+- **Copies:**  taking it today:  the five popovers (the menu's overflow since P17), the six overlays (the dialog's two,
+  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-example>`, `<ui-zoom>` (P17), spell-epic's `EpicFold`,
+  `EpicItem` and `Fold`.  Left:
   - `spell-ui/src/components/ui-accordion/UIAccordion.tsx`:  many panels in one `open` (`"0 2"`), on `<details>`,
     which keeps its own `aria-expanded` and find-in-page;  an exclusive open closes another in the same change
   - `<ui-nag>`'s `ui-opening`:  sent as it has slid in, not as a request
@@ -620,10 +675,6 @@ code (epic `coherence`, Q4 and Q5).
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
 - **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
   - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
-- **Waiting until something is true** (node):  `waitUntil(read, { timeout, every })`:
-  `spell-epic/src/tools/details.js` (`waitForAnswer`), `spell-epic/src/tools/agents.ts` (`waitForRedirects`) and
-  `spell-epic/src/demo/check-test-run.mjs` (`waitFor`);  sweep 1 added eight more, the kit's `PidFile` and
-  `spell server` among them:  so its home is the kit.
 
 ## Fine as it is
 

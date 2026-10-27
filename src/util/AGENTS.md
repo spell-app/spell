@@ -31,7 +31,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - never `toISOString().slice(0, 10)` for a day:  that's the UTC date, tomorrow in California from 5pm
   - `color.ts` -- colour maths (epic `coherence` I13):  OKLCH <-> sRGB, fitting into sRGB (`clipped()`,
     `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
-  - `string.ts`, `number.ts`, `time.ts` and `color.ts` import nothing, so plain `node` loads them too,
+  - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
+    `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
+  - `string.ts`, `number.ts`, `time.ts`, `color.ts` and `timing.ts` import nothing, so plain `node` loads them too,
     with their extension (`spell/util/time.ts`)
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
     `copyText()` (the clipboard, with the fallback VS Code's side bar needs)

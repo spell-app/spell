@@ -121,7 +121,7 @@ const noUntrack = defineRule({
   }
 })
 
-/** The platform's timing calls, and the helper (spell-element's `src/timing.ts`) that says WHEN instead. */
+/** The platform's timing calls, and the helper (util's `src/util/timing.ts`, in `E`) that says WHEN instead. */
 const TIMERS: Record<string, string> = {
   setTimeout: "`E.after(seconds, fn)` (or `E.soon(fn)` for a zero delay)",
   setInterval: "`E.every(seconds, fn)`",

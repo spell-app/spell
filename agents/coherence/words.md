@@ -109,6 +109,18 @@ One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 202
 - **Decided:**  epic `debut` P17, Q29.
   - A table of how a thing is drawn (`TAB_LOOKS`:  its icon and its text) is another idea, and keeps its name.
 
+## Keys
+
+### meta / mod
+
+- **Say:**  in a Spell UI shortcut (`<ui-keys shortcut>`, `<ui-action shortcut>`, `Chord`):
+  - `meta`:  the Meta key itself (Command on a Mac, the Windows key elsewhere)
+  - `mod`:  Command on a Mac, Control elsewhere
+- **Decided:**  Owen, 2026-10-26, epic `coherence` sweep 2 (ui-components #3):  `<ui-keys>`'s reading wins,
+  `<ui-action>` follows (P17).
+- **Not the same word:**  spell's own `meta`, in a spell program, is Command-or-Control (epic `elemental-spell` Q31):
+  it's the language's word, not Spell UI's attribute.
+
 ## Open
 
 Words a sweep found more than one of, still to decide.

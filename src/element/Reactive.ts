@@ -13,10 +13,10 @@ import {
 import { isServer } from "@solidjs/web"
 
 import { camelCase } from "spell/util/string"
+import { afterSolidUpdate } from "spell/util/timing"
 import type { E } from "spell/element"
 // Import directly to avoid circular import:  the decorators run as the classes using them are defined
 import { AriaNames } from "./elements.types"
-import { afterSolidUpdate } from "./timing"
 
 /****************
  * ### `Reactive`

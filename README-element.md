@@ -776,7 +776,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
 | [RichAttributes.ts](src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
 | [HotDefinitions.ts](src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
-| [timing.ts](src/element/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
+| timing.ts | *(none -- `spell/util/timing`, re-exported by the barrel)*:  when to run something |
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
 | [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
 | [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
