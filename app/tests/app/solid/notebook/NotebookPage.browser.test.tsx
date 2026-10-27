@@ -57,6 +57,12 @@ const COUNTER = [
   ""
 ].join("\n")
 
+/** The Counter notebook with its title as the docs pages write it:  a `<header level="1">`, its sub header inside. */
+const COUNTER_HEADER = COUNTER.replace(
+  "\t# A counter\n\tA button that counts its clicks.",
+  '\t<header level="1">\n\t\tA counter\n\t\t<header>A button that counts its clicks.</header>\n\t</header>'
+)
+
 /** Undo for each test:  unmount. */
 const cleanups: (() => void)[] = []
 
@@ -123,6 +129,32 @@ describe("<NotebookPage>", () => {
     await until(() => !column() && !!button())
   })
 
+  // the docs site's masthead:  the line under the title is the title's sub header, never title-sized
+  for (const [form, contents] of [
+    ["# A counter", COUNTER],
+    ['<header level="1">', COUNTER_HEADER]
+  ]) {
+    test(`the title's sub header is ~20px, normal weight and muted, under the title:  ${form}`, async () => {
+      const { host } = await mount({ contents })
+      const title = () => host.querySelector(".NotebookMasthead .NotebookTitle")?.shadowRoot?.querySelector("h1")
+      // the drawn box in its shadow root:  the host itself is `display: contents`, sized as the title
+      const lead = () => host.querySelector(".NotebookMasthead .NotebookLead")?.shadowRoot?.querySelector(".header")
+      await until(() => !!title() && !!lead() && lead()!.getBoundingClientRect().height > 0)
+      expect(host.querySelector(".NotebookLead")!.textContent!.trim()).toBe("A button that counts its clicks.")
+      const titleStyle = getComputedStyle(title()!)
+      const leadStyle = getComputedStyle(lead()!)
+      const textSize = parseFloat(
+        getComputedStyle(host.querySelector(".NotebookScroller")!).getPropertyValue("--ui-font-size")
+      )
+      // docs-page.css:  the page's text size x 1.34 (20.1px at 15px), muted, normal weight
+      expect(parseFloat(leadStyle.fontSize)).toBeCloseTo(textSize * 1.34, 0)
+      expect(parseFloat(leadStyle.fontSize)).toBeLessThan(parseFloat(titleStyle.fontSize) * 0.7)
+      expect(Number(leadStyle.fontWeight)).toBeLessThan(Number(titleStyle.fontWeight))
+      expect(leadStyle.color).not.toBe(titleStyle.color)
+      expect(lead()!.getBoundingClientRect().top).toBeGreaterThan(title()!.getBoundingClientRect().top)
+    })
+  }
+
   test("saves 600ms after the last edit, once", async () => {
     const { file, controller } = await mount()
     const example = keyOf(controller, "drawing")
@@ -168,10 +200,11 @@ describe("<NotebookPage>", () => {
 /** A notebook file, standing in for the editor's `SP.SpellFile`:  its text, and how many times it's saved. */
 type TestFile = { path: string; form: "spellx"; contents: string; match: unknown; saves: number; save(): Promise<void> }
 
-/** The Counter's page, its program running first;  its controller, at the page's debug global. */
-async function mount(options: { width?: number } = {}) {
+/** The Counter's page (`contents`, else `COUNTER`), its program running first;  its controller, at the page's debug global. */
+async function mount(options: { width?: number; contents?: string } = {}) {
+  const contents = options.contents ?? COUNTER
   const runtime = await testRuntime()
-  const { code } = compiledSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+  const { code } = compiledSpellProject([{ path: "/Counter.spellx", contents }])
   const appRoot = document.createElement("div")
   document.body.append(appRoot)
   // its imports, as a project's compile writes them above its code
@@ -179,11 +212,11 @@ async function mount(options: { width?: number } = {}) {
   const error = await runtime.runApp(header + code, { appRoot, coreUrl: RUNTIME_URL })
   expect(error).toBeUndefined()
 
-  const incremental = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+  const incremental = incrementalSpellProject([{ path: "/Counter.spellx", contents }])
   const file: TestFile = {
     path: "/Counter.spellx",
     form: "spellx",
-    contents: COUNTER,
+    contents,
     match: incremental.getFile("/Counter.spellx")!.match,
     saves: 0,
     async save() {
