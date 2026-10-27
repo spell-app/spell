@@ -1,0 +1,305 @@
+/**
+ * Types and constants of `spell-epic/answers`:  the pages Claude makes for Owen to answer ON, as their elements keep
+ * them (epic `epic-workflow` P12).
+ * - a DETAILS page:  questions (`<epic-ask>`), comment and notes boxes (`<epic-text-box>`), Send (`<epic-send>`)
+ * - a CHOICE page:  rows (`<epic-choice-row>`) and their bar (`<epic-choices-bar>`)
+ * - The answers' shapes are COPIES of the page server's routes' (`src/tools/detailsRoutes.ts`,
+ *   `choicesRoutes.ts`):  `epics` never imports `docs` (the root's dependency rule).
+ * - Data, types and the one-line answer box's rule (`keepOneLine()`):  nothing here runs at import.
+ */
+
+////////////////
+// ## Routes
+////////////////
+
+/** A details page's answer route (`detailsRoutes.ts`):  `POST` sends it, `GET ?page=` reads it back. */
+export const DETAILS_API = "/api/docs/details/answer"
+
+/**
+ * A details page's draft route (`detailsRoutes.ts`, epic `epic-workflow` P18):  `POST` saves what's typed and not
+ * sent, `GET ?page=` reads it back.  It never wakes anyone:  only Send does.
+ */
+export const DETAILS_DRAFT_API = "/api/docs/details/draft"
+
+/**
+ * Who waits for a details page's answer (`detailsRoutes.ts`, epic `epic-engine` r6):  `GET ?page=` answers
+ * `{ listening }`, the session's `epic ask wait` (`AnswerListener`), or `null`.
+ */
+export const DETAILS_LISTENING_API = "/api/docs/details/listening"
+
+/**
+ * How often a details page asks who is waiting, in ms, while it's in view:  a wait that ends leaves no file change
+ * to announce it, and its heartbeat goes stale in 90s (`AskListeners`).
+ */
+export const DETAILS_LISTEN_POLL_MS = 30_000
+
+/**
+ * How long after the last change a details page saves its draft, in ms:  as Owen types (epic `epic-engine` P15,
+ * r14:  "save into an inbox as I type";  2s before).  The browser's own copy is written at once.
+ */
+export const DETAILS_SAVE_MS = 500
+
+/**
+ * How long after a question or box leaves the page (an agent's rewrite, patched in place) the page looks for what
+ * it held and keeps it, in ms:  the rewrite's new elements join in the meantime.
+ */
+export const DETAILS_SETTLE_MS = 250
+
+/** The browser's copy of a details page's draft (`localStorage`):  this, then the page's path. */
+export const DRAFT_KEY_PREFIX = "spell-details-draft:"
+
+/**
+ * How long after a draft's save FAILED an answer page tries again, in ms, until one goes through (epic `epic-engine`
+ * P15):  a page server that's back takes it with no keystroke and no reload, its new token too (`ServerLink`).
+ * - Why:  a failed save used to wait for the next keystroke, and with every box filled none came (r14).
+ */
+export const ANSWER_RETRY_MS = 3000
+
+/** The key of the page's notes, among the ids a page's parts hold (`PartLabels`). */
+export const NOTES_KEY = "notes"
+
+/**
+ * A page the details route answers for:  in a `details/` folder (`detailsRoutes.ts` `DETAILS_PAGE`);  any other page
+ * (Epic UI's, showing an element live) asks nothing.
+ */
+export const DETAILS_PAGE = /\/details\/[^/]+\.html$/
+
+/** A choice page's routes (`choicesRoutes.ts`):  `<api>/draft` and `<api>/answer`, `POST` and `GET ?page=`. */
+export const CHOICES_API = "/api/docs/choices"
+
+/**
+ * How long after the last change a choice page saves its draft, in ms:  as Owen types (epic `epic-engine` P15, r14:
+ * "save into an inbox as I type";  5s before).  The browser's own copy is written at once.
+ */
+export const CHOICES_SAVE_MS = 500
+
+/** The browser's copy of a choice page's draft (`localStorage`, P15):  this, then the page's path. */
+export const CHOICES_KEY_PREFIX = "spell-choices-draft:"
+
+/**
+ * A page the choices routes save for:  in a `details/` folder (`choicesRoutes.ts` `choicesPage()`).
+ * The template, or a copy elsewhere, asks nothing.
+ */
+export const SAVED_CHOICES_PAGE = /\/details\/[^/]+\.html$/
+
+/**
+ * A run page's routes (`runRoutes.ts`, epic `epic-engine` P23):  `<api>/<run id>`,
+ * its `/answer`, `/effort` (P25) and `/send`.
+ */
+export const RUNS_API = "/api/runs"
+
+/** How long after Owen stops typing in a run page's row its answer is saved, in ms;  a pick or a tick at once. */
+export const RUN_SAVE_MS = 500
+
+/**
+ * How often a run page reads its run again while in view, in ms:  the command's heartbeat goes stale with no file
+ * changing, so "is waiting" needs asking (`RunForm.watch()`).
+ */
+export const RUN_POLL_MS = 30_000
+
+/** The docs runtime's per-page fold store:  `spell-doc-runtime.js` `FOLD_KEY_PREFIX`, `{ [section id]: folded }`. */
+export const FOLD_KEY_PREFIX = "spell-folds:"
+
+////////////////
+// ## A one-line answer box
+////////////////
+
+/**
+ * Keep answer box `box` to ONE LINE, as it's typed in:  a line break pasted in becomes a space, the spaces round it
+ * gone;  returns its text.
+ * - the ONE rule of every one-line answer box (epic `coherence` P22):  the choice rows', the run rows' and the syntax
+ *   page's class names, a line that wraps and grows;  with `stopNewLine()` on its keys
+ * - `box`:  a `<ui-textarea>`, or a native `<textarea>`
+ * - SIDE EFFECT:  rewrites `box.value` when it held a line break
+ */
+export function keepOneLine(box: { value: string }): string {
+  if (box.value.includes("\n")) box.value = box.value.replace(/\s*\n\s*/g, " ")
+  return box.value
+}
+
+/** A key in a one-line answer box (`keepOneLine()`):  Enter adds no line. */
+export function stopNewLine(event: KeyboardEvent) {
+  if (event.key === "Enter") event.preventDefault()
+}
+
+////////////////
+// ## A draft that saves itself
+////////////////
+
+/**
+ * Where a `DraftSaver`'s draft stands (epic `coherence` C10):
+ * - `idle`:  nothing to say;  `unsaved`:  changed, waiting for typing to stop;  `saving`:  on its way
+ * - `saved`:  went through, `at` ISO;  `told`:  a word of the page's own (`text`, "draft from 14:02 put back"),
+ *   `isError` in red
+ * - `failed`:  didn't go through, `why`;  tried again every 3s
+ * - `off server`:  the page isn't on the page server:  only the browser's copy keeps it
+ */
+export type DraftState =
+  | { kind: "idle" }
+  | { kind: "unsaved" }
+  | { kind: "saving" }
+  | { kind: "saved"; at: string }
+  | { kind: "told"; text: string; isError?: boolean }
+  | { kind: "failed"; why: string }
+  | { kind: "off server" }
+
+////////////////
+// ## A details page's answer
+////////////////
+
+/**
+ * What a details page holds, as the route takes it (`POST { page, answers, comments, notes }`).
+ * - `answers`:  by question key (its section's id, `q1`);  `{ picked }` with the options' letters, `other` when
+ *   Other is filled;  "Provide more details" under `<key>-more`, as its own `{ picked }`
+ * - `comments`:  by section id, and by option (`q1-B`);  only the filled ones
+ * - `notes`:  the page's notes box
+ * - `kept`:  text typed for a question, option or section that is gone from the page since (P18);  absent for none
+ */
+export type PageAnswer = {
+  answers: Record<string, AskAnswer>
+  comments: Record<string, string>
+  notes: string
+  kept?: KeptText[]
+}
+
+/**
+ * Text Owen typed or picked on a details page, kept after its question, option or section left the page (an
+ * agent rewrote it, P18):  shown in its own box, "Kept from before the page changed", and sent with the rest.
+ * - `id`:  the id it was under (`q3`, an option's `q1-B`, a section's `context`, `notes`)
+ * - `label`:  where it was, for people (`Q3 · Which layout?`, `Q1 · Which layout?, B · Blue`)
+ * - `text`:  what he typed, or picked (`picked B · Blue;  Other:  neither`)
+ */
+export type KeptText = { id: string; label: string; text: string }
+
+/**
+ * The ids a details page's parts hold answers under, each with its title for people:  a question's key
+ * (`q1` -> `Q1 · Which layout?`), each of its options (`q1-B` -> `B · Blue`), a section's comment box
+ * (`context` -> `1. Context`), the notes (`NOTES_KEY`).
+ * - a draft keeps them, so text whose id is gone from a rewritten page is kept under its old title
+ */
+export type PartLabels = Record<string, string>
+
+/** What a details page holds as typed, with the ids it was typed under:  a draft's data (`AnswerDraft`). */
+export type TypedAnswer = PageAnswer & { labels: PartLabels }
+
+/**
+ * A details page's draft, `<slug>.draft.json5` beside it (P18):  what was typed and not sent, saved a moment after
+ * each change, and put back when the page loads again (a reload, an agent's rewrite).
+ * - `page`:  the page's URL path;  `saved`:  when, ISO
+ * - only a draft NEWER than the answer sent counts:  Send deletes it
+ */
+export type DetailsDraft = TypedAnswer & { page: string; saved: string }
+
+/** One question's answer:  the letters picked (`[]` for none), and Other when written. */
+export type AskAnswer = { picked: string[]; other?: string }
+
+/**
+ * A details page's `<slug>.answer.json5`, as the route wrote it:  what was sent, plus when, how often, and what
+ * changed since the send before (`changed`:  question keys, `comment:<id>`, `notes`).
+ */
+export type SentAnswer = PageAnswer & {
+  page: string
+  answered: string
+  changes: number
+  changed?: string[]
+}
+
+/**
+ * Something on a details page that holds part of the answer, registered with the page's `AnswerForm` while it's
+ * connected:  a question (`<epic-ask>`) or a box (`<epic-text-box>`).
+ */
+export type AnswerPart = {
+  /** its element:  parts gather in page order */
+  readonly domElement: Element
+  /** add what it holds to `page` */
+  gatherInto(page: PageAnswer): void
+  /** show `answer`, as sent (or a draft put back over it):  what it holds of it, or nothing */
+  showAnswer(answer: SentAnswer): void
+  /** add the ids it holds answers under, each with its title for people (`PartLabels`) */
+  labelsInto(labels: PartLabels): void
+}
+
+/** A question on a details page:  a part with a state, which the Send bar counts ("5 of 17 decided"). */
+export type AskPart = AnswerPart & {
+  readonly askState: AskState
+}
+
+/**
+ * A question's state, the epic page's colours (`templates/epics/plan-doc.md`, "Colours"):
+ * - `attention` (red, needs Owen):  nothing yet
+ * - `done` (green, decided):  an option picked
+ * - `working` (blue, Claude's to do):  "Provide more details" asked, or only Other written
+ */
+export type AskState = "attention" | "done" | "working"
+
+/**
+ * A session waiting for a details page's answer (`epic ask wait`, `ask show --wait`):  since when, and its last
+ * heartbeat, ISO (`detailsRoutes.ts` `DetailsListener`).
+ */
+export type AnswerListener = { since: string; seen: string }
+
+/**
+ * Who hears a details page's Send, as `<epic-send>` says it beside the button (epic `epic-engine` r6):
+ * - `text`:  "repo-split is listening", "nobody is waiting yet";  `""` where the page can't tell (no page server)
+ * - `title`:  the tooltip, saying more
+ * - `isListening`:  a session waits (a green dot)
+ */
+export type ListenLine = { text: string; title: string; isListening: boolean }
+
+/**
+ * Where a details page's answer stands, which the Send bar shows (the colour scheme's FILL RULE):
+ * - `rest`:  never sent, nothing on the page:  a grey outline
+ * - `pending`:  something on the page not sent, or changed since the send:  dashed blue
+ * - `sent`:  the page as sent:  a blue outline
+ */
+export type SendFill = "rest" | "pending" | "sent"
+
+////////////////
+// ## A choice page
+////////////////
+
+/**
+ * One row of a choice page, registered with the page's `ChoicesForm` while it's connected
+ * (`<epic-choice-row>`).
+ */
+export type ChoiceRowPart = {
+  readonly domElement: Element
+  /** its id:  the key of its value in the draft and the answer */
+  readonly rowName: string
+  /** Claude's recommendation, the box's starting text */
+  readonly recommended: string | undefined
+  /** what its box holds now, as typed */
+  readonly value: string
+  /** the box differs from the recommendation (trimmed);  a `blank` row:  holds something other than today's text */
+  readonly isChanged: boolean
+  /** its table types into blank boxes (`<epic-choice-rows blank>`, epic `epic-engine` P13):  no recommendation */
+  readonly blank?: boolean
+  /**
+   * its table's key when Owen can put its rows in order (`<epic-choice-rows reorder>`):  its section's id;
+   * `undefined` for a table that keeps its order
+   */
+  readonly orderKey: string | undefined
+  /** its place in its table, from 0 */
+  readonly orderIndex: number
+  /** put `value` in its box:  a draft or an answer coming back */
+  showValue(value: string): void
+}
+
+/**
+ * What a choice page sends:  the changed boxes by row id, and the feedback.
+ * - `order`:  each table Owen can put in order (`<epic-choice-rows reorder>`), by its section's id:  its row ids in
+ *   the order he left them;  none without such a table
+ */
+export type ChoicesValues = { values: Record<string, string>; feedback: string; order?: ChoicesOrder }
+
+/** Each reorderable table's row ids, in the order Owen left them, by its section's id. */
+export type ChoicesOrder = Record<string, string[]>
+
+/**
+ * A choice page's draft (`<slug>.draft.json5`):  its values, and when it was saved.
+ * - the browser's copy (`CHOICES_KEY_PREFIX`) and Copy my answers have this shape too, with the page's path (`page`)
+ */
+export type ChoicesDraft = ChoicesValues & { saved: string; page?: string }
+
+/** A choice page's answer (`<slug>.answer.json5`):  its values, when, and how often sent. */
+export type ChoicesAnswer = ChoicesValues & { answered: string; changes?: number }

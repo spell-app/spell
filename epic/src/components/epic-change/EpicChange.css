@@ -1,0 +1,108 @@
+/*
+ * `<epic-change>` (`EpicChange.tsx`):  a change mark, inline in running text.
+ * - The words:  an orange ground (orange is "changed since you looked", T55), wrapping with the line
+ *   (`box-decoration-break: clone`:  each line's piece rounded).  Accepted:  no ground, plain text.
+ * - The chip:  the question's id, small, mono, an outline in the accent;  quiet (older, or accepted before), muted (old text is quieter, T51).
+ * - The Q&A after it, unfolded:  smaller, muted, on a faint ground of its own.
+ * - Accept and Reopen float UNDER the chip on hover or focus (and while unfolded):  out of the line, so nothing in
+ *   the paragraph moves;  above it, a stuck section title covered them.  Their own top padding bridges the chip and
+ *   the buttons, so the pointer keeps the hover.
+ * - Public tokens (`--epic-change-*`) are never declared here:  read through private aliases.
+ *   - `--epic-change-accent`:  the orange of the ground and the chip (default `--ui-orange`)
+ *   - `--epic-change-ground`:  the words' ground (default the accent, 26% over the page's)
+ */
+
+@layer ui.components.epic-change.types, ui.components.epic-change.content;
+
+@layer ui.components.epic-change.types {
+  :host {
+    --_epic-change-accent: var(--epic-change-accent, var(--ui-orange));
+    --_epic-change-ground: var(--epic-change-ground, color-mix(in srgb, var(--_epic-change-accent) 26%, transparent));
+    display: inline;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-change.content {
+  /* ## The words */
+  .words {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: var(--_epic-change-ground);
+    color: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  :host(:state(quiet)) .words {
+    padding: 0;
+    background: none;
+  }
+
+  /* ## The chip, and the buttons floating over it */
+  .chip-box {
+    position: relative;
+    display: inline-block;
+    margin-inline-start: 3px;
+    vertical-align: baseline;
+  }
+  .chip {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1px 5px;
+    border: 1px solid color-mix(in srgb, var(--_epic-change-accent) 70%, transparent);
+    border-radius: 999px;
+    background: none;
+    color: color-mix(in srgb, var(--_epic-change-accent) 60%, var(--ui-text-color, CanvasText));
+    font: 600 0.7em / 1.2 var(--ui-font-family-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    letter-spacing: 0.02em;
+    vertical-align: 0.12em;
+    cursor: pointer;
+  }
+  .chip:hover {
+    background: color-mix(in srgb, var(--_epic-change-accent) 12%, transparent);
+  }
+  .chip:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  :host(:state(quiet)) .chip {
+    border-color: var(--epic-rule, color-mix(in srgb, currentColor 25%, transparent));
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+  :host(:state(open)) .chip {
+    background: color-mix(in srgb, var(--_epic-change-accent) 12%, transparent);
+  }
+
+  /* Accept and Reopen:  a tooltip on the words, its arrow at them (`<ui-popup>`, EpicChange.tsx) */
+  .tip-words {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .tip-line {
+    color: var(--ui-text-muted, GrayText);
+  }
+
+  /* ## The question and its answer, unfolded */
+  .qa {
+    margin-inline-start: 4px;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+    color: var(--epic-muted, var(--ui-text-muted));
+    font-size: 0.85em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .qa[hidden] {
+    display: none;
+  }
+  .qa b {
+    color: var(--ui-text-color, inherit);
+    font-weight: 600;
+  }
+}

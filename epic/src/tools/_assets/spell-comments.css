@@ -1,0 +1,275 @@
+/*
+ * The COMMENTS' look on the page:  the bullhorns, a docs page's Send pill, Owen's field, where the threads sit (epic
+ * `airplane` P11;  the code:  `spell-doc-comments.js`).
+ * - The threads and the comment pane draw themselves:  `<epic-thread>` (in an `<epic-threads>` box) and
+ *   `<epic-comment-pane>`, the epics pack's, each with its own sheet (epic `epic-engine` P3).  This sheet keeps what
+ *   the page owns:  where they sit, and the `<textarea>` the comments' code slots into them.  Its own sheet since epic `epic-engine` P2 (T3), so two kinds of page load it:
+ * - the docs pages (guides, epic pages ...):  through `spell-doc.css`, its `@import` at the top
+ * - Epic UI's pages (`/components/epics/`), which load Spell UI's site and not `spell-doc.css`:  linked by
+ *   `spell-comments.js` as it runs
+ * - so every rule is for a page's `main` of either kind:  `:is(.spell-doc-main, .site-main)`, one class's weight, as
+ *   `.spell-doc-main` alone had in `spell-doc.css`
+ * - imported FIRST, so a docs page's own rules come after these:  `spell-doc.css` keeps only where Send and the page's
+ *   bullhorn sit in its page head;  every comment element on a guide drew the same before and after the move (their
+ *   computed styles compared, 2026-10-19)
+ */
+
+/*
+ * The tokens these rules read, for a page WITHOUT `spell-doc.css` (the site's):  the same values as its `:root`, which
+ * comes later on a docs page and so wins there
+ */
+:root {
+  --spell-mono: var(--ui-font-family-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  --spell-sans: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  --spell-bg: var(--ui-background, Canvas);
+  --spell-ink: var(--spell-text-body, var(--ui-text-color, CanvasText));
+  --spell-muted: var(--spell-text-muted, var(--ui-text-muted, GrayText));
+  --spell-rule: var(--spell-border-subtle, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
+  --spell-doc-accent: var(--spell-text-accent, var(--ui-link, LinkText));
+  /* a theme that gives bars a look of its own (`--ui-bar-background`, `--ui-bar-color`:  fruity's glass) wins over the ivory */
+  --spell-rail-bg: var(--ui-bar-background, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+  --spell-rail-ink: var(--ui-bar-color, var(--ui-brown-text, light-dark(#534323, #eaddc4)));
+  --spell-rail-hover: color-mix(in srgb, var(--spell-rail-ink) 9%, var(--spell-rail-bg));
+  --spell-rail-rule: color-mix(in srgb, var(--spell-rail-ink) 22%, transparent);
+}
+
+/*
+ * ## Send (a docs page's;  where it sits:  `spell-doc.css`'s page head, or the site's masthead below):  the epics
+ * pack's `<epic-send-buttons>`, which draws the fill rule and the countdown itself (epic `epic-engine` P20);  then who
+ * is listening, small and quiet
+ */
+.spell-send-who {
+  color: var(--spell-muted);
+  font-weight: 400;
+}
+.spell-send-who[data-listening="yes"]::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 5px;
+  border-radius: 50%;
+  background: var(--ui-green, #21ba45);
+  vertical-align: 1px;
+}
+@media (max-width: 720px) {
+  .spell-send-who {
+    display: none;
+  }
+}
+
+/*
+ * ## Guide comments (epic `airplane`, P11):  Owen's comments on a page's blocks, from the inbox file
+ * (`GuideInbox`, `src/tool/`), drawn by the runtime's "Comments" (`PageComments`).
+ * - the BULLHORN (`.spell-comment-mark`):  in a section's title (`.at-section`, its `actions` slot), in an epic page
+ *   block's title row (`.at-title`:  the Overview's, an item's, update's, aside's or code block's `actions` slot,
+ *   before its own buttons;  epic `epic-workflow` P25;  the Overview's shown while it's hovered outside its
+ *   sub-sections, epic `epic-engine` I55), in the page header (`.at-page`), else (`.at-block`:  a block with no title
+ *   row) first in the block's ACTIONS ROW (below);  shown only while the block is hovered (a section:  its innermost
+ *   hovered one) or focused.
+ *   It starts a new comment;  no count:  the block's threads are right there (Owen, 2026-10-10:  "Bullhorn to the
+ *   far right is unnecessary")
+ * - every comment's THREAD (`<epic-thread>`, in an `<epic-threads>` box), under the paragraph holding the quote, else
+ *   the block:  its look is its own sheet's (`EpicThread.css`);  here, the box's edges
+ * - the comment pane (`<epic-comment-pane>`):  floating, fixed on the screen, its look its own (`EpicCommentPane.css`)
+ * - Owen's FIELD in either (`textarea.spell-comment-field`):  a textarea that grows with its text (`growField()`)
+ */
+:is(.spell-doc-main, .site-main) .spell-comment-mark {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+/*
+ * A block's ACTIONS ROW (`addBlockAction()`;  epic `epic-engine` I26):  the one row of a block's own controls when it
+ * has no title row, a line of no height just before the block, its buttons over the block's top right corner, the
+ * bullhorn first, then a table's expand button (Owen, 2026-10-19:  "The expand button should be to the right of the
+ * bullhorn rather than in its own line").  A text block's too:  its text keeps its full width, the buttons on the
+ * page's ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap).
+ * - an element on every page, `<epic-actions>` (epic `epic-engine` P45;  epic `coherence` P22):  it places and styles
+ *   its own buttons
+ * - until its family loads it's a line of no height here too, so nothing in the page moves as it upgrades (the page's
+ *   cloak hides its buttons meanwhile, `spell-doc.css`)
+ * - the buttons are `<ui-button appearance="basic" size="mini">`s, as drawn:  the component centres their icons;  the
+ *   bullhorn circular, the table's expand button a bare icon (`spell-doc.css`, "TABLES")
+ */
+:is(.spell-doc-main, .site-main) epic-actions:not([hidden]) {
+  display: block;
+  height: 0;
+}
+/*
+ * a docs EXAMPLE's (`<ui-example>`), and a block's in its demo (not slotted into its description):
+ * left of the example's code button, level with it
+ * - the code button holds that corner:  28px wide, 0.8em in
+ * - on top of it, the two covered each other
+ * - here, on its buttons' box (its `base` part):  its own sheet can't see the block after it
+ */
+:is(.spell-doc-main, .site-main) epic-actions:has(+ ui-example)::part(base),
+:is(.spell-doc-main, .site-main) ui-example > epic-actions:not([slot])::part(base) {
+  top: calc(var(--spell-block-gap, 0px) + 0.8em - 1px);
+  right: calc(0.8em + 28px + 4px);
+}
+:is(.spell-doc-main, .site-main) .spell-comment-mark {
+  position: relative;
+}
+/*
+ * the bullhorns, in a block's title or actions row and floating by selected text:  a bare icon, no circle round it,
+ * a tint under the pointer (designer rule T22;  Owen, 2026-10-26, epic `epic-engine` I138).  Send keeps its ring
+ * while plans wait for his Accept (`EpicSendButtons.css`).
+ */
+.spell-comment-mark ui-button,
+ui-button.spell-comment-float {
+  --ui-button-basic-border-width: 0px;
+  /* a disc of the page's paper behind it, no ring, so it reads over the text it sits on (Owen, 2026-10-26, r41:  "bullhorn icon
+     should be in white circle so it's visible above text") */
+  --ui-button-basic-background: var(--epic-card, var(--ui-surface, Canvas));
+}
+.spell-comment-mark ui-button::part(button),
+ui-button.spell-comment-float::part(button) {
+  border-radius: 50%;
+  background: var(--epic-card, var(--ui-surface, Canvas));
+}
+:is(.spell-doc-main, .site-main)
+  :is(
+    ui-section:hover:not(:has(ui-section:hover)) > .spell-comment-mark,
+    :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
+    epic-overview:hover:not(:has(epic-section:hover)) > .spell-comment-mark,
+    :is(.spell-page-head, .site-masthead):hover > .spell-comment-mark,
+    epic-actions:is(:hover, :has(+ :hover)) .spell-comment-mark,
+    .spell-comment-mark:focus-within
+  ) {
+  opacity: 1;
+}
+/* the Spell UI site's page header draws its bullhorn as the end of Send's pill (its `site.css`):  always shown there */
+.site-main > .site-masthead > .spell-comment-mark.at-page {
+  opacity: 1;
+}
+/*
+ * a box of THREADS (`<epic-threads>`):  a column of them, a little apart, 8px below its block and 12px above the next
+ * (its own sheet);  until the epics pack has drawn it, the same, so nothing jumps as it upgrades
+ */
+:is(.spell-doc-main, .site-main) epic-threads {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+/* a docs page's threads link in its accent, as its prose does;  the site's pages keep Spell UI's link colour */
+.spell-doc-main epic-thread {
+  --epic-thread-link: var(--spell-doc-accent);
+}
+/*
+ * under an epic page's ITEM:  in from its edges as far as its note box is ("Your note:  a question ..."), so the thread
+ * lines up with it (Owen, 2026-10-10:  "same indent as comment box"):  the item's details' padding, `EpicItem.css`
+ * (`--epic-item-indent` on the left, 6px on the right)
+ * - anywhere else the thread's edges are the block's it's under:  a guide's paragraph or table, an item's paragraph
+ *   (inside its details already), a phase's field (its note box spans the phase's text)
+ */
+:is(.spell-doc-main, .site-main) epic-item + epic-threads {
+  padding-inline: var(--epic-item-indent, 26px) 6px;
+}
+/* under a guide's paragraph:  its measure too, so both edges are the paragraph's (a list item's is inside it) */
+:is(.spell-doc-main, .site-main) p + epic-threads {
+  max-width: 72ch;
+}
+/* in an epic page item's details, its note box's edges, as above */
+:is(.spell-doc-main, .site-main) epic-item p + epic-threads {
+  max-width: none;
+}
+/*
+ * TOOLTIPS that show (Owen, 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do"):  in VS
+ * Code's side bar (Electron 38 and up, on macOS) a `title`'s tooltip mostly shows only while the pointer is on the
+ * titled element ITSELF, not on its icon inside (electron/electron#49843).  So the icons inside a comment's buttons
+ * take no pointer:  it lands on the button, which carries the `title` (a `<ui-button>`'s, its inner button:
+ * `titleInside()`).  A plain browser shows them either way.
+ * - ONE rule for every titled `<ui-button>` the runtime and the comments draw (epic `epic-engine` I26), the table's
+ *   expand button and Send's pill too
+ * - the threads' and the pane's own buttons:  their sheets (`Tooltip.css`, in the epics pack)
+ */
+ui-button[title]::part(icon) {
+  pointer-events: none;
+}
+/* a comment's quoted text, on the page:  soft, under the text (`highlightQuotes()`) */
+::highlight(spell-comment-quote) {
+  background-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
+}
+/* ... purple while it waits for Claude:  Owen's words not taken in yet (`QUOTE_WAITING_HIGHLIGHT`) */
+::highlight(spell-comment-quote-waiting) {
+  background-color: color-mix(in srgb, var(--ui-violet, #6435c9) 24%, transparent);
+}
+/*
+ * the bullhorn floating beside selected text (in `body`, outside `main`):  a `<ui-button appearance="circular basic" size="mini">`
+ * (`iconButton()`), lifted off the page by a shadow
+ */
+/* its ground and shadow on the round button itself (`::part(button)`):  on the element around it they drew a second
+   circle, a little bigger, round the button's own ring (epic `epic-engine` I87) */
+.spell-comment-float {
+  position: fixed;
+  z-index: 1000;
+}
+.spell-comment-float::part(button) {
+  background: var(--spell-bg);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+}
+.spell-comment-float[hidden] {
+  display: none;
+}
+/* a comment's quote on the page, under the pointer:  a click opens it */
+.spell-over-quote :is(.spell-doc-main, .site-main) {
+  cursor: pointer;
+}
+/*
+ * Owen's FIELD (`textarea.spell-comment-field`), in the pane and, below, a thread's box:  a native `<textarea>` the
+ * comments' code makes and slots into the element (it lives through every redraw, the cursor with it)
+ * - a block, not inline:  no line-gap under it, so the pane's 8px is 8px at the bottom too
+ */
+:is(.spell-doc-main, .site-main) textarea.spell-comment-field {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4lh;
+  max-height: 50vh;
+  padding: 8px 10px;
+  border: 1px solid var(--spell-rail-rule);
+  border-radius: 6px;
+  background: var(--spell-bg);
+  color: var(--spell-ink);
+  font: inherit;
+  /* a step under the page's text, as a thread's messages (Owen, 2026-10-10:  "Make text in comments smaller") */
+  font-size: 0.9em;
+  line-height: 1.4;
+  resize: vertical;
+}
+/*
+ * Owen's REPLY BOX in a thread (`replyBoxFor()`), last in every open thread (Owen, 2026-10-10:  "Probably should have
+ * a comment box at the bottom for me"):  the pane's field, slotted into the `<epic-thread>`, which draws its floppy in
+ * the lower right corner;  a line or two empty, growing with its words (`growField()`)
+ */
+:is(.spell-doc-main, .site-main) epic-thread > textarea.spell-comment-field {
+  min-height: 2lh;
+  padding: 4px 26px 4px 6px;
+  resize: none;
+}
+
+/*
+ * ## On the site's pages (Epic UI's, in Spell UI's page shape):  the masthead is the page header (`pageHeadIn()`).
+ * - Its segment and container are `display: contents` hosts, so these place themselves by the column the site's
+ *   `site.css` gives its masthead and body:  `--site-gutter` in from `main`'s edges (3em), 1em below Fomantic's
+ *   computer width (992px), as there
+ * - the page's bullhorn and Send:  placed by the site's `site.css`, in the masthead's row of icon buttons
+ *   (Owen, 2026-10-23, epic `debut`:  "Move send/wand to the right of the bug icon");  only Send's look is here
+ * - the page's threads (the `<epic-threads>` box after the masthead):  in the column, as the lede under them
+ */
+.site-main {
+  --_spell-site-column: var(--site-gutter, 3em);
+}
+@media (width < 992px) {
+  .site-main {
+    --_spell-site-column: 1em;
+  }
+}
+.site-main > .site-masthead > .spell-send {
+  --_tint: var(--ui-blue, #2185d0);
+}
+.site-main > .site-masthead + epic-threads {
+  margin: 0 var(--_spell-site-column);
+}

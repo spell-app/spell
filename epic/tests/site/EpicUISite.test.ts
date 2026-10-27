@@ -1,0 +1,108 @@
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { afterEach, describe, expect, it } from "vite-plus/test"
+
+import { keepingCommentsIn } from "spell/util/node/json5"
+import { Definitions } from "spell-epic/definitions"
+
+import { EpicUISite, type EpicUIPages } from "spell-epic/site/EpicUISite"
+
+/** Temporary set folders, removed after each case. */
+const made: string[] = []
+
+afterEach(() => {
+  for (const folder of made.splice(0)) rmSync(folder, { recursive: true, force: true })
+})
+
+/** A set folder holding `pages` as its `pages.json5`, and `files` (relative path => text). */
+function setFolder(pages: EpicUIPages, files: Record<string, string> = {}): string {
+  const folder = mkdtempSync(join(tmpdir(), "epics-docs-"))
+  made.push(folder)
+  mkdirSync(join(folder, "__data"), { recursive: true })
+  writeFileSync(join(folder, "__data", "pages.json5"), JSON.stringify(pages))
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(join(folder, path, ".."), { recursive: true })
+    writeFileSync(join(folder, path), text)
+  }
+  return folder
+}
+
+/** A page in the set's shape:  `title` on its `main`, `summary` its description, `sections` its section ids. */
+function page(title: string, summary: string, sections: string[] = []): string {
+  const body = sections.map((id) => `<ui-section id="${id}" label="${id.toUpperCase()}"></ui-section>`).join("")
+  return `<!doctype html><html><head><title>${title}</title><meta name="description" content="${summary}" /></head><body><main id="main" class="site-main" data-toc-header="${title}">${body}</main></body></html>`
+}
+
+/** Hand-kept facts filing two elements, the rest left to Other. */
+const PAGES: EpicUIPages = {
+  groups: [{ id: "items", title: "Items", tags: ["epic-item", "epic-reply"] }],
+  drawnOnly: ["epic-review", "epic-new-item", "epic-agents"],
+  nav: { start: [{ id: "index", file: "index.html", label: "Home", icon: "house" }], foundation: [] }
+}
+
+describe("EpicUISite", () => {
+  it("writes the committed data as it is:  `yarn site:data` if not", () => {
+    const site = new EpicUISite()
+    for (const [name, text] of Object.entries(site.files())) {
+      const file = join(site.folder, "__data", name)
+      // as the script writes it:  a comment written into the file stays
+      expect(readFileSync(file, "utf8"), `${name} is stale:  yarn site:data`).toBe(keepingCommentsIn(file, text))
+    }
+  })
+
+  it("lists every element of the pack's definitions but the drawn-only ones, A-Z, filed by pages.json5", () => {
+    const data = new EpicUISite(setFolder(PAGES, { "epic-item.html": page("<epic-item>", "One item.") })).data()
+    const listed = Definitions.tags.filter((tag) => !PAGES.drawnOnly.includes(tag))
+    expect(data.components.map((tag) => tag.tag)).toEqual([...listed].sort())
+    expect(data.topics).toEqual([
+      { id: "items", title: "Items" },
+      { id: "other", title: "Other" }
+    ])
+    const item = data.components.find((tag) => tag.tag === "epic-item")!
+    expect(item).toMatchObject({ name: "epic-item", href: "epic-item.html", page: true, topics: ["items"] })
+    expect(item.attributes.find((spec) => spec.name === "status")?.values).toEqual([
+      "open",
+      "decided",
+      "done",
+      "canceled"
+    ])
+    expect(data.components.find((tag) => tag.tag === "epic-code")?.topics).toEqual(["other"])
+    expect(data.nav).toEqual(PAGES.nav)
+  })
+
+  it("marks an element without a page `planned`;  one with a page takes its summary", () => {
+    const data = new EpicUISite(setFolder(PAGES, { "epic-item.html": page("<epic-item>", "One item.") })).data()
+    expect(data.families["epic-item"]).toMatchObject({ title: "<epic-item>", summary: "One item.", status: "done" })
+    expect(data.families["epic-reply"]?.status).toBe("planned")
+  })
+
+  it("indexes the home, then each element page A-Z, with their sections", () => {
+    const folder = setFolder(PAGES, {
+      "index.html": page("The Epic Elements", "How they nest.", ["nesting"]),
+      "epic-reply.html": page("<epic-reply>", "A reply.", ["examples"]),
+      "epic-item.html": page("<epic-item>", "One item.", ["examples", "attributes"])
+    })
+    const search = new EpicUISite(folder).search()
+    expect(search.pages.map((each) => each.path)).toEqual(["index.html", "epic-item.html", "epic-reply.html"])
+    expect(search.pages[1]).toMatchObject({ title: "<epic-item>", summary: "One item.", tag: "epic-item" })
+    expect(search.pages[1]!.sections.map((section) => section.id)).toEqual(["examples", "attributes"])
+    expect(search.pages[0]!.tag).toBeUndefined()
+  })
+})
+
+// epic `epic-engine` P2 (T3):  each page draws the comments itself, beside the site's Spell UI
+describe("Epic UI's pages", () => {
+  it("each loads the comments' own script after the site's, the template too", () => {
+    const docs = join(import.meta.dirname, "../../src/docs")
+    const pages = readdirSync(docs).filter((name) => name.endsWith(".html"))
+    const template = join(import.meta.dirname, "../../templates/component-set-docs.html")
+    expect(pages.length).toBeGreaterThan(30)
+    for (const file of [...pages.map((name) => join(docs, name)), template]) {
+      const html = readFileSync(file, "utf8")
+      const site = html.search(/_assets\/site\.js"><\/script>/)
+      const comments = html.indexOf('<script defer src="/_epic/assets/spell-comments.js"></script>')
+      expect([file, site >= 0 && comments > site]).toEqual([file, true])
+    }
+  })
+})

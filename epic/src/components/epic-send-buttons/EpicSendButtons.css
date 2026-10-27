@@ -1,0 +1,189 @@
+/*
+ * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send and its countdown, ONE pill.
+ * - The plane's round end, a hairline, the wand's round end;  each a circle as tall as the pill.
+ * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
+ *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never dashed (Owen, 2026-10-22:
+ *   "Lose the dotted outline around both").
+ * - The STAGE BUTTON (`accept`, epic `epic-engine` P29):  in the plane's place, a check and its words, green;  the
+ *   pill outlined green once pressed (`accepted`).
+ * - WAITING ON YOU (`asks`, Owen, 2026-10-25):  the pill's own border 2px #666, solid, dotted once pressed (`taken`);
+ *   the same ring as a waiting plan's buttons on its phase (`EpicReview.css`, `data-asks`).
+ * - Countdown off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
+ * - The wand FILLED light blue, its icon white, while countdown mode is on (`:state(countdown)`);  grey while off.
+ * - While it counts, a very light grey ring round the wand turns blue, clockwise from the top, as the 2 minutes run
+ *   (`stroke-dasharray`, set each second by the element;  eased over the second;  Owen, 2026-10-22).
+ * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
+ *   - `--epic-send-buttons-size`:  each round end's size.  Default 28px (an epic page's `--epic-control-size`).
+ *   - `--epic-send-buttons-rule`:  the grey outline and the hairline.  Default:  Spell UI's border colour.
+ *   - `--epic-send-buttons-muted`:  the grey of a button with nothing to do.  Default:  Spell UI's muted text.
+ */
+
+@layer ui.components.epic-send-buttons.types;
+
+@layer ui.components.epic-send-buttons.types {
+  :host {
+    --_size: var(--epic-send-buttons-size, 28px);
+    --_tint: var(--ui-blue, #2185d0);
+    --_green: var(--ui-green-text, var(--ui-green, #21ba45));
+    --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
+    --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
+    display: inline-flex;
+    flex: none;
+    vertical-align: middle;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  .group {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: var(--_size);
+    border: 1px solid var(--_rule);
+    border-radius: 999px;
+  }
+  .group[data-state="sent"] {
+    border: 1.5px solid var(--_tint);
+  }
+  /* INACTIVE, nothing new to send (idle, or all of it sent):  the plane alone, its rim `transparent` (Owen, 2026-10-25:
+     "no boder around plane in this mode", then "I wanted no border when this is inactive, use `transparent`");  the
+     border kept, so nothing beside it moves.  Not the stage button's, nor while the pill waits on Owen */
+  :host(:not(:state(stage))) .group:is([data-state="idle"], [data-state="sent"]):not([data-asks]) {
+    border-color: transparent;
+  }
+  /* waiting on Owen:  the pill's OWN border 2px #666 (Owen, 2026-10-25:  "try 2px border, #666"), dotted once pressed;
+     1px out on every side, so neither the round ends inside nor what's beside it move */
+  .group[data-asks] {
+    margin: -1px;
+    height: calc(var(--_size) + 2px);
+    border: 2px solid #666;
+  }
+  .group[data-asks="taken"] {
+    border-style: dotted;
+  }
+  button {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: calc(var(--_size) - 2px);
+    height: calc(var(--_size) - 2px);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--_muted);
+    font: inherit;
+    /* the glyphs a little small for their round ends:  the countdown's ring goes round the wand's, clear of it */
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover {
+    color: var(--_tint);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--_tint));
+    outline-offset: 1px;
+  }
+  /* the plane wears the group's state */
+  .send:is([data-state="unsent"], [data-state="sent"]) {
+    color: var(--_tint);
+  }
+  /* the wand, the mode:  on, filled light blue, its icon white */
+  :host(:state(countdown)) .countdown {
+    /* see-through, so it reads light blue on a light page and a quieter blue on a dark one;  the icon white on both */
+    background: color-mix(in oklab, var(--_tint) 55%, transparent);
+    color: #fff;
+  }
+  :host(:state(countdown)) .countdown:hover {
+    background: color-mix(in oklab, var(--_tint) 75%, transparent);
+  }
+  /* countdown off, something not sent:  it waits for a press, plainly */
+  :host(:state(waiting)) .send {
+    background: var(--_tint);
+    color: var(--ui-blue-on, #fff);
+  }
+  :host(:state(waiting)) .send:hover {
+    background: color-mix(in oklab, var(--_tint) 85%, black);
+  }
+  /* the STAGE BUTTON in the plane's place (`accept`):  a check and its words, green (decided);  outlined green once
+     pressed (`accepted`), waiting for the session to move the page on */
+  .send.accept {
+    display: inline-flex;
+    gap: 5px;
+    width: auto;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    color: var(--_green);
+    font: 600 12px/1 var(--ui-font-family, system-ui, sans-serif);
+    white-space: nowrap;
+  }
+  .send.accept:hover {
+    background: color-mix(in oklab, var(--_green) 12%, transparent);
+    color: var(--_green);
+  }
+  .group[data-state="accepted"] {
+    border: 1.5px solid var(--_green);
+  }
+  .send[aria-busy="true"] {
+    cursor: progress;
+  }
+  /* the hairline between the plane's end and the wand's */
+  .countdown::before {
+    content: "";
+    position: absolute;
+    inset-block: 20%;
+    inset-inline-start: -0.5px;
+    border-inline-start: 1px solid var(--_rule);
+  }
+  .count {
+    position: absolute;
+    inset-block-start: -6px;
+    inset-inline-end: -6px;
+    min-width: 1.4em;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--_tint);
+    color: var(--ui-blue-on, #fff);
+    font: 600 10px/1.4 var(--ui-font-family, system-ui, sans-serif);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  /* the icons take no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
+  ui-icon {
+    pointer-events: none;
+  }
+  /* centred in its round end:  no icon margin or fixed width of its own */
+  ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  .ring {
+    position: absolute;
+    inset: 1px;
+    width: 100%;
+    height: 100%;
+    rotate: -90deg;
+    pointer-events: none;
+  }
+  .ring circle {
+    fill: none;
+    stroke-width: 2.5;
+  }
+  /* very light grey, turning blue as the countdown runs */
+  .ring .track {
+    stroke: color-mix(in oklab, var(--_rule) 60%, transparent);
+  }
+  .ring .elapsed {
+    stroke: var(--_tint);
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ring .elapsed {
+      transition: none;
+    }
+  }
+}

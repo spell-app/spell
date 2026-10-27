@@ -1,0 +1,72 @@
+import { ChangesAfterGoal } from "./ChangesAfterGoal"
+import { DoneCardsClose } from "./DoneCardsClose"
+import { ItemRenames } from "./ItemRenames"
+import { LinksAgree } from "./LinksAgree"
+import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { RootLinks } from "./RootLinks"
+import { TakenInPhase } from "./TakenInPhase"
+import { ToReviewMarks } from "./ToReviewMarks"
+import { TookAsMinutes } from "./TookAsMinutes"
+import { WholePhaseNumbers } from "./WholePhaseNumbers"
+import type { Migration, MigrationContext } from "./migrations.types"
+
+/****************
+ * ### `Migrations`
+ * Every MIGRATION of an epic page's markup, in the order they run (oldest first):
+ * named, dated, idempotent steps that bring an older page up to today's (`Migration`).
+ * - the epic page's share of the steps by page kind (J44 of epic `epic-workflow`);
+ *   the docs tools hold the other kinds' (`src/tools/migrate.js`)
+ * - `epic migrate` runs them on every epic page on command (`MigrateCommands`), under each page's lock
+ * - every write runs the cheap ones too (`everyEdit`), before the command's change (`PlanDocFiles.edit()`):
+ *   an older doc comes up to date the first time anything edits it, and a migrated one costs a read
+ * - A new step:  a class implementing `Migration` in this folder, its instance added to `all`, LAST,
+ *   in the same commit as the markup change it follows (epics' `AGENTS.md`, "Rules").
+ *   It must change nothing on a doc it has migrated already, and keep every word.
+ * - The older steps went once every page had run them (epic `repo-split` Q45):  `updates-as-epic-update`,
+ *   `owen-types-to-you-type`, `stable-phase-ids`, `json5-data-files`, `engine-asset-routes`,
+ *   `unstackable-tables`;  `engine-links` in P14, once the content rewrite left no epic page needing it;
+ *   `caveats-and-tests` (epic `epic-engine` P32) with `item-renames` (P44), which would read its Todo as old todos.
+ *   Their code is in git history, for a page restored from an old backup.
+ *   - `links-agree` stays:  `rename` and `add-phase --before` run it too, so links follow what moved
+ * - STATIC:  the registry.
+ ****************/
+export class Migrations {
+  /** Every step, in the order they run:  oldest first. */
+  static readonly all: readonly Migration[] = [
+    new LinksAgree(),
+    new MoreRequestsFirst(),
+    new TookAsMinutes(),
+    new WholePhaseNumbers(),
+    new TakenInPhase(),
+    new ToReviewMarks(),
+    new ChangesAfterGoal(),
+    new ItemRenames(),
+    new RootLinks(),
+    new DoneCardsClose()
+  ]
+
+  /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */
+  static get everyEdit(): readonly Migration[] {
+    return Migrations.all.filter((step) => step.everyEdit)
+  }
+
+  /** The step called `name` (`updates-as-epic-update`);  `undefined` for none. */
+  static named(name: string): Migration | undefined {
+    return Migrations.all.find((step) => step.name === name)
+  }
+
+  /**
+   * Run every step (or the steps named in `only`) on `document`, assembled, IN PLACE.
+   * - returns the names of the steps that changed something, in order (none:  `[]`)
+   * - `steps`:  which to choose from (default:  `all`)
+   */
+  static run(
+    document: Document,
+    context: MigrationContext,
+    only?: readonly string[],
+    steps: readonly Migration[] = Migrations.all
+  ): string[] {
+    const chosen = only ? steps.filter((step) => only.includes(step.name)) : steps
+    return chosen.filter((step) => step.run(document, context)).map((step) => step.name)
+  }
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-test-run</title>
+    <meta
+      name="description"
+      content="The &lt;epic-test-run&gt; element: an epic page&#39;s open tests, one at a time, each answered on the page."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-test-run&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-test-run&gt;
+            <ui-header>The &lt;epic-test-run&gt; element: an epic page's open tests, one at a time, each answered on the page.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-test-run&gt;</code> is a TEST RUN: it steps Owen through an epic page's open tests, one big
+            card at a time, and he answers each on the page: Passed, Failed, Skip or Not
+            now, with a comment and a screenshot on any of them. The listening session closes the passed ones and files each failure as an issue.
+          </p>
+          <p class="meta">
+            For anyone changing how hand checks are run, or how a test is written.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P4), the
+            <a href="/spell-epic/src/components/epic-test-run/" target="src-spell-epic-src-components-epic-test-run"><code title="spell-epic/src/components/epic-test-run/">epic-test-run</code></a> family.<br />
+            Its vocabulary: <a href="/spell-epic/src/components/epic-test-run/EpicTestRun.en.ts" target="src-spell-epic-src-components-epic-test-run-epictestrun-en-ts"><code title="spell-epic/src/components/epic-test-run/EpicTestRun.en.ts">EpicTestRun.en.ts</code></a><br />
+            Its component: <a href="/spell-epic/src/components/epic-test-run/EpicTestRun.tsx" target="src-spell-epic-src-components-epic-test-run-epictestrun-tsx"><code title="spell-epic/src/components/epic-test-run/EpicTestRun.tsx">EpicTestRun.tsx</code></a>;
+            what it reads from the page: <a href="/spell-epic/src/components/epic-test-run/TestRun.ts" target="src-spell-epic-src-components-epic-test-run-testrun-ts"><code title="spell-epic/src/components/epic-test-run/TestRun.ts">TestRun.ts</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              A run over a sample page's two tests, the first in the new shape, the second an older one (prose only).
+              This page isn't reviewed, so the answers are disabled and say why; on a served epic page they're marks.
+            </p>
+<epic-page epic="sample" title="Sample"
+  ><epic-test-run></epic-test-run
+  ><epic-section id="tests" kind="tests"
+    ><epic-item id="m1" title="Folded titles show in full" status="open" state="open"
+      ><epic-field label="Step"
+        ><p>Open the Epics page, its Judgement calls section.</p>
+        <p><a class="epic-test-action" href="/epics/index.html">Open the Epics page</a></p></epic-field
+      ><epic-field label="Should"><p>Every folded title shows all its words, wrapped; none cut with …</p></epic-field
+      ><epic-field label="If not"><p>Say which title, and paste a screenshot.</p></epic-field></epic-item
+    ><epic-item id="m2" title="Both tabs come back on their page" status="open" state="open" deferred="2026-10-18"
+      ><p>Reload each tab once. Both come back on the page they showed.</p></epic-item
+    ></epic-section
+  ></epic-page
+>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The example above · 14 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-page epic="sample" title="Sample">
+                      <epic-test-run></epic-test-run>
+                      <epic-section id="tests" kind="tests">
+                        <epic-item id="m1" title="Folded titles show in full" status="open" state="open">
+                          <epic-field label="Step"><p>Open the Epics page ...</p>
+                            <p><a class="epic-test-action" href="../../epics/index.html">Open the Epics page</a></p></epic-field>
+                          <epic-field label="Should"><p>Every folded title shows all its words ...</p></epic-field>
+                          <epic-field label="If not"><p>Say which title, and paste a screenshot.</p></epic-field>
+                        </epic-item>
+                        <epic-item id="m2" title="Both tabs come back on their page" status="open" state="open"
+                          deferred="2026-10-18"><p>Reload each tab once ...</p></epic-item>
+                      </epic-section>
+                    </epic-page>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Nobody writes it in a doc: <a href="epic-page.html" target="src-spell-epic-src-docs-epic-page-html"><code>&lt;epic-page&gt;</code></a> draws it over its blocks in TEST MODE, which starts from:
+            </p>
+            <ul>
+              <li>the Manual tests section's <b>Start testing · 9</b>, on its title (<a href="epic-section.html" target="src-spell-epic-src-docs-epic-section-html"><code>&lt;epic-section&gt;</code></a>, while the page is reviewed and a test is open)</li>
+              <li>the page's address: <code>?test=1</code> (<code>epic test &lt;epic&gt;</code>), and <code>#m3</code> lands on that test</li>
+              <li><code>?test=1&amp;all=1</code>: one epic of a run across every epic (<code>epic test --all</code>), its summary leading to the next</li>
+            </ul>
+            <p>Esc or Done testing leaves it, the blocks back, <code>?test</code> off the address. Its place stays in the address (<code>#m3</code>): a reload resumes there.</p>
+            <p>
+              LEAVING SENDS (I52): Done testing, Esc and the summary's next epic hand the run's unsent answers to Claude
+              (the page's Send, as Send results does), and the notice line at the window's foot says so: "3 results
+              sent to Claude". Nothing answered: it just leaves. The send failing (the page server gone, a
+              <code>file://</code> page): the notice says so, and the answers wait, Send blue in the header.
+            </p>
+            <p>A TEST item's details, in order (<code>epic add &lt;epic&gt;#V --step ... --should ...</code> writes them):</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Field</th><th>What the card shows</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>&lt;epic-field label="Step"&gt;</code></td><td>What to do; its <code>&lt;a class="epic-test-action" href&gt;</code> links as buttons, its code blocks (<code>&lt;pre&gt;</code>) as Spell UI's <code>&lt;ui-code copy&gt;</code>, with a Copy button. An older test with prose only: the prose.</td></tr>
+                  <tr><td><code>&lt;epic-field label="Should"&gt;</code></td><td>What should happen.</td></tr>
+                  <tr><td><code>&lt;epic-field label="Example"&gt;</code></td><td>Its screenshots as thumbnails, zoomed on a click; its words under them.</td></tr>
+                  <tr><td><code>&lt;epic-field label="If not"&gt;</code></td><td>What to tell Claude.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Parent</th><th>How many</th><th>As</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>&lt;epic-page&gt;</code>, in test mode</td><td>one</td><td>Its part <code>test-run</code>, over its blocks.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>It has no children. Its tests are the open ones of the <code>&lt;epic-page&gt;</code> around it, in page order, the deferred ones last.</p>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>all</code></td><td>One epic of a run across every epic: the summary offers "Next:  &lt;epic&gt; (n tests)".</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-test-run-answers" label="The answers" sticky collapsible dividing open="false">
+              <p>Each a review mark on the test, <code>{ action: "test", result, note?, shot? }</code>, sent with Send like any mark, or by leaving the run. Not one by one as given: each send wakes a waiting session, so a run of 17 tests would wake it 17 times.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Answer</th><th>Key</th><th>Colour</th><th>Then</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Passed</td><td>P</td><td>green</td><td>the next test; applied, the test closes</td></tr>
+                  <tr><td>Failed</td><td>F</td><td>red</td><td>applied, an issue with the comment and the screenshot</td></tr>
+                  <tr><td>Skip</td><td>S</td><td>grey</td><td>the next test; applied, canceled</td></tr>
+                  <tr><td>Not now</td><td>N</td><td>yellow</td><td>the next test; applied, deferred, last next run</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+              <p>
+                A COMMENT box on every card, under the answers ("Comment (optional)"):  it goes with whichever answer he
+                picks, typed before or after choosing, and stays when he changes the answer.  Kept as he types:  in the
+                answer's <code>note</code>, or, before an answer, the inbox's draft for the test, so a reload keeps it.
+                <code>epic inbox apply</code> puts it on the test as his reply;  the summary lists the tests commented on.
+              </p>
+              <p>← and → move;  Esc leaves, sending the answers.  An answered test shows its answer, dashed until sent, outlined once sent, and takes another.</p>
+            </ui-section>
+            <ui-section id="epic-test-run-parts" label="Parts" sticky collapsible dividing open="false">
+              <p>Pieces of what it draws.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The run.</td></tr>
+                  <tr><td><code>head</code></td><td>"Testing", "4 of 9", Done testing.</td></tr>
+                  <tr><td><code>progress</code></td><td>The thin bar: where the run is, as "4 of 9" says; how many are answered, its tooltip.</td></tr>
+                  <tr><td><code>card</code></td><td>The current test's card.</td></tr>
+                  <tr><td><code>answers</code></td><td>The four answers, one group.</td></tr>
+                  <tr><td><code>comment</code></td><td>Every card's comment box, under the answers.</td></tr>
+                  <tr><td><code>failure</code></td><td>The screenshot's area, on every card (paste, drop or choose a file):  it goes with whichever answer is picked.</td></tr>
+                  <tr><td><code>moves</code></td><td>Back and Next:  a full-width band of their own, pinned to the window's bottom.</td></tr>
+                  <tr><td><code>summary</code></td><td>The summary card: the counts, the tests commented on, Send results, the next epic.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-test-run-events" label="Events" sticky collapsible dividing open="false">
+              <p>What it tells its owner.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-test-closed</code></td><td><code>{}</code></td><td>Owen left the run: Esc, or Done testing. The run has sent its unsent answers.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Side bar first: at 390px the answers sit two by two; on a wide card, four in a row.</li>
+              <li>The card: the test's id chip in its state's colour, its title, then each field under a small mono label.</li>
+              <li>The answers by the fill rule: a grey outline at rest (the icon in its colour), dashed in its colour once chosen, outlined once sent.</li>
+              <li>Owen's words on his ivory: the comment box and the screenshot area on every card, the area dashed, its thumbnail and ×.</li>
+              <li>Light and dark through the page's tokens;  no motion of its own.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code> (P4).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

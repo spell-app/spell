@@ -1,0 +1,31 @@
+/*
+ * `<epic-hidden-note>` (`EpicHiddenNote.tsx`):  under a filtered list, a quiet line, a link to show all.
+ * - Units:  px and em, never rem (WWOD §18).
+ */
+
+@layer ui.components.epic-hidden-note.types;
+
+@layer ui.components.epic-hidden-note.types {
+  :host {
+    display: block;
+  }
+  button {
+    display: block;
+    margin: 6px 0 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--epic-muted, var(--ui-text-muted));
+    font: 14px/1.4 var(--epic-sans, var(--ui-font-family));
+    text-align: start;
+    cursor: pointer;
+  }
+  button:hover {
+    color: var(--epic-accent, var(--ui-link));
+    text-decoration: underline;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
+    outline-offset: 1px;
+  }
+}

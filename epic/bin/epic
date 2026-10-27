@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+/**
+ * `epic`:  the epic command, from THIS copy of spell-epic, through `tsx` -- no build step.  `epic --help` lists
+ * its verbs.
+ * - On the `PATH` of every Claude Code session while the spell-epic plugin is on:  Claude Code puts a plugin's
+ *   `bin/` there.  In a terminal:  link it onto your `PATH` (the README's "Install").
+ * - `tsx` with spell-epic's `tsconfig.json`:  every repo's files by their package names (`spell-epic/tool/PlanDoc`,
+ *   `spell/server`;  epic `repo-split` P14), the other repos' packages workspaces of the top `spell` install, run as
+ *   source.
+ * - Runs `src/cli/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
+ *   of a second.
+ * - Every verb runs THIS copy's code, on the caller's checkout's data (`EpicCheckout.nearest()`, `EPIC_CHECKOUT`).
+ * - Plain ESM with no extension:  `"type": "module"` in spell-epic's `package.json` makes node read it so.
+ * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in spell-epic.
+ */
+import { dirname, resolve } from "node:path"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { register } from "tsx/esm/api"
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+register({ tsconfig: resolve(root, "tsconfig.json") })
+await import(pathToFileURL(resolve(root, "src/cli/epicMain.ts")).href)

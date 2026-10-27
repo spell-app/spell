@@ -1,0 +1,22 @@
+{
+  // The extension's own settings:  it bundles `spell/server` (its own page server, when none runs) and
+  // spell-epic's repo list (`spell-epic/server/RepoList`), by their package names (epic `repo-split` P14), as tsc reads
+  // them AND esbuild bundles them (`build.mjs`).
+  // - `customConditions`:  spell-epic's SOURCE for its name (`exports`, `spell-epic-source`), as the root's
+  //   `tsconfig.json` reads it;  the kit's built declarations (`dist-types/`).
+  "compilerOptions": {
+    "customConditions": ["spell-epic-source"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vscode"],
+    "typeRoots": ["./node_modules/@types", "../node_modules/@types"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src"]
+}

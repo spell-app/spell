@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-mark</title>
+    <meta
+      name="description"
+      content="The &lt;epic-mark&gt; element: an item&#39;s id as a chip in its state colour, a link that lands on it."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-mark&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-mark&gt;
+            <ui-header>The &lt;epic-mark&gt; element: an item&#39;s id as a chip in its state colour, a link that lands on it.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-mark&gt;</code> draws an item's id as a chip in the item's state colour:
+            <code>&lt;epic-mark item="i126" link&gt;</code> shows <code>I126</code>, red while it waits on Owen, blue while
+            it's under way, green when it's newly decided, grey once it's old. Its tooltip is the item's title; with
+            <code>link</code>, a click lands on the item and opens it.
+          </p>
+          <p class="meta">
+            For anyone writing a phase's To review list, or naming an item in a page.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P45), its own
+            <a href="/spell-epic/src/components/epic-mark/" target="src-spell-epic-src-components-epic-mark"><code title="spell-epic/src/components/epic-mark/">epic-mark</code></a> family.<br />
+            Its vocabulary: <a href="/spell-epic/src/components/epic-mark/EpicMark.en.ts" target="src-spell-epic-src-components-epic-mark-epicmark-en-ts"><code title="spell-epic/src/components/epic-mark/EpicMark.en.ts">EpicMark.en.ts</code></a><br />
+            Its component: <a href="/spell-epic/src/components/epic-mark/EpicMark.tsx" target="src-spell-epic-src-components-epic-mark-epicmark-tsx"><code title="spell-epic/src/components/epic-mark/EpicMark.tsx">EpicMark.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>Three items, and a line marking them: each mark takes its item's colour, its title on hover.</p>
+            <div>
+              <epic-section id="decisions" kind="questions" open>
+                <epic-item id="q1" title="Which colour names should windows take?" status="open" state="attention"></epic-item>
+                <epic-item id="j3" title="Thumbnails 200px wide" status="decided" state="recent"></epic-item>
+                <epic-item id="i126" title="Phase numbers whole" status="open" state="progress"></epic-item>
+              </epic-section>
+              <p>To review: <epic-mark item="q1" link></epic-mark>, <epic-mark item="j3" link></epic-mark>, <epic-mark item="i126" link></epic-mark></p>
+            </div>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The marks above · 1 line</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <p>To review: <epic-mark item="q1" link></epic-mark>, <epic-mark item="j3" link></epic-mark>, <epic-mark item="i126" link></epic-mark></p>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ul>
+              <li>
+                The epic tool writes them in a phase's To review field, one per item added while the phase was active and
+                not reviewed yet, with commas between:
+                <code>&lt;epic-field name="to-review"&gt;&lt;epic-mark item="j1" link&gt;&lt;/epic-mark&gt;, ...</code>.
+              </li>
+              <li>
+                Before P45 that field held <code>&lt;a href="#j1"&gt;J1&lt;/a&gt;</code> links, coloured by a script; the
+                migration <code>to-review-marks</code> turns them into marks.
+              </li>
+              <li>It holds no text: the id is drawn from <code>item</code>, in capitals.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>item</code></td><td>The item's id on this page, any case (<code>i126</code>, <code>Q3</code>).</td></tr>
+                  <tr><td><code>link</code></td><td>A link that lands on the item; without it, the chip alone.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-mark-parts" label="Parts and states" sticky collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Name</th><th>What it is</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>base</code></td><td>The chip: an <code>&lt;a&gt;</code> with <code>link</code>, else a <code>&lt;span&gt;</code>.</td></tr>
+                    <tr><td><code>id</code></td><td>The item's id, in capitals.</td></tr>
+                    <tr><td><code>:state(missing)</code></td><td>No item with that id on the page: the accent colour, its tooltip saying so.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="4-how-it-looks" label="4. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>
+                Its colour is the item's state as the item's own id chip draws it (<code>ItemAge</code>: a decided item
+                turns grey a day after its last change), through the page's state tokens, <code>--epic-state-*</code>.
+              </li>
+              <li>
+                A pill, 1.6em tall, set in the line on its middle: <code>--epic-mark-height</code>,
+                <code>--epic-mark-min-width</code>, <code>--epic-mark-padding</code>, <code>--epic-mark-radius</code>,
+                <code>--epic-mark-font-size</code>, <code>--epic-mark-font-weight</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-25 against branch <code>epic-engine</code> (P45).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

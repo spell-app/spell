@@ -1,0 +1,165 @@
+/*
+ * `<epic-field>` (EpicField.tsx) and `<epic-updated>` (EpicUpdated.tsx):  a phase's lines.
+ * - One shape for both:
+ *   - an icon column, the icon centred on the FIRST line (`1lh` tall)
+ *   - then the label and the prose wrapping beside it
+ *   - a field's prose starting with a `<p>` runs on after its label;  lists drop below
+ * - Files and Verify hide until the Phases title's toggles show them:
+ *   `--epic-files-display` / `--epic-verify-display`, inherited from the Phases section (`block`), else `none`.
+ * - `<epic-updated>`:  fenced, a dashed orange box (Owen, 2026-10-06:  never an "Updated" word buried in the text)
+ *   - a fold column before the icon (`fold.button()`, Owen, 2026-10-08)
+ *   - what changed BELOW its heading, folded `until-found`
+ * - A request (a labelled field in a Requests field, r31):  a fold, its chevron and label the title row,
+ *   its prose below, folded `until-found`;  its screenshots' thumbnails are the page sheet's (`EpicField.requests.css`)
+ * - To review:  its `<epic-mark>`s draw their own chips (epic `epic-engine` P45).
+ * - Public tokens (`--epic-field-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-field.types, ui.components.epic-field.content;
+
+@layer ui.components.epic-field.types {
+  :host {
+    display: block;
+    margin: 0 0 6px;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  /* a labelled block sits in prose:  a paragraph's spacing */
+  :host([label]:not([name])) {
+    margin: 8px 0;
+  }
+  :host([name="files"]) {
+    display: var(--epic-files-display, none);
+  }
+  :host([name="verify"]) {
+    display: var(--epic-verify-display, none);
+  }
+}
+
+@layer ui.components.epic-field.content {
+  .field,
+  .updated {
+    display: grid;
+    grid-template-columns: 1.25em minmax(0, 1fr);
+    column-gap: 8px;
+    line-height: 1.55;
+  }
+  /* a labelled block in prose (`label`, P14):  no icon column */
+  .field.labelled {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1lh;
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+  .icon svg {
+    display: block;
+    width: auto;
+    height: 0.95em;
+    fill: currentColor;
+  }
+  .text {
+    min-width: 0;
+  }
+  .label {
+    color: var(--epic-ink, var(--ui-text-color));
+  }
+
+  /* the prose:  a first paragraph runs on after the label;  lists and later paragraphs below, close under it */
+  ::slotted(p) {
+    margin: 4px 0 0;
+  }
+  ::slotted(p:first-child) {
+    display: inline;
+    margin: 0;
+  }
+  ::slotted(:is(ul, ol)) {
+    margin: 2px 0 4px;
+    padding-left: 1.2em;
+  }
+
+  /* ## `<epic-updated>`:  the fence -- the fold chevron, the icon, its heading;  what changed under the heading */
+  .updated {
+    grid-template-columns: auto 1.25em minmax(0, 1fr);
+    margin: 0;
+    padding: 6px 10px;
+    border: 1px dashed color-mix(in srgb, var(--ui-orange) 60%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--ui-orange) 6%, var(--epic-bg, var(--ui-background)));
+  }
+  .updated > .head {
+    display: contents;
+  }
+  .fold-cell {
+    display: inline-flex;
+    height: 1lh;
+  }
+  .fold-cell .fold-button {
+    margin: 0;
+  }
+  /* nothing to fold:  no fold column */
+  .updated:not(:has(.fold-button)) {
+    grid-template-columns: 1.25em minmax(0, 1fr);
+  }
+  .updated:not(:has(.fold-button)) .fold-cell {
+    display: none;
+  }
+  .updated > .body {
+    grid-column: -2;
+  }
+  .updated > .body[hidden="until-found"] {
+    display: block;
+    content-visibility: hidden;
+  }
+  /* what changed starts on its own line, under the heading:  no run-on paragraph */
+  :host(epic-updated) ::slotted(p:first-child) {
+    display: block;
+    margin: 2px 0 0;
+  }
+  .updated .icon {
+    color: var(--ui-orange-text, var(--ui-orange));
+  }
+  time,
+  .during {
+    margin-left: 4px;
+    color: var(--epic-muted, var(--ui-text-muted));
+    font: 0.85em var(--epic-mono, var(--ui-font-family-mono));
+  }
+
+  /*
+   * Claude's build plan, waiting for Owen's Accept (epic `epic-engine` P33):  an orange rule down its side, "pay
+   * attention to this" (Owen, 2026-10-24, of the orange border);  accepted, a plain field like the rest
+   */
+  :host([name="plan"]:not([accepted])) .field {
+    padding-inline-start: 8px;
+    border-inline-start: 3px solid var(--ui-orange, #f2711c);
+    border-radius: 2px;
+  }
+
+  /* ## A request (r31):  folds by its title row;  its prose below, lined up with the label */
+  .field.request {
+    display: block;
+  }
+  .request > .head {
+    display: flex;
+    align-items: flex-start;
+  }
+  .request > .body {
+    padding-inline-start: var(--_epic-request-indent, 18px);
+  }
+  .request > .body[hidden="until-found"] {
+    display: block;
+    content-visibility: hidden;
+  }
+  :host(:state(request)) ::slotted(p:first-child) {
+    display: block;
+    margin: 4px 0 0;
+  }
+  :host(:state(request)) ::slotted(blockquote) {
+    margin: 4px 0;
+  }
+}

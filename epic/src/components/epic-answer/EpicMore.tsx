@@ -1,0 +1,64 @@
+import type { JSX } from "@solidjs/web"
+
+import { E } from "spell/element"
+
+import { Fold } from "spell-epic/components/epic-item/Fold"
+
+import { epicMoreVocabulary } from "./EpicMore.en"
+import { BODY } from "./EpicAnswer.types"
+
+import answerCSS from "./EpicAnswer.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+
+/****************
+ * ### `EpicMore`
+ * The component behind `<epic-more>`:  More Details (Add Details Now) on an item --
+ * a plain card under its text and answer, open to start with, folded by its `More Details` heading.
+ * The item labels its own text above it `Original reply` (`<epic-item>`).
+ ****************/
+export class EpicMore extends E.UIComponent<typeof epicMoreVocabulary> {
+  @E.proto static vocabulary = epicMoreVocabulary
+  @E.protoMerged static elementSetup = {
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-answer": answerCSS },
+    delegatesFocus: false
+  } satisfies Partial<E.ElementSetup>
+
+  /** Open to start with:  it's what was just added. */
+  readonly fold = new Fold(() => true)
+
+  /** Unfolded. */
+  @E.cssState("open")
+  get isOpen(): boolean {
+    return this.fold.isOpen()
+  }
+
+  render(): JSX.Element {
+    return (
+      <div class={this.rootClass} part={this.partForName("base")}>
+        {this.fold.button({
+          className: TOGGLE,
+          part: this.partForName("toggle"),
+          controls: BODY_ID,
+          tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
+          label: this.translationForKey("more"),
+          clicks: true
+        })}
+        <div
+          ref={this.fold.watch}
+          id={BODY_ID}
+          class={BODY}
+          part={this.partForName("body")}
+          hidden={this.fold.hidden()}
+        >
+          <slot />
+        </div>
+      </div>
+    )
+  }
+}
+
+/** Class of its heading, the `<button>` that folds it. */
+const TOGGLE = "toggle"
+
+/** `id` of its body, which its toggle controls. */
+const BODY_ID = "body"

@@ -1,0 +1,192 @@
+/*
+ * `<epic-phase>` (EpicPhase.tsx):  one phase, on top of the fold (`EpicFold.css`).
+ * - A nested block:  its title on the row band, reaching past the Phases section's inset, edge to edge;  a small
+ *   gap below it open, none folded (a rule instead).
+ * - The status icon in its status's colour;  a done phase's title quieter.
+ * - Its plan changed:  the title's orange pen and count while it isn't done (the changes themselves are
+ *   `<epic-update>` blocks among its children, which draw themselves).
+ * - Public tokens (`--epic-phase-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-phase.content;
+
+@layer ui.components.epic-phase.content {
+  :host {
+    --_epic-fold-band: var(--epic-band-row, transparent);
+    --_epic-fold-gap: var(--epic-phase-gap, 12px);
+    /* inside its section's inset, not edge to edge:  rounded cards with room at their sides, as items are (Owen,
+       2026-10-25:  "P1...P2 should have some horizontal margin.  NOT drawer appearance") */
+    --_epic-fold-bleed: 0px;
+    /*
+     * a card inside its section, which already sits in the page's column:  its own inset, not the column's again
+     * (Owen, 2026-10-25:  on a wide window the column's inset, taken twice, squeezed its title into a narrow strip)
+     */
+    --epic-inset: var(--epic-card-inset, 16px);
+  }
+  /*
+   * its status icon in a cell as wide as an item's id chip, so its title starts where an item's does:  chevron, icon
+   * and title in the same columns as the Questions' (Owen, 2026-10-25)
+   */
+  ui-section::part(icon) {
+    box-sizing: border-box;
+    width: var(--epic-phase-icon-cell, 30px);
+    justify-content: flex-start;
+  }
+  :host([status="done"]) {
+    --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
+  }
+  ui-section {
+    /*
+     * as an item's line:  its chevron 8px in, in the items' column;  its buttons as far from the right as from the top,
+     * 6px (Owen, 2026-10-25)
+     */
+    --ui-section-title-padding: 8px 6px 8px 8px;
+    --ui-section-content-padding: 10px var(--epic-inset, 16px) 0;
+    /* its title is an h3:  the line everything in its title row centres on (`EpicFold.css`) */
+    --_epic-fold-line: calc(var(--ui-font-size, 16px) * var(--ui-section-h3) * var(--ui-section-title-line-height));
+  }
+  /* open:  its body is a drawer, padded inside (`EpicFold.css`, I115) */
+  :host(:state(open)) ui-section {
+    --ui-section-content-padding: 0;
+  }
+
+  /*
+   * open:  the title's band rounded at the bottom, a card over its body (Owen, 2026-10-24);  square while stuck
+   * under the titles above it, flush against them (as an item's line, I93)
+   */
+  :host(:state(open)) ui-section:not(:state(stuck))::part(title) {
+    border-end-start-radius: var(--epic-phase-radius, 8px);
+    border-end-end-radius: var(--epic-phase-radius, 8px);
+  }
+  /*
+   * the title rows as RUNS, as an item list's lines (epic `epic-engine` I96;  Owen, 2026-10-24:  "showed the white
+   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runs.css`, by position),
+   * rounded at a run's top (the first phase, the one after an open phase) and bottom (the last);  square while stuck
+   */
+  ui-section:not(:state(stuck))::part(title) {
+    border-start-start-radius: var(--epic-phase-top-radius, 0px);
+    border-start-end-radius: var(--epic-phase-top-radius, 0px);
+  }
+  :host(:not(:state(open))) ui-section:not(:state(stuck))::part(title) {
+    border-end-start-radius: var(--epic-phase-bottom-radius, 0px);
+    border-end-end-radius: var(--epic-phase-bottom-radius, 0px);
+  }
+
+  /* its time pill (the estimate;  done and timed, what it took), just BEFORE the review controls, so they end at one
+     right edge row to row (Owen, 2026-10-25):  the small pill a fold's badge is (`EpicFold.css`) */
+  .estimate {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    box-sizing: border-box;
+    justify-content: center;
+    /* one width, whatever it says ("8-12h", "21m"), so it and the review buttons after it line up row to row */
+    min-width: 52px;
+    height: 22px;
+    margin-inline-end: 6px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--epic-card, var(--ui-surface));
+    box-shadow: inset 0 0 0 1px var(--epic-rule, var(--ui-border-color));
+    color: var(--epic-muted, var(--ui-text-muted));
+    font: 600 12px/1 var(--epic-sans, var(--ui-font-family));
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  /* done and timed:  what it took, in done's green;  the estimate is its tooltip (epic `epic-engine` P41) */
+  .estimate.took {
+    color: var(--ui-green-text, var(--ui-green));
+    cursor: help;
+  }
+  .icon.todo {
+    color: var(--ui-grey-text, var(--ui-text-muted));
+  }
+  .icon.active {
+    color: var(--ui-blue-text, var(--ui-blue));
+  }
+  .icon.done {
+    color: var(--ui-green-text, var(--ui-green));
+  }
+  /*
+   * Claude at work on it (`:state(working)`, I147):  the header's turning spinner (`EpicAgents.css`), in blue,
+   * a glyph's size in the icon's box
+   */
+  .icon.working {
+    color: var(--ui-blue-text, var(--ui-blue));
+    cursor: help;
+  }
+  .spinner {
+    display: block;
+    flex: none;
+    width: 1em;
+    height: 1em;
+    box-sizing: border-box;
+    border: 1.5px solid color-mix(in oklab, currentColor 25%, transparent);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: epic-phase-turn 1.1s linear infinite;
+  }
+  @keyframes epic-phase-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: none;
+    }
+  }
+  .id {
+    font-variant-numeric: tabular-nums;
+  }
+  .dot {
+    white-space: pre;
+  }
+
+  /* a phase's lines wrap anywhere:  a long path with no break (`cli/src/commands/{watch,run}Command.ts`) would
+     widen the page at phone width */
+  .body {
+    overflow-wrap: anywhere;
+  }
+
+  /*
+   * ## Plan changed:  the title's mark while it isn't done, an orange pen and how many times
+   * - its own pointer events (the title's words let them through to the fold button):  its tooltip shows
+   */
+  .changed {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 8px;
+    color: var(--ui-orange-text, var(--ui-orange));
+    font-size: 0.8em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    vertical-align: 0.05em;
+    pointer-events: auto;
+  }
+  .changed svg {
+    display: block;
+    width: auto;
+    height: 0.95em;
+    fill: currentColor;
+  }
+
+  /*
+   * ## Dragged to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`)
+   * - a to-do phase on a reviewed page:  its title row the grab cursor
+   * - while dragged:  faded;  the phase it would land beside:  an accent line on that side, over its edge (no room taken)
+   */
+  :host(:state(movable)) ui-section::part(toggle) {
+    cursor: grab;
+  }
+  :host([data-dragged]) {
+    opacity: 0.45;
+  }
+  :host([data-drop="before"]) {
+    box-shadow: 0 -2px 0 var(--epic-accent, var(--ui-link));
+  }
+  :host([data-drop="after"]) {
+    box-shadow: 0 2px 0 var(--epic-accent, var(--ui-link));
+  }
+}

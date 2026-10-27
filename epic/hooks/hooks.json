@@ -1,0 +1,67 @@
+{
+  "description": "spell-epic's hooks:  worktrees made and removed its way, the behind-main notice, the worktree guard, the hourly prune of servers whose checkout is gone, the closing-line reminder on leaving a worktree, the prompt gate, the end-of-turn window move and shared-content commit, and the inbox poller each turn's end starts, which wakes the session when Owen sends from its epic page",
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs\" create",
+            "timeout": 900
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs\" remove" }]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/behind-main.mjs\"", "timeout": 10 },
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs\"", "timeout": 10 },
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/server-prune.mjs\"", "timeout": 20 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "EnterWorktree",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/behind-main.mjs\"", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "ExitWorktree",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/left-worktree.mjs\"", "timeout": 10 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs\"" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handoff.mjs\"" }]
+      },
+      {
+        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs\"" }]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/monitors/listen.mjs\" --hook",
+            "asyncRewake": true,
+            "timeout": 86400
+          }
+        ]
+      }
+    ]
+  }
+}

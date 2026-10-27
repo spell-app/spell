@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">An epic's life</title>
+  <desc id="desc">Nine steps.  1, you type /epic name and what to plan.  2, the session is named for the epic.  3, a worktree and a window of its own.  4, the agent explores and drafts the plan.  5, the page fills with phases, questions and calls.  6, each phase is built and committed, with 7, review rounds, any time, beside it.  8, doc review:  the guide, the changelog.  9, merged into main, and the worktree goes.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1A1C27; }
+    .title { font-size: 21px; font-weight: 700; }
+    .sub { font-size: 13px; fill: #5B5E6E; }
+    .line { font-size: 13px; text-anchor: middle; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 700; fill: #4A3AA0; }
+    .num { font-size: 12px; font-weight: 700; fill: #FFFFFF; text-anchor: middle; }
+    .lbl { font-size: 12px; font-style: italic; fill: #6550CA; }
+    .box { fill: #EFECFB; stroke: #6550CA; stroke-width: 2; }
+    .review { fill: #F1E7D4; stroke: #C9B48A; stroke-width: 2; }
+    .last { fill: #E1DBFA; stroke: #4A3AA0; stroke-width: 2.5; }
+    .badge { fill: #6550CA; stroke: #FAF9FE; stroke-width: 2; }
+    .rbadge { fill: #A88A4E; stroke: #FAF9FE; stroke-width: 2; }
+    .edge { fill: none; stroke: #6550CA; stroke-width: 1.8; }
+    .loop { fill: none; stroke: #A88A4E; stroke-width: 1.8; stroke-dasharray: 6 4; }
+  </style>
+
+  <rect x="1" y="1" width="798" height="418" rx="16" fill="#FAF9FE" stroke="#E4E0F5" stroke-width="2"/>
+  <text class="title" x="40" y="44">An epic's life</text>
+  <text class="sub" x="40" y="66">Plan on a page, build in a worktree, review on the page.</text>
+
+  <!-- edges:  row 1 left to right, down, row 2 right to left -->
+  <path class="edge" d="M196,132 L216,132" marker-end="url(#arrow)"/>
+  <path class="edge" d="M388,132 L408,132" marker-end="url(#arrow)"/>
+  <path class="edge" d="M580,132 L600,132" marker-end="url(#arrow)"/>
+  <path class="edge" d="M688,166 L688,210" marker-end="url(#arrow)"/>
+  <path class="edge" d="M604,250 L584,250" marker-end="url(#arrow)"/>
+  <path class="edge" d="M412,250 L392,250" marker-end="url(#arrow)"/>
+  <path class="edge" d="M220,250 L200,250" marker-end="url(#arrow)"/>
+  <path class="loop" d="M496,288 L496,328" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text class="lbl" x="506" y="312">any time</text>
+
+  <!-- row 1 -->
+  <rect class="box" x="28" y="98" width="168" height="68" rx="12"/>
+  <circle class="badge" cx="46" cy="98" r="11"/><text class="num" x="46" y="102">1</text>
+  <text class="line" x="112" y="128">You type <tspan class="code">/epic name</tspan></text>
+  <text class="line" x="112" y="146">and what to plan</text>
+
+  <rect class="box" x="220" y="98" width="168" height="68" rx="12"/>
+  <circle class="badge" cx="238" cy="98" r="11"/><text class="num" x="238" y="102">2</text>
+  <text class="line" x="304" y="128">The session is named</text>
+  <text class="line" x="304" y="146">for the epic</text>
+
+  <rect class="box" x="412" y="98" width="168" height="68" rx="12"/>
+  <circle class="badge" cx="430" cy="98" r="11"/><text class="num" x="430" y="102">3</text>
+  <text class="line" x="496" y="128">A worktree and a</text>
+  <text class="line" x="496" y="146">window of its own</text>
+
+  <rect class="box" x="604" y="98" width="168" height="68" rx="12"/>
+  <circle class="badge" cx="622" cy="98" r="11"/><text class="num" x="622" y="102">4</text>
+  <text class="line" x="688" y="128">The agent explores</text>
+  <text class="line" x="688" y="146">and drafts the plan</text>
+
+  <!-- row 2 -->
+  <rect class="box" x="604" y="214" width="168" height="72" rx="12"/>
+  <circle class="badge" cx="622" cy="214" r="11"/><text class="num" x="622" y="218">5</text>
+  <text class="line" x="688" y="245">The page fills:</text>
+  <text class="line" x="688" y="263">phases, questions, calls</text>
+
+  <rect class="box" x="412" y="214" width="168" height="72" rx="12"/>
+  <circle class="badge" cx="430" cy="214" r="11"/><text class="num" x="430" y="218">6</text>
+  <text class="line" x="496" y="245">Each phase built</text>
+  <text class="line" x="496" y="263">and committed</text>
+
+  <rect class="box" x="220" y="214" width="168" height="72" rx="12"/>
+  <circle class="badge" cx="238" cy="214" r="11"/><text class="num" x="238" y="218">8</text>
+  <text class="line" x="304" y="245">Doc review:  the</text>
+  <text class="line" x="304" y="263">guide, the changelog</text>
+
+  <rect class="last" x="28" y="214" width="168" height="72" rx="12"/>
+  <circle class="badge" cx="46" cy="214" r="11"/><text class="num" x="46" y="218">9</text>
+  <text class="line" x="112" y="245">Merged into main;</text>
+  <text class="line" x="112" y="263">the worktree goes</text>
+
+  <!-- 7, beside 6 -->
+  <rect class="review" x="412" y="332" width="168" height="52" rx="26"/>
+  <circle class="rbadge" cx="432" cy="332" r="11"/><text class="num" x="432" y="336">7</text>
+  <text class="line" x="496" y="363">Review rounds</text>
+</svg>

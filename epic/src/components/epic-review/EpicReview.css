@@ -1,0 +1,397 @@
+/*
+ * `<epic-review>` (`EpicReview.tsx`):  the review controls -- the line's buttons, the note box and a marked note.
+ * - drawn by `<epic-item>`, an Overview `<epic-section>`, `<epic-phase>` and `<epic-summary>`, which place it
+ *   (`<epic-item>`'s sheet makes a docked note box sticky)
+ * - the same look as the old page runtime's "Review actions" (`plan-doc.css`), centred:
+ *   - every round or square control is a grid with its glyph `place-items: center`
+ *   - `ui-icon`'s own box (a width and a right margin, for an icon before text) is undone through `::part(icon)`
+ * - the controls box is one line tall and centres its children, so it sits on the title's first line
+ * - colours (decision Q20):
+ *   - green:  decided or done (Approve, Make Todo, a pick, a todo's plane)
+ *   - blue:  an ask of Claude (Revisit)
+ *   - grey:  no longer relevant (a todo's x, the note box's x:  Owen, 2026-10-09)
+ *   - Owen's own words (the note box, a marked note, the note bubble):  on the brand's ivory (`--ui-brown-*`)
+ * - THE FILL (`data-fill`, Q20), never solid:
+ *   - a grey outline:  available
+ *   - dashed in its colour:  pressed, not sent
+ *   - outlined in it:  sent, or Claude is on it
+ *   - then CLEARED, a grey outline again, once Claude has handled it
+ *     (Owen's input, taken:  the id chip carries the result, 2026-10-08)
+ *   - the note box's buttons and the pick's letter follow it too
+ * - Public tokens (`--epic-review-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-review;
+
+@layer ui.components.epic-review {
+  :host {
+    --_epic-act-size: var(--epic-review-button-size, 24px);
+    --_epic-act-muted: var(--epic-muted, var(--ui-text-muted, GrayText));
+    --_epic-act-ink: var(--ui-text-color, CanvasText);
+    --_epic-act-paper: var(--ui-background, Canvas);
+    --_epic-act-rule: var(--epic-rule, var(--ui-border-color, GrayText));
+    --_epic-act-green: var(--ui-green, #00853a);
+    --_epic-act-blue: var(--ui-blue, #1a67e0);
+    /* a todo's x (drop it):  no longer relevant, as a canceled item's chip;  darker than a button at rest */
+    --_epic-act-grey: var(--ui-grey, light-dark(#767676, #a0a0a0));
+    /* Owen's voice:  the ivory of his answer card (`EpicAnswer.css`), its accent the brown ink */
+    --_epic-act-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
+    --_epic-act-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-act-focus: var(--ui-focus-color, Highlight);
+    /* the ring of a group WAITING on Owen (Owen, 2026-10-25:  "try 2px border, #666") */
+    --_epic-asks-ring: #666;
+    display: block;
+  }
+  /* the buttons sit in their line or title like the box they draw:  one line tall, never shrunk */
+  :host([shows="buttons"]) {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* ## The line's controls:  bubble, letter, the group */
+  .review-controls {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .review-group {
+    flex: none;
+    /* a pill, round at both ends (Owen, 2026-10-25:  "take these back to pills") */
+    --ui-button-radius: 999px;
+    --ui-buttons-radius: 999px;
+  }
+  .review-controls ui-button::part(button) {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: var(--_epic-act-size);
+    height: var(--_epic-act-size);
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    color: var(--_epic-act-muted);
+    font-size: 12px;
+    line-height: 1;
+  }
+  /* the glyph alone in the square:  no margin kept for text after it */
+  .review-controls ui-button::part(icon) {
+    margin: 0;
+  }
+  .review-controls ui-button:hover::part(button) {
+    color: var(--_epic-act-ink);
+  }
+  /*
+   * A waiting plan's Accept, Revisit and Defer (`buttons="plan"`):  icons in the row's own group, so they line up row to
+   * row;  the group's OWN border (`ui-buttons`' `group` part) 2px #666, solid while it waits on Owen, dotted once he's
+   * pressed one
+   * - Owen, 2026-10-25:  "Dotted when action is being taken, 3px solid when you're waiting on input from me";  then "too
+   *   much, try 2px border, #666.  Also, there are two borders if you zoom in close" (an outline beside the hairline)
+   * - 1px out on every side, so the thicker border never moves what's beside it
+   */
+  .review-group[data-asks]::part(group) {
+    margin: -1px;
+    border: 2px solid var(--_epic-asks-ring);
+  }
+  .review-group[data-asks="taken"]::part(group) {
+    border-style: dotted;
+  }
+  [data-color="green"] {
+    --_act: var(--_epic-act-green);
+  }
+  [data-color="blue"] {
+    --_act: var(--_epic-act-blue);
+  }
+  [data-color="grey"] {
+    --_act: var(--_epic-act-grey);
+  }
+  /* pressed, not sent:  dashed in its colour */
+  ui-button[data-fill="dashed"]::part(button) {
+    outline: 1.5px dashed var(--_act);
+    outline-offset: -2px;
+    color: var(--_act);
+  }
+  /* sent (a revisit now:  taken), not done:  outlined in its colour */
+  ui-button[data-fill="outline"]::part(button) {
+    box-shadow: inset 0 0 0 1.5px var(--_act);
+    color: var(--_act);
+  }
+  /*
+   * a to-do phase's plan accepted (`buttons="accepted"`, epic `epic-engine` I140):  a chosen Approve's look, but a
+   * state, so no hand and no change under the pointer
+   */
+  .review-controls ui-button[data-state="accepted"]::part(button) {
+    cursor: default;
+    color: var(--_act);
+  }
+  /* Claude is on it:  its icon turns (Owen, 2026-10-08, the colour page's example B) */
+  ui-button[data-busy]::part(icon) {
+    animation: epic-review-turn 3s linear infinite;
+  }
+  @keyframes epic-review-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    ui-button[data-busy]::part(icon) {
+      animation: none;
+    }
+  }
+
+  /*
+   * ## A thread's answer (`buttons="thread"` / `"closed"`, drawn by `<epic-thread>`):  the line's group on the
+   * thread's ivory, so on the page's ground, as on an item's line;  no fill to follow, each button in its colour under
+   * the pointer (the old comments' look, epic `airplane` P11)
+   */
+  :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button::part(button) {
+    background: var(--_epic-act-paper);
+  }
+  :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button:hover::part(button) {
+    box-shadow: inset 0 0 0 1.5px var(--_act);
+    color: var(--_act);
+  }
+
+  /* the pick's letter:  a decision, so green, wearing the fill (dashed until sent, then outlined) */
+  .review-pick {
+    --_act: var(--_epic-act-green);
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    width: var(--_epic-act-size);
+    height: var(--_epic-act-size);
+    border: 1.5px solid var(--_act);
+    border-radius: 50%;
+    color: var(--_act);
+    font: 700 12px/1 var(--ui-font-family-mono, ui-monospace, monospace);
+  }
+  .review-pick[data-fill="dashed"] {
+    border-style: dashed;
+  }
+  /* Owen wrote on it:  a speech bubble, outline while a draft, solid once a mark's note, his ivory's ink once sent */
+  .review-noted {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--_epic-act-size);
+    height: var(--_epic-act-size);
+    color: var(--_epic-act-muted);
+    font-size: 13px;
+  }
+  .review-noted[data-sent] {
+    color: var(--_epic-act-ivory-ink);
+  }
+  .review-noted ui-icon::part(icon),
+  .note-box ui-icon::part(icon),
+  .said ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+
+  /* ## The note box:  Owen's voice, on ivory -- the note, and Revisit Later / the x stacked at its right */
+  .note-box {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 2px;
+    padding: 6px;
+    /*
+     * the page's violet, faint, its frame a touch darker (Owen, 2026-10-25, the answer-look page's Q2:  "B ... frame is a
+     * little darker ... 1px shadow rather than 2";  tan before)
+     */
+    border: 1px solid var(--epic-note-frame, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
+    /*
+     * its corners, top and bottom:  an item's or a phase's drawer sets its own (`--epic-note-radius-top` / `-bottom`);
+     * what's inside is rounded to them, less the 7px between (its 1px frame, its 6px padding;  designer rule T68,
+     * Owen, 2026-10-26:  "rounding of outer rings needs to be greater than rounding of inner bits")
+     */
+    --_epic-note-top: var(--epic-note-radius-top, 12px);
+    --_epic-note-bottom: var(--epic-note-radius-bottom, var(--_epic-note-top));
+    --_epic-note-inner-top: max(0px, calc(var(--_epic-note-top) - 7px));
+    --_epic-note-inner-bottom: max(0px, calc(var(--_epic-note-bottom) - 7px));
+    border-radius: var(--_epic-note-top) var(--_epic-note-top) var(--_epic-note-bottom) var(--_epic-note-bottom);
+    background: var(--epic-note-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--_epic-act-paper)));
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--ui-violet, #6550ca) 12%, transparent);
+    font-size: 15px;
+  }
+  /* the note, its Saved mark (a floppy, its tooltip the time) in the lower right corner */
+  .note-text {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /*
+   * grows with its text (Owen, 2026-10-06:  every "tell me more" box), from two lines to half the window:  a
+   * `<ui-textarea grow>` (epic `ui-gaps` P14), this look on its native textarea, its `control` part
+   */
+  .note-input {
+    --ui-input-textarea-grow-max-height: 50vh;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .note-input::part(input) {
+    flex: 1 1 auto;
+    font: inherit;
+  }
+  .note-input::part(control) {
+    min-block-size: 3.2em;
+    margin: 0;
+    box-sizing: border-box;
+    padding: 4px 22px 4px 6px;
+    border: 1px solid var(--_epic-act-rule);
+    /* the box's corners less the 7px between (T68) */
+    border-radius: var(--_epic-note-inner-top) var(--_epic-note-inner-top) var(--_epic-note-inner-bottom)
+      var(--_epic-note-inner-bottom);
+    background: var(--_epic-act-paper);
+    color: var(--_epic-act-ink);
+    font: inherit;
+    line-height: 1.4;
+    resize: vertical;
+  }
+  .note-input::part(control):focus-visible {
+    outline: 2px solid var(--_epic-act-focus);
+    outline-offset: 0;
+  }
+  .note-saved {
+    position: absolute;
+    inset-block-end: 6px;
+    inset-inline-end: 7px;
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    color: var(--_epic-act-muted);
+    font-size: 11px;
+    line-height: 1;
+  }
+  .note-saved[hidden] {
+    display: none;
+  }
+  .note-saved[data-failed] {
+    color: var(--ui-red, #db2828);
+  }
+  .note-actions {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+  /*
+   * Revisit Later (blue:  an ask of Claude), the x (grey:  skip this;  a todo's, drop it), a todo's plane (green):
+   * a grey ring, available;  in its colour when pointed at;
+   * the element's mark wears the fill (`data-mark`):  dashed until sent, outlined once sent
+   */
+  .note-actions > button {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    /*
+     * rounded squares, not circles:  a 28px circle 7px inside the box's corner pokes past its curve (T68);
+     * the first's top corner and the last's bottom one no rounder than the box's corner less the 7px between
+     */
+    border-radius: 5px;
+    background: var(--_epic-act-paper);
+    box-shadow: inset 0 0 0 1px var(--_epic-act-rule);
+    color: var(--_epic-act-muted);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .note-actions > button:first-child {
+    border-start-end-radius: min(5px, var(--_epic-note-inner-top));
+  }
+  .note-actions > button:last-child {
+    border-end-end-radius: min(5px, var(--_epic-note-inner-bottom));
+  }
+  .note-actions > button:is(:hover, :focus-visible, :active),
+  .note-box[data-sent][data-mark="skip"] > .note-actions > button[data-how="skip"],
+  .note-box[data-sent][data-mark="next"] > .note-actions > button[data-how="next"],
+  .note-box[data-sent][data-mark="drop"] > .note-actions > button[data-how="drop"],
+  .note-box[data-sent][data-mark="soon"] > .note-actions > button[data-how="soon"] {
+    box-shadow: inset 0 0 0 1.5px var(--_act);
+    color: var(--_act);
+  }
+  .note-box:not([data-sent])[data-mark="skip"] > .note-actions > button[data-how="skip"],
+  .note-box:not([data-sent])[data-mark="next"] > .note-actions > button[data-how="next"],
+  .note-box:not([data-sent])[data-mark="drop"] > .note-actions > button[data-how="drop"],
+  .note-box:not([data-sent])[data-mark="soon"] > .note-actions > button[data-how="soon"] {
+    box-shadow: none;
+    outline: 1.5px dashed var(--_act);
+    outline-offset: -2px;
+    color: var(--_act);
+  }
+  .note-actions > button:focus-visible {
+    outline: 2px solid var(--_epic-act-focus);
+    outline-offset: 1px;
+  }
+
+  /*
+   * ## A marked note, its box closed:  ONE line -- the note, "revisit soon · sent 10:42" small, Edit (an icon).
+   * Owen's voice:  his ivory, as the note box
+   */
+  .said {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 4px 0 2px;
+    padding: 3px 4px 3px 10px;
+    border: 1px solid color-mix(in oklab, var(--_epic-act-ivory-ink) 25%, transparent);
+    border-radius: 8px;
+    background: var(--_epic-act-ivory);
+    font-size: 15px;
+  }
+  .said > ui-icon {
+    flex: none;
+    align-self: center;
+    color: var(--_epic-act-ivory-ink);
+  }
+  .said-note {
+    flex: 1 1 12em;
+    min-width: 0;
+    margin: 0;
+    line-height: 1.4;
+    white-space: pre-wrap;
+  }
+  /* narrow:  the words and Edit wrap under the note, at its right;  in the ivory's ink (grey on ivory can't be read) */
+  .said-what {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--_epic-act-ivory-ink);
+    font-size: 12px;
+  }
+  .said-edit {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    align-self: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--_epic-act-ink);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .said-edit:hover {
+    background: color-mix(in oklab, var(--_epic-act-ivory-ink) 14%, transparent);
+  }
+  .said-edit:focus-visible {
+    outline: 2px solid var(--_epic-act-focus);
+    outline-offset: 1px;
+  }
+}

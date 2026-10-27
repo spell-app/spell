@@ -1,0 +1,103 @@
+/* GENERATED -- do not edit:  `spell pack build epics` */
+/**
+ * The `epics` pack's script:  registers with the page's Spell UI, which adds the catalog and calls `define()`.
+ * - `define()` imports every family barrel, which defines its tags:  inlined in the script, run only when called.
+ * - `families`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed.
+ */
+import { CATALOG } from "./epics.catalog"
+
+/** The docs bundle's global (`spell-ui.entry.js`). */
+const { SpellUI } = globalThis as unknown as { SpellUI: { registerPack(pack: object): void } }
+
+SpellUI.registerPack({
+  name: "epics",
+  prefix: "epic-",
+  catalog: CATALOG,
+  families: {
+    "epic-actions": "72a6edafd3970fb2",
+    "epic-agents": "291f50e0763bc21f",
+    "epic-answer": "19a494af7badd26c",
+    "epic-aside": "0e8221b602826b56",
+    "epic-ask": "8a7122829ae5394b",
+    "epic-cards": "5d77b1cc000c3346",
+    "epic-change": "7551f7ffa113804b",
+    "epic-choice-rows": "01fb71457617fdab",
+    "epic-choices": "a921595f1dd5212a",
+    "epic-choices-bar": "60a6bfcb7b927fd3",
+    "epic-code": "8e2e6e8011409df5",
+    "epic-comment-pane": "9a43ff10c77ec7b3",
+    "epic-commit": "a917f0619b50549d",
+    "epic-event": "a5014d729d3a65fa",
+    "epic-item": "c80bff9f37e9c49d",
+    "epic-link": "8b1a5977aa1c044d",
+    "epic-list": "45c8a774f306649f",
+    "epic-mark": "e8b0439ca43c9b4f",
+    "epic-net-effect": "ae726a7ca658e97f",
+    "epic-new-item": "db9a9a5aff27a393",
+    "epic-note": "c3835739da5eca70",
+    "epic-original": "68be750c7af4e484",
+    "epic-overview": "7557bc8e069a62bf",
+    "epic-page": "7e0104b5b6a26815",
+    "epic-page-note-head": "85d3a801326b64ff",
+    "epic-phase": "1adc23a0702407c6",
+    "epic-prompt": "81c7f9d5039b7228",
+    "epic-question": "e0e440e5a8ebd013",
+    "epic-review": "edb049a814d66762",
+    "epic-run": "4b361955f72777fe",
+    "epic-run-row": "06950c482bb6118e",
+    "epic-section": "e5e08a7f183b5a06",
+    "epic-send": "bb36d9ca3f16eb77",
+    "epic-send-buttons": "0445f65d6d4c6039",
+    "epic-state-filter": "f2477cf405cb7810",
+    "epic-status": "8a3a59cd421f7002",
+    "epic-summary": "68f6599f8465ac92",
+    "epic-test-run": "93edac11f8f8c448",
+    "epic-text-box": "a0afd548eca6e543",
+    "epic-thread": "948b3e14a6f4d664",
+    "epic-update": "600febd34056482c"
+  },
+  define: () =>
+    Promise.all([
+      import("../epic-actions"),
+      import("../epic-agents"),
+      import("../epic-answer"),
+      import("../epic-aside"),
+      import("../epic-ask"),
+      import("../epic-cards"),
+      import("../epic-change"),
+      import("../epic-choice-rows"),
+      import("../epic-choices"),
+      import("../epic-choices-bar"),
+      import("../epic-code"),
+      import("../epic-comment-pane"),
+      import("../epic-commit"),
+      import("../epic-event"),
+      import("../epic-item"),
+      import("../epic-link"),
+      import("../epic-list"),
+      import("../epic-mark"),
+      import("../epic-net-effect"),
+      import("../epic-new-item"),
+      import("../epic-note"),
+      import("../epic-original"),
+      import("../epic-overview"),
+      import("../epic-page"),
+      import("../epic-page-note-head"),
+      import("../epic-phase"),
+      import("../epic-prompt"),
+      import("../epic-question"),
+      import("../epic-review"),
+      import("../epic-run"),
+      import("../epic-run-row"),
+      import("../epic-section"),
+      import("../epic-send"),
+      import("../epic-send-buttons"),
+      import("../epic-state-filter"),
+      import("../epic-status"),
+      import("../epic-summary"),
+      import("../epic-test-run"),
+      import("../epic-text-box"),
+      import("../epic-thread"),
+      import("../epic-update")
+    ]).then(() => undefined)
+})

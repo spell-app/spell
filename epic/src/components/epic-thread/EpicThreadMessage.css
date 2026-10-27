@@ -1,0 +1,97 @@
+/*
+ * `<epic-thread-message>` (`EpicThreadMessage.tsx`):  one message of a comment's thread.
+ * - TIGHT (Owen, 2026-10-10:  "Tighten up padding a lot"):  2px / 6px inside, 2px between (the thread's gap).
+ * - SMALLER than the page's text (Owen, 2026-10-10:  "Make text in comments smaller"):  0.9em;  every message but
+ *   the last 0.8em, and quieter ("Make font smaller for "not current" things -- everything other than last message").
+ *   The times keep their size.
+ * - Owen's:  plain on the ivory, no box, but the same padding and (clear) border as Claude's ("my text doesn't get
+ *   bordered (but keep spacing the same)").
+ * - Claude's:  a light violet box, its outline only a faint ring drawn as a shadow, its border clear, so nothing
+ *   moves ("lighten border around your replies, make it just border-as-shadow").
+ * - The Done line:  green, a faint green ring, the same way.  The thinking stub:  Claude's box, his words violet and
+ *   italic.
+ * - Claude's latest reply on an orange thread (`latest`):  a stronger orange, a faint orange ring.
+ * - Public tokens are never declared here:  it reads the page's (`--spell-*`, `--ui-*`), with fallbacks.
+ */
+
+@layer ui.components.epic-thread-message;
+
+@layer ui.components.epic-thread-message {
+  :host {
+    --_epic-message-violet: var(--ui-violet, #6435c9);
+    --_epic-message-green: var(--ui-green-text, var(--ui-green, #21ba45));
+    --_epic-message-orange: var(--ui-orange, #f2711c);
+    --_epic-message-ink: var(--spell-ink, var(--ui-text-color, CanvasText));
+    --_epic-message-ivory: var(--spell-rail-bg, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+    --_epic-message-paper: var(--spell-bg, var(--ui-background, Canvas));
+    display: block;
+    position: relative;
+    padding: 2px 6px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 0.9em;
+    line-height: 1.35;
+  }
+  :host([older]) {
+    font-size: 0.8em;
+  }
+  :host([older]) .words {
+    color: color-mix(in srgb, var(--_epic-message-ink) 72%, var(--_epic-message-ivory));
+  }
+  :host(:is([by="claude"], [by="thinking"])) {
+    background: color-mix(in srgb, var(--_epic-message-violet) 9%, var(--_epic-message-paper));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-violet) 16%, transparent);
+  }
+  :host([by="thinking"]) .words {
+    color: var(--_epic-message-violet);
+    font-style: italic;
+  }
+  :host([by="thinking"]) .who {
+    font-style: normal;
+  }
+  :host([by="done"]) {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-green) 25%, transparent);
+    color: var(--_epic-message-green);
+  }
+  /* more orange in the dark:  13% of it on the dark ground reads as brown */
+  :host([latest]) {
+    background: light-dark(
+      color-mix(in srgb, var(--_epic-message-orange) 30%, var(--_epic-message-ivory)),
+      color-mix(in srgb, var(--_epic-message-orange) 40%, var(--_epic-message-ivory))
+    );
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-orange) 45%, transparent);
+  }
+
+  /* its time over the top right corner;  a hidden copy floats there, so the first line stops short of it */
+  :is(.when, .room) {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 22.4px;
+    white-space: nowrap;
+  }
+  .when {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+  }
+  .room {
+    float: right;
+    margin-left: 10px;
+    visibility: hidden;
+  }
+
+  /*
+   * who, in bold, on the first line of the first paragraph:  floated before it, then a plain space, as the old
+   * `<p><b>You:</b> ...` had (`white-space: pre`, so the float keeps it), so the words start where they did
+   */
+  .who {
+    float: left;
+    font-weight: 700;
+  }
+  .who::after {
+    content: " ";
+    font-weight: 400;
+    white-space: pre;
+  }
+}

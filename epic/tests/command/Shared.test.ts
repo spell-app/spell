@@ -1,0 +1,345 @@
+import { execFileSync } from "child_process"
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "fs"
+import { tmpdir } from "os"
+import { dirname, join } from "path"
+import { afterAll, describe, expect, test } from "vite-plus/test"
+
+import { Shared } from "spell-epic/command/Shared"
+
+/**
+ * A throwaway repo `spell-app` with a shared repo beside it, `spell-app-dev`.
+ * - the main checkout's content folders start as real (ignored) folders, as right after the cutover
+ * - worktree `wt` starts with none
+ */
+const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "shared-")))
+const MAIN = join(TEMP, "spell-app")
+const PEER = join(TEMP, "spell-app-dev")
+const WT = join(MAIN, ".claude", "worktrees", "wt")
+afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
+
+mkdirSync(MAIN)
+git(MAIN, "init", "-q", "-b", "main")
+// the shared repo beside it, by the repo's config (its default, written out)
+put("package.json", "{}")
+put(".epic/config.json5", '// where the shared repo is\n{ "contentFolder": "../spell-app-dev" }\n')
+put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/sagas\n/goals\n/agents\n/.claude/worktrees\n")
+git(MAIN, "add", "-A")
+commit(MAIN, "first")
+put("pages/index.html", "<h1>Docs</h1>\n")
+put("epics/x/x.plan.html", "<h1>X</h1>\n")
+put("guides/a.html", "<h1>A</h1>\n")
+put("templates/t.html", "<h1>T</h1>\n")
+put("brand/pony.html", "<h1>Pony</h1>\n")
+put("sagas/sagas.json5", '{ "sagas": [] }\n')
+put("goals/index.html", "<h1>Goals</h1>\n")
+put("agents/PAPERCUTS.md", "# Papercuts\n")
+git(MAIN, "worktree", "add", "-q", "-b", "wt", WT)
+
+const config = Shared.configOf(MAIN)
+
+describe("sharedConfig()", () => {
+  test("the shared repo beside the main checkout, from any checkout;  the default links", () => {
+    expect(config).toEqual({
+      main: MAIN,
+      dir: PEER,
+      worktrees: [join(MAIN, ".claude", "worktrees")],
+      links: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"]
+    })
+    expect(Shared.configOf(WT)).toEqual(config)
+  })
+
+  test("links are the checkout's OWN manifest's:  a branch from before the reorg keeps its old content link", () => {
+    const older = join(TEMP, "older")
+    mkdirSync(older)
+    writeFileSync(
+      join(older, "package.json"),
+      JSON.stringify({ shared: { links: ["packages/docs/content", "goals", "agents"] } })
+    )
+    expect(Shared.configOf(older).links).toEqual(["packages/docs/content", "goals", "agents"])
+  })
+})
+
+describe("before init", () => {
+  test("status:  no shared repo;  main's folders are real, the worktree has none", () => {
+    const status = new Shared({ config }).status()
+    expect(status).toMatchObject({ exists: false, isRepo: false })
+    expect(status.checkouts.map(({ checkout, links }) => [checkout, links.map((link) => link.state)])).toEqual([
+      [".", Array(7).fill("real")],
+      [".claude/worktrees/wt", Array(7).fill("missing")]
+    ])
+  })
+})
+
+describe("init --import, then link", () => {
+  test("copies main's folders into a new repo, one commit", () => {
+    expect(new Shared({ config }).init({ importFrom: MAIN })).toBe("imported")
+    expect(readFileSync(join(PEER, "epics/x/x.plan.html"), "utf8")).toBe("<h1>X</h1>\n")
+    expect(git(PEER, "log", "--format=%s")).toMatch(/^Import from spell-app [0-9a-f]+$/)
+    expect(readFileSync(join(PEER, ".gitignore"), "utf8")).toContain("pages/details/")
+    expect(new Shared({ config }).init({ importFrom: MAIN })).toBe("exists")
+  })
+
+  test("main:  identical real folders become links;  the worktree:  missing ones are made", () => {
+    expect(new Shared({ config }).link(MAIN).map((report) => report.action)).toEqual(Array(7).fill("replaced"))
+    expect(new Shared({ config }).link(WT).map((report) => report.action)).toEqual(Array(7).fill("linked"))
+    expect(lstatSync(join(WT, "goals")).isSymbolicLink()).toBe(true)
+    expect(readFileSync(join(WT, "goals/index.html"), "utf8")).toBe("<h1>Goals</h1>\n")
+    expect(new Shared({ config }).status().checkouts.flatMap(({ links }) => links.map((link) => link.state))).toEqual(
+      Array(14).fill("ok")
+    )
+    expect(git(MAIN, "status", "--porcelain")).toBe("")
+  })
+
+  test("a real folder that differs is left alone, and the shared copy untouched", () => {
+    rmSync(join(WT, "agents"))
+    put("agents/PAPERCUTS.md", "# Papercuts\n\n- the worktree's own\n", WT)
+    const report = new Shared({ config }).link(WT).find((each) => each.path === "agents")
+    expect(report).toEqual({ path: "agents", state: "real", action: "diverged" })
+    expect(readFileSync(join(PEER, "agents/PAPERCUTS.md"), "utf8")).toBe("# Papercuts\n")
+    rmSync(join(WT, "agents"), { recursive: true })
+    expect(new Shared({ config }).link(WT).find((each) => each.path === "agents")?.action).toBe("linked")
+  })
+
+  test("a folder a branch still tracks:  `tracked`, left for migrate", () => {
+    const old = join(MAIN, ".claude", "worktrees", "old")
+    git(MAIN, "worktree", "add", "-q", "-b", "old", old)
+    put("goals/index.html", "<h1>Old goals</h1>\n", old)
+    git(old, "add", "-f", "goals/index.html")
+    commit(old, "goals, tracked")
+    expect(new Shared({ config }).link(old).find((each) => each.path === "goals")).toEqual({
+      path: "goals",
+      state: "tracked",
+      action: "tracked"
+    })
+  })
+})
+
+describe("unlinkDropped()", () => {
+  // epic-eject T11:  the templates left the content folder for spell-epic, and the manifest dropped `templates`
+  test("a link to a shared folder the manifest no longer names goes, dangling or not;  real folders and other links stay", () => {
+    mkdirSync(join(PEER, "templates"), { recursive: true })
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/templates", join(WT, "templates")])
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/gone", join(WT, "gone")])
+    execFileSync("ln", ["-s", "../../../../elsewhere/templates", join(WT, "other")])
+    const shared = new Shared({ config })
+    expect(shared.unlinkDropped(WT)).toEqual([
+      { path: "gone", state: "dropped", action: "unlinked" },
+      { path: "templates", state: "dropped", action: "unlinked" }
+    ])
+    expect(lstatSync(join(WT, "templates"), { throwIfNoEntry: false })).toBeUndefined()
+    expect(lstatSync(join(WT, "other")).isSymbolicLink()).toBe(true)
+    // the links the manifest names, and main's real (ignored) templates folder, untouched
+    expect(lstatSync(join(WT, "goals")).isSymbolicLink()).toBe(true)
+    expect(shared.unlinkDropped(MAIN)).toEqual([])
+    expect(readFileSync(join(MAIN, "templates/t.html"), "utf8")).toBe("<h1>T</h1>\n")
+    // a checkout whose manifest still names it keeps it
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/templates", join(WT, "templates")])
+    expect(shared.unlinkDropped(WT, [...config.links, "templates"])).toEqual([])
+    rmSync(join(WT, "templates"))
+    rmSync(join(WT, "other"))
+    rmSync(join(PEER, "templates"), { recursive: true })
+  })
+})
+
+describe("removing a linked worktree", () => {
+  test("`git worktree remove` deletes the links, never the shared folders behind them", () => {
+    const gone = join(MAIN, ".claude", "worktrees", "gone")
+    git(MAIN, "worktree", "add", "-q", "-b", "gone", gone)
+    new Shared({ config }).link(gone)
+    git(MAIN, "worktree", "remove", gone)
+    expect(existsSync(gone)).toBe(false)
+    expect(readFileSync(join(PEER, "goals/index.html"), "utf8")).toBe("<h1>Goals</h1>\n")
+    expect(existsSync(join(PEER, "epics/x/x.plan.html"))).toBe(true)
+  })
+})
+
+describe("sharedGroup()", () => {
+  test.each([
+    ["epics/seo/seo.plan.html", "epic seo"],
+    ["epics/seo/parts/p1.htm", "epic seo"],
+    ["epics/README.md", "epics"],
+    ["guides/solid/solid-2.md", "guides/solid"],
+    ["guides/changelog.html", "guides/changelog.html"],
+    ["goals/spell/motivation.html", "goals/spell"],
+    ["goals/index.html", "goals"],
+    ["sagas/sagas.json", "sagas"],
+    ["sagas/index.html", "sagas"],
+    ["sagas/epics/epics.saga.html", "saga epics"],
+    ["sagas/epics/parts/overview.html", "saga epics"],
+    ["agents/wwod/WWOD.md", "agents"],
+    ["pages/index.html", "pages"],
+    ["templates/t.html", "templates"],
+    ["ui/index.html", "ui"],
+    ["brand/pony.html", "brand"],
+    ["README.md", "other"],
+    ["packages/docs/content/epics", "other"]
+  ])("%s:  %s", (path, group) => expect(Shared.group(path)).toBe(group))
+})
+
+describe("commitShared()", () => {
+  test("one commit per group, each with only its own files;  trailers name the turn's checkout and session", () => {
+    put("epics/x/x.plan.html", "<h1>X, edited</h1>\n", WT)
+    put("epics/x/parts/p1.htm", "<p>P1</p>\n", WT)
+    put("epics/y/y.plan.html", "<h1>Y</h1>\n", WT)
+    put("guides/a.html", "<h1>A, edited</h1>\n", WT)
+    const shas = new Shared({ config }).commit({ session: "abc123", checkout: WT })
+    expect(shas).toHaveLength(3)
+    expect(commits(3)).toEqual([
+      ["auto: epic x", "epics/x/parts/p1.htm epics/x/x.plan.html"],
+      ["auto: epic y", "epics/y/y.plan.html"],
+      ["auto: guides/a.html", "guides/a.html"]
+    ])
+    expect(git(PEER, "log", "-1", "--format=%B")).toBe("auto: guides/a.html\n\nTurn-end: wt\nSession: abc123")
+    expect(git(PEER, "status", "--porcelain")).toBe("")
+    expect(existsSync(join(PEER, ".git", "spell-shared-commit.lock"))).toBe(false)
+  })
+
+  test("nothing pending:  no commit", () => {
+    const head = git(PEER, "rev-parse", "HEAD")
+    expect(new Shared({ config }).commit({ checkout: MAIN })).toEqual([])
+    expect(git(PEER, "rev-parse", "HEAD")).toBe(head)
+  })
+
+  test("a deletion lands in its group;  a rename across groups:  the new path in its group, the deletion in the old", () => {
+    rmSync(join(PEER, "epics/y/y.plan.html"))
+    renameSync(join(PEER, "guides/a.html"), join(PEER, "agents/a.html"))
+    new Shared({ config }).commit({ checkout: MAIN })
+    expect(commits(3)).toEqual([
+      ["auto: agents", "agents/a.html"],
+      ["auto: epic y", "epics/y/y.plan.html"],
+      ["auto: guides/a.html", "guides/a.html"]
+    ])
+    expect(git(PEER, "show", "--format=", "--name-status", "HEAD")).toBe("D\tguides/a.html")
+    expect(git(PEER, "log", "-1", "--format=%B")).toBe("auto: guides/a.html\n\nTurn-end: main")
+  })
+
+  test("something staged by hand, even a rename:  still each path in its own group", () => {
+    renameSync(join(PEER, "agents/a.html"), join(PEER, "guides/b.html"))
+    git(PEER, "add", "-A")
+    new Shared({ config }).commit({ checkout: MAIN })
+    expect(commits(2)).toEqual([
+      ["auto: agents", "agents/a.html"],
+      ["auto: guides/b.html", "guides/b.html"]
+    ])
+  })
+})
+
+describe("linkEngine()", () => {
+  // a repo of its own, with spell-epic beside it:  `engineFolder`'s default
+  const top = join(TEMP, "engine")
+  const repo = join(top, "spell-app")
+  const engine = join(top, "spell-epic")
+  mkdirSync(join(engine, "bin"), { recursive: true })
+  mkdirSync(repo, { recursive: true })
+  git(repo, "init", "-q", "-b", "main")
+  const shared = new Shared({ checkout: repo, config: { main: repo, dir: join(top, "dev"), worktrees: [], links: [] } })
+
+  test("a branch that doesn't ignore spell-epic (from before the switch):  nothing linked", () => {
+    expect(shared.linkEngine(repo)).toBeUndefined()
+    expect(existsSync(join(repo, "spell-epic"))).toBe(false)
+  })
+
+  test("ignored:  linked, by a relative path;  again:  ok", () => {
+    put(".gitignore", "/spell-epic\n", repo)
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "missing", action: "linked" })
+    expect(lstatSync(join(repo, "spell-epic")).isSymbolicLink()).toBe(true)
+    expect(realpathSync(join(repo, "spell-epic"))).toBe(engine)
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "ok", action: "ok" })
+  })
+
+  test('a real folder there is never removed;  engineFolder "":  nothing linked', () => {
+    rmSync(join(repo, "spell-epic"))
+    mkdirSync(join(repo, "spell-epic"))
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "real", action: "diverged" })
+    rmSync(join(repo, "spell-epic"), { recursive: true })
+    put(".epic/config.json5", '{ "engineFolder": "" }\n', repo)
+    expect(shared.linkEngine(repo)).toBeUndefined()
+  })
+})
+
+describe("linkContentBeside()", () => {
+  // a repo whose worktrees and content folder are both beside it (epic `epic-eject` T31)
+  const top = join(TEMP, "beside")
+  const repo = join(top, "spell-app")
+  const content = join(top, "spell-app.epics")
+  const trees = join(top, "spell-app.worktrees")
+  const link = join(trees, "spell-app.epics")
+  mkdirSync(content, { recursive: true })
+  mkdirSync(repo, { recursive: true })
+  git(repo, "init", "-q", "-b", "main")
+  put(
+    ".epic/config.json5",
+    '{ "contentFolder": "../spell-app.epics", "worktreesFolder": "../spell-app.worktrees" }\n',
+    repo
+  )
+  const shared = new Shared({ checkout: repo, config: { main: repo, dir: content, worktrees: [trees], links: [] } })
+
+  test("no worktrees folder yet:  nothing linked", () => {
+    expect(shared.linkContentBeside()).toBeUndefined()
+  })
+
+  test("linked, by a relative path:  ../spell-app.epics from a worktree's root reaches the content folder;  again:  ok", () => {
+    mkdirSync(join(trees, "seo"), { recursive: true })
+    const path = "../spell-app.worktrees/spell-app.epics"
+    expect(shared.linkContentBeside()).toEqual({ path, state: "missing", action: "linked" })
+    expect(readlinkSync(link)).toBe("../spell-app.epics")
+    expect(realpathSync(join(trees, "seo", "../spell-app.epics"))).toBe(content)
+    expect(shared.linkContentBeside()).toEqual({ path, state: "ok", action: "ok" })
+  })
+
+  test("a dangling link is made again;  a real folder there is never removed", () => {
+    rmSync(link)
+    symlinkSync("../gone", link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "dangling", action: "linked" })
+    expect(realpathSync(link)).toBe(content)
+    rmSync(link)
+    mkdirSync(link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "real", action: "diverged" })
+    expect(lstatSync(link).isDirectory()).toBe(true)
+    rmSync(link, { recursive: true })
+  })
+
+  test("worktrees nested in the checkout (.claude/worktrees):  nothing linked", () => {
+    put(".epic/config.json5", '{ "contentFolder": "../spell-app.epics" }\n', repo)
+    mkdirSync(join(repo, ".claude", "worktrees"), { recursive: true })
+    expect(shared.linkContentBeside()).toBeUndefined()
+  })
+})
+
+/** The shared repo's last `count` commits, oldest first:  `[subject, files changed]`. */
+function commits(count: number): string[][] {
+  return git(PEER, "log", `-${count}`, "--reverse", "--format=%H")
+    .split("\n")
+    .map((sha) => [
+      git(PEER, "log", "-1", "--format=%s", sha),
+      git(PEER, "show", "--format=", "--name-only", sha).split("\n").join(" ")
+    ])
+}
+
+/** Write `text` at `path` under `root` (default the main checkout), making folders. */
+function put(path: string, text: string, root = MAIN): void {
+  mkdirSync(dirname(join(root, path)), { recursive: true })
+  writeFileSync(join(root, path), text)
+}
+
+/** `git <args>` in `cwd`, trimmed output. */
+function git(cwd: string, ...args: string[]): string {
+  return execFileSync("git", args, { cwd, encoding: "utf8" }).trim()
+}
+
+/** Commit everything staged in `cwd` as `subject`, with a throwaway identity. */
+function commit(cwd: string, subject: string): void {
+  git(cwd, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", subject)
+}

@@ -1,0 +1,272 @@
+/*
+ * `<epic-answer>` (EpicAnswer.tsx), `<epic-reply>` (EpicReply.tsx), `<epic-more>` (EpicMore.tsx):
+ * an item's answer, reply and More Details cards.
+ * ONE card shape (a heading line, then the slotted body), calm (Owen, 2026-10-25:  "answer/reply cards are really
+ * ugly, try to spiff them up"):  a white card, a 1px rule and one line of shadow, on the drawer's light body
+ * - the answer:  a quiet line, no card (I111)
+ * - a reply:  who said it first, as a small round mark and their name;  the date quiet at the right (`.dated`)
+ *   - Claude's:  white, its mark Claude's terracotta
+ *   - Owen's (`.owen`):  his violet, faint, as his comment box;  its mark violet
+ * - More Details:  plain, its heading a small muted eyebrow that folds it
+ * - every card folds, the folded box `hidden="until-found"`:
+ *   - the answer, a reply and a status card by their band, the chevron first
+ *     (`fold.button()`, `Fold.css`;  Owen, 2026-10-08)
+ *   - More Details by its eyebrow
+ * - also `<epic-status>`'s card (`.status`, P13), which adopts this sheet:  its fills in `EpicStatus.css`
+ * - Shared look from `<epic-page>`'s `:host`, each with a private fallback:
+ *   `--epic-part-gap` (between an item's parts), `--epic-rule`.
+ * - Public tokens (`--epic-answer-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-answer.types, ui.components.epic-answer.variations;
+
+@layer ui.components.epic-answer.types {
+  :host {
+    --_epic-card-ink: var(--ui-text-color, CanvasText);
+    /* a white card on the drawer;  in the dark, a step up from the page */
+    --_epic-card-fill: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
+    --_epic-card-accent: var(--ui-text-muted, GrayText);
+    display: block;
+    margin-top: var(--epic-part-gap, 8px);
+  }
+  :host([hidden]),
+  :host(:state(unneeded)) {
+    display: none;
+  }
+
+  /*
+   * The THREAD (epic `epic-engine` P27, Owen's layout A):  an item's replies, a redundant answer's body and its
+   * status lines are ONE brown block, in the order said.  Each card in it carries the block's ground and padding,
+   * no gap between them;  the first rounds the top, the last the bottom (`AnswerThread`'s places, as `:state()`s).
+   * - its ground:  `--epic-thread-fill`, which the item's details set (inherited through the slot), else the same mix
+   */
+  :host(:state(in-thread)) {
+    --_epic-thread-fill: var(--epic-thread-fill, color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent));
+    margin-top: 0;
+    padding: 4px 6px;
+    background: var(--_epic-thread-fill);
+  }
+  :host(:state(thread-start)) {
+    margin-top: var(--epic-part-gap, 8px);
+    padding-top: 6px;
+    border-start-start-radius: 12px;
+    border-start-end-radius: 12px;
+  }
+  :host(:state(thread-end)) {
+    padding-bottom: 6px;
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+  /* a redundant answer's body, in the thread:  Owen's words on the block's ground, no card of their own */
+  :host(:state(redundant)) .answer {
+    border-color: transparent;
+    background: transparent;
+  }
+  :host(:state(redundant)) .body {
+    padding: 2px 4px;
+  }
+
+  /* Claude's newest reply, not seen yet:  an orange rule (changed since you looked), and NEW by its name */
+  .reply.new {
+    border-color: color-mix(in oklab, var(--ui-orange, #f2711c) 55%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-orange, #f2711c) 25%, transparent);
+  }
+  .reply.new .who {
+    flex: 0 1 auto;
+  }
+  .new-tag {
+    flex: none;
+    align-self: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ui-orange, #f2711c);
+    color: var(--ui-orange-on, #fff);
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+  }
+
+  /* the band and rule mix the fill and accent ON the card box, where `.reply` / `.more` set theirs */
+  .answer,
+  .reply,
+  .more,
+  .status {
+    /* no band:  the heading sits on the card;  one quiet rule round it, one line of shadow under it */
+    --_epic-card-band: transparent;
+    --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));
+    overflow: hidden;
+    border: 1px solid var(--_epic-card-rule);
+    border-radius: 10px;
+    background: var(--_epic-card-fill);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.05), rgb(0 0 0 / 0.35));
+    color: var(--_epic-card-ink);
+  }
+  .header {
+    padding: 6px 10px 2px;
+    background: var(--_epic-card-band);
+    /* the accent, deepened toward the ink:  4.5:1 on the card in both schemes (axe) */
+    color: color-mix(in oklab, var(--_epic-card-accent) 75%, var(--_epic-card-ink));
+    font-size: 0.85em;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  /* a band with a date (`<epic-reply>`):  who and what about on the left, free to wrap within it;
+     the date pinned right on the TOP line (first baselines), never wrapping under them, at any width */
+  .header.dated {
+    display: flex;
+    align-items: baseline;
+    gap: 2px 12px;
+  }
+  .who {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .date {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--ui-text-muted, GrayText);
+    font-size: 0.92em;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  /* who said it:  a small round mark with their initial, before their name (`--_epic-who-mark`, `--_epic-who-initial`) */
+  .reply .who::before {
+    content: var(--_epic-who-initial, "C");
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--_epic-who-mark);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: 1px;
+  }
+  .header[hidden] {
+    display: none;
+  }
+  .title {
+    font-weight: 400;
+  }
+  .body {
+    padding: 4px 10px 10px;
+  }
+  /* folded by its band (`fold.button()`, `Fold.css`):  `until-found` keeps it findable, so drawn as nothing */
+  [hidden="until-found"] {
+    display: block;
+    content-visibility: hidden;
+    padding: 0;
+  }
+  .body.empty {
+    display: none;
+  }
+  ::slotted(:is(p, ul, ol)) {
+    margin-block: 0.35em;
+  }
+  ::slotted(:is(ul, ol)) {
+    padding-inline-start: 1.2em;
+  }
+  /* the first of the body:  the first child that isn't headed for a named slot (an answer's `slot="title"`) */
+  ::slotted(:nth-child(1 of :not([slot]))) {
+    margin-top: 0;
+  }
+  ::slotted(:last-child) {
+    margin-bottom: 0;
+  }
+
+  /*
+   * The ANSWER:  a quiet line, no card (Owen, 2026-10-25, the answer-look page's Q1, A):  a green check and "Answer",
+   * then the answer in the item's own ink;  a body under it, unboxed
+   */
+  .answer {
+    overflow: visible;
+    border: none;
+    background: none;
+  }
+  .answer > .header {
+    padding: 2px 0;
+    background: none;
+    color: var(--_epic-card-ink);
+    font-weight: 400;
+  }
+  .answer > .header > .label {
+    color: var(--ui-green-text, var(--ui-green, #21ba45));
+    font-weight: 700;
+  }
+  .answer > .header > .label::before {
+    content: "✓ ";
+  }
+
+  /* More Details:  a plain card, its heading a small eyebrow with the fold chevron */
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 10px;
+    border: none;
+    background: none;
+    color: var(--ui-text-muted, GrayText);
+    font: 600 0.78em / 1.4 inherit;
+    letter-spacing: 0.04em;
+    text-align: start;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .toggle:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+  .chevron {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: rotate var(--epic-turn-duration, 0.12s);
+  }
+  .more:has(> .body:not([hidden])) .chevron {
+    rotate: 90deg;
+  }
+  .more > .body {
+    padding-top: 0;
+  }
+  .more > .body[hidden] {
+    display: block;
+    content-visibility: hidden;
+    padding: 0;
+  }
+}
+
+@layer ui.components.epic-answer.variations {
+  /* Claude's:  white, its name and mark Claude's terracotta */
+  .reply {
+    --_epic-who-mark: light-dark(#c96442, #d97757);
+    --_epic-card-accent: light-dark(#a8502f, #e59a7c);
+  }
+  /* Owen's voice:  his violet, faint, as his comment box (I111) */
+  .reply.owen {
+    --_epic-who-initial: "O";
+    --_epic-who-mark: var(--ui-violet, #6550ca);
+    /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
+    --_epic-card-fill: color-mix(
+      in oklab,
+      var(--ui-violet, #6550ca) 5%,
+      light-dark(#fff, var(--ui-background, Canvas))
+    );
+    --_epic-card-rule: color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent);
+    --_epic-card-accent: var(--ui-violet-text, var(--ui-violet, #6550ca));
+  }
+  .more {
+    --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));
+  }
+}

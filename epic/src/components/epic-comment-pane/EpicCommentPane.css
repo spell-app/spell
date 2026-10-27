@@ -1,0 +1,81 @@
+/*
+ * `<epic-comment-pane>` (`EpicCommentPane.tsx`):  the floating pane Owen writes a new comment in, the old comments'
+ * look kept as it was (`spell-comments.css` until epic `epic-engine` P3).
+ * - Small, fixed on the screen, ivory as the toolbar (Owen's voice), lifted off the page by a shadow (Owen,
+ *   2026-10-10:  "make the modal bg beige so it stands out");  8px inside on every side ("reduce padding inside
+ *   bullhorn frame to 8px").
+ * - It saves as it's typed, so no buttons below its text, and no dashed "not saved" border.
+ * - See-through until placed (`:state(placed)`), so it never shows where it was added before it moves under its
+ *   text;  its field takes the focus meanwhile (a hidden one couldn't).
+ * - Reads the page's tokens (`--spell-*`), with Spell UI's as fallbacks;  declares no public token.
+ */
+
+@layer ui.components.epic-comment-pane;
+
+@layer ui.components.epic-comment-pane {
+  :host {
+    --_epic-pane-ivory: var(--spell-rail-bg, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+    --_epic-pane-ivory-ink: var(--spell-rail-ink, var(--ui-brown-text, light-dark(#534323, #eaddc4)));
+    --_epic-pane-rule: var(--spell-rail-rule, color-mix(in srgb, var(--_epic-pane-ivory-ink) 22%, transparent));
+    --_epic-pane-hover: var(
+      --spell-rail-hover,
+      color-mix(in srgb, var(--_epic-pane-ivory-ink) 9%, var(--_epic-pane-ivory))
+    );
+    --_epic-pane-muted: var(--spell-muted, var(--ui-text-muted, GrayText));
+    position: fixed;
+    z-index: 1000;
+    display: block;
+    box-sizing: border-box;
+    width: min(380px, calc(100vw - 16px));
+    outline: none;
+  }
+  :host(:not(:state(placed))) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pane {
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid var(--_epic-pane-rule);
+    border-radius: 10px;
+    background: var(--_epic-pane-ivory);
+    box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
+  }
+  /* its header:  the bullhorn, a few words of what it's on (its tooltip the whole), the floppy, ×;  drags the pane */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+    color: var(--_epic-pane-ivory-ink);
+    font-size: 14.4px;
+    cursor: move;
+    user-select: none;
+    touch-action: none;
+  }
+  .headline {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-style: italic;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* the floppy:  saved (its tooltip the time), red when the last save failed */
+  .floppy {
+    color: var(--_epic-pane-muted);
+    font-size: 12.8px;
+  }
+  .floppy[data-failed] {
+    color: var(--ui-red, #db2828);
+  }
+  .floppy > * {
+    pointer-events: none;
+  }
+  /* the trash and ×:  no ring, a tint under the pointer (Owen, 2026-10-10:  "no round border like everything else") */
+  .tool {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-basic-background-hover: var(--_epic-pane-hover);
+    flex: none;
+  }
+}

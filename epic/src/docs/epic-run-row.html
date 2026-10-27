@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-run-row</title>
+    <meta
+      name="description"
+      content="The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then Owen&#39;s answer."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-run-row&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-run-row&gt;
+            <ui-header>The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then Owen&#39;s answer.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">One row of a run page: a thing a command asks about, and Owen's answer to it.</p>
+          <p class="meta">
+            For anyone writing a command that asks Owen on a page, or changing this element.<br />
+            <ui-label size="mini" color="green">built</ui-label> in
+            <a href="/spell-epic/src/components/epic-run-row/" target="src-spell-epic-src-components-epic-run-row"
+              ><code title="spell-epic/src/components/epic-run-row/">epic-run-row/</code></a
+            >
+            (epic <code>epic-engine</code> P23).<br />
+            Its vocabulary (every name it uses):
+            <a
+              href="/spell-epic/src/components/epic-run-row/EpicRunRow.en.ts"
+              target="src-spell-epic-src-components-epic-run-row-epicrunrow-en-ts"
+              ><code title="spell-epic/src/components/epic-run-row/EpicRunRow.en.ts">EpicRunRow.en.ts</code></a
+            >.<br />
+            Its component:
+            <a
+              href="/spell-epic/src/components/epic-run-row/EpicRunRow.tsx"
+              target="src-spell-epic-src-components-epic-run-row-epicrunrow-tsx"
+              ><code title="spell-epic/src/components/epic-run-row/EpicRunRow.tsx">EpicRunRow.tsx</code></a
+            >, with its style sheet (<code>.css</code>) and tests beside it.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>Two rows, as a run page draws them: one with alternatives, one with a tick box and details.</p>
+            <epic-run-row
+              columns='[{"key":"english","label":"English"},{"key":"gender","label":"Gender"}]'
+              answer-label="Spanish"
+              row='{"id":"task","cells":{"english":"Task","gender":"f"},"value":"Tarea","alternatives":["Faena","Labor"]}'
+            ></epic-run-row>
+            <epic-run-row
+              columns='[{"key":"english","label":"English"},{"key":"gender","label":"Gender"}]'
+              answer-label="Spanish"
+              row='{"id":"done","cells":{"english":"done","gender":""},"value":"hecho","tick":{"label":"Use for every project"},"details":["line 3:  the task is done","line 9:  mark it done"]}'
+            ></epic-run-row>
+            <epic-run-row
+              columns='[{"key":"english","label":"English"},{"key":"gender","label":"Gender"}]'
+              answer-label="Spanish"
+              row='{"id":"todo","cells":{"english":"Todo","gender":"m"},"value":"Pendiente"}'
+              taken="2026-10-23T19:12:00.000Z"
+              answer='{"outcome":"typed","value":"Por hacer","at":"2026-10-23T19:13:00.000Z"}'
+            ></epic-run-row>
+            <p class="meta">
+              Live: the real element, drawn by the epics pack this page loads. Outside a run page nothing saves.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Never written in a page: <code>&lt;epic-run&gt;</code> draws one per row in its shadow root, giving it
+              the row, the columns and Owen's answer as properties. In markup, they're JSON.
+            </p>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <ul>
+              <li>
+                Its parent:
+                <a href="epic-run.html" target="src-packages-epics-docs-epic-run-html"><code>&lt;epic-run&gt;</code></a
+                >'s table, in its shadow root.
+              </li>
+              <li>Its children: none.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                    <th>Meaning</th>
+                    <th>Required</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>row</code></td>
+                    <td>a <code>RunRow</code></td>
+                    <td>
+                      The row, as the command wrote it: <code>id</code>, <code>cells</code>, <code>value</code> (the
+                      proposal), <code>alternatives</code>, <code>tick</code>, <code>details</code>.
+                    </td>
+                    <td>yes</td>
+                  </tr>
+                  <tr>
+                    <td><code>columns</code></td>
+                    <td>a list of <code>{ key, label }</code></td>
+                    <td>Which cells to show, in order.</td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>answer</code></td>
+                    <td>a <code>RunAnswer</code></td>
+                    <td>Owen's answer so far; none: the proposal.</td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>answer-label</code></td>
+                    <td>text</td>
+                    <td>The answer column's name: the box's name for a screen reader.</td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>taken</code></td>
+                    <td>a time, ISO</td>
+                    <td>
+                      When the command took the row (acted on it; epic <code>epic-engine</code> P25). An answer saved
+                      after it shows the orange note.
+                    </td>
+                    <td>no</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Sent when</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>epic-run-answered</code></td>
+                      <td>
+                        Owen typed (<code>now: false</code>), picked or ticked (<code>now: true</code>);
+                        <code>outcome</code>: <code>accepted</code>, <code>picked</code> or <code>typed</code>.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Its cells on the table's columns; the answer cell holds the box, the pick, the tick box, the details.</li>
+              <li>The pick: small pills, the proposal's dashed until chosen; the chosen one raised and inked, as a segmented control's thumb.</li>
+              <li>Answered differently from the proposal: an orange box, an orange edge, and a round button back.</li>
+              <li>Taken by the command: a quiet check and <code>taken</code> beside the box, the time in its tooltip.</li>
+              <li>
+                Changed after it was taken: an orange note under the box, <code>changed after the run took it</code>;
+                the command may still pick the change up.
+              </li>
+              
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>Nobody: <code>&lt;epic-run&gt;</code> draws it, from the run's <code>run.json5</code>.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-23 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

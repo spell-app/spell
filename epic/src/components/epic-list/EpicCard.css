@@ -1,0 +1,93 @@
+/*
+ * `<epic-card>` (`EpicCard.tsx`):  one epic's card on the Epics page, the look `spell-doc.css` gave its `<ui-card>`
+ * before epic `epic-engine` P3.
+ * - a Spell UI card, filling the host:  the host is the box its list's grid places
+ * - the star at its top right, the day it was last worked on at its bottom right:  both absolute, over the card, so
+ *   its title and meta line keep room for them (`padding-right`)
+ * - the page's tokens (`--spell-*`, `spell-doc.css`), each with a fallback for a card drawn outside a docs page
+ * - Units:  px and em, never rem (WWOD §18).
+ */
+
+@layer ui.components.epic-card.types, ui.components.epic-card.content;
+
+@layer ui.components.epic-card.types {
+  :host {
+    /* the docs pages' card grids (`ui-cards.spell-grid`):  dense, as the source's boxes */
+    --ui-font-size: 15.04px;
+    --ui-card-content-padding: 12px 14px;
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+}
+
+@layer ui.components.epic-card.content {
+  ui-card::part(card) {
+    width: auto;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+  }
+  .header,
+  .meta {
+    padding-right: 22px;
+  }
+  /*
+   * its title link reads as a title (the brand's serif, its ink), the accent and an underline on hover;  a page's own
+   * link colour wins over these (`spell-doc.css` repeats them)
+   */
+  ::slotted(a) {
+    color: var(--spell-heading-ink, inherit);
+    text-decoration: none;
+  }
+  ::slotted(a:is(:hover, :focus-visible)) {
+    color: var(--spell-doc-accent, LinkText);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  /* its state, before its title (`EpicState`):  in progress [3/6], or an errors / paused / future / done icon */
+  .mark {
+    margin-right: 4px;
+    vertical-align: 0.1em;
+  }
+  /* a long description (a saga page's epics carry their summary) stops at four lines */
+  ::slotted([slot="description"]) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+  .saga {
+    margin-top: 4px;
+  }
+  /* the meta line (the phase under way, the page's file):  mono, small, as the brand's machine-made text */
+  .meta {
+    font: 400 12.48px/1.5 var(--spell-mono, ui-monospace, monospace);
+  }
+  /* the star (Owen, 2026-10-10:  "make it yellow"):  grey until starred or pointed at */
+  .star {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+  }
+  .star::part(button) {
+    margin: 0;
+    padding: 3px;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    background: none;
+    box-shadow: none;
+  }
+  .star:is(:hover, :focus-within)::part(button),
+  .star[icon="star"]::part(button) {
+    color: var(--spell-favorite, #fbbd08);
+  }
+  .worked {
+    position: absolute;
+    right: 6px;
+    bottom: 3px;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    font-size: calc(0.75 * var(--ui-font-size));
+    font-variant-numeric: tabular-nums;
+  }
+}

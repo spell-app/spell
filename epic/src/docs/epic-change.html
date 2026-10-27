@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-change</title>
+    <meta
+      name="description"
+      content="The &lt;epic-change&gt; element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&amp;A chip, Accept and Reopen."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-change&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="/spell-epic/src/tool/PLAN-DOC.md"
+              icon="book"
+              aria-label="The markup rules, PLAN-DOC.md"
+              title="The markup rules, PLAN-DOC.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-change&gt;
+            <ui-header
+              >The &lt;epic-change&gt; element: words an answer changed, marked in the text, with the question's folded
+              chip, Accept and Reopen.</ui-header
+            >
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            A change mark: when an answer rewrites the Overview or a phase, the changed or new words show on an orange
+            ground, with a small chip naming the question that changed them. Accept clears the orange and keeps the chip
+            for good; Reopen opens the question again.
+          </p>
+          <p class="meta">
+            For anyone reading or writing an epic page's markup, or changing this element.<br />
+            Its vocabulary (every name it uses):
+            <a
+              href="/spell-epic/src/components/epic-change/EpicChange.en.ts"
+              target="src-spell-epic-src-components-epic-change-epicchange-en-ts"
+              ><code title="spell-epic/src/components/epic-change/EpicChange.en.ts">EpicChange.en.ts</code></a
+            >.<br />
+            Its component:
+            <a
+              href="/spell-epic/src/components/epic-change/EpicChange.tsx"
+              target="src-spell-epic-src-components-epic-change-epicchange-tsx"
+              ><code title="spell-epic/src/components/epic-change/EpicChange.tsx">EpicChange.tsx</code></a
+            >, with its style sheet and tests beside it.<br />
+            Since 2026-10-24 (epic <code>epic-engine</code> P30, Q13 B). The
+            <a href="epic-update.html" target="src-packages-epics-docs-epic-update-html"
+              ><code>&lt;epic-update&gt;</code></a
+            >
+            blocks written before stay as they are.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              A paragraph with two marks, as an Overview holds them after an answer. The first waits for Owen's Accept;
+              the second he accepted, so only its chip is left. Click a chip to unfold its question and answer.
+            </p>
+            <p>
+              Caveats and todos were two sections. Now there is
+              <epic-change id="ch1" item="q16" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it"
+                >one list, Caveats, and todos fold into it</epic-change
+              >, and tests take the letter
+              <epic-change
+                id="ch2"
+                item="q16"
+                at="2026-10-24 15:10"
+                accepted="2026-10-24 19:02"
+                answer="One list, Caveats;  todos fold into it"
+                >T</epic-change
+              >.
+            </p>
+            <p class="meta">
+              Live: the real element, drawn by the epics pack this page loads (the main checkout's, until this change
+              merges). On an epic page, the question's title comes from the page too; here there is no Q16, so only the
+              answer shows. Accept and Reopen show only on an epic page being reviewed.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              The rules:
+              <a href="/spell-epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md"
+                ><code title="spell-epic/src/tool/PLAN-DOC.md">PLAN-DOC.md</code></a
+              >, "Change marks".
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>what Claude writes, the question's id alone · 3 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <p>Caveats and todos were two sections.  Now there is
+                      <epic-change item="q16">one list, Caveats, and todos fold into it</epic-change>.</p>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>after the tool's next write:  stamped · 3 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-change item="q16" id="ch1" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it"
+                      >one list, Caveats, and todos fold into it</epic-change
+                    >
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>accepted, by epic inbox apply · 1 line</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-change item="q16" id="ch1" at="2026-10-24 15:10" answer="..." accepted="2026-10-24 19:02">...</epic-change>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <p><b>Its parents:</b> anywhere prose goes, inline, around the words that changed. It's a
+              <dfn class="spell-term" tabindex="0">prose element</dfn
+              ><ui-popup
+                heading="prose element"
+                label="An &lt;epic-*&gt; element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."
+              ></ui-popup
+              >: an Overview sub-section's text, a phase's fields, an item's text.</p>
+            <p><b>Its children:</b> the changed words, running text: links and code too.</p>
+            <ul>
+              <li>Mark the words that changed, not the whole paragraph (Q13 chose words over paragraphs, option C).</li>
+              <li>One mark per change; a sentence may hold several, from one answer or from several.</li>
+              <li>
+                Its host (the Overview sub-section, phase or item whose body holds it) lists the marks still waiting,
+                <code>to-accept="ch1 ch3"</code>, written by the tool: so the page counts them while the body isn't
+                loaded.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                    <th>Meaning</th>
+                    <th>Written by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>item</code></td>
+                    <td>an item's id, any case (<code>q16</code>)</td>
+                    <td>
+                      The question whose answer made the change: the chip's name, and what Reopen reopens.
+                      <code>epic lint</code> fails a mark naming no item.
+                    </td>
+                    <td>Claude (required)</td>
+                  </tr>
+                  <tr>
+                    <td><code>id</code></td>
+                    <td><code>ch1</code>, <code>ch2</code> ...</td>
+                    <td>Its Accept and Reopen marks' key, and a link's target. None: no buttons yet.</td>
+                    <td>the tool, on its next write</td>
+                  </tr>
+                  <tr>
+                    <td><code>at</code></td>
+                    <td>a time (<code>2026-10-24 15:10</code>)</td>
+                    <td>When the words changed: the words' tooltip.</td>
+                    <td>the tool, when missing</td>
+                  </tr>
+                  <tr>
+                    <td><code>answer</code></td>
+                    <td>a line of plain text</td>
+                    <td>
+                      The question's answer in short, copied from its <code>&lt;epic-answer title&gt;</code>: the
+                      chip shows it unfolded, as it was then.
+                    </td>
+                    <td>the tool, once the question has one</td>
+                  </tr>
+                  <tr>
+                    <td><code>accepted</code></td>
+                    <td>a time</td>
+                    <td>Owen accepted it: no orange, the chip stays.</td>
+                    <td><code>epic inbox apply</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="parts" label="Parts and states" sticky collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Part or state</th>
+                      <th>Is</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>base</code></td>
+                      <td>The whole mark.</td>
+                    </tr>
+                    <tr>
+                      <td><code>words</code></td>
+                      <td>The changed words, a <code>&lt;mark&gt;</code>: orange until accepted.</td>
+                    </tr>
+                    <tr>
+                      <td><code>chip</code></td>
+                      <td>The question's id, a <code>&lt;button&gt;</code> that folds its question and answer.</td>
+                    </tr>
+                    <tr>
+                      <td><code>qa</code></td>
+                      <td>The question's title and answer, after the chip, while unfolded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>buttons</code></td>
+                      <td>Accept and Reopen, under the chip on hover or focus, while reviewed.</td>
+                    </tr>
+                    <tr>
+                      <td><code>:state(accepted)</code></td>
+                      <td>Owen accepted it.</td>
+                    </tr>
+                    <tr>
+                      <td><code>:state(open)</code></td>
+                      <td>Its chip unfolded (page state, never written).</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>
+                Orange: changed since you looked, the one meaning orange has on every doc page (<a
+                  href="/spell-epic/templates/epics/plan-doc.md"
+                  target="src-spell-epic-templates-epics-plan-doc-md"
+                  ><code title="spell-epic/templates/epics/plan-doc.md">plan-doc.md</code></a
+                >, "Colours").
+              </li>
+              <li>The words: an orange ground behind the text, wrapping with the line, each line's piece rounded.</li>
+              <li>The chip: small mono capitals in an orange outline; accepted, grey and muted.</li>
+              <li>
+                Accept (green tick) and Reopen (blue) float just under the chip on hover or keyboard focus, and while
+                it's unfolded (a phone has no hover): out of the line, so nothing in the paragraph moves.
+              </li>
+              <li>Unfolded, the question and answer follow the chip in the line, smaller and muted.</li>
+              <li>
+                The page header counts the changes waiting, an orange label before Send that lands on the next; the
+                stage button's tooltip (Accept Overview, Accept Phases) counts them too.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>
+                Claude, by hand, as it rewrites the Overview or a phase from an answer:
+                <code>&lt;epic-change item="q16"&gt;</code> around the new words, in a part file or in the HTML it
+                hands a command.
+              </li>
+              <li>
+                <code>epic change &lt;epic&gt; [--for q16]</code> stamps them (id, time, answer) and lists the ones
+                waiting; any other <code>epic</code> edit stamps them too. <code>--for</code> names the marks written
+                with no <code>item</code>.
+              </li>
+              <li>
+                Accept and Reopen are marks in the page's inbox, under the mark's id; <code>epic inbox apply</code>
+                makes an Accept <code>accepted</code>, and reopens the question for a Reopen.
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-24 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

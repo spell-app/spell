@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-sort</title>
+    <meta
+      name="description"
+      content="The &lt;epic-sort&gt; element: the Epics page's sort buttons, A to Z or newest first, for every list on the page."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-sort&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-sort&gt;
+            <ui-header>The &lt;epic-sort&gt; element: the Epics page's sort buttons, A to Z or newest first, for every list on the page.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-sort&gt;</code> is the Epics page's pair of sort buttons, A–Z and Date: how every
+            <a href="epic-list.html" target="src-spell-epic-src-docs-epic-list-html"><code>&lt;epic-list&gt;</code></a> on the page sorts the cards in each group.
+          </p>
+          <ul>
+            <li>The one in use is pressed, and remembered in this browser.</li>
+            <li>The groups stay where they are: only the cards inside each move.</li>
+          </ul>
+          <p class="meta">
+            For anyone changing the Epics page.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P3), in the
+            <a href="/spell-epic/src/components/epic-list/" target="src-spell-epic-src-components-epic-list"><code title="spell-epic/src/components/epic-list/">epic-list</code></a> family, with <code>&lt;epic-list&gt;</code>,
+            <code>&lt;epic-card&gt;</code> and <code>&lt;epic-sort&gt;</code>.<br />
+            Its vocabulary: <a href="/spell-epic/src/components/epic-list/EpicSort.en.ts" target="src-spell-epic-src-components-epic-list-epicsort-en-ts"><code title="spell-epic/src/components/epic-list/EpicSort.en.ts">EpicSort.en.ts</code></a><br />
+            Its component: <a href="/spell-epic/src/components/epic-list/EpicSort.tsx" target="src-spell-epic-src-components-epic-list-epicsort-tsx"><code title="spell-epic/src/components/epic-list/EpicSort.tsx">EpicSort.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <epic-sort></epic-sort>
+
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The example above · 1 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-sort></epic-sort>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>The same choice as the Epics page's, and <a href="epic-list.html" target="src-spell-epic-src-docs-epic-list-html">epic-list's example</a>'s: they share it.</p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Nobody writes it: the docs runtime puts one in the Epics page's header, beside New epic, when the page
+              has an <code>&lt;epic-list&gt;</code> (<a href="/spell-epic/src/tools/_assets/spell-doc-runtime.js" target="src-spell-epic-src-tools-assets-spell-doc-runtime-js"><code title="spell-epic/src/tools/_assets/spell-doc-runtime.js">wireEpicSort()</code></a>).
+            </p>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Parent</th><th>How many</th><th>As</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>the page header, <code>.spell-page-head</code></td><td>one</td><td>The Epics page's sort.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>It has no children.</p>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <p>None.</p>
+            <ui-section id="epic-sort-parts" label="Parts" sticky collapsible dividing open="false">
+              <p>Pieces of what it draws.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The pair, a <code>&lt;ui-buttons appearance=&quot;circular basic&quot; size=&quot;tiny&quot;&gt;</code>.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-sort-events" label="Events" sticky collapsible dividing open="false">
+              <p>What it tells the page.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-sort</code></td><td><code>{ sort: "title" | "date" }</code></td><td>The reader picked a sort: every list on the page sorts by it.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Spell UI's grouped pill of buttons, each with its icon; the one in use <code>active</code>.</li>
+              <li>Not <code>toggle</code>: its pressed look is the positive green.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>The docs runtime, on the Epics page (before epic <code>epic-engine</code> P3, it drew the buttons itself).</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code> (P3).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

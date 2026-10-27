@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-run</title>
+    <meta
+      name="description"
+      content="The &lt;epic-run&gt; element: a run page&#39;s body: a command asks, Owen answers each row, Send."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-run&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-run&gt;
+            <ui-header>The &lt;epic-run&gt; element: a run page&#39;s body: a command asks, Owen answers each row, Send.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">A run page's body: a command stopped to ask Owen, and waits for his answers.</p>
+          <p class="meta">
+            For anyone writing a command that asks Owen on a page, or changing this element.<br />
+            <ui-label size="mini" color="green">built</ui-label> in
+            <a href="/spell-epic/src/components/epic-run/" target="src-spell-epic-src-components-epic-run"
+              ><code title="spell-epic/src/components/epic-run/">epic-run/</code></a
+            >
+            (epic <code>epic-engine</code> P23).<br />
+            Its vocabulary (every name it uses):
+            <a
+              href="/spell-epic/src/components/epic-run/EpicRun.en.ts"
+              target="src-spell-epic-src-components-epic-run-epicrun-en-ts"
+              ><code title="spell-epic/src/components/epic-run/EpicRun.en.ts">EpicRun.en.ts</code></a
+            >.<br />
+            Its component:
+            <a
+              href="/spell-epic/src/components/epic-run/EpicRun.tsx"
+              target="src-spell-epic-src-components-epic-run-epicrun-tsx"
+              ><code title="spell-epic/src/components/epic-run/EpicRun.tsx">EpicRun.tsx</code></a
+            >, with its style sheet (<code>.css</code>) and tests beside it.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              No live example here: it draws a RUN, which only a command makes, and reads it from the page server
+              (<code>GET /api/runs/&lt;id&gt;</code>). A run's page is <code>/runs/&lt;id&gt;/</code>.
+            </p>
+            <p>What Owen sees there, top to bottom:</p>
+            <ul>
+              <li>
+                the page's title (the run's), then who is waiting: <code>spell translate todos --to es</code> is
+                waiting, with a green dot; or why nobody is (it finished, it stopped, its wait ran out, it isn't
+                running)
+              </li>
+              <li>
+                the status card (epic <code>epic-engine</code> P25), when the command writes passes or offers an
+                effort: the effort picker (<code>fast | balanced | best</code>, saved at once, taking effect at the next
+                pass), then a line per pass, with its name, <code>212 of 380</code>, its calls and its time; only the
+                running pass has a bar, and its time ticks on by the second
+              </li>
+              <li>
+                the command's line about what it asks, and its latest progress line; every line, folded (with a status
+                card, only the fold)
+              </li>
+              <li>
+                the table: the command's columns, then the answer's; a row per thing to answer, each an
+                <a href="epic-run-row.html" target="src-packages-epics-docs-epic-run-row-html"
+                  ><code>&lt;epic-run-row&gt;</code></a
+                >
+              </li>
+              <li>
+                the Send bar, stuck to the window's bottom: <code>3 of 5 answered · not sent</code>, the last save, and
+                Send, with no countdown: a command carries on with exactly what you sent
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>Once a page, in the run page's template; the route module sets its run:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>run.html · the run's body · 1 line</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-run run="spell-translate-20261023-1912"></epic-run>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <ul>
+              <li>
+                Its parent: a run page's <code>main</code>, under the sticky page header, from the template (spell-epic's
+                <code title="spell-epic/src/tools/templates/run.html">run.html</code>).
+              </li>
+              <li>Its children: none. It draws its rows, <code>&lt;epic-run-row&gt;</code>, in its shadow root.</li>
+              <li>
+                Its run: the content folder's <code>pages/runs/&lt;id&gt;/</code>, written by the kit's
+                <code>SRV.CommandRun</code>; served and answered by spell-epic's
+                <code title="spell-epic/src/tools/runRoutes.ts">runRoutes.ts</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                    <th>Meaning</th>
+                    <th>Required</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>run</code></td>
+                    <td>a run's id (<code>[a-z0-9-]</code>)</td>
+                    <td>The run to draw: its folder's name in <code>pages/runs/</code>.</td>
+                    <td>yes</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Who is waiting: muted; the command in mono, a green dot before it while it waits.</li>
+              <li>
+                The status card: a quiet rounded box. The effort a pill track, the chosen one a raised thumb; disabled
+                once the run is over. The passes on one grid: the running one in full ink with a blue dot and bar, the
+                done ones muted with a green check.
+              </li>
+              <li>The table: a grid in a rounded box, its heads on a faint band; the answer's column the widest.</li>
+              <li>Too narrow for its columns (a phone): the table scrolls sideways inside its own box, never stacked.</li>
+              <li>
+                Send: blue by the fill rule (dashed: not sent, or changes since; outlined: sent), the line before it
+                green once sent.
+              </li>
+              <li>A failed read, save or Send: red, bold, under the bar. A failed save tries again every 3s.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>
+                Nobody writes it: the run page's template holds it, and the route module serves that at
+                <code>/runs/&lt;id&gt;/</code>.
+              </li>
+              <li>
+                A command opens a run with the kit's <code>SRV.CommandRun.open()</code>, shows it with
+                <code>show()</code> (<code>epic pages open &lt;run folder&gt; --review</code>), and waits with
+                <code>wait()</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-23 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

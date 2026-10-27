@@ -1,0 +1,318 @@
+import type {
+  RunAnswer,
+  RunAnswers,
+  RunEffortChoice,
+  RunOutcome,
+  RunPage,
+  RunPass,
+  RunRow,
+  RunStatus
+} from "spell/server/runs/runs.types"
+
+import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell-epic/review"
+
+import { DraftSaver } from "./DraftSaver"
+import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
+
+/****************
+ * ### `RunForm`
+ * A RUN PAGE's answers, as `<epic-run>` holds them (epic `epic-engine` P23):  a command asked Owen through the kit's
+ * `SRV.CommandRun`, and waits for his Send.
+ * - One per page (`forPage()`), for the run its `<epic-run run>` names:  a `PageStore` `<epic-run>` follows.
+ * - Reads the run (`load()`):  `GET /api/runs/<id>` (`src/tools/runRoutes.ts`), what the command asks (`page`), what
+ *   Owen answered so far (`answers`), and whether a command waits on it now (`isWaiting`).
+ * - Each row's answer is SAVED AS HE GIVES IT (`answer()`), not only at Send:  the command's steering reads the same
+ *   file as answers arrive (P24).
+ *   - kept here at once, so the page shows it;  posted `RUN_SAVE_MS` (half a second) after he stops typing, a pick or
+ *     a tick at once;  one save at a time, in order
+ *   - a save that fails says so (`saveError`), and tries again every 3s until one goes through:
+ *     a page server back on its address takes it, its new token too (`ServerLink`)
+ *   - the saving is the page's `DraftSaver`'s (epic `coherence` C10), as every form's;  no browser copy:  the
+ *     answers are saved as given
+ * - The run's EFFORT, when the command offers one (`pickEffort()`, P25):  kept at once, saved at once, in the
+ *   answers' queue and with their retries;  the command reads it before its next pass.
+ * - Send (`send()`):  what's waiting saved first, then `POST /api/runs/<id>/send`, which stamps `sent`;  the waiting
+ *   command wakes on it.  Again whenever he likes:  the page never locks.
+ * - Kept fresh (`watch()`):  the run's files changing (the live client's `spell-server:changed`), the page coming into
+ *   view, and every `RUN_POLL_MS` (30s) for the waiting state, whose heartbeat goes stale with no file changing.
+ *   - a reload never takes back what he gave and hasn't saved yet:  his rows win over the server's
+ * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;  `fetch` comes in through
+ *   `ServerLinkOptions`, so tests stub it.
+ * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers, and the kit's run
+ *   types (`spell/server/runs/runs.types`, types only).  NEVER imports Solid or Spell UI.
+ ****************/
+export class RunForm extends PageStore {
+  /** What the command asks, once read;  `undefined` before. */
+  page: RunPage | undefined
+
+  /** What Owen answered, by row id, his own as he gives them;  `sent` once he pressed Send. */
+  answers: RunAnswers = { rows: {} }
+
+  /** A command waits on the run now. */
+  isWaiting = false
+
+  /** Why the run couldn't be read, as a sentence;  `""` for none. */
+  loadError = ""
+
+  /** Why the last Send failed, as a sentence;  `""` for none. */
+  sendError = ""
+
+  /** A Send on its way. */
+  isSending = false
+
+  /** The answers given and not saved yet, by row id. */
+  private readonly unsaved = new Map<string, RunAnswer>()
+
+  /** The effort picked and not saved yet;  `undefined` for none. */
+  private unsavedEffort: string | undefined
+
+  /** The answers' saves:  one at a time, retried, sent as the page goes;  where they stand. */
+  private readonly saves: DraftSaver
+
+  /** The page server, as answers go to it. */
+  private readonly link: ServerLink
+
+  constructor(
+    readonly runId: string,
+    options: ServerLinkOptions
+  ) {
+    super()
+    this.link = new ServerLink(options)
+    this.saves = new DraftSaver({
+      save: (save) => this.saveUnsaved(save),
+      wait: RUN_SAVE_MS,
+      onChange: () => this.changed()
+    })
+  }
+
+  ////////////////
+  // ## The page's form
+  ////////////////
+
+  /**
+   * The page's form for run `runId`, made on the first call (browser only), or again for another run;
+   * a test hands it its own (`adopt()`).
+   */
+  static forPage(runId: string): RunForm {
+    return RunForm.onePerPage(
+      () => new RunForm(runId, ServerLink.pageOptions()),
+      (current) => current.runId === runId
+    )
+  }
+
+  ////////////////
+  // ## What it shows
+  ////////////////
+
+  /** The run's API, `/api/runs/<id>`. */
+  get api(): string {
+    return `${RUNS_API}/${encodeURIComponent(this.runId)}`
+  }
+
+  /** The run's rows;  none before it's read. */
+  get rows(): RunRow[] {
+    return this.page?.rows ?? []
+  }
+
+  /** The run's state:  `open` while the command can take answers. */
+  get status(): RunStatus {
+    return this.page?.status ?? "open"
+  }
+
+  /** The run's passes, for the status card, the current one last;  none when the command writes none (P25). */
+  get passes(): RunPass[] {
+    return this.page?.passes ?? []
+  }
+
+  /** The effort Owen may pick:  its choices and the command's own;  `undefined`:  no picker (P25). */
+  get effortChoice(): RunEffortChoice | undefined {
+    return this.page?.effort
+  }
+
+  /** The effort the run is on:  Owen's pick, else the command's;  `""` with no picker. */
+  get effort(): string {
+    return this.answers.effort ?? this.effortChoice?.initial ?? ""
+  }
+
+  /** When the command took row `rowId` (acted on it), ISO;  `undefined` before it did (P25). */
+  takenAt(rowId: string): string | undefined {
+    return this.page?.taken?.[rowId]
+  }
+
+  /** How many rows Owen answered, of how many. */
+  get counts(): { answered: number; total: number } {
+    return { answered: this.rows.filter((row) => this.answers.rows[row.id]).length, total: this.rows.length }
+  }
+
+  /** Something he gave after the last Send (or no Send yet). */
+  get isStale(): boolean {
+    const sent = this.answers.sent
+    if (!sent) return true
+    return Object.values(this.answers.rows).some((answer) => answer.at > sent)
+  }
+
+  /** Where Send stands, by the fill rule:  `sent` once sent with nothing given since;  else `pending`. */
+  get fill(): SendFill {
+    if (!this.page) return "rest"
+    return this.isStale ? "pending" : "sent"
+  }
+
+  /** Why the last save failed, as a sentence;  `""` for none:  it tries again every 3s. */
+  get saveError(): string {
+    return this.saves.isError ? `Not saved:  ${sentence(this.saves.text)}` : ""
+  }
+
+  /** When the last save went through, `14:04`;  `""` before one. */
+  get savedAt(): string {
+    const state = this.saves.state
+    return state.kind === "saved" ? clockOf(state.at) : ""
+  }
+
+  /** The words beside Send:  how many answered, and where the Send stands. */
+  get stateLine(): string {
+    const { answered, total } = this.counts
+    const sent = this.answers.sent
+    const counted = `${answered} of ${total} answered`
+    if (!sent) return `${counted} · not sent`
+    const when = clockOf(sent)
+    return this.isStale ? `${counted} · changes since Send ${when}` : `${counted} · sent ${when}`
+  }
+
+  ////////////////
+  // ## Answering
+  ////////////////
+
+  /**
+   * Row `rowId` answered:  `outcome`, its `value`, its tick;  kept at once, saved `RUN_SAVE_MS` later (`now`:  at once,
+   * a pick or a tick).
+   * - an answer equal to the one kept changes nothing
+   */
+  answer(
+    rowId: string,
+    { outcome, value, ticked }: { outcome: RunOutcome; value: string; ticked?: boolean },
+    now = false
+  ) {
+    const before = this.answers.rows[rowId]
+    if (before && before.outcome === outcome && before.value === value && before.ticked === ticked) return
+    const answer: RunAnswer = { outcome, value, at: new Date().toISOString(), ...(ticked !== undefined && { ticked }) }
+    this.answers = { ...this.answers, rows: { ...this.answers.rows, [rowId]: answer } }
+    this.unsaved.set(rowId, answer)
+    this.changed()
+    this.saves.changed({ now })
+  }
+
+  /**
+   * The run's effort picked:  one of `effortChoice.choices`;  kept at once, saved at once
+   * (`POST /api/runs/<id>/effort`), and the command reads it before its next pass.
+   * - throws `TypeError` for an effort the run doesn't offer;  the one it's on already changes nothing
+   */
+  pickEffort(effort: string) {
+    if (!this.effortChoice?.choices.includes(effort))
+      throw new TypeError(`RunForm.pickEffort():  ${effort} isn't one of the run's efforts`)
+    if (effort === this.effort) return
+    this.answers = { ...this.answers, effort }
+    this.unsavedEffort = effort
+    this.changed()
+    this.saves.changed({ now: true })
+  }
+
+  /** Save every answer given and not saved yet, one at a time;  resolves once they're through (or failed). */
+  async flush({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    await this.saves.save({ keepalive })
+  }
+
+  /**
+   * `DraftSaver`'s save:  post each unsaved answer, then the effort;  a failure keeps what's left, and throws
+   * (it says why, and tries again in 3s).
+   */
+  private async saveUnsaved({ keepalive }: { keepalive: boolean }): Promise<undefined> {
+    for (const [rowId, answer] of Array.from(this.unsaved)) {
+      await this.link.post(`${this.api}/answer`, { rowId, ...answer }, { keepalive })
+      if (this.unsaved.get(rowId) === answer) this.unsaved.delete(rowId)
+    }
+    const effort = this.unsavedEffort
+    if (effort !== undefined) {
+      await this.link.post(`${this.api}/effort`, { effort }, { keepalive })
+      if (this.unsavedEffort === effort) this.unsavedEffort = undefined
+    }
+    return undefined
+  }
+
+  /** Send:  everything given saved first, then `sent` stamped;  the waiting command wakes on it. */
+  async send(): Promise<void> {
+    if (this.isSending) return
+    this.isSending = true
+    this.sendError = ""
+    this.changed()
+    try {
+      await this.flush()
+      if (this.unsaved.size || this.unsavedEffort !== undefined)
+        throw new Error(this.saveError || "couldn't save every answer")
+      const reply = (await this.link.post(`${this.api}/send`, {})) as { answers?: RunAnswers; waiting?: boolean }
+      if (reply.answers) this.answers = this.withUnsaved(reply.answers)
+      if (typeof reply.waiting === "boolean") this.isWaiting = reply.waiting
+    } catch (failure) {
+      this.sendError = `Couldn't send:  ${sentence((failure as Error).message)}`
+    } finally {
+      this.isSending = false
+      this.changed()
+    }
+  }
+
+  ////////////////
+  // ## Reading
+  ////////////////
+
+  /** Read the run:  what's asked, what's answered (his unsaved answers kept over it), who waits.  NEVER rejects. */
+  async load(): Promise<void> {
+    try {
+      const reply = await this.link.get<Partial<RunReply>>(this.api)
+      if (!reply?.page)
+        throw new Error(
+          this.link.isServed ? "couldn't read the run (no such run)" : "this page isn't on the page server"
+        )
+      this.page = reply.page
+      this.answers = this.withUnsaved(reply.answers ?? { rows: {} })
+      this.isWaiting = !!reply.waiting
+      this.loadError = ""
+    } catch (failure) {
+      this.loadError = sentence((failure as Error).message)
+    }
+    this.changed()
+  }
+
+  /** `answers` from the server, with the answers (and effort) given here and not saved yet laid over them. */
+  private withUnsaved(answers: RunAnswers): RunAnswers {
+    const rows = { ...answers.rows }
+    for (const [rowId, answer] of this.unsaved) rows[rowId] = answer
+    const effort = this.unsavedEffort ?? answers.effort
+    return { ...answers, rows, ...(effort !== undefined && { effort }) }
+  }
+
+  /**
+   * Keep the run fresh on `window`'s page;  returns the undo.
+   * - a file of the run's folder changed (`spell-server:changed`):  `run.json5` (rows, progress, passes, taken rows,
+   *   how it ended), `waiting.json5`
+   * - the page coming into view, and every `RUN_POLL_MS` while it is:  a heartbeat goes stale with no file changing
+   * - the page going away (or hidden):  what's unsaved goes at once, as a request that outlives it
+   */
+  watch(window: Window): () => void {
+    const folder = `/pages/runs/${this.runId}/`
+    const unwatch = ServerLink.watch(
+      window,
+      (path) => path.includes(folder),
+      () => void this.load(),
+      {
+        every: RUN_POLL_MS
+      }
+    )
+    const unsave = this.saves.watch(window)
+    return () => {
+      unwatch()
+      unsave()
+    }
+  }
+}
+
+/** What `GET /api/runs/<id>` answers (`runRoutes.ts`' `RunReply`):  a copy, since the pack never imports the tools. */
+export type RunReply = { page: RunPage; answers: RunAnswers; waiting: boolean }

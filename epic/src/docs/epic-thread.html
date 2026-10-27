@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-thread</title>
+    <meta
+      name="description"
+      content="The &lt;epic-thread&gt; element: one comment&#x27;s whole thread on a page, as the docs runtime&#x27;s comments draw it."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-thread&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="/spell-epic/src/AGENTS.md"
+              icon="book"
+              aria-label="How comments work, src/AGENTS.md"
+              title="How comments work, src/AGENTS.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-thread&gt;
+            <ui-header>The &lt;epic-thread&gt; element: one comment&#x27;s whole thread on a page, as the docs runtime&#x27;s comments draw it.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            One comment's whole thread: its header (the bullhorn, its id, the first words it's on), Owen's answer while
+            it's his turn, the messages in order, then his reply box. The docs runtime's comments draw one under the
+            paragraph, list item or cell holding a comment's quote, else under its block, on every page that takes
+            comments: a guide, an epic page, an Epic UI page.
+          </p>
+          <p class="meta">
+            For anyone changing how comments look or work on a page.<br />
+            Its vocabulary (every name it uses):
+            <a href="/spell-epic/src/components/epic-thread/EpicThread.en.ts" target="src-spell-epic-src-components-epic-thread-epicthread-en-ts"><code title="spell-epic/src/components/epic-thread/EpicThread.en.ts">EpicThread.en.ts</code></a>.<br />
+            Its component:
+            <a href="/spell-epic/src/components/epic-thread/EpicThread.tsx" target="src-spell-epic-src-components-epic-thread-epicthread-tsx"><code title="spell-epic/src/components/epic-thread/EpicThread.tsx">EpicThread.tsx</code></a>, with its style
+            sheet (<code>.css</code>) and tests beside it.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>Every state a thread is in, from what the comments route answers (the comments are made up):</p>
+            <epic-threads>
+              <epic-thread comment="{&quot;id&quot;: &quot;c1&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Is this still true?  `spell compile` changed.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;}"></epic-thread>
+              <epic-thread open comment="{&quot;id&quot;: &quot;c2&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Explain the second step\nin more words.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;working&quot;: &quot;2026-10-17T13:30:00.000Z&quot;}"></epic-thread>
+              <epic-thread open unseen comment="{&quot;id&quot;: &quot;c3&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Why asyncio and not threads?&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;owen&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-18T12:05:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Because every target awaits the same way:  &lt;code&gt;await&lt;/code&gt; maps one to one.&lt;/p&gt;&quot;}]}"></epic-thread>
+              <epic-thread comment="{&quot;id&quot;: &quot;c4&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;table&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;Name Kind Where&quot;, &quot;text&quot;: &quot;Fix the typo in the table.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;done&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-16T20:00:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Fixed.&lt;/p&gt;&quot;, &quot;commit&quot;: &quot;a1b2c3d&quot;}], &quot;done&quot;: {&quot;how&quot;: &quot;good&quot;, &quot;at&quot;: &quot;2026-10-16T21:00:00.000Z&quot;}}"></epic-thread>
+              <epic-thread open comment="{&quot;id&quot;: &quot;c5&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;This needs a section of its own.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;taken&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;quote&quot;: &quot;every target awaits&quot;, &quot;taken&quot;: {&quot;epic&quot;: &quot;feedback&quot;, &quot;phase&quot;: 4, &quot;phaseId&quot;: &quot;p-memory&quot;, &quot;title&quot;: &quot;Memory&quot;, &quot;at&quot;: &quot;2026-10-18T16:00:00.000Z&quot;}}"></epic-thread>
+            </epic-threads>
+            <ul>
+              <li>C1:  new, Claude's turn, folded:  the pen (his words wait, Claude hasn't had them) and the trash.</li>
+              <li>C2:  Claude thinking about it:  the stub his answer replaces.</li>
+              <li>C3:  Owen's turn, orange:  the review pills, That's good, Reply, Skip it.</li>
+              <li>C4:  done:  a check circle, Reopen, and the green Done line inside.</li>
+              <li>C5:  taken into an epic's phase, linked by the phase's stable id.</li>
+            </ul>
+            <p class="meta">
+              Live: the real elements, drawn by the epics pack this page loads. Their buttons say what Owen did (their
+              events);  only the comments' code saves, so here they fold and nothing more.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Never written in a page:  the comments' code (<code title="spell-epic/src/tools/_assets/spell-doc-comments.js">PageComments.thread()</code>) makes one per
+              comment and keeps it for the visit, giving it what the server holds at each redraw.  In markup, for a page
+              like this one:
+            </p>
+            <ui-code language="html"><script type="text/plain">
+<epic-threads>
+  <epic-thread id="comment-c3" open unseen comment='{"id":"c3","text":"Why asyncio?","status":"answered","turn":"owen","replies":[...]}'>
+    <textarea class="spell-comment-field" aria-label="Your reply"></textarea>
+  </epic-thread>
+</epic-threads>
+            </script></ui-code>
+            <p>Its id, <code>comment-c3</code>, is what Cmd / Ctrl + K and the toolbar's bullhorn land on.</p>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <ul>
+              <li>Its parent:  <a href="epic-threads.html"><code>&lt;epic-threads&gt;</code></a>, the box of threads under one block.</li>
+              <li>Its child:  Owen's box, a <code>&lt;textarea&gt;</code> the comments' code makes and keeps:  the reply box, or the pen's box over his first words.</li>
+              <li>In its shadow root:  each message, an <code>&lt;epic-thread-message&gt;</code>, and Owen's answer, an <code>&lt;epic-review buttons="thread"&gt;</code> (the item's review pills).</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Values</th><th>Meaning</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>comment</code></td><td>JSON (a property)</td><td>The comment, as <code>GET /api/docs/comments</code> answers it:  <code>id</code>, <code>text</code>, <code>at</code>, <code>status</code>, <code>turn</code>, <code>replies</code>, <code>working</code>, <code>done</code>, <code>taken</code>, and where it is.</td></tr>
+                  <tr><td><code>open</code></td><td>boolean</td><td>Unfolded. A click on its header flips it, and says so (<code>epic-thread-opened</code> / <code>epic-thread-closed</code>).</td></tr>
+                  <tr><td><code>unseen</code></td><td>boolean</td><td>Orange:  Claude spoke last and Owen hasn't answered yet.</td></tr>
+                  <tr><td><code>moved</code></td><td>boolean</td><td>Its block changed since:  it says what it was on.</td></tr>
+                  <tr><td><code>boxed</code></td><td><code>first</code> or <code>pending</code></td><td>Owen's words now in the box under it (his first words, or his pending reply), left out of the messages.</td></tr>
+                  <tr><td><code>saved</code></td><td>text</td><td>The box's floppy, and its tooltip:  <code>Saved 14:02 · waiting for Claude</code>.</td></tr>
+                  <tr><td><code>failed</code></td><td>boolean</td><td>The last save failed:  the floppy red.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-thread-opened</code> / <code>epic-thread-closed</code></td><td><code>{ open }</code></td><td>Owen clicked its header:  it unfolded / folded.</td></tr>
+                  <tr><td><code>epic-thread-editing</code></td><td><code>{}</code></td><td>The pen.</td></tr>
+                  <tr><td><code>epic-thread-removing</code></td><td><code>{}</code></td><td>The trash.</td></tr>
+                  <tr><td><code>epic-thread-answered</code></td><td><code>{ act }</code></td><td>Its review pills:  <code>good</code>, <code>reply</code>, <code>skip</code>;  <code>reopen</code> once done.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>All ivory, whoever spoke last (Owen, 2026-10-10:  "Make the entire thing ivory");  orange while it's his turn.</li>
+              <li>Its id small and muted, an outline and no fill;  the first words in italics, cut short.</li>
+              <li>His messages plain on the ivory, Claude's in a light violet box, the Done line green;  a bold "You:" / "Claude:" first;  each one's time in its top right corner.</li>
+              <li>Every message but the last a step smaller and quieter.</li>
+              <li>The same on every page:  a guide, an epic page, here.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>The docs runtime's comments (<code title="spell-epic/src/tools/_assets/spell-doc-comments.js">spell-doc-comments.js</code>), in the docs bundle and in <code>spell-comments.js</code>, which this page loads.</li>
+              <li>What it shows, worked out the same way everywhere:  <code title="spell-epic/src/comments/ThreadFacts.ts">ThreadFacts</code>.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>
