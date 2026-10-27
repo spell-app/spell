@@ -11,7 +11,7 @@
   </defs>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1A1C27; }
-    .title { font-size: 21px; font-weight: 700; }
+    .title { font-size: 21px; font-weight: 700; fill: #6550CA; }
     .sub { font-size: 13px; fill: #5B5E6E; }
     .head { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; fill: #6550CA; text-anchor: middle; }
     .name { font-size: 15px; font-weight: 700; text-anchor: middle; }
@@ -25,8 +25,7 @@
     .later { fill: none; stroke: #7BA05B; stroke-width: 1.8; stroke-dasharray: 6 5; }
   </style>
 
-  <rect x="1" y="1" width="798" height="398" rx="16" fill="#FAF9FE" stroke="#E4E0F5" stroke-width="2"/>
-  <text class="title" x="40" y="44">Human language in ⇒ program out, in multiple languages.</text>
+  <text class="title" x="40" y="44">Human language in ⇒ Application out — both in multiple languages.</text>
 
   <text class="head" x="145" y="104">HUMAN LANGUAGE</text>
   <text class="head" x="655" y="104">PROGRAMMING LANGUAGE</text>
