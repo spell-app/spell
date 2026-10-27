@@ -8,6 +8,7 @@
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
  *   - `<div class="frame">`:
  *     - the `<ui-button part="toggle">`, inside its top right corner, just in from its rim (a bare example's:  further in)
+ *     - just left of it, `<div class="tools" part="tools">` round the `tools` slot:  the page's own buttons
  *     - the `<ui-segment part="demo">`, around the default slot
  *     - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
  *   - the header and description sit on the page, outside the frame:
@@ -19,6 +20,8 @@
  *   - `bare`:  never framed
  * - Public tokens (`--ui-example-*`) are never declared:  each is read through a private alias
  *   (`notes/theming.md` "Component tokens").
+ *   - EXCEPT the three the `tools` row hands down to the buttons slotted in it (`--ui-example-tool-*`):
+ *     they're for the page to read, never to set.
  */
 
 @layer ui.components.example.types, ui.components.example.content, ui.components.example.variations, ui.components.example.states;
@@ -53,6 +56,10 @@
     --_ui-example-toggle-inset: var(--ui-example-toggle-inset, 0.8em);
     /* A framed example's code button:  in from its frame's top and right edges, just inside its rim. */
     --_ui-example-toggle-corner: var(--ui-example-toggle-corner, 6px);
+    /* The code button's width and height:  one at every size */
+    --_ui-example-toggle-size: var(--ui-example-toggle-size, 28px);
+    /* Space between the buttons of the `tools` row, and from it to the code button */
+    --_ui-example-tools-gap: var(--ui-example-tools-gap, 4px);
     /* Space between the header, description and example. */
     --_ui-example-gap: var(--ui-example-gap, 0.5em);
     /* The frame round an example:  a faint see-through card, so it never runs into the prose round it. */
@@ -117,6 +124,11 @@
    *   it had the frame's own corner, as round as the ring round it
    */
   .frame {
+    /* the code button's corner:  following the frame's corner it sits in, less its inset */
+    --_example-toggle-radius: max(
+      4px,
+      calc(var(--_ui-example-frame-radius) - var(--_ui-example-toggle-corner))
+    );
     --_example-inner-radius: max(var(--ui-radius-s), calc(var(--_ui-example-frame-radius) - 16px));
     --ui-segment-radius: var(--_example-inner-radius);
     --ui-card-radius: var(--_example-inner-radius);
@@ -137,15 +149,15 @@
   .frame > [part~="toggle"]::part(button) {
     /* one width at every size, so the code's copy button can sit centred under it */
     box-sizing: border-box;
-    width: 28px;
+    width: var(--_ui-example-toggle-size);
     /* round at every size:  a theme with short tiny buttons drew it as a pill (the notebook page's, 20px tall) */
-    min-height: 28px;
+    min-height: var(--_ui-example-toggle-size);
     min-width: 0;
     padding-inline: 0;
     justify-content: center;
     margin: 0;
     /* a rounded square following the frame's corner it sits in, less its inset:  never rounder than the frame */
-    border-radius: max(4px, calc(var(--_ui-example-frame-radius) - var(--_ui-example-toggle-corner)));
+    border-radius: var(--_example-toggle-radius);
     background: var(--_ui-example-toggle-background);
     box-shadow:
       0 0 0 1px var(--ui-border-color),
@@ -164,6 +176,34 @@
   .frame > [part~="toggle"]:focus-within,
   :host(:state(open)) .frame > [part~="toggle"] {
     opacity: 1;
+  }
+
+  /*
+   * The page's own buttons (the `tools` slot):  a row just left of the code button, level with it, as far from it as
+   * from each other.
+   * - Slotted, so this sheet can't reach their boxes:  the code button's look is handed to them as tokens,
+   *   `--ui-example-tool-size`, `-radius`, `-background`, for the page's `::part(button)` rule to read.
+   * - When they show is the page's to say.
+   */
+  .frame > [part~="tools"] {
+    --ui-example-tool-size: var(--_ui-example-toggle-size);
+    --ui-example-tool-radius: var(--_example-toggle-radius);
+    --ui-example-tool-background: var(--_ui-example-toggle-background);
+    position: absolute;
+    inset-block-start: min(calc(50% - 0.675em), var(--_ui-example-toggle-inset));
+    inset-inline-end: calc(
+      var(--_ui-example-toggle-inset) + var(--_ui-example-toggle-size) + var(--_ui-example-tools-gap)
+    );
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-example-tools-gap);
+  }
+  .ui.example:not(.bare) > .frame > [part~="tools"] {
+    inset-block-start: var(--_ui-example-toggle-corner);
+    inset-inline-end: calc(
+      var(--_ui-example-toggle-corner) + var(--_ui-example-toggle-size) + var(--_ui-example-tools-gap)
+    );
   }
 
   .description {

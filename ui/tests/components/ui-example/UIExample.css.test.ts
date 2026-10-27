@@ -26,7 +26,9 @@ describe("UIExample.css source", () => {
 
   it("declares no public token of its own:  private aliases only", () => {
     const declared = [...Sheets.withoutComments(exampleRaw).matchAll(/(--ui-example-[\w-]+)\s*:/g)]
-    expect(declared.map((match) => match[1])).toEqual([])
+    // but the three the `tools` row hands down to the page's buttons, for them to read, never to set
+    const handedDown = ["--ui-example-tool-size", "--ui-example-tool-radius", "--ui-example-tool-background"]
+    expect(declared.map((match) => match[1]).filter((name) => !handedDown.includes(name!))).toEqual([])
   })
 })
 

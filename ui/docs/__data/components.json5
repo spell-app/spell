@@ -9022,6 +9022,10 @@
         {
           "name": "source",
           "description": "What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while the code is open, as the markup is."
+        },
+        {
+          "name": "tools",
+          "description": "Buttons of the page's own, in a row just left of the code button and in its look, e.g. a notebook's Add, Move and Delete.  The page decides when they show."
         }
       ],
       "events": [
@@ -9048,6 +9052,10 @@
         {
           "name": "toggle",
           "description": "The code button (`<ui-button circular basic icon=\"code\">`)."
+        },
+        {
+          "name": "tools",
+          "description": "The row round the `tools` slot, just left of the code button."
         },
         {
           "name": "description",
@@ -40110,6 +40118,18 @@
           "name": "--ui-example-toggle-corner",
           "default": "6px",
           "description": "A framed example's code button: in from its frame's top and right edges, just inside its rim.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-toggle-size",
+          "default": "28px",
+          "description": "The code button's width and height: one at every size",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-tools-gap",
+          "default": "4px",
+          "description": "Space between the buttons of the `tools` row, and from it to the code button",
           "type": "length"
         },
         {

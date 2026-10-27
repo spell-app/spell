@@ -10272,7 +10272,7 @@
       "name": "ui-example",
       "description": {
         "kind": "markdown",
-        "value": "An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.\n\nAlso known as:  example, demo, live example, code sample, playground, show code.\n\n**Slots:**  default, `description`, `source`\n\n**Events:**  `ui-opened`, `ui-closed`"
+        "value": "An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.\n\nAlso known as:  example, demo, live example, code sample, playground, show code.\n\n**Slots:**  default, `description`, `source`, `tools`\n\n**Events:**  `ui-opened`, `ui-closed`"
       },
       "attributes": [
         {

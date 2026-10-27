@@ -19,6 +19,7 @@ import exampleCSS from "./UIExample.css?inline"
  *     - both on the page, outside the frame (Owen, 2026-10-23:  "Text for the example should be OUTSIDE the ring")
  *   - `<div class="frame">`:
  *     - the code `<ui-button part="toggle">`, over the frame's top right corner
+ *     - just left of it, the `tools` slot's buttons, in a row (`part="tools"`):  the page's own, in its look
  *     - `<ui-segment part="demo">` around the default slot (the live example:  the element's own children)
  *     - while `code` is on, `<ui-segment part="code">`, with the markup in a `<ui-code>`;
  *       or what the `source` slot holds instead (an editor:  spell-app's notebook examples)
@@ -155,6 +156,10 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
           </div>
         </Show>
         <div class={FRAME_CLASS}>
+          {/* before the code button:  the Tab order follows the row, left to right */}
+          <div class={TOOLS_CLASS} part={this.partForName("tools")}>
+            <slot name={this.slotForName("tools")} />
+          </div>
           <ui-button
             part={this.partForName("toggle")}
             icon={CODE_ICON}
@@ -207,6 +212,9 @@ const CLOSE_SECONDS = 0.3
 
 /** Class word of the frame:  the live example, the code pane, and the code button over their top right corner. */
 const FRAME_CLASS = "frame"
+
+/** Class word of the row of the page's own buttons (the `tools` slot), just left of the code button. */
+const TOOLS_CLASS = "tools"
 
 /** The icon of the code button:  Fomantic's `code` icon. */
 const CODE_ICON = "code"
