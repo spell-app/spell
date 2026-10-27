@@ -500,7 +500,7 @@ What a component, or a page built on Spell UI, reaches for first.
   - a landing:  the page ready, its pane shown and folds opened, the scroll to its line, once more as it settles unless
     the reader moved;  one per document, a newer landing stops an older one
   - a page with stuck bars of its own lands its hashes itself, by its rules (`use()`):  the site's `SiteSections`, the
-    epic pages' runtime;  `<ui-docs-toc>` and `<ui-docs-api>` then leave them to it, so the page scrolls once
+    epic pages' runtime;  `<ui-toc>` and `<ui-docs-api>` then leave them to it, so the page scrolls once
 - **Use it when:**  following the scroll, turning an address's `#hash` into a section, or landing a link.
 - **Flag:**  `scrollIntoView\(|hasReaderMoved`
 - **Score:**  `hasReaderMoved|decodeURIComponent\((\w+\.)*location\.hash`
@@ -655,7 +655,7 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **Score:**  `requestChange\("is(Open|Visible|Collapsed)"|addEventListener\("beforematch"|aria-expanded=\{this\.isOpen`
   · home `src/element/Disclosure.ts`
 - **Copies:**  taking it today:  the five popovers (the menu's overflow since P17), the six overlays (the dialog's two,
-  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-docs-example>`, `<ui-zoom>` (P17), spell-epic's `EpicFold`,
+  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-example>`, `<ui-zoom>` (P17), spell-epic's `EpicFold`,
   `EpicItem` and `Fold`.  Left:
   - `spell-ui/src/components/ui-accordion/UIAccordion.tsx`:  many panels in one `open` (`"0 2"`), on `<details>`,
     which keeps its own `aria-expanded` and find-in-page;  an exclusive open closes another in the same change
