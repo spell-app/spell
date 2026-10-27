@@ -1,0 +1,73 @@
+✅ test card setup
+  ▶️ Executing   `get a new card whose rank is queen, suit is spades and direction is down`
+  ✅ As expected `its name` is `"queen of spades"`
+  ✅ As expected `its color` is `black`
+  ✅ As expected `its value` is `12`
+  ✅ As expected `its state` is `"Q♠↓"`
+  ✅ As expected `it is a face card` is `yes`
+  ✅ As expected `it is a spade` is `yes`
+  ✅ As expected `it is a club` is `no`
+  ✅ As expected `it is a queen` is `yes`
+  ✅ As expected `it is a 2` is `no`
+  ✅ As expected `it is the queen of spades` is `yes`
+  ✅ As expected `it is the queen of clubs` is `no`
+  ✅ As expected `its picture` is `"🂭"`
+  ▶️ Executing   `turn it over`
+  ✅ As expected `it is face up` is `yes`
+  ✅ As expected `its state` is `"Q♠↑"`
+  ▶️ Executing   `set seven to a new card whose rank is 7 and suit is hearts`
+  ✅ As expected `seven is a number card` is `yes`
+  ✅ As expected `the color of seven` is `red`
+  ✅ As expected `the picture of seven` is `"🂷"`
+  ✅ As expected `the picture of a new card whose rank is ace and suit is clubs` is `"🃑"`
+  ✅ As expected `the picture of a new card whose rank is king and suit is diamonds` is `"🃎"`
+✅ test a new deck
+  ▶️ Executing   `the deck is a new deck`
+  ✅ As expected `the number of cards in the deck` is `52`
+  ✅ As expected `the number of (cards in the deck where it is a queen)` is `4`
+  ✅ As expected `the state of the first card of the deck` is `"A♣↓"`
+  ✅ As expected `the name of the last card of the deck` is `"king of spades"`
+  ▶️ Executing   `shuffle the deck`
+  ✅ As expected `the number of cards in the deck` is `52`
+✅ test piles
+  ▶️ Executing   `set the stock to a new pile with name = "stock"`
+  ✅ As expected `the color of the stock` is `"none"`
+  ✅ As expected `the value of the stock` is `0`
+  ▶️ Executing   `add (a new card whose rank is queen, suit is spades and direction is up) to the stock`
+  ▶️ Executing   `add (a new card whose rank is 7, suit is hearts and direction is down) to the stock`
+  ✅ As expected `the color of the stock` is `red`
+  ✅ As expected `the value of the stock` is `7`
+  ✅ As expected `the state of the stock` is `"stock: Q♠↑ 7♥↓"`
+  ▶️ Executing   `get the last card of the stock`
+  ▶️ Executing   `add it to the discards`
+  ✅ As expected `its pile is the discards` is `yes`
+  ✅ As expected `the number of cards in the stock` is `1`
+  ✅ As expected `the state of the discards` is `"discards: 7♥↓"`
+✅ test the moves
+  ▶️ Executing   `set the column to a new tableau with name = "T1"`
+  ▶️ Executing   `set the king to a new card whose rank is king, suit is spades and direction is up`
+  ▶️ Executing   `set the queen to a new card whose rank is queen, suit is hearts and direction is up`
+  ▶️ Executing   `set the jack to a new card whose rank is jack, suit is clubs and direction is up`
+  ✅ As expected `the column can take the queen` is `no`
+  ✅ As expected `the column can take the king` is `yes`
+  ▶️ Executing   `add the king to the column`
+  ✅ As expected `the column can take the jack` is `no`
+  ✅ As expected `the column can take the queen` is `yes`
+  ▶️ Executing   `add the queen to the column`
+  ✅ As expected `the state of the column` is `"T1: K♠↑ Q♥↑"`
+  ✅ As expected `the column can give up the queen` is `yes`
+  ▶️ Executing   `turn the queen face down`
+  ✅ As expected `the column can give up the queen` is `no`
+  ▶️ Executing   `set the two to a new card whose rank is 2, suit is hearts and direction is up`
+  ▶️ Executing   `set the ace to a new card whose rank is ace, suit is hearts and direction is up`
+  ▶️ Executing   `set the column to a new tableau with name = "T2"`
+  ▶️ Executing   `add the two to the column`
+  ▶️ Executing   `add the ace to the column`
+  ✅ As expected `the foundation can take the two` is `no`
+  ✅ As expected `the foundation can take the ace` is `yes`
+  ▶️ Executing   `move the ace to the foundation`
+  ✅ As expected `the foundation can take the two` is `yes`
+  ▶️ Executing   `add the queen to the column`
+  ✅ As expected `the foundation can take the queen` is `no`
+
+<div id="spell-app-root"><test-project-app><ui-container><ui-menu><ui-item kind="header">Klondike Solitaire</ui-item><ui-item>Score: 0</ui-item><ui-menu position="right"><ui-item aria-label="Auto play" style="cursor:pointer;user-select:none" title="Auto play"><ui-icon name="fast forward"></ui-icon></ui-item><ui-item aria-label="Cheat" style="cursor:pointer;user-select:none" title="Cheat"><ui-icon name="eye"></ui-icon></ui-item><ui-item aria-label="Restart" style="cursor:pointer;user-select:none" title="Restart"><ui-icon name="redo"></ui-icon></ui-item></ui-menu></ui-menu><ui-grid class="Board" columns="7" context-menu="game menu"><test-project-stock-pile><test-project-card><ui-text color="black" part="front">🃑</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂢</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂪</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃇</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃈</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂤</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃓</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃊</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃁</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃎</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂷</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃙</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃍</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂴</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃕</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂹</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃛</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃅</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂨</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃆</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃉</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂻</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂱</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-stock-pile><test-project-discard-pile><test-project-card><ui-text color="red" part="front">🃃</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-discard-pile><ui-column></ui-column><test-project-foundation><ui-text part="placeholder">🃑</ui-text></test-project-foundation><test-project-foundation><ui-text part="placeholder">🃁</ui-text></test-project-foundation><test-project-foundation><ui-text part="placeholder">🂱</ui-text></test-project-foundation><test-project-foundation><ui-text part="placeholder">🂡</ui-text></test-project-foundation><test-project-tableau><test-project-card><ui-text color="black" part="front">🂣</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="red" part="front">🃂</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂡</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="red" part="front">🂸</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂩</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂮</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="black" part="front">🃚</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂦</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃞</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃖</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="red" part="front">🃋</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂺</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂽</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂳</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃔</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="black" part="front">🃝</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂥</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🃄</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃗</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂲</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🃘</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau><test-project-tableau><test-project-card><ui-text color="black" part="front">🃒</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂧</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂵</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂾</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂫</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="red" part="front">🂶</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card><test-project-card><ui-text color="black" part="front">🂭</ui-text><ui-text color="blue" part="back">🂠</ui-text></test-project-card></test-project-tableau></ui-grid></ui-container></test-project-app></div>

@@ -1,0 +1,189 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Card",
+    "Pile",
+    "Column",
+    "Table",
+    "test_the_column"
+  ],
+  "statements": [
+    {
+      "type": "Card",
+      "superType": "View",
+      "defined": "/HowSolitaireWorks.spell:667-1219"
+    },
+    {
+      "property": "rank",
+      "classVariable": "Ranks",
+      "of": "Card",
+      "enumeration": [
+        "ace",
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        "jack",
+        "queen",
+        "king"
+      ],
+      "defined": "/HowSolitaireWorks.spell:696-749"
+    },
+    {
+      "property": "suit",
+      "classVariable": "Suits",
+      "of": "Card",
+      "enumeration": [
+        "clubs",
+        "diamonds",
+        "hearts",
+        "spades"
+      ],
+      "defined": "/HowSolitaireWorks.spell:753-807"
+    },
+    {
+      "property": "value",
+      "of": "Card",
+      "datatype": "number",
+      "defined": "/HowSolitaireWorks.spell:881-920"
+    },
+    {
+      "property": "color",
+      "of": "Card",
+      "defined": "/HowSolitaireWorks.spell:924-997"
+    },
+    {
+      "constants": [
+        "red"
+      ],
+      "defined": "/HowSolitaireWorks.spell:942-979"
+    },
+    {
+      "constants": [
+        "black"
+      ],
+      "defined": "/HowSolitaireWorks.spell:982-997"
+    },
+    {
+      "property": "name",
+      "of": "Card",
+      "datatype": "text",
+      "defined": "/HowSolitaireWorks.spell:1029-1071"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowSolitaireWorks.spell:1111-1219"
+    },
+    {
+      "syntax": "try {thisArg:expression}",
+      "output": "try",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "try (a card)",
+      "defined": "/HowSolitaireWorks.spell:2324-2593"
+    },
+    {
+      "type": "Pile",
+      "superType": "ViewableList",
+      "itemType": "Card",
+      "defined": "/HowSolitaireWorks.spell:1246-1282"
+    },
+    {
+      "property": "pile",
+      "of": "Card",
+      "datatype": "Pile",
+      "exclusive": true,
+      "defined": "/HowSolitaireWorks.spell:1364-1390"
+    },
+    {
+      "type": "Column",
+      "superType": "Pile",
+      "defined": "/HowSolitaireWorks.spell:1645-1879"
+    },
+    {
+      "type": "Table",
+      "superType": "App",
+      "defined": "/HowSolitaireWorks.spell:1940-2248"
+    },
+    {
+      "property": "column",
+      "of": "Table",
+      "datatype": "Column",
+      "defined": "/HowSolitaireWorks.spell:1966-1994"
+    },
+    {
+      "property": "hand",
+      "of": "Table",
+      "datatype": "Pile",
+      "defined": "/HowSolitaireWorks.spell:1998-2022"
+    },
+    {
+      "property": "message",
+      "of": "Table",
+      "datatype": "text",
+      "defined": "/HowSolitaireWorks.spell:2026-2047"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Table",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowSolitaireWorks.spell:2052-2248"
+    },
+    {
+      "syntax": "test the column",
+      "output": "test_the_column",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the column",
+      "defined": "/HowSolitaireWorks.spell:3041-3392"
+    }
+  ],
+  "codeLines": [
+    20,
+    23,
+    29,
+    36,
+    40,
+    41,
+    42,
+    46,
+    51,
+    61,
+    75,
+    82,
+    88,
+    99,
+    102,
+    107,
+    112,
+    117,
+    140
+  ]
+}

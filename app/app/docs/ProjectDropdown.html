@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>ProjectDropdown</title>
+    <meta name="description" content="Every project, as a dropdown or a menu of links." />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="ProjectDropdown">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="../../src/app/solid/ProjectDropdown.tsx"
+              icon="code"
+              aria-label="Its code, ProjectDropdown.tsx"
+              title="Its code, ProjectDropdown.tsx"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            ProjectDropdown
+            <ui-header>Every project, as a dropdown or a menu of links.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            How the editor moves between projects. ProjectDropdown is the dropdown at the left of the editor's top bar,
+            naming the open project after its group's icon; ProjectMenu is the same list as a menu of links, on the page
+            that chooses a project.
+          </p>
+          <ui-list class="spell-meta">
+            <ui-item icon="user">Written for: anyone changing the spell app's editor, or reading its code</ui-item>
+            <ui-item icon="image">A picture, not live: it lists the projects the spell server has</ui-item>
+          </ui-list>
+
+          <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="image"></ui-icon>
+            <p>The editor's top toolbar, with the examples dropped down, Solitaire open:</p>
+            <ui-image
+              src="_images/ProjectDropdown.png"
+              alt="The Example dropdown open over the editor, listing Calculator, Drawable Solitaire, FizzBuzz, Solitaire, Todos and more"
+              appearance="bordered rounded"
+            >
+            </ui-image>
+            <p class="meta">
+              A picture, taken by <code>yarn site:pictures</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-using-it" label="2. Using it" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>The editor's top toolbar starts with the dropdown:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SpellEditor.tsx · the editor's toolbar · 8 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <AppMenu>
+                      <Submenu left spring>
+                        <ProjectDropdown useRunner={props.mode === "run"} showActions />
+                        <Actions.resetApp />
+                      </Submenu>
+                    </AppMenu>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p id="ProjectMenu">The page that chooses a project draws a menu for each place projects come from:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>ProjectChooser.tsx · projects and examples · 8 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <ui-column>
+                      <h4>Open Project</h4>
+                      <ProjectMenu vertical="" fluid="" projectRoot={projects} />
+                    </ui-column>
+                    <ui-column>
+                      <h4>Open Example</h4>
+                      <ProjectMenu vertical="" fluid="" projectRoot={examples} useRunner />
+                    </ui-column>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Both list the projects of one place, a project root: the editor's own, unless
+                <code>projectRoot</code> names another (your projects, the examples, the guides).
+              </li>
+              <li>Choosing one opens it in the editor, or in the runner with <code>useRunner</code>.</li>
+              <li>
+                Both load the root if it hasn't loaded yet. The dropdown spins until it has, and a project is open; the
+                menu says "Loading...", or "Couldn't load" if it fails.
+              </li>
+              <li>
+                The dropdown always shows the open project: choosing one opens it, and only then does the dropdown show
+                it. It's built as
+                <a href="FileDropdown.html" target="src-packages-app-docs-filedropdown-html">FileDropdown</a> is.
+              </li>
+              <li>
+                No label before it: its trigger is the group's icon and the open project's name. Each group has one
+                icon, the same everywhere: a folder for projects, a lightbulb for examples, an open book for guides, a
+                puzzle piece for libraries, a flask for tests.
+              </li>
+              <li>In Run, choosing a project opens it in Run (<code>useRunner</code>).</li>
+              <li>The menu passes every other prop to its <code>&lt;ui-menu&gt;</code>, e.g. <code>vertical</code>.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-props" label="3. Props, and where it's drawn" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-docs-api family="ProjectDropdown"></ui-docs-api>
+            <p class="meta">
+              From its code, by <code>yarn site:data</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="4-its-code" label="4. Its code" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="folder open"></ui-icon>
+            <ul>
+              <li>
+                <a
+                  href="../../src/app/solid/ProjectDropdown.tsx"
+                  target="src-packages-app-src-solid-projectdropdown-tsx"
+                  ><code title="src/app/solid/ProjectDropdown.tsx">ProjectDropdown.tsx</code></a
+                >: both components, and their props
+              </li>
+              <li>
+                <a
+                  href="../../src/app/solid/ProjectDropdown.css"
+                  target="src-packages-app-src-solid-projectdropdown-css"
+                  ><code title="src/app/solid/ProjectDropdown.css">ProjectDropdown.css</code></a
+                >: the dropdown's look, in a menu
+              </li>
+              <li>
+                <a
+                  href="../../tests/app/solid/shell.browser.test.tsx"
+                  target="src-tests-app-src-solid-shell-browser-test-tsx"
+                  ><code title="tests/app/solid/shell.browser.test.tsx">shell.browser.test.tsx</code></a
+                >: their tests, with the page shell's
+              </li>
+              <li>
+                In the app's Solid components, <code>spell-app/app/solid</code>:
+                <a href="../../src/app/solid/" target="src-packages-app-src-solid"
+                  ><code title="src/app/solid/">src/solid/</code></a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-12 against branch <code>epic-workflow</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

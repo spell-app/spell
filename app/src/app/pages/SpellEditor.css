@@ -1,0 +1,102 @@
+/*
+ * The editor page's panes (`SpellEditor.tsx`):  the program under its header (`<AppPane>`),
+ * and Debug's panel of tabs (`<ProgramPanel>`, a `<RunnerPane>`).
+ * - Layout only:  each tab's look is its pane's own.
+ */
+
+/* Spell UI's breakpoints (`@custom-media`), inlined at build time */
+@import "spell-ui/styles/media.css";
+
+/* the Inspector's pane:  never narrower than 300px, whatever a drag asks (Owen) */
+.SplitPanelPane:has(> .InspectorPane),
+.InspectorPane {
+  min-width: 300px;
+}
+
+/* `<AppPane>`:  its header, then the program, filling the rest */
+.AppPane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  & > .AppPaneBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  & > .AppPaneBody > .AppPaneProgram {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* a notebook's program runs out of sight:  its page shows instead (`<NotebookPage>`) */
+  & > .AppPaneBody > .AppPaneProgram.hidden {
+    display: none;
+  }
+  & > .AppPaneBody > .AppPaneProgram > .AppRoot {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  & > .AppPaneBody > .NotebookPage {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+/* its header:  the project's icon and title, Restart at the right */
+.AppPaneHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  /* its icons as the top bar's:  their gap and colour (`chrome.css`), no gap of its own */
+  gap: 0;
+  min-height: 40px;
+  padding-inline: 14px 12px;
+  border-bottom: 1px solid var(--ui-border-color);
+  /* the theme's header fill, as a panel menu's (`EditorTheme.css`) */
+  background: var(--spell-header-background);
+
+  & > h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline-end: 0.75em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0;
+    /* the theme's type:  the old Semantic UI sheet the editor still loads sets every heading in Lato */
+    font-family: var(--ui-font-family);
+    font-size: 1.05em;
+    font-weight: var(--ui-font-weight-semibold, 600);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    & > ui-icon {
+      color: var(--ui-primary, currentColor);
+    }
+  }
+}
+
+/*
+ * Phones (Owen:  "Fix it now"):  the code above the app, each the page's full width, instead of side by side
+ * - no bars to drag (they'd drag sideways):  the room between the panes stays
+ * - no third column for the Inspector:  its pane is a sheet over the page instead (`Inspector.css`), up as the
+ *   crosshairs pick something (Owen's pick, epic `debut` P17, Q6);  so the crosshairs show, the Inspector's
+ *   button and its menu of cards don't
+ */
+@media (--ui-mobile) {
+  #SpellEditor > .SplitPanel.horizontal {
+    flex-direction: column;
+  }
+  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer {
+    pointer-events: none;
+  }
+  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer:has(+ .InspectorPane),
+  .AppPaneHeader > .InspectorToggle {
+    display: none;
+  }
+}

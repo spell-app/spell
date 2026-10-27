@@ -1,0 +1,89 @@
+import { readdirSync, readFileSync } from "fs"
+import { resolve } from "path"
+import { describe, expect, test } from "vite-plus/test"
+
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { parseSpellProject } from "spell-parser/spell/test"
+import { SX } from "spell-parser/spellx"
+import environment from "spell-app/spaces/server/node/environment"
+import { importScopeIn } from "spell-app/spaces/test"
+
+// Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
+import "spell-app/spaces"
+
+/**
+ * Every built-in NOTEBOOK (`@spell/notebooks`, epic `elemental-spell` P16) compiles cleanly, and means the same in
+ * code spell:  written as code spell in memory (`SX.CodeSpellWriter`), it compiles to the same javascript.
+ * - A notebook is only ever a `.spellx` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spellx`"):
+ *   its code spell is made here, never written beside it.
+ * - Its bare names are written as the tags its own compile chose, as the editor's "Show as Code Spell" writes them:
+ *   `<counter/>` is `<counter-counter/>`.
+ * - Parsed under the projects it imports, as the editor parses it:  the Counter notebook draws the Counter example's
+ *   counter (`@spell/examples/Counter`), so it keeps no template of its own.
+ * - A project of several notebooks (Avatar's Examples, Usage and API, and the tab bar they share;  P18):  every
+ *   `.spellx` file in its folder, parsed together, and their code spell twins together.
+ * - Compared without comments and the `DECLARES` header, which carry line numbers.
+ */
+const NOTEBOOKS_DIR = resolve(environment.systemFilesRoot, "notebooks")
+
+describe("every notebook means the same in code spell", () => {
+  const notebooks = readdirSync(NOTEBOOKS_DIR, { withFileTypes: true }).filter((it) => it.isDirectory())
+  test("there's at least the Counter and the Avatar", () =>
+    expect(notebooks.map(({ name }) => name)).toEqual(expect.arrayContaining(["Avatar", "Counter"])))
+  for (const { name } of notebooks) test(name, () => meansTheSame(name))
+})
+
+// epic `elemental-spell` J159:  the page's `<!-- GAP ... -->` notes were warning messages, drawn on the page
+test("the Button's GAP notes are comments:  never drawn", () => {
+  const contents = readFileSync(resolve(NOTEBOOKS_DIR, "Button", "Examples.spellx"), "utf8")
+  expect(contents).toContain("<!-- GAP I23:")
+  const files = [{ path: "/Examples.spellx", contents }]
+  const [file] = parseSpellProject(files, { parentScope: importScopeIn(resolve(NOTEBOOKS_DIR, "Button"), []) }).files
+  expect(codeOf(file!.compiled)).not.toContain("GAP")
+})
+
+/** Notebook project `name`'s `.spellx` files compile cleanly, and their code spell to the same javascript. */
+function meansTheSame(name: string) {
+  const folder = resolve(NOTEBOOKS_DIR, name)
+  const files = readdirSync(folder)
+    .filter((file) => file.endsWith(".spellx"))
+    .map((file) => ({ path: `/${file}`, contents: readFileSync(resolve(folder, file), "utf8") }))
+  const parentScope = importScopeIn(
+    folder,
+    files.map(({ path }) => path)
+  )
+  const parsed = parseSpellProject(files, { parentScope }).files
+  for (const file of parsed) expect({ path: file.path, errors: file.errors }).toEqual({ path: file.path, errors: [] })
+
+  // each element's tag, as the parse chose it, by where it starts in its file
+  const written = files.map(({ path, contents }, index) => {
+    const tags = new Map<number, string>()
+    const visit = (match: P.Match) => {
+      const [element] = match.matched
+      const data = match.data as { tagName?: string; children?: unknown[] }
+      if (element instanceof P.JSXElementToken && data.tagName) tags.set(element.start, data.tagName)
+      for (const inner of [...match.matched, ...(data.children ?? [])]) if (inner instanceof P.Match) visit(inner)
+    }
+    visit(parsed[index]!.match!)
+    const code = SX.CodeSpellWriter.write(contents, {
+      path,
+      componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, "en")
+    })
+    return { path: path.replace(/\.spellx$/, ".spell"), contents: code }
+  })
+  const twins = parseSpellProject(written, { parentScope }).files
+  twins.forEach((spell, index) => {
+    expect({ path: spell.path, errors: spell.errors }).toEqual({ path: spell.path, errors: [] })
+    expect(codeOf(spell.compiled)).toBe(codeOf(parsed[index]!.compiled))
+  })
+}
+
+/** `compiled` without its comments and `DECLARES` headers. */
+function codeOf(compiled: string): string {
+  return compiled
+    .replace(/\/\*! SPELL: DECLARES[^]*?\*\/\n?/g, "")
+    .split("\n")
+    .filter((line) => line.trim() && !line.trim().startsWith("//"))
+    .join("\n")
+}

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(perl -pi -e ' *)",
+      "Bash(grep -v \"^src/app/store.ts$\")",
+      "Bash(git restore *)",
+      "Bash(yarn *)",
+      "Bash(spell dev *)",
+      "Bash(epic *)",
+      "Bash(node cli/bin/spell.mjs dev *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Edit(//Users/owen/www/spell/spell.epics/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/owen/www/spell/spell.epics"
+    ]
+  }
+}

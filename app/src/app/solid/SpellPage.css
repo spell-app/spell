@@ -1,0 +1,56 @@
+/*
+ * Look of `<SpellPage>` (`SpellPage.tsx`):  one class per variant prop.
+ * - NOTE: React's sheet also had `tightly` / `loosely` spacing and `.Spacer` rules:  `<SpellPage>` never drew them.
+ */
+
+.SpellPage {
+  position: relative;
+
+  &.bordered {
+    border: 1px solid var(--spell-pane-border-color);
+  }
+
+  /* the editor's pages:  the theme's page shows through (`--spell-page-background`, `spell.css`) */
+  &.dark {
+    background: var(--spell-page-background);
+    color: var(--ui-text-color);
+  }
+
+  &.fill-window {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+  }
+
+  &.columns {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &.rows {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &.light {
+    background: var(--spell-pane-background);
+    box-shadow: var(--spell-pane-shadow);
+  }
+
+  &.spaced {
+    padding: var(--spell-normal-padding);
+  }
+
+  &.padded {
+    padding: var(--spell-normal-padding);
+  }
+
+  &.rounded {
+    border-radius: 0.28571429rem;
+  }
+
+  &.scrolling {
+    overflow: auto;
+  }
+}

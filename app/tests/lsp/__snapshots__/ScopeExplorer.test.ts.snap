@@ -1,0 +1,205 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScopeExplorer > a node lists the rules its statement made 1`] = `
+{
+  "is a (suit)": [
+    {
+      "name": "is_a_$suit",
+      "syntax": "{operator:is_or_is_not_a} (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
+    },
+  ],
+  "play a card": [
+    {
+      "name": "play",
+      "syntax": "play {thisArg:expression}",
+    },
+  ],
+}
+`;
+
+exports[`ScopeExplorer > a type's members:  in document order, by file then line -- each with its line 1`] = `
+[
+  "property rank",
+  "method is a (rank)",
+  "enumeration Ranks",
+  "constant ace",
+  "constant jack",
+  "constant queen",
+  "constant king",
+  "property value",
+  "method is a face card",
+  "method is a number card",
+  "property suit",
+  "method is a (suit)",
+  "enumeration Suits",
+  "constant clubs",
+  "constant diamonds",
+  "constant hearts",
+  "constant spades",
+  "property color",
+  "enumeration Colors",
+  "constant red",
+  "constant black",
+  "property symbol",
+  "property name",
+  "method is the (rank) of (suit)",
+  "property state",
+  "property picture",
+  "property pile",
+  "method play a card",
+  "method put a card on a pile",
+  "method count the points for a card on a pile",
+  "property direction",
+  "enumeration Directions",
+  "property id",
+  "method (a thing) belongs to one (list)",
+  "method draw (a thing)",
+]
+`;
+
+exports[`ScopeExplorer > root holds the built-in types, then the project:  its files, and what each declares 1`] = `
+"root Spell (built in)
+  type Thing (base type)
+    property id (text)
+    method (a thing) belongs to one (list)
+    method draw (a thing)
+  type List (counts from 1)
+    property id (text)
+    property name (text)
+    property length (number)
+    property size (number)
+    method (a list) can give up (a thing)
+    method (a list) can take (a thing)
+    method (a list) has items where
+    method (a list) starts with (a thing)
+    method a copy of (a list)
+    method a random item of (a list)
+    method add (a thing) to (a list)
+    method draw (a list)
+    method empty (a list)
+    method for each (item) in (a list)
+    method item (n) of (a list)
+    method items (start) to (end) of (a list)
+    method items in (a list) where
+    method merge (lists)
+    method move (a thing) to (a list)
+    method number of (items) in (a list)
+    method position of (a thing) in (a list)
+    method remove (a thing) from (a list)
+    method reverse (a list)
+    method shuffle (a list)
+  type App (is a View)
+    method start (an app)
+  type View (is a Thing)
+  type Page (is a View)
+  type TwoSidedView (is a View)
+    property direction
+    enumeration Directions
+  type ViewableList (is a List)
+    property selection (list)
+  type Text
+    property length (number)
+    property characters (list of characters)
+    method character (n) of (a text)
+    method number of characters in (a text)
+    method a random character of (a text)
+    method (a text) as upper case
+  type Date
+    property year (number)
+    property day (number)
+  type Notebook (is a Page)
+    property lock
+    enumeration Locks
+  project Solitaire
+    file Card.spellx
+      type Card (is a TwoSidedView)
+      function test card setup
+    file Deck.spellx
+      type Deck (is a List)
+      function test a new deck
+    file Pile.spellx
+      type Pile (is a ViewableList)
+      function test piles
+    file Solitaire.spellx
+      type Solitaire (is a App)
+      variable solitaire (Solitaire)
+      type StockPile (is a Pile)
+      type DiscardPile (is a Pile)
+      type Foundation (is a Pile)
+      type Tableau (is a Pile)
+      function test the moves"
+`;
+
+exports[`ScopeExplorer of a project importing another, compiled > the imported project shows, with its own files and types, ahead of ours 1`] = `
+"root Spell (built in)
+  type Thing (base type)
+    property id (text)
+    method (a thing) belongs to one (list)
+    method draw (a thing)
+  type List (counts from 1)
+    property id (text)
+    property name (text)
+    property length (number)
+    property size (number)
+    method (a list) can give up (a thing)
+    method (a list) can take (a thing)
+    method (a list) has items where
+    method (a list) starts with (a thing)
+    method a copy of (a list)
+    method a random item of (a list)
+    method add (a thing) to (a list)
+    method draw (a list)
+    method empty (a list)
+    method for each (item) in (a list)
+    method item (n) of (a list)
+    method items (start) to (end) of (a list)
+    method items in (a list) where
+    method merge (lists)
+    method move (a thing) to (a list)
+    method number of (items) in (a list)
+    method position of (a thing) in (a list)
+    method remove (a thing) from (a list)
+    method reverse (a list)
+    method shuffle (a list)
+  type App (is a View)
+    method start (an app)
+  type View (is a Thing)
+  type Page (is a View)
+  type TwoSidedView (is a View)
+    property direction
+    enumeration Directions
+  type ViewableList (is a List)
+    property selection (list)
+  type Text
+    property length (number)
+    property characters (list of characters)
+    method character (n) of (a text)
+    method number of characters in (a text)
+    method a random character of (a text)
+    method (a text) as upper case
+  type Date
+    property year (number)
+    property day (number)
+  type Notebook (is a Page)
+    property lock
+    enumeration Locks
+  project lib (imported)
+    file Card.spellx
+      type Card (is a TwoSidedView)
+      function test card setup
+    file Deck.spellx
+      type Deck (is a List)
+      function test a new deck
+    file Pile.spellx
+      type Pile (is a ViewableList)
+      function test piles
+  project app
+    file Solitaire.spellx
+      type Solitaire (is a App)
+      variable solitaire (Solitaire)
+      type StockPile (is a Pile)
+      type DiscardPile (is a Pile)
+      type Foundation (is a Pile)
+      type Tableau (is a Pile)
+      function test the moves"
+`;

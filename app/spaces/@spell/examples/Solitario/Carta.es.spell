@@ -1,0 +1,176 @@
+## Una carta de la baraja -- en el estilo de esquema:  su nombre, luego lo que es cierto de ella
+// La carta dice cuáles son sus palos, rangos y colores:  un mazo, una pila o un juego solo los leen.
+// Una vista:  cada carta es un elemento propio en la página, p. ej. `<solitario-carta>`.
+una "carta" es una vista donde:
+	# rango de la carta
+	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
+	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13
+	- "es un (rango)"											// "la carta es un rey"
+	- "es una figura" si su rango es jota, dama o rey			// "la carta es una figura"
+	- "es una carta numérica" si no es una figura				// "la carta es una carta numérica"
+
+	## palo de la carta
+	- su "palo" es uno de tréboles, diamantes, corazones o espadas
+	- "es un (palo)"											// "la carta es un diamante"
+
+	- su "color" es:
+		rojo si su palo es diamantes o corazones
+		negro de lo contrario
+
+	## cartas concretas
+	- su "nombre" es su rango + " de " + su palo				// "dama de espadas"
+	- "es el (rango) de (palo)"									// "la carta es la dama de espadas"
+
+	## su dirección:  boca arriba o boca abajo
+	- su "dirección" es arriba o abajo
+	- "está boca (dirección)"									// la carta está boca arriba
+
+	## voltear la carta
+	// cada vuelta tarda lo que su giro en la página (styles.css), así `esperar a: voltear la carta` espera a que muestre su otro lado
+	- para voltearla boca arriba:
+		si está boca arriba devolver
+		poner su dirección a arriba
+		pausar 300 mseg
+	- para voltearla boca abajo:
+		si está boca abajo devolver
+		poner su dirección a abajo
+		pausar 300 mseg
+	- para voltearla:
+		si está boca arriba:
+			esperar a voltear eso boca abajo
+		de lo contrario:
+			esperar a voltear eso boca arriba
+
+
+	// Imagen de la carta:  dibujada con letras especiales del juego de caracteres unicode
+	// - MIRA:  https://www.compart.com/en/unicode/block/U+1F0A0
+	// - boca abajo, el dorso que comparten todas las cartas;  boca arriba, su cara
+	- su "imagen" es:
+		si está boca abajo:
+			devolver "🂠"			// "Dorso de carta"
+		devolver su cara
+
+	// Su cara:  la imagen de su lado de arriba, mire hacia donde mire
+	- su "cara" es:
+		si es un comodín devolver "🃟"
+		columna = el valor de la carta
+		si es un trébol
+			devolver el elemento columna de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
+		si es un diamante
+			devolver el elemento columna de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
+		si es un corazón
+			devolver el elemento columna de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
+		si es una espada
+			devolver el elemento columna de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭","🂮"]
+
+	## dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse
+	// en la página, una carta se puede arrastrar a otra pila:  las reglas de su pila dicen cuáles suelta
+	- se puede arrastrar
+	// una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+	- para dibujarla:
+		devolver
+			<span part="lados" onClick={disparar evento clic-carta con carta = eso}>
+				<es-texto part="frente" color={su color}>{su cara}</es-texto>
+				<es-texto part="dorso" color="azul">🂠</es-texto>
+			</span>
+
+	- su "símbolo" es:
+		"♣" si es tréboles
+		"♦" si es diamantes
+		"♥" si es corazones
+		"♠" si es espadas
+		"?" de lo contrario
+
+	## el "estado" de la carta, para depurar
+	- su "estado" es:
+		rango es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
+		palo es su símbolo
+		dirección es "↑" si está boca arriba de lo contrario "↓"
+		devolver rango + palo + dirección
+
+
+## Pruebas
+para probar la preparación de la carta
+	obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
+	eco "probando la " + su nombre
+	su rango debería ser dama
+	su palo debería ser espadas
+	su nombre debería ser "dama de espadas"
+	su color debería ser negro
+	su valor debería ser 12
+	su estado debería ser "D♠↓"
+	
+
+	está boca abajo debería ser sí
+	su imagen debería ser "🂠"
+	voltear eso boca arriba
+	está boca arriba debería ser sí
+	su imagen debería ser "🂭"
+
+	es una figura debería ser sí
+	no es una carta numérica debería ser sí
+
+	es una espada debería ser sí
+	es un trébol debería ser no
+
+	es una dama debería ser sí
+	es un as debería ser no
+	es un 2 debería ser no
+
+	es la dama de espadas debería ser sí
+	es la dama de tréboles debería ser no
+	es el 2 de tréboles debería ser no
+	// es el comodín rojo debería ser no
+
+	// una carta de número:  su rango tal cual, y su imagen en la fila de su palo
+	poner siete a una nueva carta cuyo rango es 7, palo es corazones y dirección es arriba
+	eco "probando el " + el nombre del siete
+	siete es una carta numérica debería ser sí
+	el color del siete debería ser rojo
+	la imagen del siete debería ser "🂷"
+	la imagen de una nueva carta cuyo rango es as y palo es tréboles debería ser "🃑"
+	la imagen de una nueva carta cuyo rango es rey y palo es diamantes debería ser "🃎"
+
+
+## Un comodín:  una carta salvaje sin rango ni palo -- hay uno rojo y uno negro
+un "comodín" es una carta donde:
+	- su "color" es uno de rojo o negro
+	- "es el comodín (color)"						// "la carta es el comodín rojo"
+
+	- su valor es:
+		53 si es el comodín rojo
+		54 de lo contrario
+
+	- su "imagen" es
+		devolver "🃟"
+
+	- su nombre es "comodín " + su color
+	- su "estado" es:
+		color es (la primera letra de su color) como mayúsculas
+		dirección es "↑" si está boca arriba de lo contrario "↓"
+		devolver "*" + color + dirección
+
+para probar los comodines
+	obtener un nuevo comodín cuyo color es rojo y dirección es arriba
+	eco eso
+	es una carta debería ser sí
+	es un comodín debería ser sí
+	su color debería ser rojo
+	su nombre debería ser "comodín rojo"
+	su estado debería ser "*R↑"
+	su imagen debería ser "🃟"
+	es el comodín rojo debería ser sí
+	es el comodín negro debería ser no
+	no es el comodín negro debería ser sí
+
+	está boca arriba debería ser sí
+	voltear eso
+	está boca abajo debería ser sí
+
+	poner comodín negro a un nuevo comodín cuyo color es negro
+	la imagen de comodín negro debería ser "🃟"
+
+	poner la carta a una nueva carta cuyo rango es dama y palo es espadas
+	la carta es un comodín debería ser no
+	la carta no es un comodín debería ser sí
+	la carta es el comodín rojo debería ser no

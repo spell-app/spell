@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SpellLanguageService > highlighting > semantic tokens 1`] = `
+[
+  "6:0 "a" keyword",
+  "6:2 "\\"card\\"" type declaration",
+  "6:9 "is" keyword",
+  "6:12 "a" keyword",
+  "6:14 "two" type defaultLibrary",
+  "6:18 "sided" type defaultLibrary",
+  "6:24 "view" type defaultLibrary",
+  "6:28 ":" operator",
+  "9:3 "its" variable",
+  "9:7 "\\"rank\\"" property declaration",
+  "9:14 "is" keyword",
+  "9:17 "one" keyword",
+  "9:21 "of" keyword",
+  "9:24 "ace" enumMember",
+  "9:27 "," operator",
+  "9:29 "2" number",
+  "9:31 "." operator",
+  "9:32 "." operator",
+  "9:33 "." operator",
+  "9:35 "10" number",
+  "9:37 "," operator",
+  "9:39 "jack" enumMember",
+  "9:43 "," operator",
+  "9:45 "queen" enumMember",
+  "9:50 "," operator",
+  "9:52 "king" enumMember",
+  "12:3 "it" variable",
+  "12:6 "\\"is a face card\\"" function declaration",
+  "12:23 "if" keyword",
+  "12:26 "its" keyword",
+  "12:30 "rank" property",
+  "12:35 "is" keyword",
+  "12:38 "jack" enumMember",
+  "12:42 "," operator",
+  "12:44 "queen" enumMember",
+  "12:50 "or" keyword",
+  "12:53 "king" enumMember",
+  "16:3 "its" variable",
+  "16:7 "\\"suit\\"" property declaration",
+  "16:14 "is" keyword",
+  "16:17 "one" keyword",
+  "16:21 "of" keyword",
+  "16:24 "clubs" enumMember",
+  "16:29 "," operator",
+  "16:31 "diamonds" enumMember",
+  "16:39 "," operator",
+  "16:41 "hearts" enumMember",
+  "16:48 "or" keyword",
+  "16:51 "spades" enumMember",
+  "35:2 "return" keyword",
+  "35:9 "rank" variable",
+  "35:14 "+" operator",
+  "35:16 "its" keyword",
+  "35:20 "symbol" property",
+  "35:27 "+" operator",
+  "35:29 "direction" variable",
+  "57:3 "to" keyword",
+  "57:6 "draw" keyword",
+  "57:11 "its" keyword",
+  "57:15 "front" property",
+  "57:20 ":" operator",
+  "58:3 "ui-text" type",
+  "58:11 "color" property",
+  "58:18 "its" keyword",
+  "58:22 "color" property",
+  "58:30 "its" keyword",
+  "58:34 "picture" property",
+  "58:44 "ui-text" type",
+]
+`;
+
+exports[`SpellLanguageService > structure > document symbols:  properties and methods nest under their type 1`] = `
+[
+  "Card (Class)
+  rank (Property)
+    "is a (rank)" (Method)
+  value (Property)
+  "is a face card" (Method)
+  "is a number card" (Method)
+  suit (Property)
+    "is a (suit)" (Method)
+  color (Property)
+  symbol (Property)
+  name (Property)
+  "is the (rank) of (suit)" (Method)
+  state (Property)
+    rank (Variable)
+    direction (Variable)
+  draw it (Method)
+  picture (Property)
+    column (Variable)
+  card setup (Function)
+    seven (Variable)",
+]
+`;
+
+exports[`SpellLanguageService > structure > folding ranges 1`] = `
+[
+  "6-86",
+  "9-10",
+  "16-17",
+  "18-20",
+  "21-25",
+  "32-35",
+  "44-46",
+  "48-56",
+  "50-51",
+  "52-53",
+  "54-55",
+  "57-58",
+  "59-60",
+  "62-86",
+  "1-4 comment",
+]
+`;

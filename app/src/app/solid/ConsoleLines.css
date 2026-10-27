@@ -1,0 +1,88 @@
+/* `<ConsoleLines>` (`ConsoleLines.tsx`):  the same rules and class names as React's had. */
+/* `.ConsoleViewer` is the lines' scrolling container -- see `<ConsoleLines>`. */
+.ConsoleViewer {
+  position: relative;
+  font-family: monaco, monospace;
+  background: var(--spell-view-background);
+  color: var(--ui-text-color);
+  font-size: 11px;
+  white-space: pre;
+
+  &.scrolling {
+    flex: 1 1 auto;
+    overflow: auto;
+  }
+
+  /* Stretch children to their "natural" width inside `<ConsoleViewer>`,
+     otherwise the line background would not extend when scrolling. */
+  .stretcher {
+    display: inline-block;
+    min-width: 100%;
+  }
+
+  .ConsoleLines {
+    position: relative;
+    overflow: visible;
+
+    .ConsoleGroupSpan {
+      z-index: 2;
+      position: absolute;
+      overflow: hidden;
+      top: -5px;
+      bottom: 0;
+      width: 5px;
+      border: solid var(--ui-border-color-strong);
+      border-width: 0 0 1px 1px;
+    }
+  }
+
+  .ConsoleLine {
+    z-index: 1;
+    border-bottom: 1px solid var(--ui-border-color-internal);
+    padding-right: 10px;
+
+    &.debug {
+    }
+
+    &.info {
+      background-color: var(--ui-info-background);
+    }
+    &.warn {
+      background-color: var(--ui-warning-background);
+    }
+    &.error {
+      background-color: var(--ui-error-background);
+    }
+    &.group {
+      font-weight: bold;
+    }
+  }
+
+  .ConsoleGroupIcon {
+    display: inline-block;
+    text-align: center;
+  }
+
+  .ConsoleValue {
+    &.boolean,
+    &.number {
+      color: var(--ui-blue-text);
+    }
+
+    &.observable {
+      color: var(--ui-green-text);
+      background: var(--ui-surface-strong);
+      box-shadow: var(--ui-shadow-subtle);
+      border-radius: 5px;
+      padding: 0 5px;
+      cursor: pointer;
+      &:hover {
+        box-shadow: var(--ui-shadow-raised);
+      }
+    }
+  }
+
+  .ConsoleValue + .ConsoleValue {
+    margin-left: 0.5em;
+  }
+}
