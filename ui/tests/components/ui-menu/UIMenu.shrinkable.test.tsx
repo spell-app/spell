@@ -118,8 +118,10 @@ describe("<ui-menu shrinkable>", () => {
     const short = partsOf(items[3]!).title!
     expect(short.scrollWidth).toBeLessThanOrEqual(short.clientWidth + 1)
     // the row fits:  the last item ends inside the menu
-    const end = partsOf(items[3]!).box.getBoundingClientRect().right
-    expect(end).toBeLessThanOrEqual(row.getBoundingClientRect().right + 0.5)
+    // polled:  on CI the icons and fonts land after the first fit, and the row refits a frame later
+    await expect
+      .poll(() => partsOf(items[3]!).box.getBoundingClientRect().right - row.getBoundingClientRect().right)
+      .toBeLessThanOrEqual(0.5)
   })
 
   it("once a title would be cut under 50px:  icons only, each title its tooltip and still its name", async () => {

@@ -44,6 +44,7 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property name",
   "method is the (rank) of (suit)",
   "property state",
+  "method draw it",
   "property picture",
   "property pile",
   "method play a card",
