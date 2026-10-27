@@ -107,6 +107,17 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   own tokenizer for spell;  only Python keeps a small scanner
 - **Flag:**  a new character-by-character comment or string scanner
 
+### Lines of code
+
+- **It is:**  `codeLines(text, extension)` (`spell/element-tools/codeLines`, `src/element-tools/codeLines.ts`;  epic
+  `coherence` P23):  the lines of a file that hold code, blank and comment-only lines left out, the comments by the
+  file's extension (HTML's, CSS's, Python's, JavaScript's)
+- **Use it when:**  any report counts a file's lines of code, so two reports never give it two sizes.
+- **Flag:**  `\.trim\(\)` per line beside `"/\*"` or `<!--` in a counter
+- **Copies:**  Spell UI's `LocCount` (`yarn report`) on it since P23.  Left:
+  - `spell-epic/src/command/LinesOfCode.ts` (`countsOf()`, `epic loc`):  its own regexes, which also take a `/*` in a
+    string for a comment;  in spell-epic's commands, P20's folder while P23 ran, so its swap waits
+
 ### A JSON5 file
 
 - **It is:**  `readJSON5File()` to read, `json5Edited()` to write keeping its comments:  `spell/util/node/json5`;
@@ -214,7 +225,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   · home `src/server/Git.ts`, `src/server/checkout.ts`, `src/server/RealPath.ts`
 - **Copies:**  `--`
   - Moved from spell-epic in epic `coherence` P7, with about 20 git runners, 10 checkout finders and 9 real-path
-    helpers across spell-epic and the kit.
+    helpers across spell-epic and the kit;  Spell UI's design export (`DesignExport.readGit()`) since P23.
   - Fine:  a test's own scratch repo (`spawnSync("git", ...)` in a test);  `spell-epic/src/tool/InboxPoller.mjs`.
 
 ### The shared content folder
@@ -345,7 +356,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Copies:**  `--`
   - Its users since epic `coherence` P7:  Spell UI's site check, screenshots, HMR test, visual tests and README
     pictures;  spell-epic's `browserPage.js`, `check-spell.js`, `designer-shots.js` and demo checks;  the brand's
-    design check and comparison;  the kit's publish check;  the app's examples script.
+    design check and comparison;  the kit's publish check;  the app's examples script;  Spell UI's smoke pages
+    (`SmokeRunner`) since P23.
   - Fine:  the kit's `scripts/favicon.ts` (renders an image, checks no page).
 
 ### The page server, from an epic page
@@ -463,7 +475,8 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Use it when:**  Spell UI's runtime fetches;  everywhere else, `$fetch()` (above).
 - **Flag:**  `response\.ok` in `spell-ui/src`
 - **Score:**  `response\.ok` · in `spell-ui/src` · home `spell-ui/src/runtime/runtime.types.ts`
-- **Copies:**  `--` since epic `coherence` P10 (`Api`, `AppStylesheet`, `Sources`, `IconPacks`)
+- **Copies:**  `--` since epic `coherence` P10 (`Api`, `AppStylesheet`, `Sources`, `IconPacks`);  the docs site's
+  `SiteData.request()` since P23
 
 ### A fallback's events
 
@@ -606,7 +619,8 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `scrollIntoView\(|hasReaderMoved`
 - **Score:**  `hasReaderMoved|decodeURIComponent\((\w+\.)*location\.hash`
   · home `spell-ui/src/components/ui-toc/TocIndex.ts`, `spell-ui/src/components/ui-toc/HashLanding.ts`
-- **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime)
+- **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime);  the API
+  tables' own hash decoding (`idForHash()`) on `decode()` since P23
   - Fine:  `spell-epic/src/components/epic-section/EpicFold.tsx`, `spell-epic/src/components/epic-item/EpicItem.tsx`:
     since P18 they only open for a link (a page whose lander doesn't know epic folds), never scroll
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
@@ -636,11 +650,18 @@ What a component, or a page built on Spell UI, reaches for first.
 
 - **It is:**  `writeOrCheck()`, `spliceGenerated()` (`spell/element-tools/generatedFiles`, `src/element-tools/generatedFiles.ts`;
   epic `coherence` P11, from Spell UI's)
+  - formatted first, in memory, as `yarn format` would:  `SRV.formatHTML(file, text)` (`spell/server`), which reads
+    any file's extension (`.ts`, `.css`, `.json`);  Spell UI's generators through `formatted()`
+    (`spell-ui/src/tools/generatedFiles.ts`;  P23), never a `vp fmt` run afterwards
 - **Use it when:**  a script writes a file, or a block of one, that `--check` must find unchanged.
-- **Flag:**  `stale:  .*yarn|readOrEmpty`
-- **Score:**  `stale:  .*yarn|readOrEmpty` · home `src/element-tools/generatedFiles.ts`
+- **Flag:**  `stale:  .*yarn|readOrEmpty|"vp", "fmt"`
+- **Score:**  `stale:  .*yarn|readOrEmpty|"vp", "fmt"` · home `src/element-tools/generatedFiles.ts`
 - **Copies:**  `--` since P11 (spell-epic's and the brand's site data, the app's site data, examples README and
-  grammar, the kit's `mermaid:pretty`)
+  grammar, the kit's `mermaid:pretty`);  Spell UI's `gen:root`, `gen:styles` and the status report's tables since
+  P23, each with `--check`.  Left:
+  - Spell UI's Theming playgrounds (`site-kitchen.ts`, `PlaygroundWriter`):  a regex over each
+    `<ui-docs-tokens playground>`, as an empty one gets its markers on its first fill, and its family names the block
+  - `spell-epic/src/tools/pages.js` (`tidy()`):  `yarn vp fmt` as a child;  P20's folder
 
 ### A page bundle's build
 
@@ -654,6 +675,48 @@ What a component, or a page built on Spell UI, reaches for first.
 - **It is:**  Spell UI's `SiteDataBuilder` (`spell-ui/src/tools/SiteDataBuilder.ts`), its `set` and `forSet()`
   (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
 - **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
+
+### A docs element's site data
+
+- **It is:**  `SiteDataLoad` (`spell-ui/src/docs-components/SiteDataLoad.ts`;  epic `coherence` P23):  a docs element's
+  field, `readonly data = new SiteDataLoad()`:  the site's data once it's in (`value`), why it didn't come (`error`),
+  `isLoading`, `loaded`;  reactive, as the element's own members are
+- **Use it when:**  a docs widget shows something from the site's data (`components.json5`, `SiteData.load()`).
+- **Flag:**  `SiteData\.load\(\)\.then`
+- **Score:**  `SiteData\.load\(\)\.then` · home `spell-ui/src/docs-components/SiteDataLoad.ts`
+- **Copies:**  `--` since P23 (`<ui-docs-api>`, `<ui-docs-tokens>`, `<ui-docs-nav>`)
+  - Fine:  `<ui-docs-search>`:  it loads on first use, the search's own file with the data
+
+### A family's examples
+
+- **It is:**  `FamilyExamples` (`spell-ui/src/tools/FamilyExamples.ts`;  epic `coherence` P23):  a family's element
+  example files, its main one first (`files()`), and each file's sections (`sections()`:  its `<h4>` the title, its
+  class, its body dedented, comments left out)
+- **Use it when:**  a tool shows a family's examples:  the kitchen sink and its Theming playgrounds, the design export.
+- **Flag:**  `examples/elements` read by a tool
+- **Copies:**  `--` since P23 (`site-kitchen.ts`, `DesignComponents`)
+  - Fine:  `DesignBrand`:  the brand's examples are its docs pages', not example files
+
+### A sheet's tokens
+
+- **It is:**  `ComponentTokens.declarations(css, prefix)` (`spell-ui/src/styles/ComponentTokens.ts`):  every custom
+  property a sheet declares, with its rule's selector and whether it's nested;  `FoundationTokens.rootDeclarations()`
+  the ones on `:root` itself (`spell-ui/src/tools/FoundationTokens.ts`;  epic `coherence` P23)
+- **Use it when:**  a tool reads a sheet's tokens:  the site's token tables, the design export's `tokens.json`, the
+  theming codemod.
+- **Flag:**  a character scanner over CSS for `--` names
+- **Copies:**  `--` since P23 (the design export's own scanner went)
+
+### Spell UI's folder, the site's pages, the page server
+
+- **It is:**  `SPELL_UI_ROOT` and `sitePages()` (`spell-ui/src/tools/tools.types.ts`), `ensurePageServer()`
+  (`spell-ui/src/tools/pageServer.ts`;  epic `coherence` P23)
+- **Use it when:**  a Spell UI script or tool needs the repo's folder, the docs site's pages, or the page server
+  running.
+- **Flag:**  `new URL\("\.\.(/\.\.)*/?", import\.meta\.url\)|import\.meta\.dirname, "\.\."`
+- **Score:**  `fileURLToPath\(new URL\("\.\.(/\.\.)*/?", import\.meta\.url\)\)|import\.meta\.dirname, "\.\.`
+  · in `spell-ui/src/tools` · home `spell-ui/src/tools/tools.types.ts`
+- **Copies:**  `--` since P23 (17 copies of the folder, four page listers, two server starts)
 
 ### A theme's values
 
