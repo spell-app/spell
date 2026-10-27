@@ -75,7 +75,9 @@ describe("incremental parsing ~== full parse", () => {
     // `the solitaire` is declared in Solitaire.spell, AFTER Deck.spell -- a full parse doesn't know it yet.
     const added = "\t\t\t\tadd a new card with rank = the rank, suit = the suit to the deck\n"
     const edited = files.map((it) =>
-      it.path === "/Deck.spell" ? { ...it, contents: it.contents.replace(added, `${added}\t\tprint the solitaire\n`) } : it
+      it.path === "/Deck.spell"
+        ? { ...it, contents: it.contents.replace(added, `${added}\t\tprint the solitaire\n`) }
+        : it
     )
     expect(edited[1]!.contents).toContain("print the solitaire")
     const project = incrementalSpellProject(files)
