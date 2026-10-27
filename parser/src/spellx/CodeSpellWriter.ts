@@ -40,6 +40,50 @@ export class CodeSpellWriter {
     return `${writer.lines.join("\n")}\n`
   }
 
+  /**
+   * The code spell `markup` reads as, markup alone:  a drawing's, an example's body (epic `elemental-spell` P18).
+   * - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`, each `</>` naming what it closes,
+   *   prose as `<markdown>` blocks:  what the same markup in a notebook's drawing is written as.
+   * - Written as a notebook's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - `options.componentTag`'s `start` is where the element starts in `markup`.
+   * - NEVER throws:  markup spellx can't read is written as it is.
+   */
+  static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
+    const language = options.language ?? SP.Language.forFile(options.path)
+    const { prefix, templates } = language.words.spellx!
+    const notebook = Object.keys(templates).find((word) => templates[word] === "notebook")
+    const head = `<${prefix}-${notebook} "markup">\n`
+    const lines = markup.split("\n")
+    // where each of `markup`'s lines starts, in it and in the notebook it's written in (one tab further in)
+    const starts: Array<{ markup: number; written: number }> = []
+    let at = 0
+    for (const line of lines) {
+      starts.push({ markup: at, written: head.length + at + starts.length + 1 })
+      at += line.length + 1
+    }
+    const markupStart = (start: number) => {
+      const line = starts.filter((each) => each.written <= start).at(-1) ?? starts[0]!
+      return line.markup + start - line.written
+    }
+    const componentTag = options.componentTag
+    const written = CodeSpellWriter.write(
+      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${notebook}>\n`,
+      {
+        ...options,
+        language,
+        componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
+      }
+    )
+    // its drawing's lines:  after the notebook's line and its `to draw its content:`, before its `start` line
+    const drawing = written.split("\n").slice(2)
+    const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
+    return drawing
+      .slice(0, end < 0 ? undefined : end)
+      .map((line) => line.replace(/^\t\t/, ""))
+      .join("\n")
+      .trimEnd()
+  }
+
   /** The lines written so far. */
   private readonly lines: string[] = []
 
