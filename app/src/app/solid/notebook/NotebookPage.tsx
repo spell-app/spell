@@ -10,6 +10,7 @@ import { PagePatch } from "spell/server/site/PagePatch"
 import { appTexts } from "spell-app/app/ui/AppTexts"
 import { NotebookController, type KeyedCell } from "./NotebookController"
 import { ExampleCode, ExampleDescription, NotebookCell } from "./NotebookCell"
+import { CellTools } from "./NotebookCellTools"
 import { NotebookDocs } from "./NotebookDocs"
 import { showNotebook } from "./NotebookHeader"
 import { SpellExample } from "./SpellExample"
@@ -34,7 +35,10 @@ import "./NotebookPage.css"
  *   draws -- examples, sections, text -- live, each in its own place, drawn by the running program's runtime.
  * - An example's code is always editable:  an edit changes only that cell's span of the file, draws only that cell
  *   again, and saves it, unless the notebook's locked (`NotebookController`).
- * - ⌘Z, outside an editor:  undoes the last lock or unlock.
+ * - Each example's tools, left of its `</>` while the pointer's over it, and a section's on its title bar
+ *   (`<CellTools>`):  Add below, Move up, Move down, Delete;  the pane header's ⋯ menu acts on the cell last
+ *   clicked (`<NotebookMenu>`).
+ * - ⌘Z, outside an editor:  undoes the last add, move, delete, lock or unlock.
  * - A change to the file from outside the page (read every couple of seconds):  only the cells it changed draw again,
  *   planned by epic-engine's shared page patch;  the cell being typed in keeps its text, with a note
  *   (`NotebookController.outsideChange()`).
@@ -77,7 +81,9 @@ export function NotebookPage(props: {
     panelFor("description", (panel) => (
       <ExampleDescription controller={controller} key={key} index={index} panel={panel} />
     )),
-    panelFor("source", () => <ExampleCode controller={controller} key={key} index={index} />)
+    panelFor("source", () => <ExampleCode controller={controller} key={key} index={index} />),
+    // its cell's tools, left of its `</>`:  on its first example only, as they act on the whole cell
+    ...(index === 0 ? [panelFor("tools", () => <CellTools controller={controller} key={key} />)] : [])
   ]
   onCleanup(() => panelDisposers.forEach((dispose) => dispose()))
 
@@ -176,7 +182,14 @@ export function NotebookPage(props: {
                     collapsible=""
                     dividing=""
                     class="NotebookSection"
+                    onPointerOver={followTitleHover}
+                    onPointerLeave={(event: PointerEvent) =>
+                      (event.currentTarget as HTMLElement).classList.remove(TITLE_HOVER)
+                    }
                   >
+                    <div slot="actions" class="NotebookSectionTools">
+                      <CellTools controller={controller} key={section().key} />
+                    </div>
                     <Cells controller={controller} cells={section().cells} />
                   </ui-section>
                 </Show>
@@ -334,6 +347,21 @@ function sectionsOf(cells: KeyedCell[]): Section[] {
   return sections[0]!.cells.length ? sections : sections.slice(1)
 }
 
+/**
+ * Mark a page section `titleHover` while the pointer's over its OWN title bar (not a nested section's):
+ * its tools show then (`NotebookCellTools.css`).
+ */
+function followTitleHover(event: PointerEvent) {
+  const section = event.currentTarget as HTMLElement
+  const onTitle = event
+    .composedPath()
+    .some((node) => node instanceof Element && node.getRootNode() === section.shadowRoot && node.part.contains("title"))
+  section.classList.toggle(TITLE_HOVER, onTitle)
+}
+
+/** The class a page section has while the pointer's over its title bar. */
+const TITLE_HOVER = "titleHover"
+
 /** A section's id, from its heading:  `Two of them` => `two-of-them`. */
 function slugOf(heading: string): string {
   return heading
@@ -400,13 +428,14 @@ function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP
 }
 
 /**
- * Is key `event` the notebook page's:  pressed in `page`, or with nothing focused -- but not in an editor, which has
- * its own undo?
+ * Is key `event` the notebook page's:  pressed in `page`, in the pane header's ⋯ menu, or with nothing focused --
+ * but not in an editor, which has its own undo?
  */
 function isForPage(event: KeyboardEvent, page: HTMLElement): boolean {
   const path = event.composedPath()
   if (path.some((node) => node instanceof HTMLElement && node.classList.contains("monaco-editor"))) return false
-  return path.includes(page) || path[0] === document.body
+  const inMenu = path.some((node) => node instanceof HTMLElement && node.classList.contains("NotebookMenu"))
+  return inMenu || path.includes(page) || path[0] === document.body
 }
 
 declare module "@solidjs/web/types/jsx.js" {

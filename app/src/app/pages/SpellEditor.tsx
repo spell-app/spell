@@ -34,6 +34,7 @@ import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
 import { RunnerPane, type RunnerTab } from "spell-app/app/runner/RunnerPane"
 import { NotebookController } from "spell-app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell-app/app/solid/notebook/NotebookHeader"
+import { NotebookMenu } from "spell-app/app/solid/notebook/NotebookCellTools"
 import { NotebookPage } from "spell-app/app/solid/notebook/NotebookPage"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
@@ -96,7 +97,7 @@ export function SpellEditor(props: { mode: Mode }) {
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
  *   - Its title is then a menu of the project's notebooks, the lock after it, and what happened to the last edit
- *     (`<NotebookHeader>`).
+ *     (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -122,6 +123,10 @@ export function AppPane() {
         <InspectorPick />
         <Actions.showProjectSettings iconOnly />
         <InspectorToggle />
+        {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
+        <Show when={notebookPage()} keyed>
+          {(page) => <NotebookMenu controller={page} />}
+        </Show>
       </header>
       <div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
         <div class={["AppPaneProgram", { hidden: !!notebook() }]}>

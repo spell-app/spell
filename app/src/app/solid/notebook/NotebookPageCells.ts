@@ -65,6 +65,28 @@ export class NotebookPageCells {
   }
 
   /**
+   * `text` with `cell`, a section written as a tag (`block`), swapped whole with the notebook's child before it
+   * (`"up"`) or after it (`"down"`):  another section, an example, a run of prose.
+   * - Only the two texts trade places, each without the blank lines round it:  the lines between them stay.
+   * - Never above the page's title;  nothing that way:  `text` as it is.
+   */
+  static sectionMoved(text: string, model: NotebookPageModel, cell: PageCell, direction: "up" | "down"): string {
+    const block = cell.block
+    if (!block) return text
+    const children = model.notebook.children
+      .map((child) => trimmedSpan(text, child.span))
+      .filter((span) => span.end > span.start)
+    const index = children.findIndex((span) => span.start === block.start)
+    const other = children[direction === "up" ? index - 1 : index + 1]
+    const title = model.cells.find((each) => each.title)
+    if (index < 0 || !other || (title && other.start <= title.span.start && title.span.start < other.end)) return text
+    const [first, second] = other.start < block.start ? [other, block] : [block, other]
+    const firstText = text.slice(first.start, first.end)
+    const secondText = text.slice(second.start, second.end)
+    return replaceSpan(replaceSpan(text, second, firstText), first, secondText)
+  }
+
+  /**
    * `text` without `cell`:  its lines go, and a blank line after it when one's before it too.
    * - A section written as a tag goes whole, with what's inside it (`block`).
    */
@@ -333,6 +355,13 @@ function groupsOf(node: SX.SpellxTemplate): CellGroup[] | undefined {
       return member.kind === "note" ? member.word : member.kind
     })
   }))
+}
+
+/** `span` of `text` without the white space at its start and end. */
+function trimmedSpan(text: string, span: SX.SpellxSpan): SX.SpellxSpan {
+  const inside = text.slice(span.start, span.end)
+  const start = span.start + (inside.length - inside.trimStart().length)
+  return { start, end: Math.max(start, span.start + inside.trimEnd().length) }
 }
 
 /** Where the text from `start` to `at` ends, less its trailing blank lines. */

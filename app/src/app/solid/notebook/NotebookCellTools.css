@@ -1,0 +1,83 @@
+/*
+ * A cell's tools (`<CellTools>`) and the notebook's ⋯ menu (`<NotebookMenu>`), NotebookCellTools.tsx.
+ * - Each tool in the look of its example's `</>`:  its size, corner and fill, handed down by the example's `tools`
+ *   row (`--ui-docs-example-tool-*`);  on a section's title bar, the same values as their fallbacks.
+ * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
+ */
+
+.NotebookCellTools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  & > ui-button::part(button),
+  & > ui-dropdown > ui-button[slot="trigger"]::part(button) {
+    box-sizing: border-box;
+    width: var(--ui-docs-example-tool-size, 28px);
+    min-width: 0;
+    min-height: var(--ui-docs-example-tool-size, 28px);
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--ui-docs-example-tool-radius, 6px);
+    background: var(--ui-docs-example-tool-background, var(--ui-surface));
+    box-shadow:
+      0 0 0 1px var(--ui-border-color),
+      var(--ui-shadow-subtle, 0 0 #0000);
+  }
+
+  /* the `+`:  the dropdown's box is just its button, no caret, no room kept for one */
+  & > ui-dropdown {
+    --ui-dropdown-icon-spacing: 0px;
+  }
+  & > ui-dropdown::part(icon) {
+    display: none;
+  }
+}
+
+/* on an example:  only while the pointer is over it, or it has the focus (Tab reaches them, and they show) */
+spell-example > [slot="tools"] {
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+spell-example:is(:hover, :focus-within) > [slot="tools"] {
+  opacity: 1;
+}
+spell-example:not(:hover, :focus-within) > [slot="tools"] {
+  pointer-events: none;
+}
+
+/* on a section's title bar:  while the pointer's over the title, or one has the focus */
+ui-section.NotebookSection > .NotebookSectionTools {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
+}
+ui-section.NotebookSection:is(.titleHover, :has(> .NotebookSectionTools:focus-within)) > .NotebookSectionTools {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* the ⋯ in the pane's header:  the header's other icons' look, no caret, no box */
+.AppPaneHeader > ui-dropdown.NotebookMenu {
+  --ui-dropdown-icon-spacing: 0px;
+  margin-inline: calc(var(--spell-bar-icon-gap) / 2);
+
+  &::part(trigger) {
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    min-height: 0;
+  }
+  & > ui-icon[slot="icon"] {
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+    --ui-icon-link-opacity: 1;
+    display: flex;
+    font-size: 1.15em;
+    color: var(--spell-bar-icon-color);
+  }
+}
