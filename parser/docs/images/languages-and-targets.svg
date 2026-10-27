@@ -69,7 +69,7 @@
   <text class="what" x="660" y="214">on Solid, or a library</text>
   <rect class="box" x="560" y="236" width="200" height="48" rx="12"/>
   <text class="name" x="660" y="257">Python</text>
-  <text class="what" x="660" y="274">a .py program</text>
+  <text class="what" x="660" y="274">.py program or website</text>
   <rect class="coming" x="560" y="296" width="200" height="48" rx="12"/>
   <text class="soon" x="660" y="317">C++, Java, Swift...</text>
   <text class="soonwhat" x="660" y="334">coming</text>
