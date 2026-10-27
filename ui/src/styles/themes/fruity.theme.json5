@@ -1,0 +1,31 @@
+// Fruity:  the Glass theme on a soft pastel wallpaper, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`.
+// - Its sheet, `fruity.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+// - Glass with what Fruity adds ON TOP (epic `debut` P17, J88):  it extends `glass`, and keeps only that.
+//   - A fix to the glass is made once, in `glass.theme.json5` or its rules sheet.
+//   - Its sheet imports Glass's, and Vite inlines the import:  the theme is still ONE sheet (`UI.themes`).
+// - What it adds:  the wallpaper behind the page, three blurred colour washes,
+//   lavender, pink and sky in light;  plum, wine and navy in dark.
+//   - and what the wallpaper asks of the bars over it:  pill tracks, title bands that hide it in dark
+//   - Each wash a `light-dark()` colour, so the gradient follows the scheme.
+//   - Drawn by Glass's page rule (`--glass-wallpaper`), over its solid page colour,
+//     and under the bars that stick at a page's top (`--ui-bar-wallpaper`).
+// - The default theme of the Spell editor and the epic pages.
+{
+  "$schema": "./theme.schema.json",
+  "extends": "glass",
+  "own": {
+    "glass-wallpaper": "radial-gradient(at 12% 18%, light-dark(#c8b6ff, #4b2f8f) 0, transparent 46%), radial-gradient(at 88% 10%, light-dark(#ffd6e7, #6b2950) 0, transparent 42%), radial-gradient(at 72% 92%, light-dark(#b8e4ff, #1f4d7a) 0, transparent 46%)"
+  },
+  "components": {
+    "bar": {
+      // a titled toolbar's track and its keys:  pills, as every Fruity tab bar
+      // (Owen, 2026-10-23:  "All should be fully rounded pills");  a key's corners follow the track's (`glass.css`)
+      "track-radius": "{radii.pill}",
+      // dark:  the wallpaper under a section title, in place or stuck, mostly covered
+      // - its wine and plum washes, under Glass's 50%, drew a red / purple seam along every title band
+      // - only over the wallpaper:  the editor's top bar keeps Glass's 50% at rest (`--ui-bar-rest-background`)
+      "wallpaper-tint": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(30 28 38 / 0.85)" }
+    }
+  }
+}

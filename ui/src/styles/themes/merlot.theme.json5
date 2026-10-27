@@ -1,0 +1,197 @@
+// Merlot:  a code studio in wine reds, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `merlot.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+// - Was Studio (`studio.css`, Shades of Purple's colours), moved from purple toward maroon
+//   (epic `debut` P17;  Owen:  "Shift toward maroon rather than purple", "Change name to merlot").
+//   - A theme remembered as `studio` comes back as `merlot` (`Themes.RENAMED`).
+// - What makes it Merlot:
+//   - flat panels joined by hairlines, no glass, no wallpaper
+//   - the page and the panels on it a VISIBLE step apart, in both schemes (Studio's were nearly one colour)
+//   - dark:  a deep wine page, panels a clear step lighter, a warm gold primary that reads on both
+//     (amber until Owen's pick, epic `debut` P17, Q3:  a selected tab looked like the epic pages' orange change marks)
+//   - light:  a pale rose-grey page, near-white panels, a maroon primary
+//   - the system font, 8px controls and 12px panels
+//   - Apple's system colours for the hues (its palette, `apple`, Glass's too):  classic's fail AA in places
+// - Tokens only, so far:  the families keep classic's shapes.
+// - The code keeps its own colours (Monaco's Purple) under every theme:  not this theme's.
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["merlot"],
+  "own": {
+    "merlot-page": { "light": "#e8dade", "dark": "#1a0c13" },
+    "merlot-panel": { "light": "#fefcfd", "dark": "#3d1f2d" },
+    "merlot-inset": { "light": "#f4ecef", "dark": "#2b1520" },
+    "merlot-code": { "light": "#ffffff", "dark": "#3d1f2d" },
+    "merlot-border": { "light": "#d9c3cb", "dark": "#573244" },
+    "merlot-accent": { "light": "#8c1d40", "dark": "#e6c27a" },
+    "merlot-on-accent": { "light": "#ffffff", "dark": "#1a0c13" },
+    "merlot-accent-wash": { "light": "rgb(140 29 64 / 0.1)", "dark": "rgb(230 194 122 / 0.15)" }
+  },
+  "typography": {
+    "size": "15px",
+    "family": {
+      "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace"
+    }
+  },
+  "radii": {
+    "s": "6px",
+    "m": "8px",
+    "l": "12px"
+  },
+  "text": {
+    "ink": { "light": "#2a1019", "dark": "#f6e9ee" },
+    "body": { "light": "#3a1824", "dark": "#f3e3e9" },
+    "strong": { "light": "#240a14", "dark": "#ffffff" },
+    "muted": { "light": "#6d4555", "dark": "#cfacb9" },
+    "light": { "light": "#7a5262", "dark": "#bc98a6" }
+  },
+  "surfaces": {
+    // the page, and the panels a clear step off it
+    "page": "{own.merlot-page}",
+    "panel": "{own.merlot-panel}",
+    "inset": "{own.merlot-inset}",
+    "strong": "{own.merlot-code}",
+    // bars over scrolling content (a page's top bar, its stuck header and section titles):  the page's own colour,
+    // as in the other three themes;  a tab bar on them keeps the panels' colour behind it, so the tabs still stand out
+    // (Owen's pick, epic `debut` P17, Q2:  the stuck header stood apart in the panels' white / lighter plum)
+    "bar": "{surfaces.page}",
+    "code": "{own.merlot-inset}",
+    "highlight": "{own.merlot-accent-wash}"
+  },
+  "borders": {
+    "color": "{own.merlot-border}",
+    "strong": { "light": "#c9a9b5", "dark": "#6b3e52" },
+    "internal": "{own.merlot-border}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  the accent, maroon in light (white on it), warm gold in dark (wine ink on it)
+      "color": "{own.merlot-accent}",
+      "on": "{own.merlot-on-accent}",
+      "text": "{own.merlot-accent}",
+      "background": "{own.merlot-accent-wash}",
+      "inverted": "{own.merlot-accent}",
+      "inverted-on": "{own.merlot-on-accent}"
+    },
+    "link": {
+      "color": { "light": "#a3214c", "dark": "#ffaec4" },
+      "hover": { "light": "#7a1638", "dark": "#ffd3df" }
+    },
+    "focus": {
+      "color": "{own.merlot-accent}"
+    }
+  },
+  "semantic": {
+    "info": {
+      "text": { "light": "oklch(0.46 0.079 222.9)", "dark": "oklch(from {semantic.info.color} 0.85 calc(c * 0.6) h)" }
+    }
+  },
+  "hues": {
+    "yellow": {
+      // Hue text on the rose-grey page:  a shade darker than `colors.css`' recipe (`min(l, 0.5)`), which reads only
+      // 4.15 to 4.47:1 there;  dark as the recipe (epic `debut` P17, J76)
+      "text": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.78) c h)"
+      },
+      "border": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.56) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.7) c h)"
+      }
+    },
+    "olive": {
+      "text": {
+        "light": "oklch(from {hues.olive.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.olive.color} max(l, 0.78) c h)"
+      }
+    },
+    "green": {
+      "text": {
+        "light": "oklch(from {hues.green.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.green.color} max(l, 0.78) c h)"
+      }
+    },
+    "teal": {
+      "text": {
+        "light": "oklch(from {hues.teal.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.teal.color} max(l, 0.78) c h)"
+      }
+    },
+    "brown": {
+      "text": {
+        "light": "oklch(from {hues.brown.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.brown.color} max(l, 0.78) c h)"
+      }
+    },
+    "grey": {
+      "text": {
+        "light": "oklch(from {hues.grey.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.grey.color} max(l, 0.78) c h)"
+      }
+    }
+  },
+  "shadows": {
+    // flat:  panels are joined by hairlines;  only what floats casts one
+    "ink": { "light": "rgb(58 24 36)", "dark": "rgb(0 0 0)" },
+    "subtle": "none",
+    "raised": "0 1px 2px light-dark(rgb(58 24 36 / 0.08), rgb(0 0 0 / 0.3))"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}"
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.merlot-inset}",
+      "border-color": "{own.merlot-border}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "active-background": "{own.merlot-accent-wash}",
+      "active-color": "{text.body}",
+      // tab bars:  the chosen tab fills its track's corner, 2px in, its corners the track's less that inset
+      // (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits"):
+      // 8px outside;  inside, 8 - 1 (the border) - 2 = 5px, and 6px where a bar draws no border (the editor's modes)
+      "segmented-background": "{own.merlot-inset}",
+      "segmented-radius": "{radii.m}",
+      "segmented-padding": "2px",
+      "segmented-item-radius": "calc({radii.m} - 3px)",
+      "segmented-active-background": "{own.merlot-accent}",
+      "segmented-active-color": "{own.merlot-on-accent}"
+    },
+    "card": {
+      "radius": "{radii.l}"
+    },
+    "segment": {
+      "radius": "{radii.l}"
+    },
+    "popup": {
+      "radius": "{radii.m}"
+    },
+    "modal": {
+      "radius": "{radii.l}"
+    },
+    "bar": {
+      "panel-background": "{own.merlot-panel}"
+    },
+    "select": {
+      // a select the same well as an input, as Glass's
+      // - a select's own default is the surface:  in the Inspector, which wears the Spell theme's tokens
+      //   (`UI.themes.scopedTokens()`), that is Spell's surface, aubergine in dark, beside Merlot's inputs
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "toolbar": {
+      // a toolbar's ‹ / › at the end of its 8px track:  a rounded square inside it, not a circle
+      "button-radius": "{radii.s}"
+    }
+  }
+}

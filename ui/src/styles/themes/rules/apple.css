@@ -1,0 +1,38 @@
+/*
+ * Apple's palette's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P18).
+ * - The rules sheet of the Apple palette (`palettes/apple.palette.json5`, `"rules": ["apple"]`);  its sheet,
+ *   `palettes/apple.css`, imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ */
+
+@layer ui.theme {
+  /*******************************
+       Pressed and hovered colours
+  *******************************/
+
+  /*
+   * A solid colour's states move AWAY from the text on it, so the text keeps 4.5:1 (epic `debut` P17, J76):
+   * - dark:  ink on these hues, so their states LIGHTEN (`colors.css` darkens them in both schemes);  light, as there
+   */
+  .ui:is(.red, .orange, .yellow, .olive, .green, .teal, .blue, .purple, .pink, .brown),
+  .ui:is(.positive, .negative, .info, .warning, .success, .error),
+  :is(.ui-red, .ui-orange, .ui-yellow, .ui-olive, .ui-green, .ui-teal, .ui-blue, .ui-purple, .ui-pink, .ui-brown),
+  :is(.ui-positive, .ui-negative, .ui-info, .ui-warning, .ui-success, .ui-error) {
+    --ui-color-hover: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.1) h),
+      oklch(from var(--ui-color) calc(l + 0.05) calc(c * 1.1) h)
+    );
+    --ui-color-focus: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.08) calc(c * 1.2) h),
+      oklch(from var(--ui-color) calc(l + 0.08) calc(c * 1.2) h)
+    );
+    --ui-color-down: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.1) c h),
+      oklch(from var(--ui-color) calc(l + 0.1) c h)
+    );
+    --ui-color-active: light-dark(
+      oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.15) h),
+      oklch(from var(--ui-color) calc(l + 0.05) calc(c * 1.15) h)
+    );
+  }
+}
