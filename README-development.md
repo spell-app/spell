@@ -293,6 +293,8 @@ after a merge neither side's copy is right, and no line merge of the two is eith
 So `epic worktree merge-main` merges `main` into every repo, child repos lowest first and the kit last,
 and REGENERATES each generated file both sides changed, from the merged source.
 - It re-runs the snapshots too, and lists any entry neither side had:  new behaviour nobody has looked at yet.
+- Then it rewrites the old Spell UI names your branch still writes (`spell ui rename --write`), as a commit of its own,
+  and lists them:  a tag renamed on `main` never draws an empty box on your branch.
 - Any other conflict stops it mid-merge:  resolve it, `git add`, then `epic worktree merge-main --continue`.
 - Never a bare `git merge main`:  git keeps your side of each such file, marks it conflicted, and can't rebuild it.
 

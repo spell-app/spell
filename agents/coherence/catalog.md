@@ -504,6 +504,15 @@ What a component, or a page built on Spell UI, reaches for first.
   (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
 - **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
 
+### A theme's values
+
+- **It is:**  a theme file, `<name>.theme.json5`, its values in the theme tree's nested groups (`themeTree`,
+  `spell-ui/src/styles/styles.en.ts`), and `ThemeFile` (`spell-ui/src/styles/ThemeFile.ts`), which checks it and
+  writes its sheet (epic `debut` P18);  `yarn gen:styles` writes every one
+- **Use it when:**  making or changing a theme, reading a theme's values (`ThemeFile.values()`), or listing the names
+  a theme may set (the tree, `theme.schema.json`):  never by reading a theme's CSS.
+- **Copies:**  `--` (the theme editor writes its own sheet until it moves onto theme data, epic `debut` P22)
+
 ## In spell-epic and the parser
 
 ### A growing text box
