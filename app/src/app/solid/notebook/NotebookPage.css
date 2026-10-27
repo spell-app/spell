@@ -58,7 +58,7 @@
 }
 
 /*
- * "On this page":  Spell UI's `<ui-docs-toc>`, as the docs site's right column holds it, with no card round it
+ * "On this page":  Spell UI's `<ui-toc>`, as the docs site's right column holds it, with no card round it
  * - stuck at the page's top as it scrolls, level with the masthead
  * - its own Hide in its header's row, after the fold-all chevron (its `tools` slot)
  */
@@ -159,11 +159,11 @@
   background-image: var(--notebook-glass-image);
   background-attachment: scroll, fixed;
 }
-.NotebookPage :is(spell-example, ui-docs-example) {
-  --ui-docs-example-frame-background: transparent;
-  --ui-docs-example-frame-filter: none;
-  --ui-docs-example-frame-shadow: none;
-  --ui-docs-example-demo-background: transparent;
+.NotebookPage :is(spell-example, ui-example) {
+  --ui-example-frame-background: transparent;
+  --ui-example-frame-filter: none;
+  --ui-example-frame-shadow: none;
+  --ui-example-demo-background: transparent;
 }
 
 /* the page's title and the line under it, as a component page's masthead (`<ui-header level="1">` and its sub header) */

@@ -2,7 +2,7 @@ import { Show, createSignal, getOwner, onCleanup, runWithOwner, type Owner } fro
 import { render } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
-import { ExampleSource } from "spell-ui/docs-components/ui-docs-example"
+import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
 
 /****************
  * ### `NotebookOriginal`
@@ -83,7 +83,7 @@ export class NotebookOriginal {
     return { ...place, element: found?.element }
   }
 
-  /** Every `<ui-docs-example>` on `page`, where it is:  read once a page. */
+  /** Every `<ui-example>` on `page`, where it is:  read once a page. */
   static examplesOf(page: string): Promise<OriginalPlace[]> {
     let examples = NotebookOriginal.pages.get(page)
     if (!examples) {
@@ -110,7 +110,7 @@ export class NotebookOriginal {
   private static readonly pages = new Map<string, Promise<OriginalPlace[]>>()
 
   /**
-   * The original example `element`, ready for this page:  a `<ui-docs-example>` of its attributes and children,
+   * The original example `element`, ready for this page:  a `<ui-example>` of its attributes and children,
    * its code open, its URLs pointing where they did on `page` but shown as written.
    */
   static copyOf(element: Element, page: string): HTMLElement {
@@ -204,7 +204,7 @@ type OriginalMatch = Omit<OriginalPlace, "element"> & { element: Element | undef
 const NOTEBOOK_EXAMPLE = "spell-example"
 
 /** A component page's example. */
-const ORIGINAL_EXAMPLE = "ui-docs-example"
+const ORIGINAL_EXAMPLE = "ui-example"
 
 /** A section, on either page. */
 const SECTION = "ui-section"

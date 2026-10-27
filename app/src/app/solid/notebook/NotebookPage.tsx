@@ -26,7 +26,7 @@ import "./NotebookPage.css"
  * editor app, editable in place.
  * - Drawn as Spell UI's docs site draws a component page, on the pane's own glass (no background of its own):
  *   a masthead, the page's title and the line under it;  each section a `<ui-section sticky collapsible>`, listed in
- *   "On this page" at the right, the site's own `<ui-docs-toc>`.
+ *   "On this page" at the right, the site's own `<ui-toc>`.
  *   - written either way (`NotebookPageCells`):  markdown (`# Counter`, `## Several counters`), or tags
  *     (`<header level="1">`, `<section label="Several counters">`)
  * - Its tools (the notebooks' menu, the lock, what happened to the last edit) are in the pane's header
@@ -48,7 +48,7 @@ import "./NotebookPage.css"
  * - A link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload.
  * - The program still runs as ever, drawn out of sight:  its classes and its notebook are what the cells draw with.
  * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as;  and loads
- *   `<ui-docs-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
+ *   `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
  ****************/
 export function NotebookPage(props: {
   file: SP.SpellFile
@@ -57,7 +57,7 @@ export function NotebookPage(props: {
   onController?: (controller: NotebookController | undefined) => void
 }) {
   SpellExample.define()
-  // Spell UI's `<ui-docs-toc>` and `<ui-docs-api>`:  a chunk of their own, loaded once
+  // Spell UI's `<ui-toc>` and `<ui-docs-api>`:  a chunk of their own, loaded once
   void NotebookDocs.load()
   const controller = new NotebookController(props.file, props.project)
   // DEBUG:  `notebook` at the devtools console
@@ -243,7 +243,7 @@ export function NotebookPage(props: {
 }
 
 /**
- * "On this page":  Spell UI's `<ui-docs-toc>`, as the docs site's, headed by the page's title, following the page's
+ * "On this page":  Spell UI's `<ui-toc>`, as the docs site's, headed by the page's title, following the page's
  * scroll inside its pane (`scroller`);  `children`, its own buttons in its header's row.
  * - A link scrolls its section into view within the page, never changing the editor's address;  `onPick` then.
  */
@@ -256,11 +256,11 @@ function Contents(props: {
   children?: JSX.Element
 }) {
   return (
-    <ui-docs-toc
+    <ui-toc
       class="NotebookToc"
       for={props.ids.main}
       scroller={props.ids.scroller}
-      header={props.title}
+      heading={props.title}
       aria-label={appTexts.text("notebookPageContents")}
       onClick={(event: MouseEvent) => {
         if (scrollTo(event)) props.onPick?.()
@@ -272,7 +272,7 @@ function Contents(props: {
       }
     >
       {props.children}
-    </ui-docs-toc>
+    </ui-toc>
   )
 }
 
@@ -436,17 +436,4 @@ function isForPage(event: KeyboardEvent, page: HTMLElement): boolean {
   if (path.some((node) => node instanceof HTMLElement && node.classList.contains("monaco-editor"))) return false
   const inMenu = path.some((node) => node instanceof HTMLElement && node.classList.contains("NotebookMenu"))
   return inMenu || path.includes(page) || path[0] === document.body
-}
-
-declare module "@solidjs/web/types/jsx.js" {
-  namespace JSX {
-    interface IntrinsicElements {
-      // Spell UI's docs-only "On this page":  not in its generated types, which name the component tags only
-      "ui-docs-toc": JSX.HTMLAttributes<HTMLElement> & {
-        for?: string
-        scroller?: string
-        header?: string
-      }
-    }
-  }
 }
