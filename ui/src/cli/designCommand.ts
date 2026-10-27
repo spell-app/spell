@@ -35,7 +35,7 @@ export function designCommand(verb: string, args: string[]): Promise<number> {
  * - `sync`:  spell-epic's `src/tools/design.js`, its verb first (`pull`, `changed` ...)
  */
 export const DESIGN_TOOLS = {
-  build: { tool: "spell-ui/scripts/design-build.ts", tsx: "spell-ui/scripts/tsconfig.json" },
+  build: { tool: "spell-ui/scripts/design-build.ts", tsx: "spell-ui/tsconfig.node.json" },
   bundle: { tool: "spell-brand/scripts/design-bundle.ts", tsx: "spell-brand/tsconfig.json" },
   check: { tool: "spell-brand/scripts/design-check.ts", tsx: "spell-brand/tsconfig.json" },
   sync: { tool: "spell-epic/src/tools/design.js" }

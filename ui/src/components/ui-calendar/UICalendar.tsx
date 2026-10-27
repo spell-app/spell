@@ -231,7 +231,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
    * - Never opens while disabled or readonly.
    * - Opening starts over in the type's first view, on the value (or `initial-date`, or today).
    */
-  readonly popover = new F.PopoverPanel({
+  readonly popover = new E.PopoverPanel({
     component: this,
     member: "isOpen",
     isOpen: () => this.popupIsOpen,

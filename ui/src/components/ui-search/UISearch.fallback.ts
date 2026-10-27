@@ -26,7 +26,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     "the magnifying glass and the loading spinner"
   ]
 
-  /** The native input, once built, for `attached()`. */
+  /** The native input, once built, for `sync()`. */
   private input: HTMLInputElement | undefined
 
   protected override build() {
@@ -45,7 +45,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     })
     input.value = typeof domElement.value === "string" ? domElement.value : (this.attr("value") ?? "")
     this.decorate(input, "prompt")
-    if (!input.hasAttribute("aria-label") && placeholder) input.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(input)
 
     const list = this.create("datalist", { id: listId })
     const titles = new Set<string>()
@@ -59,7 +59,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
 
     this.listen(input, "input", () => {
       domElement.value = input.value
-      this.sync(input)
+      this.sync()
     })
     this.listen(input, "change", (event) => {
       this.send(CHANGE_EVENT, { value: input.value, originalEvent: event })
@@ -68,18 +68,10 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     return [root]
   }
 
-  /** The first form value and validity, which need the input attached. */
-  protected override attached() {
-    this.sync(this.input!)
-  }
-
-  /** Copy the input's text (and validity) onto the DOM element. */
-  private sync(input: HTMLInputElement) {
-    const internals = this.formInternals
-    if (!internals) return
-    internals.setFormValue(this.attr("name") ? input.value : null)
-    const isMissing = input.validity.valueMissing
-    internals.setValidity(isMissing ? { valueMissing: true } : {}, input.validationMessage, input)
+  /** The input's text, and its validity (`required`). */
+  protected override sync() {
+    const { input } = this
+    if (input) this.syncForm({ value: input.value, control: input })
   }
 }
 

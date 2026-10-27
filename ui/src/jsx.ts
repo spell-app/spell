@@ -613,7 +613,7 @@ export interface UIActionAttributes {
    */
   "prop:action"?: unknown
   /**
-   * Its keys, drawn as key caps at the end:  `meta+T` is ⌘T on a Mac, Ctrl+T elsewhere.  Defaults to the action's.
+   * Its keys, drawn as key caps at the end, as `<ui-keys>` draws them:  `mod+T` is ⌘T on a Mac, Ctrl+T elsewhere;  `meta` is the Meta key.  Defaults to the action's.
    * - takes:  text
    */
   shortcut?: string

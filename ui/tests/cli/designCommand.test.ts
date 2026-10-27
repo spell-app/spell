@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs"
+import { join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
@@ -17,6 +19,12 @@ describe("DESIGN_TOOLS", () => {
   })
   test("the sync verbs:  spell-epic's design tool, plain node", () => {
     expect(CLI.toolArgs(DESIGN_TOOLS.sync, "/kit")).toEqual(["/kit/spell-epic/src/tools/design.js"])
+  })
+  test("each tool's tsconfig is there:  a missing one stops `spell design build` before it starts", () => {
+    const kit = join(import.meta.dirname, "../../..")
+    for (const spec of Object.values(DESIGN_TOOLS)) {
+      if ("tsx" in spec) expect(existsSync(join(kit, spec.tsx)), spec.tsx).toBe(true)
+    }
   })
 })
 

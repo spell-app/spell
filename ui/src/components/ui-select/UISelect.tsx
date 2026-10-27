@@ -80,7 +80,7 @@ export class UISelect extends F.FormComponent<Vocabulary> {
   ////////////////
 
   /** `value`:  set by the page, or chosen;  starts from the `selected` items. */
-  @E.controlled("value") accessor value: UIT.SelectValue | undefined = this.selectedItemValues()
+  @E.controlled("value") accessor value: UIT.SelectValue | undefined = this.items.selectedValue(!!this.multiple)
 
   /** The page's value to restore on a form reset (`undefined`:  back to the `selected` items). */
   private readonly initialValue = this.isControlledByPage("value") ? this.value : undefined
@@ -88,10 +88,7 @@ export class UISelect extends F.FormComponent<Vocabulary> {
   /** Chosen values, always as an array;  the same list while equal. */
   @E.derived({ equals: E.isSameList })
   get chosenValues(): readonly string[] {
-    const value = this.value as unknown
-    if (Array.isArray(value)) return value.map(String)
-    if (typeof value !== "string" || value === "") return []
-    return this.multiple ? E.Converters.list(value) : [value]
+    return SlottedItems.valuesIn(this.value, !!this.multiple)
   }
 
   /** Render the empty first option:  single, and a `placeholder` or nothing chosen yet. */
@@ -140,17 +137,6 @@ export class UISelect extends F.FormComponent<Vocabulary> {
       return true
     })
     this.selectRevision++
-  }
-
-  /** Values of slotted items marked `selected`, the uncontrolled starting value. */
-  @E.untracked
-  private selectedItemValues(): string | string[] | undefined {
-    const values = this.items.entries
-      .filter(UISelect.isOption)
-      .filter((option) => option.selected)
-      .map((option) => option.value)
-    if (!values.length) return undefined
-    return this.multiple ? values : values[0]
   }
 
   get formValue(): E.FieldValue {
@@ -311,18 +297,6 @@ export class UISelect extends F.FormComponent<Vocabulary> {
     if (value !== "") return { selected: values.includes(value) }
     const isRequired = this.required && this.placeholder !== undefined
     return { selected: !values.length, disabled: isRequired || !values.length }
-  }
-
-  ////////////////
-  // ## Statics
-  ////////////////
-
-  /**
-   * Is `entry` an option (not a header or divider)?
-   * - Static:  pure, a `filter()` predicate.
-   */
-  private static isOption(entry: E.MenuEntry): entry is E.MenuOption {
-    return !("type" in entry)
   }
 }
 

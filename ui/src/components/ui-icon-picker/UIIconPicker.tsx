@@ -139,7 +139,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
    * - Never opens while disabled or readonly.
    * - An outside click or Escape closes it;  Escape puts the focus back on the field.
    */
-  readonly popover = new F.PopoverPanel({
+  readonly popover = new E.PopoverPanel({
     component: this,
     member: "isOpen",
     restoreFocus: false,

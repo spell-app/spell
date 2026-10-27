@@ -29,7 +29,7 @@ function testAction(title = "Turn Card") {
       return state.title
     },
     icon: "undo",
-    shortcut: "meta+shift+Z",
+    shortcut: "mod+shift+Z",
     get isEnabled() {
       return state.enabled
     },
@@ -43,7 +43,7 @@ function testAction(title = "Turn Card") {
 
 describe("<ui-action>", () => {
   it("is an item:  a menu draws it as one, a button with its title and its shortcut's key caps", async () => {
-    const { actions, boxOf } = await menuOf('<ui-action icon="play" shortcut="meta+N">New game</ui-action>')
+    const { actions, boxOf } = await menuOf('<ui-action icon="play" shortcut="mod+N">New game</ui-action>')
     const [action] = actions
     expect(action!.component).toBeInstanceOf(UIItem)
     const item = boxOf(action!)
@@ -86,15 +86,17 @@ describe("<ui-action>", () => {
     expect(state.runs).toBe(1)
   })
 
-  it("key caps:  meta is command on a Mac, control elsewhere;  a letter in capitals", async () => {
+  it("key caps, as <ui-keys> draws them:  mod is command on a Mac, control elsewhere;  meta the Meta key", async () => {
     const { actions } = await menuOf("<ui-action>Go</ui-action>")
     const component = actions[0]!.component
     const isApple = vi.spyOn(UI.browser, "isApple", "get")
     isApple.mockReturnValue(true)
-    expect(component.keyCapsFor("meta+shift+z")).toEqual(["⌘", "⇧", "Z"])
+    expect(component.keyCapsFor("mod+shift+z")).toEqual(["⌘", "⇧", "Z"])
+    expect(component.keyCapsFor("meta+K")).toEqual(["⌘", "K"])
     expect(component.keyCapsFor("option+F2")).toEqual(["⌥", "F2"])
     isApple.mockReturnValue(false)
-    expect(component.keyCapsFor("meta+shift+z")).toEqual(["Ctrl", "Shift", "Z"])
+    expect(component.keyCapsFor("mod+shift+z")).toEqual(["Ctrl", "Shift", "Z"])
+    expect(component.keyCapsFor("meta+K")).toEqual(["Meta", "K"])
     expect(component.keyCapsFor("space")).toEqual(["Space"])
     isApple.mockRestore()
   })

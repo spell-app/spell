@@ -318,17 +318,18 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     )
   }
 
-  /** Arrow keys in the scheme control:  move to the next / previous scheme, wrapping, and choose it. */
+  /**
+   * Arrow keys in the scheme control:  move AND choose, wrapping, as in any radio group;  Home / End to the ends.
+   * - The chosen scheme is the tab stop, drawn by `schemes()` (`tabindex: "left alone"`).
+   */
   private onSchemeKey(event: KeyboardEvent): void {
-    const step = SCHEME_KEYS[event.key]
-    if (step === undefined) return
-    event.preventDefault()
-    const at = SchemeChoices.indexOf(this.chosen.scheme)
-    const next = SchemeChoices[(at + step + SchemeChoices.length) % SchemeChoices.length]!
-    this.chooseScheme(next, event)
-    this.domElement.shadowRoot
-      ?.querySelector<HTMLButtonElement>(`[role="${SCHEME_ROLES.item}"][value="${next}"]`)
-      ?.focus()
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: SCHEME_SELECTOR,
+      orientation: "both",
+      tabindex: "left alone",
+      onChange: (_option, index) => this.chooseScheme(SchemeChoices[index]!, event)
+    })
   }
 
   /** One row of the overlay's list:  a theme (or a divider or a header, which `ThemeMenu` lists none of today). */
@@ -439,28 +440,23 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     if (value !== ThemePreference.chosen.theme) void this.chooseTheme(value, event)
   }
 
-  /** Arrow keys, Home and End in the theme list:  move focus (and the tab stop) between rows. */
+  /**
+   * Arrow keys, Home and End in the theme list:  move focus between rows, wrapping, and the tab stop with it.
+   * - The tab stop is drawn by `entry()` (`tabindex: "left alone"`).
+   */
   private onMenuKey(event: KeyboardEvent): void {
-    const step = MENU_KEYS[event.key]
-    if (step === undefined) return
-    const rows = this.rows()
-    if (!rows.length) return
-    event.preventDefault()
-    const at = rows.indexOf((event.target as Element).closest<HTMLButtonElement>(ITEM_SELECTOR)!)
-    const index =
-      step === "first" ? 0 : step === "last" ? rows.length - 1 : (Math.max(at, 0) + step + rows.length) % rows.length
-    this.focusRow(rows[index]!)
+    UI.focus.arrowKey(event, {
+      container: event.currentTarget as HTMLElement,
+      items: ITEM_SELECTOR,
+      orientation: "vertical",
+      tabindex: "left alone",
+      onChange: (row) => (this.tabStopTheme = (row as HTMLButtonElement).value)
+    })
   }
 
   /** The list's theme rows, in order. */
   private rows(): HTMLButtonElement[] {
     return [...(this.domElement.shadowRoot?.querySelectorAll<HTMLButtonElement>(ITEM_SELECTOR) ?? [])]
-  }
-
-  /** Focus theme row `row`, and give it the tab stop. */
-  private focusRow(row: HTMLButtonElement): void {
-    this.tabStopTheme = row.value
-    row.focus()
   }
 
   /**
@@ -526,21 +522,8 @@ const SCHEME_ROLES = { group: "radiogroup", item: "radio" } as const
 /** A theme row of the overlay's list. */
 const ITEM_SELECTOR = `[role="${MENU_ROLES.item}"]`
 
-/** Keys that move focus in the overlay's theme list, by how far:  `"first"` / `"last"` jump to an end. */
-const MENU_KEYS: Readonly<Record<string, number | "first" | "last">> = {
-  [UIT.Key.arrowDown]: 1,
-  [UIT.Key.arrowUp]: -1,
-  [UIT.Key.home]: "first",
-  [UIT.Key.end]: "last"
-}
-
-/** Keys that move (and choose) in the scheme control, by how far. */
-const SCHEME_KEYS: Readonly<Record<string, number>> = {
-  [UIT.Key.arrowRight]: 1,
-  [UIT.Key.arrowDown]: 1,
-  [UIT.Key.arrowLeft]: -1,
-  [UIT.Key.arrowUp]: -1
-}
+/** A choice of the overlay's scheme control, in `SchemeChoices` order. */
+const SCHEME_SELECTOR = `[role="${SCHEME_ROLES.item}"]`
 
 /** Where the buttons' tooltips show. */
 const TIP_POSITION = "bottom center"
