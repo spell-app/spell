@@ -26,6 +26,9 @@ export type AnyColor = Rgb | Oklch | string
 /** WCAG AA's least contrast for body text (1.4.3). */
 export const CONTRAST_TEXT = 4.5
 
+/** WCAG AAA's least contrast for body text (1.4.6):  the Crisp theme's text (epic `debut` P20). */
+export const CONTRAST_TEXT_AAA = 7
+
 /** WCAG AA's least contrast for large text (1.4.3) and a control's edges (1.4.11). */
 export const CONTRAST_LARGE = 3
 

@@ -58,6 +58,11 @@
   //   `agents/wwod/`, and links for the three logs into the content repo's `agents/`.
   "sharedFolders": [],
 
+  // The kit's old GitHub address, to its new one:  renamed in epic `repo-split` P17 (GitHub redirects the old one).
+  // - Epic pages started before then record the old address (`repo`):  `EpicRepo` reads it as this repo's
+  //   (epic `epic-engine` I150), so their sessions aren't told they're in the wrong repo.
+  "renamedRepos": { "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" },
+
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
   "engineFolder": "",
 
