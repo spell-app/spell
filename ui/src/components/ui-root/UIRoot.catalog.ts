@@ -333,7 +333,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
         { shape: "paragraph", lines: 6 }
       ]
     },
-    attributes: ["for", "header", "size", "expanded"]
+    attributes: ["for", "scroller", "header", "size", "expanded"]
   },
   "ui-docs-tokens": {
     folder: "ui-docs-tokens",

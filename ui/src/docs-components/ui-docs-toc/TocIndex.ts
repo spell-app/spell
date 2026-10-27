@@ -157,23 +157,26 @@ export class TocIndex {
 
   /**
    * The id of the entry in view:
-   * - the last one whose top has passed the reading line (the document's scroll padding plus a fifth of the viewport)
+   * - the last one whose top has passed the reading line (the scroll padding plus a fifth of the visible height)
    * - the last one at the page's end
    * - the first one above everything
    * - Entries without a box (a hidden pane) or inside a folded `<ui-section>` are skipped.
+   * - `scroller`:  the box the content scrolls in (a pane), when it isn't the window;
+   *   its own top, scroll padding and height then make the line, and its end the page's end.
    */
-  static current(sections: readonly TocSection[], document: Document): string | undefined {
+  static current(sections: readonly TocSection[], document: Document, scroller?: Element): string | undefined {
     const view = document.defaultView
     if (!view) return undefined
     const all = TocIndex.flatten(sections).filter(
       (entry) => entry.target.getClientRects().length && !TocIndex.folded(TocIndex.lightElementOf(entry.target))
     )
     if (!all.length) return undefined
-    const scroller = document.scrollingElement ?? document.documentElement
-    if (scroller.scrollTop > 0 && scroller.scrollTop + view.innerHeight >= scroller.scrollHeight - 2)
-      return all.at(-1)!.id
-    const padding = parseFloat(view.getComputedStyle(document.documentElement).scrollPaddingTop) || 0
-    const line = padding + view.innerHeight * READING_LINE
+    const box = scroller ?? document.scrollingElement ?? document.documentElement
+    const top = scroller ? scroller.getBoundingClientRect().top : 0
+    const height = scroller ? scroller.clientHeight : view.innerHeight
+    if (box.scrollTop > 0 && box.scrollTop + height >= box.scrollHeight - 2) return all.at(-1)!.id
+    const padding = parseFloat(view.getComputedStyle(scroller ?? document.documentElement).scrollPaddingTop) || 0
+    const line = top + padding + height * READING_LINE
     const reached = TocIndex.reached(
       all.map((entry) => entry.target),
       () => line
