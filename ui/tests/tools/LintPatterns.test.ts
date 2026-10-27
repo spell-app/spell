@@ -62,7 +62,13 @@ describe("spell-ui/no-untrack", () => {
 
 describe("spell-ui/no-raw-timer", () => {
   tester.run("no-raw-timer", PATTERN_RULES["no-raw-timer"], {
-    valid: [`E.after(0.5, f)`, `if (typeof requestAnimationFrame !== "function") return`, `this.setTimeout(f)`],
+    valid: [
+      `E.after(0.5, f)`,
+      `if (typeof requestAnimationFrame !== "function") return`,
+      `this.setTimeout(f)`,
+      // a name every object has, not a timer (the rule once looked it up with `in`)
+      `valueOf(edit, "light")`
+    ],
     invalid: [
       { code: `setTimeout(f, 500)`, errors: [{ message: /E\.after/ }] },
       { code: `window.setInterval(f, 500)`, errors: [{ message: /E\.every/ }] },
