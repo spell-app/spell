@@ -176,6 +176,61 @@ describe("a spellx notebook", () => {
     expect(code).toContain('h("ui-docs-api", { tag: "ui-avatar", only: "attributes"')
   })
 
+  // epic `elemental-spell` P24:  Spell UI's pages hold JSON, markdown and CSS in `<script>`s
+  test("a `<script>`'s or `<style>`'s text is drawn as written:  its `{`, `[` and lines its own", () => {
+    const text = [
+      '<spell-notebook "script notebook">',
+      '\t<example "data">',
+      "\t\t<html>",
+      '\t\t\t<script type="application/json">',
+      '\t\t\t\t{"days": [1, 3, 5]}',
+      "\t\t\t\t[x]",
+      "\t\t\t</script>",
+      "\t\t\t<style>:root { --brand: red; }</style>",
+      "\t\t</html>",
+      "\t</example>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const { code, errors } = compiled(text, "/Script.spellx")
+    expect(errors).toEqual([])
+    expect(code).toContain('h("script", { type: "application/json" }, "{\\"days\\": [1, 3, 5]}\\n[x]")')
+    expect(code).toContain('h("style", ":root { --brand: red; }")')
+    const written = SX.CodeSpellWriter.write(text, { path: "/Script.spellx" })
+    expect(compiled(written, "/Script.spell").code).toBe(code)
+  })
+
+  test("a text's entities are its characters, as JSX reads them:  `&lt;` is `<`, `&#123;` is `{`", () => {
+    const text = [
+      '<spell-notebook "entity notebook">',
+      '\t<example "code">',
+      "\t\t<html>",
+      "\t\t\t<code>&lt;ui-button&gt; &amp; &#123;x&#125;</code>",
+      "\t\t</html>",
+      "\t</example>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const { code, errors } = compiled(text, "/Entity.spellx")
+    expect(errors).toEqual([])
+    expect(code).toContain('h("code", "<ui-button> & {x}")')
+  })
+
+  // epic `elemental-spell` P24:  `<text>B</text> <text>C</text>` was written `ui-textt>C`
+  test("written as code spell, an element after a space on its line keeps its `<`", () => {
+    const text = [
+      '<spell-notebook "inline notebook">',
+      "\t<example>",
+      "\t\t<segment><text>B</text> <text>C</text></segment>",
+      "\t</example>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const written = SX.CodeSpellWriter.write(text, { path: "/Inline.spellx" })
+    expect(written).toContain("<ui-segment><ui-text>B</ui-text> <ui-text>C</ui-text></ui-segment>")
+    expect(compiled(written, "/Inline.spell").code).toBe(compiled(text, "/Inline.spellx").code)
+  })
+
   test("an edit re-parses as a fresh parse would", () => {
     const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
     for (const edit of [

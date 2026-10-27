@@ -33,8 +33,9 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Remove "normal" whitespace (leaving newlines and indents) when parsing
   whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
   // never read as spell:  a view type's own styles (`css_block`),
-  // and formatted text (`markdown_block`, `markdown_description`)
-  rawTextTags: ["css", "markdown"],
+  // and formatted text (`markdown_block`, `markdown_description`);
+  // and the web's own raw-text tags, their contents as written, as the web reads them (epic `elemental-spell` P24)
+  rawTextTags: ["css", "markdown", "script", "style"],
   // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
   // `elemental-spell` P16);  each language's word
   quotedNameTags: ["example", "ejemplo"],
