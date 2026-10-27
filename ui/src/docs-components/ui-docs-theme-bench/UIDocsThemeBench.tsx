@@ -529,6 +529,16 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
 
   /** `token`'s value as the pages show it now:  the editor's own from the editor, the rest from the docs first. */
   private nowOf(token: string): string {
+    const fromPages = this.pagesValueOf(token)
+    if (fromPages) return fromPages
+    // set at no page's root (a component's own token, which only the component reads):  the theme file's value, its
+    // pointers worked out from the pages, so its field is never blank
+    const written = this.tokens?.valueIn(this.theme, token)
+    return written ? written.replace(VAR, (whole, name: string) => this.pagesValueOf(name) || whole) : ""
+  }
+
+  /** `token`'s value as the pages hold it at their root:  the editor's own from the editor first, the rest docs first. */
+  private pagesValueOf(token: string): string {
     const order: readonly BenchPlaceId[] = token.startsWith(EDITOR_PREFIX) ? EDITOR_FIRST : DOCS_FIRST
     for (const id of order) {
       const value = this.looks[id]?.values[token]
@@ -812,7 +822,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
               class="token-tool"
               size="mini"
               appearance="basic circular"
-              icon="adjust"
+              icon="columns"
               aria-label={t("split")}
               title={t("split")}
               onClick={() => this.split(token)}
@@ -851,6 +861,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           size="small"
           fluid=""
           value={this.valueOf(token)}
+          placeholder={t("unset", { theme: UIT.ThemeNames.titleOf(this.theme) })}
           aria-label={`${token}:  ${t("value")}`}
           on-ui-changed={(event: CustomEvent<{ value: string }>) => this.tune(token, event.detail.value.trim())}
         ></ui-input>
@@ -878,6 +889,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
               size="small"
               fluid=""
               value={this.valueOf(token, scheme)}
+              placeholder={t("unset", { theme: UIT.ThemeNames.titleOf(this.theme) })}
               aria-label={`${name}:  ${t("value")}`}
               on-ui-changed={(event: CustomEvent<{ value: string }>) =>
                 this.tune(token, event.detail.value.trim(), scheme)
@@ -1142,12 +1154,18 @@ function otherLoopback(address: string): string {
 const LOCALHOST = "localhost"
 const LOOPBACK_IP = "127.0.0.1"
 
-/** Where a token's value now is read first:  the editor's own tokens, then the rest. */
-const EDITOR_FIRST: readonly BenchPlaceId[] = ["editor", "notebook"]
+/**
+ * Where a token's value now is read first:  the editor's own tokens from the editor, then the docs pages, which hold
+ * them too (the editor's frames may not answer:  at main's address, or while the editor starts).
+ */
+const EDITOR_FIRST: readonly BenchPlaceId[] = ["editor", "notebook", "ui", "epic"]
 const DOCS_FIRST: readonly BenchPlaceId[] = ["ui", "epic", "editor", "notebook"]
 
 /** The editor app's own tokens start so. */
 const EDITOR_PREFIX = "--spell-"
+
+/** A `var()` with no nested brackets in its fallback:  its token. */
+const VAR = /var\(\s*(--[\w-]+)\s*(?:,[^()]*)?\)/g
 
 /** A length the slider takes:  px. */
 const PIXELS = /^-?\d+(?:\.\d+)?px$/

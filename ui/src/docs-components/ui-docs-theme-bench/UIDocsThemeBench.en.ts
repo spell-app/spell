@@ -115,6 +115,11 @@ export const docsThemeBenchVocabulary = {
     { key: "resetAll", text: "Reset all", description: "Put every token of the theme shown back." },
     { key: "alpha", text: "Opacity", description: "Accessible name of a colour's opacity slider." },
     { key: "value", text: "Value", description: "Accessible name of a token's text field." },
+    {
+      key: "unset",
+      text: "Not set in {theme}:  each element's own",
+      description: "A token's empty field:  the theme shown doesn't set it, so each element uses its own default."
+    },
     { key: "changes", text: "Changes", description: "The section of what's tuned, to copy into the files." },
     {
       key: "noChanges",
