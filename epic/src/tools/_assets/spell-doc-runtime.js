@@ -537,6 +537,7 @@ function wireTableWidths(main) {
  *     - the room less that readable measure (so the first wraps no more than it must)
  *     - but never so wide that the second gets less than `TWO_COLUMN_MIN_SECOND` (12em of its type)
  *     - the width:  `--spell-first-column`, on the table
+ *     - and only when that takes 2em or more off it (`TWO_COLUMN_LEAST_GAIN`):  never a word wrapped for a few px
  * - too narrow even then (a phone):  the table scrolls sideways inside its own box, as every table does
  * - again whenever its box changes size (a section or item opening, the side bar or window resizing, the expand
  *   button);  tables a part's body or a live update adds later get theirs too
@@ -573,6 +574,9 @@ const TWO_COLUMN_FIRST_SHARE = 0.4
 /** The least a two-column table's second column keeps before the table scrolls, in ems of its own type. */
 const TWO_COLUMN_MIN_SECOND = 12
 
+/** The least a two-column table's first column must give up to wrap at all, in ems of the body's type. */
+const TWO_COLUMN_LEAST_GAIN = 2
+
 /**
  * Fit one table's box (`tableBoxes()`) as `wireTwoColumnTables()` says:  wrap its first column, or not.
  * - SIDE EFFECT:  `data-spell-wrap-first` and `--spell-first-column` on its `<table>`, set or removed
@@ -599,11 +603,15 @@ function fitTwoColumns(box) {
     parseFloat(style.borderRightWidth)
   // what the second column needs to read well:  its words whole, or twice its least, if less
   const readable = Math.min(second, minSecond * 2)
-  const wraps = first > room * TWO_COLUMN_FIRST_SHARE && room - first < readable && first + second > room + 1
+  const width = Math.max(0, Math.min(Math.max(room * TWO_COLUMN_FIRST_SHARE, room - readable), room - minSecond))
+  // and only for a real gain:  not to take a word or two off it
+  const wraps =
+    first > room * TWO_COLUMN_FIRST_SHARE &&
+    room - first < readable &&
+    first + second > room + 1 &&
+    first - width >= parseFloat(style.fontSize) * TWO_COLUMN_LEAST_GAIN
   table.toggleAttribute("data-spell-wrap-first", wraps)
-  if (!wraps) return setStyle(table, "--spell-first-column", "")
-  const width = Math.min(Math.max(room * TWO_COLUMN_FIRST_SHARE, room - readable), room - minSecond)
-  setStyle(table, "--spell-first-column", `${Math.max(0, Math.floor(width))}px`)
+  setStyle(table, "--spell-first-column", wraps ? `${Math.floor(width)}px` : "")
 }
 
 /**

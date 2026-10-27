@@ -1115,6 +1115,9 @@ ui-tab > pre {
 }
 .spell-doc-main ui-table :is(td, th) {
   vertical-align: top;
+  /* whole words, even where the prose around it breaks anywhere (an epic phase's body):  a word a line, else */
+  overflow-wrap: normal;
+  word-break: normal;
 }
 /*
  * NO table ever STACKS, `unstackable` written or not (Owen, 2026-10-19, I36 of `epic-engine`:  a table drawn as its
@@ -1181,17 +1184,40 @@ ui-table:not([stackable], [stack-by]) {
   white-space: nowrap;
 }
 /*
- * A TWO-COLUMN table (every row two cells:  a term and what it is, `VERB | DOES`):  its first column never wraps, the
- * second takes the rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap").  Too wide for the
- * column then (phone width), the table scrolls sideways inside its own box, as every table does:  never the page.
+ * A TWO-COLUMN table (every row two cells:  a term and what it is, `VERB | DOES`):  its first column doesn't wrap, the
+ * second takes the rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap").
+ * - UNTIL it would take more than 40% of the table, leaving the second too little (Owen, 2026-10-26:  "table layout
+ *   sucks", a word a line at the side bar's width;  epic `epic-engine` I145):  then it wraps, at the width the
+ *   runtime measured (`wireTwoColumnTables()`:  `data-spell-wrap-first`, `--spell-first-column`), and the second
+ *   keeps at least 12em
+ * - too wide even then (phone width):  the table scrolls sideways inside its own box, as every table does:  never the
+ *   page
  * - a `ui-table`'s and a bare table's alike;  a row with a cell spanning both keeps wrapping
  */
 .spell-doc-main
-  table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(2)):not(:has(> :is(thead, tbody, tfoot) > tr > :nth-child(3)))
+  table:not([data-spell-wrap-first]):has(> :is(thead, tbody, tfoot) > tr > :nth-child(2)):not(
+    :has(> :is(thead, tbody, tfoot) > tr > :nth-child(3))
+  )
   > :is(thead, tbody, tfoot)
   > tr
   > :first-child:not([colspan]) {
   white-space: nowrap;
+}
+.spell-doc-main table[data-spell-wrap-first] > :is(thead, tbody, tfoot) > tr > :first-child:not([colspan]) {
+  box-sizing: border-box;
+  width: var(--spell-first-column);
+}
+.spell-doc-main table[data-spell-wrap-first] > :is(thead, tbody, tfoot) > tr > :nth-child(2):last-child {
+  min-width: 12em;
+}
+/* the runtime measuring it, for a moment:  every cell as wide as its words, the table as wide as its room */
+.spell-doc-main table[data-spell-measuring] {
+  display: block !important;
+}
+.spell-doc-main table[data-spell-measuring] > :is(thead, tbody, tfoot) > tr > * {
+  white-space: nowrap !important;
+  width: auto !important;
+  min-width: 0 !important;
 }
 /*
  * A state message tints ALL its text (Fomantic's look);  the source's callouts kept prose in the ink colour, which

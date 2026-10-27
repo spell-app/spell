@@ -1024,9 +1024,22 @@ In `tools/`:
           right of the bullhorn rather than in its own line");  pressed (`active`) while wide, the row moving with
           the table's right edge
         - a `<ui-button appearance="circular basic" size="mini">`, its icon arrows left right / to line, its tooltip on itself
-      - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column never wraps, the second takes the
-        rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap");  too wide then (phone width), it
-        scrolls sideways inside its own box, never the page.  `spell-doc.css`, "A TWO-COLUMN table".
+      - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column doesn't wrap, the second takes the
+        rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap")
+        - UNTIL the first would take more than 40% of the table AND leave the second less than a readable measure
+          (its words whole, or 24em):  then the first wraps, to the wider of 40% and what leaves the second that
+          measure, the second never under 12em (epic `epic-engine` I145;  Owen, 2026-10-26:  "table layout sucks",
+          the second column a word a line at the side bar's width)
+          - only when that takes 2em or more off the first:  never a word wrapped for a few px
+          - measured by the runtime (`wireTwoColumnTables()`:  `data-spell-wrap-first`, `--spell-first-column`),
+            again as its box changes size:  CSS can't say "no wider than its words, nor than 40%" for a cell
+          - measured, at 646 / 520 / 390px:  repo-split P20's trade-off table went from 167 / 41 / 34px for its
+            second column to 332 / 257 / 198px;  the server guide's "Shape" from 115px and scrolling to 368 / 292 /
+            214px, nothing scrolling;  a short first column ("spell-app") stays whole at every width
+        - its cells, header cells too, break only between words, even inside an epic phase's body (which breaks
+          anywhere):  the letter-spaced capitals never split mid-word
+        - too wide even then (phone width), it scrolls sideways inside its own box, never the page.
+          `spell-doc.css`, "A TWO-COLUMN table".
       - remembered per table, in this browser (`spell-table-wide:<path>`):
         by the table's id, else the nearest id above it and which table it is under that (`p14#table-1`)
       - the runtime's `wireTableWidths()` measures how far in a table starts,
