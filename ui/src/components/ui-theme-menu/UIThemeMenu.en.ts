@@ -105,6 +105,15 @@ export const themeMenuVocabulary = {
     },
     { key: "fruityDescription", text: "Glass on a pastel wallpaper", description: "Under `Fruity` in the list." },
     { key: "merlotDescription", text: "A wine-dark studio", description: "Under `Merlot` in the list." },
+    { key: "paperDescription", text: "Warm and bookish, for reading", description: "Under `Paper` in the list." },
+    { key: "midnightDescription", text: "Dark first, calm and glowing", description: "Under `Midnight` in the list." },
+    {
+      key: "crispDescription",
+      text: "High contrast, for anyone who needs it",
+      description: "Under `Crisp` in the list."
+    },
+    { key: "popDescription", text: "Playful and colourful", description: "Under `Pop` in the list." },
+    { key: "matrixDescription", text: "A dark ops console", description: "Under `Matrix` in the list." },
     { key: "toDark", text: "Switch to dark", description: "The light / dark button's name, while the page is light." },
     { key: "toLight", text: "Switch to light", description: "The light / dark button's name, while the page is dark." },
     {

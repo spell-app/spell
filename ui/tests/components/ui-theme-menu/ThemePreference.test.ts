@@ -173,3 +173,18 @@ function runHeadScript() {
   document.head.append(script)
   script.remove()
 }
+
+describe("ThemePreference.wear()", () => {
+  afterEach(() => ThemePreference.wear(undefined))
+
+  test("the page wears one theme while its menu still chooses, and remembers, another;  undefined wears the chosen again", async () => {
+    await ThemePreference.wear("glass")
+    expect(UI.themes.current).toBe("glass")
+    await ThemePreference.setTheme("merlot")
+    expect(ThemePreference.chosen.theme).toBe("merlot")
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
+    expect(UI.themes.current).toBe("glass")
+    await ThemePreference.wear(undefined)
+    expect(UI.themes.current).toBe("merlot")
+  })
+})

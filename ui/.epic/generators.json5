@@ -14,7 +14,7 @@
     {
       "name": "Spell UI theme sheets",
       "outputs": [
-        "src/styles/themes/{spell,glass,fruity,merlot}.css",
+        "src/styles/themes/{spell,glass,fruity,merlot,paper,midnight,crisp,pop,matrix}.css",
         "src/styles/themes/palettes/apple.css",
         "src/styles/themes/theme.schema.json"
       ],

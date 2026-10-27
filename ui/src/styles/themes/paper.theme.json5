@@ -1,0 +1,231 @@
+// Paper:  warm and bookish, for reading, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `paper.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/paper.css` (its headings, its rules).
+// - One of the four new themes (epic `debut` P20;  Owen:  "I like "Paper", "Midnight", "Crisp" and "Pop"").
+// - What makes it Paper:
+//   - light:  a cream page, ink-brown text, an oxblood primary;  white panels a shade lighter than the page, like
+//     sheets laid on a desk
+//   - dark, "lamplight":  a deep brown page, panels a step lighter, cream text, a rose primary with brown ink on it
+//   - a serif for everything you read:  Iowan Old Style first, then Spell UI's serif stack (`--ui-font-family-serif`);
+//     the controls and the code keep the system's sans and mono
+//   - hairline rules, never heavy boxes;  shadows faint, as paper casts them
+//   - small corners:  4px controls, 6px cards and panels, 8px modals (the box round a thing always rounder than it)
+//   - Apple's system colours for the hues (its palette, `apple`, Glass's and Merlot's too):  classic's fail AA in places
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "paper"],
+  "own": {
+    "paper-page": { "light": "#f4eedf", "dark": "#1d1610" },
+    "paper-panel": { "light": "#fffcf4", "dark": "#2a2119" },
+    "paper-inset": { "light": "#ece4d1", "dark": "#241c15" },
+    "paper-border": { "light": "#ddd2bb", "dark": "#43362a" },
+    "paper-accent": { "light": "#8b2c2c", "dark": "#eba493" },
+    "paper-on-accent": { "light": "#ffffff", "dark": "#24140e" },
+    "paper-accent-wash": { "light": "#8b2c2c1a", "dark": "#eba49329" },
+    "paper-accent-text": { "light": "#7d2525", "dark": "#f1b7a9" }
+  },
+  "typography": {
+    "size": "16px",
+    "family": {
+      "body": "\"Iowan Old Style\", {typography.family.serif}",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
+    },
+    "line-height": {
+      "body": 1.55,
+      "heading": 1.2
+    }
+  },
+  "radii": {
+    "s": "3px",
+    "m": "4px",
+    "l": "6px"
+  },
+  "text": {
+    "ink": { "light": "#1c120a", "dark": "#f3e9d6" },
+    "body": { "light": "#3a2a1c", "dark": "#ecdfc8" },
+    "strong": { "light": "#24170d", "dark": "#fbf3e3" },
+    "muted": { "light": "#6b5743", "dark": "#c3b199" },
+    "light": { "light": "#76624d", "dark": "#b09e86" }
+  },
+  "surfaces": {
+    // the page, and the sheets laid on it
+    "page": "{own.paper-page}",
+    "panel": "{own.paper-panel}",
+    "inset": "{own.paper-inset}",
+    "strong": "{own.paper-panel}",
+    // bars over scrolling content:  the page's own colour, as in every theme of the set
+    "bar": "{surfaces.page}",
+    "code": "{own.paper-inset}",
+    "highlight": "{own.paper-accent-wash}"
+  },
+  "borders": {
+    "color": "{own.paper-border}",
+    "strong": { "light": "#c4b597", "dark": "#5a4936" },
+    "internal": "{own.paper-border}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  oxblood in light (white on it), rose in dark (brown ink on it)
+      "color": "{own.paper-accent}",
+      "on": "{own.paper-on-accent}",
+      "text": "{own.paper-accent-text}",
+      "background": "{own.paper-accent-wash}",
+      "inverted": "{own.paper-accent}",
+      "inverted-on": "{own.paper-on-accent}"
+    },
+    "secondary": {
+      // Secondary:  the ink itself, brown;  its states a step darker in light, lighter in dark (`rules/states.css`)
+      "color": { "light": "#5b4634", "dark": "#c3b199" },
+      "on": { "light": "#ffffff", "dark": "#1c120a" },
+      "inverted": { "light": "#5b4634", "dark": "#c3b199" },
+      "inverted-on": { "light": "#ffffff", "dark": "#1c120a" },
+      "hover": { "light": "#4c3a2a", "dark": "#cdbda6" },
+      "focus": { "light": "#4c3a2a", "dark": "#cdbda6" },
+      "down": { "light": "#3d2e20", "dark": "#d8cab5" },
+      "active": { "light": "#3d2e20", "dark": "#d8cab5" }
+    },
+    "link": {
+      "color": { "light": "#8b2c2c", "dark": "#f1b7a9" },
+      "hover": { "light": "#5f1a1a", "dark": "#fbd5cb" }
+    },
+    "focus": {
+      "color": "{own.paper-accent}"
+    }
+  },
+  "hues": {
+    // Hue text on the cream page:  a shade darker than `colors.css`' recipe (`min(l, 0.5)`), as on Merlot's rose page
+    "yellow": {
+      "text": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.78) c h)"
+      },
+      "border": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.56) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.7) c h)"
+      }
+    },
+    "olive": {
+      "text": {
+        "light": "oklch(from {hues.olive.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.olive.color} max(l, 0.78) c h)"
+      }
+    },
+    "green": {
+      "text": {
+        "light": "oklch(from {hues.green.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.green.color} max(l, 0.78) c h)"
+      }
+    },
+    "teal": {
+      "text": {
+        "light": "oklch(from {hues.teal.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.teal.color} max(l, 0.78) c h)"
+      }
+    },
+    "brown": {
+      "text": {
+        "light": "oklch(from {hues.brown.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.brown.color} max(l, 0.78) c h)"
+      }
+    },
+    "grey": {
+      "text": {
+        "light": "oklch(from {hues.grey.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.grey.color} max(l, 0.78) c h)"
+      }
+    }
+  },
+  "shadows": {
+    // faint, warm:  a sheet's edge, never a float
+    "ink": { "light": "#3c2814", "dark": "#000000" },
+    "subtle": "0 1px 1px light-dark(#3c28140f, #0000004d)",
+    "raised": "0 0 0 1px {own.paper-border}, 0 1px 2px light-dark(#3c28140f, #0000004d)",
+    "floating": "0 0 0 1px {own.paper-border}, 0 6px 18px light-dark(#3c28141f, #00000073)",
+    "floating-hover": "0 0 0 1px {borders.strong}, 0 10px 28px light-dark(#3c281429, #00000080)",
+    "overlay": "{shadows.floating-hover}"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      // the controls in the system's sans:  a serif button reads as a word in a sentence
+      "font-family": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", sans-serif",
+      "font-weight": 500
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.paper-panel}",
+      "border-color": "{own.paper-border}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "active-background": "{own.paper-accent-wash}",
+      "active-color": "{own.paper-accent-text}",
+      // tab bars:  the chosen tab a white sheet on an inset track, its corners the track's less the 2px inset
+      "segmented-background": "{own.paper-inset}",
+      "segmented-radius": "{radii.l}",
+      "segmented-padding": "2px",
+      "segmented-item-radius": "{radii.m}",
+      "segmented-active-background": "{own.paper-panel}",
+      "segmented-active-color": "{text.strong}",
+      "segmented-active-shadow": "0 0 0 1px {own.paper-border}",
+      // no lines between segments:  one surface, its chosen key the only mark (T7)
+      "segmented-divider": "transparent"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "segment": {
+      "radius": "{radii.l}"
+    },
+    "section": {
+      "radius": "{radii.l}"
+    },
+    "panel": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "message": {
+      "radius": "{radii.l}"
+    },
+    "popup": {
+      "radius": "{radii.m}"
+    },
+    "modal": {
+      "radius": "8px"
+    },
+    "bar": {
+      "panel-background": "{own.paper-panel}"
+    },
+    "docs-nav": {
+      // the docs' side column (`<ui-docs-nav>`) in the theme's own colours, not the classic ivory and brown
+      "background": "{own.paper-panel}",
+      "header-background": "{own.paper-inset}",
+      "band-background": "{own.paper-inset}",
+      "band-color": "{text.muted}",
+      "border-color": "{borders.color}",
+      "current-background": "{own.paper-accent-wash}",
+      "current-color": "{own.paper-accent-text}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    },
+    "header": {
+      // headers:  the serif, a book's weights
+      "font-weight": "{typography.weight.semibold}",
+      "sub-color": "{text.muted}"
+    }
+  }
+}

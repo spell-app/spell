@@ -119,16 +119,9 @@
    * A coloured element's pressed and focused colours (`--ui-color-focus`, `-down`) are worked out from its colour by
    * `colors.css`' remap, one recipe for every hue;  these colours take this theme's own (the palette, above), so their
    * text reads on every state (4.5:1, the contrast test)
-   * - `secondary`:  darker, as grey;  the recipe lightened it, as black, and white on it fell to 3.9:1
+   * - `secondary`:  its own states, every theme's that sets them (`rules/states.css`)
    * - light orange, olive and info, dark purple:  a gentler step, as they carry ink;  the recipe took it to 4.2:1
    */
-  .ui.secondary,
-  .ui-secondary {
-    --ui-color-hover: var(--ui-secondary-hover);
-    --ui-color-focus: var(--ui-secondary-focus);
-    --ui-color-down: var(--ui-secondary-down);
-    --ui-color-active: var(--ui-secondary-active);
-  }
   .ui.orange,
   .ui-orange {
     --ui-color-focus: var(--ui-orange-focus);

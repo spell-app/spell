@@ -202,11 +202,30 @@
     font-variant-numeric: tabular-nums;
     text-align: var(--_ui-input-numeric-align);
   }
+  /*
+   * A colour:  its swatch a gap in from the field's frame, in step with it (Owen:  inner rounding less than outer):
+   * its corners the frame's inner ones less the gap, its edge the frame's own hairline.
+   * - The browser's own swatch otherwise draws a dark 1px edge and square corners, whatever the frame's shape.
+   * - One rule per engine:  a selector list with the other's pseudo-element is dropped whole.
+   */
   .ui.input > input[type="color"] {
-    padding: 0;
+    --_input-swatch-gap: 3px;
+    padding: var(--_input-swatch-gap);
     block-size: calc(
       var(--_ui-input-line-height) + 2 * var(--_ui-input-padding-block) + 2 * var(--_ui-input-border-width)
     );
+    cursor: pointer;
+  }
+  .ui.input > input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  .ui.input > input[type="color"]::-webkit-color-swatch {
+    border: var(--_ui-input-border-width) solid var(--_ui-input-border-color);
+    border-radius: max(0px, calc(var(--_ui-input-radius) - var(--_ui-input-border-width) - var(--_input-swatch-gap)));
+  }
+  .ui.input > input[type="color"]::-moz-color-swatch {
+    border: var(--_ui-input-border-width) solid var(--_ui-input-border-color);
+    border-radius: max(0px, calc(var(--_ui-input-radius) - var(--_ui-input-border-width) - var(--_input-swatch-gap)));
   }
   .ui.input > input::-webkit-calendar-picker-indicator {
     padding: 0;

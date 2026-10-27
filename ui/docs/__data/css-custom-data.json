@@ -2228,6 +2228,20 @@
       }
     },
     {
+      "name": "--ui-example-toggle-size",
+      "description": {
+        "kind": "markdown",
+        "value": "The code button's width and height: one at every size\n\n`<ui-example>`'s token.  Default:  `28px`"
+      }
+    },
+    {
+      "name": "--ui-example-tools-gap",
+      "description": {
+        "kind": "markdown",
+        "value": "Space between the buttons of the `tools` row, and from it to the code button\n\n`<ui-example>`'s token.  Default:  `4px`"
+      }
+    },
+    {
       "name": "--ui-example-gap",
       "description": {
         "kind": "markdown",
@@ -11124,6 +11138,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
+      }
+    },
+    {
+      "name": "::part(tools)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-example>`:  The row round the `tools` slot, just left of the code button."
       }
     },
     {

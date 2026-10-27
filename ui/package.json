@@ -427,6 +427,11 @@
       "types": "./dist-types/src/docs-components/ui-docs-search/index.d.ts",
       "default": "./src/docs-components/ui-docs-search/index.ts"
     },
+    "./docs-components/ui-docs-theme-bench": {
+      "spell-ui-source": "./src/docs-components/ui-docs-theme-bench/index.ts",
+      "types": "./dist-types/src/docs-components/ui-docs-theme-bench/index.d.ts",
+      "default": "./src/docs-components/ui-docs-theme-bench/index.ts"
+    },
     "./docs-components/ui-docs-tokens": {
       "spell-ui-source": "./src/docs-components/ui-docs-tokens/index.ts",
       "types": "./dist-types/src/docs-components/ui-docs-tokens/index.d.ts",

@@ -68,9 +68,9 @@ class Own {
 }
 
 describe("Themes.own:  the one set", () => {
-  it("is Spell, Glass, Fruity and Merlot, in that order, each a sheet of the folder", async () => {
+  it("is Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop and Matrix, in that order, each a sheet of the folder", async () => {
     await UI.load()
-    expect(UI.themes.own).toEqual(["spell", "glass", "fruity", "merlot"])
+    expect(UI.themes.own).toEqual(["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop", "matrix"])
     for (const name of UI.themes.own) expect(UI.themes.sheets).toContain(name)
   })
 })
@@ -225,6 +225,117 @@ describe("merlot.css", () => {
     Own.dark()
     await vi.waitFor(() => expect(Own.color("--ui-background")).toBe("rgb(26, 12, 19)"))
     expect(step()).toBeGreaterThanOrEqual(PANEL_STEP)
+  })
+})
+
+describe("paper.css", () => {
+  it("an oxblood primary in light, a rose in dark;  4px buttons, the serif (Iowan Old Style first);  a lamplit page", async () => {
+    await Own.use("paper")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(139, 44, 44)", borderTopLeftRadius: "4px" }) // #8b2c2c
+    const body = getComputedStyle(document.documentElement).getPropertyValue("--ui-font-family")
+    expect(body).toMatch(/^\s*"Iowan Old Style", Palatino/)
+    // the controls keep the system's sans:  a serif button reads as a word in a sentence
+    expect(style.fontFamily).toMatch(/^system-ui/)
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(235, 164, 147)")) // #eba493
+    expect(Own.color("--ui-background")).toBe("rgb(29, 22, 16)") // #1d1610
+  })
+
+  it("its sheets a step off the cream page, light and dark", async () => {
+    await Own.use("paper")
+    const step = () => A11y.contrast(Own.color("--ui-surface"), [Own.color("--ui-background")])
+    expect(step()).toBeGreaterThanOrEqual(1.08)
+    Own.dark()
+    await vi.waitFor(() => expect(Own.color("--ui-background")).toBe("rgb(29, 22, 16)"))
+    expect(step()).toBeGreaterThanOrEqual(1.08)
+  })
+})
+
+describe("midnight.css", () => {
+  it("a deep teal primary in light, a glowing teal in dark;  10px buttons, the system font;  a blue-black page", async () => {
+    await Own.use("midnight")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(11, 104, 112)", borderTopLeftRadius: "10px" }) // #0b6870
+    expect(style.fontFamily).toMatch(/^system-ui/)
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(67, 217, 207)")) // #43d9cf
+    expect(Own.color("--ui-background")).toBe("rgb(10, 15, 21)") // #0a0f15
+  })
+
+  it("dark:  panels a clear step off the page, their edges lit", async () => {
+    await Own.use("midnight")
+    Own.dark()
+    await vi.waitFor(() => expect(Own.color("--ui-background")).toBe("rgb(10, 15, 21)"))
+    expect(A11y.contrast(Own.color("--ui-surface"), [Own.color("--ui-background")])).toBeGreaterThanOrEqual(PANEL_STEP)
+    expect(getComputedStyle(document.documentElement).getPropertyValue("--ui-shadow-raised")).toMatch(/^0 0 0 1px/)
+  })
+})
+
+describe("crisp.css", () => {
+  it("a strong blue primary in light, a light blue in dark;  4px buttons, the system font;  pure black and white", async () => {
+    await Own.use("crisp")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(0, 64, 193)", borderTopLeftRadius: "4px" }) // #0040c1
+    expect(style.fontFamily).toMatch(/^system-ui/)
+    expect(Own.color("--ui-background")).toBe("rgb(255, 255, 255)")
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(140, 182, 255)")) // #8cb6ff
+    expect(Own.color("--ui-background")).toBe("rgb(0, 0, 0)")
+  })
+
+  it("2px borders, a 3px focus ring, and no shadows:  every edge is a line", async () => {
+    await Own.use("crisp")
+    const root = getComputedStyle(document.documentElement)
+    expect(root.getPropertyValue("--ui-border-width").trim()).toBe("2px")
+    expect(root.getPropertyValue("--ui-focus-width").trim()).toBe("3px")
+    for (const shadow of ["subtle", "raised", "floating", "floating-hover", "overlay"])
+      expect(root.getPropertyValue(`--ui-shadow-${shadow}`).trim(), shadow).toBe("none")
+  })
+})
+
+describe("pop.css", () => {
+  it("a hot pink primary in light, a lighter pink in dark;  12px buttons, the rounded font;  a deep plum page", async () => {
+    await Own.use("pop")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(200, 18, 93)", borderTopLeftRadius: "12px" }) // #c8125d
+    expect(style.fontFamily).toMatch(/^ui-rounded/)
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(255, 122, 184)")) // #ff7ab8
+    expect(Own.color("--ui-background")).toBe("rgb(29, 15, 39)") // #1d0f27
+  })
+
+  it("the sticker:  a filled button wears an ink outline and a hard offset shadow, no blur", async () => {
+    await Own.use("pop")
+    const box = await Own.primaryButton()
+    expect(getComputedStyle(box).boxShadow).toMatch(/\) 0px 0px 0px 2px, .+\) 3px 3px 0px 2px$/)
+  })
+})
+
+describe("matrix.css", () => {
+  it("a deep mint primary in light, mint in dark;  8px buttons, the system font;  a near-black green page", async () => {
+    await Own.use("matrix")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(11, 117, 82)", borderTopLeftRadius: "8px" }) // #0b7552
+    expect(style.fontFamily).toMatch(/^system-ui/)
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(124, 229, 189)")) // #7ce5bd
+    expect(Own.color("--ui-background")).toBe("rgb(7, 16, 19)") // #071013
+  })
+
+  it("the console's labels:  a table's header row in the monospace, uppercase", async () => {
+    await Own.use("matrix")
+    const { style } = await ThemeHarness.page(
+      `<table class="ui table"><thead><tr><th>Port</th></tr></thead><tbody><tr><td>48</td></tr></tbody></table>`,
+      "th"
+    )
+    expect(style.textTransform).toBe("uppercase")
+    expect(style.fontFamily).toMatch(/^ui-monospace/)
   })
 })
 

@@ -36305,6 +36305,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  The example itself, shown live;  its markup is the code shown.  A `<template>` child instead:  stamped out live, and its markup shown EXACTLY as written.
        *   - `description`:  Rich description, in place of the `description` attribute.
        *   - `source`:  What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while the code is open, as the markup is.
+       *   - `tools`:  Buttons of the page's own, in a row just left of the code button and in its look, e.g. a notebook's Add, Move and Delete.  The page decides when they show.
        * - events:  `ui-opened`, `ui-closed`
        */
       "ui-example": UIExampleJSXAttributes

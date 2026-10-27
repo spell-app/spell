@@ -1,0 +1,24 @@
+/*
+ * Paper's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P20).
+ * - A rules sheet of the Paper theme (`paper.theme.json5`, `"rules": ["modern", "paper"]`);  its sheet, `paper.css`,
+ *   imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - the page's own colour
+ *   - a book's typesetting:  kerning and ligatures, balanced headings
+ */
+
+@layer ui.theme {
+  /* the page's own colour, and a book's typesetting;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures;
+    text-rendering: optimizeLegibility;
+  }
+
+  .ui.header,
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap-style: balance;
+  }
+}
