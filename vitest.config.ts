@@ -3,6 +3,7 @@ import { resolve } from "node:path"
 import { defineConfig, type TestProjectInlineConfiguration } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
+import { browserMode } from "spell/toolchain/browserMode"
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
 
@@ -12,7 +13,8 @@ import { packageVersion } from "spell/toolchain/packageVersion"
  * - `yarn kit:test` runs them all;  one folder's:  `yarn vp test run --project server`.
  * - No aliases:  the tests import the kit by its package name (`spell/server`), which Vite finds through the
  *   kit's own `exports`.
- * - The browser projects (`util`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium.
+ * - The browser projects (`util`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium,
+ *   animations off (`browserMode()`, every repo's).
  *   - `util`'s:  `dom.test.ts` needs shadow roots and a custom element registry, and `decorators.test.ts` proves
  *     `@proto` after esbuild lowers standard decorators.
  *   - `element`'s:  its elements drawn with NO Spell UI on the page, on the stand-in settings of `TestSettings.ts`.
@@ -46,7 +48,7 @@ export default defineConfig({
           dir: testsOf("util"),
           include: ["**/*.test.ts"],
           exclude: ["**/node_modules/**", ...UTIL_NODE],
-          browser: browserMode()
+          browser: browserMode(playwright)
         }
       },
       {
@@ -66,7 +68,7 @@ export default defineConfig({
           setupFiles: [resolve(KIT, "src/test-helpers/TestSettings.ts")],
           // a guard:  an element bug that halts rendering must fail its test, not hang the run
           testTimeout: 10_000,
-          browser: browserMode()
+          browser: browserMode(playwright)
         }
       },
       nodeProject("server"),
@@ -83,11 +85,6 @@ export default defineConfig({
 /** The tests of folder `name`:  `tests/<name>/`. */
 function testsOf(name: string): string {
   return resolve(KIT, "tests", name)
-}
-
-/** Vitest's browser mode, in headless chromium:  a fresh object for each project, which Vitest names in place. */
-function browserMode() {
-  return { enabled: true, provider: playwright(), headless: true, instances: [{ browser: "chromium" as const }] }
 }
 
 /** A project of node tests:  every `*.test.ts` in `tests/<name>/`. */

@@ -1,0 +1,33 @@
+/*
+ * The style sheet of `<ui-color-chip>`:  one colour, a small rounded square, read-only.
+ * - Public tokens (`--ui-color-chip-*`) are read through private aliases.
+ */
+
+@layer ui.components.color-chip.types;
+
+@layer ui.components.color-chip.types {
+  :host {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 0;
+    --_ui-color-chip-size: var(--ui-color-chip-size, 1.4em);
+    --_ui-color-chip-radius: var(--ui-color-chip-radius, 0.35em);
+  }
+  .color-chip {
+    display: inline-block;
+    inline-size: var(--_ui-color-chip-size);
+    block-size: var(--_ui-color-chip-size);
+    border-radius: var(--_ui-color-chip-radius);
+    /* the colour over a checkerboard, so a see-through one shows as it is */
+    background:
+      linear-gradient(var(--_ui-color-chip-color), var(--_ui-color-chip-color)),
+      repeating-conic-gradient(#c8c8c8 0 25%, #ffffff 0 50%) 0 0 / 0.6em 0.6em;
+    box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.14), rgb(255 255 255 / 0.24));
+  }
+  .color-chip.light {
+    color-scheme: light;
+  }
+  .color-chip.dark {
+    color-scheme: dark;
+  }
+}

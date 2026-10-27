@@ -53,6 +53,16 @@ export default defineConfig({
       "/components": {
         target: `http://${environment.api_server}:${environment.expressPort}`,
         changeOrigin: true
+      },
+      // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
+      // epic `debut` P24)
+      "/epics": {
+        target: `http://${environment.api_server}:${environment.expressPort}`,
+        changeOrigin: true
+      },
+      "/_epic": {
+        target: `http://${environment.api_server}:${environment.expressPort}`,
+        changeOrigin: true
       }
     }
   },

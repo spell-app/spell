@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url"
 import { defineConfig, type TestProjectConfiguration, type UserConfig } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
+import { browserMode } from "spell/toolchain/browserMode"
 import { standardDecorators } from "spell/toolchain/decorators"
 
 /**
@@ -16,11 +17,11 @@ const UI_CONFIG = "spell/ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
- * vitest config for `spell-epic`, a component pack (`spell-pack`):  two projects, over `tests/`.
+ * vitest config for `spell-epic`, a component pack (`spell-pack`):  three projects, over `tests/`.
  * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
- *   chromium), as Spell UI's are.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
+ *   chromium, animations off), as Spell UI's are;  `motion`:  the few that test motion itself, animations on.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
  *   Lightning CSS;  the test helpers come from the kit (`spell/test-helpers/...`)
  * - NOT here:  the window script's and the extension's tests (`tests/window.test.mjs`, `tests/vscode/`), plain
  *   `node --test` (`yarn test:scripts`)
@@ -32,6 +33,16 @@ const TESTS = resolve(import.meta.dirname, "tests")
 
 /** Spell UI's test setup (`spell/ui/test-helpers/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
 const UI_SETUP = fileURLToPath(import.meta.resolve("spell/ui/test-helpers/setup.ts"))
+
+/**
+ * Test files that test MOTION itself:  the `motion` project's, with animations on;  every other browser test runs with
+ * them off (epic `debut` I77).
+ * - A project of their own:  a project's files run side by side in ONE page, and reduced motion is the page's setting.
+ */
+const MOTION_TESTS = [
+  // its details fold by height
+  "components/epic-item/EpicItem.test.tsx"
+]
 
 export function epicsProjects({
   prefix = "",
@@ -51,29 +62,42 @@ export function epicsProjects({
         exclude: ["**/node_modules/**", "components/**", "vscode/**"]
       }
     },
-    {
-      ...baseConfig(),
-      ...(root && { root }),
-      // Spell UI's files the page fetches, not imports (its icon packs' SVGs, beside `BuiltInPacks.ts`), and the
-      // hoisted `node_modules`:  in the top `spell` repo, outside this one, which Vite's default allow list covers (the
-      // workspace root it finds above, the top's `package.json` with its `workspaces`;  epic `epic-engine` P10)
-      test: {
-        name: `${prefix}browser`,
-        dir: TESTS,
-        include: ["components/**/*.test.{ts,tsx}"],
-        // Spell UI's core first, as a page has it:  its settings for `spell/element` (spell-ui's
-        // `test/setup.ts`)
-        setupFiles: [UI_SETUP],
-        testTimeout: 10_000,
-        browser: {
-          enabled: true,
-          provider: playwright(),
-          headless: true,
-          instances: [{ browser: "chromium" }]
-        }
-      }
-    }
+    browserProject({ name: `${prefix}browser`, root, animations: "off" }),
+    browserProject({ name: `${prefix}motion`, root, animations: "on" })
   ]
+}
+
+/**
+ * The elements' tests, in a REAL browser:  `browser`, animations off, or `motion`, the tests of motion itself
+ * (`MOTION_TESTS`), animations on (the kit's `browserMode()`).
+ * - Spell UI's files the page fetches, not imports (its icon packs' SVGs, beside `BuiltInPacks.ts`), and the
+ *   hoisted `node_modules`:  in the top `spell` repo, outside this one, which Vite's default allow list covers (the
+ *   workspace root it finds above, the top's `package.json` with its `workspaces`;  epic `epic-engine` P10)
+ */
+function browserProject({
+  name,
+  root,
+  animations
+}: {
+  name: string
+  root: string | undefined
+  animations: "off" | "on"
+}): TestProjectConfiguration {
+  return {
+    ...baseConfig(),
+    ...(root && { root }),
+    test: {
+      name,
+      dir: TESTS,
+      include: animations === "off" ? ["components/**/*.test.{ts,tsx}"] : MOTION_TESTS,
+      exclude: animations === "off" ? ["**/node_modules/**", ...MOTION_TESTS] : [],
+      // Spell UI's core first, as a page has it:  its settings for `spell/element` (spell-ui's
+      // `test/setup.ts`)
+      setupFiles: [UI_SETUP],
+      testTimeout: 10_000,
+      browser: browserMode(playwright, { animations })
+    }
+  }
 }
 
 export default defineConfig({

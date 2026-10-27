@@ -2,8 +2,8 @@
  * The English vocabulary of `<ui-theme-editor>`:  every name the tag uses.
  * - Its tag, attributes, events, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
- * - Most of it is TEXTS:  the editor's panels, fields and choices, and the sample app its preview shows,
- *   each translated in `UIThemeEditor.es.ts`.
+ * - Most of it is TEXTS:  the bar, the Basics, the token tree, the sample app, each translated in
+ *   `UIThemeEditor.es.ts`.
  * - Pure data:  `import type` only, so node loads it (`yarn site:data`, `yarn gen:root`).
  */
 
@@ -11,26 +11,33 @@ import type { E } from "spell/ui/core"
 
 /****************
  * ### `themeEditorVocabulary`
- * The names of `<ui-theme-editor>`:  an inspector of a theme's colours, fonts and shapes,
- * a live preview of real elements in light and dark, and the theme as a stylesheet to copy.
+ * The names of `<ui-theme-editor>`:  a theme's big choices and every token it sets, real pages (or a sample app)
+ * wearing it live in light and dark, and the theme as a theme file to copy.
  ****************/
 export const themeEditorVocabulary = {
   tag: "ui-theme-editor",
   topics: ["forms", "controls", "typography"],
-  aka: ["theme editor", "theme builder", "theme creator", "theme generator", "style editor", "design tokens"],
+  aka: [
+    "theme editor",
+    "theme builder",
+    "theme bench",
+    "theme creator",
+    "theme generator",
+    "style editor",
+    "design tokens",
+    "token tuner"
+  ],
   skeleton: "30 tall",
   noun: "theme editor",
   description:
-    "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements " +
-    "follow in light and dark, then copy the stylesheet or keep it in the browser.",
+    "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by " +
+    "hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.",
   attributes: [
     {
       name: "base",
       group: "link",
       kind: "string",
-      description:
-        "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  " +
-        "Picking another one in the editor applies it to the page."
+      description: "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`."
     },
     {
       name: "value",
@@ -39,19 +46,29 @@ export const themeEditorVocabulary = {
       reflect: false,
       description:
         'The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the ' +
-        "theme kept in this browser (`SavedTheme`), else the base theme as it is."
+        "theme being made in this browser, else the one kept (`SavedTheme`), else the base theme as it is."
+    },
+    {
+      name: "pages",
+      group: "content",
+      kind: "json",
+      reflect: false,
+      description:
+        "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  " +
+        "`id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself " +
+        "wears the theme."
     }
   ],
   events: [
     {
       name: "ui-changed",
       detail: "{ value: ThemeChoices, css: string }",
-      description: "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet."
+      description: "A choice changed:  `value` is every choice now, `css` the theme's sheet, worn over its base."
     },
     {
       name: "ui-copied",
-      detail: "{ css: string }",
-      description: "Copy CSS put the stylesheet on the clipboard."
+      detail: "{ text: string }",
+      description: "Copy changes put the theme file's JSON5 on the clipboard."
     },
     {
       name: "ui-saved",
@@ -63,26 +80,41 @@ export const themeEditorVocabulary = {
   ],
   slots: [],
   parts: [
-    { name: "editor", description: "The whole editor:  the inspector beside the preview and the stylesheet." },
-    { name: "inspector", description: "The inspector, a `<ui-panel>` of `<ui-property-editor>` fields." },
-    { name: "preview", description: "The preview:  a sample app of real elements, in light and dark." },
-    { name: "sheet", description: "The stylesheet section, with Copy CSS." }
+    { name: "editor", description: "The whole editor:  the bar, the preview, and the side column." },
+    { name: "bar", description: "The top bar, one line:  its title, the theme, which pages, how they show." },
+    { name: "basics", description: "The Basics:  the theme's name and base, and its big choices." },
+    { name: "tokens", description: "Every token, in the theme file's groups." },
+    { name: "token", description: "One token's row:  its name, which pages read it, its control." },
+    { name: "pages", description: "The previewed pages' grid." },
+    { name: "page", description: "One previewed page:  its title row and its frames." },
+    { name: "preview", description: "The sample app, light and dark, when no pages are given." },
+    { name: "changes", description: "The theme file's text, with Copy changes." }
   ],
-  states: [{ name: "saved", description: "The theme it shows is the one kept in this browser (Use this theme)." }],
+  states: [
+    { name: "saved", description: "The theme it shows is the one kept in this browser (Use this theme)." },
+    { name: "changed", description: "Something is changed:  a Basic, or a token set by hand." }
+  ],
   texts: [
-    { key: "theme", text: "Theme", description: "The inspector's title." },
+    { key: "label", text: "Theme editor", description: "The bar's title, and the editor's accessible name." },
     {
-      key: "themeTip",
-      text: "A theme is the look of an app:  its colours, fonts and shapes.  Start from one, and change what you like.",
-      description: "The inspector's tip."
+      key: "lede",
+      text: "Tune a token and watch them all follow.",
+      description: "The title's tooltip."
+    },
+    { key: "theme", text: "Theme", description: "The bar's theme row:  the theme it builds on." },
+    { key: "basics", text: "Basics", description: "The side column's first section:  the big choices." },
+    {
+      key: "basicsTip",
+      text: "A theme is the look of an app:  its colours, fonts and shapes.  Each choice here sets many tokens.",
+      description: "The Basics' tip."
     },
     { key: "name", text: "Name", description: "The theme's name field." },
-    { key: "nameTip", text: "Names the file:  themes/<name>.css.", description: "The name field's tip." },
+    { key: "nameTip", text: "Names the file:  <name>.theme.json5.", description: "The name field's tip." },
     { key: "defaultName", text: "My theme", description: "The name a new theme starts with." },
-    { key: "base", text: "Start from", description: "The base theme field." },
+    { key: "base", text: "Builds on", description: "The base theme field." },
     {
       key: "baseTip",
-      text: "The theme yours changes.  Each choice below is a change to it;  the rest stays as it is.",
+      text: "The theme yours changes.  Each choice is a change to it;  the rest stays as it is.",
       description: "The base theme field's tip."
     },
     { key: "color", text: "Color", description: "The colour band." },
@@ -138,7 +170,11 @@ export const themeEditorVocabulary = {
       text: "The size of everyday text.  Everything else grows and shrinks with it, headings and buttons included.",
       description: "Its tip."
     },
-    { key: "reset", text: "Reset", description: "A button that puts one choice back to the theme's own." },
+    {
+      key: "reset",
+      text: "Reset",
+      description: "A button that puts one choice, or one token, back to the theme's own."
+    },
     { key: "shape", text: "Shape", description: "The shape band." },
     { key: "shapeTip", text: "How rounded things are, and how much they lift off the page.", description: "Its tip." },
     { key: "corners", text: "Corners", description: "The corners field." },
@@ -165,11 +201,180 @@ export const themeEditorVocabulary = {
     { key: "inUse", text: "In use", description: "The use button, while the theme shown is the one kept." },
     { key: "forget", text: "Stop using", description: "The button that forgets the kept theme." },
     { key: "startOver", text: "Start over", description: "The button that drops every change." },
-    { key: "preview", text: "Preview", description: "The preview's title." },
-    { key: "previewMode", text: "Preview in", description: "Name of the Both / Light / Dark control." },
-    { key: "both", text: "Both", description: "Preview choice:  light and dark side by side." },
-    { key: "light", text: "Light", description: "Preview choice, and the light card's label." },
-    { key: "dark", text: "Dark", description: "Preview choice, and the dark card's label." },
+    { key: "layout", text: "Show", description: "Accessible name of the pages' menu." },
+    { key: "grid", text: "All", description: "The pages' menu:  every page, two by two." },
+    { key: "titles", text: "Section titles", description: "Accessible name of the titles' scroll menu." },
+    { key: "rest", text: "At rest", description: "Scroll each page to its top, its titles at rest." },
+    { key: "stuck", text: "Stuck", description: "Scroll each page so its section titles stick." },
+    { key: "schemes", text: "Schemes", description: "Accessible name of the schemes' menu." },
+    { key: "both", text: "Both", description: "Light and dark side by side:  pages, samples and token values." },
+    { key: "light", text: "Light", description: "Light alone;  the light half of a pair;  the light sample's label." },
+    { key: "dark", text: "Dark", description: "Dark alone;  the dark half of a pair;  the dark sample's label." },
+    { key: "phone", text: "Phone", description: "The bar's toggle:  every page at a phone's width." },
+    {
+      key: "phoneTip",
+      text: "Phone:  every page at a phone's width, in its phone layout",
+      description: "The phone toggle's tooltip."
+    },
+    {
+      key: "swap",
+      text: "Swap light and dark",
+      description: "The bar's button:  every pair's light and dark sides change places."
+    },
+    {
+      key: "scrollBack",
+      text: "Scroll back",
+      description: "The bar's ‹, while some of its row is out of sight before."
+    },
+    { key: "scrollOn", text: "Scroll on", description: "The bar's ›, while some of its row is out of sight after." },
+    { key: "reload", text: "Reload", description: "Reload one page's frames (its title row's icon)." },
+    { key: "open", text: "Open in a tab", description: "Open a page in a tab of its own." },
+    {
+      key: "loadingPage",
+      text: "Loading the page…",
+      description: "Over a page's frame until it's drawn in the theme."
+    },
+    { key: "unreachable", text: "This page can't be reached.", description: "A page's frame, when it isn't running." },
+    { key: "tokens", text: "Every token", description: "The side column's token tree." },
+    {
+      key: "tokensTip",
+      text: "Each token the theme sets, as its file nests them.  One set here wins over the Basics.",
+      description: "The token tree's tip."
+    },
+    { key: "themeTitle", text: "{theme} Theme", description: "The token tree's header:  the theme shown." },
+    { key: "searchTip", text: "Search the tokens", description: "The header's search toggle:  the search row." },
+    {
+      key: "infoTip",
+      text: "Read by, and what the marks mean",
+      description: "The header's info toggle:  the pane of which pages read each token, and the marks."
+    },
+    { key: "find", text: "Find a token", description: "Placeholder of the token filter." },
+    { key: "loading", text: "Reading the theme files…", description: "Shown while the theme files load." },
+    { key: "failed", text: "The theme files didn't load:  {error}", description: "Shown when they can't." },
+    { key: "groupOwn", text: "The theme's own", description: "Group:  the theme's private tokens (`own`)." },
+    { key: "groupTypography", text: "Type", description: "Group:  `typography`." },
+    { key: "groupSizes", text: "Sizes", description: "Group:  `sizes`." },
+    { key: "groupSpacing", text: "Spacing", description: "Group:  `spacing`." },
+    { key: "groupRadii", text: "Corners", description: "Group:  `radii`." },
+    { key: "groupText", text: "Text", description: "Group:  `text`." },
+    { key: "groupSurfaces", text: "Surfaces", description: "Group:  the page, panels and bars (`surfaces`)." },
+    { key: "groupBorders", text: "Borders", description: "Group:  `borders`." },
+    { key: "groupBrand", text: "Brand and focus", description: "Group:  `brand`." },
+    { key: "groupSemantic", text: "Feedback", description: "Group:  positive, negative ... (`semantic`)." },
+    { key: "groupHues", text: "Palette", description: "Group:  the named hues (`hues`)." },
+    { key: "groupShadows", text: "Shadows", description: "Group:  `shadows`." },
+    { key: "groupMotion", text: "Motion", description: "Group:  `motion`." },
+    { key: "groupComponents", text: "Components", description: "Group:  each family's own tokens (`components`)." },
+    {
+      key: "pageOwn",
+      text: "The {page}'s own",
+      description:
+        "Group:  a previewed page's own tokens (the editor's `--spell-*`), in its own sheet, not a theme file."
+    },
+    { key: "buildsOn", text: "Builds on", description: "The marks' legend:  what the theme shown extends." },
+    { key: "foundation", text: "Spell UI", description: "What a theme that extends none builds on." },
+    { key: "setHere", text: "Set here", description: "A token this theme sets (●), and the button that sets it here." },
+    {
+      key: "setHereTip",
+      text: "Set it in this theme, as it is now",
+      description: "The Set here button's tooltip:  the value doesn't change."
+    },
+    {
+      key: "setHereMark",
+      text: "Set here:  this theme gives the value",
+      description: "The filled dot's tooltip."
+    },
+    { key: "fromBase", text: "from {base}", description: "A token the theme leaves to what it builds on (○)." },
+    {
+      key: "fromMark",
+      text: "From {base}:  inherited, untouched",
+      description: "The hollow dot's tooltip."
+    },
+    { key: "backToBase", text: "Back to {base}'s value", description: "Drop this theme's own value of a token." },
+    { key: "pointsAt", text: "points at", description: "A token whose value is another token's (↳)." },
+    { key: "derived", text: "derived", description: "A token worked out from others (ƒ)." },
+    { key: "over", text: "over", description: 'A colour mix in words:  "accent 15% over clear".' },
+    { key: "clearWord", text: "clear", description: "`transparent`, in a colour mix in words." },
+    { key: "amount", text: "Amount", description: "Accessible name of a colour mix's amount slider." },
+    {
+      key: "groupCount",
+      text: "{set} set here · {from} from {base}",
+      description: "A group's title band:  how many of its tokens the theme sets."
+    },
+    { key: "setHereOnly", text: "Set here only", description: "The filter's chip:  only the tokens set here." },
+    {
+      key: "setHereOnlyTip",
+      text: "Only the tokens this theme sets:  what it changes on {base}",
+      description: "The chip's tooltip."
+    },
+    {
+      key: "pointerAll",
+      text: "Change {place} for everything using it",
+      description: "A pointer's pick:  change the token it points at."
+    },
+    { key: "pointerThis", text: "Set this one", description: "A pointer's pick:  set this token alone." },
+    { key: "cancel", text: "Cancel", description: "Drop a pick." },
+    { key: "usedBy", text: "Used by:  {tokens}", description: "A colour's tooltip:  the tokens pointing at it." },
+    { key: "expandAll", text: "Expand all", description: "The token tree's toggle, while a branch is folded." },
+    { key: "collapseAll", text: "Collapse all", description: "The token tree's toggle, once every branch is open." },
+    { key: "readBy", text: "Read by", description: "Accessible name of a token's row of the pages that read it." },
+    { key: "readsTip", text: "{place} reads it", description: "A reader's tip:  the page reads the token." },
+    {
+      key: "overridesTip",
+      text: "{place} reads it (also set on its own elements)",
+      description: "A reader's tip:  the page also sets the token below its root, where the theme doesn't reach."
+    },
+    {
+      key: "overridesLegend",
+      text: "the page also sets it on its own elements",
+      description: "The legend's half dot:  what it marks on an icon."
+    },
+    {
+      key: "overridesLegendTip",
+      text: "The page also sets it on its own elements:  a theme doesn't reach those",
+      description: "The legend's half dot's tip."
+    },
+    {
+      key: "split",
+      text: "Split into light / dark",
+      description: "Give a token a light and a dark value of its own, each with its own control."
+    },
+    { key: "alpha", text: "Opacity", description: "Accessible name of a colour's opacity slider." },
+    { key: "value", text: "Value", description: "Accessible name of a token's text field." },
+    {
+      key: "unset",
+      text: "Not set in {theme}:  each element's own",
+      description: "A token's empty field:  the theme doesn't set it, so each element uses its own default."
+    },
+    { key: "changes", text: "Changes", description: "The theme file's section." },
+    { key: "copy", text: "Copy changes", description: "The copy button:  the theme file's JSON5." },
+    { key: "copied", text: "Copied", description: "The copy button, just after copying." },
+    { key: "noChanges", text: "No changes yet:  this is {base} as it is.", description: "The changes, while none." },
+    {
+      key: "fileMade",
+      text: "a theme on {base}, made with Spell UI's theme editor.",
+      description: "The theme file's first comment, after its file name."
+    },
+    {
+      key: "fileMerge",
+      text: 'Save it beside the themes, or merge its values into {base}.theme.json5 (and drop "extends").',
+      description: "The theme file's second comment:  how to use it."
+    },
+    {
+      key: "sheetMade",
+      text: "made with Spell UI's theme editor.",
+      description: "The sheet's first comment, after its file name."
+    },
+    {
+      key: "sheetBase",
+      text: 'On the {base} theme:  apply it first (UI.themes.apply("{base}")), then this sheet.',
+      description: "The sheet's second comment:  which theme it changes."
+    },
+    {
+      key: "pageOwnSheet",
+      text: "the previewed pages' own tokens, for their own sheets",
+      description: "The comment over the rule of the pages' own tokens."
+    },
     { key: "appTitle", text: "Habit Tracker", description: "The sample app's title." },
     { key: "today", text: "Today", description: "The sample app's card title." },
     { key: "habitWater", text: "Drink water", description: "A sample habit." },
@@ -182,20 +387,6 @@ export const themeEditorVocabulary = {
     { key: "live", text: "Live", description: "A sample label." },
     { key: "streak", text: "7-day streak.", description: "The sample message's bold start." },
     { key: "streakMore", text: "Keep it going:  one habit left today.", description: "The rest of the message." },
-    { key: "progress", text: "Today's habits", description: "Name of the sample progress bar." },
-    { key: "css", text: "CSS", description: "The stylesheet section's title." },
-    { key: "copy", text: "Copy CSS", description: "The copy button." },
-    { key: "copied", text: "Copied", description: "The copy button, just after copying." },
-    {
-      key: "sheetMade",
-      text: "made with Spell UI's theme editor.",
-      description: "The stylesheet's first comment, after its file name."
-    },
-    {
-      key: "sheetBase",
-      text: 'On the {base} theme:  apply it first (UI.themes.apply("{base}")), then this sheet.',
-      description: "The stylesheet's second comment:  which theme it changes."
-    },
-    { key: "sheetEmpty", text: "No changes yet:  this is {base} as it is.", description: "The stylesheet, unchanged." }
+    { key: "progress", text: "Today's habits", description: "Name of the sample progress bar." }
   ]
 } as const satisfies E.ComponentVocabulary

@@ -159,9 +159,11 @@ describe("scrollEnds() and scrollByRow()", () => {
   it("steps most of the row's width, smoothly;  at once under reduced motion", () => {
     const box = row()
     const scrollBy = vi.spyOn(box, "scrollBy")
+    // the tests' page asks for reduced motion (the kit's `browserMode()`):  motion on first, then off
+    const matchMedia = vi.spyOn(window, "matchMedia").mockReturnValue({ matches: false } as MediaQueryList)
     scrollByRow(box, 1)
     expect(scrollBy).toHaveBeenLastCalledWith({ left: 80, behavior: "smooth" })
-    vi.spyOn(window, "matchMedia").mockReturnValue({ matches: true } as MediaQueryList)
+    matchMedia.mockReturnValue({ matches: true } as MediaQueryList)
     scrollByRow(box, -1)
     expect(scrollBy).toHaveBeenLastCalledWith({ left: -80, behavior: "instant" })
   })

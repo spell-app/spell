@@ -31,6 +31,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell/toolchain/decorators` ([decorators.ts](decorators.ts)):  the decorator pre-pass, every Vite and Vitest
     config's (standard decorators lowered by esbuild, before the Solid plugin)
   - `spell/toolchain/packageVersion` ([packageVersion.ts](packageVersion.ts)):  `__PACKAGE_VERSION__`
+  - `spell/toolchain/browserMode` ([browserMode.ts](browserMode.ts)):  `browserMode()`, the `browser` block of every
+    repo's browser test projects:  headless Playwright, animations off (reduced motion;  epic `debut` I77)
   - [`spell/toolchain/tsconfig.base.json`](tsconfig.base.json):  the TypeScript settings every package shares.
     - Every repo's `tsconfig.json` extends it, with `"customConditions": ["<package>-source"]` and no `paths`
       (epic `repo-split` P14).
