@@ -1830,7 +1830,7 @@ export const ThemeHues = [
 /** One of `ThemeHues`, e.g. `"pink"`. */
 export type ThemeHue = (typeof ThemeHues)[number]
 
-/** The fonts a theme editor offers, each already on people's computers (`ThemeSheet` has their stacks). */
+/** The fonts a theme editor offers, each already on people's computers (`ThemeDraft` has their stacks). */
 export const ThemeFonts = ["system", "rounded", "serif", "georgia", "humanist", "verdana", "mono"] as const
 /** One of `ThemeFonts`, e.g. `"rounded"`. */
 export type ThemeFont = (typeof ThemeFonts)[number]
@@ -1878,7 +1878,12 @@ export type ThemeChoices = {
   depth?: ThemeDepth
   /** a glass theme's see-through:  fruity's only */
   glass?: ThemeGlass
+  /** tokens set by hand, by CSS name (`--ui-radius-l`):  each wins over what the choices above set */
+  tokens?: Readonly<Record<string, ThemeTokenEdit>>
 }
+
+/** A token set by hand in `<ui-theme-editor>`:  one value for both schemes, or one per scheme. */
+export type ThemeTokenEdit = { both: string } | { light?: string; dark?: string }
 
 ////////////////
 // ## Theme names

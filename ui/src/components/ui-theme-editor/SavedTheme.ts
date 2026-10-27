@@ -15,10 +15,11 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
  *   - imported by its file, `spell/ui/components/ui-theme-editor/SavedTheme`:
  *     the family's barrel would load the editor too
  * - Kept in `localStorage` under `STORAGE_KEY`:  the choices AND the stylesheet's text,
- *   so a page restores it without the editor's texts or code (`ThemeSheet`).
+ *   so a page restores it without the editor's texts or code (`ThemeDraft`, `ThemeFile`).
+ *   - P25 (Saving Themes) moves it to the person's space.
  *   - Through `PrefStore`:  a private window or blocked storage keeps it for this page only.
- * - Restoring applies the base theme (`UI.themes.apply()`) and then the sheet, on the page:
- *   the same two steps `ThemeSheet.applyToPage()` takes, so it looks as it did in the editor.
+ * - Restoring applies the base theme (`UI.themes.apply()`) and then the sheet, on the page (`wear()`):
+ *   the same two steps the editor takes, so it looks as it did there.
  * - Static:  one kept theme per browser.
  ****************/
 export class SavedTheme {
@@ -60,17 +61,16 @@ export class SavedTheme {
   static async restore(): Promise<boolean> {
     const kept = SavedTheme.read()
     if (!kept) return false
-    const { themes, styles } = await UI.load()
+    const { themes } = await UI.load()
     const base = UIT.ThemeNames.nameNow(themes, kept.choices.base)
     if (base !== kept.choices.base) SavedTheme.save({ ...kept.choices, base }, kept.css)
     try {
-      await themes.apply(base)
+      await SavedTheme.wear(base, kept.css)
     } catch (error) {
       E.Warnings.warn("SavedTheme", `the kept theme's base \`${kept.choices.base}\` is gone;  forgetting it`, error)
       SavedTheme.forget()
       return false
     }
-    styles.register(EDITS_SHEET, kept.css, { page: true })
     return true
   }
 
@@ -85,6 +85,35 @@ export class SavedTheme {
     const css = kept && UIT.ThemeNames.nameNow(themes, kept.choices.base) === theme ? kept.css : ""
     if (css || styles.has(EDITS_SHEET)) styles.register(EDITS_SHEET, css, { page: true })
   }
+
+  ////////////////
+  // ## On the page
+  ////////////////
+
+  /**
+   * Wear theme `base` on the page, then `css` over it (`EDITS_SHEET`):  what the editor makes, shown page-wide.
+   * - SIDE EFFECT:  page-wide, every element on the page follows;  replaces the sheet worn before.
+   * - Calls racing:  the LAST one wins (`putOnPage()` counts too), even when an earlier base loads later.
+   * - Throws a `TypeError` when `base` isn't a theme (`UI.themes.apply()`).
+   */
+  static async wear(base: string, css: string): Promise<void> {
+    const call = ++SavedTheme.calls
+    const { themes, styles } = await UI.load()
+    if (themes.current !== base) await themes.apply(base)
+    if (call === SavedTheme.calls) styles.register(EDITS_SHEET, css, { page: true })
+  }
+
+  /**
+   * Put `css` on the page as the edited theme's sheet, at once (`""`:  none);  a pending `wear()` won't land.
+   * - SIDE EFFECT:  page-wide.  The runtime must be in (`UI.styles`).
+   */
+  static putOnPage(css: string): void {
+    SavedTheme.calls++
+    UI.styles.register(EDITS_SHEET, css, { page: true })
+  }
+
+  /** Counts `wear()` and `putOnPage()` calls:  only the last one's sheet lands. */
+  private static calls = 0
 
   /** What's kept, if it reads as a theme;  anything else is `undefined`. */
   private static read(): KeptTheme | undefined {

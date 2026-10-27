@@ -64,13 +64,21 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",
-    "--ui-section-margin": "its preview and stylesheet sections sit in a column spaced by its gap",
-    "--ui-code-font-size": "its stylesheet is a long listing:  smaller code than a page's",
+    "--ui-button-radius": "the bar's icon toggles are pills, as the bar's segmented menus",
+    "--ui-button-background": "the bar's icon toggles are plain icons, filled only while pressed",
+    "--ui-section-margin": "its side column's sections sit in a column spaced by its gap",
+    "--ui-section-content-padding": "the token tree's groups and branches meet edge to edge:  no inner padding",
+    "--ui-menu-margin": "the bar's menus sit side by side on one line:  no block margin between them",
+    "--ui-icon-width": "the page heads', the halves' and the legend's icons take their glyph's own width",
+    "--ui-code-font-size": "its theme file is a long listing:  smaller code than a page's",
     "--ui-code-line-height": "and tighter lines, with the smaller code",
     "--ui-card-margin-block": "the sample app's parts are spaced by its gap",
     "--ui-progress-margin": "the same",
     "--ui-message-margin": "the same",
     "--ui-message-icon-size": "the sample's message is one short line:  its icon sized to the text, not to a paragraph"
+  },
+  "ui-theme-editor/UIThemeToken.css": {
+    "--ui-icon-width": "the readers' icons take their glyph's own width, in a 22px square"
   },
   "ui-theme-menu/UIThemeMenu.css": {
     "--ui-button-background":
