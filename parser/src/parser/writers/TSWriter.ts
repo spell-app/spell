@@ -1097,6 +1097,7 @@ export class TSWriter extends JSWriter {
     "send",
     "sharedLabel",
     "sharedLink",
+    "sharedTarget",
     "sharedText",
     "sharedTooltip",
     "shownValueOf",
