@@ -68,4 +68,18 @@ describe("<ui-docs-theme-bench>", () => {
     expect(tokens.length).toBeGreaterThan(0)
     expect(tokens.every((token) => token.includes("segmented"))).toBe(true)
   })
+
+  it("a read-by icon keeps its element, and its tooltip, while the pages report again", async () => {
+    const { bench, component } = await render()
+    const look = (declares: string[]) => ({ reads: ["--ui-surface"], declares, overrides: [], values: {} })
+    component.looks = { ui: look([]), editor: look(["--spell-pane-radius"]) }
+    await ElementFixture.settle()
+    const icon = () => bench.shadowRoot!.querySelector<HTMLElement>(".reader[title='Spell UI reads it']")
+    const first = icon()
+    expect(first).not.toBeNull()
+    // the same reports again, as new objects:  every page sends one each time it's dressed
+    component.looks = { ui: look([]), editor: look(["--spell-pane-radius"]) }
+    await ElementFixture.settle()
+    expect(icon()).toBe(first)
+  })
 })

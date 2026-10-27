@@ -687,7 +687,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           when={this.tokens}
           fallback={<p class="note">{this.tokensError ? t("failed", { error: this.tokensError }) : t("loading")}</p>}
         >
-          <For each={this.groups}>{(group) => this.group(group)}</For>
+          <For each={this.groups.map((group) => group.place)}>{(place) => this.group(place)}</For>
         </Show>
         {this.changesSection()}
       </aside>
@@ -695,13 +695,16 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   }
 
   /** One group of tokens, folding. */
-  private group(group: BenchGroup): JSX.Element {
+  private group(place: string): JSX.Element {
+    // By its place, not the group's object:  each page's report makes new groups, and a new object would draw the
+    // whole group again (its fold, and the read-by icon under the pointer with its tooltip, lost)
+    const tokens = () => this.groups.find((group) => group.place === place)?.tokens ?? []
     return (
-      <ui-section class="group" label={this.text(GROUP_TEXTS[group.place] ?? "groupOwn")} collapsible="" level="4">
+      <ui-section class="group" label={this.text(GROUP_TEXTS[place] ?? "groupOwn")} collapsible="" level="4">
         <code slot="actions" class="group-place">
-          {group.place}
+          {place}
         </code>
-        <For each={group.tokens}>{(token) => this.token(token)}</For>
+        <For each={tokens()}>{(token) => this.token(token)}</For>
       </ui-section>
     )
   }
@@ -813,25 +816,21 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
    */
   private readersIcons(token: string): JSX.Element {
     const t = this.text
-    const readers = () =>
-      BenchPlaceIds.flatMap((id) => {
-        const sets = this.readers[id]
-        if (!sets?.reads.has(token)) return []
-        return [{ id, state: sets.overrides.has(token) ? ("overrides" as const) : ("reads" as const) }]
-      })
+    // The ids, not objects:  `<For>` keeps each icon while its page goes on reading the token, so the one under the
+    // pointer is never swapped for a copy (a swapped one loses its tooltip:  each page's report made new ones)
+    const readerIds = () => BenchPlaceIds.filter((id) => this.readers[id]?.reads.has(token))
+    const stateOf = (id: BenchPlaceId): ReaderState => (this.readers[id]?.overrides.has(token) ? "overrides" : "reads")
     return (
       <span class="readers" role="list" aria-label={t("readBy")}>
-        <For each={readers()}>
-          {(reader) => (
-            <span
-              class={["reader", reader.state]}
-              role="listitem"
-              title={t(READER_TIPS[reader.state], { place: t(reader.id) })}
-              aria-label={t(READER_TIPS[reader.state], { place: t(reader.id) })}
-            >
-              <ui-icon name={BenchPlaces[reader.id].icon} aria-hidden="true"></ui-icon>
-            </span>
-          )}
+        <For each={readerIds()}>
+          {(id) => {
+            const tip = () => t(READER_TIPS[stateOf(id)], { place: t(id) })
+            return (
+              <span class={["reader", stateOf(id)]} role="listitem" title={tip()} aria-label={tip()}>
+                <ui-icon name={BenchPlaces[id].icon} aria-hidden="true"></ui-icon>
+              </span>
+            )
+          }}
         </For>
       </span>
     )
