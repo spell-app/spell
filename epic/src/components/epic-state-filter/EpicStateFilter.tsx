@@ -45,12 +45,17 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   // ## Derived state
   ////////////////
 
-  /** How many items are in each state, from `counts`. */
+  /**
+   * How many items are in each state, from `counts`.
+   * - `handled` counts with `old`:  ONE grey chip for everything settled (Owen, 2026-10-26:  "why are there two grey
+   *   pills?";  two before, the same grey);  the row's "in P4" chip still tells them apart
+   */
   get stateCounts(): ReadonlyMap<string, number> {
     const counts = new Map<string, number>()
     for (const pair of (this.counts ?? "").split(/\s+/)) {
-      const [state, count] = pair.split(":")
-      if (state && Number(count) > 0) counts.set(state, Number(count))
+      const [raw, count] = pair.split(":")
+      const state = raw === SETTLED_TOO ? SETTLED : raw
+      if (state && Number(count) > 0) counts.set(state, (counts.get(state) ?? 0) + Number(count))
     }
     return counts
   }
@@ -155,11 +160,17 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     const present = this.present.map((it) => it.state as string)
     const next = StateFilter.nextShown(present, [...this.showing], state)
     // what's handed to Claude has no chip of its own:  it never hides behind one
-    const shown =
+    const withSubmitted =
       present.includes(SUBMITTED_STATE) && !next.includes(SUBMITTED_STATE) ? [...next, SUBMITTED_STATE] : next
+    // the grey chip is `old` and `handled` both:  shown or hidden together
+    const shown = withSubmitted.includes(SETTLED) ? [...withSubmitted, SETTLED_TOO] : withSubmitted
     this.send(STATE_PICK, { state, shown } satisfies StatePickDetail)
   }
 }
+
+/** The grey chip's state, and the one that counts in it (`handled`, epic `epic-engine` P31):  one chip for both. */
+const SETTLED = "old"
+const SETTLED_TOO = "handled"
 
 /** The state of what Claude is working on:  it counts in the blue badge, with the marked items. */
 const SUBMITTED_STATE = "progress"

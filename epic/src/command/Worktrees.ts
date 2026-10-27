@@ -707,6 +707,7 @@ function mergeMainLines(report: MergeMainReport): string[] {
 /** `merge-main`'s report, for a person:  what the merge itself did. */
 function mergeResultLines(report: MergeMainReport): string[] {
   const { branch, result, conflicts, untracked, regenerated, review, unstaged, installed } = report
+  const { renamed = [], renameSkipped } = report
   const install = !installed
     ? []
     : installed.ok
@@ -729,6 +730,14 @@ function mergeResultLines(report: MergeMainReport): string[] {
       ...keys.map((key) => `    ${key}`)
     ]),
     ...(unstaged.length ? ["  changed by regenerating, NOT committed:", ...unstaged.map((file) => `    ${file}`)] : []),
-    ...install
+    ...install,
+    // Spell UI's old names the branch still wrote (`MainMerge.renameOldNames()`, epic `epic-engine` I143)
+    ...(renamed.length
+      ? [
+          `  renamed old names in ${renamed.length} file(s), committed on their own (spell ui rename):`,
+          ...renamed.flatMap(({ file, renames }) => renames.map((rename) => `    ${file}   ${rename}`))
+        ]
+      : []),
+    ...(renameSkipped ? [`  spell ui rename skipped:  ${renameSkipped}`] : [])
   ]
 }

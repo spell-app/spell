@@ -313,6 +313,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
       - `Worktrees` (`worktree`), with `MainMerge`
         (`worktree merge-main`:  installs the packages when it changed a lockfile)
+        - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
+          the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
+          merged, committed on its own;  generated files and links out of the checkout (the content folder) left out;
+          no kit above the checkout, no step;  a failure is one line (`renameSkipped`), never the merge's
       - `StrayFiles`:  what's uncommitted in a main checkout `epic merge` fast-forwards,
         and moving it aside into the epic home's `ditched/` (epic `epic-engine` I77)
         - a snapshot or generated output by itself, a few others with `--ditch`

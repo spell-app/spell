@@ -537,6 +537,14 @@ export type MergeMainReport = {
   /** generated files left uncommitted, moved aside before the merge (`StrayFiles`);  `ditchedTo`:  where */
   ditched?: string[]
   ditchedTo?: string
+  /**
+   * Spell UI's old names the branch brought in, rewritten after the merge by `spell ui rename --write`
+   * (`MainMerge.renameOldNames()`, epic `epic-engine` I143), committed on their own:
+   * each file, from the kit's root, with its renames (`<ui-docs-toc> => <ui-toc> (2)`);  left out when none
+   */
+  renamed?: { file: string; renames: string[] }[]
+  /** why that step didn't run, in one line:  a kit with no `spell ui rename`, a failure;  never fails the merge */
+  renameSkipped?: string
 }
 
 /**

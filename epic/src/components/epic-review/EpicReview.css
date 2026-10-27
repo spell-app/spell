@@ -66,20 +66,6 @@
     /* a pill, round at both ends (Owen, 2026-10-25:  "take these back to pills") */
     --ui-button-radius: 999px;
     --ui-buttons-radius: 999px;
-    /*
-     * its END's corners:  a pill, unless what it sits in sets `--epic-review-end-radius` (an item's line, whose
-     * rounded end it sits 1px inside:  designer rule T68)
-     */
-    --_epic-review-end-radius: var(--epic-review-end-radius, 999px);
-  }
-  .review-group::part(group) {
-    border-start-end-radius: var(--_epic-review-end-radius);
-    border-end-end-radius: var(--_epic-review-end-radius);
-  }
-  /* the last button's tile, inside the track's padding:  its end's corners less that padding */
-  .review-group > ui-button:last-child::part(button) {
-    border-start-end-radius: max(0px, calc(var(--_epic-review-end-radius) - var(--ui-space-3xs, 0.125em)));
-    border-end-end-radius: max(0px, calc(var(--_epic-review-end-radius) - var(--ui-space-3xs, 0.125em)));
   }
   .review-controls ui-button::part(button) {
     display: inline-grid;
