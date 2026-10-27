@@ -69,7 +69,7 @@ una "carta" es una vista donde:
 	// una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	- para dibujarla:
 		devolver
-			<span onClick={disparar evento clic-carta con carta = eso}>
+			<span part="lados" onClick={disparar evento clic-carta con carta = eso}>
 				<es-texto part="frente" color={su color}>{su cara}</es-texto>
 				<es-texto part="dorso" color="azul">🂠</es-texto>
 			</span>

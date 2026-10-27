@@ -90,43 +90,45 @@
   text-indent: -0.049em;
   user-select: none;
 }
-/* a card's letter is only its ink:  a white face, its corners rounded as the letter's are, hides the cards below */
-[layout] > * {
-  background: #fff;
-  background-clip: content-box;
-  border-radius: 0.035em;
-}
 
 /****************
- * Turning over:  a card draws both its sides (Card.spellx), and shows the one it's turned to
- * - As its direction changes it turns about its middle, edge-on halfway, where the other side takes over:
- *   --card-flip runs 0 (face up) to 1 (face down), and its angle is 90° at 0.5, none at either end.
+ * Turning over:  a card draws both its sides (Card.spellx), back to back, and turns over in 3D
+ * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
+ *   Its back side is drawn already turned half round, so it faces you when the card does.
+ * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
+ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
+ *   card that cut its own content would draw flat, and its sides couldn't turn with it.
  * - A card that's drawn already turned shows that side at once:  only a change turns it.
  * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellx), so it turns over before it moves.
  ****************/
 
-@property --card-flip {
-  syntax: "<number>";
-  /* its sides read it too */
-  inherits: true;
-  initial-value: 0;
-}
 [layout] > * {
-  --card-flip: 0;
-  transform: perspective(3em) rotateY(calc(90deg * (1 - max(1 - 2 * var(--card-flip), 2 * var(--card-flip) - 1))));
-  transition: --card-flip 0.3s ease-in-out;
-  /* both sides on one line, so the one drawn sits at the card's top */
-  white-space: nowrap;
+  /* its sides turn with it, in 3D */
+  transform-style: preserve-3d;
+  overflow: visible;
+  transform: perspective(3em) rotateY(0deg);
+  transition: transform 0.3s ease-in-out;
 }
 [layout] > :not([direction="up"]) {
-  --card-flip: 1;
+  transform: perspective(3em) rotateY(180deg);
 }
-/* each side is drawn only while the card is turned its way:  the other shrinks to nothing as it passes edge-on */
-[layout] > *::part(front) {
-  font-size: calc(1em * clamp(0, (0.5 - var(--card-flip)) * 1000, 1));
+/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
+   a <ui-text> draws no box of its own, so it's given one */
+[layout] > *::part(front),
+[layout] > *::part(back) {
+  display: block;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding-block: 0.008em;
+  overflow: hidden;
+  background: #fff;
+  background-clip: content-box;
+  border-radius: 0.035em;
+  backface-visibility: hidden;
 }
 [layout] > *::part(back) {
-  font-size: calc(1em * clamp(0, (var(--card-flip) - 0.5) * 1000, 1));
+  transform: rotateY(180deg);
 }
 @media (prefers-reduced-motion: reduce) {
   [layout] > * {

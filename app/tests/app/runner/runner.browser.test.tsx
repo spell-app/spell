@@ -538,6 +538,9 @@ describe("compiled spell draws with Solid", () => {
     const solitaire = await solitaireSource()
     const first = await mount(solitaire)
     await waitFor(() => first.querySelectorAll("test-project-card").length === 52)
+    // its deal done first:  this file's runners share one core, and two deals at once would share its flags for what's
+    // running (`deal the cards`, `play from the stock`), so one game's play would block the other's (debut I52)
+    await waitFor(() => dealtAndPlayed(first), 10_000)
     const defined = customElements.get("test-project-foundation")
     // what an empty foundation shows, edited:  a placeholder of another kind
     const edited = solitaire.compiled!.replace(PLACEHOLDER, EDITED_PLACEHOLDER)
@@ -553,6 +556,8 @@ describe("compiled spell draws with Solid", () => {
     // the new program's foundations draw the edit;  the old program's keep drawing their own things
     expect(placeholders(second).map((place) => place?.getAttribute("part"))).toEqual(Array(4).fill("edited"))
     expect(placeholders(first).map((place) => place?.getAttribute("part"))).toEqual(Array(4).fill("placeholder"))
+    // and its deal done too, before the next test's program starts on the same core
+    await waitFor(() => dealtAndPlayed(second), 10_000)
   })
 
   test("the counter app counted, then its counter library recompiled to draw differently:  the same count, drawn the new way (P16)", async () => {
@@ -585,9 +590,7 @@ describe("compiled spell draws with Solid", () => {
     expect(printed).not.toContain("test counting")
   })
 
-  // KNOWN:  since I50 (the cards' flip) the deal never finishes when this runs after the file's other Solitaire tests
-  // (alone it passes;  main, without I50, passes the whole file):  debut I52, and the code-debt log
-  test.skip("`Solitaire` played, then its app's own file edited:  a fresh game, as Restart deals (P17)", async () => {
+  test("`Solitaire` played, then its app's own file edited:  a fresh game, as Restart deals (P17)", async () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)
     type Element = HTMLElement & { ready: Promise<void> }
@@ -982,6 +985,17 @@ async function snapshotText(name: string, file: string): Promise<string> {
 async function rawText(path: string): Promise<string> {
   const { default: text } = (await import(/* @vite-ignore */ `${path}?raw`)) as { default: string }
   return text
+}
+
+/**
+ * Has Solitaire in `host` finished its deal?  Seven tableaus dealt, and the stock's top card played onto the discards.
+ * - Solitaire's deal ends by playing from the stock:  both are animations, flagged on the core while they run.
+ */
+function dealtAndPlayed(host: HTMLElement): boolean {
+  return (
+    host.querySelectorAll("test-project-tableau")[6]?.children.length === 7 &&
+    host.querySelector("test-project-discard-pile")?.children.length === 1
+  )
 }
 
 /** What an empty foundation shows, in Solitaire's compiled javascript, and an edit of it. */
