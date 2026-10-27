@@ -1,3 +1,4 @@
+// spell ui rename: leave this file (its docstrings quote the renames merge-main makes, old names on purpose)
 import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, realpathSync } from "node:fs"
 import { basename, dirname, join, matchesGlob, relative, resolve, sep } from "node:path"

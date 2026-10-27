@@ -1,5 +1,6 @@
 /**
  * Types for the `epic` command's verb groups (`spell-epic/command/`):
+ * - spell ui rename: leave this file (its merge report's example quotes an old name on purpose)
  * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
  * - Runtime-light:  types, constants, the folder's one error class, and pure helpers over them.
  * - Its position:  the BOTTOM of the folder's imports, and loaded by plain `node` too (types stripped):
