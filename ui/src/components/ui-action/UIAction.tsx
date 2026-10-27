@@ -31,7 +31,8 @@ import actionCSS from "./UIAction.css?inline"
  * - Knows nothing of spell:  any object of that shape will do.
  *   Spell's runner hands it each item of `core.menuOf()`;  the `disabled`, `selected` and `icon` attributes still
  *   work without one.
- * - Its shortcut's key caps:  `meta` is ⌘ on a Mac, Ctrl elsewhere (`keyCapsFor()`).
+ * - Its shortcut's key caps, as `<ui-keys>` draws them (`keyCapsFor()`):
+ *   `mod` is ⌘ on a Mac and Ctrl elsewhere;  `meta` is the Meta key itself.
  ****************/
 export class UIAction extends UIItem {
   // the item's names under the action's tag, and its own:  TypeScript only knows the item's literals
