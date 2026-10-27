@@ -55,41 +55,41 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-keys" label="Keys" sticky collapsible dividing>
-                <ui-docs-example description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
+                <ui-example description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
                   <p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-on-a-mac-and-elsewhere" label="On a Mac, and elsewhere" sticky collapsible dividing>
-                <ui-docs-example description="`platform=&quot;apple&quot;` or `&quot;other&quot;` draws one keyboard's keys whatever the reader has.">
+                <ui-example description="`platform=&quot;apple&quot;` or `&quot;other&quot;` draws one keyboard's keys whatever the reader has.">
                   <p>
                     <ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac,
                     <ui-keys shortcut="shift+mod+P" platform="other"></ui-keys> elsewhere.
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-two-shortcuts" label="Two shortcuts" sticky collapsible dividing>
-                <ui-docs-example description="Two shortcuts, a space apart, draw both.">
+                <ui-example description="Two shortcuts, a space apart, draw both.">
                   <p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-named-keys" label="Named keys" sticky collapsible dividing>
-                <ui-docs-example description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
+                <ui-example description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
                   <p>
                     <ui-keys shortcut="up"></ui-keys> <ui-keys shortcut="down"></ui-keys> to move,
                     <ui-keys shortcut="enter"></ui-keys> to open, <ui-keys shortcut="escape"></ui-keys> to close.
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

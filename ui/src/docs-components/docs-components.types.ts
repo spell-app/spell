@@ -10,13 +10,14 @@
  * - Also the JSX types of the `<ui-docs-*>` tags the docs elements render in their shadow roots (`DocsJSXTags`),
  *   and the exact ones of every component tag they render (`spell-ui/jsx`).
  * - Runtime-light:
- *   types and constants only, plus the docs families' small pure helpers (`HeadingLevels`, `VocabularyTexts`).
+ *   types and constants only, plus the docs families' small pure helper `VocabularyTexts`.
+ *   - What they share with the components (`HeadingLevels`, `CODE_SPAN`, `TocMarks`) is `UIT`'s, since epic `ui-gaps`
+ *     P14 made the table of contents and the example components.
  */
 
 import type { JSX } from "@solidjs/web"
 
-import { clamp } from "spell-ui/util"
-import type { UIHeaderAttributes } from "spell-ui/jsx"
+import type { OutlineSection } from "spell-ui/components/ui-toc"
 
 ////////////////
 // ## `<ui-*>` in JSX
@@ -414,19 +415,7 @@ export type SiteSearchPage = {
   /** its `#site-tabs` panes:  value => label, e.g. `examples` => `Examples` */
   readonly tabs?: Readonly<Record<string, string>>
   /** its sections (and headers with ids), in document order */
-  readonly sections: readonly SiteSearchSection[]
-}
-
-/** One section of a page:  where a search result for it lands. */
-export type SiteSearchSection = {
-  /** its id, the hash that lands on it, e.g. `examples-types-vertical-divider` */
-  readonly id: string
-  /** its title, e.g. `Vertical Divider` */
-  readonly title: string
-  /** index in `sections` of the section around it */
-  readonly parent?: number
-  /** value of the tab it's in (`SiteSearchPage.tabs`), on a top-level section only */
-  readonly tab?: string
+  readonly sections: readonly OutlineSection[]
 }
 
 ////////////////
@@ -451,61 +440,6 @@ export const SITE_DATA_META = "ui-docs-data"
 ////////////////
 // ## What the docs elements share
 ////////////////
-
-/**
- * A backticked span in a description, its content in group 1:
- * `<ui-docs-example>` and `<ui-docs-tokens>` split text on it and draw each odd piece as `<code>`.
- * - `<ui-docs-api>` follows CommonMark's longer fences instead (`InlineCode`):  its texts come from vocabularies.
- */
-export const CODE_SPAN = /`([^`]+)`/g
-
-/**
- * Marks an element in a docs element's SHADOW root as an entry of the page's "On this page" list (`<ui-docs-toc>`);
- * its value is the entry's text.
- * - The list reads light DOM only, except the shadow roots of `TOC_SHADOW_HOSTS`:  there it lists these, in order,
- *   under the `<ui-section>` around the host.
- * - The element has an id, so the entry links to `#<id>`;  the site lands there (`SiteSections`), as the browser can't.
- * - `<ui-docs-api only>` marks its tag headers and every row's name cell (`th`):  "every member in the list".
- */
-export const TOC_ENTRY_ATTRIBUTE = "data-toc"
-
-/** On a `TOC_ENTRY_ATTRIBUTE` element:  a GROUP (a tag's header);  the entries after it, to the next group, nest in it. */
-export const TOC_GROUP_ATTRIBUTE = "data-toc-group"
-
-/** The docs elements whose shadow roots hold "On this page" entries (`TOC_ENTRY_ATTRIBUTE`). */
-export const TOC_SHADOW_HOSTS = "ui-docs-api"
-
-/** A family's `level` attribute:  the heading levels it may draw, and the one when unset. */
-export type HeadingBounds = {
-  /** lowest level allowed */
-  readonly min: number
-  /** highest level allowed */
-  readonly max: number
-  /** level when unset or not a number */
-  readonly fallback: number
-}
-
-/****************
- * ### `HeadingLevels`
- * A `level` attribute as a heading level the element and its native fallback both draw.
- * - Static:  pure;  a helper of every docs family with a `level`, so it lives with their shared types.
- ****************/
-export class HeadingLevels {
-  /** `value` (an attribute) rounded and clamped to `bounds`;  `bounds.fallback` when unset or not a number. */
-  static levelFor(value: unknown, bounds: HeadingBounds): number {
-    const level = Math.round(Number(value ?? bounds.fallback))
-    return Number.isFinite(level) ? clamp(level, bounds.min, bounds.max) : bounds.fallback
-  }
-
-  /** `level` as `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`, rounded and clamped to a real heading. */
-  static attributeFor(level: number): HeadingLevelText {
-    // clamped to 1 ... 6 just above, which TypeScript can't follow
-    return String(clamp(Math.round(level), 1, 6)) as HeadingLevelText
-  }
-}
-
-/** `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`. */
-export type HeadingLevelText = NonNullable<UIHeaderAttributes["level"]>
 
 /** What `VocabularyTexts` reads of a vocabulary:  its texts. */
 export type TextsVocabulary = {

@@ -9,7 +9,7 @@
  * - Every component set's pages load it (the page server's `componentSets` setting):  Spell UI's own at
  *   `/components/ui/`, Epic UI's, App UI's and the brand's, each taking its set's folder as the site's root.
  * - What it holds, in import order (ES modules evaluate top to bottom):
- *   1. `./snapshot`:  every `<ui-docs-example>`'s markup, kept before anything upgrades;  then `./SitePacks`:
+ *   1. `./snapshot`:  every `<ui-example>`'s markup, kept before anything upgrades;  then `./SitePacks`:
  *      `globalThis.SpellUI`, so a page's component packs (`<ui-components source="x.pack.js">`) share its Solid and
  *      Spell UI:  every set's layout loads the epics pack, for the comments' threads and pane, and Epic UI's, App UI's
  *      and the brand's their own for their live examples

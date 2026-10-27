@@ -6,7 +6,7 @@ export type ComponentDefinition = {
   readonly tag: string
   /**
    * Its folder under `components/` (= its family, its docs page, its package entry), e.g. `ui-button`;
-   * a doc-only tag's is under `src/docs-components/`, e.g. `ui-docs-example`.
+   * a doc-only tag's is under `src/docs-components/`, e.g. `ui-docs-api`.
    */
   readonly folder: string
   /** Display name from the tag:  `ui-breadcrumb` => `Breadcrumb section`. */
@@ -30,7 +30,7 @@ const DOCS_VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("../do
 /**
  * A vocabulary module's folder:
  * - `./ui-button/UIOr.en.ts` => `ui-button`
- * - `../docs-components/ui-docs-example/UIDocsExample.en.ts` => `ui-docs-example`
+ * - `../docs-components/ui-docs-api/UIDocsApi.en.ts` => `ui-docs-api`
  */
 const FOLDER = /^(?:\.\/|\.\.\/docs-components\/)([\w-]+)\//
 
@@ -49,7 +49,7 @@ export class ComponentDefinitions {
   /** Every component definition, sorted by name. */
   static readonly all: readonly ComponentDefinition[] = ComponentDefinitions.collect(VOCABULARY_MODULES)
 
-  /** Every doc-only element's definition (`<ui-docs-example>` ...), sorted by name. */
+  /** Every doc-only element's definition (`<ui-docs-api>` ...), sorted by name. */
   static readonly docs: readonly ComponentDefinition[] = ComponentDefinitions.collect(DOCS_VOCABULARY_MODULES)
 
   /** The definition of `tag`, if it's a component tag. */

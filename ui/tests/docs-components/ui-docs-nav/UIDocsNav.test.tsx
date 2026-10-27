@@ -69,7 +69,7 @@ const DATA: SiteDataFile = {
     tag("Input", "ui-input", ["forms"], { aka: ["text field"] }),
     tag("Checkbox", "ui-checkbox", ["forms", "buttons"])
   ],
-  docs: [tag("Docs example", "ui-docs-example", ["documentation"])],
+  docs: [tag("Docs example", "ui-example", ["documentation"])],
   families: {
     "ui-button": family("ui-button"),
     "ui-calendar": family("ui-calendar", "in-progress"),

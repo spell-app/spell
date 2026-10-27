@@ -62,48 +62,48 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-input" label="Input" sticky collapsible dividing>
-                <ui-docs-example description="A standard input.">
+                <ui-example description="A standard input.">
                   <ui-input placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-native-types" label="Native types" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`type` passes through to the native input:  password, e-mail, number, date and the rest."
                 >
                   <ui-input type="password" placeholder="Password" aria-label="Password"></ui-input>
                   <ui-input type="email" placeholder="E-mail" aria-label="E-mail"></ui-input>
                   <ui-input type="number" placeholder="Quantity" aria-label="Quantity"></ui-input>
                   <ui-input type="date" aria-label="Date"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description="Numbers sit right-aligned against their unit, in tabular figures:  `type=&quot;number&quot;`, or a text field with `inputmode=&quot;decimal&quot;` / `&quot;numeric&quot;`.  `--ui-input-numeric-align: start` sets them back."
                 >
                   <ui-input type="number" value="250" labeled="right" label="°" aria-label="Hue"></ui-input>
                   <ui-input inputmode="decimal" value="55.5" labeled="right" label="%" aria-label="Lightness"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-file-input" label="File Input" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A file input: <code>type="file"</code>.</p>
                   <ui-message slot="description" size="small"
                     >For a trigger button with your own text or an icon, use a
                     <a href="#examples-variations-file-action">File Action</a> input.</ui-message
                   >
                   <ui-input type="file" aria-label="Upload"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I95:  no invisible file input that a separate `<label for>` (a button, a placeholder segment) triggers;  left out. -->
               <ui-section id="examples-types-textarea" label="Textarea" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A <code>&lt;ui-textarea&gt;</code> allows extended user input. Its states, variations and the rest are on
                     the <a href="ui-textarea.html">Textarea</a> page.
                   </p>
                   <ui-textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"></ui-textarea>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -115,7 +115,7 @@
               >
 
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An icon input field can show that it is currently loading data.</p>
                   <ui-message slot="description" size="small"
                     >Loading inputs automatically turn their icon into a spinner while loading.</ui-message
@@ -127,26 +127,26 @@
                     placeholder="Search..."
                     aria-label="Search"
                   ></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input loading icon="search" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <!-- GAP I96:  Fomantic's `purple double loading` and `red fast elastic loading` inputs have no attributes;  left out. -->
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="An input field can show that it is disabled.">
+                <ui-example description="An input field can show that it is disabled.">
                   <ui-input disabled placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input disabled icon="search" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-error" label="Error" sticky collapsible dividing>
-                <ui-docs-example description='An input field can show the data contains errors:  `state="error"`.'>
+                <ui-example description='An input field can show the data contains errors:  `state="error"`.'>
                   <ui-input state="error" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <p slot="description">
                     Input types with built-in validation (date, email, url ...) and <code>required</code> fields get the
                     error look by themselves when invalid. They show it once the user has interacted with them, as
@@ -154,7 +154,7 @@
                   </p>
                   <ui-input type="date" aria-label="Date"></ui-input>
                   <ui-input type="email" placeholder="E-Mail Address" required aria-label="E-Mail Address"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -164,20 +164,20 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="`state` also takes `info`, `success` and `warning`;  a state tints a joined label too."
                 >
                   <ui-input state="info" placeholder="Info" aria-label="Info"></ui-input>
                   <ui-input state="success" placeholder="Success" aria-label="Success"></ui-input>
                   <ui-input state="warning" placeholder="Warning" aria-label="Warning"></ui-input>
                   <ui-input state="error" label="https://" placeholder="mysite.com" aria-label="Site"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-icon" label="Icon" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     An input can be formatted with an icon: <code>icon</code>, at the end by default.
                   </p>
@@ -186,34 +186,34 @@
                     <code>icon</code> slot).</ui-message
                   >
                   <ui-input icon="search" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example description='`icon-position="left"` puts it at the start.'>
+                </ui-example>
+                <ui-example description='`icon-position="left"` puts it at the start.'>
                   <ui-input
                     icon="users"
                     icon-position="left"
                     placeholder="Search users..."
                     aria-label="Search users"
                   ></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input placeholder="Search..." aria-label="Search"
                     ><ui-icon slot="icon" name="search" appearance="circular link"></ui-icon
                   ></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input placeholder="Search..." aria-label="Search"
                     ><ui-icon slot="icon" name="search" inverted appearance="circular link"></ui-icon
                   ></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-labeled" label="Labeled" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An input can be formatted with a label:  `label` is its text, and `labeled` says where it sits."
                 >
                   <ui-input label="https://" placeholder="mysite.com" aria-label="Site"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example description="The `label` slot takes any markup, e.g. a `<ui-dropdown>`.">
+                </ui-example>
+                <ui-example description="The `label` slot takes any markup, e.g. a `<ui-dropdown>`.">
                   <ui-input labeled="right" placeholder="Find domain" aria-label="Domain">
                     <ui-dropdown slot="label" value=".com" aria-label="Top-level domain">
                       <ui-item value=".com">.com</ui-item>
@@ -221,23 +221,23 @@
                       <ui-item value=".org">.org</ui-item>
                     </ui-dropdown>
                   </ui-input>
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I102:  a slotted `<ui-label>` (basic, tag) sits inside the grey joined label box, a label in a label. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-input labeled="right" placeholder="Enter weight.." aria-label="Weight"
                     ><ui-label slot="label" appearance="basic">kg</ui-label></ui-input
                   >
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I97:  one label per input, so Fomantic's `$` ... `.00` input shows only the `$`. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-input label="$" placeholder="Amount" aria-label="Amount"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input labeled="right" icon="tags" icon-position="left" placeholder="Enter tags" aria-label="Tags"
                     ><ui-label slot="label" tag link="#input">Add Tag</ui-label></ui-input
                   >
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description='A `corner` label&apos;s `label` is an icon name:  `labeled="left corner"` or `labeled="corner"`.'
                 >
                   <ui-input
@@ -246,40 +246,40 @@
                     placeholder="Search..."
                     aria-label="Search, required"
                   ></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input
                     labeled="corner"
                     label="asterisk"
                     placeholder="Search..."
                     aria-label="Search, required"
                   ></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <!-- GAP I98:  a label joins only a text field, not a `<ui-dropdown selection>` (Fomantic's `I am a [Developer]` / `[1-5] Persons`);  left out. -->
               <ui-section id="examples-variations-action" label="Action" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An input can be formatted to alert the user to an action they may perform:  buttons go in the `action` slot."
                 >
                   <ui-input placeholder="Search..." aria-label="Search"
                     ><ui-button slot="action">Search</ui-button></ui-input
                   >
-                </ui-docs-example>
-                <ui-docs-example description='`action="left"` puts them first.'>
+                </ui-example>
+                <ui-example description='`action="left"` puts them first.'>
                   <ui-input action="left" value="$52.03" aria-label="Amount"
                     ><ui-button slot="action" color="green" labeled icon="cart">Checkout</ui-button></ui-input
                   >
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I11:  a `basic` dropdown button draws no basic look. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-input icon="search" icon-position="left" placeholder="Search" aria-label="Search">
                     <ui-dropdown slot="action" button basic floating label="This Page">
                       <ui-item>This Organization</ui-item>
                       <ui-item>Entire Site</ui-item>
                     </ui-dropdown>
                   </ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input placeholder="Search..." aria-label="Search">
                     <ui-dropdown slot="action" selection padding="compact" value="articles" aria-label="Search in">
                       <ui-item value="all">All</ui-item>
@@ -288,34 +288,34 @@
                     </ui-dropdown>
                     <ui-button slot="action">Search</ui-button>
                   </ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input value="https://ww.short.url/c0opq" aria-label="Short link"
                     ><ui-button slot="action" color="teal" labeled="right" icon="copy">Copy</ui-button></ui-input
                   >
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input placeholder="Search..." aria-label="Search"
                     ><ui-button slot="action" icon="search" aria-label="Search"></ui-button
                   ></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I100:  a `file` input's trigger is the native choose-file button:  no custom content (Fomantic's File Action label button). -->
               <ui-section id="examples-variations-file-action" label="File Action" sticky collapsible dividing>
-                <ui-docs-example description="A file input's choose-file button takes a `color`.">
+                <ui-example description="A file input's choose-file button takes a `color`.">
                   <ui-input type="file" color="blue" aria-label="Choose wisely"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-transparent" label="Transparent" sticky collapsible dividing>
-                <ui-docs-example description="A transparent input has no background.">
+                <ui-example description="A transparent input has no background.">
                   <ui-input appearance="transparent" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input
                     appearance="transparent"
                     icon="search"
@@ -323,12 +323,12 @@
                     placeholder="Search..."
                     aria-label="Search"
                   ></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I103:  an inverted input takes the dark surface with no border, so the field itself doesn't show. -->
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="An input can be formatted to appear on dark backgrounds.">
+                <ui-example description="An input can be formatted to appear on dark backgrounds.">
                   <ui-segment inverted>
                     <ui-input inverted placeholder="Search..." aria-label="Search"></ui-input>
                     <ui-divider inverted></ui-divider>
@@ -342,11 +342,11 @@
                     <ui-divider inverted></ui-divider>
                     <ui-input inverted appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"></ui-input>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="An input can take the size of its container.">
+                <ui-example description="An input can take the size of its container.">
                   <ui-input
                     fluid
                     icon="search"
@@ -357,32 +357,32 @@
                   <ui-input fluid placeholder="Search..." aria-label="Search"
                     ><ui-button slot="action">Search</ui-button></ui-input
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An input can vary in size.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Inputs size themselves unless you give them a width.</ui-message
                   >
                   <ui-input size="mini" icon="search" placeholder="Search mini..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input size="small" icon="search" placeholder="Search small..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input size="large" icon="search" placeholder="Search large..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input size="big" icon="search" placeholder="Search big..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input size="huge" icon="search" placeholder="Search huge..." aria-label="Search"></ui-input>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-input size="massive" icon="search" placeholder="Search massive..." aria-label="Search"></ui-input>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

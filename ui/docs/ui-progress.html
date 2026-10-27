@@ -61,37 +61,37 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-standard" label="Standard" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A standard progress bar.  `value` is a percentage unless there is a `total`."
                 >
                   <ui-progress value="74" bar-text="percent" label="Uploading Files"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-indicating" label="Indicating" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An indicating progress bar visually indicates the current level of progress of a task:  its colour runs from red to green."
                 >
                   <ui-progress indicating value="12" label="{percent}% funded"></ui-progress>
                   <ui-progress indicating value="47" label="{percent}% funded"></ui-progress>
                   <ui-progress indicating value="91" label="{percent}% funded"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-bar" label="Bar" sticky collapsible dividing>
-                <ui-docs-example description="A progress element can contain a bar visually indicating progress.">
+                <ui-example description="A progress element can contain a bar visually indicating progress.">
                   <ui-progress value="30" aria-label="Bar only"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-progress" label="Progress" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A progress bar can contain a text value indicating current progress:  `bar-text="percent"`.'
                 >
                   <ui-progress value="60" bar-text="percent" aria-label="With percent"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I29:  no centered bar text;  the percent stays at the bar's end. -->
@@ -102,29 +102,29 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="The text inside a progress can be centered.">
+                <ui-example description="The text inside a progress can be centered.">
                   <ui-progress value="60" bar-text="percent" aria-label="Centered text"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-ratio" label="Ratio" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='With a `total`, `value` counts towards it, and `bar-text="ratio"` shows the count.'
                 >
                   <ui-progress value="9" total="20" bar-text="ratio" aria-label="With ratio"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-label" label="Label" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A progress element can contain a label.  Slotted text is the rich version of `label`, and names the bar."
                 >
                   <ui-progress value="55" bar-text="percent">Uploading Files</ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-multiple-bars" label="Multiple Bars" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A progress element can have multiple bars:  `value` (or `percent`) takes a comma list, `bar-colors` a hue per bar."
                 >
                   <ui-progress
@@ -132,7 +132,7 @@
                     bar-colors="blue yellow purple green"
                     aria-label="Disk usage"
                   ></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I29:  no per-bar names (`WIP`, `Review` ...) in the bar text;  each bar shows its plain percent. -->
@@ -143,7 +143,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A progress bar can contain text values indicating current proportion:  each value is a share of the one `total`."
                 >
                   <ui-progress
@@ -153,19 +153,19 @@
                     bar-text="percent"
                     label="Tickets"
                   ></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can show activity:  a pulse runs along the bar.">
+                <ui-example description="A progress bar can show activity:  a pulse runs along the bar.">
                   <ui-progress active value="42" bar-text="percent" label="Uploading Files"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-success" label="Success" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A progress bar can show a success state.  A single bar turns `success` by itself at 100%."
                 >
                   <ui-progress
@@ -173,32 +173,32 @@
                     bar-text="percent"
                     label="Everything worked, your file is all ready."
                   ></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-warning" label="Warning" sticky collapsible dividing>
-                <ui-docs-example description='A progress bar can show a warning state:  `state="warning"`.'>
+                <ui-example description='A progress bar can show a warning state:  `state="warning"`.'>
                   <ui-progress state="warning" value="100" bar-text="percent"
                     >Your file didn't meet the minimum resolution requirements.</ui-progress
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-error" label="Error" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can show an error state.">
+                <ui-example description="A progress bar can show an error state.">
                   <ui-progress state="error" value="100" bar-text="percent" label="There was an error."></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can be disabled.">
+                <ui-example description="A progress bar can be disabled.">
                   <ui-progress disabled value="80" aria-label="Disabled"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I29:  no text inside an indeterminate bar;  each bar's words are its `label` instead. -->
               <ui-section id="examples-states-indeterminate" label="Indeterminate" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A progress bar can be shown in different indeterminate states:  bare
                     <code>indeterminate</code> pulses, or it takes filling, sliding or swinging.
@@ -211,19 +211,19 @@
                   <ui-progress indeterminate="filling" color="blue" label="Filling"></ui-progress>
                   <ui-progress indeterminate="sliding" color="blue" label="Sliding"></ui-progress>
                   <ui-progress indeterminate="swinging" color="blue" label="Swinging"></ui-progress>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description='Indeterminate progress can also vary in speed:  `speed="slow"` or `"fast"`.'
                 >
                   <ui-progress indeterminate speed="slow" color="blue" label="Slow"></ui-progress>
                   <ui-progress indeterminate speed="fast" color="blue" label="Fast"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-right-aligned" label="Right aligned" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can be right aligned growing to the left.">
+                <ui-example description="A progress bar can be right aligned growing to the left.">
                   <ui-progress
                     align="right"
                     active
@@ -231,29 +231,29 @@
                     bar-text="percent"
                     aria-label="Right aligned"
                   ></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can have its colors inverted.">
+                <ui-example description="A progress bar can have its colors inverted.">
                   <ui-segment inverted>
                     <ui-progress inverted value="64" bar-text="percent" label="Uploading Files"></ui-progress>
                     <ui-progress inverted state="success" value="100" bar-text="percent" label="Success"></ui-progress>
                     <ui-progress inverted state="warning" value="70" bar-text="percent" label="Warning"></ui-progress>
                     <ui-progress inverted state="error" value="40" bar-text="percent" label="Error"></ui-progress>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example description="A basic progress has its remaining background bar removed.">
+                <ui-example description="A basic progress has its remaining background bar removed.">
                   <ui-progress appearance="basic" value="45" bar-text="percent" aria-label="Basic"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I36:  attached bars sit inside the segment's padding, not on its edges. -->
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A progress bar can show progress of an element: a thin line on its <code>top</code> or
                     <code>bottom</code> edge.
@@ -263,8 +263,8 @@
                     <p>La la la la</p>
                     <ui-progress attach="bottom" value="70" aria-label="Bottom"></ui-progress>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-card>
                     <img src="images/wireframe/image.png" alt="" />
                     <ui-content>
@@ -276,11 +276,11 @@
                     >
                     <ui-progress attach="bottom" value="40" aria-label="Project progress"></ui-progress>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A progress bar can vary in size.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Some small sizes may not be able to fit an inlined label.</ui-message
@@ -290,11 +290,11 @@
                   <ui-progress value="50" label="Standard"></ui-progress>
                   <ui-progress size="large" value="60" label="Large"></ui-progress>
                   <ui-progress size="big" value="80" label="Big"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-color" label="Color" sticky collapsible dividing>
-                <ui-docs-example description="A progress bar can have different colors.">
+                <ui-example description="A progress bar can have different colors.">
                   <ui-progress color="red" value="30" aria-label="Red"></ui-progress>
                   <ui-progress color="orange" value="35" aria-label="Orange"></ui-progress>
                   <ui-progress color="yellow" value="40" aria-label="Yellow"></ui-progress>
@@ -308,11 +308,11 @@
                   <ui-progress color="brown" value="80" aria-label="Brown"></ui-progress>
                   <ui-progress color="grey" value="85" aria-label="Grey"></ui-progress>
                   <ui-progress color="black" value="90" aria-label="Black"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted-color" label="Inverted Color" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="These colors can also be inverted for improved contrast on dark backgrounds."
                 >
                   <ui-segment inverted>
@@ -354,7 +354,7 @@
                     <ui-progress inverted color="grey" value="85" bar-text="percent" aria-label="Grey"></ui-progress>
                     <ui-progress inverted color="black" value="90" bar-text="percent" aria-label="Black"></ui-progress>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -394,11 +394,11 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='`total` sets what `value` counts up to;  `bar-text="ratio"` shows the count.'
                 >
                   <ui-progress indicating value="1" total="20" bar-text="ratio" label="Adding Photos"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-code language="js">
                 <script type="text/plain">
@@ -420,19 +420,19 @@
                 </script>
               </ui-markdown>
               <ui-section id="usage-custom-labels-templated-label" label="Templated label" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`label="Adding {value} of {total} photos"`, filled in as the value changes.'
                 >
                   <ui-progress indicating value="7" total="20" label="Adding {value} of {total} photos"></ui-progress>
                   <ui-progress value="12" total="20" label="{left} photos to go"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="usage-custom-labels-translation" label="Translation" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="The label is yours, so write it in the page's language;  the bar texts (`45%`, `9 of 20`) are the vocabulary's `progressPercent` / `progressRatio` texts, which a translation replaces."
                 >
                   <ui-progress value="15" total="20" label="{value} de {total}: carga de archivos"></ui-progress>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic

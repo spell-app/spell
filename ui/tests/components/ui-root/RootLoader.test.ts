@@ -11,7 +11,7 @@ describe("RootLoader.load()", () => {
   })
 
   it("doesn't know the doc-only families until a bundle adds them (I12)", async () => {
-    await expect(RootLoader.load("ui-docs-toc")).rejects.toThrow('no family "ui-docs-toc"')
+    await expect(RootLoader.load("ui-docs-api")).rejects.toThrow('no family "ui-docs-api"')
   })
 
   it("rejects a folder with no family", async () => {

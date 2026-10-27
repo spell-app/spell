@@ -6,7 +6,6 @@
  *   but for documenting the library, not for apps.
  *   Same files in `ui-docs-<name>/`:  a component class, a vocabulary with `topics` + `aka`, css, tests,
  *   `examples/elements/*.html` (`packages/ui/AGENTS.md` "Solid authoring").
- *   - `<ui-docs-example>` -- a live example plus its source (Fomantic's `.example`)
  *   - `<ui-docs-api>`, `<ui-docs-tokens>`, `<ui-docs-nav>` --
  *     a tag's API / token tables, the sidebar:
  *     built from the site's generated data, `docs/__data/components.json5`
@@ -23,17 +22,22 @@
  *   - `RootLoader` imports a family from here on first use, like any component's,
  *     once the page's bundle has called `DocsFamilies.add()` (the docs site's does)
  *   - never in the library's own `<ui-root>` (`DocsFamilies` says why)
- * - Adding one:  make `ui-docs-<name>/` (copy `ui-docs-example/`), `yarn gen:root`, `yarn site:data`;
+ * - Adding one:  make `ui-docs-<name>/` (copy `ui-docs-inspector/`), `yarn gen:root`, `yarn site:data`;
  *   add the tags its JSX renders to `DocsJSXTags`,
  *   and import their families in its barrel (a root only loads the light DOM's).
  * - `package.json` `sideEffects` lists every `./src/docs-components/<family>/index.ts`:
  *   without it a bundler drops each barrel's `define()` (the family chunk loads, the tag stays undefined, no error).
  * - Imports:  shared code from `spell-ui/core` as any family;
  *   docs-only shared code (`SiteData`) from `spell-ui/docs-components/<file>`.
- * - The theme menu is a real component since epic `debut` P17:  `<ui-theme-menu>` (`spell-ui/components/ui-theme-menu`),
- *   with the remembered theme and scheme, `ThemePreference`.
+ * - Real components now, once docs widgets:
+ *   - the theme menu, since epic `debut` P17:  `<ui-theme-menu>` (`spell-ui/components/ui-theme-menu`),
+ *     with the remembered theme and scheme, `ThemePreference`
+ *   - the page's contents and the live example, since epic `ui-gaps` P14:  `<ui-toc>` and `<ui-example>`
+ *     (`spell-ui/components/ui-toc`, `spell-ui/components/ui-example`);  a docs widget may use them, never the
+ *     other way round
+ *   - what they share with the docs widgets is `UIT`'s:  `HeadingLevels`, `CODE_SPAN`, `TocMarks`
  * - NOTE:  this barrel defines NOTHING:  types and `SiteData` only.
- *   Import a family (`spell-ui/docs-components/ui-docs-example`) to define its tags.
+ *   Import a family (`spell-ui/docs-components/ui-docs-api`) to define its tags.
  */
 
 export * from "./docs-components.types"

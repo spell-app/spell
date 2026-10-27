@@ -1,6 +1,6 @@
 /**
- * The types and constants of the docs search family:  what the component, its index (`SearchIndex`),
- * the page reader (`PageOutline`) and the search file's loader (`SearchData`) share.
+ * The types and constants of the docs search family:  what the component, its index (`SearchIndex`)
+ * and the search file's loader (`SearchData`) share.
  * - Data only:  nothing here runs.
  */
 
@@ -162,7 +162,7 @@ export const TYPING_SELECTOR =
 
 /**
  * What the field reads "On this page" from when `page` isn't set:  the site's page `main`, else any `main`.
- * - A page's sections:  `PageOutline` (its `SECTIONS`).
+ * - A page's sections:  `PageOutline` (its `SECTIONS`;  `spell-ui/components/ui-toc`).
  */
 export const DEFAULT_PAGE = "main#main, main"
 

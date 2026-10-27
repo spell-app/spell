@@ -15,9 +15,10 @@ import type { RenameOptions } from "./cli.types"
  * - With it:  rewrites them in place.
  * - `--markup-only`:  only tags a browser draws, never escaped markup in a code sample:  for pages that quote the old
  *   names on purpose (an epic's record of what was decided).
- * - Reads HTML, Markdown, code (`.ts`, `.tsx`, `.js`, `.mjs`) and spell (`.spell`);  leaves out what's built (bundles, packs,
+ * - Reads HTML, Markdown, code (`.ts`, `.tsx`, `.js`, `.mjs`), style sheets (`.css`) and spell (`.spell`);  leaves out what's built (bundles, packs,
  *   generated data, `node_modules`), minified files, and the vocabularies (`UIButton.en.ts`), which name their old
  *   names on purpose.
+ * - Leaves alone a request sent to an epic (`requests/r3/request.md`):  someone's words, verbatim.
  * - Leaves alone a file that says `spell ui rename: leave this file`:  one whose old names are the point
  *   (this command, its rewriter, a test of the old names).
  * - Prints what it left for a person (a value it can't see, a button `label` that could be either).
@@ -67,7 +68,7 @@ function filesUnder(path: string): string[] {
 /** A file `rename` reads:  a page or code, not built, not minified. */
 function isReadable(file: string, size: number): boolean {
   if (!READ_EXTENSIONS.has(extname(file)) || size > MAX_FILE_SIZE) return false
-  if (BUILT_FILE.test(file)) return false
+  if (BUILT_FILE.test(file) || SENT_REQUEST.test(file)) return false
   return !readFileSync(file, "utf8")
     .split("\n")
     .some((line) => line.length > MINIFIED_LINE)
@@ -76,8 +77,12 @@ function isReadable(file: string, size: number): boolean {
 /** A file saying this is left as it is:  its old names are the point.  (This file says it too.) */
 const LEAVE_MARKER = "spell ui rename: leave this file"
 
-/** The kinds of file it reads. */
-const READ_EXTENSIONS = new Set([".html", ".md", ".ts", ".tsx", ".js", ".mjs", ".spell"])
+/**
+ * The kinds of file it reads.
+ * - `.css` since epic `ui-gaps` P14:  a renamed tag is a selector there (`ui-docs-example::part(demo)`), and its
+ *   tokens (`--ui-docs-example-gap`);  a sheet has no markup, so nothing else changes in it.
+ */
+const READ_EXTENSIONS = new Set([".html", ".md", ".ts", ".tsx", ".js", ".mjs", ".spell", ".css"])
 
 /** Folders it never walks into:  built, vendored, or results. */
 const SKIPPED_FOLDERS = new Set([
@@ -101,6 +106,12 @@ const BUILD_FOLDER = /^dist-[\w-]+$/
  * names on purpose (`UIButton.en.ts`, `UIButton.es.ts`).
  */
 const BUILT_FILE = /(?:^|\/)(?:jsx\.ts|[^/]*\.catalog\.ts|[^/]*\.pack\.js|[^/]*\.min\.js|[^/]*\.[a-z]{2}\.ts)$/
+
+/**
+ * A request another session sent an epic (`/send`, `epic send`):  someone's words VERBATIM, a record that's never
+ * rewritten, whatever names it uses (epic `ui-gaps` P14).
+ */
+const SENT_REQUEST = /(?:^|\/)requests\/r\d+\/request\.md$/
 
 /** A file bigger than this is built, not written:  left alone. */
 const MAX_FILE_SIZE = 2_000_000

@@ -57,18 +57,18 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-panel" label="Panel" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A panel is a tinted box under a header band:  `label` is the band's title.  Its content is a column of fields, 8px apart."
                 >
                   <ui-panel label="Theme" style="max-width: 320px">
                     <ui-input placeholder="Name, e.g. sunrise" aria-label="Name"></ui-input>
                     <ui-slider min="13" max="19" value="16" aria-label="Text size"></ui-slider>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-sub-panels" label="Sub-panels" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A panel inside a panel is a SUB-HEAD BAND:  small capitals, a hairline above, reaching the box's edges.  Group a panel's fields under them."
                 >
                   <ui-panel label="Color Set" style="max-width: 320px">
@@ -78,11 +78,11 @@
                       <ui-slider min="-40" max="40" step="8" value="0" aria-label="Hue drift toward dark"></ui-slider>
                     </ui-panel>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-collapsible" label="Collapsible" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`collapsible` bands close and open when clicked;  `open=&quot;false&quot;` starts one closed.  A closed LAST band closes the box, no gap under it."
                 >
                   <ui-panel label="Color Set" collapsible style="max-width: 320px">
@@ -93,13 +93,13 @@
                       <p>Six preset chips.</p>
                     </ui-panel>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`slot="actions"` puts small buttons at the end of a band, before the chevron:  a reset, a copy.'
                 >
                   <ui-panel label="CSS" collapsible style="max-width: 320px">
@@ -110,19 +110,19 @@
                       </script></ui-code
                     >
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-subhead" label="Subhead" sticky collapsible dividing>
-                <ui-docs-example description="`hint` is a line of small, muted text under the band.">
+                <ui-example description="`hint` is a line of small, muted text under the band.">
                   <ui-panel label="Theme" hint="Saved to themes/sunrise.css" style="max-width: 320px">
                     <ui-slider min="0" max="3" value="2" aria-label="Corners"></ui-slider>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-info-tip" label="Info tip" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`description` (or `slot="description"`, for bold words and paragraphs):  a tip about the band, shown under it while the pointer is on its title or its open / close button has focus.'
                 >
                   <ui-panel label="Theme" collapsible style="max-width: 320px">
@@ -133,11 +133,11 @@
                       <ui-slider min="0" max="3" value="2" aria-label="Corners"></ui-slider>
                     </ui-panel>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-fold-icon" label="Fold icon" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`fold-icon`:  where a band's chevron sits.  `end` (the panel's default) at the far end of the band, after any actions;  `start` before the title, as a plain `<ui-section>`'s."
                 >
                   <div class="ui-cluster" style="align-items: start">
@@ -150,13 +150,13 @@
                       <p>fold-icon="start"</p>
                     </ui-panel>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-colors" label="Colors" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`color` paints the whole panel from a hue:  the header band, a lighter box, the border, the sub-head bands.  No `color` is `primary`;  sub-panels follow their panel's hue.  A hue a theme adds works too (the brand pages' `accent`)."
                 >
                   <div class="ui-cluster" style="align-items: start">
@@ -173,11 +173,11 @@
                       <ui-panel label="Tweak"><p>Sub-panels follow.</p></ui-panel>
                     </ui-panel>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-tokens" label="Tokens" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Every colour, the radius, the padding and the spacing are tokens (`--ui-panel-*`):  set them on the panel or any ancestor.  The Theming tab lists them."
                 >
                   <ui-panel
@@ -191,7 +191,7 @@
                   >
                     <ui-checkbox appearance="toggle" selected>Notifications</ui-checkbox>
                   </ui-panel>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

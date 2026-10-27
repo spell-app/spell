@@ -69,7 +69,7 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <!-- GAP I56:  `<ui-image size="medium">` is the natural size, not 300px, so the image crowds the description. -->
               <ui-section id="examples-types-modal" label="Modal" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A standard modal:  a header, image content and actions.  The approve / deny buttons close it."
                 >
                   <ui-button commandfor="modal-types-standard" command="--show">Show</ui-button>
@@ -92,11 +92,11 @@
                       <ui-button class="approve" labeled="right" icon="checkmark" color="positive">Yep, that's me</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can reduce its complexity:  no box, light text straight on the dimmer."
                 >
                   <ui-button commandfor="modal-types-basic" command="--show">Show basic</ui-button>
@@ -115,22 +115,22 @@
                       <ui-button class="ok" color="green" inverted icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can have a header:  a slotted `<ui-header>`, or the `header` shorthand."
                 >
                   <ui-button commandfor="modal-content-header" command="--show">Show</ui-button>
                   <ui-modal id="modal-content-header" heading="Header" closable></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-content" label="Content" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can contain content:  a slotted `<ui-content>`, or the `content` shorthand for a block of text."
                 >
                   <ui-button commandfor="modal-content-content" command="--show">Show</ui-button>
@@ -142,12 +142,12 @@
                       <p>And a third.</p>
                     </ui-content>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I56:  `<ui-image size="medium">` is the natural size, not 300px, so the image crowds the description. -->
               <ui-section id="examples-content-image-content" label="Image Content" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can contain image content:  `<ui-content image>` puts an image beside the description."
                 >
                   <ui-button commandfor="modal-content-image" command="--show">Show</ui-button>
@@ -161,11 +161,11 @@
                     </ui-content>
                     <ui-actions><ui-button class="approve" color="primary">Use it</ui-button></ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A modal can contain a row of actions: <code>&lt;ui-actions&gt;</code>.</p>
                   <ui-message slot="description" size="small" state="info"
                     >Buttons anywhere inside act by Fomantic's classes:
@@ -195,13 +195,13 @@
                       <ui-button class="cancel">Cancel</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-full-screen" label="Full Screen" sticky collapsible dividing>
-                <ui-docs-example description="A modal can use the entire size of the screen.">
+                <ui-example description="A modal can use the entire size of the screen.">
                   <ui-button commandfor="modal-variations-full" command="--show">Show</ui-button>
                   <ui-modal
                     id="modal-variations-full"
@@ -210,7 +210,7 @@
                     content="Nearly as wide as the screen."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -220,7 +220,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A modal can overlay the entire screen: <code>overlay fullscreen</code>.</p>
                   <ui-message slot="description" size="small" state="info"
                     >An overlay fullscreen modal hides the dimmer, so a click on it can't close the modal: give it a
@@ -235,11 +235,11 @@
                     content="Edge to edge."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can vary in size.  Sizes are widths:  ratios of the default width;  the text does not scale."
                 >
                   <ui-button commandfor="modal-variations-mini" command="--show">Mini</ui-button>
@@ -274,11 +274,11 @@
                     content="A large modal."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A modal can be shown inverted: the dark scheme.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's <code>inverted: true</code> setting (a white dimmer). The dimmer is the
@@ -290,7 +290,7 @@
                     <ui-content><p>The dark scheme, on the default dimmer.</p></ui-content>
                     <ui-actions><ui-button class="ok" inverted>OK</ui-button></ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -300,7 +300,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A modal can have a scrolling content: <code>&lt;ui-content scrolling&gt;</code> caps its height and
                     scrolls.
@@ -324,12 +324,12 @@
                     </ui-content>
                     <ui-actions><ui-button class="approve" color="primary">I agree</ui-button></ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99, I110:  no centred actions (`<ui-actions>` has no text-align), and the header ignores its text-align;  only the content centres. -->
               <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='You can center align the header, the content or even actions individually:  `text-align="center"`.'
                 >
                   <ui-button commandfor="modal-variations-center" command="--show">Show</ui-button>
@@ -341,12 +341,12 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99:  no left actions;  they stay on the right. -->
               <ui-section id="examples-variations-left-actions" label="Left Actions" sticky collapsible dividing>
-                <ui-docs-example description="You can also place the action buttons to the left.">
+                <ui-example description="You can also place the action buttons to the left.">
                   <ui-button commandfor="modal-variations-left" command="--show">Show</ui-button>
                   <ui-modal id="modal-variations-left" heading="Look at the Actions">
                     <ui-content><p>They are aligned to the left</p></ui-content>
@@ -355,7 +355,7 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99:  no basic header or actions;  they keep their tinted backgrounds and rules. -->
@@ -366,7 +366,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="Header and/or Actions can also appear on the same basic background as the content."
                 >
                   <ui-button commandfor="modal-variations-basic-parts" command="--show">Show</ui-button>
@@ -378,13 +378,13 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An active modal is visible on the page:  `open` (it emits Fomantic's `active` class).  Writing it shows or hides the modal and fires no `ui-opening` / `ui-closing`."
                 >
                   <ui-button commandfor="modal-states-active" command="--toggle">Toggle</ui-button>
@@ -395,7 +395,7 @@
                     content="Shown while `visible` is set."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -407,7 +407,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A modal can be pinned near the top or bottom of the viewport instead of centred:  `vertical-align`.  Top aligned is Fomantic's `centered: false`, for content whose height changes."
                 >
                   <ui-button commandfor="modal-behaviour-top" command="--show">Top aligned</ui-button>
@@ -428,11 +428,11 @@
                     content="Pinned near the bottom."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-behaviour-scrolling-modal" label="Scrolling Modal" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="When a `scrolling` modal is taller than the browser, it scrolls inside itself, without scrolling the page below."
                 >
                   <ui-button commandfor="modal-behaviour-long" command="--show">Show long modal</ui-button>
@@ -457,11 +457,11 @@
                       ></ui-actions
                     >
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-behaviour-multiple-modals" label="Multiple Modals" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A modal can open a second modal, which opens on top of the first (Fomantic's `allowMultiple: true`);  Escape closes only the topmost."
                 >
                   <ui-button commandfor="modal-behaviour-first" command="--show">Show first</ui-button>
@@ -482,7 +482,7 @@
                     </ui-content>
                     <ui-actions><ui-button class="approve" icon="checkmark">All Done</ui-button></ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -492,7 +492,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='A modal can refuse to close from the dimmer or Escape, to force a user to make a choice:  `closedby="none"`.'
                 >
                   <ui-button commandfor="modal-behaviour-none" command="--show">Show</ui-button>
@@ -509,7 +509,7 @@
                       <ui-button class="ok" color="green" inverted icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-message size="small" class="site-not-ported"
@@ -575,7 +575,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='`closedby="none"`:  Escape and the dimmer do nothing.  The close button is an invoker, `command="--close"`.'
                 >
                   <ui-button commandfor="modal-usage-none" command="--show">Show</ui-button>
@@ -587,7 +587,7 @@
                       <ui-button commandfor="modal-usage-none" command="--close">Close</ui-button>
                     </ui-actions>
                   </ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 

@@ -62,7 +62,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-sidebar" label="Sidebar" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A sidebar:  <code>&lt;ui-pushable&gt;</code>, the context, holds the sidebars and one
                     <code>&lt;ui-pusher&gt;</code>, the page beside them.
@@ -86,11 +86,11 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-labeled-icon" label="Labeled Icon" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A thin sidebar of a `labeled icon` menu:  each item an icon over its label."
                 >
                   <ui-pushable>
@@ -108,13 +108,13 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-visible" label="Visible" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A sidebar can be visible on the page: add <code>visible</code>.</p>
                   <ui-message slot="description" state="info" size="small"
                     >A modal sidebar that starts <code>visible</code> takes focus as the page loads, so a sidebar shown
@@ -135,11 +135,11 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-dimmed" label="Dimmed" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     The pusher is the element pushed away by the sidebar: it holds your site content. A pusher is dimmed
                     while a modal sidebar beside it is visible.
@@ -162,13 +162,13 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-direction" label="Direction" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A sidebar can appear on different sides of the page:  `position` is `left` (the default), `right`, `top` or `bottom`.  Top and bottom sidebars overlay the page by default."
                 >
                   <ui-buttons>
@@ -209,11 +209,11 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-width" label="Width" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A sidebar can specify its width:  <code>width</code> is very thin (60px), thin (150px), 260px by
                     default, wide (350px) or very wide (475px). Or it's columns of the viewport:  4, 1/4, 25%.
@@ -282,11 +282,11 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-blurring" label="Blurring" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A `blurring` sidebar blurs the dimmed page beside it (Fomantic's `blurring` dimmer)."
                 >
                   <ui-pushable>
@@ -300,13 +300,13 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-more-examples" label="More Examples" sticky collapsible dividing>
               <ui-section id="examples-more-examples-transitions" label="Transitions" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Not all sidebar transitions are available for every sidebar direction. Overlay, push and scale down
                     work on every edge;  uncover (the default at the sides), slide along and slide out on the left and
@@ -365,7 +365,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -375,7 +375,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Multiple sidebars can be displayed at the same time when they are <code>persistent</code>, with a
                     transition like push or overlay. A modal sidebar is a drawer:  one at a time.
@@ -414,7 +414,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I73:  a menu item can't toggle the sidebar (no invoker commands on `<ui-item>`);  a button in the menu does. -->
@@ -425,7 +425,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A sidebar can sit inside any element, not just a page's body: its
                     <code>&lt;ui-pushable&gt;</code> is the context.
@@ -455,7 +455,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -465,7 +465,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='Any `<ui-button>` (or native `<button>`) toggles a sidebar:  `commandfor` its id, `command="--toggle"`.'
                 >
                   <ui-button commandfor="sidebar-trigger" command="--toggle">Trigger Sidebar</ui-button>
@@ -482,7 +482,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -492,7 +492,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="You can also say what the button does:  `--show`, `--close` or `--toggle`."
                 >
                   <ui-button commandfor="sidebar-open" command="--show">Open Sidebar</ui-button>
@@ -509,7 +509,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -519,7 +519,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A sidebar can start visible: <code>visible</code>.</p>
                   <ui-message slot="description" state="info" size="small"
                     >No pre-script class is needed: the elements lay the sidebar out before and after they load, at any
@@ -542,7 +542,7 @@
                       </ui-segment>
                     </ui-pusher>
                   </ui-pushable>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

@@ -1,7 +1,7 @@
 import { E, UI } from "spell-ui/core"
 // Leaves, not barrels:  a family's barrel defines its tags, which `<ui-root>` does on first use
 import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
-import { ExampleSource } from "spell-ui/docs-components/ui-docs-example/ExampleSource"
+import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
 import type { SitePatch } from "./SitePatch"
 import { SiteSections } from "./SiteSections"
@@ -104,8 +104,8 @@ export class SiteRouter {
     toc.className = old.className
     toc.toggleAttribute("for", false)
     if (main.querySelector(`#${SITE_TABS_ID}`)) toc.setAttribute("for", SITE_TABS_ID)
-    if (main.dataset.tocHeader) toc.setAttribute("header", main.dataset.tocHeader)
-    else toc.removeAttribute("header")
+    if (main.dataset.tocHeader) toc.setAttribute("heading", main.dataset.tocHeader)
+    else toc.removeAttribute("heading")
     if (toc !== old) old.replaceWith(toc)
   }
 
@@ -434,10 +434,10 @@ const TIMEOUT_MS = 10_000
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 
 /** The layout's "On this page" toc. */
-const SITE_TOC = "ui-docs-toc.site-toc"
+const SITE_TOC = "ui-toc.site-toc"
 
 /** The toc's tag:  a new one per swap, once defined. */
-const TOC_TAG = "ui-docs-toc"
+const TOC_TAG = "ui-toc"
 
 /** Id of a page's tabs, which the toc follows. */
 const SITE_TABS_ID = "site-tabs"

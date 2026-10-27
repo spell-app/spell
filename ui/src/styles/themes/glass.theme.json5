@@ -331,8 +331,8 @@
       "current-background": "{own.glass-accent-wash}",
       "current-color": "{own.glass-accent-text}"
     },
-    "docs-example": {
-      // Docs examples (`<ui-docs-example>`):  a glass frame;  the open demo a very light white, not pure white
+    "example": {
+      // Docs examples (`<ui-example>`):  a glass frame;  the open demo a very light white, not pure white
       "frame-background": { "light": "#ffffff59", "dark": "#1e1c2659" },
       "frame-border": "1px solid {own.glass-edge}",
       // no blur, only the saturation:

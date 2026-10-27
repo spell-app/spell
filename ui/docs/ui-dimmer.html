@@ -62,7 +62,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-dimmer" label="Dimmer" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A simple dimmer displays no content:  it covers its parent, <code>visible</code> shows it, and a
                     click on the dimmer hides it. The buttons show and hide it with <code>command="--show"</code> /
@@ -82,11 +82,11 @@
                     <ui-button icon="plus" commandfor="dimmer-plain" command="--show" aria-label="Show"></ui-button>
                     <ui-button icon="minus" commandfor="dimmer-plain" command="--close" aria-label="Hide"></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-content-dimmer" label="Content Dimmer" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can display content, centred over what it dims. A dark dimmer is the dark scheme for its
                     content, so a plain header reads light.
@@ -107,11 +107,11 @@
                     <ui-button icon="plus" commandfor="dimmer-content" command="--show" aria-label="Show"></ui-button>
                     <ui-button icon="minus" commandfor="dimmer-content" command="--close" aria-label="Hide"></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-page-dimmer" label="Page Dimmer" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can be formatted to be fixed to the page: <code>page</code> covers the whole viewport, as a
                     modal dialog, so the page behind it can't be reached. A click anywhere, or Escape, brings the page
@@ -119,35 +119,35 @@
                   </p>
                   <ui-button icon="plus" commandfor="dimmer-page" command="--show">Show</ui-button>
                   <ui-dimmer id="dimmer-page" page aria-label="Page dimmer">Hello</ui-dimmer>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example description="An active dimmer will dim its parent container.">
+                <ui-example description="An active dimmer will dim its parent container.">
                   <ui-segment>
                     <ui-dimmer visible closedby="none"></ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A disabled dimmer cannot be activated, even while `visible`.">
+                <ui-example description="A disabled dimmer cannot be activated, even while `visible`.">
                   <ui-segment>
                     <ui-dimmer disabled visible></ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-blurring" label="Blurring" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can blur its contents: <code>blurring</code> blurs and greys what's behind it.
                   </p>
@@ -169,8 +169,8 @@
                       aria-label="Hide"
                     ></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment>
                     <ui-dimmer id="dimmer-blurring-inverted" blurring inverted></ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -190,7 +190,7 @@
                       aria-label="Hide"
                     ></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -200,7 +200,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A dimmer can have its content top or bottom aligned:  `vertical-align`.">
+                <ui-example description="A dimmer can have its content top or bottom aligned:  `vertical-align`.">
                   <ui-segment>
                     <ui-dimmer vertical-align="top" visible closedby="none">
                       <ui-header level="2" inverted>Title</ui-header>
@@ -210,8 +210,8 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment>
                     <ui-dimmer vertical-align="bottom" visible closedby="none">
                       <ui-header level="2" inverted>Title</ui-header>
@@ -221,11 +221,11 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-simple-dimmer" label="Simple Dimmer" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can be controlled without JavaScript. On the element, <code>simple</code> looks the same:
                     <code>visible</code> shows it.
@@ -235,11 +235,11 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted-dimmer" label="Inverted Dimmer" sticky collapsible dividing>
-                <ui-docs-example description="A dimmer can be formatted to have its colors inverted.">
+                <ui-example description="A dimmer can be formatted to have its colors inverted.">
                   <ui-segment>
                     <ui-dimmer id="dimmer-inverted" inverted></ui-dimmer>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -254,11 +254,11 @@
                       aria-label="Hide"
                     ></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-dimmer-shades" label="Dimmer Shades" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can be formatted to have a different depth of background shading:
                     <code>shade</code> is medium, light or very light.
@@ -270,19 +270,19 @@
                     <ui-dimmer shade="medium" visible closedby="none"></ui-dimmer>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment>
                     <ui-dimmer shade="light" visible closedby="none"></ui-dimmer>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment>
                     <ui-dimmer shade="very light" visible closedby="none"></ui-dimmer>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-message size="small" class="site-not-ported"
@@ -296,7 +296,7 @@
               <!-- GAP I55:  `<ui-image>` holds no children, so a dimmer can't sit in Fomantic's `ui medium image` wrapper;  a compact basic segment stands in, and the circular variant is left out. -->
               <!-- GAP I56:  `size="medium"` is the natural size, not 300px;  `large` here. -->
               <ui-section id="examples-examples-dimmer-events" label="Dimmer Events" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A dimmer can trigger a visibility change on an event: <code>show-on="hover"</code> shows it while the
                     pointer is over its parent, or keyboard focus is inside it (Tab reaches its buttons).
@@ -309,11 +309,11 @@
                       <ui-button>View</ui-button>
                     </ui-dimmer>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-examples-on-click" label="On click" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`show-on="click"` shows the dimmer when its parent is clicked;  a click on the dimmer hides it again.'
                 >
                   <ui-segment>
@@ -321,7 +321,7 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-dimmer show-on="click"><ui-header level="4" inverted>Clicked!</ui-header></ui-dimmer>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I43:  a dimmer doesn't show or invert its loader;  the loaders say `visible` (and `inverted` on a dark dimmer) themselves. -->
@@ -332,7 +332,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="Any loader inside a dimmer will automatically use an appropriate color to match."
                 >
                   <ui-segment>
@@ -342,8 +342,8 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's loader settings (displayLoader, loaderVariation, loaderText). Put the loader
                     you want inside the dimmer.</ui-message
@@ -356,7 +356,7 @@
                     </ui-dimmer>
                     <ui-image src="images/wireframe/image.png" size="large" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

@@ -63,7 +63,7 @@
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
@@ -75,29 +75,29 @@
               >
 
               <ui-section id="examples-transitions-scale" label="Scale" sticky collapsible dividing>
-                <ui-docs-example description="An element can scale into or out of view.">
+                <ui-example description="An element can scale into or out of view.">
                   <ui-button size="small" commandfor="tr-scale" command="--toggle">scale</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-scale" animation="scale" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-zoom" label="Zoom" sticky collapsible dividing>
-                <ui-docs-example description="An element can zoom into view from far away.">
+                <ui-example description="An element can zoom into view from far away.">
                   <ui-button size="small" commandfor="tr-zoom" command="--toggle">zoom</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-zoom" animation="zoom" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-fade" label="Fade" sticky collapsible dividing>
-                <ui-docs-example description="An element can fade into or out of view descending and ascending.">
+                <ui-example description="An element can fade into or out of view descending and ascending.">
                   <ui-button size="small" commandfor="tr-fade" command="--toggle">fade</ui-button>
                   <ui-button size="small" commandfor="tr-fade-up" command="--toggle">fade up</ui-button>
                   <ui-button size="small" commandfor="tr-fade-down" command="--toggle">fade down</ui-button>
@@ -120,11 +120,11 @@
                       <ui-image size="tiny" src="images/leaves/7.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-flip" label="Flip" sticky collapsible dividing>
-                <ui-docs-example description="An element can flip into or out of view vertically or horizontally.">
+                <ui-example description="An element can flip into or out of view vertically or horizontally.">
                   <ui-button size="small" commandfor="tr-horizontal-flip" command="--toggle">horizontal flip</ui-button>
                   <ui-button size="small" commandfor="tr-vertical-flip" command="--toggle">vertical flip</ui-button>
                   <ui-segment appearance="basic">
@@ -135,22 +135,22 @@
                       <ui-image size="tiny" src="images/leaves/3.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-drop" label="Drop" sticky collapsible dividing>
-                <ui-docs-example description="An element can drop into view from above.">
+                <ui-example description="An element can drop into view from above.">
                   <ui-button size="small" commandfor="tr-drop" command="--toggle">drop</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-drop" animation="drop" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-fly" label="Fly" sticky collapsible dividing>
-                <ui-docs-example description="An element can fly in from off canvas.">
+                <ui-example description="An element can fly in from off canvas.">
                   <ui-button size="small" commandfor="tr-fly-left" command="--toggle">fly left</ui-button>
                   <ui-button size="small" commandfor="tr-fly-right" command="--toggle">fly right</ui-button>
                   <ui-button size="small" commandfor="tr-fly-up" command="--toggle">fly up</ui-button>
@@ -169,11 +169,11 @@
                       <ui-image size="tiny" src="images/leaves/5.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-swing" label="Swing" sticky collapsible dividing>
-                <ui-docs-example description="An element can swing into view.">
+                <ui-example description="An element can swing into view.">
                   <ui-button size="small" commandfor="tr-swing-left" command="--toggle">swing left</ui-button>
                   <ui-button size="small" commandfor="tr-swing-right" command="--toggle">swing right</ui-button>
                   <ui-button size="small" commandfor="tr-swing-up" command="--toggle">swing up</ui-button>
@@ -192,11 +192,11 @@
                       <ui-image size="tiny" src="images/leaves/5.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-browse" label="Browse" sticky collapsible dividing>
-                <ui-docs-example description="An element can appear and disappear as part of a series.">
+                <ui-example description="An element can appear and disappear as part of a series.">
                   <ui-button size="small" commandfor="tr-browse" command="--toggle">browse</ui-button>
                   <ui-button size="small" commandfor="tr-browse-right" command="--toggle">browse right</ui-button>
                   <ui-segment appearance="basic">
@@ -207,11 +207,11 @@
                       <ui-image size="tiny" src="images/leaves/3.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-transitions-slide" label="Slide" sticky collapsible dividing>
-                <ui-docs-example description="An element can appear to slide in from above or below.">
+                <ui-example description="An element can appear to slide in from above or below.">
                   <ui-button size="small" commandfor="tr-slide-down" command="--toggle">slide down</ui-button>
                   <ui-button size="small" commandfor="tr-slide-up" command="--toggle">slide up</ui-button>
                   <ui-button size="small" commandfor="tr-slide-left" command="--toggle">slide left</ui-button>
@@ -230,7 +230,7 @@
                       <ui-image size="tiny" src="images/leaves/5.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -242,7 +242,7 @@
               >
 
               <ui-section id="examples-static-animations-pulsating" label="Pulsating" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     An element can have pulsating edges. This works best on circular or square elements.
                   </p>
@@ -262,84 +262,84 @@
                   <ui-transition pulsating looping inline visible>
                     <ui-button>CSS only transition</ui-button>
                   </ui-transition>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-jiggle" label="Jiggle" sticky collapsible dividing>
-                <ui-docs-example description="An element can jiggle to draw attention to its shape.">
+                <ui-example description="An element can jiggle to draw attention to its shape.">
                   <ui-button size="small" commandfor="tr-jiggle" command="--transition">jiggle</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-jiggle" animation="jiggle" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-flash" label="Flash" sticky collapsible dividing>
-                <ui-docs-example description="An element can flash to draw attention to itself.">
+                <ui-example description="An element can flash to draw attention to itself.">
                   <ui-button size="small" commandfor="tr-flash" command="--transition">flash</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-flash" animation="flash" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-shake" label="Shake" sticky collapsible dividing>
-                <ui-docs-example description="An element can shake to draw attention to its position.">
+                <ui-example description="An element can shake to draw attention to its position.">
                   <ui-button size="small" commandfor="tr-shake" command="--transition">shake</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-shake" animation="shake" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-pulse" label="Pulse" sticky collapsible dividing>
-                <ui-docs-example description="An element can pulse to draw attention to its visibility.">
+                <ui-example description="An element can pulse to draw attention to its visibility.">
                   <ui-button size="small" commandfor="tr-pulse" command="--transition">pulse</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-pulse" animation="pulse" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-tada" label="Tada" sticky collapsible dividing>
-                <ui-docs-example description="An element can give user positive feedback for an action.">
+                <ui-example description="An element can give user positive feedback for an action.">
                   <ui-button size="small" commandfor="tr-tada" command="--transition">tada</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-tada" animation="tada" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-bounce" label="Bounce" sticky collapsible dividing>
-                <ui-docs-example description="An element can bounce to politely remind you of itself.">
+                <ui-example description="An element can bounce to politely remind you of itself.">
                   <ui-button size="small" commandfor="tr-bounce" command="--transition">bounce</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-bounce" animation="bounce" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-static-animations-glow" label="Glow" sticky collapsible dividing>
-                <ui-docs-example description="An element can glow to show its position in a page.">
+                <ui-example description="An element can glow to show its position in a page.">
                   <ui-button size="small" commandfor="tr-glow" command="--transition">glow</ui-button>
                   <ui-segment appearance="basic">
                     <ui-transition id="tr-glow" animation="glow" inline visible>
                       <ui-image size="tiny" src="images/leaves/1.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -351,7 +351,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Once an element's animation queue finishes, its final visibility is set:  an outward transition
                     leaves it hidden, an inward one visible. Without <code>visible</code>, the content starts hidden:
@@ -362,7 +362,7 @@
                   <ui-transition id="tr-hidden" animation="drop">
                     <ui-segment>Hidden until shown</ui-segment>
                   </ui-transition>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -380,7 +380,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     To force an animation direction, use <code>--show</code> (in) or <code>--close</code> (out), or
                     <code>show()</code> / <code>hide()</code> from script. Showing a shown element does nothing.
@@ -392,13 +392,13 @@
                       <ui-image size="tiny" src="images/leaves/4.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-automatic-direction" label="Automatic Direction" sticky collapsible dividing>
               <ui-section id="examples-automatic-direction-toggle" label="Toggle" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     If an animation direction is not specified it will automatically be determined based on the
                     element's current visibility: <code>--toggle</code> (or <code>toggle()</code>) runs it out while
@@ -410,7 +410,7 @@
                       <ui-image size="tiny" src="images/leaves/7.png" alt="Autumn leaf"></ui-image>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -426,7 +426,7 @@
 
             <ui-section id="examples-looping" label="Looping" sticky collapsible dividing>
               <ui-section id="examples-looping-looping" label="Looping" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Animation loops can be controlled by setting `looping`:  it repeats any animation until it's removed."
                 >
                   <ui-transition animation="pulse" looping inline visible>
@@ -435,23 +435,23 @@
                   <ui-transition animation="pulse" looping inline visible>
                     <ui-label color="teal">Looping</ui-label>
                   </ui-transition>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="An inverted ring for dark backgrounds.">
+                <ui-example description="An inverted ring for dark backgrounds.">
                   <ui-segment inverted>
                     <ui-transition pulsating looping inverted inline visible>
                       <ui-button inverted>Pulsating inverted</ui-button>
                     </ui-transition>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-display-type" label="Display Type" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Animations can be used on any display type, not just block level elements:  `inline` keeps a button an inline block while it animates."
                 >
                   <ui-button size="small" commandfor="tr-inline" command="--transition">Jiggle the button</ui-button>
@@ -459,15 +459,15 @@
                   <ui-transition id="tr-inline" animation="jiggle" inline visible>
                     <ui-button icon="user">Sign-up</ui-button>
                   </ui-transition>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A disabled transition pauses its running animation.">
+                <ui-example description="A disabled transition pauses its running animation.">
                   <ui-transition pulsating looping disabled inline visible>
                     <ui-button>Paused</ui-button>
                   </ui-transition>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

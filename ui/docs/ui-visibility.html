@@ -61,13 +61,13 @@
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
             <ui-section id="examples-usage" label="Usage" sticky collapsible dividing>
               <ui-section id="examples-usage-how-to-use" label="How To Use" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Visibility reports an element's position on screen: wrap the content in
                     <code>&lt;ui-visibility&gt;</code> and listen for its events, each with the calculations as
@@ -158,7 +158,7 @@
                       </ui-sticky>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -168,7 +168,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     By default each event fires only <b>the first time</b> its conditions are met:
                     <code>once="false"</code> fires it each time its condition <b>becomes true</b>, and
@@ -184,13 +184,13 @@
                   <ui-visibility class="visibility-counter" once="false" continuous>
                     <ui-segment><code>once="false" continuous</code>: <ui-label size="small">0</ui-label></ui-segment>
                   </ui-visibility>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-callbacks" label="Callbacks" sticky collapsible dividing>
               <ui-section id="examples-callbacks-standard-events" label="Standard Events" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Events occur at the first check where their conditions turn true, each Fomantic's callback as a
                     <code>ui-*</code> event. The log below shows the demo's events as you scroll past it.
@@ -255,7 +255,7 @@
                       <ui-item>Scroll the page: events appear here, newest first.</ui-item>
                     </ui-list>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I112:  no grouped `onPassed` thresholds (pixels / percentages);  shown as a note. -->
@@ -266,7 +266,7 @@
               >
 
               <ui-section id="examples-callbacks-reverse-events" label="Reverse Events" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Reverse events occur under the same conditions, but as the user scrolls back up the page:
                     <code>UI.observeVisibility(element, options)</code> takes Fomantic's <code>...Reverse</code>
@@ -280,7 +280,7 @@
                       <ui-item>Scroll past, then back up: reverse callbacks appear here.</ui-item>
                     </ui-list>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -293,7 +293,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>type="image"</code> lazy-loads every <code>&lt;img data-src&gt;</code> inside:  once its top is
                     on screen, its data-src becomes its src;  keep a placeholder in src so the content doesn't jump when
@@ -455,7 +455,7 @@
                       </ui-item>
                     </ui-items>
                   </ui-visibility>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-message size="small" class="site-not-ported"
@@ -471,7 +471,7 @@
               >
 
               <ui-section id="examples-examples-infinite-scroll" label="Infinite Scroll" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     As an alternative to pagination, listen for <code>ui-bottom-in-view</code> with
                     <code>once="false"</code> and load more content when the bottom of a container is reached. Here the
@@ -488,7 +488,7 @@
                       <ui-loader id="visibility-infinite-loader" inline align="center" size="small"></ui-loader>
                     </ui-segment>
                   </ui-visibility>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <script type="module">

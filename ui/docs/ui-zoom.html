@@ -42,7 +42,7 @@
             Zoom
             <ui-header>A zoom shows something small in the page, and full size over it on a click.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-zoom" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -54,18 +54,18 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-zoom" label="Zoom" sticky collapsible dividing>
-                <ui-docs-example description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
+                <ui-example description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
                   <ui-zoom max-width="360px">
                     <ui-segment>
                       <ui-header level="3">Release notes</ui-header>
@@ -73,24 +73,24 @@
                       <ui-button color="primary">Read more</ui-button>
                     </ui-segment>
                   </ui-zoom>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-screenshot" label="Screenshot" sticky collapsible dividing>
-                <ui-docs-example description="A plain `&lt;img&gt;` inside it:  a screenshot shown at a third of its size, then full size.">
+                <ui-example description="A plain `&lt;img&gt;` inside it:  a screenshot shown at a third of its size, then full size.">
                   <ui-zoom shrink="33%">
                     <img src="images/hello-light.png" alt="Hello, in the light theme" />
                   </ui-zoom>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-image" label="Image" sticky collapsible dividing>
-                <ui-docs-example description="`&lt;ui-image zoom&gt;`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
+                <ui-example description="`&lt;ui-image zoom&gt;`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
                   <ui-image zoom src="images/hello-light.png" alt="Hello, in the light theme" style="width: 240px"></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-shrink" label="Shrink" sticky collapsible dividing>
-                <ui-docs-example description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
+                <ui-example description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
                   <ui-stack direction="horizontal" align="start">
                     <ui-zoom shrink="25%">
                       <ui-segment style="width: 400px"><ui-header level="3">25%</ui-header><p>A quarter of its size.</p></ui-segment>
@@ -99,10 +99,10 @@
                       <ui-segment style="width: 400px"><ui-header level="3">50%</ui-header><p>Half its size.</p></ui-segment>
                     </ui-zoom>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-cut-off" label="Cut off" sticky collapsible dividing>
-                <ui-docs-example description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=&quot;100%&quot;` keeps it full size, only cut off.">
+                <ui-example description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=&quot;100%&quot;` keeps it full size, only cut off.">
                   <ui-zoom max-height="120px" shrink="100%">
                     <ui-list bulleted>
                       <ui-item>Zoom</ui-item>
@@ -113,7 +113,7 @@
                       <ui-item>Theme menu</ui-item>
                     </ui-list>
                   </ui-zoom>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

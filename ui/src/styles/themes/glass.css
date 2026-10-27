@@ -196,11 +196,11 @@
     --ui-docs-nav-border-color: var(--glass-hairline);
     --ui-docs-nav-current-background: var(--glass-accent-wash);
     --ui-docs-nav-current-color: var(--glass-accent-text);
-    --ui-docs-example-frame-background: light-dark(#ffffff59, #1e1c2659);
-    --ui-docs-example-frame-border: 1px solid var(--glass-edge);
-    --ui-docs-example-frame-filter: saturate(1.7);
-    --ui-docs-example-demo-background: light-dark(#ffffff8c, #ffffff0d);
-    --ui-docs-example-toggle-background: light-dark(#fffffff2, #ffffff2e);
+    --ui-example-frame-background: light-dark(#ffffff59, #1e1c2659);
+    --ui-example-frame-border: 1px solid var(--glass-edge);
+    --ui-example-frame-filter: saturate(1.7);
+    --ui-example-demo-background: light-dark(#ffffff8c, #ffffff0d);
+    --ui-example-toggle-background: light-dark(#fffffff2, #ffffff2e);
     --ui-header-font-weight: var(--ui-font-weight-semibold);
     --ui-header-h1: 2.25;
     --ui-header-h2: 1.375;
