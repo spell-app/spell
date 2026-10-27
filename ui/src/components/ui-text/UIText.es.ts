@@ -11,5 +11,22 @@ export const textEs = {
   tag: "ui-text",
   name: "texto",
   aka: ["texto", "texto en línea", "texto de color", "etiqueta de texto", "párrafo"],
-  attributes: { paragraph: "parrafo" }
+  attributes: {
+    paragraph: "parrafo",
+    bold: "negrita",
+    italic: "cursiva",
+    underline: "subrayado",
+    strikethrough: "tachado",
+    highlight: "resaltado",
+    subscript: "subindice",
+    superscript: "superindice",
+    "all-caps": "mayusculas",
+    "title-caps": "iniciales",
+    headline: "titular",
+    subhead: "subtitulo",
+    serif: "serifa",
+    "sans-serif": "sin-serifa",
+    typewriter: "maquina",
+    code: "codigo"
+  }
 } as const satisfies E.TagDictionary

@@ -276,6 +276,18 @@ export const fonts = {
    * - Paper reads it (Iowan Old Style before it), and the theme editor's "Palatino" (epic `debut` P20, J77)
    */
   serif: ["Palatino", "Palatino Linotype", "Book Antiqua", "P052", "URW Palladio L", "Georgia", "serif"],
+  /**
+   * a plain sans, the platform's own:  `<ui-text sans-serif>` (epic `elemental-spell` P26)
+   * - Its own token, not the body's:  a theme whose body is a serif (Paper) still has a sans to offer
+   */
+  sans: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Noto Sans", "Arial", "sans-serif"],
+  /**
+   * a subhead's, under a heading:  `<ui-text subhead>` (epic `elemental-spell` P26)
+   * - The heading's, unless a theme sets its own (Spell's:  its sans, under its serif headings)
+   */
+  subhead: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Noto Sans", "Arial", "sans-serif"],
+  /** a typewriter's letters, every one the same width:  `<ui-text typewriter>` (epic `elemental-spell` P26) */
+  typewriter: ["American Typewriter", "Courier Prime", "Courier New", "Courier", "monospace"],
   /** a rounded sans, the platform's own where it has one:  Pop, and the theme editor's "Rounded" (J77) */
   rounded: [
     "ui-rounded",
@@ -504,6 +516,9 @@ export const themeTree = {
       heading: "--ui-font-family-heading",
       mono: "--ui-font-family-mono",
       serif: "--ui-font-family-serif",
+      sans: "--ui-font-family-sans",
+      typewriter: "--ui-font-family-typewriter",
+      subhead: "--ui-font-family-subhead",
       rounded: "--ui-font-family-rounded"
     },
     weight: tokensFor(fontWeights, "--ui-font-weight-"),

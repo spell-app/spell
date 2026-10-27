@@ -140,14 +140,14 @@
 
               <ui-section id="examples-types-paragraph" label="Paragraph" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="`paragraph` makes a text a paragraph (`<p>`):  a block, with the body's line height and a line's space under it.  `font` and `link` still work inside it."
+                  description="`paragraph` makes a text a paragraph (`<p>`):  a block, with the body's line height and a line's space under it.  Its letter styles and `link` still work inside it."
                 >
                   <ui-segment>
                     <ui-text paragraph>
                       A paragraph holds a few sentences about one thing. It wraps at the edge of its box, and the
                       next paragraph starts a line's space below it.
                     </ui-text>
-                    <ui-text paragraph font="italic">
+                    <ui-text paragraph italic>
                       This one is in italics, as a pull-out or a caption might be.
                     </ui-text>
                   </ui-segment>
@@ -156,14 +156,56 @@
 
               <ui-section id="examples-types-letter-styles" label="Letter styles" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="`font` says how the letters look, several words at once:  each is drawn as its HTML element, so screen readers hear it."
+                  description="Its faces are bare attributes, any together (`bold italic`), and so is its case (`all-caps`, `title-caps`):  each is drawn as its HTML element, so screen readers hear it.  `font` says the same (`font=&quot;bold italic&quot;`), as it does on every other element."
                 >
                   <ui-segment>
-                    It's <ui-text font="bold">free</ui-text>, <ui-text font="italic">today</ui-text> only.
-                    Run <ui-text font="code">yarn review</ui-text> first;
-                    <ui-text font="highlight">nothing is saved</ui-text> until then.
-                    <ui-text font="strikethrough">Was 10</ui-text> now 5. H<ui-text font="subscript">2</ui-text>O,
-                    E&nbsp;=&nbsp;mc<ui-text font="superscript">2</ui-text>, <ui-text font="bold italic underline">all three</ui-text>.
+                    It's <ui-text bold>free</ui-text>, <ui-text italic>today</ui-text> only.
+                    Run <ui-text code>yarn review</ui-text> first;
+                    <ui-text highlight>nothing is saved</ui-text> until then.
+                    <ui-text strikethrough>Was 10</ui-text> now 5. H<ui-text subscript>2</ui-text>O,
+                    E&nbsp;=&nbsp;mc<ui-text superscript>2</ui-text>, <ui-text bold italic underline>all three</ui-text>.
+                    <ui-text all-caps>An eyebrow in capitals</ui-text>, <ui-text title-caps>a title in title case</ui-text>.
+                  </ui-segment>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-types-families" label="Families" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`headline`, `subhead`, `serif`, `sans-serif` and `typewriter` pick a family from the theme, one at a time;  `code` is inline code, in the look `<code>` has in prose.  Pick another theme in the header to see each theme's."
+                >
+                  <ui-segment>
+                    <ui-text paragraph headline>A headline, in the theme's headings' face.</ui-text>
+                    <ui-text paragraph subhead>A subhead, under a heading.</ui-text>
+                    <ui-text paragraph serif>A serif, for reading:  the theme's book face.</ui-text>
+                    <ui-text paragraph sans-serif>A sans-serif, plain and even.</ui-text>
+                    <ui-text paragraph typewriter>A typewriter's letters, every one as wide.</ui-text>
+                    <ui-text paragraph>And <ui-text code>code</ui-text>, inside a sentence.</ui-text>
+                  </ui-segment>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-types-font-size" label="Font size" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A number in `font` is a size in pixels (`font=&quot;14&quot;`);  with a slash, its line height too:  `font=&quot;10/20&quot;` is 10px letters on 20px lines.  `font` takes it on every element."
+                >
+                  <ui-segment>
+                    <ui-text paragraph font="20">Twenty pixels.</ui-text>
+                    <ui-text paragraph font="bold serif 13/26">Thirteen-pixel serif on twenty-six-pixel lines, so a long sentence breathes as it wraps across the box.</ui-text>
+                  </ui-segment>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-types-line-breaks" label="Line breaks" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="In a paragraph, a blank line in its text is a line break, and a single line break a space, as in Markdown."
+                >
+                  <ui-segment>
+                    <ui-text paragraph>
+                      Jenny Hess
+                      and Elliot Fu
+
+                      12 Main Street
+                    </ui-text>
                   </ui-segment>
                 </ui-example>
               </ui-section>

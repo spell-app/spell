@@ -35,7 +35,12 @@
     "family": {
       "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
       "heading": "{typography.family.body}",
-      "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace"
+      "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace",
+      // `<ui-text serif>`, `sans-serif`, `typewriter` and `subhead` (epic `elemental-spell` P26)
+      "serif": "Georgia, Palatino, \"Palatino Linotype\", \"Book Antiqua\", P052, \"URW Palladio L\", serif",
+      "sans": "{typography.family.body}",
+      "typewriter": "\"American Typewriter\", \"Courier Prime\", \"Courier New\", Courier, monospace",
+      "subhead": "{typography.family.heading}"
     }
   },
   "radii": {

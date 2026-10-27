@@ -541,6 +541,11 @@ export type SharedDictionary = {
       >
     >
   >
+  /**
+   * Shared attribute name => its values, localized:  `{ font: { bold: "negrita" } }` (epic `elemental-spell` P26).
+   * - Only where the language words them its own way:  `animation` keeps Fomantic's names.
+   */
+  values?: Readonly<Partial<Record<"font", Readonly<Record<string, string>>>>>
 }
 
 /** Per-component part of a `Dictionary`:  wins over the dictionary-wide maps for that component only. */

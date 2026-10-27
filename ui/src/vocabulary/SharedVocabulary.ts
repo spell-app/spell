@@ -60,6 +60,15 @@ export class SharedVocabulary {
   }
 
   /**
+   * The values language `lang` gives the shared attribute `name`, from its `SharedVocabulary.<lang>.ts`:
+   * `translatedValues("es", "font")` => `{ bold: "negrita", ... }`.
+   * - `undefined` where the language keeps them as they are (`animation`'s Fomantic names).
+   */
+  static translatedValues(lang: string, name: string): Readonly<Record<string, string>> | undefined {
+    return SHARED_DICTIONARIES.get(lang)?.values?.[name as keyof NonNullable<SharedDictionary["values"]>]
+  }
+
+  /**
    * The shared attributes' names, which every tag observes unless its vocabulary declares its own:
    * what a root adds to a tag it defines before its family loads (`RootLoader.defineEarly()`).
    */
@@ -169,8 +178,11 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     values: UIT.FontWords,
     description:
       "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, " +
-      '`highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML ' +
-      "element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+      '`highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from ' +
+      "the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` " +
+      '(`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), ' +
+      "so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every " +
+      "other element shows the look alone."
   },
   {
     name: "tooltip",

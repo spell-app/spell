@@ -172,6 +172,68 @@ describe("<ui-text> link and font", () => {
   })
 })
 
+describe("<ui-text> letters as bare attributes", () => {
+  it("draws each face written bare, as `font` does:  `<ui-text bold italic>`", async () => {
+    const { host, root } = await text(`<ui-text bold italic highlight>free</ui-text>`)
+    expect(root.querySelector("strong > em > mark > slot")).not.toBe(null)
+    expect(host.matches(":state(font-bold)")).toBe(true)
+  })
+
+  it("`font` still says the same, beside the bare ones", async () => {
+    const { root } = await text(`<ui-text bold font="italic">free</ui-text>`)
+    expect(root.querySelector("strong > em > slot")).not.toBe(null)
+  })
+
+  it("draws `code` as inline code, in the theme's code font", async () => {
+    const { root } = await text(`<ui-text code>yarn review</ui-text>`)
+    const code = root.querySelector("code")!
+    expect(getComputedStyle(code).fontFamily).toBe(
+      getComputedStyle(document.documentElement).getPropertyValue("--ui-font-family-mono").trim()
+    )
+  })
+
+  it.each([
+    ["headline", "--ui-font-family-heading"],
+    ["subhead", "--ui-font-family-subhead"],
+    ["serif", "--ui-font-family-serif"],
+    ["sans-serif", "--ui-font-family-sans"],
+    ["typewriter", "--ui-font-family-typewriter"]
+  ])("<ui-text %s> takes the theme's family", async (family, token) => {
+    const { root } = await text(`<ui-text ${family}>Words</ui-text>`)
+    expect(getComputedStyle(root).fontFamily).toBe(
+      getComputedStyle(document.documentElement).getPropertyValue(token).trim()
+    )
+  })
+
+  it("`all-caps` and `title-caps` change its letters' case, beside a family", async () => {
+    const all = await text(`<ui-text all-caps serif>Words</ui-text>`)
+    const title = await text(`<ui-text font="title-caps">two words</ui-text>`)
+    expect([getComputedStyle(all.root).textTransform, getComputedStyle(title.root).textTransform]).toEqual([
+      "uppercase",
+      "capitalize"
+    ])
+  })
+
+  it("one family at a time:  `code` before `serif`, `serif` before `typewriter`", async () => {
+    const both = await text(`<ui-text serif typewriter>Words</ui-text>`)
+    const code = await text(`<ui-text code font="serif">Words</ui-text>`)
+    expect([
+      both.host.matches(":state(font-serif)"),
+      both.host.matches(":state(font-typewriter)"),
+      code.host.matches(":state(font-serif)"),
+      !!code.root.querySelector("code")
+    ]).toEqual([true, false, false, true])
+  })
+
+  it('a size in `font`:  `font="14/28"` is 14px letters on 28px lines', async () => {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div><ui-text paragraph font="14/28">Words</ui-text></div>`
+    )
+    const root = wrapper.querySelector("ui-text")!.shadowRoot!.querySelector<HTMLElement>("[part~=text]")!
+    expect([getComputedStyle(root).fontSize, getComputedStyle(root).lineHeight]).toEqual(["14px", "28px"])
+  })
+})
+
 describe("<ui-text paragraph> and <ui-link>", () => {
   it("`paragraph`:  a `<p>`, a block with the body's line height and a line's space under it", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
@@ -185,6 +247,19 @@ describe("<ui-text paragraph> and <ui-link>", () => {
     expect(getComputedStyle(first!).display).toBe("block")
     expect(second!.getBoundingClientRect().top).toBeGreaterThan(first!.getBoundingClientRect().bottom)
     expect(getComputedStyle(second!).marginBlockEnd).toBe("0px")
+  })
+
+  it("`paragraph`:  a blank line in its text is a line break, a single line break a space", async () => {
+    const one = await text(`<ui-text paragraph>One line\nand more</ui-text>`)
+    const two = await text(`<ui-text paragraph>First line\n\n  Second line</ui-text>`)
+    const lines = (root: HTMLElement) =>
+      Math.round(root.getBoundingClientRect().height / parseFloat(getComputedStyle(root).lineHeight))
+    expect([one.host.textContent, lines(one.root), two.host.textContent, lines(two.root)]).toEqual([
+      "One line and more",
+      1,
+      "First line\nSecond line",
+      2
+    ])
   })
 
   it("`paragraph` with `link`:  a link inside the paragraph", async () => {

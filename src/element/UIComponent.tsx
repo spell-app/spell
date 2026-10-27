@@ -338,7 +338,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // Four more attributes every element takes (`SharedVocabulary`;  epic `ui-gaps` P3, Owen's request r1),
   // unless its vocabulary declares its own of that name:
   // - `link` (and `target`):  where a click goes (`elementSetup.link`);  `:state(linked)`
-  // - `font`:  how its letters look, several words at once (`font="bold italic"`):  `:state(font-bold)` ...
+  // - `font`:  how its letters look, several words at once (`font="bold italic"`):  `:state(font-bold)` ...;
+  //   a family (`font="serif"`);  a size in pixels, `font="14"`, or with its line height, `font="10/20"`
   // - `tooltip`:  the browser's own tooltip, its `title`
   // - `label`:  its accessible name, `aria-label`
   ////////////////
@@ -385,15 +386,47 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
-   * The words of the shared `font` (`bold italic`), as `:state(font-<word>)`s:  every word its spec lists, on or off.
+   * The words of the shared `font` (`bold italic serif`), as `:state(font-<word>)`s:  every word its spec lists,
+   * on or off;  and `:state(font-size)` while it holds a size (`sharedFontSize`).
    * - Empty where the family declares its own `font`.
    */
   get fontStates(): Record<string, boolean> {
     if (!this.elementDefinition.takesShared(FONT)) return {}
     const written = new Set((this.sharedText(FONT) ?? "").split(/\s+/))
     const { values } = this.elementDefinition.attribute(FONT).spec
-    const words = Array.isArray(values) ? values : [...written]
-    return Object.fromEntries(words.filter(Boolean).map((word) => [`${FONT}-${word}`, written.has(word)]))
+    const words = Array.isArray(values) ? values : [...written].filter((word) => !FONT_SIZE.test(word))
+    return {
+      ...Object.fromEntries(words.filter(Boolean).map((word) => [`${FONT}-${word}`, written.has(word)])),
+      [FONT_SIZE_STATE]: this.sharedFontSize !== undefined
+    }
+  }
+
+  /**
+   * The size the shared `font` says, in pixels:  `font="14"` => `"14"`, `font="bold 10/20"` => `"10/20"`
+   * (a 10px font on 20px lines);  `undefined` without one.
+   * - Text, so `onFontSizeChanged()` runs only when it changes.
+   */
+  get sharedFontSize(): string | undefined {
+    return this.sharedText(FONT)
+      ?.split(/\s+/)
+      .find((word) => FONT_SIZE.test(word))
+  }
+
+  /**
+   * The shared `font`'s size changed:  the element's `--ui-font-size` (and `--ui-line-height`, with a leading),
+   * which every component's sizes are worked out from, and `:state(font-size)` sets as its own font size.
+   * - SIDE EFFECT:  writes them in the element's `style`;  removes them again once `font` has no size.
+   */
+  @onChange("sharedFontSize", { writesDOMElement: true })
+  protected onFontSizeChanged(fontSize: string | undefined) {
+    const { style } = this.domElement
+    const [, size, leading] = fontSize?.match(FONT_SIZE) ?? []
+    if (size) style.setProperty(FONT_SIZE_TOKEN, `${size}px`)
+    else if (this.internalState.wroteFontSize) style.removeProperty(FONT_SIZE_TOKEN)
+    // the leading as a ratio of the size, as `--ui-line-height` always is (`1.5`)
+    if (size && leading) style.setProperty(LINE_HEIGHT_TOKEN, String(Number(leading) / Number(size)))
+    else if (this.internalState.wroteFontSize) style.removeProperty(LINE_HEIGHT_TOKEN)
+    this.internalState.wroteFontSize = !!size
   }
 
   /** The shared `tooltip`:  the browser's own tooltip, written as the element's `title`. */
@@ -1372,6 +1405,16 @@ const ROOT_TAG = "ui-root"
 const LINK = "link"
 const TARGET = "target"
 const FONT = "font"
+/**
+ * A size in the shared `font`, in pixels:  `14`, or with its leading, `10/20` (a 10px font on 20px lines).
+ * - Groups:  the size, then the line height.
+ */
+const FONT_SIZE = /^(\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?$/
+/** The state a `font` with a size sets:  `reset.css` makes it the element's own font size. */
+const FONT_SIZE_STATE = "font-size"
+/** The tokens a size in `font` writes:  every set's components work their sizes out from them (Spell UI's). */
+const FONT_SIZE_TOKEN = "--ui-font-size"
+const LINE_HEIGHT_TOKEN = "--ui-line-height"
 const TOOLTIP = "tooltip"
 const LABEL = "label"
 
@@ -1391,6 +1434,8 @@ type InternalState = {
   madeInert?: HTMLElement[]
   /** the shared `tooltip` wrote the element's `title`, so a later empty one removes it again */
   wroteTitle?: boolean
+  /** the shared `font`'s size wrote the element's `--ui-font-size`, so a later one without removes it again */
+  wroteFontSize?: boolean
   /** `isVisible` as `onVisibleChange()` last ran with it;  `undefined` before the element first drew */
   wasVisible?: boolean
   /** counts `onVisibleChange()` runs, so only the latest ends the hiding */

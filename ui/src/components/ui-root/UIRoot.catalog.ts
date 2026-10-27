@@ -1400,7 +1400,32 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-term": { folder: "ui-terms", attributes: ["label", "value"] },
   "ui-terms": { folder: "ui-terms", attributes: ["direction", "spacing"] },
-  "ui-text": { folder: "ui-text", attributes: ["size", "color", "state", "inverted", "paragraph", "disabled"] },
+  "ui-text": {
+    folder: "ui-text",
+    attributes: [
+      "size",
+      "color",
+      "state",
+      "inverted",
+      "paragraph",
+      "bold",
+      "italic",
+      "underline",
+      "strikethrough",
+      "highlight",
+      "subscript",
+      "superscript",
+      "all-caps",
+      "title-caps",
+      "headline",
+      "subhead",
+      "serif",
+      "sans-serif",
+      "typewriter",
+      "code",
+      "disabled"
+    ]
+  },
   "ui-textarea": {
     folder: "ui-input",
     skeleton: { width: "20em", height: "6em" },

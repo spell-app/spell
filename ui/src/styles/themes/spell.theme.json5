@@ -171,7 +171,12 @@
     "family": {
       "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
       "heading": "\"Spell Serif\", Palatino, \"Palatino Linotype\", \"Book Antiqua\", P052, \"TeX Gyre Pagella\", \"URW Palladio L\", serif",
-      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Liberation Mono\", monospace"
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Liberation Mono\", monospace",
+      // `<ui-text serif>`, `sans-serif`, `typewriter` and `subhead` (epic `elemental-spell` P26)
+      "serif": "{typography.family.heading}",
+      "sans": "{typography.family.body}",
+      "typewriter": "\"American Typewriter\", \"Courier Prime\", \"Courier New\", Courier, monospace",
+      "subhead": "{typography.family.body}"
     },
     "line-height": {
       "body": 1.5,

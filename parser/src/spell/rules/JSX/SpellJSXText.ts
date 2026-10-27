@@ -51,19 +51,32 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
 }
 
 /**
- * `value`, a run of JSX text, as JSX reads it:  each line trimmed where it meets a line break, blank lines dropped,
- * the lines joined by a space;  text on one line keeps its spaces, `Clicked ` before a hole.
+ * `value`, a run of JSX text, as JSX reads it:  each line trimmed where it meets a line break, the lines joined by a
+ * space;  text on one line keeps its spaces, `Clicked ` before a hole.
+ * - A blank line between two lines is kept, as `\n\n`:  a paragraph's line break, as in Markdown
+ *   (`<text paragraph>`, which draws it so;  Owen, 2026-10-27).  Anywhere else the web reads it as a space.
+ * - Blank lines at either end are dropped.
  */
 function jsxText(value: string): string {
   if (!value.includes("\n")) return value
-  const lines = value.split(/\r?\n/)
-  return lines
-    .map((line, index) => {
-      let each = line
-      if (index > 0) each = each.trimStart()
-      if (index < lines.length - 1) each = each.trimEnd()
-      return each
-    })
-    .filter((line) => line.trim())
-    .join(" ")
+  const lines = value.split(/\r?\n/).map((line, index, all) => {
+    let each = line
+    if (index > 0) each = each.trimStart()
+    if (index < all.length - 1) each = each.trimEnd()
+    return each
+  })
+  let text = ""
+  let blank = false
+  for (const line of lines) {
+    if (!line.trim()) {
+      blank = !!text
+      continue
+    }
+    text += text ? (blank ? PARAGRAPH_BREAK : " ") + line : line
+    blank = false
+  }
+  return text
 }
+
+/** A blank line in a run of text, kept:  a paragraph's line break (`jsxText()`). */
+const PARAGRAPH_BREAK = "\n\n"

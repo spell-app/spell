@@ -298,6 +298,26 @@ describe("UIComponent shared words", () => {
     expect([element.matches(":state(font-bold)"), element.matches(":state(font-italic)")]).toEqual([false, true])
   })
 
+  test("a size in `font` writes its `--ui-font-size` (and line height), and takes them away again", async () => {
+    const element = await shown(`font="bold 10/20"`)
+    const written = () => ({
+      size: element.style.getPropertyValue("--ui-font-size"),
+      leading: element.style.getPropertyValue("--ui-line-height"),
+      state: element.matches(":state(font-size)")
+    })
+    const leading = written()
+    element.setAttribute("font", "14")
+    await ElementFixture.settle()
+    const size = written()
+    element.setAttribute("font", "bold")
+    await ElementFixture.settle()
+    expect([leading, size, written()]).toEqual([
+      { size: "10px", leading: "2", state: true },
+      { size: "14px", leading: "", state: true },
+      { size: "", leading: "", state: false }
+    ])
+  })
+
   test("`tooltip` writes the element's `title`, and takes it away again", async () => {
     const element = await shown(`tooltip="Saves it"`)
     expect(element.title).toBe("Saves it")

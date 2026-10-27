@@ -22,6 +22,11 @@
     --ui-font-family: var(--ui-font-family-rounded);
     --ui-font-family-heading: var(--ui-font-family-rounded);
     --ui-font-family-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --ui-font-family-serif:
+      ui-serif, Palatino, "Palatino Linotype", "Book Antiqua", P052, "URW Palladio L", Georgia, serif;
+    --ui-font-family-sans: system-ui, -apple-system, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --ui-font-family-typewriter: "American Typewriter", "Courier Prime", "Courier New", Courier, monospace;
+    --ui-font-family-subhead: var(--ui-font-family-heading);
     --ui-radius-s: 8px;
     --ui-radius-m: 12px;
     --ui-radius-l: 16px;
