@@ -41,14 +41,14 @@ The page imports one module, `<ui-root>`'s, and never names a family.
 The root found three tags it didn't know yet, looked each one up in its catalog,
 and imported the three families that define them, once each:
 `ui-segment.js`, `ui-parts.js` (a header is one of the content parts) and `ui-button.js`.
-The other 69 families never left the server.
+The other 73 families never left the server.
 
 The dark one took one attribute.
 Its blue is lighter, and the button's label turned from white to ink, Spell UI's near-black:
 white on that blue measures 2.43:1, under the 4.5:1 that WCAG AA asks of text, and the ink measures 8.10:1.
 Every colour carries the text colour that reads on it, in light and in dark, so your page never has to know.
 
-Spell UI is 72 families of these `<ui-*>` custom elements, 118 tags in all:
+Spell UI is 76 families of these `<ui-*>` custom elements, 122 tags in all:
 buttons, forms, dropdowns, cards, menus, modals, tables, a calendar, a tree diagram, a page frame, video ...
 It's Spell's component library ([the kit's front page](https://github.com/spell-app/spell/blob/main/README.md) says what Spell is),
 and a page needs nothing else of Spell's to use it.
@@ -56,7 +56,7 @@ and a page needs nothing else of Spell's to use it.
 - **Accessible:**  each element draws real, semantic markup into its shadow root,
   a `<button>`, a `<dialog>`, an `<input>`, never a `<div>` pretending to be one.
   The tests run axe, the accessibility checker, in a real browser,
-  on every example of every family that has examples:  68 of the 72.
+  on every example of every family that has examples:  72 of the 76.
 - **Themeable:**  everything draws from CSS tokens, in OKLCH colours that work in light and dark.
   Set a few, or switch the whole look to one of Spell's four themes with one call, `UI.themes.apply("merlot")`,
   or let people pick with `<ui-theme-menu>`.
@@ -93,7 +93,7 @@ The page above maps `spell-ui/` onto the kit's own build of the library, and Sol
 - `Save` never moved into the shadow root:  it's the page's own text, shown through the `<slot>`,
   so find-in-page still finds it.
 - `class="ui primary button"` is Fomantic UI's class grammar, written for you from the attributes
-  ([below](#the-families--72-in-fomantic-uis-groups), where the words come from).
+  ([below](#the-families--76-in-fomantic-uis-groups), where the words come from).
 
 </details>
 
@@ -380,7 +380,7 @@ It borrows the page's, so the page still has one Solid, and the pack's elements 
   [the kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md#packs-and-ui-root);
   the `spell pack` commands that make one:  [the kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui).
 
-## The families:  72, in Fomantic UI's groups
+## The families:  76, in Fomantic UI's groups
 
 Looking for a datepicker?  It's `<ui-calendar>`, and a snackbar is `<ui-toast>`.
 [The catalogue](README-components.md#the-catalogue) finds a family by the name your last library gave it:
@@ -393,8 +393,8 @@ The names, and the groups they sort into, are Semantic UI's and Fomantic UI's:
 - Views, ways to present a kind of content:  `<ui-card>`, `<ui-feed>`, `<ui-statistic>` ...
 - Modules, elements with behaviour, that open, pick or move:  `<ui-dropdown>`, `<ui-modal>`, `<ui-calendar>` ...
 - then one set of content parts every family shares, each styled by what it's in:  `<ui-header>`, `<ui-meta>` ...
-- and twelve of Spell UI's own, with no Fomantic counterpart:
-  `<ui-root>`, `<ui-page>`, `<ui-stack>`, `<ui-section>`, `<ui-code>`, `<ui-markdown>`, `<ui-keys>`, `<ui-quote>` ...
+- and sixteen of Spell UI's own, with no Fomantic counterpart:
+  `<ui-root>`, `<ui-page>`, `<ui-stack>`, `<ui-section>`, `<ui-code>`, `<ui-markdown>`, `<ui-keys>`, `<ui-zoom>`, `<ui-toc>` ...
 
 The class grammar is theirs too:  `ui small primary basic button`, written for you from the attributes,
 over each family's CSS, ported from Fomantic UI 2.9.4 into its shadow root.
@@ -617,7 +617,7 @@ The rest is on the page that owns each one:
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 72 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 npm</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 76 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 npm</li></ul> |
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  eighteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
 | [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and Spell's four themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>the theme menu, `<ui-theme-menu>`</li><li>🌱 themes per component</li></ul> |
