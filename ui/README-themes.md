@@ -367,11 +367,15 @@ To make a look of your own, start from one of Spell UI's and change what you lik
 <ui-theme-editor></ui-theme-editor>
 ```
 
-- Its inspector picks the primary, secondary and background colours, the heading and body fonts, the text size,
-  the corners, the depth and, on `fruity`, how much the glass shows through.
+- Its Basics pick the primary, secondary and background colours, the heading and body fonts, the text size,
+  the corners, the depth and, on `fruity`, how much the glass shows through:  each sets many tokens.
+- Under them, every token a theme sets, in the theme file's nested groups, light and dark side by side;
+  a token set there wins over the Basics.
 - The whole page wears the theme as you change it, and a sample app shows it in light and dark side by side.
-- Copy CSS gives the theme as one stylesheet:  tokens on `:root`, in `@layer ui.app`.
-  Apply its base first (`UI.themes.apply("fruity")`), then the sheet, and the page looks as it did in the editor.
+  - Hand it `pages` (real pages, each in a frame) and it previews those instead, its own look staying put.
+- What it makes is a theme FILE:  Copy changes gives its JSON5 (`extends` its base), colours in hex.
+  - Its sheet (`el.css`):  the file's values on `:root`, in `@layer ui.app`.
+    Apply its base first (`UI.themes.apply("fruity")`), then the sheet, and the page looks as it did in the editor.
 - Use this theme keeps it in this browser.
   The Spell editor wears it over its base, and any page can:  `SavedTheme.restore()`.
 - It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.

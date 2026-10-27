@@ -1,34 +1,34 @@
 import { E } from "spell-ui/core"
 import {
-  BENCH_MESSAGE,
-  type BenchMessage,
-  type BenchReply,
-  type BenchScheme,
+  PAGE_MESSAGE,
+  type PageMessage,
+  type PageReply,
+  type PageScheme,
   type PageLook,
   type TitlesAt
-} from "./UIDocsThemeBench.types"
+} from "./UIThemeEditor.types"
 
 /****************
- * ### `BenchBridge`
- * What the theme bench (`<ui-docs-theme-bench>`) does INSIDE a page it shows in a frame:
+ * ### `PageBridge`
+ * What the theme editor (`<ui-theme-editor>`) does INSIDE a page it shows in a frame:
  * lay its tuning over the page, scroll its section titles, and read what the page's sheets say about the tokens.
  * - Two ways in, the same functions:
- *   - a page beside the bench, on the page server (same origin):  the bench calls them on the frame's document
- *   - the editor app, on its own port (another origin):  the bench sends messages, and the editor, in development,
+ *   - a page beside the editor (same origin):  the editor calls them on the frame's document
+ *   - the Spell editor app, on its own port (another origin):  the theme editor sends messages, and the app, in development,
  *     takes them with `listen()` (spell-app's `EditorTheme`), handing it what only it knows how to do
  *     (choose a theme, open the full view)
  * - Plain DOM, no Solid, no element:  so the editor imports it as a leaf, and it works on any document.
- * - Messages come only from this machine (`localhost`, `127.0.0.1`, any port), and say so (`BENCH_MESSAGE`):
+ * - Messages come only from this machine (`localhost`, `127.0.0.1`, any port), and say so (`PAGE_MESSAGE`):
  *   anything else is ignored.
  ****************/
-export class BenchBridge {
+export class PageBridge {
   ////////////////
   // ## The tuning
   ////////////////
 
   /**
    * Lay `css` over everything `doc` has:  its own `<style>`, last in `<head>`;  `""` takes it away.
-   * - The bench writes its tokens on `:root` with `!important`, so they win over every theme's and page's sheet
+   * - The theme editor writes its tokens on `:root` with `!important`, so they win over every theme's and page's sheet
    *   in any layer;  a token a page sets on an element of its own still wins there, as it would for a theme.
    */
   static applyCss(doc: Document, css: string): void {
@@ -62,9 +62,9 @@ export class BenchBridge {
     if (!win) return
     const isNew = !PINNED.has(win)
     PINNED.set(win, scheme)
-    BenchBridge.showScheme(doc, scheme)
+    PageBridge.showScheme(doc, scheme)
     // after the page's own `storage` listener, which applied the stored scheme
-    if (isNew) win.addEventListener("storage", () => E.soon(() => BenchBridge.showScheme(doc, PINNED.get(win)!)))
+    if (isNew) win.addEventListener("storage", () => E.soon(() => PageBridge.showScheme(doc, PINNED.get(win)!)))
   }
 
   /** Show `scheme` on `doc`'s `<html>`:  its class, the other one off, and the same `color-scheme`. */
@@ -88,16 +88,16 @@ export class BenchBridge {
    *   Opening one would change how the page was left, which it remembers.
    */
   static scrollTitles(doc: Document, at: TitlesAt): void {
-    const sections = BenchBridge.deepAll(doc, STICKY_SECTION)
+    const sections = PageBridge.deepAll(doc, STICKY_SECTION)
     if (!sections.length) return
     const tall = sections.filter((section) => section.getBoundingClientRect().height > TALL_ENOUGH)
-    const target = tall.find((section) => BenchBridge.parentSection(section)) ?? tall[0]
+    const target = tall.find((section) => PageBridge.parentSection(section)) ?? tall[0]
     if (at === "rest" || !target) {
-      for (const scroller of new Set(sections.map((section) => BenchBridge.scrollerOf(section)))) scroller.scrollTop = 0
+      for (const scroller of new Set(sections.map((section) => PageBridge.scrollerOf(section)))) scroller.scrollTop = 0
       return
     }
-    const scroller = BenchBridge.scrollerOf(target)
-    const top = target.getBoundingClientRect().top - BenchBridge.topOf(scroller) + scroller.scrollTop
+    const scroller = PageBridge.scrollerOf(target)
+    const top = target.getBoundingClientRect().top - PageBridge.topOf(scroller) + scroller.scrollTop
     scroller.scrollTop = Math.max(0, top + SCROLL_INTO)
   }
 
@@ -115,9 +115,9 @@ export class BenchBridge {
    */
   static look(doc: Document, tokens: readonly string[]): PageLook {
     const found: Found = { reads: new Set(), declares: new Set(), overrides: new Set() }
-    for (const [sheet, roots] of BenchBridge.sheetsOf(doc)) {
+    for (const [sheet, roots] of PageBridge.sheetsOf(doc)) {
       try {
-        BenchBridge.collect(sheet.cssRules, found, roots)
+        PageBridge.collect(sheet.cssRules, found, roots)
       } catch {
         // another origin's sheet:  its rules can't be read
       }
@@ -141,12 +141,12 @@ export class BenchBridge {
         for (const match of rule.style.cssText.matchAll(READ)) found.reads.add(match[1]!)
         const tokens = [...rule.style].filter((name) => name.startsWith("--"))
         for (const name of tokens) found.declares.add(name)
-        if (tokens.length && !isNested && BenchBridge.isBelowRoot(rule.selectorText, roots)) {
+        if (tokens.length && !isNested && PageBridge.isBelowRoot(rule.selectorText, roots)) {
           for (const name of tokens) found.overrides.add(name)
         }
       }
       // a nested rule's selector is relative to its parent's:  read for what it says, never matched
-      if ("cssRules" in rule) BenchBridge.collect((rule as CSSGroupingRule).cssRules, found, roots, isStyleRule(rule))
+      if ("cssRules" in rule) PageBridge.collect((rule as CSSGroupingRule).cssRules, found, roots, isStyleRule(rule))
     }
   }
 
@@ -169,45 +169,45 @@ export class BenchBridge {
   ////////////////
 
   /**
-   * Take the bench's messages in this window, from now on;  returns the stop.
-   * - Says `hello` to the window it's framed in, so the bench sends everything at once.
+   * Take the theme editor's messages in this window, from now on;  returns the stop.
+   * - Says `hello` to the window it's framed in, so the theme editor sends everything at once.
    * - Each message's parts, in order:  `theme`, `scheme`, `fullMonty` (each through `handlers`), `css`, `titles`;
    *   then the reply to an `ask`.
    * - NEVER throws:  a part that fails says so on the console, and the rest still runs.
    */
   static listen(handlers: BridgeHandlers): () => void {
     const onMessage = (event: MessageEvent) => {
-      const message = event.data as BenchMessage | undefined
-      if (message?.type !== BENCH_MESSAGE || !LOCAL_ORIGIN.test(event.origin)) return
-      void BenchBridge.take(message, handlers).then((reply) => {
+      const message = event.data as PageMessage | undefined
+      if (message?.type !== PAGE_MESSAGE || !LOCAL_ORIGIN.test(event.origin)) return
+      void PageBridge.take(message, handlers).then((reply) => {
         if (reply) (event.source as Window | null)?.postMessage(reply, event.origin)
       })
     }
     window.addEventListener("message", onMessage)
     if (window.parent !== window)
-      window.parent.postMessage({ type: BENCH_MESSAGE, hello: true } satisfies BenchReply, "*")
+      window.parent.postMessage({ type: PAGE_MESSAGE, hello: true } satisfies PageReply, "*")
     return () => window.removeEventListener("message", onMessage)
   }
 
   /** Do what `message` says, in this window;  the reply to its `ask`, if any. */
-  private static async take(message: BenchMessage, handlers: BridgeHandlers): Promise<BenchReply | undefined> {
+  private static async take(message: PageMessage, handlers: BridgeHandlers): Promise<PageReply | undefined> {
     const run = async (part: string, job: () => unknown) => {
       try {
         await job()
       } catch (error) {
-        console.error(`BenchBridge:  couldn't apply the bench's ${part}`, error)
+        console.error(`PageBridge:  couldn't apply the theme editor's ${part}`, error)
       }
     }
     if (message.theme !== undefined) await run("theme", () => handlers.theme(message.theme!))
     if (message.scheme !== undefined) await run("scheme", () => handlers.scheme(message.scheme!))
     if (message.fullMonty) await run("full view", () => handlers.fullMonty?.())
-    if (message.css !== undefined) await run("tuning", () => BenchBridge.applyCss(document, message.css!))
+    if (message.css !== undefined) await run("tuning", () => PageBridge.applyCss(document, message.css!))
     if (message.titles !== undefined) {
       // after the parts above have drawn
-      await run("titles", () => E.after(LAYOUT_SECONDS, () => BenchBridge.scrollTitles(document, message.titles!)))
+      await run("titles", () => E.after(LAYOUT_SECONDS, () => PageBridge.scrollTitles(document, message.titles!)))
     }
     if (!message.ask) return undefined
-    return { type: BENCH_MESSAGE, reply: message.ask.id, look: BenchBridge.look(document, message.ask.tokens) }
+    return { type: PAGE_MESSAGE, reply: message.ask.id, look: PageBridge.look(document, message.ask.tokens) }
   }
 
   ////////////////
@@ -218,14 +218,14 @@ export class BenchBridge {
   static deepAll(root: Document | ShadowRoot, selector: string): Element[] {
     const found = [...root.querySelectorAll(selector)]
     for (const element of root.querySelectorAll("*")) {
-      if (element.shadowRoot) found.push(...BenchBridge.deepAll(element.shadowRoot, selector))
+      if (element.shadowRoot) found.push(...PageBridge.deepAll(element.shadowRoot, selector))
     }
     return found
   }
 
   /** The sticky section `section` sits in, across shadow roots;  `undefined` for a top-level one. */
   private static parentSection(section: Element): Element | undefined {
-    for (let node = BenchBridge.up(section); node; node = BenchBridge.up(node)) {
+    for (let node = PageBridge.up(section); node; node = PageBridge.up(node)) {
       if (node.matches(STICKY_SECTION)) return node
     }
     return undefined
@@ -234,7 +234,7 @@ export class BenchBridge {
   /** The box `element` scrolls in:  its nearest ancestor that scrolls, across shadow roots;  else the page. */
   private static scrollerOf(element: Element): Element {
     const doc = element.ownerDocument
-    for (let node = BenchBridge.up(element); node; node = BenchBridge.up(node)) {
+    for (let node = PageBridge.up(element); node; node = PageBridge.up(node)) {
       if (node === doc.documentElement || node === doc.body) break
       const { overflowY } = doc.defaultView!.getComputedStyle(node)
       if (SCROLLS.test(overflowY) && node.scrollHeight > node.clientHeight + 1) return node
@@ -265,17 +265,17 @@ export class BenchBridge {
       }
     }
     add(doc)
-    for (const element of BenchBridge.deepAll(doc, "*")) if (element.shadowRoot) add(element.shadowRoot)
+    for (const element of PageBridge.deepAll(doc, "*")) if (element.shadowRoot) add(element.shadowRoot)
     return sheets
   }
 }
 
 /** What only the framed app knows how to do, handed to `listen()`. */
 export type BridgeHandlers = {
-  /** Choose theme `name`, as the app's menu would. */
+  /** Wear theme `name`, as the app's menu would show it, but never remembered:  the app's own choice stays. */
   theme(name: string): unknown
-  /** Choose `scheme`, as the app's menu would. */
-  scheme(scheme: BenchScheme): unknown
+  /** Show `scheme`, never remembered (`PageBridge.pinScheme()`):  a pair's two frames may share the storage. */
+  scheme(scheme: PageScheme): unknown
   /** Open the app's full view (the editor:  Debug, every side bar, a part picked). */
   fullMonty?(): unknown
 }
@@ -283,8 +283,8 @@ export type BridgeHandlers = {
 /** The scheme each framed window is pinned to (`pinScheme()`). */
 const PINNED = new WeakMap<Window, "light" | "dark">()
 
-/** Id of the `<style>` the tuning goes in. */
-const STYLE_ID = "ui-theme-bench"
+/** Id of the `<style>` the theme being made goes in. */
+const STYLE_ID = "ui-theme-editor-sheet"
 
 /** A section whose title sticks. */
 const STICKY_SECTION = "ui-section[sticky]"
@@ -315,5 +315,5 @@ function isStyleRule(rule: CSSRule): rule is CSSStyleRule {
 /** What `collect()` gathers. */
 type Found = { reads: Set<string>; declares: Set<string>; overrides: Set<string> }
 
-/** This machine, any port:  where the bench runs. */
+/** This machine, any port:  where the theme editor runs. */
 const LOCAL_ORIGIN = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/

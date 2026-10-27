@@ -1,10 +1,10 @@
-import type { BenchGroup } from "./BenchTokens"
+import type { TokenGroup } from "./ThemeTokens"
 
 /****************
- * ### `BenchTree`
- * The theme bench's tokens as a TREE, the way a theme file nests them (Owen:  "Instead of the --spell-accent-x, can
+ * ### `TokenTree`
+ * The theme editor's tokens as a TREE, the way a theme file nests them (Owen:  "Instead of the --spell-accent-x, can
  * we show this as a tree?"):  each group a branch, its tokens under it by their name's parts.
- * - A token's path in its group (`pathOf()`, from `BenchTokens.placeOf()`):
+ * - A token's path in its group (`pathOf()`, from `ThemeTokens.placeOf()`):
  *   - `components.menu.segmented-background` in `components.menu`:  `segmented › background`
  *   - `own.glass-blur` in `own`:  `glass › blur`
  *   - the editor's own `--spell-accent-x`, which no theme file places:  `accent › x`
@@ -12,14 +12,14 @@ import type { BenchGroup } from "./BenchTokens"
  *   `segmented › item › padding` with nothing else under `item` is `segmented › item-padding`.
  * - A node can be a token AND a branch (`--ui-menu-segmented` beside `--ui-menu-segmented-background`).
  * - Ids are paths, `components.menu/segmented`:  stable across reports, so a fold is kept by its id.
- * - Data, no DOM:  `UIDocsThemeBench` draws it.
+ * - Data, no DOM:  `UIThemeEditor` draws it.
  ****************/
-export class BenchTree {
+export class TokenTree {
   /** Every node, by id. */
-  readonly nodes: ReadonlyMap<string, BenchTreeNode>
+  readonly nodes: ReadonlyMap<string, TokenTreeNode>
 
   /** The groups' nodes, in order. */
-  readonly roots: readonly BenchTreeNode[]
+  readonly roots: readonly TokenTreeNode[]
 
   /**
    * The tree of `groups`, each token's path in its group from `pathOf(token, group.place)`;
@@ -30,11 +30,11 @@ export class BenchTree {
     pathOf,
     labelOf
   }: {
-    groups: readonly BenchGroup[]
+    groups: readonly TokenGroup[]
     pathOf: (token: string, place: string) => readonly string[]
     labelOf: (place: string) => string
   }) {
-    const nodes = new Map<string, BenchTreeNode>()
+    const nodes = new Map<string, TokenTreeNode>()
     this.roots = groups.map((group) => {
       const root: Building = { id: group.place, name: labelOf(group.place), children: new Map() }
       for (const token of group.tokens) {
@@ -46,27 +46,27 @@ export class BenchTree {
         }
         node.token = token
       }
-      return BenchTree.finish(root, nodes, true)
+      return TokenTree.finish(root, nodes, true)
     })
     this.nodes = nodes
   }
 
   /** The tree with only the tokens `keep` says yes to, and the branches that hold them. */
-  filtered(keep: (node: BenchTreeNode) => boolean): BenchTreeNode[] {
-    const prune = (node: BenchTreeNode): BenchTreeNode | undefined => {
-      const children = node.children.map(prune).filter((child): child is BenchTreeNode => !!child)
+  filtered(keep: (node: TokenTreeNode) => boolean): TokenTreeNode[] {
+    const prune = (node: TokenTreeNode): TokenTreeNode | undefined => {
+      const children = node.children.map(prune).filter((child): child is TokenTreeNode => !!child)
       const token = node.token !== undefined && keep(node) ? node.token : undefined
       if (!children.length && token === undefined) return undefined
       return { ...node, token, children }
     }
-    return this.roots.map(prune).filter((node): node is BenchTreeNode => !!node)
+    return this.roots.map(prune).filter((node): node is TokenTreeNode => !!node)
   }
 
   /**
    * The node `building` finished:  its children in order, a branch of one child and no token folded into that child
    * (never a group's own node), each kept in `nodes` by id.
    */
-  private static finish(building: Building, nodes: Map<string, BenchTreeNode>, isRoot = false): BenchTreeNode {
+  private static finish(building: Building, nodes: Map<string, TokenTreeNode>, isRoot = false): TokenTreeNode {
     let { id, name } = building
     let current = building
     while (!isRoot && current.token === undefined && current.children.size === 1) {
@@ -75,11 +75,11 @@ export class BenchTree {
       id = only.id
       current = only
     }
-    const node: BenchTreeNode = {
+    const node: TokenTreeNode = {
       id,
       name,
       token: current.token,
-      children: [...current.children.values()].map((child) => BenchTree.finish(child, nodes))
+      children: [...current.children.values()].map((child) => TokenTree.finish(child, nodes))
     }
     nodes.set(id, node)
     return node
@@ -87,7 +87,7 @@ export class BenchTree {
 }
 
 /** One node of the tree:  a token, a branch, or both. */
-export type BenchTreeNode = {
+export type TokenTreeNode = {
   /** Its path, `components.menu/segmented`:  the same for the same token or branch in every report */
   id: string
   /** Its short name:  `color`, `segmented`, `item-padding`;  a group's, its title */
@@ -95,7 +95,7 @@ export type BenchTreeNode = {
   /** The CSS name, when it's a token */
   token?: string
   /** The nodes under it, in the group's order */
-  children: readonly BenchTreeNode[]
+  children: readonly TokenTreeNode[]
 }
 
 /** A node while the tree's being built. */

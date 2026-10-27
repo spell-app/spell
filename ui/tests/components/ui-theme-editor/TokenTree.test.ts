@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { BenchTree } from "spell-ui/docs-components/ui-docs-theme-bench/BenchTree"
+import { TokenTree } from "spell-ui/components/ui-theme-editor/TokenTree"
 
 /** A tree of `tokens` in group `place`, each token's path its name's parts after `--ui-<place>-`. */
 function treeOf(place: string, tokens: string[]) {
-  return new BenchTree({
+  return new TokenTree({
     groups: [{ place, tokens }],
     pathOf: (token) => token.slice(`--ui-${place}-`.length).split("-"),
     labelOf: (group) => group.toUpperCase()
   })
 }
 
-describe("BenchTree", () => {
+describe("TokenTree", () => {
   it("nests a group's tokens by their name's parts;  a branch can be a token too", () => {
     const tree = treeOf("menu", ["--ui-menu-radius", "--ui-menu-segmented", "--ui-menu-segmented-background"])
     const [menu] = tree.roots

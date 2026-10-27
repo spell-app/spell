@@ -4969,6 +4969,193 @@
       "href": "ui-code.html"
     },
     {
+      "tag": "ui-color-chip",
+      "name": "Color chip",
+      "folder": "ui-theme-editor",
+      "topics": [
+        "media",
+        "typography"
+      ],
+      "aka": [
+        "color chip",
+        "swatch",
+        "colour sample",
+        "color preview",
+        "color dot"
+      ],
+      "description": "A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.",
+      "noun": "colour chip",
+      "attributes": [
+        {
+          "name": "color",
+          "kind": "string",
+          "description": "The colour:  any CSS colour (`#7c55e6`, `oklch(...)`, `var(--ui-primary)`, `light-dark(...)`)."
+        },
+        {
+          "name": "scheme",
+          "kind": "enum",
+          "values": [
+            "auto",
+            "light",
+            "dark"
+          ],
+          "default": "auto",
+          "description": "The scheme a `light-dark()` colour resolves in:  the page's (`auto`), `light` or `dark`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What the colour is, for a screen reader and the tooltip.  None:  the colour itself."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "chip",
+          "description": "The chip itself."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-theme-editor",
+      "main": false,
+      "page": false,
+      "href": "ui-theme-editor.html#ui-color-chip"
+    },
+    {
       "tag": "ui-column",
       "name": "Column",
       "folder": "ui-grid",
@@ -31751,24 +31938,32 @@
       "aka": [
         "theme editor",
         "theme builder",
+        "theme bench",
         "theme creator",
         "theme generator",
         "style editor",
-        "design tokens"
+        "design tokens",
+        "token tuner"
       ],
-      "description": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.",
+      "description": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.",
       "noun": "theme editor",
       "attributes": [
         {
           "name": "base",
           "kind": "string",
-          "description": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page."
+          "description": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`."
         },
         {
           "name": "value",
           "kind": "json",
           "reflect": false,
-          "description": "The theme to start with, as `ThemeChoices` (`{\"primary\": \"pink\", \"corners\": \"soft\"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is."
+          "description": "The theme to start with, as `ThemeChoices` (`{\"primary\": \"pink\", \"corners\": \"soft\"}`).  None:  the theme being made in this browser, else the one kept (`SavedTheme`), else the base theme as it is."
+        },
+        {
+          "name": "pages",
+          "kind": "json",
+          "reflect": false,
+          "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme."
         },
         {
           "name": "disabled",
@@ -31877,12 +32072,12 @@
         {
           "name": "ui-changed",
           "detail": "{ value: ThemeChoices, css: string }",
-          "description": "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet."
+          "description": "A choice changed:  `value` is every choice now, `css` the theme's sheet, worn over its base."
         },
         {
           "name": "ui-copied",
-          "detail": "{ css: string }",
-          "description": "Copy CSS put the stylesheet on the clipboard."
+          "detail": "{ text: string }",
+          "description": "Copy changes put the theme file's JSON5 on the clipboard."
         },
         {
           "name": "ui-saved",
@@ -31893,25 +32088,49 @@
       "parts": [
         {
           "name": "editor",
-          "description": "The whole editor:  the inspector beside the preview and the stylesheet."
+          "description": "The whole editor:  the bar, the preview, and the side column."
         },
         {
-          "name": "inspector",
-          "description": "The inspector, a `<ui-panel>` of `<ui-property-editor>` fields."
+          "name": "bar",
+          "description": "The top bar, one line:  its title, the theme, which pages, how they show."
+        },
+        {
+          "name": "basics",
+          "description": "The Basics:  the theme's name and base, and its big choices."
+        },
+        {
+          "name": "tokens",
+          "description": "Every token, in the theme file's groups."
+        },
+        {
+          "name": "token",
+          "description": "One token's row:  its name, which pages read it, its control."
+        },
+        {
+          "name": "pages",
+          "description": "The previewed pages' grid."
+        },
+        {
+          "name": "page",
+          "description": "One previewed page:  its title row and its frames."
         },
         {
           "name": "preview",
-          "description": "The preview:  a sample app of real elements, in light and dark."
+          "description": "The sample app, light and dark, when no pages are given."
         },
         {
-          "name": "sheet",
-          "description": "The stylesheet section, with Copy CSS."
+          "name": "changes",
+          "description": "The theme file's text, with Copy changes."
         }
       ],
       "states": [
         {
           "name": "saved",
           "description": "The theme it shows is the one kept in this browser (Use this theme)."
+        },
+        {
+          "name": "changed",
+          "description": "Something is changed:  a Basic, or a token set by hand."
         },
         {
           "name": "disabled",
@@ -31952,14 +32171,29 @@
       ],
       "texts": [
         {
-          "key": "theme",
-          "text": "Theme",
-          "description": "The inspector's title."
+          "key": "label",
+          "text": "Theme editor",
+          "description": "The bar's title, and the editor's accessible name."
         },
         {
-          "key": "themeTip",
-          "text": "A theme is the look of an app:  its colours, fonts and shapes.  Start from one, and change what you like.",
-          "description": "The inspector's tip."
+          "key": "lede",
+          "text": "Tune a token and watch them all follow.",
+          "description": "The title's tooltip."
+        },
+        {
+          "key": "theme",
+          "text": "Theme",
+          "description": "The bar's theme row:  the theme it builds on."
+        },
+        {
+          "key": "basics",
+          "text": "Basics",
+          "description": "The side column's first section:  the big choices."
+        },
+        {
+          "key": "basicsTip",
+          "text": "A theme is the look of an app:  its colours, fonts and shapes.  Each choice here sets many tokens.",
+          "description": "The Basics' tip."
         },
         {
           "key": "name",
@@ -31968,7 +32202,7 @@
         },
         {
           "key": "nameTip",
-          "text": "Names the file:  themes/<name>.css.",
+          "text": "Names the file:  <name>.theme.json5.",
           "description": "The name field's tip."
         },
         {
@@ -31978,12 +32212,12 @@
         },
         {
           "key": "base",
-          "text": "Start from",
+          "text": "Builds on",
           "description": "The base theme field."
         },
         {
           "key": "baseTip",
-          "text": "The theme yours changes.  Each choice below is a change to it;  the rest stays as it is.",
+          "text": "The theme yours changes.  Each choice is a change to it;  the rest stays as it is.",
           "description": "The base theme field's tip."
         },
         {
@@ -32174,7 +32408,7 @@
         {
           "key": "reset",
           "text": "Reset",
-          "description": "A button that puts one choice back to the theme's own."
+          "description": "A button that puts one choice, or one token, back to the theme's own."
         },
         {
           "key": "shape",
@@ -32287,29 +32521,409 @@
           "description": "The button that drops every change."
         },
         {
-          "key": "preview",
-          "text": "Preview",
-          "description": "The preview's title."
+          "key": "layout",
+          "text": "Show",
+          "description": "Accessible name of the pages' menu."
         },
         {
-          "key": "previewMode",
-          "text": "Preview in",
-          "description": "Name of the Both / Light / Dark control."
+          "key": "grid",
+          "text": "All",
+          "description": "The pages' menu:  every page, two by two."
+        },
+        {
+          "key": "titles",
+          "text": "Section titles",
+          "description": "Accessible name of the titles' scroll menu."
+        },
+        {
+          "key": "rest",
+          "text": "At rest",
+          "description": "Scroll each page to its top, its titles at rest."
+        },
+        {
+          "key": "stuck",
+          "text": "Stuck",
+          "description": "Scroll each page so its section titles stick."
+        },
+        {
+          "key": "schemes",
+          "text": "Schemes",
+          "description": "Accessible name of the schemes' menu."
         },
         {
           "key": "both",
           "text": "Both",
-          "description": "Preview choice:  light and dark side by side."
+          "description": "Light and dark side by side:  pages, samples and token values."
         },
         {
           "key": "light",
           "text": "Light",
-          "description": "Preview choice, and the light card's label."
+          "description": "Light alone;  the light half of a pair;  the light sample's label."
         },
         {
           "key": "dark",
           "text": "Dark",
-          "description": "Preview choice, and the dark card's label."
+          "description": "Dark alone;  the dark half of a pair;  the dark sample's label."
+        },
+        {
+          "key": "phone",
+          "text": "Phone",
+          "description": "The bar's toggle:  every page at a phone's width."
+        },
+        {
+          "key": "phoneTip",
+          "text": "Phone:  every page at a phone's width, in its phone layout",
+          "description": "The phone toggle's tooltip."
+        },
+        {
+          "key": "swap",
+          "text": "Swap light and dark",
+          "description": "The bar's button:  every pair's light and dark sides change places."
+        },
+        {
+          "key": "scrollBack",
+          "text": "Scroll back",
+          "description": "The bar's ‹, while some of its row is out of sight before."
+        },
+        {
+          "key": "scrollOn",
+          "text": "Scroll on",
+          "description": "The bar's ›, while some of its row is out of sight after."
+        },
+        {
+          "key": "reload",
+          "text": "Reload",
+          "description": "Reload one page's frames (its title row's icon)."
+        },
+        {
+          "key": "open",
+          "text": "Open in a tab",
+          "description": "Open a page in a tab of its own."
+        },
+        {
+          "key": "loadingPage",
+          "text": "Loading the page…",
+          "description": "Over a page's frame until it's drawn in the theme."
+        },
+        {
+          "key": "unreachable",
+          "text": "This page can't be reached.",
+          "description": "A page's frame, when it isn't running."
+        },
+        {
+          "key": "tokens",
+          "text": "Every token",
+          "description": "The side column's token tree."
+        },
+        {
+          "key": "tokensTip",
+          "text": "Each token the theme sets, as its file nests them.  One set here wins over the Basics.",
+          "description": "The token tree's tip."
+        },
+        {
+          "key": "themeTitle",
+          "text": "{theme} Theme",
+          "description": "The token tree's header:  the theme shown."
+        },
+        {
+          "key": "searchTip",
+          "text": "Search the tokens",
+          "description": "The header's search toggle:  the search row."
+        },
+        {
+          "key": "infoTip",
+          "text": "Read by, and what the marks mean",
+          "description": "The header's info toggle:  the pane of which pages read each token, and the marks."
+        },
+        {
+          "key": "find",
+          "text": "Find a token",
+          "description": "Placeholder of the token filter."
+        },
+        {
+          "key": "loading",
+          "text": "Reading the theme files…",
+          "description": "Shown while the theme files load."
+        },
+        {
+          "key": "failed",
+          "text": "The theme files didn't load:  {error}",
+          "description": "Shown when they can't."
+        },
+        {
+          "key": "groupOwn",
+          "text": "The theme's own",
+          "description": "Group:  the theme's private tokens (`own`)."
+        },
+        {
+          "key": "groupTypography",
+          "text": "Type",
+          "description": "Group:  `typography`."
+        },
+        {
+          "key": "groupSizes",
+          "text": "Sizes",
+          "description": "Group:  `sizes`."
+        },
+        {
+          "key": "groupSpacing",
+          "text": "Spacing",
+          "description": "Group:  `spacing`."
+        },
+        {
+          "key": "groupRadii",
+          "text": "Corners",
+          "description": "Group:  `radii`."
+        },
+        {
+          "key": "groupText",
+          "text": "Text",
+          "description": "Group:  `text`."
+        },
+        {
+          "key": "groupSurfaces",
+          "text": "Surfaces",
+          "description": "Group:  the page, panels and bars (`surfaces`)."
+        },
+        {
+          "key": "groupBorders",
+          "text": "Borders",
+          "description": "Group:  `borders`."
+        },
+        {
+          "key": "groupBrand",
+          "text": "Brand and focus",
+          "description": "Group:  `brand`."
+        },
+        {
+          "key": "groupSemantic",
+          "text": "Feedback",
+          "description": "Group:  positive, negative ... (`semantic`)."
+        },
+        {
+          "key": "groupHues",
+          "text": "Palette",
+          "description": "Group:  the named hues (`hues`)."
+        },
+        {
+          "key": "groupShadows",
+          "text": "Shadows",
+          "description": "Group:  `shadows`."
+        },
+        {
+          "key": "groupMotion",
+          "text": "Motion",
+          "description": "Group:  `motion`."
+        },
+        {
+          "key": "groupComponents",
+          "text": "Components",
+          "description": "Group:  each family's own tokens (`components`)."
+        },
+        {
+          "key": "pageOwn",
+          "text": "The {page}'s own",
+          "description": "Group:  a previewed page's own tokens (the editor's `--spell-*`), in its own sheet, not a theme file."
+        },
+        {
+          "key": "buildsOn",
+          "text": "Builds on",
+          "description": "The marks' legend:  what the theme shown extends."
+        },
+        {
+          "key": "foundation",
+          "text": "Spell UI",
+          "description": "What a theme that extends none builds on."
+        },
+        {
+          "key": "setHere",
+          "text": "Set here",
+          "description": "A token this theme sets (●), and the button that sets it here."
+        },
+        {
+          "key": "setHereTip",
+          "text": "Set it in this theme, as it is now",
+          "description": "The Set here button's tooltip:  the value doesn't change."
+        },
+        {
+          "key": "setHereMark",
+          "text": "Set here:  this theme gives the value",
+          "description": "The filled dot's tooltip."
+        },
+        {
+          "key": "fromBase",
+          "text": "from {base}",
+          "description": "A token the theme leaves to what it builds on (○)."
+        },
+        {
+          "key": "fromMark",
+          "text": "From {base}:  inherited, untouched",
+          "description": "The hollow dot's tooltip."
+        },
+        {
+          "key": "backToBase",
+          "text": "Back to {base}'s value",
+          "description": "Drop this theme's own value of a token."
+        },
+        {
+          "key": "pointsAt",
+          "text": "points at",
+          "description": "A token whose value is another token's (↳)."
+        },
+        {
+          "key": "derived",
+          "text": "derived",
+          "description": "A token worked out from others (ƒ)."
+        },
+        {
+          "key": "over",
+          "text": "over",
+          "description": "A colour mix in words:  \"accent 15% over clear\"."
+        },
+        {
+          "key": "clearWord",
+          "text": "clear",
+          "description": "`transparent`, in a colour mix in words."
+        },
+        {
+          "key": "amount",
+          "text": "Amount",
+          "description": "Accessible name of a colour mix's amount slider."
+        },
+        {
+          "key": "groupCount",
+          "text": "{set} set here · {from} from {base}",
+          "description": "A group's title band:  how many of its tokens the theme sets."
+        },
+        {
+          "key": "setHereOnly",
+          "text": "Set here only",
+          "description": "The filter's chip:  only the tokens set here."
+        },
+        {
+          "key": "setHereOnlyTip",
+          "text": "Only the tokens this theme sets:  what it changes on {base}",
+          "description": "The chip's tooltip."
+        },
+        {
+          "key": "pointerAll",
+          "text": "Change {place} for everything using it",
+          "description": "A pointer's pick:  change the token it points at."
+        },
+        {
+          "key": "pointerThis",
+          "text": "Set this one",
+          "description": "A pointer's pick:  set this token alone."
+        },
+        {
+          "key": "cancel",
+          "text": "Cancel",
+          "description": "Drop a pick."
+        },
+        {
+          "key": "usedBy",
+          "text": "Used by:  {tokens}",
+          "description": "A colour's tooltip:  the tokens pointing at it."
+        },
+        {
+          "key": "expandAll",
+          "text": "Expand all",
+          "description": "The token tree's toggle, while a branch is folded."
+        },
+        {
+          "key": "collapseAll",
+          "text": "Collapse all",
+          "description": "The token tree's toggle, once every branch is open."
+        },
+        {
+          "key": "readBy",
+          "text": "Read by",
+          "description": "Accessible name of a token's row of the pages that read it."
+        },
+        {
+          "key": "readsTip",
+          "text": "{place} reads it",
+          "description": "A reader's tip:  the page reads the token."
+        },
+        {
+          "key": "overridesTip",
+          "text": "{place} reads it (also set on its own elements)",
+          "description": "A reader's tip:  the page also sets the token below its root, where the theme doesn't reach."
+        },
+        {
+          "key": "overridesLegend",
+          "text": "the page also sets it on its own elements",
+          "description": "The legend's half dot:  what it marks on an icon."
+        },
+        {
+          "key": "overridesLegendTip",
+          "text": "The page also sets it on its own elements:  a theme doesn't reach those",
+          "description": "The legend's half dot's tip."
+        },
+        {
+          "key": "split",
+          "text": "Split into light / dark",
+          "description": "Give a token a light and a dark value of its own, each with its own control."
+        },
+        {
+          "key": "alpha",
+          "text": "Opacity",
+          "description": "Accessible name of a colour's opacity slider."
+        },
+        {
+          "key": "value",
+          "text": "Value",
+          "description": "Accessible name of a token's text field."
+        },
+        {
+          "key": "unset",
+          "text": "Not set in {theme}:  each element's own",
+          "description": "A token's empty field:  the theme doesn't set it, so each element uses its own default."
+        },
+        {
+          "key": "changes",
+          "text": "Changes",
+          "description": "The theme file's section."
+        },
+        {
+          "key": "copy",
+          "text": "Copy changes",
+          "description": "The copy button:  the theme file's JSON5."
+        },
+        {
+          "key": "copied",
+          "text": "Copied",
+          "description": "The copy button, just after copying."
+        },
+        {
+          "key": "noChanges",
+          "text": "No changes yet:  this is {base} as it is.",
+          "description": "The changes, while none."
+        },
+        {
+          "key": "fileMade",
+          "text": "a theme on {base}, made with Spell UI's theme editor.",
+          "description": "The theme file's first comment, after its file name."
+        },
+        {
+          "key": "fileMerge",
+          "text": "Save it beside the themes, or merge its values into {base}.theme.json5 (and drop \"extends\").",
+          "description": "The theme file's second comment:  how to use it."
+        },
+        {
+          "key": "sheetMade",
+          "text": "made with Spell UI's theme editor.",
+          "description": "The sheet's first comment, after its file name."
+        },
+        {
+          "key": "sheetBase",
+          "text": "On the {base} theme:  apply it first (UI.themes.apply(\"{base}\")), then this sheet.",
+          "description": "The sheet's second comment:  which theme it changes."
+        },
+        {
+          "key": "pageOwnSheet",
+          "text": "the previewed pages' own tokens, for their own sheets",
+          "description": "The comment over the rule of the pages' own tokens."
         },
         {
           "key": "appTitle",
@@ -32375,36 +32989,6 @@
           "key": "progress",
           "text": "Today's habits",
           "description": "Name of the sample progress bar."
-        },
-        {
-          "key": "css",
-          "text": "CSS",
-          "description": "The stylesheet section's title."
-        },
-        {
-          "key": "copy",
-          "text": "Copy CSS",
-          "description": "The copy button."
-        },
-        {
-          "key": "copied",
-          "text": "Copied",
-          "description": "The copy button, just after copying."
-        },
-        {
-          "key": "sheetMade",
-          "text": "made with Spell UI's theme editor.",
-          "description": "The stylesheet's first comment, after its file name."
-        },
-        {
-          "key": "sheetBase",
-          "text": "On the {base} theme:  apply it first (UI.themes.apply(\"{base}\")), then this sheet.",
-          "description": "The stylesheet's second comment:  which theme it changes."
-        },
-        {
-          "key": "sheetEmpty",
-          "text": "No changes yet:  this is {base} as it is.",
-          "description": "The stylesheet, unchanged."
         }
       ],
       "mainTag": "ui-theme-editor",
@@ -32777,6 +33361,283 @@
       "main": true,
       "page": true,
       "href": "ui-theme-menu.html"
+    },
+    {
+      "tag": "ui-theme-token",
+      "name": "Theme token",
+      "folder": "ui-theme-editor",
+      "topics": [
+        "forms",
+        "controls"
+      ],
+      "aka": [
+        "theme token",
+        "design token",
+        "token row",
+        "css variable",
+        "custom property editor"
+      ],
+      "description": "A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it.",
+      "noun": "theme token",
+      "attributes": [
+        {
+          "name": "row",
+          "kind": "json",
+          "reflect": false,
+          "description": "PROPERTY:  what to draw, as `TokenRow` (its name, where its value comes from, its value in each scheme, what its drawer offers).  `<ui-theme-editor>` works it out."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-changed",
+          "detail": "{ token: string, value: string, scheme?: \"light\" | \"dark\" }",
+          "description": "Its drawer set a value:  for `scheme` alone, or (none) for both."
+        },
+        {
+          "name": "ui-command",
+          "detail": "{ token: string, command: \"open\" | \"reset\" | \"set here\" | \"split\" | \"show\", place?: string }",
+          "description": "Its name opened or closed its drawer (`open`), a button was pressed (`reset`, `set here`, `split`), or a link to another token (`show`, its `place`)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "row",
+          "description": "The row:  its mark, name, readers, buttons and values."
+        },
+        {
+          "name": "drawer",
+          "description": "The drawer under the name, while it's open."
+        }
+      ],
+      "states": [
+        {
+          "name": "here",
+          "description": "The theme sets the token (●)."
+        },
+        {
+          "name": "open",
+          "description": "Its drawer is open."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "setHere",
+          "text": "Set here",
+          "description": "The button that sets the token in this theme, as it is."
+        },
+        {
+          "key": "setHereTip",
+          "text": "Set it in this theme, as it is now",
+          "description": "Its tooltip."
+        },
+        {
+          "key": "split",
+          "text": "Split into light / dark",
+          "description": "Give the token a light and a dark value."
+        },
+        {
+          "key": "edit",
+          "text": "Edit {token}",
+          "description": "The name's button:  opens the drawer."
+        },
+        {
+          "key": "light",
+          "text": "Light",
+          "description": "The light value's name."
+        },
+        {
+          "key": "dark",
+          "text": "Dark",
+          "description": "The dark value's name."
+        },
+        {
+          "key": "base",
+          "text": "Base",
+          "description": "A mix's base colour."
+        },
+        {
+          "key": "mixIn",
+          "text": "Mixed in",
+          "description": "A mix's colour mixed in over the base."
+        },
+        {
+          "key": "amount",
+          "text": "Amount",
+          "description": "How much of it is mixed in."
+        },
+        {
+          "key": "pointsAt",
+          "text": "Points at",
+          "description": "A pointer's target, in the drawer."
+        },
+        {
+          "key": "pointsAtTip",
+          "text": "Its value is that token's:  change that one, or set this one here",
+          "description": "Its tip."
+        },
+        {
+          "key": "value",
+          "text": "Value",
+          "description": "A value's field."
+        },
+        {
+          "key": "alpha",
+          "text": "Opacity",
+          "description": "A colour's opacity field."
+        },
+        {
+          "key": "readBy",
+          "text": "Read by",
+          "description": "The pages that read the token."
+        },
+        {
+          "key": "clear",
+          "text": "clear",
+          "description": "`transparent`, as a mix's base."
+        }
+      ],
+      "mainTag": "ui-theme-editor",
+      "main": false,
+      "page": false,
+      "href": "ui-theme-editor.html#ui-theme-token"
     },
     {
       "tag": "ui-title",
@@ -37022,7 +37883,7 @@
         "theme playground",
         "design tokens"
       ],
-      "description": "A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file.",
+      "description": "A theme bench shows the theme editor full width, previewing Spell's real pages side by side in the theme being made:  the editor, an epic page, Spell UI's docs and a notebook.",
       "noun": "theme bench",
       "attributes": [
         {
@@ -37131,35 +37992,11 @@
       "events": [],
       "parts": [
         {
-          "name": "bench",
-          "description": "The whole bench:  the bar, the pages and the tuning."
-        },
-        {
-          "name": "bar",
-          "description": "The top bar:  its title, the layout, the titles' scroll, the schemes, and the pages' theme."
-        },
-        {
-          "name": "pages",
-          "description": "The pages' grid."
-        },
-        {
-          "name": "page",
-          "description": "One page:  its title row and its frame."
-        },
-        {
-          "name": "tuning",
-          "description": "The tuning column:  every token, by group, and the changes."
-        },
-        {
-          "name": "token",
-          "description": "One token's row:  its name, who reads it, its control."
+          "name": "editor",
+          "description": "The theme editor it shows (`<ui-theme-editor>`)."
         }
       ],
       "states": [
-        {
-          "name": "tuned",
-          "description": "Some token of the theme shown is tuned."
-        },
         {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
@@ -37199,26 +38036,6 @@
       ],
       "texts": [
         {
-          "key": "label",
-          "text": "Theme bench",
-          "description": "The bench's title, and its accessible name."
-        },
-        {
-          "key": "lede",
-          "text": "Every place in one theme.  Tune a token and watch them all follow.",
-          "description": "The line under the title."
-        },
-        {
-          "key": "layout",
-          "text": "Show",
-          "description": "Accessible name of the layout's menu."
-        },
-        {
-          "key": "grid",
-          "text": "All four",
-          "description": "The layout showing every page."
-        },
-        {
           "key": "epic",
           "text": "Epic page",
           "description": "The epic page's title."
@@ -37239,214 +38056,9 @@
           "description": "The editor's title."
         },
         {
-          "key": "titles",
-          "text": "Section titles",
-          "description": "Accessible name of the titles' scroll menu."
-        },
-        {
-          "key": "rest",
-          "text": "At rest",
-          "description": "Scroll each page to its top, its titles at rest."
-        },
-        {
-          "key": "stuck",
-          "text": "Stuck",
-          "description": "Scroll each page so its section titles stick."
-        },
-        {
-          "key": "schemes",
-          "text": "Schemes",
-          "description": "Accessible name of the schemes' menu."
-        },
-        {
-          "key": "both",
-          "text": "Light & dark",
-          "description": "Show each page in light and dark, side by side."
-        },
-        {
-          "key": "one",
-          "text": "One scheme",
-          "description": "Show each page once, in the scheme picked."
-        },
-        {
-          "key": "light",
-          "text": "Light",
-          "description": "The light half of a page's pair."
-        },
-        {
-          "key": "dark",
-          "text": "Dark",
-          "description": "The dark half of a page's pair."
-        },
-        {
-          "key": "swap",
-          "text": "Swap light and dark",
-          "description": "The bar's button:  every pair's light and dark sides change places, the lights side by side."
-        },
-        {
-          "key": "theme",
-          "text": "Theme",
-          "description": "The pages' theme row, and its accessible name."
-        },
-        {
-          "key": "reload",
-          "text": "Reload",
-          "description": "Reload one page's frames (its title row's icon)."
-        },
-        {
-          "key": "open",
-          "text": "Open in a tab",
-          "description": "Open a page in a tab of its own."
-        },
-        {
           "key": "noEditor",
           "text": "The editor isn't running:  it starts with the page server.",
           "description": "Shown in an editor page's frame when the editor app can't be reached."
-        },
-        {
-          "key": "find",
-          "text": "Find a token",
-          "description": "Placeholder of the token filter."
-        },
-        {
-          "key": "loadingPage",
-          "text": "Loading the page…",
-          "description": "Over a page's frame until it's drawn in the theme."
-        },
-        {
-          "key": "loading",
-          "text": "Reading the theme files…",
-          "description": "Shown while the theme files load."
-        },
-        {
-          "key": "failed",
-          "text": "The theme files didn't load:  {error}",
-          "description": "Shown when they can't."
-        },
-        {
-          "key": "groupSurfaces",
-          "text": "Surfaces",
-          "description": "Group:  the page, panels and bars (`surfaces`)."
-        },
-        {
-          "key": "groupBar",
-          "text": "Bars",
-          "description": "Group:  bars over the page (`components.bar`)."
-        },
-        {
-          "key": "groupMenu",
-          "text": "Menus and page tabs",
-          "description": "Group:  `components.menu`."
-        },
-        {
-          "key": "groupSection",
-          "text": "Section titles",
-          "description": "Group:  `components.section`."
-        },
-        {
-          "key": "groupOwn",
-          "text": "The theme's own",
-          "description": "Group:  the theme's private tokens (`own`)."
-        },
-        {
-          "key": "groupRadii",
-          "text": "Corners",
-          "description": "Group:  `radii`."
-        },
-        {
-          "key": "groupShadows",
-          "text": "Shadows",
-          "description": "Group:  `shadows`."
-        },
-        {
-          "key": "groupBorders",
-          "text": "Borders",
-          "description": "Group:  `borders`."
-        },
-        {
-          "key": "groupDocsNav",
-          "text": "Docs side column",
-          "description": "Group:  `components.docs-nav`."
-        },
-        {
-          "key": "groupEditor",
-          "text": "The editor's own",
-          "description": "Group:  the editor app's tokens (`--spell-*`), in its own sheet, not a theme file."
-        },
-        {
-          "key": "expandAll",
-          "text": "Expand all",
-          "description": "The column head's toggle, while a branch is folded."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Collapse all",
-          "description": "The column head's toggle, once every branch is open."
-        },
-        {
-          "key": "readBy",
-          "text": "Read by",
-          "description": "Accessible name of a token's row of the places that read it."
-        },
-        {
-          "key": "readsTip",
-          "text": "{place} reads it",
-          "description": "A reader's tip:  the page reads the token."
-        },
-        {
-          "key": "overridesTip",
-          "text": "{place} reads it (also set on its own elements)",
-          "description": "A reader's tip:  the page also sets the token below the page's root, where a tuning doesn't reach."
-        },
-        {
-          "key": "overridesLegend",
-          "text": "the page also sets it on its own elements",
-          "description": "The legend's half dot:  what it marks on an icon."
-        },
-        {
-          "key": "overridesLegendTip",
-          "text": "The page also sets it on its own elements:  a tuning doesn't reach those",
-          "description": "The legend's half dot's tip."
-        },
-        {
-          "key": "reset",
-          "text": "Reset",
-          "description": "Put a token back to the theme's own value."
-        },
-        {
-          "key": "split",
-          "text": "Split into light / dark",
-          "description": "Give a token a light and a dark value of its own, each with its own control."
-        },
-        {
-          "key": "resetAll",
-          "text": "Reset all",
-          "description": "Put every token of the theme shown back."
-        },
-        {
-          "key": "alpha",
-          "text": "Opacity",
-          "description": "Accessible name of a colour's opacity slider."
-        },
-        {
-          "key": "value",
-          "text": "Value",
-          "description": "Accessible name of a token's text field."
-        },
-        {
-          "key": "unset",
-          "text": "Not set in {theme}:  each element's own",
-          "description": "A token's empty field:  the theme shown doesn't set it, so each element uses its own default."
-        },
-        {
-          "key": "changes",
-          "text": "Changes",
-          "description": "The section of what's tuned, to copy into the files."
-        },
-        {
-          "key": "noChanges",
-          "text": "Nothing tuned in {theme} yet.",
-          "description": "The changes section, while nothing is tuned in the theme shown."
         }
       ],
       "mainTag": "ui-docs-theme-bench",
@@ -46089,21 +46701,23 @@
       "folder": "ui-theme-editor",
       "mainTag": "ui-theme-editor",
       "title": "Theme Editor",
-      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
+      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
       "status": "in-progress",
       "docs": false,
       "tags": [
-        "ui-theme-editor"
+        "ui-theme-editor",
+        "ui-color-chip",
+        "ui-theme-token"
       ],
       "tokens": [
         {
-          "name": "--ui-theme-editor-inspector-width",
-          "default": "320px",
+          "name": "--ui-theme-editor-side-width",
+          "default": "440px",
           "type": "length"
         },
         {
           "name": "--ui-theme-editor-gap",
-          "default": "1.5em",
+          "default": "12px",
           "type": "length"
         }
       ]
@@ -47121,6 +47735,620 @@
           "name": "--ui-focus-border",
           "default": "light-dark( oklch(from var(--ui-primary) calc(l + 0.18) calc(c * 0.5) h), oklch(from var(--ui-primary) calc(l - 0.1) calc(c * 0.7) h) )",
           "description": "Border of a focused field.",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "brand",
+      "title": "Brand colours",
+      "description": "Aliases that point at a hue:  re-point `--ui-primary` (and its `-inverted`, `-on`) to re-brand.",
+      "tokens": [
+        {
+          "name": "--ui-primary",
+          "default": "var(--ui-blue)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-hover",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-focus",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-down",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-active",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-text",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.5) c h), oklch(from var(--ui-primary) max(l, 0.78) c h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-header",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.45) c h), oklch(from var(--ui-primary) max(l, 0.85) c h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-border",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.6) c h), oklch(from var(--ui-primary) max(l, 0.7) c h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-background",
+          "default": "light-dark( oklch(from var(--ui-primary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-inverted",
+          "default": "var(--ui-blue-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-on",
+          "default": "var(--ui-blue-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-inverted-on",
+          "default": "var(--ui-blue-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary",
+          "default": "var(--ui-black)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-hover",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.05) c h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-focus",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.08) c h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-down",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-active",
+          "default": "oklch(from var(--ui-secondary) calc(l - 0.05) c h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-text",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.5) c h), oklch(from var(--ui-secondary) max(l, 0.78) c h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-header",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.45) c h), oklch(from var(--ui-secondary) max(l, 0.85) c h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-border",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.6) c h), oklch(from var(--ui-secondary) max(l, 0.7) c h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-background",
+          "default": "light-dark( oklch(from var(--ui-secondary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-inverted",
+          "default": "var(--ui-black-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-on",
+          "default": "var(--ui-black-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-inverted-on",
+          "default": "var(--ui-black-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "semantic",
+      "title": "Semantic colours",
+      "description": "Emotive colours for messages, labels and form states;  `success` / `error` are aliases of `positive` / `negative`.",
+      "tokens": [
+        {
+          "name": "--ui-positive",
+          "default": "var(--ui-green)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-inverted",
+          "default": "var(--ui-green-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-on",
+          "default": "var(--ui-green-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-inverted-on",
+          "default": "var(--ui-green-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-hover",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-focus",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-down",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-active",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-text",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.46 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-header",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.4 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-border",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.8 calc(c * 0.3) h), oklch(from var(--ui-positive) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-background",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.985 calc(c * 0.08) h), oklch(from var(--ui-positive) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative",
+          "default": "var(--ui-red)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-inverted",
+          "default": "var(--ui-red-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-on",
+          "default": "var(--ui-red-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-inverted-on",
+          "default": "var(--ui-red-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-hover",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-focus",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-down",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-active",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-text",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.46 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-header",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.4 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-border",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.8 calc(c * 0.3) h), oklch(from var(--ui-negative) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-background",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.985 calc(c * 0.08) h), oklch(from var(--ui-negative) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on-light",
+          "default": "oklch(0.74 0.13 218)",
+          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on-dark",
+          "default": "oklch(0.8 0.12 215)",
+          "description": "Concrete base in the dark scheme (a registered `<color>`).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info",
+          "default": "light-dark(var(--ui-info-on-light), var(--ui-info-on-dark))",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-inverted",
+          "default": "var(--ui-info-on-dark)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-inverted-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-hover",
+          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-focus",
+          "default": "oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-down",
+          "default": "oklch(from var(--ui-info) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-active",
+          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-text",
+          "default": "light-dark( oklch(from var(--ui-info) 0.46 calc(c * 0.6) h), oklch(from var(--ui-info) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-header",
+          "default": "light-dark( oklch(from var(--ui-info) 0.4 calc(c * 0.6) h), oklch(from var(--ui-info) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-border",
+          "default": "light-dark( oklch(from var(--ui-info) 0.8 calc(c * 0.3) h), oklch(from var(--ui-info) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-background",
+          "default": "light-dark( oklch(from var(--ui-info) 0.985 calc(c * 0.08) h), oklch(from var(--ui-info) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on-light",
+          "default": "oklch(0.8 0.16 80)",
+          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on-dark",
+          "default": "oklch(0.86 0.15 85)",
+          "description": "Concrete base in the dark scheme (a registered `<color>`).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning",
+          "default": "light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark))",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-inverted",
+          "default": "var(--ui-warning-on-dark)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-inverted-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-hover",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-focus",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-down",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-active",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-text",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.46 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-header",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.4 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-border",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.8 calc(c * 0.3) h), oklch(from var(--ui-warning) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-background",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.985 calc(c * 0.08) h), oklch(from var(--ui-warning) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success",
+          "default": "var(--ui-positive)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-inverted",
+          "default": "var(--ui-positive-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-on",
+          "default": "var(--ui-positive-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-inverted-on",
+          "default": "var(--ui-positive-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-hover",
+          "default": "var(--ui-positive-hover)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-focus",
+          "default": "var(--ui-positive-focus)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-down",
+          "default": "var(--ui-positive-down)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-active",
+          "default": "var(--ui-positive-active)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-text",
+          "default": "var(--ui-positive-text)",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-header",
+          "default": "var(--ui-positive-header)",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-border",
+          "default": "var(--ui-positive-border)",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-background",
+          "default": "var(--ui-positive-background)",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error",
+          "default": "var(--ui-negative)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-inverted",
+          "default": "var(--ui-negative-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-on",
+          "default": "var(--ui-negative-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-inverted-on",
+          "default": "var(--ui-negative-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-hover",
+          "default": "var(--ui-negative-hover)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-focus",
+          "default": "var(--ui-negative-focus)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-down",
+          "default": "var(--ui-negative-down)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-active",
+          "default": "var(--ui-negative-active)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-text",
+          "default": "var(--ui-negative-text)",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-header",
+          "default": "var(--ui-negative-header)",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-border",
+          "default": "var(--ui-negative-border)",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-background",
+          "default": "var(--ui-negative-background)",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
           "type": "color"
         }
       ]
@@ -48225,633 +49453,6 @@
       ]
     },
     {
-      "id": "brand",
-      "title": "Brand colours",
-      "description": "Aliases that point at a hue:  re-point `--ui-primary` (and its `-inverted`, `-on`) to re-brand.",
-      "tokens": [
-        {
-          "name": "--ui-primary",
-          "default": "var(--ui-blue)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-hover",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-focus",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-down",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-active",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-text",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.5) c h), oklch(from var(--ui-primary) max(l, 0.78) c h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-header",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.45) c h), oklch(from var(--ui-primary) max(l, 0.85) c h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-border",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.6) c h), oklch(from var(--ui-primary) max(l, 0.7) c h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-background",
-          "default": "light-dark( oklch(from var(--ui-primary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-inverted",
-          "default": "var(--ui-blue-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-on",
-          "default": "var(--ui-blue-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-inverted-on",
-          "default": "var(--ui-blue-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary",
-          "default": "var(--ui-black)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-hover",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.05) c h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-focus",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.08) c h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-down",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-active",
-          "default": "oklch(from var(--ui-secondary) calc(l - 0.05) c h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-text",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.5) c h), oklch(from var(--ui-secondary) max(l, 0.78) c h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-header",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.45) c h), oklch(from var(--ui-secondary) max(l, 0.85) c h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-border",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.6) c h), oklch(from var(--ui-secondary) max(l, 0.7) c h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-background",
-          "default": "light-dark( oklch(from var(--ui-secondary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-inverted",
-          "default": "var(--ui-black-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-on",
-          "default": "var(--ui-black-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-inverted-on",
-          "default": "var(--ui-black-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        }
-      ]
-    },
-    {
-      "id": "semantic",
-      "title": "Semantic colours",
-      "description": "Emotive colours for messages, labels and form states;  `success` / `error` are aliases of `positive` / `negative`.",
-      "tokens": [
-        {
-          "name": "--ui-positive",
-          "default": "var(--ui-green)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-inverted",
-          "default": "var(--ui-green-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-on",
-          "default": "var(--ui-green-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-inverted-on",
-          "default": "var(--ui-green-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-hover",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-focus",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-down",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-active",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-text",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.46 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-header",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.4 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-border",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.8 calc(c * 0.3) h), oklch(from var(--ui-positive) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-background",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.985 calc(c * 0.08) h), oklch(from var(--ui-positive) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative",
-          "default": "var(--ui-red)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-inverted",
-          "default": "var(--ui-red-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-on",
-          "default": "var(--ui-red-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-inverted-on",
-          "default": "var(--ui-red-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-hover",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-focus",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-down",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-active",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-text",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.46 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-header",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.4 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-border",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.8 calc(c * 0.3) h), oklch(from var(--ui-negative) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-background",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.985 calc(c * 0.08) h), oklch(from var(--ui-negative) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on-light",
-          "default": "oklch(0.74 0.13 218)",
-          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on-dark",
-          "default": "oklch(0.8 0.12 215)",
-          "description": "Concrete base in the dark scheme (a registered `<color>`).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info",
-          "default": "light-dark(var(--ui-info-on-light), var(--ui-info-on-dark))",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-inverted",
-          "default": "var(--ui-info-on-dark)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-inverted-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-hover",
-          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-focus",
-          "default": "oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-down",
-          "default": "oklch(from var(--ui-info) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-active",
-          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-text",
-          "default": "light-dark( oklch(from var(--ui-info) 0.46 calc(c * 0.6) h), oklch(from var(--ui-info) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-header",
-          "default": "light-dark( oklch(from var(--ui-info) 0.4 calc(c * 0.6) h), oklch(from var(--ui-info) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-border",
-          "default": "light-dark( oklch(from var(--ui-info) 0.8 calc(c * 0.3) h), oklch(from var(--ui-info) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-background",
-          "default": "light-dark( oklch(from var(--ui-info) 0.985 calc(c * 0.08) h), oklch(from var(--ui-info) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on-light",
-          "default": "oklch(0.8 0.16 80)",
-          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on-dark",
-          "default": "oklch(0.86 0.15 85)",
-          "description": "Concrete base in the dark scheme (a registered `<color>`).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning",
-          "default": "light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark))",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-inverted",
-          "default": "var(--ui-warning-on-dark)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-inverted-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-hover",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-focus",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-down",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-active",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-text",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.46 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-header",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.4 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-border",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.8 calc(c * 0.3) h), oklch(from var(--ui-warning) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-background",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.985 calc(c * 0.08) h), oklch(from var(--ui-warning) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success",
-          "default": "var(--ui-positive)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-inverted",
-          "default": "var(--ui-positive-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-on",
-          "default": "var(--ui-positive-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-inverted-on",
-          "default": "var(--ui-positive-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-hover",
-          "default": "var(--ui-positive-hover)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-focus",
-          "default": "var(--ui-positive-focus)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-down",
-          "default": "var(--ui-positive-down)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-active",
-          "default": "var(--ui-positive-active)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-text",
-          "default": "var(--ui-positive-text)",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-header",
-          "default": "var(--ui-positive-header)",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-border",
-          "default": "var(--ui-positive-border)",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-background",
-          "default": "var(--ui-positive-background)",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error",
-          "default": "var(--ui-negative)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-inverted",
-          "default": "var(--ui-negative-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-on",
-          "default": "var(--ui-negative-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-inverted-on",
-          "default": "var(--ui-negative-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-hover",
-          "default": "var(--ui-negative-hover)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-focus",
-          "default": "var(--ui-negative-focus)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-down",
-          "default": "var(--ui-negative-down)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-active",
-          "default": "var(--ui-negative-active)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-text",
-          "default": "var(--ui-negative-text)",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-header",
-          "default": "var(--ui-negative-header)",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-border",
-          "default": "var(--ui-negative-border)",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-background",
-          "default": "var(--ui-negative-background)",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        }
-      ]
-    },
-    {
-      "id": "scheme",
-      "title": "Scheme",
-      "description": "Which colour scheme is in force:  `ui-invert` and style queries read it.",
-      "tokens": [
-        {
-          "name": "--ui-scheme",
-          "default": "light",
-          "description": "`light` or `dark`;  follows the OS unless the page forces one.",
-          "type": "other"
-        }
-      ]
-    },
-    {
       "id": "shadows",
       "title": "Shadows",
       "description": "Box shadows by role, in layers of the shadow ink.",
@@ -48981,6 +49582,19 @@
           "name": "--ui-ease-expo",
           "default": "cubic-bezier(0.19, 1, 0.22, 1)",
           "description": "Easing `expo`.",
+          "type": "other"
+        }
+      ]
+    },
+    {
+      "id": "scheme",
+      "title": "Scheme",
+      "description": "Which colour scheme is in force:  `ui-invert` and style queries read it.",
+      "tokens": [
+        {
+          "name": "--ui-scheme",
+          "default": "light",
+          "description": "`light` or `dark`;  follows the OS unless the page forces one.",
           "type": "other"
         }
       ]

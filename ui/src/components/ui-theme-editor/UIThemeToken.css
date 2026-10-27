@@ -1,0 +1,233 @@
+/*
+ * The style sheet of `<ui-theme-token>`:  one token's row in the theme editor's tree, and its drawer.
+ * - The row:  the mark, the name (a button), who reads it and the buttons, on one line;  the values under it, light
+ *   then dark, 20px apart (Owen).
+ * - ○ (from what the theme builds on):  the row dimmed, until it's hovered.
+ * - Public tokens (`--ui-theme-token-*`) are read through private aliases.
+ */
+
+@layer ui.components.theme-token.types, ui.components.theme-token.content;
+
+@layer ui.components.theme-token.types {
+  :host {
+    display: block;
+    --_ui-theme-token-gap: var(--ui-theme-token-gap, 20px);
+  }
+}
+
+@layer ui.components.theme-token.content {
+  .theme-token {
+    display: grid;
+    gap: 4px;
+    padding: 6px 8px;
+  }
+  :host(:not(:state(here))) .theme-token:not(:hover) :is(.name, .values, .pointer) {
+    opacity: 0.6;
+  }
+
+  /* ## The head */
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+  }
+  .mark {
+    flex: none;
+    width: 1em;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1;
+  }
+  .mark.set {
+    color: var(--ui-primary-text, var(--ui-primary));
+  }
+  .mark.from {
+    color: var(--ui-text-muted);
+  }
+  .name {
+    min-width: 0;
+    margin-inline-end: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-family: var(--ui-font-family-mono, monospace);
+    font-size: 0.85em;
+    color: inherit;
+    text-align: start;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .name:hover,
+  .open .name {
+    color: var(--ui-link, var(--ui-primary));
+  }
+  .name:focus-visible,
+  .link:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--ui-link));
+    outline-offset: 1px;
+  }
+  .readers {
+    display: inline-flex;
+    gap: 2px;
+    flex: none;
+  }
+  .reader {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    color: var(--ui-primary-text, var(--ui-primary));
+    background: var(--ui-primary-background, transparent);
+  }
+  .reader ui-icon {
+    --ui-icon-width: auto;
+    margin: 0;
+    font-size: 0.8em;
+  }
+  /* it reads it, but sets its own below `:root` too, where the theme doesn't reach:  a half dot on its corner */
+  .reader.overrides::after {
+    content: "";
+    position: absolute;
+    inset: auto -2px -2px auto;
+    width: 9px;
+    height: 9px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--ui-warning-text, #b45309);
+    background: linear-gradient(90deg, var(--ui-warning-text, #b45309) 50%, var(--ui-surface) 50%);
+  }
+  /* Set here, Split, Reset:  quiet, until the row's hovered */
+  .tool {
+    flex: none;
+    opacity: 0.55;
+  }
+  .theme-token:hover .tool,
+  .tool:focus-within {
+    opacity: 1;
+  }
+
+  /* ## The values:  light, then dark, 20px apart */
+
+  .values {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px var(--_ui-theme-token-gap);
+    padding-inline-start: 1.1em;
+  }
+  .value {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+  }
+  .mix {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85em;
+    color: var(--ui-text-muted);
+  }
+  .amount {
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ui-text-muted);
+  }
+  .text {
+    font-size: 0.8em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pointer {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-inline-start: 1.1em;
+    font-size: 0.8em;
+    color: var(--ui-text-muted);
+  }
+  .link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-family: var(--ui-font-family-mono, monospace);
+    color: var(--ui-link, var(--ui-primary));
+    cursor: pointer;
+  }
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  /* ## The drawer:  under the row, a step in */
+
+  .drawer {
+    display: grid;
+    gap: 8px;
+    margin: 0 8px 8px 1.6em;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--ui-surface-muted, transparent);
+    border: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  }
+  .mix-editor,
+  .pointer-editor {
+    display: grid;
+    gap: 8px;
+  }
+  .field {
+    display: grid;
+    grid-template-columns: 6em minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+  .amount-field {
+    grid-template-columns: 6em minmax(0, 1fr) 3em;
+  }
+  .amount-field .amount {
+    text-align: end;
+  }
+  .field-label {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: var(--ui-text-muted);
+  }
+  /* a colour's value:  the picker, its hex, its opacity against its % (numbers right-aligned, Owen's rule) */
+  .value-editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+  }
+  .value-editor.color {
+    grid-template-columns: 32px minmax(0, 1fr) 3.4em auto;
+  }
+  .value-editor.length {
+    grid-template-columns: 7em minmax(0, 1fr);
+  }
+  .picker::part(control) {
+    inline-size: 32px;
+    block-size: 28px;
+  }
+  .hex::part(control) {
+    font-family: var(--ui-font-family-mono, monospace);
+  }
+  .opacity::part(control),
+  .value-editor.length ui-input::part(control) {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  .unit {
+    font-size: 0.8em;
+    color: var(--ui-text-muted);
+  }
+}

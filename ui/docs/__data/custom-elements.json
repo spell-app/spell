@@ -34296,15 +34296,162 @@
       "declarations": [
         {
           "kind": "class",
+          "name": "UIColorChip",
+          "tagName": "ui-color-chip",
+          "customElement": true,
+          "summary": "A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.",
+          "description": "A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.\n\nAlso known as:  color chip, swatch, colour sample, color preview, color dot.",
+          "attributes": [
+            {
+              "name": "color",
+              "description": "The colour:  any CSS colour (`#7c55e6`, `oklch(...)`, `var(--ui-primary)`, `light-dark(...)`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "color"
+            },
+            {
+              "name": "scheme",
+              "description": "The scheme a `light-dark()` colour resolves in:  the page's (`auto`), `light` or `dark`.",
+              "type": {
+                "text": "\"auto\" | \"light\" | \"dark\""
+              },
+              "default": "\"auto\"",
+              "fieldName": "scheme"
+            },
+            {
+              "name": "label",
+              "description": "What the colour is, for a screen reader and the tooltip.  None:  the colour itself.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "chip",
+              "description": "The chip itself."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
           "name": "UIThemeEditor",
           "tagName": "ui-theme-editor",
           "customElement": true,
-          "summary": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.",
-          "description": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens.",
+          "summary": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.",
+          "description": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme bench, theme creator, theme generator, style editor, design tokens, token tuner.",
           "attributes": [
             {
               "name": "base",
-              "description": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.",
+              "description": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.",
               "type": {
                 "text": "string"
               },
@@ -34387,7 +34534,15 @@
             {
               "kind": "field",
               "name": "value",
-              "description": "The theme to start with, as `ThemeChoices` (`{\"primary\": \"pink\", \"corners\": \"soft\"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.  A JS property (rich data), not an attribute.",
+              "description": "The theme to start with, as `ThemeChoices` (`{\"primary\": \"pink\", \"corners\": \"soft\"}`).  None:  the theme being made in this browser, else the one kept (`SavedTheme`), else the base theme as it is.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pages",
+              "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -34396,16 +34551,16 @@
           "events": [
             {
               "name": "ui-changed",
-              "description": "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.",
+              "description": "A choice changed:  `value` is every choice now, `css` the theme's sheet, worn over its base.",
               "type": {
                 "text": "CustomEvent<{ value: ThemeChoices, css: string }>"
               }
             },
             {
               "name": "ui-copied",
-              "description": "Copy CSS put the stylesheet on the clipboard.",
+              "description": "Copy changes put the theme file's JSON5 on the clipboard.",
               "type": {
-                "text": "CustomEvent<{ css: string }>"
+                "text": "CustomEvent<{ text: string }>"
               }
             },
             {
@@ -34420,25 +34575,49 @@
           "cssParts": [
             {
               "name": "editor",
-              "description": "The whole editor:  the inspector beside the preview and the stylesheet."
+              "description": "The whole editor:  the bar, the preview, and the side column."
             },
             {
-              "name": "inspector",
-              "description": "The inspector, a `<ui-panel>` of `<ui-property-editor>` fields."
+              "name": "bar",
+              "description": "The top bar, one line:  its title, the theme, which pages, how they show."
+            },
+            {
+              "name": "basics",
+              "description": "The Basics:  the theme's name and base, and its big choices."
+            },
+            {
+              "name": "tokens",
+              "description": "Every token, in the theme file's groups."
+            },
+            {
+              "name": "token",
+              "description": "One token's row:  its name, which pages read it, its control."
+            },
+            {
+              "name": "pages",
+              "description": "The previewed pages' grid."
+            },
+            {
+              "name": "page",
+              "description": "One previewed page:  its title row and its frames."
             },
             {
               "name": "preview",
-              "description": "The preview:  a sample app of real elements, in light and dark."
+              "description": "The sample app, light and dark, when no pages are given."
             },
             {
-              "name": "sheet",
-              "description": "The stylesheet section, with Copy CSS."
+              "name": "changes",
+              "description": "The theme file's text, with Copy changes."
             }
           ],
           "cssStates": [
             {
               "name": "saved",
               "description": "The theme it shows is the one kept in this browser (Use this theme)."
+            },
+            {
+              "name": "changed",
+              "description": "Something is changed:  a Basic, or a token set by hand."
             },
             {
               "name": "disabled",
@@ -34479,17 +34658,199 @@
           ],
           "cssProperties": [
             {
-              "name": "--ui-theme-editor-inspector-width",
-              "default": "320px"
+              "name": "--ui-theme-editor-side-width",
+              "default": "440px"
             },
             {
               "name": "--ui-theme-editor-gap",
-              "default": "1.5em"
+              "default": "12px"
             }
           ]
+        },
+        {
+          "kind": "class",
+          "name": "UIThemeToken",
+          "tagName": "ui-theme-token",
+          "customElement": true,
+          "summary": "A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it.",
+          "description": "A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it.\n\nAlso known as:  theme token, design token, token row, css variable, custom property editor.",
+          "attributes": [
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "row",
+              "description": "PROPERTY:  what to draw, as `TokenRow` (its name, where its value comes from, its value in each scheme, what its drawer offers).  `<ui-theme-editor>` works it out.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-changed",
+              "description": "Its drawer set a value:  for `scheme` alone, or (none) for both.",
+              "type": {
+                "text": "CustomEvent<{ token: string, value: string, scheme?: \"light\" | \"dark\" }>"
+              }
+            },
+            {
+              "name": "ui-command",
+              "description": "Its name opened or closed its drawer (`open`), a button was pressed (`reset`, `set here`, `split`), or a link to another token (`show`, its `place`).",
+              "type": {
+                "text": "CustomEvent<{ token: string, command: \"open\" | \"reset\" | \"set here\" | \"split\" | \"show\", place?: string }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "row",
+              "description": "The row:  its mark, name, readers, buttons and values."
+            },
+            {
+              "name": "drawer",
+              "description": "The drawer under the name, while it's open."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "here",
+              "description": "The theme sets the token (●)."
+            },
+            {
+              "name": "open",
+              "description": "Its drawer is open."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "UIColorChip",
+          "declaration": {
+            "name": "UIColorChip",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-color-chip",
+          "declaration": {
+            "name": "UIColorChip",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        },
         {
           "kind": "js",
           "name": "UIThemeEditor",
@@ -34503,6 +34864,22 @@
           "name": "ui-theme-editor",
           "declaration": {
             "name": "UIThemeEditor",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UIThemeToken",
+          "declaration": {
+            "name": "UIThemeToken",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-theme-token",
+          "declaration": {
+            "name": "UIThemeToken",
             "module": "src/components/ui-theme-editor/index.ts"
           }
         }

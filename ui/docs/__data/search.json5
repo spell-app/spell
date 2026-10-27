@@ -160,7 +160,7 @@
     {
       "path": "theme-bench.html",
       "title": "Theme bench",
-      "summary": "Spell's real pages side by side in one theme:  tune the tokens behind their tabs, section titles and surfaces, live.",
+      "summary": "The theme editor, full width:  Spell's real pages side by side in the theme being made, its big choices and every token, live.",
       "sections": []
     },
     {
@@ -3434,7 +3434,7 @@
     {
       "path": "ui-theme-editor.html",
       "title": "Theme Editor",
-      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
+      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
       "tag": "ui-theme-editor",
       "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
       "sections": [
@@ -3444,6 +3444,7 @@
         {"id":"usage-use-this-theme","title":"Use this theme","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
         {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-tags","title":"Tags","tab":"api"},
         {"id":"api-attributes","title":"Attributes","tab":"api"},
         {"id":"api-properties","title":"Properties","tab":"api"},
         {"id":"api-events","title":"Events","tab":"api"},

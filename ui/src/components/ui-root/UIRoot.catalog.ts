@@ -224,6 +224,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { parts: [{ shape: "paragraph", lines: 5 }] },
     attributes: ["source", "load", "language", "line-numbers", "start", "wrap", "copy"]
   },
+  "ui-color-chip": {
+    folder: "ui-theme-editor",
+    skeleton: { display: "inline", width: "1.4em", height: "1.4em" },
+    attributes: ["color", "scheme", "label"]
+  },
   "ui-column": {
     folder: "ui-grid",
     attributes: [
@@ -1421,12 +1426,17 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
-  "ui-theme-editor": { folder: "ui-theme-editor", skeleton: { height: "30em" }, attributes: ["base", "value"] },
+  "ui-theme-editor": {
+    folder: "ui-theme-editor",
+    skeleton: { height: "30em" },
+    attributes: ["base", "value", "pages"]
+  },
   "ui-theme-menu": {
     folder: "ui-theme-menu",
     skeleton: { display: "inline", width: "5em", height: "2.25em" },
     attributes: ["show", "size", "inverted", "compact"]
   },
+  "ui-theme-token": { folder: "ui-theme-editor", skeleton: { height: "2em" }, attributes: ["row"] },
   "ui-title": { folder: "ui-parts", attributes: ["link"] },
   "ui-toast": {
     folder: "ui-toast",

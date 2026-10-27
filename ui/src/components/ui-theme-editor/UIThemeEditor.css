@@ -1,12 +1,15 @@
 /*
- * The style sheet of `<ui-theme-editor>`:  the inspector beside the preview and the stylesheet.
- * - `.theme-editor`:  a two-column grid, the inspector 320px;  one column when the element is narrow
- *   (a container query on the host, so it fits a side panel as well as a page).
- * - `.inspector`:  a `<ui-panel>` (its own look:  the brand's compact inspector), around a `<ui-property-editor>`.
+ * The style sheet of `<ui-theme-editor>`:  a one-line bar, then the preview beside the side column.
+ * - `.bar`:  ONE line (Owen:  "dont' wrap"):  the title, then the tools, which scroll sideways when there's no room.
+ * - `.body`:  the preview (the pages' grid, or the sample app) beside the side column, 440px;
+ *   stacked when the element is narrow (a container query on the host, so it fits a side panel as well as a page).
+ * - `.side`:  the actions, the Basics, the token tree (its filter stuck at the column's top as it scrolls), the changes.
  * - `.swatches`:  the colour rows, small round swatches as macOS's accent colours;  the base's own a ring of hues.
- * - `.sample`:  the preview's sample app, once per scheme (`ui-light` / `ui-dark` on it),
- *   on the page's own background and wallpaper (`--ui-bar-wallpaper`, a glass theme's), so glass shows as it will.
- * - Every colour, font and radius here is a token:  the editor wears the theme it edits.
+ * - `.sample`:  the sample app, once per scheme (`ui-light` / `ui-dark` on it), on the page's own background.
+ * - Every colour, font and radius here is a token.
+ *   With pages, the editor itself wears Fruity, and only the pages change;  without, it wears the theme it edits.
+ * - Outer boxes round more than what they hold (Owen:  "rounding of outer rings needs to be greater than rounding of
+ *   inner bits"):  a page's card `--ui-radius-l`, its frame's corner a step less.
  * - Public tokens (`--ui-theme-editor-*`) are read through private aliases.
  */
 
@@ -16,114 +19,275 @@
   :host {
     display: block;
     container-type: inline-size;
-    --_ui-theme-editor-inspector-width: var(--ui-theme-editor-inspector-width, 320px);
-    --_ui-theme-editor-gap: var(--ui-theme-editor-gap, 1.5em);
+    --_ui-theme-editor-side-width: var(--ui-theme-editor-side-width, 440px);
+    --_ui-theme-editor-gap: var(--ui-theme-editor-gap, 12px);
   }
   .theme-editor {
     display: grid;
-    grid-template-columns: var(--_ui-theme-editor-inspector-width) minmax(0, 1fr);
+    /* one column no wider than the element:  a wide menu scrolls in the bar, never the page */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
     gap: var(--_ui-theme-editor-gap);
-    align-items: start;
+    height: 100%;
+    box-sizing: border-box;
+    color: var(--ui-text-color);
+    font-family: var(--ui-font-family);
   }
-  @container (width < 768px) {
-    .theme-editor {
+  /* with pages, a page whose own height is left to it:  room enough for the grid of frames */
+  .theme-editor.paged {
+    min-height: 640px;
+  }
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--_ui-theme-editor-side-width);
+    gap: var(--_ui-theme-editor-gap);
+    min-height: 0;
+  }
+  @container (width < 960px) {
+    .body {
       grid-template-columns: minmax(0, 1fr);
     }
-  }
-  .side {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    min-width: 0;
   }
 }
 
 @layer ui.components.theme-editor.content {
-  /* ## The inspector */
+  /* ## The bar:  one line */
 
-  .properties {
-    display: block;
-  }
-  .actions {
+  .bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5em;
-    margin-block-start: 1em;
-    --ui-button-margin-inline: 0;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 8px 12px;
+    border-radius: var(--ui-radius-l, 12px);
+    background: var(--ui-bar-background, var(--ui-surface));
+    backdrop-filter: var(--ui-bar-filter, none);
+    box-shadow: var(--ui-shadow-subtle, none);
+  }
+  .title {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .title ui-icon {
+    font-size: 1.4em;
+    color: var(--ui-primary);
+  }
+  .title h1 {
+    margin: 0;
+    font-family: var(--ui-font-family-heading, inherit);
+    font-size: 1.1em;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  /* the row's box:  its ‹ › over its ends, while there's more of it that way */
+  .tools-wrap {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* the theme row and the menus:  one row at the bar's end, scrolling sideways when there's no room;
+     a side with more out of sight fades out under its ‹ or › */
+  .tools {
+    --_fade-start: 0px;
+    --_fade-end: 0px;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--_fade-start),
+      #000 calc(100% - var(--_fade-end)),
+      transparent
+    );
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* side by side, so no block margin beside each other (a menu takes 1em above and below its siblings) */
+    --ui-menu-margin: 0;
+  }
+  /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
+  .tools > *,
+  .themes-row > * {
+    flex: none;
+  }
+  /* the theme row first, pushed to the end with the rest while there's room */
+  .themes-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-inline-start: auto;
   }
 
-  /* ## Swatches:  one row a colour, the chosen one ringed */
-
-  /* one row, however narrow the inspector:  the swatches shrink, up to 22px each */
-  .swatches {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 22px);
-    gap: 4px;
-    padding: 4px;
-    margin-inline: -4px;
+  .more-start .tools {
+    --_fade-start: 40px;
   }
-  .swatch {
-    inline-size: 100%;
-    aspect-ratio: 1;
+  .more-end .tools {
+    --_fade-end: 40px;
+  }
+  .edge {
+    position: absolute;
+    inset-block: 0;
+    z-index: 1;
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
     padding: 0;
     border: 0;
-    border-radius: 50%;
-    background: var(--_swatch);
-    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
-    cursor: pointer;
-    transition: transform var(--ui-duration-fast, 0.1s);
-  }
-  .swatch:hover {
-    transform: scale(1.12);
-  }
-  .swatch.own {
-    background: conic-gradient(
-      var(--ui-red),
-      var(--ui-yellow),
-      var(--ui-green),
-      var(--ui-teal),
-      var(--ui-blue),
-      var(--ui-violet),
-      var(--ui-pink),
-      var(--ui-red)
-    );
-  }
-  .swatch[aria-checked="true"] {
-    box-shadow:
-      0 0 0 2px var(--ui-surface, white),
-      0 0 0 4px var(--_swatch, var(--ui-text-muted));
-  }
-  .swatch:focus-visible {
-    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
-    outline-offset: 4px;
-  }
-
-  /* ## Preview and stylesheet sections */
-
-  .tool {
-    --ui-section-margin: 0;
-  }
-  .file {
-    font-family: var(--ui-font-family-mono);
-    font-size: 0.8em;
+    background: none;
     color: var(--ui-text-muted);
+    cursor: pointer;
+  }
+  .edge.start {
+    inset-inline-start: 0;
+  }
+  .edge.end {
+    inset-inline-end: 0;
+  }
+  .edge[hidden] {
+    display: none;
+  }
+  .edge:hover {
+    color: var(--ui-link, var(--ui-primary));
+  }
+  .edge ui-icon {
+    --ui-icon-width: auto;
+    margin: 0;
+  }
+  /* Phone and ⇄:  plain icons;  pressed, the segmented menus' chosen fill, in a pill */
+  .bar-toggle {
+    --ui-button-radius: 9999px;
+    --ui-button-background: transparent;
+  }
+  .bar-toggle[aria-pressed="true"] {
+    --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+  }
+
+  /* ## The pages */
+
+  .pages {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(0, 1fr);
+    gap: var(--_ui-theme-editor-gap);
+    min-height: 0;
+  }
+  .pages.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .page {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    margin: 0;
+    min-height: 0;
+    padding: 6px;
+    gap: 6px;
+    border-radius: var(--ui-radius-l, 12px);
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border-color);
+    box-shadow: var(--ui-shadow-raised, none);
+  }
+  .page[hidden] {
+    display: none;
+  }
+  /* narrow:  one page a row, each as tall as most of the window;  its path left out */
+  @container (width < 960px) {
+    .pages,
+    .pages.grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: 70vh;
+    }
+    .page-path {
+      display: none;
+    }
+  }
+  .page-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 6px;
+    min-width: 0;
+  }
+  .page-icon {
+    --ui-icon-width: auto;
+    margin: 0;
+    color: var(--ui-primary-text, var(--ui-primary));
+  }
+  .page-title {
+    font-weight: 600;
     white-space: nowrap;
+  }
+  .page-path {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-inline-end: auto;
+    font-size: 0.8em;
+    color: var(--ui-text-muted);
   }
+  /* reload and open:  plain icons, as every toolbar's */
+  .page-tool {
+    display: inline-flex;
+    color: var(--ui-text-muted);
+  }
+  /* a page's frames:  its light and dark halves side by side, or its one */
+  .frames {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    min-height: 0;
+  }
+  .frames.both {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* a row's right-hand pair, or a swapped one:  its dark side first, so a row's two darks (or lights) sit together */
+  .frames.dark-first .frame.dark {
+    order: -1;
+  }
+  .frame {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .viewport {
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+    /* a step less than the card around it */
+    border-radius: calc(var(--ui-radius-l, 12px) - 6px);
+    background: var(--ui-background);
+  }
+  /* Phone:  the page a phone's width, centred on the frame's ground */
+  .viewport.phone {
+    background: var(--ui-surface-muted, var(--ui-background));
+  }
+  .viewport iframe {
+    position: absolute;
+    inset: 0 auto auto 0;
+    border: 0;
+    transform-origin: 0 0;
+    background: var(--ui-background);
+  }
+  /* until it's drawn in the theme:  hidden, so it never flashes white or the theme before */
+  .viewport:not(.loaded) iframe {
+    visibility: hidden;
+  }
+  .viewport .note {
+    margin: 1.5em;
+  }
+
+  /* ## The sample app, with no pages:  on the page's background, in its scheme */
+
   .previews {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-content: start;
     gap: 1em;
   }
-  ui-code {
-    --ui-code-font-size: 0.8em;
-    --ui-code-line-height: 1.55;
-  }
-
-  /* ## The sample app:  on the page's background, in its scheme */
-
   .sample {
     display: flex;
     flex-direction: column;
@@ -189,5 +353,343 @@
     align-items: center;
     gap: 0.5em;
     --ui-button-margin-inline: 0;
+  }
+
+  /* ## The side column */
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    border-radius: var(--ui-radius-l, 12px);
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border-color);
+    box-shadow: var(--ui-shadow-raised, none);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    --ui-button-margin-inline: 0;
+  }
+  .note {
+    margin: 0.5em 0;
+    color: var(--ui-text-muted);
+  }
+  .properties {
+    display: block;
+    padding: 4px 8px 8px;
+  }
+  .file {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.8em;
+    color: var(--ui-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .group::part(heading) {
+    white-space: nowrap;
+  }
+  .changes ui-code {
+    --ui-code-font-size: 0.8em;
+    --ui-code-line-height: 1.55;
+  }
+  .changes .note {
+    padding-inline: 8px;
+  }
+
+  /* ### Swatches:  one row a colour, the chosen one ringed */
+
+  /* one row, however narrow the column:  the swatches shrink, up to 22px each */
+  .swatches {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 22px);
+    gap: 4px;
+    padding: 4px;
+    margin-inline: -4px;
+  }
+  .swatch {
+    inline-size: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--_swatch);
+    box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.12), rgb(255 255 255 / 0.22));
+    cursor: pointer;
+    transition: transform var(--ui-duration-fast, 0.1s);
+  }
+  .swatch:hover {
+    transform: scale(1.12);
+  }
+  .swatch.own {
+    background: conic-gradient(
+      var(--ui-red),
+      var(--ui-yellow),
+      var(--ui-green),
+      var(--ui-teal),
+      var(--ui-blue),
+      var(--ui-violet),
+      var(--ui-pink),
+      var(--ui-red)
+    );
+  }
+  .swatch[aria-checked="true"] {
+    box-shadow:
+      0 0 0 2px var(--ui-surface, white),
+      0 0 0 4px var(--_swatch, var(--ui-text-muted));
+  }
+  .swatch:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: 4px;
+  }
+
+  /*
+   * ### The tree:  each group a panel of its own under a title band, as the docs pages' sections;
+   * a branch inside it indented on a guide line, its title a step quieter.  Nesting reads by indent and line, not space.
+   */
+
+  .tokens {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .group {
+    display: block;
+    /* no section's margins:  the column's gap spaces the groups, the panels' edges part them */
+    --ui-section-margin: 0;
+    --ui-section-content-padding: 0;
+    /* a step less than the column's corners around it */
+    border-radius: calc(var(--ui-radius-l, 12px) - 4px);
+    border: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+    background: color-mix(in oklab, var(--ui-surface) 55%, transparent);
+    overflow: clip;
+  }
+  /* the group's title band:  the docs pages' resting section title */
+  .group::part(title) {
+    padding: 6px 8px;
+    background: var(--ui-section-title-background, var(--ui-surface-strong));
+    border-block-end: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  }
+  .group::part(heading) {
+    font-size: 1em;
+  }
+  .branch {
+    display: block;
+    --ui-section-margin: 0;
+    --ui-section-content-padding: 0;
+    margin-inline-start: 12px;
+    border-inline-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  }
+  .branch::part(title) {
+    padding: 4px 8px;
+  }
+  .branch::part(heading) {
+    font-size: 0.85em;
+    font-weight: 600;
+    font-family: var(--ui-font-family-mono, monospace);
+  }
+  /* ### The marks' legend (Owen's):  ● set here, ○ from what the theme builds on;  each row draws its own (`<ui-theme-token>`) */
+  .mark {
+    flex: none;
+    width: 1em;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1;
+  }
+  .mark.set {
+    color: var(--ui-primary-text, var(--ui-primary));
+  }
+  .mark.from {
+    color: var(--ui-text-muted);
+  }
+  /* a formula's result, read-only:  its light and dark colours, then its amount */
+  /* a pointer's pick, asked */
+  /* a group's count, on its title band */
+  .group-count {
+    font-size: 0.75em;
+    color: var(--ui-text-muted);
+    white-space: nowrap;
+  }
+  /* the filter's chip:  only what's set here;  pressed, filled */
+  .chip {
+    flex: none;
+    --ui-button-radius: 9999px;
+  }
+  .chip[aria-pressed="true"] {
+    --ui-button-background: var(--ui-primary-background, var(--ui-surface-strong));
+  }
+  .marks-legend {
+    margin: 0;
+    padding-inline: 8px;
+    font-size: 0.75em;
+    color: var(--ui-text-muted);
+  }
+  .marks-legend .mark {
+    display: inline-block;
+  }
+
+  /* a token's controls, one row:  a colour's picker, its value, its opacity;  a length's value and slider */
+  /* split and reset:  quiet, until the row's hovered */
+
+  /* a token shown light and dark apart:  the two halves side by side, each under its sun or moon */
+  /* a colour's half:  the scheme's icon, the swatch (the picker), its hex, its opacity and its % */
+  /* the opacity:  a number, right-aligned against its unit (Owen's standing rule) */
+
+  /* the tree's title, filter and readers' legend:  stuck to the column's top as the tokens scroll under them */
+  .tokens-head {
+    position: sticky;
+    top: -12px;
+    z-index: 1;
+    display: grid;
+    gap: 8px;
+    margin: 0 -12px;
+    padding: 12px 12px 6px;
+    /* the column's own fill over the page's:  opaque in every theme, so nothing shows through it (a glass
+       theme's surface is see-through) */
+    background: linear-gradient(var(--ui-surface), var(--ui-surface)), var(--ui-background);
+    container-type: scroll-state;
+    border-block-end: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  }
+  /* stuck:  a soft shadow under it, so the tokens read as passing beneath */
+  @container scroll-state(stuck: top) {
+    .tokens-head::after {
+      content: "";
+      position: absolute;
+      inset: 100% 0 auto;
+      height: 10px;
+      background: linear-gradient(rgb(0 0 0 / 0.12), transparent);
+      pointer-events: none;
+    }
+  }
+  /* the tree head's bar:  the theme's name, then Search, Collapse and Info, plain icons, pressed while open */
+  .tokens-bar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .tokens-bar .tokens-title {
+    margin-inline-end: auto;
+  }
+  .head-tool {
+    --ui-button-background: transparent;
+    --ui-button-radius: 0.45em;
+  }
+  .head-tool[aria-pressed="true"] {
+    --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+  }
+  .info-pane {
+    display: grid;
+    gap: 4px;
+  }
+  /* the legend's half dot:  a page that also sets the token on its own elements */
+  .half-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--ui-warning-text, #b45309);
+    background: linear-gradient(90deg, var(--ui-warning-text, #b45309) 50%, var(--ui-surface) 50%);
+  }
+  .tokens-title {
+    margin: 0;
+    font-family: var(--ui-font-family-heading, inherit);
+    font-size: 1em;
+  }
+  /* the filter, and expand all / collapse all at its right:  `<ui-toc>`'s double chevron, muted, a square on hover */
+  .find-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .find-row .find {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .toggle-all {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.9em;
+    height: 1.9em;
+    padding: 0;
+    border: none;
+    border-radius: 0.45em;
+    background: none;
+    color: var(--ui-text-muted);
+    cursor: pointer;
+  }
+  .toggle-all:hover {
+    color: var(--ui-link, var(--ui-primary));
+    background: color-mix(in oklab, currentColor 10%, transparent);
+  }
+  .toggle-all:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--ui-link));
+    outline-offset: 1px;
+  }
+  .chevrons {
+    display: block;
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ### Who reads it:  the reading pages' icons on a token's name line;  their legend once, in the tree's head */
+
+  /* it reads it, but sets its own below `:root` too, where the theme doesn't reach:  a half dot on the icon's corner */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    padding-inline: 8px;
+    font-size: 0.75em;
+    color: var(--ui-text-muted);
+  }
+  .legend-label {
+    font-weight: 600;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  /* what the half dot means:  a line of its own, under the pages */
+  .legend-item.overrides {
+    flex-basis: 100%;
+  }
+  .legend-item ui-icon {
+    --ui-icon-width: auto;
+    margin: 0;
+    color: var(--ui-primary-text, var(--ui-primary));
+  }
+
+  /* ## The colour probe:  out of sight, in the scheme shown */
+
+  .probe {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  .probe.ui-light {
+    color-scheme: light;
+  }
+  .probe.ui-dark {
+    color-scheme: dark;
   }
 }
