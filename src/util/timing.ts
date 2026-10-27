@@ -12,6 +12,7 @@
  *   - each returns a way to cancel, where one makes sense
  * - And waiting:  `waitUntil(read, { timeout, every })` looks until something is true, `within(promise, seconds)` waits
  *   for a promise at most so long
+ * - And work asked for often, run once at one of those moments:  `new Queued({ when, run })`, then `ask()`
  * - Plain JS, importing nothing:  safe to import anywhere, on a server too, and plain `node` loads it with its
  *   extension (`spell/util/timing.ts`).  Only `beforeNextPaint()` needs a browser to CALL.
  * - Its place:  util's generic files, so the kit's server and command line, the parser's core and every node tool may
@@ -113,6 +114,74 @@ export type CancelablePromise<T> = Promise<T> & {
   /** Stop the timer if it hasn't fired;  the promise rejects with an `AbortError`.  Does nothing after. */
   cancel(): void
 }
+
+////////////////
+// ## Once, however often asked
+////////////////
+
+/****************
+ * ### `Queued`
+ * Work asked for again and again, run ONCE at the next moment you name:  a burst of asks runs it once.
+ * - A field, then `ask()` as often as you like:
+ *   ```ts
+ *   readonly refit = new Queued({ when: beforeNextPaint, run: () => this.measure() })
+ *   ```
+ *   `this.refit.ask()` from each resize, scroll or change;  `this.refit.cancel()` in a cleanup.
+ * - An ask while a run is pending rides it:  the work runs once, at that moment.
+ *   An ask once it has run (or from inside the work) queues it again.
+ * - `cancel()` drops a pending run;  the next ask queues afresh.
+ * - For a measurer, a fitter, a re-reader:  anything several events ask for in one turn.
+ ****************/
+export class Queued {
+  /** When the work runs. */
+  private readonly when: QueuedMoment
+  /** The work. */
+  private readonly run: () => void
+  /** Drops the pending run;  `undefined` while none is pending. */
+  private dropPending: (() => void) | undefined
+
+  constructor({ when, run }: QueuedProps) {
+    this.when = when
+    this.run = run
+  }
+
+  /** Is a run pending? */
+  get isPending(): boolean {
+    return this.dropPending !== undefined
+  }
+
+  /** Ask for the work:  it runs at the next moment `when` names, once however many asks come before it. */
+  ask(): void {
+    if (this.dropPending) return
+    let isDropped = false
+    const cancel = this.when(() => {
+      if (isDropped) return
+      this.dropPending = undefined
+      this.run()
+    })
+    this.dropPending = () => {
+      isDropped = true
+      if (cancel) cancel()
+    }
+  }
+
+  /** Drop a pending run, if there is one. */
+  cancel(): void {
+    this.dropPending?.()
+    this.dropPending = undefined
+  }
+}
+
+/** What a `Queued` is made from. */
+export type QueuedProps = {
+  /** when the work runs:  `afterSolidUpdate`, `beforeNextPaint` or `soon` */
+  when: QueuedMoment
+  /** the work, run once per burst of asks */
+  run: () => void
+}
+
+/** One of the moments above:  runs `fn` later, maybe returning a way to cancel it. */
+export type QueuedMoment = (fn: () => void) => (() => void) | void
 
 ////////////////
 // ## Waiting

@@ -8,6 +8,8 @@
  * - `Cell`, `SlotContent`
  * - `Disclosure`:  one open / closed state, its events, `aria-expanded` and find-in-page, for anything that shows
  *   and hides a box
+ * - `OwnControls`:  did a click land on a control inside an element (a button, a link, a field), not on the element?
+ * - `ParentLink`:  the `parent` attribute, an element joining the container with that id
  * - `PartContext` and `OwnerContext`:  the generic content parts, and the elements they belong to
  * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell-ui/core` loads)
  * - the vocabulary's types (`ComponentVocabulary` ...)
@@ -48,6 +50,8 @@ export * from "./PartContext"
 export * from "./UIComponent"
 export * from "./SlotContent"
 export * from "./Disclosure"
+export * from "./OwnControls"
+export * from "./ParentLink"
 
 /**
  * The package namespace (WWOD §4):

@@ -51,6 +51,10 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [Disclosure](Disclosure.ts):  one open / closed state for anything that shows and hides a box (a fold, a section,
     a popover, an overlay):  a guarded request with `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed`,
     `aria-expanded`, find-in-page opening it (epic `coherence` P8)
+  - [OwnControls](OwnControls.ts):  did a click land on a control inside an element (a button, a link, a field),
+    not on the element itself?  A linked element's click, Spell UI's folding titles and toasts (epic `coherence` P21)
+  - [ParentLink](ParentLink.ts):  the `parent` attribute, an element joining the container with that id;
+    `UIComponent` follows it for every tag whose vocabulary declares one (Spell UI's until epic `coherence` P21)
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots

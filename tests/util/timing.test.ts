@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { waitUntil, within } from "spell/util/timing"
+import { afterSolidUpdate, Queued, soon, waitUntil, within } from "spell/util/timing"
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -47,5 +47,47 @@ describe("within()", () => {
     const slow = within(new Promise(() => {}), 1)
     await vi.advanceTimersByTimeAsync(1000)
     await expect(slow).resolves.toBeUndefined()
+  })
+})
+
+describe("Queued", () => {
+  test("a burst of asks runs the work ONCE, at the moment named;  an ask after it queues it again", async () => {
+    const run = vi.fn()
+    const queued = new Queued({ when: soon, run })
+    queued.ask()
+    queued.ask()
+    expect(queued.isPending).toBe(true)
+    expect(run).not.toHaveBeenCalled()
+    await vi.advanceTimersByTimeAsync(0)
+    expect({ runs: run.mock.calls.length, isPending: queued.isPending }).toEqual({ runs: 1, isPending: false })
+    queued.ask()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(run).toHaveBeenCalledTimes(2)
+  })
+
+  test("`cancel()` drops the pending run, even at a moment that can't be cancelled (`afterSolidUpdate`)", async () => {
+    const run = vi.fn()
+    const queued = new Queued({ when: afterSolidUpdate, run })
+    queued.ask()
+    queued.cancel()
+    await Promise.resolve()
+    expect({ runs: run.mock.calls.length, isPending: queued.isPending }).toEqual({ runs: 0, isPending: false })
+    queued.ask()
+    await Promise.resolve()
+    expect(run).toHaveBeenCalledTimes(1)
+  })
+
+  test("an ask from inside the work queues the next run", async () => {
+    let runs = 0
+    const queued: Queued = new Queued({
+      when: soon,
+      run: () => {
+        if (++runs === 1) queued.ask()
+      }
+    })
+    queued.ask()
+    // a timer made inside another one waits a millisecond under fake timers
+    await vi.advanceTimersByTimeAsync(10)
+    expect(runs).toBe(2)
   })
 })

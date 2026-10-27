@@ -97,6 +97,11 @@ export class ElementDefinition {
     return attribute
   }
 
+  /** Does this tag have attribute `name` (canonical):  its vocabulary's own, or a shared one it takes? */
+  takesAttribute(name: string): boolean {
+    return this.byName.has(name)
+  }
+
   /**
    * Does this tag take the SHARED attribute `name` (Spell UI's `SharedVocabulary`)?
    * - False when its vocabulary declares its own of that name:  `<ui-sidebar>`'s `visible` starts hidden.

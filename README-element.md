@@ -772,6 +772,8 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [Reactive.ts](src/element/Reactive.ts) | the reactive members' decorators |
 | [Cell.ts](src/element/Cell.ts), [SlotContent.ts](src/element/SlotContent.ts) | a reactive cell;  slotted content |
 | [Disclosure.ts](src/element/Disclosure.ts) | one open / closed state for anything that shows and hides a box:  its request and events, `aria-expanded`, find-in-page |
+| [OwnControls.ts](src/element/OwnControls.ts) | did a click land on a control inside an element (a button, a link, a field), not on the element itself? |
+| [ParentLink.ts](src/element/ParentLink.ts) | the `parent` attribute:  an element written apart on the page joins the container with that id |
 | [PartContext.ts](src/element/PartContext.ts), [OwnerContext.ts](src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
 | [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
 | [RichAttributes.ts](src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |

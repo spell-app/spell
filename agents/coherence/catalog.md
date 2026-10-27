@@ -308,6 +308,18 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - sweep 1 found about 30 more:  the docs pages' runtime and comments, Spell UI's site, the app's runner and
     editor, the parser's command line (sleeps:  `await after(0.25)` instead)
 
+### Once, however often asked
+
+- **It is:**  `Queued` (`spell/util/timing`, `src/util/timing.ts`;  `E.Queued` through `spell/element`;  epic
+  `coherence` P21):  `new Queued({ when, run })`, then `ask()` as often as you like:  the work runs ONCE, at the moment
+  `when` names (`afterSolidUpdate`, `beforeNextPaint`, `soon`);  `cancel()` in a cleanup
+- **Use it when:**  several events in one turn ask for the same work:  a measurer, a fitter, a re-reader.
+- **Flag:**  `[qQ]ueued = (true|false)|cancelQueued|ScheduledFrame`
+- **Score:**  `this\.\w*[qQ]ueued\w* = true|this\.cancel\w*(Queued|Scheduled)\w* = ` · home `src/util/timing.ts`
+- **Copies:**  `--` in Spell UI and the brand since P21 (the tabs, the menu, a menu's thumb and title fit, the toc, the
+  visibility watch, the brand's checklist).  Left:
+  - `spell-epic/src/components/epic-page/EpicPage.tsx` (`isLayoutQueued`):  the epic pages' (P22)
+
 ### Building a bundle on demand
 
 - **It is:**  `Bundle` (`spell/server`):  built when stale, never committed
@@ -417,7 +429,8 @@ What a component, or a page built on Spell UI, reaches for first.
     the slider's change its value.
   - Taking it since epic `coherence` P17:  the theme menu's scheme control and list
     (`spell-ui/src/components/ui-theme-menu/`), a shrinkable menu's overflow menu (`UIMenu`).
-  - Not swept yet:  the docs' search (`UIDocsSearch`);  the brand's `BrandColorSet`, left for after repo-split P20.
+  - Taking it since epic `coherence` P21:  the brand's `BrandColorSet` (Enter / Space stay its own).
+  - Not swept yet:  the docs' search (`UIDocsSearch`).
 
 ### The highlighted option of a list
 
@@ -483,17 +496,25 @@ What a component, or a page built on Spell UI, reaches for first.
   · not `spell-ui/src/components/ui-form/`, `spell-ui/src/components/ui-property-editor/`
 - **Copies:**  the brand's two controls (`BrandColorPicker.en.ts`, `BrandComposer.en.ts`);  `<ui-field>`'s and the
   property editor's `readonly` are their own (a group's, reaching each field)
+  - Left (P21 tried):  a pack's vocabulary is bundled into its pack, which may import only what a page shares
+    (`PACK_MODULES`, the kit's `src/element-tools/packModules.ts`), and `components.types` isn't one;
+    `spell-ui/core`'s `UIT` can't load in node, where the pack's catalog and docs data read the vocabularies
 
 ### A keyboard shortcut
 
 - **It is:**  `UI.keyboard` (`spell-ui/src/runtime/Keyboard.ts`) and `Chord` (`spell-ui/src/runtime/Chord.ts`):
   one registry, scopes per overlay, `Mod` for Command on a Mac and Control elsewhere
+  - `Chord` is Spell UI's ONE reading of a shortcut (epic `coherence` P21):  `<ui-keys>` and `<ui-action>` draw what
+    it reads (`UI.keyboard.chord(text, { isApple })`:  its modifiers in the order written, then its key), from ONE set
+    of key caps, `UIKeys.capsOf()`, their words translated (`keyCapTexts`)
 - **Use it when:**  any key combination a page or component answers.
 - **Flag:**  `(metaKey|ctrlKey) &&`
 - **Score:**  `(?<!!)\b\w+\.(metaKey|ctrlKey) &&`
   · home `spell-ui/src/runtime/Keyboard.ts`, `spell-ui/src/runtime/Chord.ts`
 - **Copies:**  six (sweep 0, the elemental-spell dry run):  the editor's hotkeys, the docs search, the epic toolbar and
   comments, the live client, a details pane
+  - Left:  spell's own reading, `shortcutMatches()` (`spell-parser/src/core/acting.ts`):  spell's core can't import
+    Spell UI, so a grammar both share would live in the kit (sweep 2, ui-components #3)
 
 ### An animation in or out
 
@@ -501,6 +522,68 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Use it when:**  an overlay or a toast comes and goes.
 - **Copies:**  `--`:  the six overlays animate here, and open and close through their `Disclosure`
   ("A disclosure:  open and closed", below;  epic `coherence` P8)
+
+### A box's close button
+
+- **It is:**  `E.CloseButton` (`spell-ui/src/elements/CloseButton.tsx`;  epic `coherence` P21):  THE close button of a
+  box that closes, its icon and its name, drawn while it can close (`draw()`)
+- **Use it when:**  a box that closes shows a close button:  a message, a toast, a nag, a dialog.
+- **Flag:**  `class=\{UIT\.CLOSE_CLASS\}`
+- **Score:**  `class=\{UIT\.CLOSE_CLASS\}` · in `spell-ui/src/` · home `spell-ui/src/elements/CloseButton.tsx`
+- **Copies:**  `--` since P21 (the message, the toast, the nag, the dialog)
+
+### An element's own link
+
+- **It is:**  `UIComponent.linkTo` and `linkTarget` (the kit's `spell/element`;  epic `coherence` P21):  where its own
+  `<a>` goes, its `link` (the family's own or the shared one) unless it's disabled, and its `target`
+- **Use it when:**  a family draws its own `<a>` for `link`:  its `href` and `target`.
+- **Flag:**  `href=\{this\.(link|disabled|isDisabled)`
+- **Score:**  `href=\{(this\.(isD|d)isabled \? undefined : )?this\.link\}|target=\{this\.(sharedTarget|target)\}`
+  · home `src/element/UIComponent.tsx`
+- **Copies:**  `--` since P21 (text, link, button, label, card, step, item, breadcrumb, image, header;  the parts'
+  author, title and detail)
+
+### An element's own `:host` rule
+
+- **It is:**  `UIComponent`'s `hostLayout` hook (the kit's `spell/element`;  epic `coherence` P21):  a getter of
+  declarations, written into ONE sheet adopted into the shadow root, never the page's `style`
+- **Use it when:**  an element's own layout follows its attributes:  a stack's gap, a cell's span, a root's size.
+- **Flag:**  `<style>\{this\.|:host \{ \$\{`
+- **Score:**  `<style>\{this\.hostLayout\}</style>|:host \{ \$\{` · home `src/element/UIComponent.tsx`
+- **Copies:**  `--` since P21 (stack, cell, terms;  the root's sheet, `RootBox`, is its declarations now)
+
+### Joining a container:  `parent`
+
+- **It is:**  `ParentLink` (the kit's `spell/element`, `src/element/ParentLink.ts`;  Spell UI's until epic `coherence`
+  P21):  `parent="<id>"` moves the element into the container with that id;  `UIComponent` follows it for every tag
+  whose vocabulary declares `parent`
+- **Use it when:**  an element written apart on the page belongs in a container:  a tab, a step, a section.
+- **Flag:**  `new E\.ParentLink\(`
+- **Score:**  `new E\.ParentLink\(` · home `src/element/UIComponent.tsx`, `src/element/ParentLink.ts`
+- **Copies:**  `--` since P21 (the tab's, step's and section's own)
+
+### A click on a control of its own
+
+- **It is:**  `OwnControls.isClicked(event, { upTo, before })` (the kit's `spell/element`, `src/element/OwnControls.ts`;
+  epic `coherence` P21):  ONE list of what counts as a control inside an element, ONE walk of the click's path
+  - beside it, the dialog's and the toast's approve / deny walk:  `UIT.ModalActions`
+    (`spell-ui/src/components/components.types.ts`)
+- **Use it when:**  a click on an element acts, unless it landed on a button, link or field inside:  a linked element,
+  a folding title, a toast that closes on a click.
+- **Flag:**  `"a\[href\], button, input`
+- **Score:**  `"a\[href\], button, input|TITLE_CONTROLS|const CLICKABLE =` · home `src/element/OwnControls.ts`
+- **Copies:**  `--` in Spell UI since P21 (`UIComponent`'s link click, the accordion's and section's titles, the toast).
+  Left:
+  - `spell-epic/src/components/epic-item/Fold.tsx` (`CONTROLS`, a line's actions slot too):  the epic pages' (P22)
+
+### A row that scrolls sideways
+
+- **It is:**  `scrollEnds(row)` and `scrollByRow(row, direction)` (`spell/util`, `src/util/dom.ts`;  epic `coherence`
+  P21):  which ends can still scroll, and a step of most of the row, at once under reduced motion
+- **Use it when:**  a row's `‹` / `›` keys:  Spell UI's `<ui-toolbar>`, the kit's site header.
+- **Flag:**  `scrollLeft \+ [\w.]*clientWidth <`
+- **Score:**  `scrollLeft \+ [\w.]*clientWidth <|clientWidth \* (PAGE_SHARE|SCROLL_SHARE)` · home `src/util/dom.ts`
+- **Copies:**  `--` since P21 (the toolbar, the site header)
 
 ### The next frame
 
@@ -705,8 +788,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **Score:**  `requestChange\("is(Open|Visible|Collapsed)"|addEventListener\("beforematch"|aria-expanded=\{this\.isOpen`
   · home `src/element/Disclosure.ts`
 - **Copies:**  taking it today:  the five popovers (the menu's overflow since P17), the six overlays (the dialog's two,
-  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-example>`, `<ui-zoom>` (P17), spell-epic's `EpicFold`,
-  `EpicItem` and `Fold`.  Left:
+  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-example>`, `<ui-zoom>` (P17), `<ui-message>` (P21),
+  spell-epic's `EpicFold`, `EpicItem` and `Fold`.  Left:
   - `spell-ui/src/components/ui-accordion/UIAccordion.tsx`:  many panels in one `open` (`"0 2"`), on `<details>`,
     which keeps its own `aria-expanded` and find-in-page;  an exclusive open closes another in the same change
   - `<ui-nag>`'s `ui-opening`:  sent as it has slid in, not as a request
