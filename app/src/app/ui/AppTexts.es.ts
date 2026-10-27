@@ -205,6 +205,7 @@ const APP_TEXTS_ES: AppTextPack = {
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
   homeNoGuides: "Las guías están en camino.",
+  homeNotebooksLine: "Las páginas de Spell UI, escritas en Encanto.",
 
   ////////////////
   // ## Project groups
