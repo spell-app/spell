@@ -1,0 +1,75 @@
+<spell-notebook "button theming" original="/components/ui/ui-button.html">
+	<header level="1">
+		Button
+		<header>A button indicates a possible user action.</header>
+	</header>
+	<button-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</ui-item>
+				<ui-item link="#themes">Themes</ui-item>
+			</ui-menu>
+		</html>
+	</section>
+
+	<section label="Tokens">
+		<markdown>
+			Theme a button with the public `--ui-button-*` tokens.
+			Set one on the element, on any ancestor (a group, a toolbar, `:root`),
+			or on the inner box through `::part(button)`.
+
+			- They inherit into the shadow root, where the sheet reads each through a private alias,
+			  so nothing inside blocks them.
+			- Set on a `<ui-buttons>`, they reach every button in the group.
+		</markdown>
+		<markdown>
+			```css
+			/* every button on the page */
+			:root {
+			  --ui-button-radius: 999px;
+			}
+			/* one region */
+			.toolbar {
+			  --ui-button-padding-inline: 1.5em;
+			}
+			/* one kind, on its box */
+			ui-button.cta::part(button) {
+			  --ui-button-background: var(--ui-yellow);
+			}
+			```
+		</markdown>
+		<message state="info" size="small">
+			<markdown>
+				Variations build on the base tokens:
+
+				- `compact` scales your `--ui-button-padding-block`.
+				- `circular` replaces the radius, whatever you set.
+
+				To restyle a variation itself, target it with plain properties:
+
+				```css
+				/* less round */
+				ui-button[appearance~="circular"]::part(button) {
+				  border-radius: 0.5em;
+				}
+				```
+
+				Never set the private names, `--_ui-*` and `--_button-*`:  they're the sheet's own plumbing.
+			</markdown>
+		</message>
+		<markdown>Edit a value below to try it.</markdown>
+		<html>
+			<ui-docs-tokens family="ui-button" playground>
+				<ui-button>Follow</ui-button>
+			</ui-docs-tokens>
+		</html>
+	</section>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</markdown>
+	</section>
+</spell-notebook>

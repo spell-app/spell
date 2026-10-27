@@ -1,0 +1,48 @@
+<spell-notebook "button api" original="/components/ui/ui-button.html">
+	<header level="1">
+		Button
+		<header>A button indicates a possible user action.</header>
+	</header>
+	<button-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tags">Tags</ui-item>
+				<ui-item link="#attributes">Attributes</ui-item>
+				<ui-item link="#events">Events</ui-item>
+				<ui-item link="#slots">Slots</ui-item>
+				<ui-item link="#parts">Parts</ui-item>
+				<ui-item link="#states">States</ui-item>
+				<ui-item link="#texts">Texts</ui-item>
+			</ui-menu>
+		</html>
+	</section>
+
+	<section label="Tags">
+		<docs-api family="ui-button" only="tags"/>
+	</section>
+
+	<section label="Attributes">
+		<docs-api family="ui-button" only="attributes"/>
+	</section>
+
+	<section label="Events">
+		<docs-api family="ui-button" only="events"/>
+	</section>
+
+	<section label="Slots">
+		<docs-api family="ui-button" only="slots"/>
+	</section>
+
+	<section label="Parts">
+		<docs-api family="ui-button" only="parts"/>
+	</section>
+
+	<section label="States">
+		<docs-api family="ui-button" only="states"/>
+	</section>
+
+	<section label="Texts">
+		<docs-api family="ui-button" only="texts"/>
+	</section>
+</spell-notebook>
