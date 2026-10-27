@@ -485,6 +485,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - It reports snapshot entries with a value NEITHER side had:
     new behaviour nobody reviewed;  show them to Owen.
   - Then it renames the old Spell UI names the branch still writes (`<ui-docs-toc>` => `<ui-toc>`):
+    <!-- spell ui rename: leave this file (the line above quotes an old name on purpose) -->
     `spell ui rename --write` over the branch's files, once every repo is merged (epic `epic-engine` I143).
     - The branch's files:  what the merged branch differs from `main` in;  `main`'s own were renamed on `main`.
     - Each repo's run is the WORKTREE's kit (`node bin/spell.mjs`), never main's.
