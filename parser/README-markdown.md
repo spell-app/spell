@@ -148,7 +148,7 @@ MD.render("> [!NOTE]\n> Hi", { ui: true }).html
 ```
 
 ```html
-<ui-message state="info" icon="info circle" header="Note"><p>Hi</p></ui-message>
+<ui-message state="info" icon="info circle" heading="Note"><p>Hi</p></ui-message>
 ```
 
 And the outline comes back with the HTML, ids and all:
@@ -184,8 +184,8 @@ MD.render("# Getting started!\n\n## Setup\n\n## Setup\n", { headingOffset: 1 }).
 | heading | `<h2>` | `<ui-header level="2" id="setup">` |
 | list | `<ul>`, `<ol>` | `<ui-list bulleted>`, `<ui-list ordered>`, each `<ui-item>` numbered by its `value`;  a bullet list inside a numbered one stays `<ul>` |
 | task item | `<input type="checkbox" disabled>` | `<ui-checkbox readonly>`, in a `<ui-list>` with no bullets |
-| alert (`> [!NOTE]`) | GitHub's own:  `<div class="markdown-alert markdown-alert-note">` | `<ui-message state icon header>` |
-| quote | `<blockquote>` | `<ui-segment secondary>` |
+| alert (`> [!NOTE]`) | GitHub's own:  `<div class="markdown-alert markdown-alert-note">` | `<ui-message state icon heading>` |
+| quote | `<blockquote>` | `<ui-segment appearance="secondary">` |
 | table | `<table>` | `<ui-table celled>` around the `<table>` |
 | code block | `<pre><code>` | `<ui-code language copy>` |
 | `---` | `<hr>` | `<ui-divider>` |

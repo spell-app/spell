@@ -184,6 +184,8 @@ export const englishWords: SP.LanguageWords = {
       icon: "icon",
       "menu-bar": "menu-bar",
       locked: "locked",
+      // the page a notebook was converted from (P18):  read by the editor only, compiled to nothing
+      original: "original",
       group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`

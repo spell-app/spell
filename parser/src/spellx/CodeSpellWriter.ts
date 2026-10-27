@@ -30,12 +30,58 @@ export class CodeSpellWriter {
     const parser = language.parser.clone({ module: "code spell writer", form: "spellx" } as P.ParserProps)
     const componentTag =
       options.componentTag ?? ((word: string) => SP.ComponentPacks.tagFor(word, language.lang, options.packs))
-    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag)
+    // the language's example word is a block of Spell's own too (`<example>`, `<ejemplo>`):  never `<ui-example>`
+    const blocks = new Set([...SPELL_BLOCK_TAGS, language.words.exampleTag])
+    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag, blocks)
     const { tokenizer } = writer.parser
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeItems(root?.tokens ?? [], 0, "file")
     while (writer.lines.at(-1) === "") writer.lines.pop()
     return `${writer.lines.join("\n")}\n`
+  }
+
+  /**
+   * The code spell `markup` reads as, markup alone:  a drawing's, an example's body (epic `elemental-spell` P18).
+   * - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`, each `</>` naming what it closes,
+   *   prose as `<markdown>` blocks:  what the same markup in a notebook's drawing is written as.
+   * - Written as a notebook's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - `options.componentTag`'s `start` is where the element starts in `markup`.
+   * - NEVER throws:  markup spellx can't read is written as it is.
+   */
+  static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
+    const language = options.language ?? SP.Language.forFile(options.path)
+    const { prefix, templates } = language.words.spellx!
+    const notebook = Object.keys(templates).find((word) => templates[word] === "notebook")
+    const head = `<${prefix}-${notebook} "markup">\n`
+    const lines = markup.split("\n")
+    // where each of `markup`'s lines starts, in it and in the notebook it's written in (one tab further in)
+    const starts: Array<{ markup: number; written: number }> = []
+    let at = 0
+    for (const line of lines) {
+      starts.push({ markup: at, written: head.length + at + starts.length + 1 })
+      at += line.length + 1
+    }
+    const markupStart = (start: number) => {
+      const line = starts.filter((each) => each.written <= start).at(-1) ?? starts[0]!
+      return line.markup + start - line.written
+    }
+    const componentTag = options.componentTag
+    const written = CodeSpellWriter.write(
+      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${notebook}>\n`,
+      {
+        ...options,
+        language,
+        componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
+      }
+    )
+    // its drawing's lines:  after the notebook's line and its `to draw its content:`, before its `start` line
+    const drawing = written.split("\n").slice(2)
+    const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
+    return drawing
+      .slice(0, end < 0 ? undefined : end)
+      .map((line) => line.replace(/^\t\t/, ""))
+      .join("\n")
+      .trimEnd()
   }
 
   /** The lines written so far. */
@@ -46,7 +92,9 @@ export class CodeSpellWriter {
     /** the file's text */
     readonly text: string,
     /** the tag a bare component name stands for, if any */
-    readonly componentTag: (word: string, start: number) => string | undefined
+    readonly componentTag: (word: string, start: number) => string | undefined,
+    /** Spell's own block words in a drawing, written as they are (`SPELL_BLOCK_TAGS`, the language's example word) */
+    readonly blocks: ReadonlySet<string>
   ) {}
 
   /** Write `items`, a block's lines and blocks, `depth` tabs in;  `where` says whether a tag there is bulleted. */
@@ -136,7 +184,7 @@ export class CodeSpellWriter {
     P.Tokenizer.forEachToken(tokens, (token) => {
       if (!(token instanceof P.JSXElementToken)) return
       const { tagName } = token
-      const isComponent = BARE_NAME.test(tagName) && !SPELL_BLOCK_TAGS.has(tagName)
+      const isComponent = BARE_NAME.test(tagName) && !this.blocks.has(tagName)
       const tag = isComponent ? this.componentTag(tagName, token.start) : undefined
       const name = tag ?? tagName
       if (tag) edits.push({ start: token.start + 1, end: token.start + 1 + tagName.length, text: tag })
@@ -183,6 +231,8 @@ const BARE_NAME = /^\p{Ll}+$/u
 /**
  * Spell's own blocks in a drawing, the same words in code spell:  never a pack's component (`<ui-markdown>`).
  * - `<markdown>`:  raw text, drawn as markdown;  `<html>`:  markup as written (P18)
+ * - and the language's example word (`<example>`, `ExampleBlock`), added per file:  since epic `ui-gaps` P14 Spell
+ *   UI has an `<ui-example>`, which a bare `example` would otherwise name
  */
 const SPELL_BLOCK_TAGS: ReadonlySet<string> = new Set(["markdown", "html"])
 

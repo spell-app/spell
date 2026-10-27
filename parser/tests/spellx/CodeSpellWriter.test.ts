@@ -43,6 +43,47 @@ describe("CodeSpellWriter", () => {
     })
     expect(card).toContain("\t\t<game-card />")
   })
+
+  test("the language's example word stays an example, though a pack has a component by that name (`<ui-example>`)", () => {
+    const text = '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
+    const written = SX.CodeSpellWriter.write(text, {
+      componentTag: (word) => (word === "example" ? "ui-example" : word === "text" ? "ui-text" : undefined)
+    })
+    expect(written).toContain('\t\t<example "one">')
+    expect(written).not.toContain("ui-example")
+    expect(written).toContain("<ui-text>hi</ui-text>")
+  })
+
+  test("markup alone, an example's body:  its tags, at its own indent (P18)", () => {
+    const body = '<card>\n\t<content>\n\t\t<avatar src="jenny.jpg"/> Jenny Hess\n\t</>\n</card>'
+    const starts: number[] = []
+    const written = SX.CodeSpellWriter.writeMarkup(body, {
+      componentTag: (word, start) => {
+        starts.push(start)
+        return `ui-${word}`
+      }
+    })
+    expect(written).toBe(
+      '<ui-card>\n\t<ui-content>\n\t\t<ui-avatar src="jenny.jpg"/> Jenny Hess\n\t</ui-content>\n</ui-card>'
+    )
+    // each element's start, in the markup itself
+    expect(starts.sort((a, b) => a - b)).toEqual([0, body.indexOf("<content>"), body.indexOf("<avatar")])
+    expect(SX.CodeSpellWriter.writeMarkup("<button>Go</>")).toBe("<ui-button>Go</ui-button>")
+  })
+
+  test("an example with no name:  its twin writes none, no empty quoted name (P18)", () => {
+    const text = [
+      '<spell-notebook "avatar notebook">',
+      '\t<example description="A button.">',
+      "\t\t<button>Go</button>",
+      "\t</example>",
+      "</spell-notebook>",
+      ""
+    ].join("\n")
+    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellx" })
+    expect(written).toContain('\t\t<example description="A button.">\n')
+    expect(written).not.toContain('<example ""')
+  })
 })
 
 /** Pair fixture `name`'s text. */
