@@ -29,7 +29,7 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
     "labels from `<label for>` (only `aria-label` names a fitted box)"
   ]
 
-  /** The native input, once built, for `attached()`. */
+  /** The native input, once built, for `sync()`. */
   private input: HTMLInputElement | undefined
 
   protected override build() {
@@ -64,21 +64,10 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
     return [root]
   }
 
-  /** The first form value and validity, which need the input attached. */
-  protected override attached() {
-    this.sync()
-  }
-
-  /** Copy the input's state and validity onto the DOM element. */
-  private sync() {
-    const { input, formInternals } = this
-    if (!input || !formInternals) return
-    const name = this.attr("name")
-    const value = input.checked ? this.chosenValue() : this.unchosenValue()
-    // `null`:  `setFormValue()`'s "submit nothing"
-    formInternals.setFormValue(name && value !== undefined ? value : null)
-    if (input.validity.valid) formInternals.setValidity({})
-    else formInternals.setValidity(input.validity, input.validationMessage, input)
+  /** What the box submits, chosen or not, and the input's validity. */
+  protected override sync() {
+    const { input } = this
+    if (input) this.syncForm({ value: input.checked ? this.chosenValue() : this.unchosenValue(), control: input })
   }
 
   /** What the box submits while chosen:  the DOM element's `chosenValue`, else its `value`, else the native default. */

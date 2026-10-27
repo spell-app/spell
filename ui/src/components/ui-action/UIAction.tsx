@@ -7,6 +7,7 @@ import { E, UI, UIT } from "spell-ui/core"
 // (SIDE EFFECT:  defines `<ui-item>`, which an action extends)
 import { UIItem } from "spell-ui/components/ui-item"
 import type { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
+import { UIKeys } from "spell-ui/components/ui-keys/UIKeys"
 import { actionVocabulary } from "./UIAction.en"
 
 import actionCSS from "./UIAction.css?inline"
@@ -129,29 +130,20 @@ export class UIAction extends UIItem {
   }
 
   /**
-   * The key caps of `shortcut` as a template writes it:  `meta+shift+Z` is `⌘ ⇧ Z` on a Mac, `Ctrl Shift Z`
+   * The key caps of `shortcut` as a template writes it:  `mod+shift+Z` is `⌘ ⇧ Z` on a Mac, `Ctrl Shift Z`
    * elsewhere.
-   * - `meta` / `mod`:  command on a Mac, control elsewhere, as spell's runner presses it;  `command`, `control`,
-   *   `option` / `alt` and `shift` as written.
-   * - The key itself:  a letter in capitals, `space` by its name.
+   * - Read and drawn as `<ui-keys>` reads and draws them (`UIKeys.keysOf()`, `UIKeys.capOf()`):
+   *   `mod` is command on a Mac and control elsewhere;  `meta` the Meta key (⌘ on a Mac);
+   *   `ctrl`, `alt` (Option) and `shift` those keys.
+   * - Off a Mac, the words are the page's language (Ctrl, Shift, Alt), and so is `space`'s.
    */
   keyCapsFor(shortcut: string): string[] {
     const isApple = UI.browser.isApple
-    const text = (key: string) => this.translationForKey(key as never)
-    const caps = shortcut.split("+").map((part, index, parts) => {
-      const word = part.trim().toLowerCase()
-      if (index === parts.length - 1) {
-        if (word === "space" || word === "spacebar") return text("keySpace")
-        return word.length === 1 ? word.toUpperCase() : part.trim()
-      }
-      if (word === "meta" || word === "mod") return isApple ? COMMAND : text("keyControl")
-      if (word === "command" || word === "cmd") return COMMAND
-      if (word === "control" || word === "ctrl") return isApple ? CONTROL : text("keyControl")
-      if (word === "shift") return isApple ? SHIFT : text("keyShift")
-      if (word === "option" || word === "alt") return isApple ? OPTION : text("keyAlt")
-      return part.trim()
+    return UIKeys.keysOf(shortcut.trim()).map((key) => {
+      const name = UIKeys.nameOf(key)
+      const text = name === "space" || !isApple ? WORD_TEXTS[name] : undefined
+      return text ? this.translationForKey(text) : UIKeys.capOf(key, isApple)
     })
-    return caps.filter(Boolean)
   }
 
   /** A part of the action's own (its vocabulary adds them to the item's, which TypeScript knows). */
@@ -171,7 +163,7 @@ export type ActionToDraw = {
   readonly title: string
   /** an icon's name, e.g. `rotate` */
   readonly icon?: string
-  /** its keys, as a template writes them, e.g. `meta+T` */
+  /** its keys, as a template writes them, e.g. `mod+T` */
   readonly shortcut?: string
   /** can it run now?  Greyed while not. */
   readonly isEnabled: boolean
@@ -188,8 +180,11 @@ export type ActionToDraw = {
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"
 
-/** A Mac's key caps. */
-const COMMAND = "⌘"
-const CONTROL = "⌃"
-const SHIFT = "⇧"
-const OPTION = "⌥"
+/** The keys whose caps are words in the page's language (off a Mac;  `space` everywhere), by `UIKeys.nameOf()`. */
+const WORD_TEXTS: Readonly<Record<string, "keyControl" | "keyShift" | "keyAlt" | "keySpace">> = {
+  mod: "keyControl",
+  ctrl: "keyControl",
+  shift: "keyShift",
+  alt: "keyAlt",
+  space: "keySpace"
+}

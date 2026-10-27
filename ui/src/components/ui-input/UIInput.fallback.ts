@@ -27,7 +27,7 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
     "labels from `<label for>` (only `aria-label` / `placeholder` name the control)"
   ]
 
-  /** The native control, once built, for `attached()`. */
+  /** The native control, once built, for `sync()`. */
   private control: HTMLInputElement | HTMLTextAreaElement | undefined
 
   protected override build() {
@@ -58,8 +58,7 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
           inputmode: this.attr("inputmode")
         })
     this.decorate(control, "control")
-    const placeholder = this.attr("placeholder")
-    if (!control.hasAttribute("aria-label") && placeholder) control.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(control)
     const value = domElement.value ?? this.attr("value")
     if (value && control.type !== "file") control.value = value
 
@@ -83,19 +82,10 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
     return [root]
   }
 
-  /** The first form value and validity, which need the control attached. */
-  protected override attached() {
-    this.sync()
-  }
-
-  /** Copy the control's value and validity onto the DOM element. */
-  private sync() {
-    const { control, formInternals } = this
-    if (!control || !formInternals) return
-    const name = this.attr("name")
-    formInternals.setFormValue(name && control.type !== "file" ? control.value : null)
-    if (control.validity.valid) formInternals.setValidity({})
-    else formInternals.setValidity(control.validity, control.validationMessage, control)
+  /** The control's value (a file input's:  none) and validity. */
+  protected override sync() {
+    const { control } = this
+    if (control) this.syncForm({ value: control.type === "file" ? undefined : control.value, control })
   }
 
   /** Send event `name` (`ui-input`, `ui-changed`) with the control's value. */

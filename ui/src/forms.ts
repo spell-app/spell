@@ -6,7 +6,7 @@
  * - `MenuOptions` (search, additions, keyboard navigation of an option list)
  * - `HighlightedOption` (the highlighted option of a list a control opens:  dropdown, search, icon picker)
  * - `ControlLabels` (the DOM element's `<label>`s as the inner control's name)
- * - `PopoverPanel` (the panel a control opens under itself:  dropdown, calendar, search, icon picker)
+ * - NOT `PopoverPanel`, the panel a control opens under itself:  `core`'s, since a menu opens one too.
  * - Imported by the families with a value:
  *   `checkbox`, `dropdown`, `form`, `input`, `select`, `search`, `calendar`, `rating` and `slider`.
  *   - `ui-button` is form-associated too (submit / reset), but through `elementSetup.isAFormControl` alone:
@@ -25,7 +25,6 @@ export * from "spell-ui/elements/HighlightedOption"
 export * from "spell-ui/elements/DOMFormControl"
 export * from "spell-ui/elements/FormComponent"
 export * from "spell-ui/elements/ControlLabels"
-export * from "spell-ui/elements/PopoverPanel"
 
 /** The `forms` namespace:  `import { F } from "spell-ui/forms"`, then `F.FormComponent` (`AGENTS.md`). */
 export * as F from "spell-ui/forms"

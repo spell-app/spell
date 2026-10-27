@@ -26,7 +26,7 @@ export class SliderFallback extends E.NativeFallback<typeof sliderVocabulary> {
     "`step-labels` (numbers are spoken), vetoing by re-setting `value`, form reset, translated thumb names"
   ]
 
-  /** The native inputs, once built, for `attached()`. */
+  /** The native inputs, once built, for `sync()`. */
   private inputs: HTMLInputElement[] = []
 
   protected override build() {
@@ -61,11 +61,6 @@ export class SliderFallback extends E.NativeFallback<typeof sliderVocabulary> {
     return [this.create("div", { class: this.classes(), part: ROOT_PART }, ...this.inputs)]
   }
 
-  /** The first form value, which needs the inputs built. */
-  protected override attached() {
-    this.sync()
-  }
-
   /** An input moved:  keep a range in order, update the DOM element, send event `name`. */
   private changed(originalEvent: Event, name: E.EventName<typeof sliderVocabulary>) {
     const [first, second] = this.inputs
@@ -83,16 +78,10 @@ export class SliderFallback extends E.NativeFallback<typeof sliderVocabulary> {
     this.send(name, detail)
   }
 
-  /** Set the DOM element's form value to the value(s). */
-  private sync() {
-    const name = this.attr("name")
-    if (!this.formInternals) return
-    // `setFormValue()` takes `null` for "no value":  a platform boundary
-    if (!name) return this.formInternals.setFormValue(null)
-    if (this.inputs.length < 2) return this.formInternals.setFormValue(this.inputs[0]!.value)
-    const data = new FormData()
-    for (const input of this.inputs) data.append(name, input.value)
-    this.formInternals.setFormValue(data)
+  /** The value, or a range's two;  a range input is never invalid, so no validity. */
+  protected override sync() {
+    const values = this.inputs.map((input) => input.value)
+    this.syncForm({ value: values.length < 2 ? values[0] : values })
   }
 
   /** The DOM element's attribute `name` as a number, else `fallback`. */

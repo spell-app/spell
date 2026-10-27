@@ -157,6 +157,16 @@ describe("<ui-{part}> standalone", () => {
     expect(image.getAttribute("part")).toBe("image")
     expect(root(avatar).querySelector("slot")).toBeNull()
   })
+
+  it.each([
+    [`<ui-title link="#t" target="_blank">T</ui-title>`],
+    [`<ui-detail link="#all" target="_blank">214</ui-detail>`],
+    [`<ui-header link="#h" target="_blank">H</ui-header>`]
+  ])("a link root opens in the shared `target`, as every tag's `link` promises:  %s", async (html) => {
+    const host = await ElementFixture.render(html)
+    expect(root(host).localName).toBe("a")
+    expect(root(host).getAttribute("target")).toBe("_blank")
+  })
 })
 
 ////////////////

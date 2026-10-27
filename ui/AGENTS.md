@@ -129,8 +129,9 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     `ParentLink` (the `parent` attribute:  an element joining the container with that id)
   - on Solid:
     - `FormComponent` + `DOMFormControl` (form controls)
-    - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker),
-      a `Disclosure` (the kit's `spell/element`) with the popover, its `UI.overlays` entry and its anchor on top
+    - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker,
+      a shrinkable menu's overflow), a `Disclosure` (the kit's `spell/element`) with the popover,
+      its `UI.overlays` entry and its anchor on top;  in `core`, as a menu has no value
     - `PartComponent`:  the generic content parts' component, styled by their owner
     - `IconGlyph`
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
@@ -195,8 +196,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
       (WWOD §4 › "Circular imports";  `barrel.ssr.test.ts`).
 - [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`spell-ui/core`, `spell-ui/forms`).
   - `core`:  the element core, and the foundation JS every family needs.
-  - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`,
-    `PopoverPanel`).
+  - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`).
   - Component files import shared code ONLY through these (see "Solid authoring").
 - [`src/styles/`](src/styles/):  its own lib entry, `spell-ui/styles`.
   - `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`, `themes/`
@@ -998,7 +998,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
   - Tests `await ElementFixture.settle()` / `tick()` (which `flush()`) before checking the DOM.
     Never sleep.
 - **Running something later:**  through the timing helpers, never the platform's calls, so the code says WHEN.
-  - They're `spell/element`'s ([`timing`](../src/element/timing.ts)), re-exported by `spell-ui/util`.
+  - They're the kit's util's ([`timing`](../src/util/timing.ts)), re-exported by `spell-ui/util` (and `spell/element`).
   - `E.afterSolidUpdate(fn)`:  as soon as the current code finishes (a microtask:  `queueMicrotask()`)
   - `E.beforeNextPaint(fn)`:  just before the next paint (`requestAnimationFrame()`)
   - `E.soon(fn)`:  the next task (`setTimeout(fn, 0)`)

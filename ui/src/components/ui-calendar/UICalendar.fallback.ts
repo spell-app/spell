@@ -29,7 +29,7 @@ export class CalendarFallback extends E.NativeFallback<Vocabulary> {
     "vetoing `ui-changing`, `ui-opening` / `ui-closing`, `:state(invalid)`, form reset of the value"
   ]
 
-  /** The native control, once built, for `attached()`. */
+  /** The native control, once built, for `sync()`. */
   private control: HTMLInputElement | undefined
 
   protected override build() {
@@ -48,8 +48,7 @@ export class CalendarFallback extends E.NativeFallback<Vocabulary> {
       readonly: this.flag("readonly")
     })
     this.decorate(control, "control")
-    const placeholder = this.attr("placeholder")
-    if (!control.hasAttribute("aria-label") && placeholder) control.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(control)
     const value = domElement.value ?? this.attr("value")
     if (value) control.value = String(value)
     const box = this.create("div", { class: INPUT_CLASS, part: INPUT_PART }, control)
@@ -66,19 +65,10 @@ export class CalendarFallback extends E.NativeFallback<Vocabulary> {
     return [root]
   }
 
-  /** The first form value and validity, which need the control attached. */
-  protected override attached() {
-    this.sync()
-  }
-
-  /** Copy the control's value and validity onto the DOM element. */
-  private sync() {
-    const { control, formInternals } = this
-    if (!control || !formInternals) return
-    // `null`:  `setFormValue()`'s "no value"
-    formInternals.setFormValue(this.attr("name") && control.value ? control.value : null)
-    if (control.validity.valid) formInternals.setValidity({})
-    else formInternals.setValidity(control.validity, control.validationMessage, control)
+  /** The control's value (none while empty) and validity. */
+  protected override sync() {
+    const { control } = this
+    if (control) this.syncForm({ value: control.value || undefined, control })
   }
 }
 

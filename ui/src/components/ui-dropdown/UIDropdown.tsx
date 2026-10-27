@@ -107,7 +107,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
 
   /** `value`:  set by the page, or chosen;  starts from the `selected` items (so it's below `items`). */
   @E.controlled("value")
-  accessor value = this.selectedItemValues()
+  accessor value = this.items.selectedValue(!!this.multiple)
 
   /** The page's value to restore on a form reset (`undefined`:  back to the `selected` items). */
   private readonly initialValue = this.isControlledByPage("value") ? this.value : undefined
@@ -115,10 +115,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   /** Chosen values, always as an array;  the same list while equal. */
   @E.derived({ equals: E.isSameList })
   get chosenValues(): readonly string[] {
-    const value = this.value as unknown
-    if (Array.isArray(value)) return value.map(String)
-    if (typeof value !== "string" || value === "") return []
-    return this.multiple ? E.Converters.list(value) : [value]
+    return SlottedItems.valuesIn(this.value, !!this.multiple)
   }
 
   /** Chosen values as a set, for row state. */
@@ -136,17 +133,6 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   private get hasRoomForMore(): boolean {
     const max = this.maxSelections
     return !this.multiple || max === undefined || this.chosenValues.length < max
-  }
-
-  /** Values of slotted items marked `selected`, the uncontrolled starting value. */
-  @E.untracked
-  private selectedItemValues(): string | string[] | undefined {
-    const values = this.items.entries
-      .filter(UIDropdown.isOption)
-      .filter((option) => option.selected)
-      .map((option) => option.value)
-    if (!values.length) return undefined
-    return this.multiple ? values : values[0]
   }
 
   /** Choose `option` (or add the addition), as the person did with `originalEvent`. */
@@ -314,7 +300,7 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
    * - Never opens while disabled or readonly.
    * - Opening highlights the chosen option, else the first enabled one;  closing clears the query.
    */
-  readonly popover = new F.PopoverPanel({
+  readonly popover = new E.PopoverPanel({
     component: this,
     member: "isOpen",
     restoreFocus: false,
