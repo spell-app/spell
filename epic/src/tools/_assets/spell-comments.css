@@ -86,7 +86,7 @@
  * block's top right corner, the bullhorn first, then a table's expand button (Owen, 2026-10-19:  "The expand button
  * should be to the right of the bullhorn rather than in its own line").  A text block's too:  its text keeps its full
  * width, the buttons on the page's ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap).
- * - the buttons are `<ui-button basic size="mini">`s, as drawn:  the component centres their icons;  the bullhorn
+ * - the buttons are `<ui-button appearance="basic" size="mini">`s, as drawn:  the component centres their icons;  the bullhorn
  *   circular, the table's expand button a bare icon (`spell-doc.css`, "TABLES")
  */
 :is(.spell-doc-main, .site-main) .spell-block-actions {
@@ -115,13 +115,13 @@
   height: var(--spell-block-head);
 }
 /*
- * a docs EXAMPLE's (`<ui-docs-example>`), and a block's in its demo (not slotted into its description):
+ * a docs EXAMPLE's (`<ui-example>`), and a block's in its demo (not slotted into its description):
  * left of the example's code button, level with it
  * - the code button holds that corner:  28px wide, 0.8em in
  * - on top of it, the two covered each other
  */
-:is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-docs-example) > .spell-block-buttons,
-:is(.spell-doc-main, .site-main) ui-docs-example > .spell-block-actions:not([slot]) > .spell-block-buttons {
+:is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-example) > .spell-block-buttons,
+:is(.spell-doc-main, .site-main) ui-example > .spell-block-actions:not([slot]) > .spell-block-buttons {
   top: calc(var(--spell-block-gap, 0px) + 0.8em - 1px);
   right: calc(0.8em + 28px + 4px);
 }
@@ -226,7 +226,7 @@ ui-button[title]::part(icon) {
   background-color: color-mix(in srgb, var(--ui-violet, #6435c9) 24%, transparent);
 }
 /*
- * the bullhorn floating beside selected text (in `body`, outside `main`):  a `<ui-button circular basic size="mini">`
+ * the bullhorn floating beside selected text (in `body`, outside `main`):  a `<ui-button appearance="circular basic" size="mini">`
  * (`iconButton()`), lifted off the page by a shadow
  */
 /* its ground and shadow on the round button itself (`::part(button)`):  on the element around it they drew a second

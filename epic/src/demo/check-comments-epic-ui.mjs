@@ -42,7 +42,7 @@
  *     landing on its thread, words going to the site's search;  the router's swap:  the next page's toolbar
  *   - a page in TABS (Spell UI's and Brand's element pages, the swap's):  the toolbar the shown tab's sections, and
  *     another tab's once it's shown
- *   - Spell UI's:  the page's own live examples still draw (`<ui-docs-example>`'s upgraded, no element left undefined)
+ *   - Spell UI's:  the page's own live examples still draw (`<ui-example>`'s upgraded, no element left undefined)
  *   - no page errors
  * - and, for Epic UI, on a GUIDE (`guides/python-target.html`), served with `--bundle` as its `spell-ui.js` when given:
  *   the docs runtime still draws bullhorns, and a thread has the comments' look (`spell-comments.css`, through
@@ -563,7 +563,7 @@ function shownToolbar() {
   const tabs = document.querySelector("main ui-tabs")
   const pane = tabs && [...tabs.querySelectorAll(":scope > ui-tab")].find((tab) => tab.matches(":state(selected)"))
   const top = [...document.querySelectorAll("main ui-section[id]")].filter(
-    (section) => !section.parentElement.closest("ui-section, ui-docs-example, template")
+    (section) => !section.parentElement.closest("ui-section, ui-example, template")
   )
   const sections = (
     article
@@ -609,10 +609,10 @@ async function clear(name) {
  */
 async function checkExamples() {
   const tries = [
-    ["ui-dropdown", "main ui-docs-example ui-dropdown", (element) => element.matches(":state(open)")],
-    ["ui-modal", "main ui-docs-example ui-button[commandfor]", () => !!document.querySelector("ui-modal")
+    ["ui-dropdown", "main ui-example ui-dropdown", (element) => element.matches(":state(open)")],
+    ["ui-modal", "main ui-example ui-button[commandfor]", () => !!document.querySelector("ui-modal")
       && [...document.querySelectorAll("ui-modal")].some((modal) => modal.shadowRoot?.querySelector("dialog[open]"))],
-    ["ui-checkbox", "main ui-docs-example ui-checkbox", (element) => element.checked === true]
+    ["ui-checkbox", "main ui-example ui-checkbox", (element) => element.checked === true]
   ]
   for (const [name, selector, answered] of tries) {
     const page = await newPage(1200)
@@ -622,7 +622,7 @@ async function checkExamples() {
     })
     await page.waitForTimeout(800)
     const drawn = await page.evaluate(() => {
-      const examples = [...document.querySelectorAll("ui-docs-example")]
+      const examples = [...document.querySelectorAll("ui-example")]
       const tags = [...document.querySelectorAll("*")].map((each) => each.localName)
       return {
         examples: examples.length,

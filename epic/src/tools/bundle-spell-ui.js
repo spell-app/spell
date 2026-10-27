@@ -106,10 +106,14 @@ const DATA_PAGES_ONLY = args.includes("--data-pages")
 const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
 /**
  * What the runtime takes from UI's SOURCE, never `dist/` (`spellUiResolver()`):  the doc-only families' leaves (no lib
- * entry holds them), the pure types file they read, and the zoom's plain-DOM `ImageZoom` (epic `ui-gaps` P14:  its
- * family's lib entry would bring the element;  stateless, so the family's own copy beside it is harmless).
+ * entry holds them), the pure types file they read, and the plain-DOM leaves of two families whose lib entries would
+ * bring their elements (epic `ui-gaps` P14):
+ * - the zoom's `ImageZoom`:  stateless, so the family's own copy beside it is harmless
+ * - the table of contents' `TocIndex`, `HashLanding`, `PageOutline`:  what they keep page-wide (the landings, the
+ *   shadow hosts) is on `globalThis`, so the family's own copy shares it
  */
-const UI_SOURCE_ONLY = /^spell-ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom)$/
+const UI_SOURCE_ONLY =
+  /^spell-ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom|components\/ui-toc\/(TocIndex|HashLanding|PageOutline))$/
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
@@ -426,9 +430,10 @@ async function bundleShared(entry, outfile) {
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
  * - the page runtime:  an empty module until its file exists
- * - the doc-only families' plain-DOM leaves the runtime lands links with (`TocIndex`, `HashLanding`;  epic `coherence`
- *   P11), and the pure types they read:  from UI's SOURCE (`UI_SOURCE_ONLY`), as UI's lib build never holds
- *   `src/docs-components/`;  what they import of `spell-ui/util` is `dist/core.js`'s, the page's one copy
+ * - the plain-DOM leaves the runtime lands links with (`<ui-toc>`'s `TocIndex`, `HashLanding`;  epic `coherence`
+ *   P11), the doc-only families' leaves, and the pure types they read:  from UI's SOURCE (`UI_SOURCE_ONLY`), as UI's
+ *   lib build holds neither the leaves alone nor `src/docs-components/`;  what they import of `spell-ui/util` is
+ *   `dist/core.js`'s, the page's one copy
  */
 function spellUiResolver() {
   return {

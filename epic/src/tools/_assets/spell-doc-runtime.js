@@ -106,8 +106,8 @@ import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 // the doc-only families' plain-DOM leaves, bundled from source (`bundle-spell-ui.js`):  Spell UI's docs land links and
 // follow the scroll the same way (epic `coherence` P11)
-import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -2535,7 +2535,7 @@ function h2HeightAbove(sticky) {
  *   folded sections around the target unfold first, and a target that is a folded item opens (`folds.reveal()`);
  *   an unfolded `<ui-section>` draws on the next frames, so the jump lands once it has, and once more as the page
  *   settles (`SETTLE_MS` twice) unless the reader moved meanwhile
- *   - the page lands its hashes itself:  a `<ui-docs-toc>` or `<ui-docs-api>` on it leaves them to it
+ *   - the page lands its hashes itself:  a `<ui-toc>` or `<ui-docs-api>` on it leaves them to it
  * - the target's entry becomes the current one even when the page can't scroll it up to its line (the last
  *   short sections), until the user scrolls on (`follow.pin()`)
  * - `hashchange` / `popstate` (back, forward, a typed hash) jump the same way

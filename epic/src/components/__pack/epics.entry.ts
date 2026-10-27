@@ -19,7 +19,7 @@ SpellUI.registerPack({
     "epic-answer": "22c3556778007957",
     "epic-aside": "6056e142a29ec53b",
     "epic-ask": "bc427f9d4a881f8f",
-    "epic-cards": "713760a7d5a1f22e",
+    "epic-cards": "de44a5923df498b9",
     "epic-change": "5397bb70d76c319a",
     "epic-choice-rows": "453945d840bf68b1",
     "epic-choices": "91635e832150c62d",
@@ -30,7 +30,7 @@ SpellUI.registerPack({
     "epic-event": "2ce4620dcafc7f84",
     "epic-item": "7918eac4e1299c60",
     "epic-link": "5f3bad48e6d065d1",
-    "epic-list": "759b3c04b9f53e40",
+    "epic-list": "dc77a10b03d8ea73",
     "epic-mark": "5da419d70d8bf808",
     "epic-net-effect": "2fa3b968cd5af688",
     "epic-new-item": "1be70c1b4949fc6e",
@@ -53,7 +53,7 @@ SpellUI.registerPack({
     "epic-summary": "0e1c39c23e4f30ad",
     "epic-test-run": "78c46f6df37bcaf0",
     "epic-text-box": "bc2b196f0499ee4d",
-    "epic-thread": "fe2efd81df3eb1f9",
+    "epic-thread": "3c638113a2975953",
     "epic-update": "16675695798f2c90"
   },
   define: () =>

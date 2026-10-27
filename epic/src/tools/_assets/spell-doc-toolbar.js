@@ -235,7 +235,7 @@ function takesKeys(element) {
   return element.matches(
     '[role="menu"], [role="menubar"], [role="listbox"], [role="combobox"], [role="grid"], [role="tree"], ' +
       '[role="slider"], [role="tablist"], ui-dropdown, ui-select, ui-search, ui-calendar, ui-menu, ui-tabs, ' +
-      "ui-docs-example *, ui-docs-example"
+      "ui-example *, ui-example"
   )
 }
 
