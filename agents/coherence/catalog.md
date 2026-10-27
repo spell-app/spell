@@ -88,7 +88,18 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `lineStarts\.push|indexOf\("\\n"`
 - **Score:**  `lineStarts\.push|\b[lL]ineStarts\w* = \[0\]|slice\(0, [\w.]+\)\.split\("\\n"\)\.length`
   · home `spell-parser/src/parser/tokenizer/tokenizer.types.ts`
-- **Copies:**  `--`
+- **Copies:**  (epic `coherence` P16 moved spellx's writer onto it)
+  - `spell-parser/src/spell/languages/packs.ts`, `spell-parser/src/spell/node/spellSyntax.ts`:
+    a line by `slice(0, at).split("\n")`, once a match;  they move with the TypeScript reader (sweep 2's parser-app #1)
+
+### A phrase's end, a brace's close, in spell text
+
+- **It is:**  `P.Tokenizer`'s two scans:  `findPhraseEnd(text, start, end, { stop, lineEnds })`, the first `>` or `:`
+  outside strings and brackets;  `findMatchingDelimiter("{", "}", ...)`, where a brace closes:  `spell-parser/parser`
+- **Use it when:**  finding where a tag's phrase, a line's body colon or a hole ends, in spell or spellx text.
+  - Strings are skipped as the tokenizer reads them (spell's:  only `"`), so a quoted `}` or `>` never ends one.
+- **Flag:**  `inString|let depth = 0` in a new scan of spell text
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
 
 ### Comments in code
 
@@ -120,7 +131,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Use it when:**  "did you mean ...?" for an unknown name, attribute or word.
 - **Flag:**  `function (levenshtein|editDistance|distance)\(|[Dd]id you mean`
 - **Score:**  `function (levenshtein|editDistance|distance)\(` · home `src/util/string.ts`
-- **Copies:**  `--`
+- **Copies:**  `--`  (epic `coherence` P16 moved spellx's unknown words and attributes onto it)
 
 ## Files, folders and processes (node)
 
