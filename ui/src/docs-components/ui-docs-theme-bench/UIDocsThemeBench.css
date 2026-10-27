@@ -146,27 +146,11 @@
 .frames.both {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+/* a frame:  its page, nothing over it (its scheme is clear from the page, and named in its frame's title) */
 .frame {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 4px;
-  min-height: 0;
-}
-.frames.one .frame {
   grid-template-rows: minmax(0, 1fr);
-}
-/* a pair's half:  its scheme named over it, never over the page */
-.frame-scheme {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding-inline: 6px;
-  color: var(--ui-text-muted);
-  font-size: 0.75em;
-}
-.frame-scheme ui-icon {
-  --ui-icon-width: auto;
-  margin: 0;
+  min-height: 0;
 }
 .viewport {
   position: relative;

@@ -701,12 +701,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     const url = () => this.urlOf(key)
     return (
       <div class="frame">
-        <Show when={slot !== "shown"}>
-          <span class="frame-scheme">
-            <ui-icon name={slot === "dark" ? "moon" : "sun"} aria-hidden="true"></ui-icon>
-            {t(slot as "light" | "dark")}
-          </span>
-        </Show>
         <div class={["viewport", { loaded: !!this.loaded[key] }]} ref={(cell) => this.watchCell(key, cell)}>
           <Show when={url()} fallback={<p class="note">{this.editorBase === "" ? t("noEditor") : t("loadingPage")}</p>}>
             <iframe
