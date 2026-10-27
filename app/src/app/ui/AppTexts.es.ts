@@ -135,8 +135,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorNoEvents: "Ninguno aún.",
   inspectorEventsTip: "Elige una parte para ver sus eventos.",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
-  themeEditorTitle: "Editor de temas",
   editTheme: "Editar el tema…",
+  "themePage.editor": "Editor",
+  "themePage.epic": "Página de épica",
+  "themePage.ui": "Spell UI",
+  "themePage.notebook": "Cuaderno",
   inspectorEventHeading: "con {event}",
   inspectorEventCode: "Qué pasa con {event}",
   inspectorProperties: "Propiedades",
