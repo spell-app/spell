@@ -693,15 +693,19 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.
 - EVERY epic session listens on its own while it's open, `/epic review` or not (epic `epic-engine` P18):
-  - the plugin's monitor holds the inbox for the session whose title, or worktree, names the epic, while it runs:
-    the page says it's listening
+  - the session's inbox POLLER holds the inbox for the session whose title, or worktree, names the epic, while it
+    runs:  the page says it's listening
     - a small poller (`InboxPoller`), which runs `epic session listen` for a moment as the inbox changes
       (epic `epic-engine` P19:  about 45MB a session, not 170)
+    - the plugin's `Stop` hook starts it at each turn's end (`asyncRewake`, epic `epic-engine` I144):  nothing to arm
+      - Claude Code starts plugin MONITORS only in a terminal session, never in VS Code's panel
     - `/epic review`'s `epic inbox watch` takes the inbox over;  once that session's `wait` stops for good, the
       monitor takes it back within about 90s
   - it prints NOTHING until Owen sends;  then ONE line, `📬 <epic>:  Owen sent work ...`, which wakes the session
   - that line:  take the work with `epic inbox wait <epic> --timeout 5`, then go on at 7.3, as if your own `wait` had
     finished
+  - `📬 <epic>:  Owen pressed "start review" ...`:  he asked for a review from the page;  start one, `/epic review
+    <epic>` (this section), as if he'd typed it
   - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents.
@@ -718,8 +722,10 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
   - No worktree, no plan mode.
 - Started from the PAGE too (epic `airplane` P12):  Owen clicks the "No Claude session is reviewing" pill
   (or the review line).
-  - The page server finds the ONE running session titled for the epic (`🚧 <name>`, or the name as a word),
-    and types `/epic review <name>` into its tab through its window's bridge:  Owen presses Enter there.
+  - The page server finds the ONE running session titled for the epic (`🚧 <name>`, or the name as a word).
+    - Its inbox poller runs:  it asks through the inbox, and the poller's `📬` line wakes the session (above).
+    - Else it types `/epic review <name>` into its tab through its window's bridge:  Owen presses Enter there.
+      Its tab open already, VS Code refuses that, so nothing is typed and the page says to paste it.
   - None, or several:  nothing is sent, and the page says which sessions it found.
 - And WOKEN by the page (epic `epic-workflow` P16):  Send with NO session listening.
   - The page server, the first of these that applies:
@@ -968,7 +974,7 @@ want you to just do it").
 
 When Owen says he's done ("stop reviewing", "that's it"), or the session must stop:
 - stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
-  - a session whose title or worktree names the epic keeps listening anyway, through its monitor (P18):  the next
+  - a session whose title or worktree names the epic keeps listening anyway, through its inbox poller (P18, I144):  the next
     Send still reaches it, as a `📬` line
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on him;  the link pair

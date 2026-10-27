@@ -442,15 +442,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
-    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR, one beside every session
-      ([monitors.json](../monitors/monitors.json);  epic `epic-engine` P18):
-      an epic's session listens to its page whenever it's open
+    - `InboxMonitor`:  `epic session listen`, ONE look for the session's inbox POLLER, one beside every session
+      (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
       - the epic:  the session's title, else its worktree;  none, it does nothing
       - holds the inbox for the session (`setListening()`, with the monitor's pid:  live while it runs, no heartbeat)
         unless another listener holds it
-      - says what's waiting, the `📬` line to print, which files to watch, and when to look again
-    - `InboxPoller`:  the monitor itself (epic `epic-engine` P19)
-      - [InboxPoller.mjs](tool/InboxPoller.mjs), run by the plugin's monitor, [listen.mjs](../monitors/listen.mjs)
+      - says what's waiting, the `📬` line to print, its `batch`, which files to watch, and when to look again
+      - "start review" asked for (`reviewAsked`):  waiting too, its line asking for `/epic review` (I144)
+    - `InboxPoller`:  the poller itself (epic `epic-engine` P19), run by [listen.mjs](../monitors/listen.mjs)
+      - [InboxPoller.mjs](tool/InboxPoller.mjs)
+      - started by the plugin's `Stop` hook at each turn's end, in every session (`--hook`, `asyncRewake`):  it prints
+        the line to stderr and exits 2, which wakes the session;  the next turn's end starts it again (I144)
+        - why:  Claude Code starts a plugin's MONITORS ([monitors.json](../monitors/monitors.json)) only in an
+          interactive terminal session;  VS Code's panel runs `claude` as a stream, where none ever ran (checked
+          2026-10-26, Claude Code 2.1.310, with a probe plugin:  no monitor;  its `asyncRewake` `Stop` hook woke it)
+        - in a terminal session the monitor runs it too
+      - ONE per session, the newest:  `~/.spell-epic/listeners/<session pid>.pid` names it (and the batch it last
+        announced, so the next turn's hook never announces it again);  an older one sees it gone and ends
+      - the page server reads that file (`listenerOf()`):  a session with a poller is asked through its inbox, never
+        typed into (`ReviewStart`)
       - plain JavaScript, node's own modules only:  bare node, about 45MB a session
         - the look, under `tsx`, about 150MB, runs for a moment as its own process
         - NEVER import TypeScript into it:  node's TypeScript support alone adds about 28MB
@@ -1558,11 +1568,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Waiting until answered (`epic inbox done <name>#C3`).
   - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
-  - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
-    P19):  live exactly while that process runs, with no heartbeat.
+  - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
+    `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
+    - a newer poller of the same session (the next turn's `Stop` hook) takes the place over (I144)
+  - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
+    next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
+    Gone once the session's own `epic inbox watch` listens.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send with nobody listening wakes it, inside the request:
-      `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
+      its session's poller told (`told`:  it hears the Send itself), `/epic review <epic>` typed into its session, or
+      a new session in its window (`ReviewStart`).
     - Claimed under the inbox's lock (`claimWake()`):  two Sends at once wake once.
     - It stands 10 minutes (`WAKE_COOLDOWN_MS`), or until a session listens (`setListening()` clears it).
     - No wake with several sessions titled for the epic, in airplane mode, or for a Send with nothing new.
@@ -1580,7 +1595,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
       every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
-    - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
+    - `POST start { page }`:  the pill's click (`StartResult`):  the epic's session asked through its inbox poller
+      (`asked`), else `/epic review <epic>` typed into its tab (`sent`);  its tab open already, VS Code would refuse
+      ("Session is already open"), so the bridge types nothing and the answer says so (`tab-open`;  I144)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key
     - `POST shot { page, id, png }`:  a test run's screenshot (a PNG data URL, at most 8 MB, else 413), written
       beside the page in `tests/` (`TestShots`), never over a file;  answers `{ shot }`, its path, which the

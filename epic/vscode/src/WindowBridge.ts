@@ -33,8 +33,12 @@
  *   - `reload-view { view? }`:  rebuild that doc view from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
  *   - `close-window {}`:  close this window, just after answering (`/isolate done` closes the worktree's window)
- *   - `open-session { sessionId?, prompt? }`:  open Claude Code session `sessionId` in an editor tab
- *     (never the sidebar), `prompt` typed into its input (not sent:  Owen presses enter)
+ *   - `open-session { sessionId?, prompt?, title? }`:  open Claude Code session `sessionId` in an editor tab
+ *     (never the sidebar), `prompt` typed into its input (not sent:  Owen presses enter);  answers `typed`
+ *     - VS Code types a prompt only into a session it OPENS:  with its tab open already it refuses ("Session is
+ *       already open.  Your prompt was not applied"), and says nothing to us
+ *     - so with `title` (the session's), a Claude tab already showing it types nothing:  `typed: false`, and the
+ *       caller says so (epic `epic-engine` I144)
  *     - `/isolate` hands its session to the worktree's window this way
  *     - no `sessionId`:  a NEW session;
  *       `/epic <name>` from another epic's session starts its own this way (`epic window launch`)
@@ -225,8 +229,13 @@ export class WindowBridge {
         }
         // 2nd argument:  the extension's `initialPrompt` (2.1.287), typed in, not sent
         const prompt = typeof body.prompt === "string" && body.prompt ? body.prompt : undefined
+        const title = typeof body.title === "string" ? body.title : ""
+        // its tab open already:  VS Code would refuse the prompt, and tell only Owen
+        if (sessionId && prompt && title && WindowBridge.claudeTabs().some((tab) => tabShows(tab.label, title))) {
+          return { sessionId, typed: false }
+        }
         await vscode.commands.executeCommand("claude-vscode.primaryEditor.open", sessionId, prompt)
-        return { sessionId: sessionId ?? null }
+        return { sessionId: sessionId ?? null, typed: Boolean(prompt) }
       }
       case "close-session-tab": {
         const titles = Array.isArray(body.titles) ? body.titles : [body.title]
@@ -275,6 +284,13 @@ export class WindowBridge {
     return { removed: true, path: folder }
   }
 
+  /** Every Claude Code editor tab in this window. */
+  static claudeTabs(): vscode.Tab[] {
+    return vscode.window.tabGroups.all
+      .flatMap((group) => group.tabs)
+      .filter((tab) => tab.input instanceof vscode.TabInputWebview && tab.input.viewType.endsWith(CLAUDE_PANEL))
+  }
+
   /**
    * `close-session-tab`:  close the Claude Code tab labelled with the first of `titles` exactly one tab shows.
    * - HACK:  a Claude tab says nothing of its session but its label, the session's title cut to
@@ -285,9 +301,7 @@ export class WindowBridge {
   static async closeSessionTab(titles: string[]): Promise<Record<string, unknown>> {
     titles = titles.map((title) => title.trim()).filter(Boolean)
     if (!titles.length) throw new BridgeError(400, "no title")
-    const claudeTabs = vscode.window.tabGroups.all
-      .flatMap((group) => group.tabs)
-      .filter((tab) => tab.input instanceof vscode.TabInputWebview && tab.input.viewType.endsWith(CLAUDE_PANEL))
+    const claudeTabs = WindowBridge.claudeTabs()
     const matches: Record<string, number> = {}
     for (const title of titles) {
       const tabs = claudeTabs.filter((tab) => tabShows(tab.label, title))
