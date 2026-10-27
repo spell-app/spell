@@ -4,6 +4,7 @@ import { basename, join, relative } from "node:path"
 import { localMinutes } from "spell/util/time"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
@@ -65,20 +66,20 @@ export class Stock {
     const { flags } = parseVerbArgs(args, ["json"])
     const report = this.take()
     if (flags.json) {
-      out(JSON.stringify(report, null, 2))
+      CLI.out(JSON.stringify(report, null, 2))
       return EXIT.OK
     }
-    for (const line of Worktrees.table(report.sessions, report.idle)) out(line)
+    for (const line of Worktrees.table(report.sessions, report.idle)) CLI.out(line)
     const items = new Map(report.items.map((item) => [item.key, item]))
     for (const group of ["active", "stalled", "dead"] as const) {
       const keys = report.groups[group]
-      out(`## ${Stock.TITLES[group]} (${keys.length})\n\n`)
+      CLI.out(`## ${Stock.TITLES[group]} (${keys.length})\n\n`)
       for (const key of keys) {
         const item = items.get(key)!
-        out(`- ${key}  ${(item.why ?? []).join(";  ")}`)
-        for (const action of item.actions ?? []) out(`    > ${action.id}:  ${action.label}`)
+        CLI.out(`- ${key}  ${(item.why ?? []).join(";  ")}`)
+        for (const action of item.actions ?? []) CLI.out(`    > ${action.id}:  ${action.label}`)
       }
-      out("")
+      CLI.out("")
     }
     return EXIT.OK
   }
@@ -410,11 +411,6 @@ export class Stock {
 ////////////////
 // ## Helpers:  no repo needed
 ////////////////
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
 
 /** Asides about an item's `/park` note and `/bedtime` report, which don't decide its group alone. */
 function notes(item: StockItem, parked: StockItem["parked"]): string[] {

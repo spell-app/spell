@@ -6,7 +6,7 @@ import { Git } from "spell/server/Git"
 
 // By package path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
 
 /****************
  * ### `PromptAck`
@@ -29,12 +29,12 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  * - NEVER throws, and never blocks the prompt longer than the summary's time limit.
  ****************/
 export class PromptAck {
-  /** Claude Code's own folder, where the session registry is:  `~/.claude` */
+  /** Claude Code's own folder, where the session registry is (`ClaudeHome.home()`) */
   readonly home: string
   /** runs the summary:  `claude -p` by default */
   private readonly summarize: (text: string) => string | null
 
-  constructor({ home = SessionFolders.home(), summarize = haikuSummary }: PromptAckProps = {}) {
+  constructor({ home = ClaudeHome.home(), summarize = haikuSummary }: PromptAckProps = {}) {
     this.home = home
     this.summarize = summarize
   }
@@ -120,7 +120,7 @@ export class PromptAck {
 
 /** `PromptAck`'s constructor options. */
 export type PromptAckProps = {
-  /** Claude Code's own folder;  default `SessionFolders.home()` */
+  /** Claude Code's own folder;  default `ClaudeHome.home()` */
   home?: string
   /** turns a message into one sentence, or `null`;  default Haiku's (`claude -p`) */
   summarize?: (text: string) => string | null

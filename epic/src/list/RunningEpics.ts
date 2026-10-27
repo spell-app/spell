@@ -1,9 +1,9 @@
 import { existsSync, readdirSync, readFileSync, watch, type FSWatcher } from "node:fs"
-import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { RealPath } from "spell/server/RealPath"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
 import { DataFile } from "spell-epic/data/DataFile"
@@ -69,14 +69,11 @@ export class RunningEpics {
 
   /**
    * Claude Code's own folder, whose `sessions/<pid>.json` say which sessions run (`runningNames()`):
-   * `~/.claude`, or `SPELL_CLAUDE_HOME` (as the CLI's `claudeHome()`;  tests point it at a fixture)
+   * `ClaudeHome.home()` (a test points `CLAUDE_CONFIG_DIR` at a fixture)
    */
   readonly claudeHome: string
 
-  constructor(
-    root: string,
-    { claudeHome = process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude") }: { claudeHome?: string } = {}
-  ) {
+  constructor(root: string, { claudeHome = ClaudeHome.home() }: { claudeHome?: string } = {}) {
     this.root = root
     this.worktrees = new EpicConfig(root).worktreesFolders
     this.epics = join(EpicConfig.contentOf(root), "epics")
@@ -280,37 +277,24 @@ export class RunningEpics {
   }
 
   /**
-   * Every live Claude session (`sessions/<pid>.json`, its process alive):  its pid, id, title, status and folder.
+   * Every live Claude session (`ClaudeHome.liveSessions()`):  its pid, id, title, status and folder.
    * - the title its tab shows (`SessionFolders.recordTitle()`):  a session resumed in a new process keeps its
    *   `🚧 <epic>` only in its transcript (epic `epic-engine` I51)
    * - NEVER throws:  an unreadable record is skipped
    */
-  liveSessions(): LiveSession[] {
-    const sessions: LiveSession[] = []
-    const folder = join(this.claudeHome, "sessions")
-    if (!existsSync(folder)) return sessions
-    for (const file of readdirSync(folder)) {
-      if (!file.endsWith(".json")) continue
-      try {
-        const record = JSON.parse(readFileSync(join(folder, file), "utf8")) as SessionRecord
-        if (typeof record.pid !== "number" || !SRV.isProcessAlive(record.pid)) continue
-        sessions.push({
-          pid: record.pid,
-          sessionId: record.sessionId ?? "",
-          title: SessionFolders.recordTitle(record, this.claudeHome),
-          status: record.status ?? "",
-          cwd: record.cwd ?? ""
-        })
-      } catch {
-        // a record being written, or not JSON:  not a running session we can read
-      }
-    }
-    return sessions
+  liveSessions(): TitledSession[] {
+    return ClaudeHome.liveSessions({ home: this.claudeHome, isAlive: SRV.isProcessAlive }).map((record) => ({
+      pid: record.pid,
+      sessionId: record.sessionId,
+      title: SessionFolders.recordTitle(record, this.claudeHome),
+      status: record.status ?? "",
+      cwd: record.cwd ?? ""
+    }))
   }
 }
 
-/** A live Claude session, as `RunningEpics.liveSessions()` reads its record. */
-export type LiveSession = {
+/** A live Claude session, its title as its tab shows it (`RunningEpics.liveSessions()`). */
+export type TitledSession = {
   pid: number
   /** Claude Code's session id (a uuid) */
   sessionId: string
@@ -329,7 +313,7 @@ export function bareTitle(title: string): string {
 /**
  * The sessions titled for epic `epic` (epic `airplane` P12), by `titleNames()`.
  */
-export function sessionsTitledFor(epic: string, sessions: LiveSession[]): LiveSession[] {
+export function sessionsTitledFor(epic: string, sessions: TitledSession[]): TitledSession[] {
   return sessions.filter((session) => titleNames(session.title, epic))
 }
 
@@ -343,18 +327,6 @@ export function titleNames(title: string, epic: string): boolean {
   if (!name || !bare) return false
   if (bare === name) return true
   return new RegExp(`(^|[^a-z0-9_-])${escapeRegExp(name)}($|[^a-z0-9_-])`, "u").test(bare)
-}
-
-/** The fields `RunningEpics.liveSessions()` reads of a session's record, `~/.claude/sessions/<pid>.json`. */
-type SessionRecord = {
-  pid?: number
-  sessionId?: string
-  cwd?: string
-  /** its address, and its title unless Claude Code made it up (`nameSource`) */
-  name?: string
-  /** `hook`, `derived` ...:  `derived` when Claude Code made the `name` up (`SessionFolders.recordTitle()`) */
-  nameSource?: string
-  status?: string
 }
 
 /** The Epics page's list, as `docs index` writes it since epic `epic-engine` P3:  its opening tag. */

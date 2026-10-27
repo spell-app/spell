@@ -5,7 +5,9 @@ import { join } from "node:path"
 import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
 import { Git } from "spell/server/Git"
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { Transcript } from "spell-epic/config/Transcript"
 import { DataFile } from "spell-epic/data/DataFile"
 import { PhaseIds } from "spell-epic/phases"
 
@@ -13,6 +15,7 @@ import {
   EXIT,
   EpicCommandError,
   parseVerbArgs,
+  stringFlag,
   type EpicRequest,
   type MergeOptions,
   type MergeResult,
@@ -90,20 +93,20 @@ export class Requests {
       if (!named) throw new EpicCommandError("merge:  which epic?")
       const merged = Requests.mergeEach(named, undefined, { ditch: Boolean(flags.ditch) })
       for (const { repo, ditched, ditchedTo } of merged.filter(({ ditched }) => ditched.length)) {
-        out(`${repo ? `${repo}:  ` : ""}moved ${ditched.length} stray file(s) aside, into ${ditchedTo}:`)
-        for (const file of ditched) out(`  ${file}`)
+        CLI.out(`${repo ? `${repo}:  ` : ""}moved ${ditched.length} stray file(s) aside, into ${ditchedTo}:`)
+        for (const file of ditched) CLI.out(`  ${file}`)
       }
       if (merged.length === 1 && !merged[0]!.repo) {
         const { commits } = merged[0]!
-        out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
-        for (const commit of commits) out(`  ${commit}`)
+        CLI.out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
+        for (const commit of commits) CLI.out(`  ${commit}`)
       } else {
         // a multi-repo top:  each repo whose branch has commits
         const moved = merged.filter(({ commits }) => commits.length)
-        if (!moved.length) out(`nothing to merge:  every repo's main already has ${named}`)
+        if (!moved.length) CLI.out(`nothing to merge:  every repo's main already has ${named}`)
         for (const { repo, base, commits } of moved) {
-          out(`${repo}:  ${base} fast-forwarded to ${named}:`)
-          for (const commit of commits) out(`  ${commit}`)
+          CLI.out(`${repo}:  ${base} fast-forwarded to ${named}:`)
+          for (const commit of commits) CLI.out(`  ${commit}`)
         }
       }
       await Requests.recordMerged(named, merged)
@@ -111,7 +114,7 @@ export class Requests {
     }
     if (verb === "home") {
       if (named) this.setHome(named)
-      out(this.home() ?? "no tooling home:  epic home <epic> sets one")
+      CLI.out(this.home() ?? "no tooling home:  epic home <epic> sets one")
       return EXIT.OK
     }
     // no epic named:  the tooling home's (`send` only:  the other verbs say which epic)
@@ -123,9 +126,9 @@ export class Requests {
         return this.sendVerb(epic, flags)
       case "requests": {
         const requests = await this.shown(epic)
-        if (flags.json) out(JSON.stringify(requests, null, 2))
-        else if (!requests.length) out(`no requests in epic ${epic}`)
-        else for (const request of requests) out(requestLine(request))
+        if (flags.json) CLI.out(JSON.stringify(requests, null, 2))
+        else if (!requests.length) CLI.out(`no requests in epic ${epic}`)
+        else for (const request of requests) CLI.out(requestLine(request))
         return EXIT.OK
       }
       case "file":
@@ -137,7 +140,8 @@ export class Requests {
 
   /** `epic send`:  write the request, then say who to tell. */
   private sendVerb(epic: string, flags: VerbArgs["flags"]): number {
-    const text = typeof flags.file === "string" ? readFileSync(flags.file, "utf8") : flags.text
+    const file = stringFlag(flags.file)
+    const text = file !== undefined ? readFileSync(file, "utf8") : flags.text
     if (typeof text !== "string" || !text.trim())
       throw new EpicCommandError('send:  Owen\'s words?  --text "..." or --file <file>')
     const images = Number(flags.images ?? 0)
@@ -146,24 +150,24 @@ export class Requests {
       epic,
       text,
       images,
-      context: typeof flags.context === "string" ? flags.context : undefined,
-      from: typeof flags.from === "string" ? flags.from : process.env.CLAUDE_CODE_SESSION_ID
+      context: stringFlag(flags.context),
+      from: stringFlag(flags.from) ?? process.env.CLAUDE_CODE_SESSION_ID
     })
     const { request, receivers } = sent
     if (flags.json) {
-      out(JSON.stringify({ ...sent, receivers: receivers.map((it) => it.name ?? it.sessionId) }, null, 2))
+      CLI.out(JSON.stringify({ ...sent, receivers: receivers.map((it) => it.name ?? it.sessionId) }, null, 2))
       return EXIT.OK
     }
-    out(`${request.id}  epics/${epic}/requests/${request.id}/request.md`)
-    for (const image of request.images) out(`    ${image}`)
+    CLI.out(`${request.id}  epics/${epic}/requests/${request.id}/request.md`)
+    for (const image of request.images) CLI.out(`    ${image}`)
     if (receivers.length) {
       for (const receiver of receivers)
-        out(`tell:  ${receiver.name ?? receiver.sessionId}  (${receiver.status ?? "running"})`)
+        CLI.out(`tell:  ${receiver.name ?? receiver.sessionId}  (${receiver.status ?? "running"})`)
     } else if (sent.fromEpic) {
-      out(`this session is ${epic}'s own:  take ${request.id} up here (/epic request ${epic} ${request.id})`)
+      CLI.out(`this session is ${epic}'s own:  take ${request.id} up here (/epic request ${epic} ${request.id})`)
     } else {
-      out(`no session of ${epic} is running:  open one with`)
-      out(`  epic window launch ${epic} --prompt "/epic request ${epic} ${request.id}"`)
+      CLI.out(`no session of ${epic} is running:  open one with`)
+      CLI.out(`  epic window launch ${epic} --prompt "/epic request ${epic} ${request.id}"`)
     }
     return EXIT.OK
   }
@@ -182,13 +186,13 @@ export class Requests {
       const phase = phaseOf(where)
       if (phase !== undefined)
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
-      out(requestLine(this.file(epic, id, where)))
+      CLI.out(requestLine(this.file(epic, id, where)))
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
     const request = this.list(epic).find((it) => it.id === id)
-    let html = typeof flags.file === "string" ? flags.file : undefined
-    let from = typeof flags.from === "string" ? flags.from : undefined
+    let html = stringFlag(flags.file)
+    let from = stringFlag(flags.from)
     if (!html || !from) {
       if (!request) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
       html = join(mkdtempSync(join(tmpdir(), "epic-request-")), `${id}.html`)
@@ -199,7 +203,7 @@ export class Requests {
     const exitCode = await EpicTools.runPlanDoc(["file", named, id, "--from", from, "--file", html])
     if (exitCode !== EXIT.OK) return exitCode
     const { filed, phase } = await this.phaseFiled(epic, ref)
-    out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
+    CLI.out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
     return EXIT.OK
   }
 
@@ -273,7 +277,7 @@ export class Requests {
     for (const line of readFileSync(path, "utf8").split("\n")) {
       // cheap pre-check:  most lines have no image
       if (!line.includes('"image"')) continue
-      const content = Requests.promptBlocks(Sessions.parseJSONLine(line))
+      const content = Requests.promptBlocks(Transcript.parseLine(line))
       if (!content) continue
       for (const block of content) {
         const source = block?.type === "image" ? block.source : undefined
@@ -526,10 +530,11 @@ export class Requests {
       const root = new EpicConfig(main).top?.main ?? main
       if (!existsSync(join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`))) return
       const exitCode = await record(["commits", epic, "--backfill", "--merged", shas.join(",")], root)
-      if (exitCode !== EXIT.OK) out(`merged, but its commits aren't on the epic page:  epic commits ${epic} --backfill`)
+      if (exitCode !== EXIT.OK)
+        CLI.out(`merged, but its commits aren't on the epic page:  epic commits ${epic} --backfill`)
     } catch (error) {
       const why = error instanceof Error ? error.message : String(error)
-      out(`merged, but its commits aren't on the epic page (${why}):  epic commits ${epic} --backfill`)
+      CLI.out(`merged, but its commits aren't on the epic page (${why}):  epic commits ${epic} --backfill`)
     }
   }
 
@@ -657,11 +662,6 @@ const EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/gif": "gif",
   "image/webp": "webp"
-}
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
 }
 
 /** A phase as a filed request names it:  `P7 · Comment Threads`, its number its place today. */

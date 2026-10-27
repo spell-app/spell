@@ -15,6 +15,7 @@ import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 import { Sessions } from "spell-epic/command/Sessions"
 import { TranscriptIndex } from "spell-epic/command/TranscriptIndex"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { Transcript } from "spell-epic/config/Transcript"
 
 /** A fake `~/.claude`, and a folder that is NOT a git checkout to list sessions from. */
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))
@@ -109,7 +110,7 @@ describe("named()", () => {
   for (const id of ["busy-1", "busy-2", "busy-3"]) transcript("-busy", id, busy)
   test("each distinct folder resolved once;  a transcript that can't match, never parsed", () => {
     const ask = vi.spyOn(EpicConfig.prototype, "worktreeNameOf")
-    const parse = vi.spyOn(Sessions, "parseJSONLine")
+    const parse = vi.spyOn(Transcript, "parseLine")
     try {
       expect(new Sessions({ home: HOME }).named("seo")).toHaveLength(2)
       // 600 lines name /elsewhere/busy;  a handful of folders in all

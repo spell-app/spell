@@ -29,9 +29,9 @@
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { join, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { join } from "node:path"
 
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import { SRV } from "spell/server"
@@ -40,7 +40,7 @@ import { PageServer, pageServerRoot } from "spell/server/page"
 import { AirplaneInbox } from "./AirplaneInbox.ts"
 import { AirplaneMode } from "./AirplaneMode.ts"
 import { DOCS_FOLDERS, HIGHLIGHT, Offline } from "./offline.ts"
-import { ROOT, parseArgs } from "./pages.js"
+import { ROOT } from "./pages.js"
 
 /** One line of `check`:  what was checked, how it stands, and what to do about it. */
 export type FlightCheck = { name: string; status: "ok" | "fixed" | "fail" | "note"; detail: string }
@@ -191,7 +191,7 @@ export async function run([verb = "status"]: string[], flags: Record<string, str
       return checks.some((check) => check.status === "fail") ? 1 : 0
     }
     case "inbox": {
-      const since = typeof flags.since === "string" ? flags.since : AirplaneMode.read()?.since
+      const since = stringFlag(flags.since) ?? AirplaneMode.read()?.since
       const inbox = AirplaneInbox.gather(ROOT, { since })
       if (json) console.log(JSON.stringify(inbox, null, 2))
       else if (inbox.isEmpty) console.log("nothing waiting")
@@ -206,7 +206,7 @@ export async function run([verb = "status"]: string[], flags: Record<string, str
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { positional, flags } = parseArgs(process.argv.slice(2))
+if (import.meta.main) {
+  const { positional, flags } = parseVerbArgs(process.argv.slice(2))
   process.exitCode = await run(positional, flags)
 }

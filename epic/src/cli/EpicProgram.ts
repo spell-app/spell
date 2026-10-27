@@ -1,9 +1,11 @@
 import chalk from "chalk"
-import { Command } from "commander"
+import { Command, Help, Option } from "commander"
 
+import { suggest } from "spell/util/string"
 import { Git } from "spell/server/Git"
+import { CLI } from "spell/cli"
 import { EpicCheckout } from "spell-epic/command/EpicCheckout"
-import { EXIT, EpicCommandError } from "spell-epic/command/command.types"
+import { EXIT, EpicCommandError, flagName } from "spell-epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell-epic/command/EpicTools"
 import { Hub } from "spell-epic/command/Hub"
 import { LinesOfCode } from "spell-epic/command/LinesOfCode"
@@ -18,7 +20,7 @@ import { Worktrees } from "spell-epic/command/Worktrees"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { EpicRepo } from "spell-epic/config/EpicRepo"
 
-import { GROUP_VERBS, type GroupName } from "./epicGroups"
+import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicGroups"
 
 /****************
  * ### `EpicProgram`
@@ -45,8 +47,10 @@ import { GROUP_VERBS, type GroupName } from "./epicGroups"
  * - Help and mistakes:
  *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
  *     and an unknown one is refused
- *   - every verb's help has its usage, what it does and an example (`epic close --help`)
- *   - an unknown verb exits 1, listing them;  a usage error exits 2 (`EXIT`)
+ *   - every verb's help has its usage, what it does, its flags and an example (`epic close --help`)
+ *   - every verb's flags are listed (`epicGroups.ts`'s `flags`, `VERB_FLAGS`), and any other `--flag` is refused,
+ *     never ignored (`checkFlags()`;  epic `coherence` P20)
+ *   - an unknown verb exits 1, listing them;  a usage error exits 2 (`EXIT`), an unknown flag too
  * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it.
  *   - the data is the caller's (`EpicCheckout.nearest()`)
  *   - `epic --version` says which code runs
@@ -55,10 +59,13 @@ import { GROUP_VERBS, type GroupName } from "./epicGroups"
  *   stock, `stock` before);  an item's status card is `update`'s (`epic update seo#J3 underway`, J140)
  *   - gone with no stand-in:  the tool in its own order (`epic plan-doc ...`), `add-request` (`file`'s old name),
  *     `overnight`
+ * - Its base is the kit's `spell/cli`, every repo's command line's (epic `coherence` P20):  `runCommand()` (a verb's
+ *   exit, once its output is out, at most 2s later), `rawArgsAfter()`, `EXIT` and `CliError` (`EpicCommandError`)
  * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs,
  *   so `epic` starts in a fraction of a second.
  *   - its entry is `epicMain.ts`, beside this
- *   - NEVER imports the kit's `spell` program (`spell/cli`)
+ *   - NEVER imports the kit's `spell` PROGRAM (`spell/cli/main`):  the base (`spell/cli`) loads node's modules,
+ *     commander, chalk, `json5`, the kit's `RealPath` and util's timing, and no spell
  * - NOTE: `spell commands` reads the `epic.command(...)` calls in this file's TEXT:
  *   keep the receiver named `epic`
  ****************/
@@ -115,11 +122,7 @@ export class EpicProgram {
     const epic = this.epic
     epic.commandsGroup("Requests from other sessions:")
 
-    const requests = (verb: Command) =>
-      verb
-        .argument("[args...]")
-        .allowUnknownOption()
-        .action(() => runVerb(() => new Requests().run([verb.name(), ...rawArgs(verb.name())])))
+    const requests = (verb: Command) => this.verb(verb, (args) => new Requests().run([verb.name(), ...args]))
 
     requests(epic.command("send"))
       .description("send an epic a request:  Owen's words and screenshots;  no epic:  the tooling home")
@@ -459,14 +462,10 @@ export class EpicProgram {
       (args) => new Parking().run(args)
     )
     // `stock` until Owen's names (epic `repo-split` J140);  an item's status card is `epic update seo#J3 underway`
-    epic
-      .command("status")
+    this.verb(epic.command("status"), (args) => new Stock().run(args))
       .description("take stock:  worktrees, branches, sessions, parked work, plans -- in process, hung or parked, dead")
       .usage("[--json]")
-      .argument("[args...]")
-      .allowUnknownOption()
       .addHelpText("after", example("epic status --json"))
-      .action(() => runVerb(() => new Stock().run(rawArgs("status"))))
 
     epic.commandsGroup("Shared content:")
 
@@ -528,17 +527,13 @@ export class EpicProgram {
       "the docs pages:  the home and list pages (index), a new page, a page's links, opening one, its writing",
       (args) => EpicTools.runPages(args)
     )
-    epic
-      .command("loc")
+    this.verb(epic.command("loc"), (args) => new LinesOfCode().run(args))
       .description(
         "lines of code:  every repo of this checkout, per repo and per folder, code, tests and docs;  rewrites the " +
           "LOC guide (guides/loc/loc.html) and prints its links and the totals"
       )
       .usage("[--print] [--json]")
-      .argument("[args...]")
-      .allowUnknownOption()
       .addHelpText("after", LOC_HELP)
-      .action(() => runVerb(() => new LinesOfCode().run(rawArgs("loc"))))
     this.group(
       epic.command("repo"),
       "the repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
@@ -555,37 +550,25 @@ export class EpicProgram {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
 
-    epic
-      .command("config")
+    this.verb(epic.command("config"), (args) => EpicProgram.config(args))
       .description("where this repo keeps its epic things (.epic/config.json5):  a value, or all of them")
       .usage("[<key>] [--json]")
-      .argument("[args...]")
-      .allowUnknownOption()
       .addHelpText("after", CONFIG_HELP)
-      .action(() => runVerb(() => EpicProgram.config(rawArgs("config"))))
 
-    epic
-      .command("voice")
+    this.verb(epic.command("voice"), (args) => EpicProgram.voice(args))
       .description(
         "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice"
       )
       .usage("[<name> | --for <kind>] [--json]")
-      .argument("[args...]")
-      .allowUnknownOption()
       .addHelpText("after", VOICE_HELP)
-      .action(() => runVerb(() => EpicProgram.voice(rawArgs("voice"))))
 
-    epic
-      .command("init")
+    this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
         "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
           ".gitignore lines;  safe to run again"
       )
       .usage("[--dry-run] [--json]")
-      .argument("[args...]")
-      .allowUnknownOption()
       .addHelpText("after", INIT_HELP)
-      .action(() => runVerb(() => new RepoInit().run(rawArgs("init"))))
   }
 
   ////////////////
@@ -639,57 +622,88 @@ export class EpicProgram {
    * - returns it, for its usage line and help
    * - `sample`:  a whole command line, for its help's "Example:"
    *   (a verb with its own help text has its examples there)
-   * - its arguments are taken raw (`rawArgs()`):  `--goal` / `--details` ... are the tool's, not commander's
+   * - its flags:  `VERB_FLAGS`', and `--here`, unlisted:  the tool accepts and ignores it, for old callers
    * - `epic.command("<name>")` stays at each call:  `spell commands` finds the verbs by that text
    */
   private page(verb: Command, description: string, sample?: string): Command {
     const name = verb.name()
     if (sample) verb.addHelpText("after", example(sample))
-    return verb
-      .description(description)
-      .argument("[args...]")
-      .allowUnknownOption()
-      .action(() => runVerb(() => EpicTools.runPlanDoc([name, ...rawArgs(name)])))
+    return this.verb(verb, (args) => EpicTools.runPlanDoc([name, ...args]), { accepted: OLD_PAGE_FLAGS }).description(
+      description
+    )
   }
 
   /**
    * Make `command` group `name` of `epic`'s, run by `run` with its arguments verbatim.
-   * - a verb of its own for each of `GROUP_VERBS`, so `epic ask create --help` prints that verb's help
+   * - a verb of its own for each of `GROUP_VERBS`, so `epic ask create --help` prints that verb's help, its flags
+   *   among it, and refuses a flag it hasn't got
    * - an unknown verb (`epic ask bogus`):  refused, exit 1, listing the group's verbs
    * - no verb (`epic agents`, `epic comments --json`):  the tool's default, or its usage
    * - a verb after a flag the tool takes (`epic agents --epic seo list`) is the tool's to read:
-   *   commander can't tell a flag's value from a verb
+   *   commander can't tell a flag's value from a verb, so the group takes any of its verbs' flags
    * - `epic.command("<name>")` stays at each call:  `spell commands` finds the verbs by that text
    */
   private group(command: Command, description: string, run: (args: string[]) => Promise<number>): Command {
     const name = command.name() as GroupName
+    const verbs = GROUP_VERBS[name]
+    const anyVerbs: VerbFlags = Object.assign({}, ...verbs.map((verb) => verb.flags))
     command
       .description(description)
       .usage("<verb> [arguments]")
       .argument("[args...]")
       .allowUnknownOption()
       .configureHelp({ subcommandTerm: (verb) => verb.name() })
-      .addHelpText(
-        "after",
-        `${example(GROUP_VERBS[name][0]!.example)}\n\nepic ${name} <verb> --help says more about each.`
-      )
+      .addHelpText("after", `${example(verbs[0]!.example)}\n\nepic ${name} <verb> --help says more about each.`)
       .action((args: string[]) => {
         // a known verb went to its own command (below):  a word here is a verb the group lacks
         if (args[0] !== undefined && !args[0].startsWith("-")) unknownVerb(command, `epic ${name} ${args[0]}`)
-        return runVerb(() => run(rawArgs(name)))
+        return runVerb(`epic ${name}`, anyVerbs, CLI.rawArgsAfter(name), run)
       })
-    for (const verb of GROUP_VERBS[name]) {
-      command
-        .command(verb.name)
+    for (const verb of verbs) {
+      const typed = command.command(verb.name)
+      this.flagged(typed, verb.flags)
         .description(verb.description)
         // a verb with no arguments (`airplane on`):  none, rather than commander's "[options] [args...]"
         .usage(verb.usage || " ")
         .argument("[args...]")
         .allowUnknownOption()
         .addHelpText("after", example(verb.example))
-        .action(() => runVerb(() => run(rawArgs(name))))
+        .action(() => runVerb(`epic ${name} ${verb.name}`, verb.flags, CLI.rawArgsAfter(name), run))
     }
     return command
+  }
+
+  /**
+   * Make `verb`, a verb of no group, run `run` with its arguments as typed (everything after its name), taking its
+   * flags (`VERB_FLAGS`):  its help lists them, and any other `--flag` is refused (`runVerb()`).
+   * - `accepted`:  flags it takes without listing them
+   * - returns `verb`, for its usage and help
+   */
+  private verb(
+    verb: Command,
+    run: (args: string[]) => Promise<number>,
+    { accepted = [] }: { accepted?: readonly string[] } = {}
+  ): Command {
+    const name = verb.name()
+    const flags = VERB_FLAGS[name]
+    return this.flagged(verb, flags)
+      .argument("[args...]")
+      .allowUnknownOption()
+      .action(() => runVerb(`epic ${name}`, flags, CLI.rawArgsAfter(name), run, accepted))
+  }
+
+  /**
+   * Show `flags` in `verb`'s help, under commander's own `Options:`;  `undefined`:  none listed.
+   * - help only, to commander:  each verb's tool reads its own flags, as typed (`parseVerbArgs()`), so commander parses
+   *   none:  a value that starts with `-` stays a value, and a flag's missing value is the tool's to say
+   * - returns `verb`
+   */
+  private flagged(verb: Command, flags: VerbFlags | undefined): Command {
+    const options = Object.entries(flags ?? {}).map(([spec, description]) => new Option(spec, description))
+    return verb.configureHelp({
+      ...verb.configureHelp(),
+      visibleOptions: (command: Command) => [...options, ...new Help().visibleOptions(command)]
+    })
   }
 
   ////////////////
@@ -787,25 +801,58 @@ export class EpicProgram {
     const branch = Git.run(["branch", "--show-current"], EpicCheckout.CODE_ROOT).out || "detached"
     return `epic ${sha} (${branch}) ${EpicCheckout.CODE_ROOT}`
   }
+
+  /**
+   * `args`, a verb's as typed, when every `--flag` among them is one of `flags` (or `accepted`);  else a usage error
+   * naming the one it hasn't got, and the nearest it has (`suggest()`):
+   * `epic summary --jsn?  no such flag;  did you mean --json?  epic summary --help lists its flags`.
+   * - a flag as the tools read one (`flagName()`):  `--name`, alone;  so a value like `"-- a note"` is never one
+   * - compared camelCased, as the tools read them:  `--dry-run` and `--dryRun` are one flag
+   * - `typed`:  the verb as typed, `epic ask create`, for the message;  `flags` `undefined`:  any flag goes
+   * - throws `EpicCommandError` (exit 2)
+   * - static:  pure
+   */
+  static checkFlags(
+    typed: string,
+    flags: VerbFlags | undefined,
+    args: readonly string[],
+    accepted: readonly string[] = []
+  ): readonly string[] {
+    if (!flags) return args
+    const known = new Map(
+      [...Object.keys(flags), ...accepted].map((spec) => {
+        const long = LONG_FLAG.exec(spec)![1]!
+        return [flagName(long)!, long] as const
+      })
+    )
+    for (const arg of args) {
+      const name = flagName(arg)
+      if (name === undefined || known.has(name)) continue
+      const near = suggest(
+        arg.slice(2),
+        [...known.values()].map((long) => long.slice(2))
+      )
+      throw new EpicCommandError(
+        `${typed} ${arg}?  no such flag${near ? `;  did you mean --${near}?` : "."}  ${typed} --help lists its flags`
+      )
+    }
+    return args
+  }
 }
 
 /**
- * Run verb `run`, then exit with the code it resolves to, once its output is written.
- * - An `EpicCommandError` prints just its message, in red;  anything else is a crash, and prints its stack.
- * - NOTE: exits explicitly:  a tool can leave timers running, which would keep the process alive.
+ * Run verb `typed` (`epic ask create`):  its `args` checked against its flags (`EpicProgram.checkFlags()`), then
+ * handed to `run`;  the process exits with what it resolves to, once its output is out (`CLI.runCommand()`).
+ * - an `EpicCommandError` prints just its message, in red;  anything else is a crash, and prints its stack
  */
-async function runVerb(run: () => Promise<number>): Promise<never> {
-  let exitCode: number
-  try {
-    exitCode = await run()
-  } catch (error) {
-    const known = error instanceof EpicCommandError
-    process.stderr.write(`${chalk.red(known ? error.message : ((error as Error)?.stack ?? String(error)))}\n`)
-    exitCode = known ? error.exitCode : EXIT.ERRORS
-  }
-  // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short
-  await new Promise<void>((done) => process.stdout.write("", () => done()))
-  process.exit(exitCode)
+function runVerb(
+  typed: string,
+  flags: VerbFlags | undefined,
+  args: string[],
+  run: (args: string[]) => Promise<number>,
+  accepted: readonly string[] = []
+): Promise<never> {
+  return CLI.runCommand(async () => run([...EpicProgram.checkFlags(typed, flags, args, accepted)]))
 }
 
 /**
@@ -842,14 +889,14 @@ function example(commandLine: string): string {
   return `\nExample:\n  ${commandLine}`
 }
 
+/** A flag's long name at the start of its spec (`--epic <epic>`):  `--epic`. */
+const LONG_FLAG = /^(--[\w-]+)/
+
 /**
- * Everything on the command line after verb `verb`, as typed.
- * - Why:  commander would take a tool's own flags (`--all`, `--goal`) as ours
+ * The flags every epic page's verb takes without listing them:  `--here`, which the `epic` tool accepts and ignores
+ * (every checkout edits the one shared page), for old callers.
  */
-function rawArgs(verb: string): string[] {
-  const argv = process.argv
-  return argv.slice(argv.indexOf(verb, 2) + 1)
-}
+const OLD_PAGE_FLAGS = ["--here"]
 
 /** After `epic --help`'s verbs:  how to name things. */
 const EPIC_HELP = `

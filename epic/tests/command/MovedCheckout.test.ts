@@ -38,11 +38,11 @@ const WORKTREES = join(NEW_WWW, "spell-epic.worktrees")
 /** the content folder, moved and renamed:  only the old name, through its link, finds it */
 const CONTENT = join(NEW_WWW, "spell.epics")
 const CLAUDE = join(TOP, "claude")
-const saved = process.env.SPELL_CLAUDE_HOME
-process.env.SPELL_CLAUDE_HOME = CLAUDE
+const saved = process.env.CLAUDE_CONFIG_DIR
+process.env.CLAUDE_CONFIG_DIR = CLAUDE
 afterAll(() => {
-  if (saved === undefined) delete process.env.SPELL_CLAUDE_HOME
-  else process.env.SPELL_CLAUDE_HOME = saved
+  if (saved === undefined) delete process.env.CLAUDE_CONFIG_DIR
+  else process.env.CLAUDE_CONFIG_DIR = saved
   rmSync(TOP, { recursive: true, force: true })
 })
 

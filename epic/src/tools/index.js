@@ -42,7 +42,6 @@
 import { execFileSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
-import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
@@ -248,7 +247,7 @@ export const LISTS = [
   }
 ]
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) main()
+if (import.meta.main) main()
 
 /** Write every list page, then the home's cards;  tidy them;  print what each holds, and the guides in Misc. */
 function main() {

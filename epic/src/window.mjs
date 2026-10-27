@@ -190,12 +190,14 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { RealPath } from "spell/server/RealPath"
 
+import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
 import { SessionMoves } from "spell-epic/command/SessionMoves.ts"
@@ -1126,14 +1128,14 @@ export class Window {
 
   /** `epic window <argv>`:  run one command;  resolves to the exit code. */
   static async main(argv) {
-    const { positional, flags } = parseArgs(argv)
+    const { positional, flags, lists } = parseVerbArgs(argv)
     const [command, target] = positional
     if (command === "init") {
       const written = Window.init()
       console.log(written.length ? `wrote ${written.join(", ")}` : "every window file is up to date")
       return 0
     }
-    if (command === "move") return Window.moveCommand({ dryRun: flags["dry-run"] === true })
+    if (command === "move") return Window.moveCommand({ dryRun: flags.dryRun === true })
     const bare = ["which", "should-stay", "reload", "color"].includes(command) || (command === "stay" && flags.end)
     if (!COMMANDS.includes(command) || (!bare && !target)) {
       console.error(USAGE)
@@ -1148,7 +1150,7 @@ export class Window {
     }
     if (["open", "launch", "close", "handoff", "resume"].includes(command)) {
       if (command !== "resume") sayBefore(process.env.CLAUDE_CODE_SESSION_ID)
-      return Window.worktreeCommand(command, target, flags)
+      return Window.worktreeCommand(command, target, flags, lists)
     }
     const window = Window.current()
     if (!window) {
@@ -1195,7 +1197,7 @@ export class Window {
         const { removed } = await Window.request("remove-folder", { path }, window)
         console.log(removed ? `removed ${path} from window ${window.pid}` : `${path} isn't in window ${window.pid}`)
       } else {
-        const hash = typeof flags.hash === "string" ? flags.hash : undefined
+        const hash = stringFlag(flags.hash)
         const { later } = await Window.show(path, { hash, view: flags.review ? "review" : undefined })
         console.log(
           later
@@ -1244,11 +1246,12 @@ export class Window {
   /**
    * `open` / `close` / `handoff` worktree `name`'s window, or `resume` a handoff;  resolves to the exit code.
    * - `resume`'s `name` is the handoff record's file:  read, then deleted
+   * - `flags`, `lists`:  the command line's (`parseVerbArgs()`);  `resume` takes `--title` once per title (`lists`)
    */
-  static async worktreeCommand(command, name, flags) {
+  static async worktreeCommand(command, name, flags, lists = {}) {
     try {
       if (command === "handoff") {
-        const prompt = typeof flags.prompt === "string" ? flags.prompt : null
+        const prompt = stringFlag(flags.prompt) ?? null
         const sessionId = process.env.CLAUDE_CODE_SESSION_ID
         const refused = SESSION_ID.test(sessionId ?? "") ? Window.moveProblem(sessionId) : null
         if (refused) {
@@ -1272,7 +1275,7 @@ export class Window {
       if (command === "resume") {
         const handoff = JSON.parse(readFileSync(name, "utf8"))
         rmSync(name, { force: true })
-        const { closed, matches, shown } = await Window.resume(handoff, flags.title)
+        const { closed, matches, shown } = await Window.resume(handoff, lists.title)
         console.log(`${new Date().toISOString()}  opened session ${handoff.sessionId} in ${handoff.to}`)
         if (shown !== undefined) console.log(`  ${shown ? "showed" : "couldn't show"} ${handoff.show.file}`)
         if (!closed)
@@ -1281,8 +1284,8 @@ export class Window {
       }
       if (command === "launch") {
         const pkg = flags.pkg ?? DEFAULT_WINDOW
-        const color = typeof flags.color === "string" ? flags.color : null
-        const prompt = typeof flags.prompt === "string" ? flags.prompt : `/epic ${name}`
+        const color = stringFlag(flags.color) ?? null
+        const prompt = stringFlag(flags.prompt) ?? `/epic ${name}`
         const move = flags.move ? process.env.CLAUDE_CODE_SESSION_ID : null
         if (flags.move && !SESSION_ID.test(move ?? "")) throw new Error("--move:  $CLAUDE_CODE_SESSION_ID isn't set")
         const launched = await Window.launch(name, pkg, { color, prompt, move })
@@ -1301,9 +1304,9 @@ export class Window {
       }
       // not a package window (a worktree's ...):  the whole repo's window, never a question (Owen, 2026-10-07)
       const pkg = flags.pkg ?? Window.packageOf(Window.current()) ?? DEFAULT_WINDOW
-      const color = typeof flags.color === "string" ? flags.color : null
+      const color = stringFlag(flags.color) ?? null
       // `--pkg` named:  that window's look, not this one's
-      const noOpen = flags["no-open"] === true
+      const noOpen = flags.noOpen === true
       const { file, colors } = Window.open(name, pkg, { color, fromCurrent: !flags.pkg, noOpen })
       console.log(noOpen ? `wrote ${file}  (not opened:  \`code ${file}\` opens it)` : `opened ${file}`)
       if (colors && !(await Window.applyColors(file, colors)))
@@ -1846,30 +1849,20 @@ function launchedLine(name, prompt, { action, file, sessions }) {
 }
 
 /**
- * Every live Claude Code session:  `{ pid, sessionId, title, cwd }` each, from Claude's own registry,
- * `sessions/<pid>.json` in `$SPELL_CLAUDE_HOME`, else `~/.claude`;  a record whose process is gone is skipped.
+ * Every live Claude Code session:  `{ pid, sessionId, title, cwd }` each, from Claude's own registry
+ * (`ClaudeHome.liveSessions()`, as `RunningEpics.liveSessions()` reads it);  a record whose process is gone is skipped.
  * - `title`:  the title its tab shows, icon and all (`🚧 seo`);  `""` when it has none
  *   - its record's `name`, or its transcript's title when Claude Code made that up for a resumed session
  *     (`SessionFolders.recordTitle()`;  epic `epic-engine` I50, I51)
- * - the same records `RunningEpics.liveSessions()` reads, in `spell-epic`
  */
 function liveSessions() {
-  const home = process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude")
-  const folder = join(home, "sessions")
-  if (!existsSync(folder)) return []
-  const sessions = []
-  for (const name of readdirSync(folder)) {
-    if (!name.endsWith(".json")) continue
-    try {
-      const record = JSON.parse(readFileSync(join(folder, name), "utf8"))
-      if (!Number.isInteger(record.pid) || !record.sessionId || !isAlive(record.pid)) continue
-      const title = SessionFolders.recordTitle(record, home)
-      sessions.push({ pid: record.pid, sessionId: record.sessionId, title, cwd: record.cwd ?? "" })
-    } catch {
-      // half-written, or not a session's:  skip it
-    }
-  }
-  return sessions
+  const home = ClaudeHome.home()
+  return ClaudeHome.liveSessions({ home, isAlive }).map((record) => ({
+    pid: record.pid,
+    sessionId: record.sessionId,
+    title: SessionFolders.recordTitle(record, home),
+    cwd: record.cwd ?? ""
+  }))
 }
 
 /**
@@ -1977,28 +1970,6 @@ function real(path) {
   return RealPath.of(path)
 }
 
-/**
- * `--key value` flags, plus everything else in order.
- * - a flag given twice is an array (`--title a --title b`)
- * - NOTE:  a value can't start with `--`
- */
-function parseArgs(argv) {
-  const positional = []
-  const flags = {}
-  for (let i = 0; i < argv.length; i++) {
-    const match = argv[i].match(/^--([\w-]+)$/)
-    if (!match) {
-      positional.push(argv[i])
-      continue
-    }
-    // a bare flag (`--back`) before another flag takes no value
-    const value = i + 1 < argv.length && !argv[i + 1].startsWith("--") ? argv[++i] : true
-    const key = match[1]
-    flags[key] = key in flags ? [flags[key], value].flat() : value
-  }
-  return { positional, flags }
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (import.meta.main) {
   process.exitCode = await Window.main(process.argv.slice(2))
 }

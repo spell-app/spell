@@ -218,6 +218,21 @@ export const ItemLetters = {
 /** A section kind that holds items:  a key of `ItemLetters`. */
 export type ItemSectionKind = keyof typeof ItemLetters
 
+/**
+ * An epic page's id that's a letter or two and a number, in any case:  an item's (`q7`, `J3`:  its letter is its kind,
+ * `ItemLetters`), a comment's (`c3`, an old `cm3`), an Overview sub-section's (`o2`), an old decision's (`d7`).
+ * - the ONE pattern every reader of one uses (`isItemId()`):  the epic tool, its inbox and migrations, `epic`'s
+ *   command line
+ * - NOT a phase's stable id (`p-epic-migrate`:  `PhaseIds.isStable()`);  an old phase id (`p3`) has the same shape, so a
+ *   reader that takes both tells it apart first (`PlanDoc.renameEntry()`)
+ */
+export const ITEM_ID = /^[a-z]{1,2}\d+$/i
+
+/** Is `text` an id of `ITEM_ID`'s shape:  `j3`, `C3`, `o2`? */
+export function isItemId(text: string): boolean {
+  return ITEM_ID.test(text)
+}
+
 ////////////////
 // ## Data
 ////////////////

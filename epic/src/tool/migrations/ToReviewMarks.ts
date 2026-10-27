@@ -1,3 +1,4 @@
+import { isItemId } from "spell-epic/definitions"
 import { Markup } from "spell-epic/markup"
 
 import type { Migration, MigrationContext } from "./migrations.types"
@@ -26,7 +27,7 @@ export class ToReviewMarks implements Migration {
     for (const link of Array.from(document.querySelectorAll(LINKS))) {
       const id = decodeURIComponent(link.getAttribute("href")!.slice(1))
       const words = (link.textContent ?? "").trim()
-      if (!ITEM_ID.test(id) || words.toLowerCase() !== id.toLowerCase()) {
+      if (!isItemId(id) || words.toLowerCase() !== id.toLowerCase()) {
         const phase = link.closest("epic-phase")?.id ?? "?"
         context.notes?.push(`to-review-marks:  ${phase}:  <a href="#${id}">${words}</a> isn't an item's id;  left`)
         continue
@@ -43,6 +44,3 @@ const LINKS = 'epic-phase > epic-field[name="to-review"] > a[href^="#"]'
 
 /** An item mark's tag. */
 const MARK = "epic-mark" as const
-
-/** An item's id:  `j1`, `q13`, `i126`. */
-const ITEM_ID = /^[a-z]{1,2}\d+$/i

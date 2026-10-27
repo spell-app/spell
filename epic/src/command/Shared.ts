@@ -17,12 +17,14 @@ import { FileLock } from "spell/server/FileLock"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import type { SRV } from "spell/server"
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
   EXIT,
   EpicCommandError,
   parseVerbArgs,
+  stringFlag,
   type LinkReport,
   type MigrateReport,
   type SharedConfig,
@@ -92,13 +94,13 @@ export class Shared {
     switch (verb) {
       case "status": {
         const status = this.status()
-        if (flags.json) out(JSON.stringify(status, null, 2))
-        else for (const line of statusLines(status)) out(line)
+        if (flags.json) CLI.out(JSON.stringify(status, null, 2))
+        else for (const line of statusLines(status)) CLI.out(line)
         return status.checkouts.every((each) => each.links.every((link) => link.state === "ok")) ? EXIT.OK : EXIT.ERRORS
       }
       case "init": {
         const done = this.init({ importFrom: flags.import ? checkout : undefined })
-        out(`${config.dir}:  ${done}`)
+        CLI.out(`${config.dir}:  ${done}`)
         if (done !== "exists") this.linkAll([checkout])
         return EXIT.OK
       }
@@ -107,9 +109,9 @@ export class Shared {
         return reports.some((report) => report.action === "diverged") ? EXIT.ERRORS : EXIT.OK
       }
       case "commit": {
-        const session = typeof flags.session === "string" ? flags.session : undefined
+        const session = stringFlag(flags.session)
         const shas = this.commit({ session, checkout })
-        if (!flags.quiet) out(shas.length ? `committed ${shas.join(", ")}` : "nothing to commit")
+        if (!flags.quiet) CLI.out(shas.length ? `committed ${shas.join(", ")}` : "nothing to commit")
         return EXIT.OK
       }
       case "migrate": {
@@ -120,8 +122,8 @@ export class Shared {
         const dryRun = Boolean(flags.dryRun)
         const report = new SharedMigration({ worktree, config }).run({ dryRun })
         if (flags.json)
-          out(JSON.stringify({ ...report, folds: report.folds.map(({ text: _text, ...each }) => each) }, null, 2))
-        else for (const line of migrateLines(report, dryRun)) out(line)
+          CLI.out(JSON.stringify({ ...report, folds: report.folds.map(({ text: _text, ...each }) => each) }, null, 2))
+        else for (const line of migrateLines(report, dryRun)) CLI.out(line)
         return report.conflicts.length ? EXIT.ERRORS : EXIT.OK
       }
       default:
@@ -135,7 +137,7 @@ export class Shared {
     const beside = this.linkContentBeside()
     if (beside) {
       all.push(beside)
-      if (beside.action !== "ok") out(`${resolve(this.config.main, beside.path)}:  ${beside.action}`)
+      if (beside.action !== "ok") CLI.out(`${resolve(this.config.main, beside.path)}:  ${beside.action}`)
     }
     for (const checkout of checkouts) {
       // each checkout's OWN links:  a branch from before the reorg (claude-design P4) still links `packages/docs/content`
@@ -148,7 +150,7 @@ export class Shared {
       ]
       for (const report of reports) {
         all.push(report)
-        if (report.action !== "ok") out(`${checkout}/${report.path}:  ${report.action}`)
+        if (report.action !== "ok") CLI.out(`${checkout}/${report.path}:  ${report.action}`)
       }
     }
     return all
@@ -523,11 +525,6 @@ epics/*/agents.json5
 # VS Code's window files (\`epic window\`, epic epic-eject P13):  each machine's own, never committed
 /windows/
 `
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
 
 /** The `"shared"` field of checkout `root`'s `package.json`;  `{}` without one. */
 function manifest(root: string): Partial<{ links: string[] }> {

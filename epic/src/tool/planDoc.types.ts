@@ -12,7 +12,9 @@
  *   wraps the combined types.
  */
 
-import type { ItemSectionKind } from "spell-epic/definitions"
+// By file, with its extension:  plain `node` loads this file (`Sagas`, for the docs index), and the barrel too would load
+// every vocabulary
+import { ItemLetters, type ItemSectionKind } from "spell-epic/definitions/definitions.types.ts"
 
 ////////////////
 // ## Errors
@@ -124,13 +126,13 @@ export type Duration = {
  *   - `caveat`, the word before P44, is read as `limit` (`kindNamed()`)
  */
 export const KINDS = {
-  question: { prefix: "q", section: "questions", live: "open" },
-  todo: { prefix: "t", section: "todos", live: "open", limit: false },
-  limit: { prefix: "t", section: "todos", live: "open", limit: true },
-  issue: { prefix: "i", section: "issues", live: "open" },
-  test: { prefix: "m", section: "tests", live: "open" },
-  decision: { prefix: "q", section: "questions", live: "decided" },
-  judgement: { prefix: "j", section: "judgements", live: "open" }
+  question: { prefix: ItemLetters.questions, section: "questions", live: "open" },
+  todo: { prefix: ItemLetters.todos, section: "todos", live: "open", limit: false },
+  limit: { prefix: ItemLetters.todos, section: "todos", live: "open", limit: true },
+  issue: { prefix: ItemLetters.issues, section: "issues", live: "open" },
+  test: { prefix: ItemLetters.tests, section: "tests", live: "open" },
+  decision: { prefix: ItemLetters.questions, section: "questions", live: "decided" },
+  judgement: { prefix: ItemLetters.judgements, section: "judgements", live: "open" }
 } as const satisfies Record<
   string,
   { prefix: string; section: ItemSectionKind; live: "open" | "decided"; limit?: boolean }

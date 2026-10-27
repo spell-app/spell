@@ -29,13 +29,13 @@ describe("runningRoutes", () => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-")))
   // no running sessions:  never this machine's (`RunningEpics.claudeHome`)
   const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-claude-")))
-  const home = process.env.SPELL_CLAUDE_HOME
+  const home = process.env.CLAUDE_CONFIG_DIR
   const stops: (() => unknown)[] = []
   let server: PageServer
   let port: number
 
   beforeAll(async () => {
-    process.env.SPELL_CLAUDE_HOME = claudeHome
+    process.env.CLAUDE_CONFIG_DIR = claudeHome
     put(root, "epics/index.html", `<html><head></head><body>${LIST}</body></html>\n`)
     put(
       root,
@@ -52,8 +52,8 @@ describe("runningRoutes", () => {
   afterAll(async () => {
     for (const stop of stops) await stop()
     await server.stop()
-    if (home === undefined) delete process.env.SPELL_CLAUDE_HOME
-    else process.env.SPELL_CLAUDE_HOME = home
+    if (home === undefined) delete process.env.CLAUDE_CONFIG_DIR
+    else process.env.CLAUDE_CONFIG_DIR = home
     rmSync(root, { recursive: true, force: true })
     rmSync(claudeHome, { recursive: true, force: true })
   })
@@ -90,7 +90,7 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
   const top = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-moved-")))
   const root = join(top, "repo")
   const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-claude-")))
-  const home = process.env.SPELL_CLAUDE_HOME
+  const home = process.env.CLAUDE_CONFIG_DIR
   const stops: (() => unknown)[] = []
   let server: PageServer
   let port: number
@@ -101,7 +101,7 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
     `<epic-phase id="p1" title="${phase}" status="active"></epic-phase></epic-page></body></html>\n`
 
   beforeAll(async () => {
-    process.env.SPELL_CLAUDE_HOME = claudeHome
+    process.env.CLAUDE_CONFIG_DIR = claudeHome
     put(root, ".epic/config.json5", '{ "worktreesFolder": "../repo.worktrees" }')
     put(root, "epics/index.html", `<html><head></head><body>${MARKER}</body></html>\n`)
     put(top, "repo.worktrees/new/epics/new/new.plan.html", page("new", "Beside"))
@@ -115,8 +115,8 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
   afterAll(async () => {
     for (const stop of stops) await stop()
     await server.stop()
-    if (home === undefined) delete process.env.SPELL_CLAUDE_HOME
-    else process.env.SPELL_CLAUDE_HOME = home
+    if (home === undefined) delete process.env.CLAUDE_CONFIG_DIR
+    else process.env.CLAUDE_CONFIG_DIR = home
     rmSync(top, { recursive: true, force: true })
     rmSync(claudeHome, { recursive: true, force: true })
   })

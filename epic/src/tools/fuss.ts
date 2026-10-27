@@ -35,7 +35,6 @@
  */
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
 import { extname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
 import { checkoutOf } from "spell/server/checkout"
@@ -932,6 +931,6 @@ function unique(list: string[]): string[] {
 }
 
 // run as a script (`epic pages fuss`), not when a test imports it;  last, so every `const` above is set
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   process.exitCode = run(process.argv.slice(2))
 }

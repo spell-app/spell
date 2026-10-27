@@ -863,7 +863,8 @@ test("launch():  the epic's window open, its session running:  typed into it;  n
   writeFileSync(join(dir, `${process.pid}.json`), JSON.stringify(entry))
   const home = mkdtempSync(join(tmpdir(), "spell-claude-home-"))
   mkdirSync(join(home, "sessions"))
-  process.env.SPELL_CLAUDE_HOME = home
+  // this test's own Claude Code folder, the module's put back after
+  process.env.CLAUDE_CONFIG_DIR = home
   const record = (id, title) =>
     writeFileSync(
       join(home, "sessions", `${id}.json`),
@@ -881,7 +882,7 @@ test("launch():  the epic's window open, its session running:  typed into it;  n
     // never written:  an open window's file changing would recolour it, live
     assert.equal(existsSync(file), false)
   } finally {
-    delete process.env.SPELL_CLAUDE_HOME
+    process.env.CLAUDE_CONFIG_DIR = claudeHome
     rmSync(home, { recursive: true, force: true })
     server.close()
   }
@@ -948,7 +949,8 @@ test("launch --move:  can't move (the hook won't run):  a NEW session in the epi
   writeFileSync(join(dir, `${process.pid}.json`), JSON.stringify(entry))
   const home = mkdtempSync(join(tmpdir(), "spell-claude-home-"))
   mkdirSync(join(home, "sessions"))
-  process.env.SPELL_CLAUDE_HOME = home
+  // this test's own Claude Code folder, the module's put back after
+  process.env.CLAUDE_CONFIG_DIR = home
   // this session, titled for the epic by the prompt hook:  never the epic's own session to wake
   const record = { pid: sleeper.pid, sessionId: SESSION, name: `🚧 ${name}` }
   writeFileSync(join(home, "sessions", `${SESSION}.json`), JSON.stringify(record))
@@ -960,7 +962,7 @@ test("launch --move:  can't move (the hook won't run):  a NEW session in the epi
     assert.deepEqual(seen.splice(0), [["/open-session", { prompt: `/epic ${name}` }]])
     assert.equal(existsSync(Window.handoffFile(SESSION)), false)
   } finally {
-    delete process.env.SPELL_CLAUDE_HOME
+    process.env.CLAUDE_CONFIG_DIR = claudeHome
     rmSync(home, { recursive: true, force: true })
     server.close()
   }

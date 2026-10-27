@@ -2,7 +2,9 @@ import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
 import { DataFile } from "spell-epic/data/DataFile"
-import { PageStages, type PageStage } from "spell-epic/phases"
+// By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
+import { isItemId } from "spell-epic/definitions/definitions.types"
+import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 
@@ -930,7 +932,7 @@ export class ReviewInbox {
    */
   static toItemId(this: void, id: unknown): string {
     const key = typeof id === "string" ? id.toLowerCase() : ""
-    if (!ITEM_ID.test(key) && key !== SUMMARY_ID && key !== STAGE_ID && !NEW_ID.test(key))
+    if (!isMarkKey(key) && key !== SUMMARY_ID && key !== STAGE_ID && !NEW_ID.test(key))
       throw new InboxError(`not an item id:  ${id}`)
     return key
   }
@@ -1272,12 +1274,6 @@ const OPTION_LETTER = /^[A-Z]$/
 /** The highest card set position a pick may name:  a sanity bound, far above any item's count. */
 const MAX_CHOICES = 99
 
-/**
- * What a mark may be keyed by:  an item id, a letter or two and a number (`q7`, `j12`;  an Overview sub-section's
- * `o3`), or a phase's id (`p-epic-migrate`, stable since P15;  an older page's `p3`).
- */
-const ITEM_ID = /^(?:[a-z]{1,2}\d+|p-[a-z0-9]+(?:-[a-z0-9]+)*)$/
-
 /** A new item's key (`setNew()`):  `new1`, `new2` ... */
 const NEW_PREFIX = "new"
 const NEW_ID = /^new\d+$/
@@ -1421,4 +1417,13 @@ function toCommentIds(comments: unknown): { comments?: string[] } {
 export function isoTime(date = new Date()): string {
   const milliseconds = String(date.getMilliseconds()).padStart(3, "0")
   return localTime(date).replace(/(?=[+-]\d\d:\d\d$)/, `.${milliseconds}`)
+}
+
+/**
+ * Whether a mark may be keyed by `key`:  an item's id, a letter or two and a number (`q7`, `j12`;  an Overview
+ * sub-section's `o3`:  `isItemId()`), or a phase's stable id (`p-epic-migrate`, since P15;  an older page's `p3` has
+ * an item id's shape).
+ */
+function isMarkKey(key: string): boolean {
+  return isItemId(key) || PhaseIds.isStable(key)
 }

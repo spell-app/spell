@@ -35,25 +35,14 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
 import { localDate } from "spell/util/time.ts"
+import { duration, parseVerbArgs } from "spell-epic/command/command.types.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { ROWS, TOOL_TEMPLATES, choiceSections, fillHead, fillWords } from "./answerPages.js"
-import {
-  SLUG,
-  duration,
-  findPage,
-  isEpicsPage,
-  listPages,
-  noAnswerYet,
-  parseArgs,
-  readAnswer,
-  shown,
-  waitForAnswer
-} from "./details.js"
+import { SLUG, findPage, isEpicsPage, listPages, noAnswerYet, readAnswer, shown, waitForAnswer } from "./details.js"
 import { CONTENT, ROOT, fromTemplate, openInVSCode, serialize } from "./pages.js"
 import { archiveAnswer, askedOf, dropSentDraft, foldRound, formatRound, refuseNearCopy } from "./rounds.js"
 
@@ -62,7 +51,7 @@ const DEFAULT_TIMEOUT = "8h"
 
 /** Run `epic choices <argv>`;  the exit code:  0, 1 a failure (the message says why), 2 usage. */
 async function main(argv) {
-  const { positional, flags } = parseArgs(argv)
+  const { positional, flags } = parseVerbArgs(argv)
   const [command, target] = positional
   try {
     if (command === "create") {
@@ -461,6 +450,6 @@ async function waitAndPrint(file, flags) {
  */
 
 // run as a script (`epic choices`), not when a test imports it;  last, so every `const` above is set
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   process.exitCode = await main(process.argv.slice(2))
 }

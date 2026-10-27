@@ -21,10 +21,11 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
+import { parseVerbArgs } from "spell-epic/command/command.types.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { CONTENT, GUIDES, PACKAGE, TOOLS, fromTemplate, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
-const { positional, flags } = parseArgs(process.argv.slice(2))
+const { positional, flags } = parseVerbArgs(process.argv.slice(2), ["dryRun"])
 const [templateArg, page] = positional
 if (!templateArg || !page?.endsWith(".html")) {
   fail(
@@ -62,18 +63,6 @@ if (!tidy([file])) process.exit(1)
 const run = spawnSync("node", [join(TOOLS, "index.js")], { cwd: PACKAGE, encoding: "utf8" })
 if (run.status !== 0) process.stderr.write(run.stderr)
 console.log(relative(process.cwd(), file))
-
-/** `--key value` flags (`--dry-run` takes none:  `flags.dryRun`), plus everything else in order. */
-function parseArgs(argv) {
-  const positional = []
-  const flags = {}
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--dry-run") flags.dryRun = true
-    else if (argv[i].startsWith("--") && i + 1 < argv.length) flags[argv[i].slice(2)] = argv[++i]
-    else positional.push(argv[i])
-  }
-  return { positional, flags }
-}
 
 /** Print `message` and exit 1. */
 function fail(message) {

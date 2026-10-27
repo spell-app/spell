@@ -30,9 +30,9 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { PACK_MODULES } from "spell/element-tools/packModules"
+import { parseVerbArgs } from "spell-epic/command/command.types"
 
 import { packageDir } from "./packageDir.ts"
-import { parseArgs } from "./pages.js"
 
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -46,7 +46,7 @@ const UI_SOURCE = /^spell-ui\/(docs-components|components\/components\.types)(\/
 /** Imports the page must share, never bundled:  Spell UI, Solid, our other repos' packages (as `packBuild.ts`). */
 const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
 
-const { positional } = parseArgs(process.argv.slice(2))
+const { positional } = parseVerbArgs(process.argv.slice(2))
 const entry = positional[0] ? resolve(positional[0]) : ""
 if (!entry.endsWith(".ts") || !existsSync(entry)) {
   console.error("usage:  yarn tsx src/tools/bundle-experiment.ts <entry.ts> [<out.js>]")

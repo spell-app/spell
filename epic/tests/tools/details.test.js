@@ -11,7 +11,6 @@ import {
   answerFile,
   createPage,
   draftFile,
-  duration,
   findPage,
   formatAnswer,
   formatDraft,
@@ -265,11 +264,4 @@ test("an epic's own pages:  in its folder, not another's, nor a scratch one", ()
   const pages = listPages(docs).filter((file) => isEpicsPage(file, "big", docs))
   expect(pages).toEqual([join(docs, "epics/big/details/shape.html")])
   expect(isEpicsPage(join(docs, "epics/bigger/details/x.html"), "big", docs)).toBe(false)
-})
-
-test("durations", () => {
-  expect(duration("8h")).toBe(8 * 3_600_000)
-  expect(duration("1h30m")).toBe(90 * 60_000)
-  expect(duration("45s")).toBe(45_000)
-  expect(() => duration("soon")).toThrow(/duration/)
 })

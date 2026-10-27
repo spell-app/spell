@@ -1,10 +1,9 @@
-import { spawn } from "node:child_process"
-import { constants } from "node:os"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 
 import { settingsParts } from "spell/server/page/settings"
-import { firstPackageDir, KIT_PACKAGES, tsxImports } from "spell-epic/tools/packageDir"
+import { CLI } from "spell/cli"
+import { firstPackageDir, KIT_PACKAGES } from "spell-epic/tools/packageDir"
 
 import { EpicCheckout } from "./EpicCheckout"
 import { EXIT, type ToolSpec } from "./command.types"
@@ -25,6 +24,8 @@ import { Sessions } from "./Sessions"
  *     - the page server, the `spell/server` its install resolves (`package`)
  *     - `serve`, every web server:  the kit's `spell` its install resolves (`spell/cli`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
+ * - A child runs as the kit's `spell` runs its tools:  `CLI.runChild()`, its arguments `CLI.toolArgs()`'s
+ *   (`spell/cli`, the base `epic` is built on).
  ****************/
 export class EpicTools {
   /**
@@ -34,7 +35,7 @@ export class EpicTools {
    * - the data:  the caller's checkout (`EPIC_CHECKOUT`)
    *   - a tool with a `cwd` runs in that folder of it
    *   - else (a repo without the epic tools, one `epic init` set up) in that folder of the code's checkout
-   * - a child `node`, under THIS checkout's `tsx` when the tool has a `tsx` config:
+   * - a child `node` (`CLI.runChild()`), under the kit's `tsx` when the tool has a `tsx` config (`CLI.toolArgs()`):
    *   its `TSX_TSCONFIG_PATH` is the CODE's checkout's config
    * - `env`:  added to this process's
    * - `cwd`:  the caller's folder, default the current one
@@ -50,7 +51,7 @@ export class EpicTools {
       return Promise.resolve(EXIT.ERRORS)
     }
     const toolCwd = spec.cwd && (existsSync(join(data, spec.cwd)) ? join(data, spec.cwd) : join(code, spec.cwd))
-    return EpicTools.runChild(process.execPath, [...EpicTools.toolArgs(spec, code), ...args], {
+    return CLI.runChild(process.execPath, [...CLI.toolArgs(spec, code), ...args], {
       cwd: toolCwd || cwd,
       env: {
         ...process.env,
@@ -72,48 +73,6 @@ export class EpicTools {
     return spec.code === "caller" ? data : codeRoot
   }
 
-  /**
-   * `node`'s arguments before the tool's own, for `spec` in checkout `root`:  the `tsx` loaders if any, the script.
-   * - the loaders are THIS checkout's (`TSX_IMPORTS`):  a worktree's tool runs before the worktree has a `node_modules`
-   */
-  static toolArgs(spec: ToolSpec, root: string): string[] {
-    return spec.tsx ? [...EpicTools.TSX_IMPORTS, join(root, spec.tool)] : [join(root, spec.tool)]
-  }
-
-  /**
-   * Run `command` with `args` as a child, with this terminal attached, and resolve to its exit code.
-   * - `Ctrl-C` reaches the child from the terminal itself, so this process ignores it until the child is done:
-   *   a foreground server (`server serve`) gets to stop cleanly, and we exit with its code
-   * - `SIGTERM` / `SIGHUP` sent to us alone are passed on
-   * - killed by a signal:  `128 +` its number, as a shell reports it;  failed to start:  `EXIT.ERRORS`, saying why
-   * - static:  any command
-   */
-  static runChild(
-    command: string,
-    args: string[],
-    options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}
-  ): Promise<number> {
-    const child = spawn(command, args, { ...options, stdio: "inherit" })
-    const ignore = () => {}
-    const pass = (signal: NodeJS.Signals) => child.kill(signal)
-    process.on("SIGINT", ignore)
-    for (const signal of PASSED_SIGNALS) process.on(signal, pass)
-    return new Promise((done) => {
-      child.on("error", (error) => {
-        process.stderr.write(`${command}:  ${error.message}\n`)
-        finish(EXIT.ERRORS)
-      })
-      child.on("exit", (code, signal) => finish(code ?? 128 + (signal ? constants.signals[signal] : 0)))
-
-      /** Stop listening for signals, and resolve to `code`. */
-      function finish(code: number) {
-        process.off("SIGINT", ignore)
-        for (const signal of PASSED_SIGNALS) process.off(signal, pass)
-        done(code)
-      }
-    })
-  }
-
   ////////////////
   // ## The `epic` tool, in this process
   ////////////////
@@ -121,8 +80,8 @@ export class EpicTools {
   /**
    * Run the `epic` tool's command line `argv` (`add seo judgement "Title"`, the tool's own order) IN this process:
    * `PlanDocCommands`, on the caller's checkout's epic pages (`PlanDocFiles`).
-   * - resolves to its exit code, once its output is written
-   *   (a pipe on macOS takes writes asynchronously, and the program exits at once)
+   * - resolves to its exit code;  its output is out before the process exits (`CLI.runCommand()` waits for it:  a
+   *   pipe on macOS takes writes asynchronously)
    * - loaded on first use (a dynamic `import()`):  the other verbs don't pay for linkedom and oxfmt
    * - gives the tool an epic's RUNNING sessions (`Sessions.ofEpic()`), for `migrate --notify`
    * - `root`:  the checkout whose pages and repos it works on, default the nearest (`EpicCheckout.nearest()`)
@@ -137,9 +96,7 @@ export class EpicTools {
       { PlanDocFiles: new (props: { root: string }) => unknown }
     ]
     const files = new PlanDocFiles({ root })
-    const exitCode = await new PlanDocCommands({ files, sessionsOf }).run(argv)
-    await flushed()
-    return exitCode
+    return new PlanDocCommands({ files, sessionsOf }).run(argv)
   }
 
   /**
@@ -227,14 +184,6 @@ export class EpicTools {
     }
     return EpicTools.run(name, args)
   }
-
-  /**
-   * This checkout's own `tsx` loader, as `node --import` arguments (`tsxImports()`):  as
-   * this code's install resolves them (a workspace of the top `spell` install hoists them there, epic `epic-engine`
-   * P10), never `<root>/node_modules/...` by hand.
-   * - static:  where every tool's loaders come from
-   */
-  static readonly TSX_IMPORTS = tsxImports(EpicCheckout.CODE_ROOT)
 }
 
 /** A tool `EpicTools.run()` runs, e.g. `details`. */
@@ -258,19 +207,8 @@ const COMMANDS = "spell-epic/tool/PlanDocCommands"
 /** `COMMANDS`' twin:  the docs on disk. */
 const FILES = "spell-epic/tool/PlanDocFiles"
 
-/** Signals `runChild()` passes on to its child:  they come to us alone, not from the terminal. */
-const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
-
 /** What marks the caller's checkout for a tool in a package:  the nearest repo's root (a worktree's `.git` is a file). */
 const CHECKOUT_MARKER = ".git"
-
-/** Resolves once everything written to stdout and stderr so far is out:  an empty write's callback comes after. */
-function flushed(): Promise<void> {
-  const streams = [process.stdout, process.stderr]
-  return Promise.all(streams.map((stream) => new Promise<void>((done) => stream.write("", () => done())))).then(
-    () => undefined
-  )
-}
 
 /**
  * The running Claude sessions working on epic `epic`, as `epic send` finds its receivers (`Sessions.ofEpic()`):

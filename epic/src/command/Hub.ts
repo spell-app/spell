@@ -1,5 +1,6 @@
 import { resolve } from "node:path"
 
+import { CLI } from "spell/cli"
 import { RepoList } from "spell-epic/server/RepoList"
 import { DEFAULT_EPIC_PORT, PID_FILE } from "spell-epic/server/server.types"
 
@@ -43,19 +44,19 @@ export class Hub {
         return this.serve(port)
       case "start":
       case "ensure":
-        out(JSON.stringify(await this.ensure(port), null, 2))
+        CLI.out(JSON.stringify(await this.ensure(port), null, 2))
         return EXIT.OK
       case "stop":
-        out((await (await this.pidFile()).stop()) ? "stopped" : "not running")
+        CLI.out((await (await this.pidFile()).stop()) ? "stopped" : "not running")
         return EXIT.OK
       case "status": {
         const running = await (await this.pidFile()).status()
-        out(running ? JSON.stringify(running, null, 2) : "not running")
+        CLI.out(running ? JSON.stringify(running, null, 2) : "not running")
         return running ? EXIT.OK : EXIT.ERRORS
       }
       case "url": {
         if (!file) throw new EpicCommandError("url:  which file?  epic hub url <file>", EXIT.USAGE)
-        out(await this.urlOf(resolve(file), port))
+        CLI.out(await this.urlOf(resolve(file), port))
         return EXIT.OK
       }
       default:
@@ -102,7 +103,7 @@ export class Hub {
     ])
     const server = await new EpicServer({ home: this.home }).start({ port })
     const repos = server.repos.map((repo) => `${repo.name}${repo.isDefault ? " (at /)" : ""}`).join(", ")
-    out(`epic server:  ${server.web.url}/  (repos:  ${repos || "none"};  engine ${server.engine})`)
+    CLI.out(`epic server:  ${server.web.url}/  (repos:  ${repos || "none"};  engine ${server.engine})`)
     await SRV.untilInterrupted(server.web.server, () => server.stop())
     return EXIT.OK
   }
@@ -112,9 +113,4 @@ export class Hub {
     const { SRV } = await import("spell/server")
     return new SRV.PidFile(this.home, PID_FILE)
   }
-}
-
-/** Print `text` on a line of its own. */
-function out(text: string): void {
-  process.stdout.write(`${text}\n`)
 }

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
 import { Git } from "spell/server/Git"
+import { CLI } from "spell/cli"
 import { EpicConfig, type EpicSettings } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
@@ -45,8 +46,8 @@ export class RepoInit {
   async run(args: string[]): Promise<number> {
     const { flags } = parseVerbArgs(args, ["dryRun", "json"])
     const report = this.init({ dryRun: flags.dryRun === true })
-    if (flags.json) out(JSON.stringify(report, null, 2))
-    else for (const line of RepoInit.lines(report)) out(line)
+    if (flags.json) CLI.out(JSON.stringify(report, null, 2))
+    else for (const line of RepoInit.lines(report)) CLI.out(line)
     return EXIT.OK
   }
 
@@ -337,9 +338,4 @@ const BLOCK_END = "# shared:end"
 /** `values` with each key after `prefix`:  `{ default: "x" }` => `{ "windows.default": "x" }`. */
 function prefixed(prefix: string, values: object): Record<string, unknown> {
   return Object.fromEntries(Object.entries(values).map(([key, value]) => [`${prefix}${key}`, value]))
-}
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(`${text}\n`)
 }

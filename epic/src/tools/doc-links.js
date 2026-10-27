@@ -30,7 +30,6 @@
  */
 import { readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve as resolvePath } from "node:path"
-import { pathToFileURL } from "node:url"
 
 import { SRV } from "spell/server"
 import { RepoList } from "spell-epic/server/RepoList"
@@ -153,7 +152,7 @@ export function checkText(text, docDir, file) {
 // ## Command line
 ////////////////
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (import.meta.main) {
   const args = process.argv.slice(2)
   const at = args.indexOf("--root")
   const root = at >= 0 ? args[at + 1] : undefined

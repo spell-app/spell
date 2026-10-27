@@ -1,8 +1,9 @@
 import { Git } from "spell/server/Git"
+import { CLI } from "spell/cli"
 import { RepoList, RepoListError } from "spell-epic/server/RepoList"
 import type { Repo } from "spell-epic/server/server.types"
 
-import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
+import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 
 /****************
  * ### `Repos`
@@ -32,27 +33,27 @@ export class Repos {
     try {
       switch (verb) {
         case "add": {
-          const name = typeof flags.name === "string" ? flags.name : undefined
+          const name = stringFlag(flags.name)
           const repo = this.list.add(target ?? Git.mainRoot(), { name, isDefault: flags.default === true })
-          out(`added ${Repos.line(repo)}`)
+          CLI.out(`added ${Repos.line(repo)}`)
           return EXIT.OK
         }
         case "list": {
           const repos = this.list.repos()
-          if (flags.json) out(JSON.stringify(repos, null, 2))
-          else out(repos.length ? repos.map(Repos.line).join("\n") : "no repos yet:  epic repo add <checkout>")
+          if (flags.json) CLI.out(JSON.stringify(repos, null, 2))
+          else CLI.out(repos.length ? repos.map(Repos.line).join("\n") : "no repos yet:  epic repo add <checkout>")
           return EXIT.OK
         }
         case "remove": {
           if (!target) throw new EpicCommandError("remove:  which repo?  epic repo remove <name>")
           if (!this.list.remove(target)) throw new EpicCommandError(`no repo "${target}":  epic repo list`, EXIT.ERRORS)
-          out(`removed ${target}`)
+          CLI.out(`removed ${target}`)
           return EXIT.OK
         }
         case "default": {
           if (!target) throw new EpicCommandError("default:  which repo?  epic repo default <name>")
           this.list.setDefault(target)
-          out(`${target} is served at / now`)
+          CLI.out(`${target} is served at / now`)
           return EXIT.OK
         }
         default:
@@ -69,9 +70,4 @@ export class Repos {
     const at = repo.isDefault ? `${repo.prefix} (and /)` : repo.prefix
     return `${repo.name}  ${at}  ${repo.checkout}  content ${repo.content}`
   }
-}
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(`${text}\n`)
 }

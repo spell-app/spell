@@ -7,7 +7,7 @@
  *   until the gate moved into the epic code (epic `epic-eject` P5).
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
@@ -324,8 +324,12 @@ describe("gate()", () => {
 
 describe("dropDoneTitle()", () => {
   test("a queued ✅ title goes when the work reopens;  any other queued title stays", () => {
-    const dir = mkdtempSync(join(tmpdir(), "titles-"))
-    process.env.SPELL_SESSION_TITLES_DIR = dir
+    // Claude Code's folder, a throwaway one:  its titles' folder (`ClaudeHome.titlesFolder()`)
+    const home = mkdtempSync(join(tmpdir(), "claude-home-"))
+    const dir = join(home, "session-titles")
+    mkdirSync(dir)
+    const before = process.env.CLAUDE_CONFIG_DIR
+    process.env.CLAUDE_CONFIG_DIR = home
     try {
       writeFileSync(join(dir, "s1"), "✅ seo")
       writeFileSync(join(dir, "s2"), "seo")
@@ -335,8 +339,9 @@ describe("dropDoneTitle()", () => {
       expect(existsSync(join(dir, "s1"))).toBe(false)
       expect(readFileSync(join(dir, "s2"), "utf8")).toBe("seo")
     } finally {
-      delete process.env.SPELL_SESSION_TITLES_DIR
-      rmSync(dir, { recursive: true, force: true })
+      if (before === undefined) delete process.env.CLAUDE_CONFIG_DIR
+      else process.env.CLAUDE_CONFIG_DIR = before
+      rmSync(home, { recursive: true, force: true })
     }
   })
 })

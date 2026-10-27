@@ -12,7 +12,7 @@ import {
   RunningEpics,
   sessionsTitledFor,
   titleNames,
-  type LiveSession,
+  type TitledSession,
   type RunningEpic
 } from "spell-epic/list/RunningEpics"
 import runningRoutes from "spell-epic/list/runningRoutes"
@@ -48,12 +48,12 @@ describe("RunningEpics", () => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-")))
   // no running sessions but the ones a test writes:  never this machine's (`RunningEpics.claudeHome`)
   const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-claude-")))
-  const home = process.env.SPELL_CLAUDE_HOME
+  const home = process.env.CLAUDE_CONFIG_DIR
   let server: PageServer
   let port: number
 
   beforeAll(async () => {
-    process.env.SPELL_CLAUDE_HOME = claudeHome
+    process.env.CLAUDE_CONFIG_DIR = claudeHome
     writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: { watch: ["pages", "epics"] } }))
     put(root, "epics/index.html", `<html><head></head><body><h1>Epics</h1>${list("")}</body></html>\n`)
     // merged into the main checkout:  a worktree's copy of it is stale, never listed
@@ -83,8 +83,8 @@ describe("RunningEpics", () => {
 
   afterAll(async () => {
     await server.stop()
-    if (home === undefined) delete process.env.SPELL_CLAUDE_HOME
-    else process.env.SPELL_CLAUDE_HOME = home
+    if (home === undefined) delete process.env.CLAUDE_CONFIG_DIR
+    else process.env.CLAUDE_CONFIG_DIR = home
     rmSync(root, { recursive: true, force: true })
     rmSync(claudeHome, { recursive: true, force: true })
   })
@@ -196,7 +196,12 @@ describe("RunningEpics", () => {
       put(
         stale,
         "claude/sessions/1.json",
-        JSON.stringify({ pid: process.pid, cwd: join(stale, ".claude/worktrees/slow/packages"), name: "🚧 other" })
+        JSON.stringify({
+          pid: process.pid,
+          sessionId: "s1",
+          cwd: join(stale, ".claude/worktrees/slow/packages"),
+          name: "🚧 other"
+        })
       )
       const running = new RunningEpics(stale, { claudeHome: join(stale, "claude") })
       expect(running.runningNames()).toEqual(new Set(["slow", "other"]))
@@ -399,7 +404,7 @@ describe("sessions titled for an epic", () => {
   })
 
   it("keeps the matching sessions, in order", () => {
-    const session = (title: string, pid: number): LiveSession => ({
+    const session = (title: string, pid: number): TitledSession => ({
       pid,
       sessionId: "",
       title,

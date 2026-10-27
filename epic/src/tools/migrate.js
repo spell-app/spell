@@ -27,19 +27,19 @@
  *   - one page (`--file`, its kind found unless given)
  *   - `--list`:  the steps
  */
-import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
-import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
 import { FileLock } from "spell/server/FileLock"
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
 import { engineUrlFor } from "spell-epic/server/server.types.ts"
 import { rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
-import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
+import { findPages, formattedAlready, pageFile, ROOT, serialize, tidy } from "./pages.js"
 import { convertMarkup, hasMarkup } from "./to-components.js"
 import { linkerFor, linkerUnder } from "./doc-links.js"
 import { RootLinks } from "spell-epic/tool/migrations/RootLinks"
@@ -135,13 +135,21 @@ export const STEPS = [
       "every local link a root path (/spell-ui/x.ts), as the page server serves it;  broken ones mended where a move left one home (epic-engine P46)",
     applies: (html) => RELATIVE_URL.test(html),
     rewrite(text, { file, root }) {
-      const { linker, dir } = resolve(root) === resolve(ROOT) ? linkerFor(dirname(resolve(file))) : scratchLinker(root, file)
+      const { linker, dir } =
+        resolve(root) === resolve(ROOT) ? linkerFor(dirname(resolve(file))) : scratchLinker(root, file)
       const { text: rooted, changes } = RootLinks.rewrite(text, join(dir, basename(file)), linker)
       const notes = changes
         .filter((change) => change.kind === "broken" || change.kind === "outside")
-        .map((change) => `${change.kind === "broken" ? "BROKEN" : "LEFT, above the root"}, for a person:  ${change.from} -> ${change.to}`)
+        .map(
+          (change) =>
+            `${change.kind === "broken" ? "BROKEN" : "LEFT, above the root"}, for a person:  ${change.from} -> ${change.to}`
+        )
       const rewritten = changes.filter((change) => change.kind !== "outside").length
-      return { text: rooted, changed: rooted !== text, notes: [...(rewritten ? [`${rewritten} links as root paths`] : []), ...notes] }
+      return {
+        text: rooted,
+        changed: rooted !== text,
+        notes: [...(rewritten ? [`${rewritten} links as root paths`] : []), ...notes]
+      }
     }
   }
 ]
@@ -160,7 +168,8 @@ function scratchLinker(root, file) {
  * A cheap test for `root-links`:  any relative URL or site header root in the page (the step reads it properly).
  * - any double-quoted URL attribute that doesn't start `/`, `#` or a scheme, or a Markdown link
  */
-const RELATIVE_URL = /\s(?:href|src|source|poster|link|title|data-[\w-]+)="\.?\.\/|\s(?:href|link)="(?![#/?]|[a-z][a-z0-9+.-]*:)[^"]+"|<spell-site-header\b[^>]*\sroot=/i
+const RELATIVE_URL =
+  /\s(?:href|src|source|poster|link|title|data-[\w-]+)="\.?\.\/|\s(?:href|link)="(?![#/?]|[a-z][a-z0-9+.-]*:)[^"]+"|<spell-site-header\b[^>]*\sroot=/i
 
 /**
  * The elements that LOAD an engine file, and the attribute naming it:  a stylesheet (`<link href>`), a script
@@ -266,7 +275,10 @@ export function pagesFor(root, kind) {
  *   - oxfmt only on a page that was formatted BEFORE (`formattedAlready()`):  it folds runs of spaces in text, and a
  *     page that wasn't keeps them (`Bedtime:  epic-workflow` in an h1:  epic `epic-engine` I7)
  */
-export function migratePages(pages, { step = /** @type {string | undefined} */ (undefined), dryRun = false, tidied = true, root = ROOT } = {}) {
+export function migratePages(
+  pages,
+  { step = /** @type {string | undefined} */ (undefined), dryRun = false, tidied = true, root = ROOT } = {}
+) {
   const results = []
   const written = []
   const due = new Set(
@@ -395,8 +407,8 @@ function pathFrom(file, root) {
  * - returns rather than exits:  `process.exit()` cuts off output still on its way down a pipe
  */
 export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
-  const { positional, flags } = parseArgs(argv)
-  const root = resolve(typeof flags.root === "string" ? flags.root : ROOT)
+  const { positional, flags } = parseVerbArgs(argv)
+  const root = resolve(stringFlag(flags.root) ?? ROOT)
   const [kind] = positional
   try {
     if (kind && !KINDS.includes(kind)) throw new MigrateError(`no page kind "${kind}":  ${KINDS.join(", ")}`)
@@ -406,11 +418,12 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
         say(`${step.kinds.join(",").padEnd(11)} ${step.date}  ${step.name.padEnd(24)} ${step.description}`)
       return 0
     }
-    const step = typeof flags.step === "string" ? flags.step : undefined
-    const dryRun = Boolean(flags["dry-run"])
+    const step = stringFlag(flags.step)
+    const dryRun = Boolean(flags.dryRun)
     let pages
-    if (typeof flags.file === "string") {
-      const file = fileOf(flags.file, root)
+    const named = stringFlag(flags.file)
+    if (named !== undefined) {
+      const file = fileOf(named, root)
       if (!existsSync(file)) throw new MigrateError(`no page ${flags.file}`)
       const found = kind ?? pageKind(file, root)
       if (found === "epic") throw new MigrateError("an epic page:  epic migrate --file <page>")
@@ -421,7 +434,7 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
       return 0
     }
     const { results } = migratePages(pages, { step, dryRun, root })
-    for (const line of report(results, root, { dryRun, all: typeof flags.file === "string" })) say(line)
+    for (const line of report(results, root, { dryRun, all: named !== undefined })) say(line)
     return 0
   } catch (error) {
     if (!(error instanceof MigrateError)) throw error
@@ -430,6 +443,4 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
   }
 }
 
-// by real path:  node runs a script reached through a link by its real one
-if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href)
-  process.exitCode = main(process.argv.slice(2))
+if (import.meta.main) process.exitCode = main(process.argv.slice(2))

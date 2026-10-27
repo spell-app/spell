@@ -5,6 +5,7 @@ import { basename, dirname, join, relative } from "node:path"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { EpicRepo } from "spell-epic/config/EpicRepo"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
@@ -103,43 +104,43 @@ export class Worktrees {
       case "list": {
         const sessions = this.sessions.live(this.main)
         const idle = this.idle(sessions)
-        if (flags.json) out(JSON.stringify({ sessions, idle }, null, 2))
-        else for (const line of Worktrees.table(sessions, idle)) out(line)
+        if (flags.json) CLI.out(JSON.stringify({ sessions, idle }, null, 2))
+        else for (const line of Worktrees.table(sessions, idle)) CLI.out(line)
         return EXIT.OK
       }
       case "status":
         if (!name) throw new EpicCommandError("status:  which name?")
-        out(JSON.stringify(this.nameStatus(name), null, 2))
+        CLI.out(JSON.stringify(this.nameStatus(name), null, 2))
         return EXIT.OK
       case "path": {
         if (!name) throw new EpicCommandError("path:  which worktree?")
         // another repo's epic:  ITS worktree, said on stderr (epic `epic-engine` I47)
         const home = EpicRepo.elsewhere(name, this.main)
         if (home?.worktree) process.stderr.write(`epic ${name} is ${basename(home.checkout!)}'s:  its worktree there\n`)
-        out(home?.worktree ?? this.config.worktreeFolder(name))
+        CLI.out(home?.worktree ?? this.config.worktreeFolder(name))
         return EXIT.OK
       }
       case "move": {
         if (!name && !flags.idle) throw new EpicCommandError("move:  which worktree?  (or --idle:  every idle one)")
         const dryRun = Boolean(flags.dryRun)
         const reports = flags.idle ? this.moveIdle({ dryRun }) : [this.move(name!, { dryRun })]
-        if (flags.json) out(JSON.stringify(reports, null, 2))
-        else for (const line of reports.flatMap((report) => moveLines(report, dryRun))) out(line)
-        if (!reports.length) out("no idle worktree in the old place:  nothing to move")
+        if (flags.json) CLI.out(JSON.stringify(reports, null, 2))
+        else for (const line of reports.flatMap((report) => moveLines(report, dryRun))) CLI.out(line)
+        if (!reports.length) CLI.out("no idle worktree in the old place:  nothing to move")
         return EXIT.OK
       }
       case "remove": {
         if (!name) throw new EpicCommandError("remove:  which worktree?  (its name, or its folder)")
         const options = { force: Boolean(flags.force), branches: Boolean(flags.branches) }
-        for (const line of this.remove(name, options)) out(line)
+        for (const line of this.remove(name, options)) CLI.out(line)
         return EXIT.OK
       }
       case "repos": {
         const epic = name ?? this.config.worktreeNameOf(RealPath.of(process.cwd()))
         if (!epic) throw new EpicCommandError("repos:  which epic?  (not run in an epic's worktree)")
         const states = this.repoStates(epic)
-        if (flags.json) out(JSON.stringify(states, null, 2))
-        else for (const line of repoLines(states)) out(line)
+        if (flags.json) CLI.out(JSON.stringify(states, null, 2))
+        else for (const line of repoLines(states)) CLI.out(line)
         return EXIT.OK
       }
       case "merge-main": {
@@ -147,11 +148,11 @@ export class Worktrees {
         const reports = MainMerge.runAll(checkout, flags.continue ? "continue" : "start")
         // one repo:  its report as before;  a multi-repo top:  one per repo, `repo` in each
         const single = reports.length === 1 && !reports[0]!.repo
-        if (flags.json) out(JSON.stringify(single ? reports[0] : reports, null, 2))
+        if (flags.json) CLI.out(JSON.stringify(single ? reports[0] : reports, null, 2))
         else
           for (const report of reports)
             for (const line of report.error ? [`${report.repo}:  FAILED:  ${report.error}`] : mergeMainLines(report))
-              out(report.repo && !report.error ? `${report.repo}:  ${line}` : line)
+              CLI.out(report.repo && !report.error ? `${report.repo}:  ${line}` : line)
         const failed = (report: MergeMainReport) =>
           report.result === "conflicts" || report.error || report.installed?.ok === false
         return reports.some(failed) ? EXIT.ERRORS : EXIT.OK
@@ -160,8 +161,8 @@ export class Worktrees {
         const here = EpicCheckout.nearest({ marker: ".git" })
         const checkouts = flags.all ? CheckoutPatches.allCheckouts(here) : CheckoutPatches.checkoutsAt(here)
         const reports = new CheckoutPatches({ dryRun: Boolean(flags.dryRun) }).patchAll(checkouts)
-        if (flags.json) out(JSON.stringify(reports, null, 2))
-        else for (const line of CheckoutPatches.lines(reports)) out(line)
+        if (flags.json) CLI.out(JSON.stringify(reports, null, 2))
+        else for (const line of CheckoutPatches.lines(reports)) CLI.out(line)
         return reports.some((report) => report.failed.length) ? EXIT.ERRORS : EXIT.OK
       }
       default:
@@ -662,11 +663,6 @@ const SWITCHES = ["json", "continue", "idle", "dryRun", "force", "branches", "al
  * - module-wide:  every `Worktrees` in one run reads a page once
  */
 const PLAN_SUMMARIES = new Map<string, PlanSummary>()
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
 
 /** `move`'s lines for one worktree:  the move, its links, its session folder, its window file. */
 function moveLines(report: MoveReport, dryRun: boolean): string[] {

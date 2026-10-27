@@ -43,7 +43,7 @@ try {
     renameSync(file, running)
     await requeueTitle(sessionId)
     const args = [SCRIPT, "resume", running]
-    for (const title of sessionTitles(transcript)) args.push("--title", title)
+    for (const title of await sessionTitles(transcript)) args.push("--title", title)
     const log = openSync(join(Window.handoffs, `${sessionId}.log`), "a", 0o600)
     spawn(process.execPath, args, { detached: true, stdio: ["ignore", log, log], env: process.env }).unref()
   }
@@ -63,22 +63,20 @@ async function requeueTitle(sessionId) {
 
 /**
  * The titles the session's tab may show, most likely first:  the last `/rename` (`custom-title`, which the prompt
- * hook `prompt-gate.mjs` sets on `/isolate <name>`), then Claude's own (`ai-title`);  `[]` if none.
+ * hook `prompt-gate.mjs` sets on `/isolate <name>`), then Claude's own (`ai-title`);  `[]` if none
+ * (`Transcript.titles()`, the one reader of a transcript's titles).
  * - both, since the tab's label may lag a rename
+ * - NEVER throws:  never stops the move
  */
-function sessionTitles(transcript) {
+async function sessionTitles(transcript) {
   if (!transcript || !existsSync(transcript)) return []
-  let custom = null
-  let ai = null
-  for (const line of readFileSync(transcript, "utf8").split("\n")) {
-    if (!line.includes('"custom-title"') && !line.includes('"ai-title"')) continue
-    try {
-      const entry = JSON.parse(line)
-      if (entry.type === "custom-title" && entry.customTitle) custom = entry.customTitle
-      if (entry.type === "ai-title" && entry.aiTitle) ai = entry.aiTitle
-    } catch {
-      // a half-written last line
-    }
+  try {
+    const { Transcript } = await import("spell-epic/config/Transcript.ts")
+    const { custom, ai } = new Transcript(transcript).titles()
+    return [...new Set([custom, ai].filter(Boolean))]
+  } catch (error) {
+    // never stops the move:  its old tab stays open, found by no title
+    console.error(`handoff hook:  no titles read:  ${error.message}`)
+    return []
   }
-  return [...new Set([custom, ai].filter(Boolean))]
 }

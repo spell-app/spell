@@ -41,12 +41,12 @@
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
 import { clamp } from "spell/util/number.ts"
 import { localDate } from "spell/util/time.ts"
+import { duration, parseVerbArgs } from "spell-epic/command/command.types.ts"
 import {
   ASK,
   CHOICES,
@@ -92,7 +92,7 @@ const SWEPT = /\.(html|(answer|rows|draft)\.json5?)$/
 
 /** Run `epic ask <argv>`;  the exit code:  0, 1 a failure (the message says why), 2 usage. */
 async function main(argv) {
-  const { positional, flags } = parseArgs(argv)
+  const { positional, flags } = parseVerbArgs(argv)
   const [command, target] = positional
   try {
     if (command === "create") {
@@ -108,7 +108,7 @@ async function main(argv) {
       return 0
     }
     if (command === "fold") {
-      const lines = await foldCopies(CONTENT, { dryRun: !!flags["dry-run"] })
+      const lines = await foldCopies(CONTENT, { dryRun: !!flags.dryRun })
       console.log(lines.length ? lines.join("\n") : "no near-copies to fold")
       return 0
     }
@@ -708,33 +708,13 @@ async function waitAndPrint(file, flags) {
 // ## Helpers
 ////////////////
 
-/** `"8h"`, `"30m"`, `"90s"`, `"1h30m"` in ms. */
-export function duration(text) {
-  const parts = [...String(text).matchAll(/(\d+(?:\.\d+)?)\s*(h|m|s)/g)]
-  if (!parts.length) throw new Error(`a duration is like 8h, 30m or 1h30m:  '${text}'`)
-  const unit = { h: 3_600_000, m: 60_000, s: 1000 }
-  return parts.reduce((total, [, amount, which]) => total + Number(amount) * unit[which], 0)
-}
-
 /** `file` as printed:  absolute, so it means the same wherever Claude reads it. */
 export function shown(file) {
   return resolve(file)
 }
 
-/** `--key value` flags (`--wait` alone is `true`), plus everything else in order;  flags go AFTER the page. */
-export function parseArgs(argv) {
-  const positional = []
-  const flags = {}
-  for (let i = 0; i < argv.length; i++) {
-    if (!argv[i].startsWith("--")) positional.push(argv[i])
-    else if (i + 1 < argv.length && !argv[i + 1].startsWith("--")) flags[argv[i].slice(2)] = argv[++i]
-    else flags[argv[i].slice(2)] = true
-  }
-  return { positional, flags }
-}
-
 // run as a script (`epic ask`), not when a test imports it;  last, so every `const` above is set
 // - NOT a top-level `await`:  `fold` imports `choices.js`, which imports this file, and would wait for it forever
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   void main(process.argv.slice(2)).then((code) => (process.exitCode = code))
 }

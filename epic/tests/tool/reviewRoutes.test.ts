@@ -68,7 +68,7 @@ beforeAll(async () => {
   home = mkdtempSync(join(tmpdir(), "review-start-"))
   mkdirSync(join(home, "sessions"))
   mkdirSync(join(home, "windows"))
-  process.env.SPELL_CLAUDE_HOME = home
+  process.env.CLAUDE_CONFIG_DIR = home
   process.env.SPELL_WINDOWS_DIR = join(home, "windows")
   // spell-epic's own registry too, empty:  else a real window of Owen's (its extension's bridge) is found and typed into
   process.env.SPELL_EPIC_WINDOWS_DIR = join(home, "epic-windows")
@@ -91,7 +91,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await server.stop()
   rmSync(root, { recursive: true, force: true })
-  delete process.env.SPELL_CLAUDE_HOME
+  delete process.env.CLAUDE_CONFIG_DIR
   delete process.env.SPELL_WINDOWS_DIR
   delete process.env.SPELL_EPIC_WINDOWS_DIR
   delete process.env.SPELL_AIRPLANE_FILE

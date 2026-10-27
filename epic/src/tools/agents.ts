@@ -26,21 +26,22 @@
  */
 import { setTimeout as sleep } from "node:timers/promises"
 
+import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
 import { WorkTime } from "spell-epic/command/WorkTime"
 import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 import { PlanTime } from "spell-epic/tool/PlanTime"
 
 import { AgentList, AgentListError, type RunningAgent, type Untold } from "./AgentList"
-import { ROOT, parseArgs } from "./pages.js"
+import { ROOT } from "./pages.js"
 
-const { positional, flags } = parseArgs(process.argv.slice(2))
+const { positional, flags } = parseVerbArgs(process.argv.slice(2))
 process.exitCode = await run(positional, flags)
 
 /** Run verb `positional[0]` with its arguments;  returns the exit code. */
 async function run([verb = "list", name, task]: string[], flags: Record<string, string | true>): Promise<number> {
   const list = new AgentList(ROOT, { epic: stringFlag(flags.epic) })
   const status = stringFlag(flags.status)
-  const taskId = stringFlag(flags["task-id"])
+  const taskId = stringFlag(flags.taskId)
   try {
     if (verb === "list") {
       const agents = list.agents
@@ -58,6 +59,11 @@ async function run([verb = "list", name, task]: string[], flags: Record<string, 
     else return usage()
     return 0
   } catch (error) {
+    // a time `wait` can't read (`duration()`):  a usage error
+    if (error instanceof EpicCommandError) {
+      console.error(error.message)
+      return error.exitCode
+    }
     if (!(error instanceof AgentListError)) throw error
     console.error(error.message)
     return 1
@@ -66,11 +72,12 @@ async function run([verb = "list", name, task]: string[], flags: Record<string, 
 
 /**
  * `wait`:  poll `list` until a redirect is untold (0, printed), no agent runs (3), or `--max` passes (2).
+ * - `--every` (default 2) and `--max` (default 3600):  seconds, or a time with its unit (`duration()`:  `30s`, `2h`)
  * - reads the file without its lock:  writes are atomic renames, so a read never sees half a file
  */
 async function waitForRedirects(list: AgentList, flags: Record<string, string | true>): Promise<number> {
-  const every = Number(stringFlag(flags.every) ?? 2) * 1000
-  const deadline = Date.now() + Number(stringFlag(flags.max) ?? 3600) * 1000
+  const every = duration(stringFlag(flags.every) ?? "2")
+  const deadline = Date.now() + duration(stringFlag(flags.max) ?? "3600")
   for (;;) {
     const untold = list.untold
     if (untold.length) {
@@ -121,11 +128,6 @@ function age(ms: number): string {
   if (minutes < 1) return `${Math.max(0, Math.floor(ms / 1000))}s`
   if (minutes < 60) return `${minutes}m`
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`
-}
-
-/** A flag's value when it was given one;  a bare `--flag` or none:  `undefined`. */
-function stringFlag(value: string | true | undefined): string | undefined {
-  return typeof value === "string" ? value : undefined
 }
 
 /** Print how to call it;  exit code 2, a usage error, as the other `epic` groups' tools. */

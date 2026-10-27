@@ -100,7 +100,7 @@ beforeAll(async () => {
   // so a test can never type into a real session or open a real window
   mkdirSync(join(root, ".home/sessions"), { recursive: true })
   mkdirSync(join(root, ".home/windows"))
-  process.env.SPELL_CLAUDE_HOME = join(root, ".home")
+  process.env.CLAUDE_CONFIG_DIR = join(root, ".home")
   process.env.SPELL_WINDOWS_DIR = join(root, ".home/windows")
   process.env.SPELL_EPIC_WINDOWS_DIR = join(root, ".home/windows")
   process.env.SPELL_AIRPLANE_FILE = join(root, ".home/airplane.json")
@@ -117,7 +117,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  delete process.env.SPELL_CLAUDE_HOME
+  delete process.env.CLAUDE_CONFIG_DIR
   delete process.env.SPELL_WINDOWS_DIR
   delete process.env.SPELL_EPIC_WINDOWS_DIR
   delete process.env.SPELL_AIRPLANE_FILE

@@ -43,20 +43,19 @@
  */
 import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { clamp } from "spell/util/number"
+import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
 import { CommentList, CommentsError } from "spell-epic/tool/CommentList"
 import { GuideInbox } from "spell-epic/tool/GuideInbox"
 import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 import { SeeAlso, epicNamed } from "spell-epic/tool/SeeAlso"
 
-import { duration } from "./details.js"
 import { FEEDBACK, GuideChanges } from "./GuideChanges"
-import { CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"
+import { CONTENT, ROOT, pageAndId, pageFile, pagePath } from "./pages.js"
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { positional, flags } = parseArgs(process.argv.slice(2))
+if (import.meta.main) {
+  const { positional, flags } = parseVerbArgs(process.argv.slice(2))
   process.exitCode = await run(positional, flags)
 }
 
@@ -71,12 +70,17 @@ export async function run([verb = "list", ...rest]: string[], flags: Record<stri
     const [page, id] = pageAndId(rest)
     if (!page || !id || typeof flags.file !== "string") return usage()
     const reply = readFileSync(resolve(flags.file), "utf8")
-    const commit = typeof flags.commit === "string" ? flags.commit : undefined
+    const commit = stringFlag(flags.commit)
     GuideInbox.update(GuideInbox.fileFor(pageFile(page)), (comments) => comments.answer(id, reply, new Date(), commit))
     touchOwner(page)
     console.log(`${pagePath(pageFile(page))}#${CommentList.label(id)}  answered`)
     return 0
   } catch (error) {
+    // a time `wait` can't read (`duration()`):  a usage error
+    if (error instanceof EpicCommandError) {
+      console.error(error.message)
+      return error.exitCode
+    }
     if (!(error instanceof CommentsError) && !isMissingFile(error)) throw error
     console.error((error as Error).message)
     return 1
@@ -137,7 +141,7 @@ function list(flags: Record<string, string | true>, asked?: string): number {
  * - e.g. the spell syntax guide's wand, which adds a comment on its row:  "Provide more details here"
  */
 async function wait(pages: string[], flags: Record<string, string | true>): Promise<number> {
-  const timeout = duration(typeof flags.timeout === "string" ? flags.timeout : DEFAULT_TIMEOUT)
+  const timeout = duration(stringFlag(flags.timeout) ?? DEFAULT_TIMEOUT)
   const inboxes = () =>
     pages.length
       ? pages.map((page) => GuideInbox.fileFor(pageFile(page)))
@@ -195,7 +199,7 @@ const WAIT_POLL_MS = 2000
 
 /** Gather the waiting comments into the epic, one phase per page;  print what went where. */
 async function gather(pages: string[], flags: Record<string, string | true>): Promise<number> {
-  const epic = typeof flags.epic === "string" ? flags.epic : FEEDBACK
+  const epic = stringFlag(flags.epic) ?? FEEDBACK
   const only = flags.all || !pages.length ? undefined : pages.map((page) => pagePath(pageFile(page)))
   const gathered = await new GuideChanges({ root: ROOT, epic }).gather(only)
   if (flags.json) console.log(JSON.stringify(gathered, null, 2))

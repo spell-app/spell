@@ -1,9 +1,13 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, realpathSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
+import type { Command } from "commander"
 import JSON5 from "json5"
 import { describe, expect, test, vi } from "vite-plus/test"
 
+import { EpicProgram } from "spell-epic/cli/EpicProgram"
+import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "spell-epic/cli/epicGroups"
+import { EpicCommandError } from "spell-epic/command/command.types"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 /**
@@ -11,6 +15,8 @@ import { EpicConfig } from "spell-epic/config/EpicConfig"
  * - Its data:  spell-app's checkout, beside spell-epic in the top `spell` repo (`SPELL_APP`), its epic pages
  *   (`unified-server`, merged long ago) and worktrees;  skipped without it.
  * - Moved from spell-app's CLI tests (`tests/cli/src/cli.test.ts`) at the switch (epic `epic-eject` I5).
+ * - And, in this process, its flags (epic `coherence` P20):  each verb's, listed in its help;  any other refused
+ *   (`EpicProgram.checkFlags()`);  every example in a verb's help taking only flags it has.
  */
 const EPIC = resolve(import.meta.dirname, "../../bin/epic")
 
@@ -175,3 +181,156 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
     })
   }
 )
+
+////////////////
+// ## Flags (epic `coherence` P20):  each verb's listed in its help, any other refused, the help's examples taking them
+////////////////
+
+describe("EpicProgram.checkFlags()", () => {
+  const FLAGS = { "--json": "print it as JSON", "--dry-run": "only say", "--epic <epic>": "that epic's" }
+
+  test("a flag the verb hasn't got:  a usage error naming the nearest it has", () => {
+    expect(() => EpicProgram.checkFlags("epic summary", FLAGS, ["seo", "--jsn"])).toThrow(
+      "epic summary --jsn?  no such flag;  did you mean --json?  epic summary --help lists its flags"
+    )
+    expect(() => EpicProgram.checkFlags("epic summary", FLAGS, ["--zzzzzz"])).toThrow(
+      "epic summary --zzzzzz?  no such flag.  epic summary --help lists its flags"
+    )
+    try {
+      EpicProgram.checkFlags("epic summary", FLAGS, ["--jsn"])
+    } catch (error) {
+      expect(error).toBeInstanceOf(EpicCommandError)
+      expect((error as EpicCommandError).exitCode).toBe(2)
+    }
+  })
+
+  test("its own flags, any spelling the tools read (--dry-run, --dryRun);  values, words and -x untouched", () => {
+    const args = ["seo", "--epic", "x", "--dryRun", "--json", "- a note", "-1", "--", "--a=b"]
+    expect(EpicProgram.checkFlags("epic x", FLAGS, args)).toEqual(args)
+    expect(EpicProgram.checkFlags("epic x", FLAGS, ["--here"], ["--here"])).toEqual(["--here"])
+    expect(EpicProgram.checkFlags("epic x", undefined, ["--anything"])).toEqual(["--anything"])
+  })
+})
+
+describe("every verb's flags", () => {
+  const program = new EpicProgram()
+  const verbs = program.epic.commands.filter((verb) => verb.name() !== "help")
+  const groups = verbs.filter((verb) => verb.name() in GROUP_VERBS)
+
+  test("every verb of no group lists its flags (VERB_FLAGS)", () => {
+    const missing = verbs.filter((verb) => !(verb.name() in GROUP_VERBS) && !VERB_FLAGS[verb.name()])
+    expect(missing.map((verb) => verb.name())).toEqual([])
+  })
+
+  test("its help lists them, under Options", () => {
+    expect(helpOf(command("summary"))).toMatch(/Options:\n {2}--json +print it as JSON\n/)
+    expect(helpOf(command("ask", "create"))).toMatch(/^ {2}--epic <epic> +in that epic's details\//m)
+  })
+
+  // the help's own examples must run (`epic pages update guides/greet.html` named a page the tool refuses)
+  test("every example in a verb's help takes only flags the verb has", () => {
+    const refused: string[] = []
+    for (const verb of verbs) {
+      const runs = groups.includes(verb) ? [verb, ...verb.commands] : [verb]
+      for (const each of runs)
+        for (const line of examplesIn(helpOf(each))) {
+          try {
+            checkExample(line)
+          } catch (error) {
+            refused.push(`${line}:  ${(error as Error).message}`)
+          }
+        }
+    }
+    expect(refused).toEqual([])
+  })
+
+  test("every flag a verb's usage names is one of its flags", () => {
+    const wrong: string[] = []
+    for (const verb of verbs) {
+      if (verb.name() in GROUP_VERBS) {
+        for (const each of GROUP_VERBS[verb.name() as GroupName])
+          for (const flag of flagsIn(each.usage))
+            if (!(flag in specs(each.flags))) wrong.push(`epic ${verb.name()} ${each.name}:  ${flag}`)
+        continue
+      }
+      for (const flag of flagsIn(verb.usage()))
+        if (!USAGE_PLACEHOLDERS.includes(flag) && !(flag in specs(VERB_FLAGS[verb.name()])))
+          wrong.push(`epic ${verb.name()}:  ${flag}`)
+    }
+    expect(wrong).toEqual([])
+  })
+
+  /** Verb `name` (and group verb `sub`) of the program. */
+  function command(name: string, sub?: string): Command {
+    const found = program.epic.commands.find((verb) => verb.name() === name)!
+    return sub ? found.commands.find((verb) => verb.name() === sub)! : found
+  }
+
+  /** Example `line` (`epic ask create x --epic seo`) through its verb's flag check. */
+  function checkExample(line: string): void {
+    const [, verb, sub, ...rest] = shellWords(line)
+    if (!(verb! in GROUP_VERBS)) {
+      EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb!], [sub ?? "", ...rest], ["--here"])
+      return
+    }
+    const group = GROUP_VERBS[verb as GroupName]
+    const known = group.find((each) => each.name === sub)
+    const flags = known ? known.flags : Object.assign({}, ...group.map((each) => each.flags))
+    EpicProgram.checkFlags(`epic ${verb} ${sub}`, flags, [sub ?? "", ...rest])
+  }
+})
+
+/** Words of `usage` that name a flag but are placeholders, not flags:  `update`'s `--field <value>`. */
+const USAGE_PLACEHOLDERS = ["--field"]
+
+/** `command`'s whole help, as `--help` prints it:  its usage, options and the text after. */
+function helpOf(command: Command): string {
+  let text = ""
+  command.configureOutput({ writeOut: (each) => (text += each), writeErr: (each) => (text += each) })
+  command.outputHelp()
+  return text
+}
+
+/** The example command lines in help `text`:  each line starting `  epic `, its description still on it (`shellWords()`). */
+function examplesIn(text: string): string[] {
+  return text
+    .split("\n")
+    .filter((line) => /^ {2}epic /.test(line))
+    .map((line) => line.trim())
+}
+
+/**
+ * `line` split as a shell would:  quotes kept together, unquoted;  stops at two spaces outside quotes, where a help's
+ * example has its description.
+ */
+function shellWords(line: string): string[] {
+  const words: string[] = []
+  let word: string | undefined
+  let quote: string | undefined
+  for (let at = 0; at < line.length; at++) {
+    const char = line[at]!
+    if (quote) {
+      if (char === quote) quote = undefined
+      else word += char
+    } else if (char === '"' || char === "'") {
+      quote = char
+      word ??= ""
+    } else if (char === " ") {
+      if (word !== undefined) words.push(word)
+      word = undefined
+      if (line[at + 1] === " ") break
+    } else word = (word ?? "") + char
+  }
+  if (word !== undefined) words.push(word)
+  return words
+}
+
+/** The `--flags` words of a usage line:  `<epic> [--json] [--epic <epic>]` -> `--json`, `--epic`. */
+function flagsIn(usage: string): string[] {
+  return [...usage.matchAll(/(?<![\w-])(--[a-z][\w-]*)/g)].map((match) => match[1]!)
+}
+
+/** The long names of `flags`' specs:  `{ "--epic <epic>": ... }` -> `{ "--epic": true }`. */
+function specs(flags: VerbFlags | undefined): Record<string, true> {
+  return Object.fromEntries(Object.keys(flags ?? {}).map((spec) => [/^(--[\w-]+)/.exec(spec)![1]!, true]))
+}

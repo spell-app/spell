@@ -4,6 +4,7 @@ import { dirname, extname, join, posix } from "node:path"
 import { localDate } from "spell/util/time"
 import { DataFile } from "spell/server/DataFile"
 import { Git } from "spell/server/Git"
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
@@ -73,18 +74,18 @@ export class LinesOfCode {
     if (written) process.stderr.write(`wrote ${settingsFile} with the defaults:  tweak it, then epic loc again\n`)
     const scan = this.scan()
     if (flags.json) {
-      out(JSON.stringify(scan, null, 2))
+      CLI.out(JSON.stringify(scan, null, 2))
       return EXIT.OK
     }
     if (flags.print) {
-      out(LinesOfCode.table(scan))
+      CLI.out(LinesOfCode.table(scan))
       return EXIT.OK
     }
     const page = join(this.content, LinesOfCode.PAGE)
     const { created } = await new LocPage({ file: page, scan, root: this.root }).write()
     if (created) process.stderr.write(`made ${page} from the guide template\n`)
     await EpicTools.run("pages link", [page], { cwd: this.root })
-    out(LinesOfCode.totals(scan))
+    CLI.out(LinesOfCode.totals(scan))
     return EXIT.OK
   }
 
@@ -386,9 +387,4 @@ const SETTINGS_SOURCE = `// epic loc's settings:  what counts, and what's a row 
 /** Whether `file` matches one of `globs`. */
 function matchesAny(file: string, globs: string[]): boolean {
   return globs.some((glob) => posix.matchesGlob(file, glob))
-}
-
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(`${text}\n`)
 }

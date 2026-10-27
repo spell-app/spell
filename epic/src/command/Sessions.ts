@@ -1,24 +1,16 @@
 import { execFileSync, spawnSync } from "node:child_process"
-import {
-  closeSync,
-  existsSync,
-  mkdirSync,
-  openSync,
-  readFileSync,
-  readSync,
-  readdirSync,
-  statSync,
-  writeFileSync
-} from "node:fs"
-import { homedir } from "node:os"
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
 import { clockTime, localDate } from "spell/util/time"
 import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { CLI } from "spell/cli"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { Transcript } from "spell-epic/config/Transcript"
 import { epicStateFor } from "spell-epic/list/EpicState"
 
 import {
@@ -46,7 +38,7 @@ import { Worktrees } from "./Worktrees"
  * `epic session <verb> ...`:  Claude Code sessions -- find, open, title, digest --
  * and what every other verb group reads of them.
  * The `/session`, `/wtf` and `/worktrees` skills use it.
- * - Where they are:  Claude Code's own folder (`home`, `~/.claude`):
+ * - Where they are:  Claude Code's own folder (`home`:  `ClaudeHome.home()`), read through `ClaudeHome` and `Transcript`:
  *   - running ones:  its registry, `sessions/<pid>.json`
  *   - saved ones:  their transcripts, `projects/<slug>/<id>.jsonl`
  *   - titles waiting for a session's next prompt:  `session-titles/<id>`
@@ -76,15 +68,15 @@ import { Worktrees } from "./Worktrees"
  *     every session, its monitor in a terminal one) runs it as files change, `--json`, its own pid as `--monitor`,
  *     which holds the place while it runs
  *   - `--json` (`list`, `find`, `transcript`):  the data instead of lines
- * - Node built-ins only, plus the repo's config:  no spell.
+ * - Node built-ins, the repo's config and the kit's command base:  no spell.
  * - Was `session.py` and `transcript.py`.
  ****************/
 export class Sessions {
   /** Claude Code's own folder:  STATIC for the object's life;  a test that needs another builds another object */
   readonly home: string
 
-  /** - `home`:  default `Sessions.claudeHome()` */
-  constructor({ home = Sessions.claudeHome() }: SessionsProps = {}) {
+  /** - `home`:  default `ClaudeHome.home()` */
+  constructor({ home = ClaudeHome.home() }: SessionsProps = {}) {
     this.home = home
   }
 
@@ -111,7 +103,7 @@ export class Sessions {
         return this.refreshIcons(Boolean(flags.dryRun))
       case "window": {
         const window = Sessions.windowOf(rest[0] ? Number(rest[0]) : Sessions.thisPid())
-        out(String(window ?? "none"))
+        CLI.out(String(window ?? "none"))
         return window === undefined ? EXIT.ERRORS : EXIT.OK
       }
       case "transcript":
@@ -121,8 +113,11 @@ export class Sessions {
         const { InboxMonitor } = await import("spell-epic/tool/InboxMonitor")
         const monitor = Number(flags.monitor) || undefined
         const check = new InboxMonitor({ sessions: this }).check({ monitor })
-        if (flags.json) out(JSON.stringify(check))
-        else out(check.notice ?? (check.epic ? `listening to ${check.epic}:  nothing waiting` : "no epic to listen to"))
+        if (flags.json) CLI.out(JSON.stringify(check))
+        else
+          CLI.out(
+            check.notice ?? (check.epic ? `listening to ${check.epic}:  nothing waiting` : "no epic to listen to")
+          )
         return EXIT.OK
       }
       default:
@@ -148,7 +143,7 @@ export class Sessions {
       .slice(0, limit)
     if (flags.json) {
       const listed = shown.map((it) => ({ ...it, running: live.get(it.id) ?? null }))
-      out(JSON.stringify(listed, null, 2))
+      CLI.out(JSON.stringify(listed, null, 2))
       return EXIT.OK
     }
     for (const it of shown) {
@@ -158,9 +153,9 @@ export class Sessions {
         : "saved"
       const where = it.cwd ? relative(root, it.cwd) || "." : "?"
       const title = `${it.named ? "*" : " "}${it.title.slice(0, 60).padEnd(61)}`
-      out(`${it.id.slice(0, 8)}  ${stamp(it.last)}  ${status.padEnd(28)}  ${title}  ${where}`)
+      CLI.out(`${it.id.slice(0, 8)}  ${stamp(it.last)}  ${status.padEnd(28)}  ${title}  ${where}`)
     }
-    if (!shown.length) out("no matching sessions")
+    if (!shown.length) CLI.out("no matching sessions")
     return EXIT.OK
   }
 
@@ -168,11 +163,11 @@ export class Sessions {
   private find(name: string, flags: VerbArgs["flags"]): number {
     if (!name) throw new EpicCommandError("find:  which name?")
     const found = this.named(name)
-    if (flags.json) out(JSON.stringify(found, null, 2))
+    if (flags.json) CLI.out(JSON.stringify(found, null, 2))
     else {
       for (const it of found)
-        out(`${it.id.slice(0, 8)}  ${it.title.padEnd(24)}  ${it.last.slice(0, 16)}  ${it.cwd ?? ""}`)
-      if (!found.length) out(`no session named or in worktree ${name}`)
+        CLI.out(`${it.id.slice(0, 8)}  ${it.title.padEnd(24)}  ${it.last.slice(0, 16)}  ${it.cwd ?? ""}`)
+      if (!found.length) CLI.out(`no session named or in worktree ${name}`)
     }
     return EXIT.OK
   }
@@ -200,7 +195,7 @@ export class Sessions {
     const url = `vscode://anthropic.claude-code/open?session=${hit.id}${target === undefined ? "" : `&windowId=${target}`}`
     const run = spawnSync("code", ["--open-url", url], { stdio: "inherit" })
     if (run.status !== 0) throw new EpicCommandError("open:  `code --open-url` failed", EXIT.ERRORS)
-    out(`opened ${hit.id.slice(0, 8)} "${hit.title}" in window ${target ?? "?"}${live ? " (where it runs)" : ""}`)
+    CLI.out(`opened ${hit.id.slice(0, 8)} "${hit.title}" in window ${target ?? "?"}${live ? " (where it runs)" : ""}`)
     return EXIT.OK
   }
 
@@ -220,16 +215,16 @@ export class Sessions {
     const queued = this.queuedTitle(me)
     if (!title) {
       const tab = shown && shown !== current ? `  (its tab may show "${shown}")` : ""
-      out(`${summary?.named ? "*" : " "}${current ?? "?"}${tab}${queued ? `  (queued:  ${queued})` : ""}`)
+      CLI.out(`${summary?.named ? "*" : " "}${current ?? "?"}${tab}${queued ? `  (queued:  ${queued})` : ""}`)
       return EXIT.OK
     }
     // so skills can call it on every resume / phase start:  "check, rename if needed" is one command
     if (!force && (queued === title || (shown === title && queued === null))) {
-      out(`${me.slice(0, 8)} is already "${title}"${queued ? " (queued)" : ""}:  nothing to do`)
+      CLI.out(`${me.slice(0, 8)} is already "${title}"${queued ? " (queued)" : ""}:  nothing to do`)
       return EXIT.OK
     }
     this.queueTitle(me, title)
-    out(`queued "${title}" for ${me.slice(0, 8)} (was "${shown ?? current ?? "?"}"):  applied on the next prompt`)
+    CLI.out(`queued "${title}" for ${me.slice(0, 8)} (was "${shown ?? current ?? "?"}"):  applied on the next prompt`)
     return EXIT.OK
   }
 
@@ -243,18 +238,18 @@ export class Sessions {
     const targets = name
       ? this.named(name).map((it) => ({ id: it.id, title: it.title }))
       : [{ id: me!, title: this.currentTitle(me!) ?? "" }]
-    if (!targets.length) out(`no session named or in worktree ${name}`)
+    if (!targets.length) CLI.out(`no session named or in worktree ${name}`)
     for (const { id, title } of targets) {
       // its work's name:  the title without its icon (🚧, 📅 or an older ✅);  the queued one first, it's newer
       const queued = this.queuedTitle(id)
       const bare = bareTitle(queued ?? title) || name
       const done = `${TITLE_ICONS.done} ${bare}`
       if ((queued ?? this.shownTitle(id)) === done) {
-        out(`${id.slice(0, 8)} is already done:  "${done}"`)
+        CLI.out(`${id.slice(0, 8)} is already done:  "${done}"`)
         continue
       }
       this.queueTitle(id, done)
-      out(`queued "${done}" for ${id.slice(0, 8)}:  applied on its next prompt or resume`)
+      CLI.out(`queued "${done}" for ${id.slice(0, 8)}:  applied on its next prompt or resume`)
     }
     return EXIT.OK
   }
@@ -287,10 +282,10 @@ export class Sessions {
         if (now === wanted) continue
         if (!dryRun) this.queueTitle(it.id, wanted)
         queued++
-        out(`${dryRun ? "would queue" : "queued"} "${wanted}" for ${it.id.slice(0, 8)} (now "${now}")`)
+        CLI.out(`${dryRun ? "would queue" : "queued"} "${wanted}" for ${it.id.slice(0, 8)} (now "${now}")`)
       }
     }
-    out(
+    CLI.out(
       queued
         ? `${queued} session${queued === 1 ? "" : "s"}${dryRun ? " to retitle" : " retitled"}:  each shows on its next prompt or resume`
         : "every named session already has its icon"
@@ -343,17 +338,17 @@ export class Sessions {
     const digest = this.digest(id)
     if (!digest) throw new EpicCommandError(`no transcript for ${id}`, EXIT.ERRORS)
     if (flags.json) {
-      out(JSON.stringify(digest, null, 2))
+      CLI.out(JSON.stringify(digest, null, 2))
       return EXIT.OK
     }
-    out(`transcript:  ${digest.path}\n\n## Owen's prompts\n\n`)
-    for (const { when, text } of digest.prompts) out(`- ${when}  ${cut(text, PROMPT_LIMIT)}`)
-    out(`\n## Last reply\n\n${cut(digest.lastReply ?? "(none)", REPLY_LIMIT)}`)
+    CLI.out(`transcript:  ${digest.path}\n\n## Owen's prompts\n\n`)
+    for (const { when, text } of digest.prompts) CLI.out(`- ${when}  ${cut(text, PROMPT_LIMIT)}`)
+    CLI.out(`\n## Last reply\n\n${cut(digest.lastReply ?? "(none)", REPLY_LIMIT)}`)
     if (digest.pending?.length) {
-      out("\n## Waiting for an answer\n\n")
+      CLI.out("\n## Waiting for an answer\n\n")
       for (const question of digest.pending) {
-        out(`- ${question.question ?? ""}`)
-        for (const option of question.options ?? []) out(`  - ${option.label ?? ""}:  ${option.description ?? ""}`)
+        CLI.out(`- ${question.question ?? ""}`)
+        for (const option of question.options ?? []) CLI.out(`  - ${option.label ?? ""}:  ${option.description ?? ""}`)
       }
     }
     return EXIT.OK
@@ -364,21 +359,12 @@ export class Sessions {
   ////////////////
 
   /**
-   * The live sessions, by session id:  each registry record `sessions/<pid>.json` whose process is alive.
+   * The live sessions, by session id:  each registry record whose process is alive (`ClaudeHome.liveSessions()`).
    * - a record whose `pid` is gone is a session that ended without cleaning up:  skipped
    */
   running(): Map<string, RunningSession> {
-    const found = new Map<string, RunningSession>()
-    const folder = join(this.home, "sessions")
-    if (!existsSync(folder)) return found
-    for (const name of readdirSync(folder).sort()) {
-      if (!name.endsWith(".json")) continue
-      const record = readJSON(join(folder, name)) as Partial<RunningSession>
-      if (typeof record.pid === "number" && record.sessionId && SRV.isProcessAlive(record.pid)) {
-        found.set(record.sessionId, record as RunningSession)
-      }
-    }
-    return found
+    const live = ClaudeHome.liveSessions({ home: this.home, isAlive: SRV.isProcessAlive })
+    return new Map(live.map((record) => [record.sessionId, record]))
   }
 
   /**
@@ -391,11 +377,11 @@ export class Sessions {
     for (const record of this.running().values()) {
       const transcript = this.transcriptOf(record.sessionId)
       const mtime = transcript ? statSync(transcript).mtimeMs : (record.updatedAt ?? 0)
-      const tail = transcript ? readTail(transcript, 512_000) : ""
+      const tail = transcript ? new Transcript(transcript).tail(512_000) : ""
       const cwd = [...tail.matchAll(/"cwd":"([^"]*)"/g)].at(-1)?.[1] || record.cwd || ""
       const silent = Math.floor((Date.now() - mtime) / 60_000)
       const state = record.status ?? "?"
-      const asked = pendingQuestion(tail)
+      const asked = Transcript.pendingQuestion(tail)
       const place =
         cwd && existsSync(cwd) ? Worktrees.checkoutOf(cwd) : { label: "(not in git)", branch: "", inside: cwd }
       found.push({
@@ -414,8 +400,8 @@ export class Sessions {
         waitingFor: record.waitingFor ?? null,
         lastActive: Stock.iso(mtime),
         silentMin: silent,
-        question: asked?.question ?? null,
-        questionMin: asked?.minutes ?? 0,
+        question: asked ? (asked.questions[0]?.question ?? "?") : null,
+        questionMin: asked ? Stock.minutesSince(asked.at as string) : 0,
         this: mine.has(record.pid),
         used: !!transcript
       })
@@ -449,11 +435,10 @@ export class Sessions {
    */
   saved(options: { everywhere?: boolean; cwd?: string } = {}): SessionSummary[] {
     const prefix = Sessions.projectSlug(Git.mainRoot(options.cwd))
-    const projects = join(this.home, "projects")
-    if (!existsSync(projects)) return []
+    const projects = ClaudeHome.projects(this.home)
     const found: SessionSummary[] = []
     // each real folder once:  a linked worktree's folder (epic `epic-eject` Q4) IS main's
-    for (const dir of SessionFolders.listed(projects)) {
+    for (const dir of ClaudeHome.projectFolders(projects)) {
       if (!options.everywhere && dir !== prefix && !dir.startsWith(`${prefix}-`)) continue
       const folder = join(projects, dir)
       for (const name of readdirSync(folder)) {
@@ -479,17 +464,17 @@ export class Sessions {
     let cwd: string | null = null
     for (const line of readFileSync(path, "utf8").split("\n")) {
       if (line.includes('"custom-title"') || line.includes('"ai-title"')) {
-        const entry = Sessions.parseJSONLine(line)
+        const entry = Transcript.parseLine(line)
         custom = (entry.customTitle as string) || custom
         ai = (entry.aiTitle as string) || ai
       } else if ((entrypoint === null || prompt === null) && line.includes('"type":"user"')) {
-        const entry = Sessions.parseJSONLine(line)
+        const entry = Transcript.parseLine(line)
         entrypoint ??= (entry.entrypoint as string) ?? null
         cwd ??= (entry.cwd as string) ?? null
         prompt ??= Sessions.entryPrompt(entry)
       }
     }
-    const moved = [...readTail(path, 256_000).matchAll(/"cwd":"([^"]*)"/g)]
+    const moved = [...new Transcript(path).tail(256_000).matchAll(/"cwd":"([^"]*)"/g)]
     if (moved.length) cwd = moved.at(-1)![1]!
     const sidecar = join(path.replace(/\.jsonl$/, ""), "custom-title.json")
     if (existsSync(sidecar)) custom = (readJSON(sidecar).customTitle as string) || custom
@@ -525,7 +510,7 @@ export class Sessions {
     }
     const index = new TranscriptIndex({ file: join(this.home, TRANSCRIPT_INDEX) })
     const found: NamedSession[] = []
-    for (const path of this.transcripts()) {
+    for (const path of ClaudeHome.transcripts(this.home)) {
       let title: string | null = null
       let cwd: string | null = null
       let last = ""
@@ -534,7 +519,7 @@ export class Sessions {
       for (const line of readFileSync(path, "utf8").split("\n")) {
         // cheap pre-check:  most lines are neither
         if (!line.includes('"custom-title"') && !line.includes('"cwd"')) continue
-        const entry = Sessions.parseJSONLine(line)
+        const entry = Transcript.parseLine(line)
         if (entry.type === "custom-title") title = (entry.customTitle as string) ?? null
         if (typeof entry.cwd === "string" && entry.cwd) {
           cwd = entry.cwd
@@ -560,52 +545,26 @@ export class Sessions {
     return facts.titles.some((title) => bareTitle(title) === name) || facts.cwds.some((cwd) => worktreeOf(cwd) === name)
   }
 
-  /** Every transcript file, of every project:  each once, a linked worktree's folder skipped (`SessionFolders.listed()`). */
-  transcripts(): string[] {
-    const projects = join(this.home, "projects")
-    if (!existsSync(projects)) return []
-    const found: string[] = []
-    for (const dir of SessionFolders.listed(projects)) {
-      const folder = join(projects, dir)
-      for (const name of readdirSync(folder)) if (name.endsWith(".jsonl")) found.push(join(folder, name))
-    }
-    return found
-  }
-
   /**
-   * The transcript of session `id`, in any project folder;  `undefined` when there's none.
+   * The transcript of session `id`, in any project folder (`ClaudeHome.transcriptOf()`);  `undefined` when there's
+   * none.
    * - one session's transcript can sit in two folders (copied when it moved):  the newest wins
    */
   transcriptOf(id: string): string | undefined {
-    const projects = join(this.home, "projects")
-    if (!existsSync(projects)) return undefined
-    let newest: { path: string; mtime: number } | undefined
-    for (const dir of readdirSync(projects)) {
-      const path = join(projects, dir, `${id}.jsonl`)
-      if (!existsSync(path)) continue
-      const mtime = statSync(path).mtimeMs
-      if (!newest || mtime > newest.mtime) newest = { path, mtime }
-    }
-    return newest?.path
+    return ClaudeHome.transcriptOf(id, this.home)
   }
 
   /**
-   * Session `id`'s title:  its last `custom-title`, else its last `ai-title`;  `null` when it has neither.
-   * - the same rule as the handoff hook (`hooks/handoff.mjs`), which finds a session's tab by it
+   * Session `id`'s title:  its last `custom-title`, else its last `ai-title` (`Transcript.titles()`);  `null` when it
+   * has neither.
+   * - the same rule as the handoff hook (`hooks/handoff.mjs`), which finds a session's tab by them
    * - whether its tab SHOWS a title, to title it again or not:  `shownTitle()`
    */
   title(id: string): string | null {
     const path = this.transcriptOf(id)
     if (!path) return null
-    let custom: string | null = null
-    let ai: string | null = null
-    for (const line of readFileSync(path, "utf8").split("\n")) {
-      if (!line.includes('"custom-title"') && !line.includes('"ai-title"')) continue
-      const entry = Sessions.parseJSONLine(line)
-      if (entry.type === "custom-title") custom = (entry.customTitle as string) ?? null
-      else if (entry.type === "ai-title") ai = (entry.aiTitle as string) ?? null
-    }
-    return custom || ai
+    const { custom, ai } = new Transcript(path).titles()
+    return custom || ai || null
   }
 
   /**
@@ -619,34 +578,29 @@ export class Sessions {
    * - returns `undefined` when no transcript matches
    */
   digest(idPrefix: string): TranscriptDigest | undefined {
-    const paths = this.transcripts().filter((path) => basename(path).startsWith(idPrefix))
+    const paths = ClaudeHome.transcripts(this.home).filter((path) => basename(path).startsWith(idPrefix))
     if (!paths.length) return undefined
     const path = paths.reduce((newest, it) => (statSync(it).mtimeMs > statSync(newest).mtimeMs ? it : newest))
-    const digest: TranscriptDigest = { path, prompts: [], lastReply: null, pending: null }
-    for (const line of readFileSync(path, "utf8").split("\n")) {
-      const entry = Sessions.parseJSONLine(line)
-      if (entry.isSidechain) continue
-      const message = entry.message as { content?: unknown } | undefined
-      if (!message || typeof message !== "object") continue
-      const blocks = typeof message.content === "string" ? [{ type: "text", text: message.content }] : message.content
-      if (!Array.isArray(blocks)) continue
-      if (entry.type === "user") {
-        for (const block of blocks) {
-          // any answer clears a waiting question
-          if (block?.type === "tool_result") digest.pending = null
-          else if (block?.type === "text") {
-            const text = Sessions.promptText(block.text ?? "")
-            const when = typeof entry.timestamp === "string" ? entry.timestamp.slice(0, 16) : ""
-            if (text) digest.prompts.push({ when, text })
-          }
+    const text = readFileSync(path, "utf8")
+    // the question waiting:  any answer clears it
+    const digest: TranscriptDigest = {
+      path,
+      prompts: [],
+      lastReply: null,
+      pending: Transcript.pendingQuestion(text)?.questions ?? null
+    }
+    for (const line of text.split("\n")) {
+      const entry = Transcript.parseLine(line)
+      if (entry.isSidechain || (entry.type !== "user" && entry.type !== "assistant")) continue
+      for (const block of Transcript.blocksOf(entry.message)) {
+        if (block.type !== "text") continue
+        if (entry.type === "assistant") {
+          if (String(block.text ?? "").trim()) digest.lastReply = block.text!.trim()
+          continue
         }
-      } else if (entry.type === "assistant") {
-        for (const block of blocks) {
-          if (block?.type === "text" && String(block.text ?? "").trim()) digest.lastReply = block.text.trim()
-          else if (block?.type === "tool_use" && block.name === "AskUserQuestion") {
-            digest.pending = block.input?.questions ?? []
-          }
-        }
+        const prompt = Sessions.promptText(block.text ?? "")
+        const when = typeof entry.timestamp === "string" ? entry.timestamp.slice(0, 16) : ""
+        if (prompt) digest.prompts.push({ when, text: prompt })
       }
     }
     return digest
@@ -663,27 +617,20 @@ export class Sessions {
    *   on the session's NEXT prompt, then deletes it (undocumented, found in CLI 2.1.287)
    */
   queueTitle(id: string, title: string): void {
-    mkdirSync(join(this.home, "session-titles"), { recursive: true })
-    writeFileSync(join(this.home, "session-titles", id), title)
+    const titles = ClaudeHome.titlesFolder(this.home)
+    mkdirSync(titles, { recursive: true })
+    writeFileSync(join(titles, id), title)
   }
 
   /** The title queued for session `id`'s next prompt (`queueTitle()`), or `null`. */
   queuedTitle(id: string): string | null {
-    const file = join(this.home, "session-titles", id)
+    const file = join(ClaudeHome.titlesFolder(this.home), id)
     return existsSync(file) ? readFileSync(file, "utf8").trim() : null
   }
 
   ////////////////
-  // ## Statics:  Claude Code's folder, processes, transcript lines
+  // ## Statics:  processes, transcript lines
   ////////////////
-
-  /**
-   * Claude Code's own folder:  `~/.claude`, or `SPELL_CLAUDE_HOME` (tests point it at a fixture).
-   * - static:  the default every `Sessions` starts from, before there's one
-   */
-  static claudeHome(): string {
-    return process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude")
-  }
 
   /**
    * The pids above this process, so the session that ran us can be told apart (or left out).
@@ -732,19 +679,6 @@ export class Sessions {
   }
 
   /**
-   * One JSON line (a transcript's), or `{}` when it isn't an object.
-   * - static:  pure;  `Requests` reads transcripts' lines too
-   */
-  static parseJSONLine(line: string): Record<string, unknown> {
-    try {
-      const value = JSON.parse(line)
-      return value && typeof value === "object" ? value : {}
-    } catch {
-      return {}
-    }
-  }
-
-  /**
    * What Owen typed, from a transcript `user` entry;  `null` for tool results and harness text.
    * - `isMeta` entries are the harness's
    * - static:  pure
@@ -786,7 +720,7 @@ export class Sessions {
 
 /** What `new Sessions()` takes. */
 export type SessionsProps = {
-  /** Claude Code's own folder;  default `Sessions.claudeHome()` */
+  /** Claude Code's own folder;  default `ClaudeHome.home()` */
   home?: string
 }
 
@@ -794,7 +728,7 @@ export type SessionsProps = {
 const TRANSCRIPT_INDEX = join("spell-epic", "transcript-index.json")
 
 /** The flags of `epic session` that take no value. */
-const SWITCHES = ["all", "json", "dryRun", "force", "once"]
+const SWITCHES = ["all", "json", "dryRun", "force"]
 
 /** Longest prompt and reply a transcript digest prints, in characters. */
 const PROMPT_LIMIT = 800
@@ -803,51 +737,13 @@ const REPLY_LIMIT = 3000
 /** How the harness's own `user` messages start:  never prompts. */
 const HARNESS_MESSAGES = ["Base directory for this skill:", "Another Claude session sent a message:"]
 
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
-
-/** An `AskUserQuestion` in transcript text `tail` with no answer after it:  its first question, minutes ago. */
-function pendingQuestion(tail: string): { question: string; minutes: number } | undefined {
-  let pending: { question: string; minutes: number } | undefined
-  for (const line of tail.split("\n")) {
-    if (!line.includes('"AskUserQuestion"') && !line.includes('"tool_result"')) continue
-    const entry = Sessions.parseJSONLine(line)
-    if (entry.isSidechain) continue
-    const content = (entry.message as { content?: unknown } | undefined)?.content
-    for (const block of Array.isArray(content) ? content : []) {
-      if (block?.type === "tool_result") pending = undefined
-      else if (block?.type === "tool_use" && block.name === "AskUserQuestion") {
-        const [first = {}] = block.input?.questions ?? []
-        pending = { question: first.question ?? "?", minutes: Stock.minutesSince(entry.timestamp as string) }
-      }
-    }
-  }
-  return pending
-}
-
-/** A JSON file, or `{}`. */
+/** A JSON file, or `{}`:  `Transcript.parseLine()` of its text. */
 function readJSON(path: string): Record<string, unknown> {
   try {
-    return Sessions.parseJSONLine(readFileSync(path, "utf8"))
+    return Transcript.parseLine(readFileSync(path, "utf8"))
   } catch {
     return {}
   }
-}
-
-/** The last `bytes` of file `path`, as text. */
-function readTail(path: string, bytes: number): string {
-  const size = statSync(path).size
-  const length = Math.min(size, bytes)
-  const buffer = Buffer.alloc(length)
-  const fd = openSync(path, "r")
-  try {
-    readSync(fd, buffer, 0, length, size - length)
-  } finally {
-    closeSync(fd)
-  }
-  return buffer.toString("utf8")
 }
 
 /** `text` with every run of whitespace one space, trimmed. */

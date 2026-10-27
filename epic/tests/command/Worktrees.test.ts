@@ -11,9 +11,9 @@ import { Worktrees } from "spell-epic/command/Worktrees"
 /** A throwaway repo:  `main` with one commit, branch `done` merged, branch `wip` one commit ahead in a worktree. */
 const MAIN = realpathSync(mkdtempSync(join(tmpdir(), "repo-")))
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))
-process.env.SPELL_CLAUDE_HOME = HOME
+process.env.CLAUDE_CONFIG_DIR = HOME
 afterAll(() => {
-  delete process.env.SPELL_CLAUDE_HOME
+  delete process.env.CLAUDE_CONFIG_DIR
   rmSync(MAIN, { recursive: true, force: true })
   rmSync(HOME, { recursive: true, force: true })
 })

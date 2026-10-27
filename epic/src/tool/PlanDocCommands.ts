@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
 import { WorkTime } from "spell-epic/command/WorkTime"
 import { Markup } from "spell-epic/markup"
 import { PageStages } from "spell-epic/phases"
@@ -140,7 +141,7 @@ export class PlanDocCommands {
 
   /** Run one command;  resolves to its exit code, `undefined` for 0. */
   private async main(argv: string[]): Promise<number | void> {
-    const { positional, flags } = parseArgs(argv)
+    const { positional, flags } = parseVerbArgs(argv)
     const [command, name, ...rest] = positional
     if (command === "list") return this.printEpics(this.files.listEpics(), Boolean(flags.json))
     if (command === "backfill") return this.backfill(name, flags)
@@ -227,7 +228,7 @@ export class PlanDocCommands {
           plan.addPhaseUpdate(
             plan.phasePlace(need(rest[0], "a phase")),
             flags.file ? readFileSync(flags.file as string, "utf8") : need(rest[1], "what changed (html)"),
-            { summary: typeof flags.summary === "string" ? flags.summary : undefined }
+            { summary: stringFlag(flags.summary) }
           )
         )
       case "stage":
@@ -428,7 +429,7 @@ export class PlanDocCommands {
    * - read after the edit:  `plan` is what the edit just set
    */
   static planningAfter(phase: Element, flags: Flags): { id: string; on: boolean } | undefined {
-    if (typeof flags.plan === "string" && flags.plan.trim()) return { id: phase.id, on: false }
+    if (stringFlag(flags.plan)?.trim()) return { id: phase.id, on: false }
     const todo = (phase.getAttribute("status") ?? "todo") === "todo"
     if (todo && phase.getAttribute("plan") !== "accepted") return { id: phase.id, on: true }
     return undefined
@@ -675,7 +676,7 @@ export class PlanDocCommands {
   private async details(name: string, file: string, rest: string[], flags: Flags): Promise<void> {
     const id = need(rest[0], "an item id")
     const fields = this.tests.fieldsOf(id, flags)
-    const given = typeof flags.file === "string" || !fields.html
+    const given = stringFlag(flags.file) !== undefined || !fields.html
     const html =
       fields.html + (given ? readFileSync(need(flags.file as string | undefined, "--file <html file>"), "utf8") : "")
     refuseCanceled(name, file, id)
@@ -1173,7 +1174,7 @@ export class PlanDocCommands {
   }
 }
 
-/** Command-line flags (`parseArgs()`):  `--key value` is the value, a bare `--key` is `true`;  keys camel-cased. */
+/** Command-line flags (`parseVerbArgs()`):  `--key value` is the value, a bare `--key` is `true`;  keys camel-cased. */
 export type Flags = Record<string, string | true>
 
 /** `openInVSCode()`'s options:  an id to land on, and the page's query (`test=1`). */
@@ -1423,19 +1424,6 @@ function refuseCanceled(name: string, file: string, id: string): void {
   )
 }
 
-/** `--key value` flags and `--key` switches, plus everything else in order. */
-export function parseArgs(argv: string[]): { positional: string[]; flags: Flags } {
-  const positional: string[] = []
-  const flags: Flags = {}
-  for (let i = 0; i < argv.length; i++) {
-    const match = argv[i].match(/^--([\w-]+)$/)
-    if (!match) positional.push(argv[i])
-    else if (i + 1 < argv.length && !argv[i + 1].startsWith("--")) flags[camel(match[1])] = argv[++i]
-    else flags[camel(match[1])] = true
-  }
-  return { positional, flags }
-}
-
 /**
  * Item `id` not urgent (`calm`) or urgent again, as the page's id chip does (`PlanDoc.setCalm()`), logged.
  * - returns the line to print:  `J11 not urgent:  <title>`, or `J11 not urgent already:  <title>` (not logged)
@@ -1446,11 +1434,6 @@ function calmItem(plan: PlanDoc, id: string, calm: boolean): string {
   const line = `${id.toUpperCase()} ${state}:  ${PlanItem.titleOf(plan.item(id))}`
   if (did) plan.log(line)
   return line
-}
-
-/** `no-browser` -> `noBrowser`. */
-function camel(flag: string): string {
-  return flag.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase())
 }
 
 /** `value`, or a usage error naming what's missing, and where the usage is. */

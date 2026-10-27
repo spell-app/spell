@@ -28,17 +28,6 @@ describe("SessionFolders", () => {
     expect(SessionFolders.folderOf(MAIN, HOME)).toBe(join(HOME, "projects", "-Users-owen-www-spell-app-spell-app"))
   })
 
-  test("home():  $CLAUDE_CONFIG_DIR when set, else ~/.claude", () => {
-    const before = process.env.CLAUDE_CONFIG_DIR
-    process.env.CLAUDE_CONFIG_DIR = HOME
-    try {
-      expect(SessionFolders.home()).toBe(HOME)
-    } finally {
-      if (before === undefined) delete process.env.CLAUDE_CONFIG_DIR
-      else process.env.CLAUDE_CONFIG_DIR = before
-    }
-  })
-
   test("link():  the worktree's folder becomes a link to main's (made first);  again:  ok;  unlink():  gone", () => {
     const made = SessionFolders.link(BESIDE, MAIN, HOME)
     expect(made).toMatchObject({ action: "linked" })
@@ -75,19 +64,6 @@ describe("SessionFolders", () => {
     expect(SessionFolders.unlink(elsewhere, "/repo", HOME).action).toBe("kept")
   })
 
-  test("listed():  each real folder once, a linked worktree's skipped;  a link to an unlisted folder kept", () => {
-    const projects = join(HOME, "listing")
-    mkdirSync(join(projects, "-main"), { recursive: true })
-    mkdirSync(join(projects, "-other"), { recursive: true })
-    symlinkSync(join(projects, "-main"), join(projects, "-main-worktrees-seo"))
-    mkdirSync(join(HOME, "outside"), { recursive: true })
-    symlinkSync(join(HOME, "outside"), join(projects, "-moved"))
-    symlinkSync(join(HOME, "nowhere"), join(projects, "-dangling"))
-    writeFileSync(join(projects, "notes.txt"), "not a folder")
-    expect(SessionFolders.listed(projects)).toEqual(["-main", "-moved", "-other"])
-    expect(SessionFolders.listed(join(HOME, "missing"))).toEqual([])
-  })
-
   // epic `epic-engine` I50, I51:  a resumed session's record has a made-up name;  its transcript has its title
   test("recordTitle():  the record's name, or its transcript's last custom title when the name was made up", () => {
     const home = join(HOME, "titles")
@@ -115,7 +91,6 @@ describe("SessionFolders", () => {
     expect(SessionFolders.recordTitle({ sessionId: "s2", name: "seo-a1", nameSource: "derived" }, home)).toBe("seo-a1")
     expect(SessionFolders.recordTitle({ sessionId: "none", nameSource: "derived" }, home)).toBe("")
     expect(SessionFolders.customTitle("s3", home)).toBe("🚧 far")
-    expect(SessionFolders.transcriptOf("s3", home)).toBe(join(home, "projects", "-b", "s3.jsonl"))
   })
 
   // epic `epic-engine` r2:  after a handoff, ba126030's tab showed Claude Code's own title, written after its custom one
@@ -134,7 +109,6 @@ describe("SessionFolders", () => {
     write("ai-custom", ai, custom)
     write("custom", custom)
     write("cleared", ai, { type: "custom-title", customTitle: "" })
-    const path = (id: string) => join(home, "projects", "-a", `${id}.jsonl`)
 
     expect(SessionFolders.shownTitle("custom-ai", home)).toBe("Claude in Chrome browser automation")
     expect(SessionFolders.shownTitle("ai-custom", home)).toBe("🚧 editor")
@@ -149,12 +123,6 @@ describe("SessionFolders", () => {
     // finding a session BY its name is unchanged:  the last custom title (I51)
     expect(SessionFolders.customTitle("custom-ai", home)).toBe("🚧 editor")
     expect(SessionFolders.recordTitle(derived, home)).toBe("🚧 editor")
-
-    expect(SessionFolders.lastTitleLine(path("custom-ai"))).toEqual({
-      title: "Claude in Chrome browser automation",
-      custom: false
-    })
-    expect(SessionFolders.lastTitleLine(path("ai-custom"))).toEqual({ title: "🚧 editor", custom: true })
   })
 
   test("requeueTitle():  the session's own title queued for its next prompt (the handoff), unless one is", () => {

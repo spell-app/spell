@@ -1,3 +1,5 @@
+import { Transcript, type TranscriptBlock } from "spell-epic/config/Transcript.ts"
+
 import type { TimeSpan } from "./command.types"
 
 /****************
@@ -19,7 +21,8 @@ import type { TimeSpan } from "./command.types"
  * - Work done side by side (the session and its agents, agents at once) counts ONCE:  `union()`, then `minutes()`.
  * - STATIC and instance-free on purpose:  pure functions of the text and the times passed in;
  *   finding the transcripts is `WorkTime`'s.
- * - Its position:  nothing but its types file;  plain node can load it (no aliases, no parameter properties).
+ * - Its position:  its types file, and `Transcript` (a line, a message's blocks);  plain node can load it (no aliases, no
+ *   parameter properties).
  ****************/
 export class ActiveTime {
   /** The longest a tool's result may take, in a turn, and still count as work:  15 minutes, in ms. */
@@ -82,18 +85,18 @@ export class ActiveTime {
       const stamp = STAMP.exec(line)?.[1]
       const at = stamp ? Date.parse(stamp) : NaN
       if (Number.isNaN(at) || (within && (at < within.from || at > within.to))) continue
-      const entry = ActiveTime.parsed(line)
-      if (entry?.type === "assistant") {
-        for (const block of ActiveTime.blocks(entry.message)) ActiveTime.noteOwens(block, owens)
+      const entry = Transcript.parseLine(line) as RawEntry
+      if (entry.type === "assistant") {
+        for (const block of Transcript.blocksOf(entry.message)) ActiveTime.noteOwens(block, owens)
         entries.push({ at, after: "work" })
-      } else if (entry?.type === "user") entries.push({ at, after: ActiveTime.gapBefore(entry, owens) })
+      } else if (entry.type === "user") entries.push({ at, after: ActiveTime.gapBefore(entry, owens) })
     }
     return entries.sort((a, b) => a.at - b.at)
   }
 
   /** What the gap before user entry `entry` was:  `owens`, the tool calls whose answer is Owen's. */
   private static gapBefore(entry: RawEntry, owens: OwenCalls): Gap {
-    const blocks = ActiveTime.blocks(entry.message)
+    const blocks = Transcript.blocksOf(entry.message)
     const results = blocks.filter((block) => block.type === "tool_result")
     if (results.length) {
       const his =
@@ -111,7 +114,7 @@ export class ActiveTime {
    * Note tool call `block` in `owens` when it waits for Owen:  a question or a plan (`answers`), or a background
    * command waiting for his notes (`waits`)
    */
-  private static noteOwens(block: RawBlock, owens: OwenCalls): void {
+  private static noteOwens(block: TranscriptBlock, owens: OwenCalls): void {
     if (block.type !== "tool_use") return
     const id = String(block.id)
     if (ASKS_OWEN.has(String(block.name))) owens.answers.add(id)
@@ -123,23 +126,6 @@ export class ActiveTime {
   private static permittedByHand(entry: RawEntry): boolean {
     const decision = entry.permissionDecision
     return !!decision && /^user/.test(String(decision.source)) && decision.reasonType !== "rule"
-  }
-
-  /** Line `line` as an entry;  `undefined` when it isn't a JSON object. */
-  private static parsed(line: string): RawEntry | undefined {
-    try {
-      const value = JSON.parse(line)
-      return value && typeof value === "object" ? value : undefined
-    } catch {
-      return undefined
-    }
-  }
-
-  /** A message's content as blocks:  a plain string is one text block. */
-  private static blocks(message: RawEntry["message"]): RawBlock[] {
-    const content = message?.content
-    if (typeof content === "string") return [{ type: "text", text: content }]
-    return Array.isArray(content) ? content.filter((block) => block && typeof block === "object") : []
   }
 }
 
@@ -170,9 +156,6 @@ type RawEntry = {
   message?: { content?: unknown }
   permissionDecision?: { source?: unknown; reasonType?: unknown }
 }
-
-/** One block of a message's content. */
-type RawBlock = { type?: string; name?: unknown; id?: unknown; tool_use_id?: unknown; text?: string; input?: unknown }
 
 /** How a user or assistant entry's line starts;  the other kinds (titles, API requests ...) start otherwise. */
 const ENTRY_START = '{"parentUuid"'

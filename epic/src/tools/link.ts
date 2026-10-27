@@ -23,14 +23,15 @@
  */
 import { existsSync, readFileSync } from "node:fs"
 
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
 import { EpicAddress } from "spell-epic/links"
 import { EpicTargets } from "spell-epic/tool/EpicTargets"
 import { SRV } from "spell/server"
 
 import { Window } from "spell-epic/window.mjs"
-import { ROOT, ensurePageServer, pageFile, parseArgs, serverUrl } from "./pages.js"
+import { ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
 
-const { positional, flags } = parseArgs(process.argv.slice(2))
+const { positional, flags } = parseVerbArgs(process.argv.slice(2))
 const addressed = positional[0] && EpicAddress.isAddress(positional[0]) ? addressOf(positional[0]) : undefined
 const file = addressed?.file ?? (positional[0] ? pageFile(positional[0]) : "")
 if (!positional[0] || !file.endsWith(".html") || !existsSync(file)) {
@@ -39,8 +40,8 @@ if (!positional[0] || !file.endsWith(".html") || !existsSync(file)) {
   )
   process.exit(1)
 }
-const hash = typeof flags.hash === "string" ? flags.hash : addressed?.hash
-const text = typeof flags.text === "string" ? flags.text : addressed?.text
+const hash = stringFlag(flags.hash) ?? addressed?.hash
+const text = stringFlag(flags.text) ?? addressed?.text
 const view = flags.review ? "review" : undefined
 console.log(await markdownLink(file, { hash, text, view, window: Window.current()?.pid }))
 if (flags.show) {

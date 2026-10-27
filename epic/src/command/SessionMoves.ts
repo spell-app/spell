@@ -14,7 +14,7 @@ import { basename, dirname, join } from "node:path"
 
 // By package path, `.ts` and all:  the window script and the `UserPromptSubmit` hook load this file with plain `node`
 // (types stripped)
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
 
 /****************
  * ### `SessionMoves`
@@ -29,7 +29,7 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  *      `epic window handoff` and `launch --move` refuse a move with a problem, saying why and what fixes it.
  *   2. `sawHooks()` / `missedMove()`:  the prompt hook marks each session whose hooks it saw run, and notices a
  *      record still waiting at the session's next prompt:  the hook didn't run.  It says so, and clears the record.
- * - Its position:  node's own modules and `SessionFolders` by path, so plain `node` loads it;
+ * - Its position:  node's own modules and `ClaudeHome` by path, so plain `node` loads it;
  *   NEVER imports the window script (`src/window.mjs`), which imports it.
  *   NEVER an alias, an `enum` or a parameter property.
  ****************/
@@ -41,7 +41,7 @@ export class SessionMoves {
   /** the plugin's folder, spell-epic's:  its `.claude-plugin/` names it */
   readonly engine: string
 
-  constructor({ registry = SessionMoves.registry(), home = SessionFolders.home(), engine = ENGINE }: MovesProps = {}) {
+  constructor({ registry = SessionMoves.registry(), home = ClaudeHome.home(), engine = ENGINE }: MovesProps = {}) {
     this.registry = registry
     this.home = home
     this.engine = engine
@@ -229,7 +229,7 @@ export class SessionMoves {
 export type MovesProps = {
   /** spell-epic's registry folder;  default `SessionMoves.registry()` */
   registry?: string
-  /** Claude Code's own folder;  default `SessionFolders.home()` */
+  /** Claude Code's own folder;  default `ClaudeHome.home()` */
   home?: string
   /** the plugin's folder;  default this file's engine, spell-epic */
   engine?: string

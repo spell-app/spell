@@ -46,6 +46,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types.ts"
 
 import { PACK_TAG, openPage, settle } from "./browserPage.js"
 import { browserUrlFor, componentSetAddress, pageFile } from "./pages.js"
@@ -53,9 +54,11 @@ import { browserUrlFor, componentSetAddress, pageFile } from "./pages.js"
 /** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
 const NAV = ".spell-toolbar"
 
-const baseAt = process.argv.indexOf("--base")
-const baseArg = baseAt > 0 ? process.argv[baseAt + 1] : undefined
-const [docArg, outArg] = process.argv.slice(2).filter((arg, at, args) => arg !== "--base" && args[at - 1] !== "--base")
+const {
+  positional: [docArg, outArg],
+  flags
+} = parseVerbArgs(process.argv.slice(2))
+const baseArg = stringFlag(flags.base)
 if (!docArg) {
   console.error(
     "usage:  node tools/check-spell.js <page> [outDir]   (e.g. guides/solid/solid-2.html:  `pages.js` `pageFile()`)"

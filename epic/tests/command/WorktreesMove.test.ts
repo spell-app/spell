@@ -29,16 +29,13 @@ const OLD = join(MAIN, ".claude", "worktrees")
 const CLAUDE = join(TEMP, "claude")
 const saved = {
   shared: process.env.SPELL_SHARED_DIR,
-  home: process.env.SPELL_CLAUDE_HOME,
   config: process.env.CLAUDE_CONFIG_DIR
 }
 process.env.SPELL_SHARED_DIR = join(TEMP, "content")
-process.env.SPELL_CLAUDE_HOME = CLAUDE
 process.env.CLAUDE_CONFIG_DIR = CLAUDE
 afterAll(() => {
   for (const [key, value] of [
     ["SPELL_SHARED_DIR", saved.shared],
-    ["SPELL_CLAUDE_HOME", saved.home],
     ["CLAUDE_CONFIG_DIR", saved.config]
   ] as const)
     if (value === undefined) delete process.env[key]

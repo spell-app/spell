@@ -46,7 +46,7 @@ import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
 
-import { RunningEpics, sessionsTitledFor, type LiveSession } from "spell-epic/list/RunningEpics"
+import { RunningEpics, sessionsTitledFor, type TitledSession } from "spell-epic/list/RunningEpics"
 import { listenerOf } from "./InboxPoller.mjs"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
 
@@ -342,7 +342,7 @@ export class ReviewStart {
   ////////////////
 
   /** The live Claude sessions (`RunningEpics.liveSessions()`). */
-  sessions(): LiveSession[] {
+  sessions(): TitledSession[] {
     return new RunningEpics(this.mainRoot).liveSessions()
   }
 
@@ -510,7 +510,7 @@ export class ReviewStart {
   }
 
   /** `session` is titled for the epic, but has no window bridge:  type `command` there by hand. */
-  private static noWindow(session: LiveSession, command: string) {
+  private static noWindow(session: TitledSession, command: string) {
     return {
       state: "no-window" as const,
       command,
@@ -523,7 +523,7 @@ export class ReviewStart {
    * `session`'s tab is open, so VS Code wouldn't type `command` into it ("Session is already open"):  says so, plainly.
    * - the page has the command on the clipboard
    */
-  private static tabOpen(session: LiveSession, command: string): string {
+  private static tabOpen(session: TitledSession, command: string): string {
     return (
       `${session.title}'s tab is open, and VS Code types only into a session it opens:  nothing typed.  ` +
       `Paste ${command} there:  it's copied.`

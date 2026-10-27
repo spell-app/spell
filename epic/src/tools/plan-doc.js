@@ -10,7 +10,6 @@
  *   `yarn plan-doc` in `spell-epic`, `epic worktree` reading summaries, a checkout on older code
  *   - under `tsx`, with this package's `tsconfig.json` for the aliases
  */
-import { pathToFileURL } from "node:url"
 
 import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
@@ -23,6 +22,6 @@ export { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 /** `PlanDocFiles.sharedDocLog()`:  a shared doc's commits, from `checkout`'s history (`shared.test.js`). */
 export const sharedDocLog = PlanDocFiles.sharedDocLog
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (import.meta.main) {
   process.exitCode = await new PlanDocCommands().run(process.argv.slice(2))
 }

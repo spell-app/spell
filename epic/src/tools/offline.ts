@@ -20,7 +20,6 @@
  */
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from "node:fs"
 import { dirname, extname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { checkoutOf } from "spell/server/checkout"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
@@ -190,6 +189,6 @@ export function run(args: string[], { cwd = process.cwd() } = {}): number {
 /** The flags `run()` takes. */
 const FLAGS = ["--fix", "--json"]
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   process.exitCode = run(process.argv.slice(2))
 }

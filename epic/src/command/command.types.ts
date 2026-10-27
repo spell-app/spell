@@ -2,98 +2,122 @@
  * Types for the `epic` command's verb groups (`spell-epic/command/`):
  * - spell ui rename: leave this file (its merge report's example quotes an old name on purpose)
  * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
- * - Runtime-light:  types, constants, the folder's one error class, and pure helpers over them.
+ * - Runtime-light:  types, constants, the exit codes and error class (the kit's), and pure helpers over them:
+ *   the ONE reader of a verb's command line (`parseVerbArgs()`, `stringFlag()`, `duration()`).
  * - Its position:  the BOTTOM of the folder's imports, and loaded by plain `node` too (types stripped):
- *   the prompt gate (`PromptGate.ts`, which the `UserPromptSubmit` hook imports by path) needs `TITLE_ICONS`.
- *   - So NEVER give it a value import, an alias, an `enum` or a parameter property:  plain `node` can't load those.
+ *   - the prompt gate (`PromptGate.ts`, which the `UserPromptSubmit` hook imports by path) needs `TITLE_ICONS`
+ *   - the docs tools' plain scripts (`details.js`, `migrate.js`, the window script) read their command lines with it
+ *   - So NEVER give it an alias, an `enum` or a parameter property, nor a value import plain `node` can't load:
+ *     only files that import nothing (by their extension, `spell/util/string.ts`), and the kit's `spell/cli/cli.types.ts`,
+ *     which imports types only.
  */
+import { camelCase } from "spell/util/string.ts"
+import { CliError, EXIT, type ToolSpec as CliToolSpec } from "spell/cli/cli.types.ts"
+import type { RunningSession } from "spell-epic/config/ClaudeHome.ts"
+import type { PendingQuestion } from "spell-epic/config/Transcript.ts"
 
 ////////////////
 // ## Exit codes and errors
 ////////////////
 
-/** What every verb exits with. */
-export const EXIT = {
-  /** all went well */
-  OK: 0,
-  /** it failed, or found problems;  an unknown verb */
-  ERRORS: 1,
-  /** the command line itself was wrong, e.g. a missing name */
-  USAGE: 2
-} as const
-
 /**
- * A verb's own failure, its message all there is to say:  the program prints it (no stack) and exits `exitCode`.
- * - default `EXIT.USAGE`:  most are a command line that can't work (`find:  which name?`)
+ * What every verb exits with (`EXIT`), and a verb's own failure (`EpicCommandError`):  the kit's command base's
+ * (`spell/cli`), ONE table and ONE error class for every repo's commands.
+ * - `EpicCommandError` IS the kit's `CliError`, as spell-app's `CLI.CliError` is:  its message is all there is to say,
+ *   so the program prints it (no stack) and exits its `exitCode`, by default `EXIT.USAGE`
+ *   (most are a command line that can't work:  `find:  which name?`)
  * - anything else thrown is a bug, and prints its stack
  */
-export class EpicCommandError extends Error {
-  /** what the program exits with */
-  exitCode: number
-  constructor(message: string, exitCode: number = EXIT.USAGE) {
-    super(message)
-    this.exitCode = exitCode
-  }
-}
-EpicCommandError.prototype.name = "EpicCommandError"
+export { EXIT, CliError as EpicCommandError }
+
+////////////////
+// ## A verb's command line
+////////////////
 
 /**
  * A verb's arguments, read from the command line as typed (`parseVerbArgs()`):
  * `--key value` flags, `--switch` switches, the rest in order.
+ * - `flags`:  each flag's value, the LAST one given;  a switch, or a flag with no value after it, is `true`
+ * - `lists`:  each flag's values in order, for a flag given more than once (`--title a --title b`)
  * - flag names camelCased:  `--dry-run` is `dryRun`
  */
-export type VerbArgs = { positional: string[]; flags: Record<string, string | true> }
+export type VerbArgs = { positional: string[]; flags: Record<string, string | true>; lists: Record<string, string[]> }
+
+/** A flag, as `parseVerbArgs()` takes one:  `--` and its name. */
+const FLAG = /^--([\w-]+)$/
+
+/** A bare number of seconds, `duration()`'s:  `3300`, `1.5`. */
+const SECONDS = /^\d+(?:\.\d+)?$/
+
+/** One part of a time with its unit, `duration()`'s:  `8h`, `30m`, `90s`. */
+const TIME_PART = /(\d+(?:\.\d+)?)\s*(h|m|s)/g
+
+/** Each of `duration()`'s units, in ms. */
+const UNIT_MS = { h: 3_600_000, m: 60_000, s: 1000 }
 
 /**
- * `argv` as `VerbArgs`.
+ * `argv` as `VerbArgs`:  the ONE reader of every `epic` verb's and docs tool's command line (`pages.js`, the window
+ * script, the epic tool's `PlanDocCommands` read theirs with it too).
+ * - a flag is `--name`, alone:  a letter, digit, `_` or `-` after the dashes;  anything else (`-x`, `--x=y`, `--`)
+ *   is a positional
  * - `switches`:  the flags that take no value, camelCased:  a word after one is a positional (`--all seo`)
  * - any other flag takes the next word as its value, unless that starts with `--`
+ * - which flags a verb takes, and its help, are `epic`'s (`EpicProgram`):  this reads them, whatever they are
  */
-export function parseVerbArgs(argv: string[], switches: readonly string[] = []): VerbArgs {
+export function parseVerbArgs(argv: readonly string[], switches: readonly string[] = []): VerbArgs {
   const positional: string[] = []
   const flags: Record<string, string | true> = {}
+  const lists: Record<string, string[]> = {}
   for (let i = 0; i < argv.length; i++) {
-    const match = /^--([\w-]+)$/.exec(argv[i]!)
-    if (!match) {
+    const name = flagName(argv[i]!)
+    if (name === undefined) {
       positional.push(argv[i]!)
       continue
     }
-    const name = match[1]!.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase())
     const next = argv[i + 1]
-    if (!switches.includes(name) && next !== undefined && !next.startsWith("--")) flags[name] = argv[++i]!
-    else flags[name] = true
+    if (switches.includes(name) || next === undefined || next.startsWith("--")) {
+      flags[name] = true
+      continue
+    }
+    flags[name] = next
+    ;(lists[name] ??= []).push(next)
+    i++
   }
-  return { positional, flags }
+  return { positional, flags, lists }
+}
+
+/** The text flag `value` was given (`--epic seo`:  `"seo"`);  `undefined` for none, or a bare `--epic`. */
+export function stringFlag(value: string | true | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined
+}
+
+/** `word`'s name as a flag, camelCased as `parseVerbArgs()` keys it (`--dry-run`:  `dryRun`);  `undefined`:  no flag. */
+export function flagName(word: string): string | undefined {
+  const match = FLAG.exec(word)
+  return match ? camelCase(match[1]!) : undefined
+}
+
+/**
+ * How long a time flag says, in ms:  `8h`, `30m`, `90s`, `1h30m`, or a bare number, of SECONDS (`3300`).
+ * - the ONE reader of every wait's times:  `--timeout` (`ask`, `choices`, `comments` and `inbox wait`), `--every` and
+ *   `--max` (`park wait`, `agents wait`);  each takes a unit, or seconds, as it took one or the other before
+ * - throws `EpicCommandError` (a usage error) for anything else:  a time it can't read never waits for ever
+ *   (`--max 2h` was `NaN` seconds, a deadline that never came)
+ */
+export function duration(text: string): number {
+  const value = String(text).trim()
+  if (SECONDS.test(value)) return Number(value) * 1000
+  const parts = [...value.matchAll(TIME_PART)]
+  if (!parts.length) throw new CliError(`a duration is like 8h, 30m, 1h30m, or seconds (3300):  '${text}'`)
+  return parts.reduce((total, [, amount, unit]) => total + Number(amount) * UNIT_MS[unit as keyof typeof UNIT_MS], 0)
 }
 
 ////////////////
 // ## Sessions
 ////////////////
 
-/**
- * A live Claude Code session, from its registry record `~/.claude/sessions/<pid>.json`.
- * - only the fields we read;  the record has more
- */
-export type RunningSession = {
-  /** the `claude` process */
-  pid: number
-  /** session id, the transcript's file name */
-  sessionId: string
-  /** `busy`, `idle`, `waiting` ... */
-  status?: string
-  /** `cli`, `claude-vscode`, `claude-desktop`, `sdk-ts` ... */
-  entrypoint?: string
-  /** folder it started in */
-  cwd?: string
-  /** title the registry knows, when any;  its address (`SendMessage`'s `to`) */
-  name?: string
-  /** `hook`, `derived` ...:  `derived` when Claude Code made `name` up (`SessionFolders.recordTitle()`) */
-  nameSource?: string
-  /** what a `waiting` session waits for, e.g. `permission` */
-  waitingFor?: string
-  /** when the record last changed, in ms */
-  updatedAt?: number
-}
+/** A live Claude Code session, its registry record (`ClaudeHome.liveSessions()`):  `ClaudeHome`'s, named here too. */
+export type { RunningSession }
 
 /**
  * One saved session, summarized from its transcript `~/.claude/projects/<slug>/<id>.jsonl` -- `Sessions.summarize()`.
@@ -147,11 +171,8 @@ export type TranscriptDigest = {
   pending: PendingQuestion[] | null
 }
 
-/** One question of a waiting `AskUserQuestion`. */
-export type PendingQuestion = {
-  question?: string
-  options?: { label?: string; description?: string }[]
-}
+/** One question of a waiting `AskUserQuestion` (`Transcript.pendingQuestion()`):  `Transcript`'s, named here too. */
+export type { PendingQuestion }
 
 /**
  * A running session, as `/worktrees` sees it -- `Sessions.live()`.
@@ -636,7 +657,8 @@ export type PastedImage = {
 ////////////////
 
 /**
- * How the `epic` command runs one of its tools, a script in a child `node` -- `EpicTools.run()`.
+ * How the `epic` command runs one of its tools, a script in a child `node` -- `EpicTools.run()`:  the kit's
+ * `ToolSpec` (`spell/cli`, its `runTool()`'s), plus whose copy of the script runs.
  * - `tool`:  the script, relative to a checkout's root
  * - `tsx`:  the `tsconfig.json` it runs under `tsx` with, relative to a checkout's root
  *   - none:  plain `node`
@@ -651,7 +673,7 @@ export type PastedImage = {
  *   there (`firstPackageDir()`):  `tool` and `tsx` are relative to its folder, and `code` is moot
  *   (the page server, in the kit:  `spell`, or `spell-kit` in a checkout from before epic `repo-split` P17)
  */
-export type ToolSpec = { tool: string; tsx?: string; cwd?: string; code?: "own" | "caller"; package?: string[] }
+export type ToolSpec = Prettify<CliToolSpec & { code?: "own" | "caller"; package?: string[] }>
 
 ////////////////
 // ## Lines of code

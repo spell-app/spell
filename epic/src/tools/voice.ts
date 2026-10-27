@@ -23,7 +23,6 @@
  */
 import { readFileSync, writeFileSync } from "node:fs"
 import { basename, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { localDate } from "spell/util/time.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
@@ -163,6 +162,6 @@ function usage(message: string): number {
 }
 
 // run as a script (`epic pages voice`), not when a test imports it;  last, so every `const` above is set
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   process.exitCode = run(process.argv.slice(2))
 }

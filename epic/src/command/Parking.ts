@@ -1,12 +1,15 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
+import { CLI } from "spell/cli"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
   EXIT,
   EpicCommandError,
+  duration,
   parseVerbArgs,
+  stringFlag,
   type ParkedNote,
   type WaitCandidate,
   type WaitResult
@@ -21,7 +24,8 @@ import { Worktrees } from "./Worktrees"
  *   - `list`:  JSON:  every parked worktree's note (`PARKED-<name>.md`):  name, file, state, where it stopped
  *   - `candidates`:  JSON:  what `/wait-for ?` offers:  unfinished worktrees and epics, running sessions
  *   - `wait <name> [--every 60] [--max 7140]`:  poll until `<name>` finishes, then print its status JSON.
- *     Exits `0` finished, `2` `--max` seconds passed (run it again), `3` nothing named `<name>`.
+ *     Exits `0` finished, `2` `--max` passed (run it again), `3` nothing named `<name>`.
+ *     Both in seconds, or a time with its unit (`--max 2h`:  `duration()`).
  * - Where a name stands, without waiting:  `epic worktree status <name>`.
  ****************/
 export class Parking {
@@ -53,15 +57,15 @@ export class Parking {
     const [verb, name] = positional
     switch (verb) {
       case "list":
-        out(JSON.stringify(this.notes(), null, 2))
+        CLI.out(JSON.stringify(this.notes(), null, 2))
         return EXIT.OK
       case "candidates":
-        out(JSON.stringify(this.candidates(), null, 2))
+        CLI.out(JSON.stringify(this.candidates(), null, 2))
         return EXIT.OK
       case "wait": {
         if (!name) throw new EpicCommandError("wait:  which name?")
-        const result = await this.waitFor(name, Number(flags.every ?? 60), Number(flags.max ?? 7140))
-        out(result.status ? JSON.stringify(result.status, null, 2) : (result.message ?? ""))
+        const result = await this.waitFor(name, secondsOf(flags.every, "60"), secondsOf(flags.max, "7140"))
+        CLI.out(result.status ? JSON.stringify(result.status, null, 2) : (result.message ?? ""))
         return result.code
       }
       default:
@@ -157,9 +161,12 @@ export class Parking {
   }
 }
 
-/** Write `text` to stdout, on its own line. */
-function out(text: string): void {
-  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
+/**
+ * Time flag `flag` in seconds:  seconds, or a time with its unit (`duration()`);  `fallback` when it isn't given.
+ * - `--max 2h` was `NaN` seconds before epic `coherence` P20:  a deadline that never came
+ */
+function secondsOf(flag: string | true | undefined, fallback: string): number {
+  return duration(stringFlag(flag) ?? fallback) / 1000
 }
 
 /**

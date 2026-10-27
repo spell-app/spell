@@ -1,4 +1,9 @@
-import { EpicCommandError } from "./command.types"
+import { kebabCase } from "spell/util/string"
+// By file:  the definitions' barrel loads every vocabulary, and `epic` starts lean
+import { ItemLetters, isItemId } from "spell-epic/definitions/definitions.types"
+import { PhaseIds } from "spell-epic/phases"
+
+import { EpicCommandError, parseVerbArgs } from "./command.types"
 
 /**
  * How an `epic <verb> ...` command line becomes the `epic` tool's (`<verb> <name> ...`, its own order:  `PlanDocCommands`):
@@ -19,7 +24,8 @@ import { EpicCommandError } from "./command.types"
  *   - Why:  run silently, it taught agents the old shape (epic `epic-workflow` P19).
  * - Pure:  no files, no output.
  * - Throws `EpicCommandError` (a usage error, exit 2) for a target the verb can't take.
- * - Lean:  imports only the folder's types, so `epic` starts fast.
+ * - Lean:  imports only the folder's types, util's string helpers, the items' letters (`ItemLetters`) and `PhaseIds`,
+ *   so `epic` starts fast.
  */
 export function planDocArgs(verb: string, args: string[]): string[][] {
   if (verb === "inbox") return [inboxArgs(args)]
@@ -149,7 +155,7 @@ export function parseTarget(text: string): EpicTarget {
 export function phaseOf(ref: string): string | undefined {
   const match = PHASE_REF.exec(ref)
   if (match) return match[1]
-  return STABLE_PHASE_ID.test(ref) ? ref : undefined
+  return PhaseIds.isStable(ref) ? ref : undefined
 }
 
 /**
@@ -159,7 +165,7 @@ export function phaseOf(ref: string): string | undefined {
 function needPhase(verb: string, text: string, ref: string): string {
   const phase = phaseOf(ref)
   if (phase !== undefined) return phase
-  if (ITEM_REF.test(ref)) throw new EpicCommandError(`${verb}:  ${text}?  a phase, e.g. ${text.split("#")[0]}#P3`)
+  if (isItemId(ref)) throw new EpicCommandError(`${verb}:  ${text}?  a phase, e.g. ${text.split("#")[0]}#P3`)
   return ref
 }
 
@@ -215,23 +221,22 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
   const phase = ref === undefined ? undefined : phaseOf(ref)
   const fields = ref === undefined ? PAGE_FIELDS : phase === undefined ? ITEM_FIELDS : PHASE_FIELDS
   const what = ref === undefined ? "the page" : phase === undefined ? `item ${ref}` : `phase ${phaseLabel(phase)}`
-  if (!keys.length)
-    throw new EpicCommandError(`update ${args[at]}:  which fields?  ${what} has --${fields.join(", --")}`)
+  const typed = (names: string[]) => names.map((name) => `--${kebabCase(name)}`).join(", ")
+  if (!keys.length) throw new EpicCommandError(`update ${args[at]}:  which fields?  ${what} has ${typed(fields)}`)
   const unknown = keys.filter((key) => !fields.includes(key))
-  if (unknown.length)
-    throw new EpicCommandError(`update:  ${what} has no --${unknown.join(", --")} (it has --${fields.join(", --")})`)
+  if (unknown.length) throw new EpicCommandError(`update:  ${what} has no ${typed(unknown)} (it has ${typed(fields)})`)
   const runs: string[][] = []
   const value = (key: string) => {
     const it = flags[key]
-    if (it === true) throw new EpicCommandError(`update:  --${key} needs a value`)
+    if (it === true) throw new EpicCommandError(`update:  --${kebabCase(key)} needs a value`)
     return it!
   }
   const rename = (id: string) => {
     if ("title" in flags) runs.push(["rename", epic, id, value("title"), ...(flags.html ? ["--html"] : [])])
   }
   if (ref === undefined) {
-    if ("standing" in flags || "no-standing" in flags) {
-      const on = flags["no-standing"] ? "off" : flags.standing === true ? "on" : value("standing")
+    if ("standing" in flags || "noStanding" in flags) {
+      const on = flags.noStanding ? "off" : flags.standing === true ? "on" : value("standing")
       runs.push(["standing", epic, on])
     }
   } else if (phase !== undefined) {
@@ -269,17 +274,16 @@ function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: 
   return ["status", epic, ref, ...rest]
 }
 
-/** `--key value` flags and `--key` switches, as the tool reads them:  a value is the next word unless it's a flag. */
+/**
+ * `update`'s fields, as the tool reads them (`parseVerbArgs()`:  a value is the next word unless it's a flag;  names
+ * camelCased);  a word that's no field's value is refused.
+ */
 function flagsOf(args: string[]): Record<string, string | true> {
-  const flags: Record<string, string | true> = {}
-  for (let i = 0; i < args.length; i++) {
-    const match = /^--([\w-]+)$/.exec(args[i]!)
-    if (!match)
-      throw new EpicCommandError(
-        `update:  "${args[i]}"?  --field value pairs after the target, or a card:  underway | done | noted`
-      )
-    flags[match[1]!] = i + 1 < args.length && !args[i + 1]!.startsWith("--") ? args[++i]! : true
-  }
+  const { positional, flags } = parseVerbArgs(args)
+  if (positional.length)
+    throw new EpicCommandError(
+      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | noted`
+    )
   return flags
 }
 
@@ -430,32 +434,20 @@ const PHASE_EXAMPLES: Record<string, string> = {
 /** A phase ref by number:  `P3`, `p3`, `3`, a decimal phase's `P11.1`. */
 const PHASE_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
 
-/** An item's id (or a comment's, an Overview section's):  `J3`, `C3` (`cm3`), `o2`. */
-const ITEM_REF = /^[A-Za-z]{1,2}\d+$/
-
-/**
- * A phase's stable id (`spell-epic` `PhaseIds`, copied:  `epic` loads no `spell-epic` barrel up front):  `p-epic-migrate`.
- */
-const STABLE_PHASE_ID = /^p-[a-z0-9]+(?:-[a-z0-9]+)*$/
-
 /** One part of a bedtime run's phases:  `P3`, `P3-P6`, `3-6`. */
 const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/
 
 /**
- * The item kinds' letters, for `add seo#J`:  each kind's id prefix (the `epic` tool's `KINDS`),
- * plus `d` for a decision (whose ids are questions')
+ * The item kinds' letters, for `add seo#J`:  each section's letter (`ItemLetters`, the ONE table), to its kind's word,
+ * the section's name less its plural `s` (`judgements`:  `judgement`);  plus `d` for a decision (whose ids are
+ * questions')
  * - `t`:  a todo, work still to do;  `--limit` makes it a limit to know about (the tool's `limit`), as does the word
  *   `limit` (or `caveat`, its word before epic `epic-engine` P44)
  * - `m`:  a manual test (`t` before P44, `v` before P32)
- * - a private copy:  importing `spell-epic/tool/planDoc.types` here would load the tool's types into every call
  */
 const KIND_LETTERS: Record<string, string> = {
-  q: "question",
-  t: "todo",
-  i: "issue",
-  m: "test",
-  d: "decision",
-  j: "judgement"
+  ...Object.fromEntries(Object.entries(ItemLetters).map(([section, letter]) => [letter, section.slice(0, -1)])),
+  d: "decision"
 }
 
 /** The item kinds' words, which `add seo#judgement` takes too. */
@@ -494,5 +486,5 @@ const PHASE_FIELDS = [...PHASE_BODY, "estimate", "title", "html"]
 /** What `update` sets on an item. */
 const ITEM_FIELDS = ["title", "html", "calm", "loud"]
 
-/** What `update` sets on the page. */
-const PAGE_FIELDS = ["standing", "no-standing"]
+/** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
+const PAGE_FIELDS = ["standing", "noStanding"]

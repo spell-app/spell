@@ -27,12 +27,13 @@ import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
 import { editNotes, notesIn } from "./notesOnDisk"
+import { parseVerbArgs } from "spell-epic/command/command.types"
 import { SeeAlso } from "spell-epic/tool/SeeAlso"
 
 import { NotesError } from "./PageNotes.js"
-import { AREAS, CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"
+import { AREAS, CONTENT, ROOT, pageAndId, pageFile, pagePath } from "./pages.js"
 
-const { positional, flags } = parseArgs(process.argv.slice(2))
+const { positional, flags } = parseVerbArgs(process.argv.slice(2))
 process.exitCode = await run(positional, flags)
 
 /** Run verb `positional[0]` with its arguments;  returns the exit code. */

@@ -5,6 +5,7 @@ import {
   OVERVIEW_ID,
   OVERVIEW_PART_ID,
   SectionIds,
+  isItemId,
   type EpicData,
   type EpicTag,
   type PageSectionKind
@@ -341,7 +342,7 @@ export class PlanDoc extends PlanReader {
    */
   renameEntry(target: string, title: string, { html = false }: { html?: boolean } = {}): RenameResult {
     const key = String(target).trim().toLowerCase()
-    const element = ITEM_REF.test(key) && !OLD_PHASE_REF.test(key) ? this.item(key) : this.phase(this.phasePlace(key))
+    const element = isItemId(key) && !OLD_PHASE_REF.test(key) ? this.item(key) : this.phase(this.phasePlace(key))
     const label = element.localName === "epic-phase" ? PhaseIds.labelOf(element) : element.id.toUpperCase()
     const was = PlanItem.titleOf(element)
     const heading = html ? this.titleFromHTML(title) : { title: PlanMarkup.squeeze(title) }
@@ -2555,9 +2556,6 @@ const SUMMARY_SLOT = "summary"
 
 /** The slot of Owen's kept notes on the summary (`<epic-reply slot="notes">`, `PlanDoc.keepNote()`). */
 const NOTES_SLOT = "notes"
-
-/** An item's id, or what may be one:  `j3`, a comment's `c3` / `cm3`, `o2` (but an old phase id, `p3`:  `OLD_PHASE_REF`). */
-const ITEM_REF = /^[a-z]{1,2}\d+$/
 
 /** A phase by its number:  `p3`, `3`. */
 const OLD_PHASE_REF = /^p?\d+$/

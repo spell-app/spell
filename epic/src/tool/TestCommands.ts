@@ -1,6 +1,8 @@
 import { copyFileSync, existsSync, mkdirSync } from "node:fs"
 import { dirname, extname, join, resolve } from "node:path"
 
+import { stringFlag } from "spell-epic/command/command.types"
+
 import { kindNamed, PlanDocError } from "./planDoc.types"
 
 import { EpicTests, type EpicTestCount, type OpenTest, type TestFieldValues } from "./EpicTests"
@@ -142,7 +144,7 @@ export class TestCommands {
     if (flags.limit && kind === "todo") kind = "limit"
     else if (flags.limit && kind !== "limit") throw new PlanDocError(`--limit is a todo's (T), not a ${kind}'s`)
     const { html, example } = this.fieldsOf(plan.nextId(kind), flags)
-    const details = `${html}${typeof flags.details === "string" ? flags.details : ""}`
+    const details = `${html}${stringFlag(flags.details) ?? ""}`
     const id = plan.addItem(kind, title, { ...flags, details })
     return { id, example }
   }

@@ -1,3 +1,4 @@
+import { isItemId } from "spell-epic/definitions"
 import { Markup } from "spell-epic/markup"
 import { PhaseIds } from "spell-epic/phases"
 
@@ -89,7 +90,7 @@ export class PhaseTakes {
       const id = (
         link.localName === "a" ? link.getAttribute("href")!.slice(1) : link.getAttribute("item")!
       ).toLowerCase()
-      if (ITEM_ID.test(id)) ids.add(id)
+      if (isItemId(id)) ids.add(id)
     }
     return ids
   }
@@ -97,9 +98,6 @@ export class PhaseTakes {
 
 /** The statuses that mean a phase's work closed it:  never `canceled` (made moot) or `open`. */
 const CLOSED_BY_WORK = new Set(["done", "decided"])
-
-/** An item id, as a link names it:  `i1`, `q13`, `d7`. */
-const ITEM_ID = /^[a-z]{1,2}\d+$/
 
 /** The Manual tests section:  a test's run says where it passed. */
 const TESTS_SECTION = 'epic-section[kind="tests"]'

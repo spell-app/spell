@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
+import { stringFlag } from "spell-epic/command/command.types"
+
 import { PlanDocError } from "./planDoc.types"
 
 import { ContentRelink, Migrations, PAGE_KINDS, RootLinks, type PageKind } from "./migrations"
@@ -60,11 +62,11 @@ export class MigrateCommands {
   async run(positional: string[], flags: Flags): Promise<number> {
     const { kind, names } = MigrateCommands.parse(positional, flags)
     if (flags.list) return this.list(kind)
-    const step = typeof flags.step === "string" ? flags.step : undefined
+    const step = stringFlag(flags.step)
     if (flags.step === true) throw new PlanDocError("--step needs a step's name (migrate --list lists them)")
     const epicStep = step === undefined || Migrations.named(step) !== undefined
     const dryRun = Boolean(flags.dryRun)
-    const file = typeof flags.file === "string" ? flags.file : undefined
+    const file = stringFlag(flags.file)
     const epicFile = file !== undefined && PLAN_DOC.test(file)
     let code = 0
     if ((kind === undefined || kind === "epic") && epicStep && (file === undefined || epicFile)) {
@@ -206,7 +208,9 @@ export class MigrateCommands {
    */
   private rootContent(names: string[], { dryRun }: { dryRun: boolean }): void {
     const { files } = this
-    const folders = names.length ? names.map((name) => relative(files.content, dirname(files.findDoc(name)))) : undefined
+    const folders = names.length
+      ? names.map((name) => relative(files.content, dirname(files.findDoc(name))))
+      : undefined
     const census = RootLinks.run(files.content, files.linker, {
       dryRun,
       ...(folders && { folders }),

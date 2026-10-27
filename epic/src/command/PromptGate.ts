@@ -6,7 +6,8 @@ import { join } from "node:path"
 import { LOOKS, worktreeOf } from "spell-epic/window.mjs"
 import { TITLE_ICONS } from "./command.types.ts"
 import { EpicRepo, type EpicHome } from "spell-epic/config/EpicRepo.ts"
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
+import { Transcript } from "spell-epic/config/Transcript.ts"
 
 /****************
  * ### `PromptGate`
@@ -86,7 +87,7 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  * - Natural-language triggers ("isolate as foo") never reach here:  each skill's step 0 repeats these checks.
  *
  * Its position:  imports only node's own modules, the window script, this folder's types and the config folder's
- * plain-node classes (`EpicRepo`, `SessionFolders`), by relative path,
+ * plain-node classes (`EpicRepo`, `ClaudeHome`, `Transcript`), by relative path,
  * so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * All `static`:  no state, one answer per prompt.
  ****************/
@@ -193,12 +194,11 @@ export class PromptGate {
   /**
    * Drop session `id`'s queued title when it's a ✅ one:  the work it marked done is open again.
    * - Any other queued title stays.
-   * - The queue:  `~/.claude/session-titles/<id>`, `$SPELL_SESSION_TITLES_DIR` in tests
+   * - The queue:  `<home>/session-titles/<id>` (`ClaudeHome.titlesFolder()`)
    */
   static dropDoneTitle(id: string | undefined): void {
     if (!id) return
-    const dir = process.env.SPELL_SESSION_TITLES_DIR ?? join(homedir(), ".claude", "session-titles")
-    const file = join(dir, String(id).replace(/[^\w-]/g, ""))
+    const file = join(ClaudeHome.titlesFolder(), String(id).replace(/[^\w-]/g, ""))
     try {
       if (readFileSync(file, "utf8").trim().startsWith(TITLE_ICONS.done)) rmSync(file)
     } catch {
@@ -314,7 +314,7 @@ export type GateCommand = { skill: string; name: string; text: string; color: st
  * Title the session `title` (`hookSpecificOutput.sessionTitle`), unless it already is;  `null`:  nothing to do.
  * - "already is":  its `session_title` is `title`, and so is its transcript's LAST title line, when it has one
  *   - not when Claude Code's own title (`ai-title`) came after it:  the tab may show that (epic `epic-engine` r2;
- *     `SessionFolders.shownTitle()`)
+ *     `SessionFolders.shownTitle()`;  `Transcript.titles()`' `last`)
  * - `always`:  whatever it seems to be
  * - reopened:  a ✅ queued when its work merged (epic `windows-and-review` P6) and not yet applied must not land now
  */
@@ -325,7 +325,7 @@ function rename(input: GateInput, title: string, always = false): GateAnswer | n
 
   /** Transcript `path`'s last title line, either kind;  `session_title`'s when there's none to read. */
   function lastTitle(path: string | undefined): string | null | undefined {
-    const line = path && existsSync(path) ? SessionFolders.lastTitleLine(path) : null
+    const line = path && existsSync(path) ? new Transcript(path).titles().last : undefined
     return line ? line.title : input.session_title
   }
 }

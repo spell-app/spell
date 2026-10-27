@@ -1,10 +1,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
 import { localDate } from "spell/util/time"
+import { bareTitle } from "spell-epic/command/command.types"
+import { ClaudeHome } from "spell-epic/config/ClaudeHome"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { Transcript } from "spell-epic/config/Transcript"
+import { ItemLetters } from "spell-epic/definitions"
 
 /****************
  * ### `ReviewBackfill`
@@ -13,7 +15,8 @@ import { SessionFolders } from "spell-epic/config/SessionFolders"
  * - EVIDENCE:  in a session of the epic, Owen named the item's id in his own message,
  *   or answered a modal whose question or answer named it (Claude asked about it, he picked)
  * - a session of the epic:
- *   - titled `<name>` (`/rename`, the prompt hook, or Claude's own title)
+ *   - titled `<name>`, with or without its icon (`🚧 <name>`:  `bareTitle()`;  `/rename`, the prompt hook, or Claude's
+ *     own title)
  *   - or working in its worktree (`.claude/worktrees/<name>`)
  *   - or saved under that worktree's own project folder (older sessions)
  * - only items not reviewed yet (`PlanDoc.reviewState()`):  struck, decided and decision-linked ones already count
@@ -26,12 +29,12 @@ import { SessionFolders } from "spell-epic/config/SessionFolders"
  ****************/
 export class ReviewBackfill {
   /**
-   * where Claude Code keeps transcripts:  one folder per project, `<slug>/<session id>.jsonl`.
+   * where Claude Code keeps transcripts (`ClaudeHome.projects()`):  one folder per project, `<slug>/<session id>.jsonl`.
    * STATIC for the object's life;  a test that needs a fixture builds its own `ReviewBackfill`
    */
   readonly projects: string
 
-  constructor({ projects = PROJECTS }: { projects?: string } = {}) {
+  constructor({ projects = ClaudeHome.projects() }: { projects?: string } = {}) {
     this.projects = projects
   }
 
@@ -51,7 +54,7 @@ export class ReviewBackfill {
     if (!existsSync(this.projects)) return []
     const found: BackfillSession[] = []
     // each real folder once:  a linked worktree's folder (epic `epic-eject` Q4) IS main's, and would claim every session
-    for (const folder of SessionFolders.listed(this.projects)) {
+    for (const folder of ClaudeHome.projectFolders(this.projects)) {
       if (folder !== slug && !folder.startsWith(`${slug}-`)) continue
       // an older session made its worktree's own project folder:  every session in it is the epic's
       const worktreeFolder = folder === worktreeSlug
@@ -60,7 +63,7 @@ export class ReviewBackfill {
         const path = join(this.projects, folder, file)
         const { title, cwds } = scan(path)
         const inWorktree = cwds.some((cwd) => config.worktreeNameOf(cwd) === name)
-        if (worktreeFolder || title === name || inWorktree)
+        if (worktreeFolder || (title !== null && bareTitle(title) === name) || inWorktree)
           found.push({ id: basename(file, ".jsonl"), file: path, title })
       }
     }
@@ -91,9 +94,9 @@ export class ReviewBackfill {
     for (const session of sessions) {
       for (const line of readFileSync(session.file, "utf8").split("\n")) {
         if (!line.includes('"type":"user"')) continue
-        const entry = parse(line)
+        const entry = Transcript.parseLine(line) as TranscriptEntry
         // Claude Code's own entries:  meta, sub-agents, a compacted session's summary
-        if (!entry || entry.type !== "user" || entry.isMeta || entry.isSidechain || entry.isCompactSummary) continue
+        if (entry.type !== "user" || entry.isMeta || entry.isSidechain || entry.isCompactSummary) continue
         for (const { kind, text } of owenTexts(entry)) {
           for (const id of idsIn(text)) {
             if (!wanted.has(id)) continue
@@ -132,11 +135,12 @@ type TranscriptEntry = {
   toolUseResult?: { questions?: { header?: string; question?: string }[]; answers?: Record<string, unknown> }
 }
 
-/** Where Claude Code keeps transcripts:  one folder per project, `<slug>/<session id>.jsonl`. */
-const PROJECTS = join(homedir(), ".claude", "projects")
-
-/** Item ids in text:  `I7`, `q12`, `T3`, never `P2` (phases) or `D4`-in-a-word. */
-const ITEM_ID = /\b([qcitvd])(\d+)\b/gi
+/**
+ * Item ids in text:  `I7`, `q12`, `J3`, `M2`, never `P2` (phases) or `D4`-in-a-word.
+ * - each kind's letter (`ItemLetters`, the ONE table), and an old decision's `d`:  `[qcitvd]` before epic `coherence`
+ *   P20 never had `j`, and lost `m` (`t`'s tests moved to `m` in epic `epic-engine` P44)
+ */
+const MENTIONED_ID = new RegExp(`\\b([${Object.values(ItemLetters).join("")}d])(\\d+)\\b`, "gi")
 
 /**
  * A user entry whose text is Claude Code's, not Owen's:
@@ -160,9 +164,9 @@ function scan(path: string): { title: string | null; cwds: string[] } {
   const cwds = new Set<string>()
   for (const line of readFileSync(path, "utf8").split("\n")) {
     if (line.includes('"custom-title"') || line.includes('"ai-title"')) {
-      const entry = parse(line)
-      custom = entry?.customTitle ?? custom
-      ai = entry?.aiTitle ?? ai
+      const entry = Transcript.parseLine(line) as TranscriptEntry
+      custom = entry.customTitle ?? custom
+      ai = entry.aiTitle ?? ai
     }
     const cwd = /"cwd":"([^"]*)"/.exec(line)
     if (cwd) cwds.add(cwd[1])
@@ -177,12 +181,9 @@ function scan(path: string): { title: string | null; cwds: string[] } {
  *   he read the question and picked, so an id in either counts
  */
 function owenTexts(entry: TranscriptEntry): { kind: Evidence["kind"]; text: string }[] {
-  const content = entry.message?.content
-  const texts: string[] = []
-  if (typeof content === "string") texts.push(content)
-  else if (Array.isArray(content)) {
-    for (const part of content) if (part?.type === "text" && typeof part.text === "string") texts.push(part.text)
-  }
+  const texts = Transcript.blocksOf(entry.message)
+    .filter((block) => block.type === "text" && typeof block.text === "string")
+    .map((block) => block.text!)
   const said: { kind: Evidence["kind"]; text: string }[] = texts
     .filter((text) => !NOT_OWEN.test(text.trim()))
     .map((text) => ({ kind: "message", text: text.replace(/<\/?command-[a-z]+>/g, " ") }))
@@ -199,7 +200,7 @@ function owenTexts(entry: TranscriptEntry): { kind: Evidence["kind"]; text: stri
 
 /** Item ids `text` names, upper case, once each. */
 function idsIn(text: string): string[] {
-  return [...new Set(Array.from(text.matchAll(ITEM_ID), (match) => `${match[1].toUpperCase()}${match[2]}`))]
+  return [...new Set(Array.from(text.matchAll(MENTIONED_ID), (match) => `${match[1].toUpperCase()}${match[2]}`))]
 }
 
 /** `text` around `id`'s first mention, one line, cut to `QUOTE_SIDE` characters each side. */
@@ -219,13 +220,4 @@ function dayOf(timestamp: string | undefined): string | null {
   const date = timestamp ? new Date(timestamp) : null
   if (!date || Number.isNaN(date.getTime())) return null
   return localDate(date)
-}
-
-/** A JSON line, or `null`. */
-function parse(line: string): TranscriptEntry | null {
-  try {
-    return JSON.parse(line)
-  } catch {
-    return null
-  }
 }

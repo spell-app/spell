@@ -295,11 +295,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`)
       - and the link that makes a worktree's main's (`linkSessionFolders`)
       - plain `node` loads it too (the worktree hook)
+    - `ClaudeHome` (epic `coherence` P20):  Claude Code's own folder, the ONE reader of where it is and what's in it:
+      `$CLAUDE_CONFIG_DIR` (Claude Code's own variable, which a test sets too), else `~/.claude`
+      - its running sessions (`liveSessions()`, the process check handed in), every transcript (`transcripts()`),
+        one session's (`transcriptOf()`), the titles' queue (`titlesFolder()`)
+      - `Sessions`, `SessionFolders`, `RunningEpics`, the window script, `ReviewBackfill`, the prompt gate and the
+        hooks all ask it;  plain `node` loads it
+    - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
+      titles, the end first (`titles()`), its end (`tail()`), the question waiting (`pendingQuestion()`);  plain
+      `node` loads it (the handoff hook)
   - `cli/` -- the `epic` COMMAND LINE (epic `repo-split` J114:  every repo's command-line tools in its `cli/`).
     - `EpicProgram`:  the commander tree, every verb on it under its heading, `epic --help`
     - `epicGroups.ts`:  each group's verbs, for their help (`epic ask create --help`)
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
-      - NEVER imports the kit's `spell` program (`spell/cli`), and loads no spell
+      - its base is the kit's `spell/cli` (`runCommand()`, `rawArgsAfter()`, `EXIT`, `CliError`;  epic `coherence` P20),
+        NEVER the kit's program (`spell/cli/main`), and it loads no spell
     - Owen's names (repo-split P13):
       - `create`, `lint`
       - `inbox watch | ignore | wait ... <epic>` (the inbox's verb first)
@@ -403,7 +413,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the caller's checkout:  `EpicCheckout.nearest()`
       - the tools get it as `EPIC_CHECKOUT`, which [pages.js](tools/pages.js) and the window script take as their root
     - `epicArgs.ts`:  `epic <verb> <epic>#<id>` turned into the `epic` tool's own order (`planDocArgs()`)
-    - this folder NEVER imports the kit's `spell` program, and loads no spell
+    - this folder's base is the kit's `spell/cli` (`CLI.out()`, `runChild()`, `toolArgs()`;  `EXIT` and
+      `EpicCommandError`, its `CliError`), NEVER the kit's program (`spell/cli/main`), and it loads no spell
     - node only, NOT in the `spell-epic` barrel:  imported by path, `spell-epic/command/Worktrees` ...
     - its tests:  `tests/command/`
   - `data/` -- `DataFile`:  the tooling's DATA FILES in the shared folders, as JSON5 (epic `epic-workflow` P21).
@@ -2397,7 +2408,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - `findPages()`
   - `pageFile()`:  a page argument to its file
   - `fromTemplate()`:  a template as a new page holds it (its links root paths:  no rebasing by depth since P46)
-  - `parseArgs()`:  a tool's command line, `--key value` flags and positionals
+  - a tool's command line:  `parseVerbArgs()`, every verb's and tool's one reader (`spell-epic/command/command.types.ts`,
+    which plain `node` loads;  epic `coherence` P20)
   - `tidy()` (link targets + oxfmt), `serialize()`
   - `openInChrome()`, `openInVSCode()`
     - epic pages:  the doc preview, through the spell extension's `DocPreview`

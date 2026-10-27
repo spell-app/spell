@@ -47,10 +47,12 @@ for (const [root, owner] of [
 mkdirSync(join(DATA, ".git"))
 writeFileSync(join(DATA, "package.json"), JSON.stringify({ name: "data", pageServer: {} }))
 mkdirSync(join(SERVER, "page"), { recursive: true })
+// an ES module package, as the real kit is:  its `.ts` run under the kit's `tsx` loader (`CLI.toolArgs()`), ESM's only
 writeFileSync(
   join(KIT, "package.json"),
   JSON.stringify({
     name: "spell",
+    type: "module",
     exports: { "./server": "./src/server/index.ts", "./package.json": "./package.json" }
   })
 )
@@ -120,16 +122,5 @@ describe("EpicTools.hasPageServer()", () => {
     expect(EpicTools.hasPageServer(bare)).toBe(false)
     writeFileSync(join(bare, "package.json"), JSON.stringify({ name: "bare", pageServer: {} }))
     expect(EpicTools.hasPageServer(bare)).toBe(false)
-  })
-})
-
-describe("EpicTools.toolArgs()", () => {
-  test("plain node:  just the script;  tsx:  this checkout's loader first", () => {
-    expect(EpicTools.toolArgs(EpicTools.TOOLS.window, "/wt")).toEqual(["/wt/src/window.mjs"])
-    expect(EpicTools.toolArgs(EpicTools.TOOLS.notes, "/wt")).toEqual([
-      "--import",
-      expect.stringMatching(/\/tsx\/dist\/loader\.mjs$/),
-      "/wt/src/tools/notes.ts"
-    ])
   })
 })

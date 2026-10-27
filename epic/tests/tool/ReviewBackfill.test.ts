@@ -33,10 +33,11 @@ function projects(sessions: Record<string, Record<string, string[]>>) {
 describe("ReviewBackfill", () => {
   const slug = ReviewBackfill.projectSlug(ROOT)
 
-  test("finds an epic's sessions:  by title, by its worktree, by its worktree's own project folder", () => {
+  test("finds an epic's sessions:  by title (its icon or not), by its worktree, by its worktree's own project folder", () => {
     const dir = projects({
       [slug]: {
         titled: [JSON.stringify({ type: "custom-title", customTitle: "seo" }), user("hi")],
+        icon: [JSON.stringify({ type: "custom-title", customTitle: "🚧 seo" }), user("hi")],
         moved: [user("go", { cwd: `${ROOT}/.claude/worktrees/seo` })],
         other: [JSON.stringify({ type: "custom-title", customTitle: "seo-two" }), user("hi")]
       },
@@ -44,9 +45,10 @@ describe("ReviewBackfill", () => {
       "-somewhere-else": { stray: [JSON.stringify({ type: "custom-title", customTitle: "seo" })] }
     })
     const ids = new ReviewBackfill({ projects: dir }).sessionsOf("seo", ROOT).map((session) => session.id)
-    expect(ids.sort()).toEqual(["moved", "old", "titled"])
+    expect(ids.sort()).toEqual(["icon", "moved", "old", "titled"])
   })
 
+  // every kind's letter (`ItemLetters`):  the judgement calls (J) and manual tests (M) too, which `[qcitvd]` missed
   test("counts Owen's messages and modal answers;  never skill bodies, agent notices or summaries", () => {
     const dir = projects({
       [slug]: {
@@ -55,12 +57,12 @@ describe("ReviewBackfill", () => {
           user("<command-name>/epic</command-name><command-args>fix I7 first</command-args>"),
           user([{ type: "text", text: "Base directory for this skill: ... I8 ..." }]),
           user("<task-notification>agent T1 done</task-notification>"),
-          user("summary mentions C2", { isCompactSummary: true }),
-          user("meta C3", { isMeta: true }),
+          user("summary mentions J2", { isCompactSummary: true }),
+          user("meta J3", { isMeta: true }),
           user([{ type: "tool_result", content: "answered" }], {
             toolUseResult: {
-              questions: [{ header: "seo", question: "Fix the caveat C4 now?" }],
-              answers: { "Fix the caveat C4 now?": "Later" }
+              questions: [{ header: "seo", question: "Test M4 now?" }],
+              answers: { "Test M4 now?": "Later" }
             }
           })
         ]
@@ -70,17 +72,17 @@ describe("ReviewBackfill", () => {
       "I7",
       "I8",
       "T1",
-      "C2",
-      "C3",
-      "C4"
+      "J2",
+      "J3",
+      "M4"
     ])
-    expect(Object.keys(evidence).sort()).toEqual(["C4", "I7"])
+    expect(Object.keys(evidence).sort()).toEqual(["I7", "M4"])
     expect(evidence.I7[0]).toMatchObject({
       session: "s",
       kind: "message",
       quote: expect.stringContaining("fix I7 first")
     })
-    expect(evidence.C4[0].kind).toBe("answer")
+    expect(evidence.M4[0].kind).toBe("answer")
     // the local date, not UTC's
     const local = new Date("2026-10-02T17:00:00.000Z")
     expect(evidence.I7[0].date).toBe(

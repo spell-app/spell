@@ -26,7 +26,7 @@ export class WorkTime {
   /** the sessions, in Claude Code's folder:  STATIC for the object's life */
   readonly sessions: Sessions
 
-  /** - `home`:  Claude Code's folder (default `Sessions.claudeHome()`) */
+  /** - `home`:  Claude Code's folder (default `ClaudeHome.home()`) */
   constructor({ home }: { home?: string } = {}) {
     this.sessions = new Sessions({ home })
   }

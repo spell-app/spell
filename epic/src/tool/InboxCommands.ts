@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import { EpicCommandError, duration, stringFlag } from "spell-epic/command/command.types"
 import { PageInboxes } from "spell-epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
@@ -61,7 +62,7 @@ export class InboxCommands {
       case undefined:
         return this.print(name, this.owner.read(file), file, Boolean(flags.json))
       case "watch": {
-        const session = typeof flags.session === "string" ? flags.session : process.env.CLAUDE_CODE_SESSION_ID
+        const session = stringFlag(flags.session) ?? process.env.CLAUDE_CODE_SESSION_ID
         if (!session) throw new PlanDocError("watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
         ReviewInbox.update(path, (box) => box.setListening(session))
         return this.owner.print(`listening:  session ${session}`)
@@ -114,7 +115,10 @@ export class InboxCommands {
       return this.owner.print("doing:  nothing")
     }
     const text = this.owner.need(args[0], 'what it\'s doing ("Responding", "Building P35")')
-    const ids = typeof flags.items === "string" ? flags.items.split(/[\s,]+/).filter(Boolean) : []
+    const ids =
+      stringFlag(flags.items)
+        ?.split(/[\s,]+/)
+        .filter(Boolean) ?? []
     const plan = ids.length ? this.owner.read(file) : undefined
     const comments = ReviewInbox.read(path).comments
     const items = ids.map((given): DoingItem => {
@@ -269,7 +273,7 @@ export class InboxCommands {
   /**
    * `inbox wait <name>`:  poll the inbox every second until there's work (`hasWork`),
    * TAKE it under the lock (`takeWork()`) and print it (`printWork()`).
-   * - none by `timeout` seconds (default 3300, 55 minutes):  exit code 2
+   * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code 2
    * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
    * - the poll reads without the lock (atomic writes:  never half a file);  only taking locks
    * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every `LISTEN_HEARTBEAT_MS`
@@ -279,8 +283,7 @@ export class InboxCommands {
    */
   private async waitForWork(name: string, file: string, { timeout = "3300", json }: Flags): Promise<number | void> {
     const path = ReviewInbox.pathFor(file)
-    const seconds = Number(timeout)
-    if (!(seconds > 0)) throw new PlanDocError(`--timeout in seconds, not '${timeout}'`)
+    const seconds = timeoutOf(timeout)
     const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
     let beat = 0
@@ -601,8 +604,9 @@ export class InboxCommands {
    * - SIDE EFFECT:  writes the inbox, under its lock
    */
   private finishComments(file: string, what: "done" | "clear", ids: string[], flags: Flags): void {
-    const html = typeof flags.file === "string" ? readFileSync(resolve(flags.file), "utf8") : ""
-    const commit = typeof flags.commit === "string" ? flags.commit : undefined
+    const reply = stringFlag(flags.file)
+    const html = reply !== undefined ? readFileSync(resolve(reply), "utf8") : ""
+    const commit = stringFlag(flags.commit)
     ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
       for (const id of ids) {
         box.commentList.comment(id)
@@ -788,10 +792,10 @@ function calmWords(calm: boolean): string {
   return calm ? "not urgent" : "urgent"
 }
 
-/** What an agent works on for a mark:  a revisit's answer, else details. */
 /** What names a phase, not an item or a comment:  `p20`, a stable id `p-one-repo`. */
 const PHASE_REF = /^p(\d+|-[a-z0-9-]+)$/
 
+/** What an agent works on for a mark:  a revisit's answer, else details. */
 function workOf(mark: { action: string } | undefined): "revisit" | "details" {
   return mark?.action === "revisit" ? "revisit" : "details"
 }
@@ -835,3 +839,17 @@ function firstWords(text: string): string {
 
 /** How long a comment's first words run (`firstWords()`). */
 const FIRST_WORDS = 60
+
+/**
+ * `inbox wait`'s `--timeout`, in seconds:  seconds, or a time with its unit (`duration()`:  `8h`, `30m`).
+ * - throws `PlanDocError` for one it can't read, or none at all (`0`)
+ */
+function timeoutOf(timeout: string | true): number {
+  try {
+    const seconds = duration(String(timeout)) / 1000
+    if (seconds > 0) return seconds
+  } catch (error) {
+    if (!(error instanceof EpicCommandError)) throw error
+  }
+  throw new PlanDocError(`--timeout:  seconds (3300) or a time with its unit (8h, 30m), not '${timeout}'`)
+}

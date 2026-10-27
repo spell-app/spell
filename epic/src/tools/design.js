@@ -17,13 +17,13 @@
  */
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { basename, dirname, join, relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
 import { escapeHTML } from "spell/util/string.ts"
 import { localDate } from "spell/util/time.ts"
+import { parseVerbArgs } from "spell-epic/command/command.types.ts"
 import { ENGINE_ROUTES } from "spell-epic/server/server.types.ts"
 import { packageDir } from "./packageDir.ts"
 import { CONTENT, ROOT, pageFile } from "./pages.js"
@@ -47,7 +47,7 @@ const HOLE = /\{\{\s*([\w.$]+)\s*\}\}/g
 /** Run `spell design <verb> ...`;  the exit code. */
 async function main(argv) {
   const [verb, ...rest] = argv
-  const { positional, flags } = parseArgs(rest)
+  const { positional, flags } = parseVerbArgs(rest)
   if (verb === "pull") {
     const [board, page] = positional
     if (!board || !page) return usage("pull <board.dc.html> <page.html> [--title ...] [--from <design link>]")
@@ -265,25 +265,12 @@ function walk(dir) {
 // ## Arguments
 ////////////////
 
-/** `argv` as `{ positional, flags }`:  `--name value`, `--flag` (true). */
-function parseArgs(argv) {
-  const positional = []
-  const flags = {}
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]
-    if (!arg.startsWith("--")) positional.push(arg)
-    else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) flags[arg.slice(2)] = argv[++i]
-    else flags[arg.slice(2)] = true
-  }
-  return { positional, flags }
-}
-
 /** Print how to call a verb;  exit code 1. */
 function usage(text) {
   console.error(`usage:  spell design ${text}`)
   return 1
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (import.meta.main) {
   process.exitCode = await main(process.argv.slice(2))
 }
