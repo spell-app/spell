@@ -258,9 +258,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     let open = false
     for (const child of match.data.children ?? []) {
       if (!child?.is(SpellJSX) || !child.data.chain) {
-        // text between branches (their indent) leaves the chain open;  anything else ends it
+        // text between branches (their indent), or a comment, leaves the chain open;  anything else ends it
         const [token] = child?.matched ?? []
-        if (child && !(token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())) open = false
+        const isQuiet =
+          token instanceof P.JSXCommentToken || (token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())
+        if (child && !isQuiet) open = false
         continue
       }
       child.data.inMarkup = true

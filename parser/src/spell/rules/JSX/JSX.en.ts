@@ -13,6 +13,7 @@ import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
 import { SpellJSXAttribute } from "./SpellJSXAttribute"
+import { SpellJSXComment } from "./SpellJSXComment"
 import { SpellJSXEndTag } from "./SpellJSXEndTag"
 import { SpellJSXExpression } from "./SpellJSXExpression"
 import { SpellJSXFragment } from "./SpellJSXFragment"
@@ -363,3 +364,5 @@ JSX.addRule(SpellJSXText)
 JSX.addRule(SpellJSXEndTag)
 
 JSX.addRule(SpellJSXExpression)
+
+JSX.addRule(SpellJSXComment)

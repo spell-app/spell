@@ -128,11 +128,14 @@ export class CodeSpellWriter {
   private writeLine(tokens: P.Token[], indent: string, bullet = "") {
     const code = tokens.filter((token) => !(token instanceof SP.SpellxCloserToken))
     let end = code.length
-    while (end > 0 && code[end - 1] instanceof SP.SpellxProseToken) end--
-    const comments = code.slice(end) as SP.SpellxProseToken[]
-    // a line of prose, or a note's:  a comment
+    while (end > 0 && isCommentLike(code[end - 1])) end--
+    const comments = code.slice(end) as P.CommentToken[]
+    // a line of prose, or a note's:  a comment;  a line of a `<!-- ... -->` comment:  a `//` line, empty or not
     if (end === 0) {
-      for (const comment of comments) this.lines.push(comment.value ? `${indent}// ${comment.value}` : "")
+      for (const comment of comments)
+        this.lines.push(
+          comment.value || comment instanceof SP.SpellxCommentToken ? lineComment(indent, comment.value) : ""
+        )
       if (!tokens.length) this.lines.push("")
       return
     }
@@ -182,6 +185,8 @@ export class CodeSpellWriter {
     const from = tokens[0]!.start
     const edits: Array<{ start: number; end: number; text: string }> = []
     P.Tokenizer.forEachToken(tokens, (token) => {
+      const comment = token instanceof P.JSXCommentToken ? this.commentLines(token) : undefined
+      if (comment) edits.push(comment)
       if (!(token instanceof P.JSXElementToken)) return
       const { tagName } = token
       const isComponent = BARE_NAME.test(tagName) && !this.blocks.has(tagName)
@@ -208,6 +213,27 @@ export class CodeSpellWriter {
   }
 
   /**
+   * A `<!-- ... -->` comment in markup, alone on its lines, as code spell writes it:  a `//` line for each of its lines,
+   * at its first line's indent (Owen, 2026-10-26).
+   * - `undefined` for one sharing a line with markup, `<text>a <!-- b --> c</text>`:  code spell reads it as written.
+   */
+  private commentLines(token: P.JSXCommentToken): { start: number; end: number; text: string } | undefined {
+    if (token.commentSymbol !== P.HTML_COMMENT_START) return undefined
+    const raw = `${token.raw}`
+    const start = token.start + raw.length - raw.trimStart().length
+    const lineStart = this.text.lastIndexOf("\n", start - 1) + 1
+    const indent = this.text.slice(lineStart, start)
+    const lineEnd = this.text.indexOf("\n", token.end)
+    const after = this.text.slice(token.end, lineEnd < 0 ? undefined : lineEnd)
+    if (/\S/.test(indent) || /\S/.test(after)) return undefined
+    const inner = this.text
+      .slice(start + P.HTML_COMMENT_START.length, token.end)
+      .replace(new RegExp(`${P.HTML_COMMENT_END}$`), "")
+    const lines = inner.split("\n").map((line, index) => lineComment(index ? indent : "", line.trim()))
+    return { start, end: token.end, text: lines.join("\n") }
+  }
+
+  /**
    * `line` with its twin's colon written as code spell writes it, against the word before:
    * `to flip it :` => `to flip it:`, `on mouse down : flip it` => `on mouse down: flip it`.
    */
@@ -223,6 +249,16 @@ export class CodeSpellWriter {
       .join("")
       .trimEnd()
   }
+}
+
+/** Is `token` a line's comment, written as one of its own:  prose, or a line of a `<!-- ... -->` comment? */
+function isCommentLike(token: P.Token | undefined): boolean {
+  return token instanceof SP.SpellxProseToken || token instanceof SP.SpellxCommentToken
+}
+
+/** A `//` comment line, `indent` in:  `// text`, or `//` alone. */
+function lineComment(indent: string, text: string): string {
+  return text ? `${indent}// ${text}` : `${indent}//`
 }
 
 /** A component's bare name in spellx markup (`<text>`, `<botón>`):  lowercase letters only, as `SpellJSX` reads it. */

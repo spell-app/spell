@@ -45,12 +45,28 @@ export class SpellxTokenizer extends P.Tokenizer {
       this.frames = []
       this.inlineCloser = undefined
       this.closedChain = undefined
+      this.openComment = undefined
       const tokens = tokenizeFile(text, start, end)
       for (const frame of this.frames.reverse()) {
         for (const error of this.unclosed(frame)) SP.addSpellxError(frame.token, error)
       }
+      // a comment still open at the file's end was never closed (read through a cast:  `tokenizeFile()` changed it)
+      const unclosed = (this.openComment as SpellxTokenizer["openComment"])?.token
+      if (unclosed) SP.addSpellxError(unclosed, this.message("spellx-unclosed-comment", {}))
       this.frames = []
+      this.openComment = undefined
       return tokens
+    }
+    // a comment's later lines sit at its first line's indent, however they're written:  never a block of their own
+    const toLines = this.breakIntoLines
+    this.breakIntoLines = (tokens: P.Token[]) => {
+      const lines = toLines(tokens)
+      for (const line of lines) {
+        const [first] = line.tokens
+        const indent = first instanceof SP.SpellxCommentToken ? commentIndentOf(first) : undefined
+        if (indent !== undefined) line.record.indent = indent
+      }
+      return lines
     }
     // a `<spell>` chunk is code spell where it sits:  its tag goes, its lines join the block around it
     const groupLines = this.breakIntoIndentedBlocks
@@ -67,16 +83,25 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - `open` is never changed.
    * - No line is checked against the file's end:  a tag still open isn't an error here.
    * - A tag's head over several lines is read a line at a time, so it's unclosed on its first.
+   * - `inComment`:  the line before it left a comment open, `<!--` with no `-->` yet;  the result says if this one
+   *   does.
    */
-  tokenizeLine(line: string, open: readonly SpellxOpenTag[] = []): { tokens: P.Token[]; open: SpellxOpenTag[] } {
+  tokenizeLine(
+    line: string,
+    open: readonly SpellxOpenTag[] = [],
+    inComment = false
+  ): { tokens: P.Token[]; open: SpellxOpenTag[]; inComment: boolean } {
     this.frames = open.map((tag) => ({ ...tag }))
     this.inlineCloser = undefined
     this.closedChain = undefined
     this.lineError = undefined
+    this.openComment = inComment ? { indent: 0 } : undefined
     const tokens = this.tokenizeText(line)
     const after = this.frames
+    const stillInComment = !!this.openComment
     this.frames = []
-    return { tokens, open: after }
+    this.openComment = undefined
+    return { tokens, open: after, inComment: stillInComment }
   }
 
   /** Spell's own `tokenize()`, before ours wraps it for a whole file:  see `tokenizeLine()`. */
@@ -102,10 +127,16 @@ export class SpellxTokenizer extends P.Tokenizer {
   private closedChain: Frame | undefined
   /** An error for the next token, the first of its line:  a line indented less than its tag's body. */
   private lineError: string | undefined
+  /**
+   * A comment still open, `<!--` with no `-->` yet:  its first line's indent, and its first token (where the error
+   * goes if the file ends first).
+   */
+  private openComment: { indent: number; token?: SP.SpellxCommentToken } | undefined
 
   /** Match a single top-level token at `start`:  a spellx tag, closer or line of prose, else spell's. */
   matchTopTokens(text: string, start = 0, end = text.length) {
     if (this.inlineCloser?.start === start) return this.takeInlineCloser(text, start)
+    if (this.openComment && this.isLineStart(text, start)) return this.comment(text, start, start, end)
     if (this.isLineStart(text, start)) {
       const token = this.matchLineStart(text, start, end)
       if (token) return token
@@ -129,6 +160,14 @@ export class SpellxTokenizer extends P.Tokenizer {
   private matchLineStart(text: string, start: number, end: number): P.Token | undefined {
     const indent = start - (text.lastIndexOf("\n", start - 1) + 1)
     const lineEnd = lineEndOf(text, start, end)
+    // a comment, `<!-- ... -->`, anywhere (Owen, 2026-10-26):  it ends the tags open deeper, as a `//` line does,
+    // but is never itself wrong where it sits
+    if (text.startsWith(P.HTML_COMMENT_START, start)) {
+      this.ownerOfLine(indent)
+      this.lineError = undefined
+      this.openComment = { indent }
+      return this.comment(text, start, start + P.HTML_COMMENT_START.length, end)
+    }
     if (text.startsWith("</", start)) {
       const closer = this.readCloser(text, start)
       if (closer) return this.closeTag(closer, indent)
@@ -722,6 +761,31 @@ export class SpellxTokenizer extends P.Tokenizer {
     return new SP.SpellxProseToken(record)
   }
 
+  /**
+   * A line of the comment still open (`openComment`), from `start`, its text from `from`:  to its `-->`, which closes
+   * it, else to the line's end, leaving it open.
+   */
+  private comment(text: string, start: number, from: number, end: number): SP.SpellxCommentToken {
+    const open = this.openComment!
+    const lineEnd = lineEndOf(text, start, end)
+    const close = text.indexOf(P.HTML_COMMENT_END, from)
+    const closes = close >= 0 && close < lineEnd
+    const textEnd = closes ? close : lineEnd
+    const value = text.slice(from, textEnd).trim()
+    const tokenEnd = closes ? close + P.HTML_COMMENT_END.length : start + text.slice(start, lineEnd).trimEnd().length
+    const token = new SP.SpellxCommentToken({
+      start,
+      raw: text.slice(start, tokenEnd),
+      value,
+      commentSymbol: "//",
+      initialWhitespace: value ? " " : ""
+    })
+    ;(token.record as CommentLineRecord).commentIndent = open.indent
+    open.token ??= token
+    if (closes) this.openComment = undefined
+    return token
+  }
+
   /** Our language's message `key`. */
   private message(key: SP.ParserMessageKey, params: Record<string, string>) {
     return this.language.parserMessage(key, params)
@@ -812,6 +876,14 @@ function withErrors<T extends P.Token>(token: T, errors: string[]): T {
 function lineEndOf(text: string, start: number, end: number) {
   const at = text.indexOf("\n", start)
   return at < 0 || at > end ? end : at
+}
+
+/** A comment line's `record`:  the indent its comment's first line has. */
+type CommentLineRecord = P.CommentTokenProps & { commentIndent?: number }
+
+/** The indent of the first line of the comment `token` is a line of:  where `breakIntoLines()` puts its line. */
+function commentIndentOf(token: SP.SpellxCommentToken): number | undefined {
+  return (token.record as CommentLineRecord).commentIndent
 }
 
 /** Skip spaces, tabs and line breaks from `pos`. */

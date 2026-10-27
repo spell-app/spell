@@ -320,6 +320,24 @@ export type JSXAttributeTokenProps = Prettify<P.TokenProps<JSXAttributeValue>> &
  */
 export class JSXTextToken extends JSXToken<string> {}
 
+/**
+ * A comment inside markup, never drawn (epic `elemental-spell`, Owen 2026-10-26):  see `Tokenizer.markupComments`.
+ * - `<!-- GAP I23:  ... -->`, over as many lines as it takes;  or a line of its own starting `//`.
+ * - `value`:  its text, without `<!--` / `-->` or `//`, trimmed.
+ * - `commentSymbol`:  which way it's written, `<!--` or `//`.
+ */
+export class JSXCommentToken extends JSXToken<string, JSXCommentTokenProps> {
+  /** How it's written:  `<!--` or `//`. */
+  get commentSymbol() {
+    return this.record.commentSymbol
+  }
+}
+/** Extra `record` props for `JSXCommentToken`. */
+export type JSXCommentTokenProps = Prettify<P.TokenProps<string>> & {
+  /** How it's written:  `<!--` or `//`. */
+  commentSymbol: "<!--" | "//"
+}
+
 /** JSX expression, composed of inline tokens which should yield an `expression` or `statement`. */
 export class JSXExpressionToken extends JSXToken<string, JSXExpressionTokenProps> {
   /**

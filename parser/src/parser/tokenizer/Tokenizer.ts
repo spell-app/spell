@@ -51,6 +51,15 @@ export class Tokenizer {
   chainTags: Record<string, P.JSXChainKind> = {}
 
   /**
+   * Does markup hold COMMENTS, never drawn (epic `elemental-spell`, Owen 2026-10-26)?  Each is a `JSXCommentToken`:
+   * - `<!-- ... -->`, anywhere among an element's children, over as many lines as it takes
+   * - a line of its own starting `//`, as a comment line is everywhere else in spell
+   * - Not in a raw-text tag's contents (`rawTextTags`):  a `<markdown>` block's `<!--` and `//` are its own.
+   * - Off by default:  markup's `<!--` is then no tag, and `//` is text.
+   */
+  markupComments = false
+
+  /**
    * Quote symbols recognized by `matchText`.
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
@@ -730,6 +739,7 @@ export class Tokenizer {
    */
   matchJSXChild(endTagName: string, text: string, start = 0, end?: number) {
     return (
+      this.matchJSXComment(text, start, end) ||
       this.matchJSXEndTag(endTagName, text, start, end) ||
       this.matchJSXExpression(text, start, end) ||
       this.matchJSXElement(text, start, end) ||
@@ -848,8 +858,40 @@ export class Tokenizer {
   }
 
   /**
+   * A comment among markup's children at `start` of `text`, when `markupComments` says markup has them:
+   * `<!-- ... -->` (to its `-->`, else to `end`), or a line of its own starting `//` (to its line's end).
+   * - Ignores leading spaces and tabs.
+   */
+  matchJSXComment = (text: string, start = 0, end?: number): P.JSXCommentToken | undefined => {
+    if (!this.markupComments) return undefined
+    if (typeof end !== "number" || end > text.length) end = text.length
+    const at = this.eatWhitespace(text, start, end)
+    if (text.startsWith(HTML_COMMENT_START, at)) {
+      const close = text.indexOf(HTML_COMMENT_END, at + HTML_COMMENT_START.length)
+      const commentEnd = close < 0 || close + HTML_COMMENT_END.length > end ? end : close + HTML_COMMENT_END.length
+      const inner = text.slice(at + HTML_COMMENT_START.length, close < 0 ? commentEnd : close)
+      return new P.JSXCommentToken({
+        start,
+        raw: text.slice(start, commentEnd),
+        value: inner.trim(),
+        commentSymbol: HTML_COMMENT_START
+      })
+    }
+    if (!text.startsWith("//", at) || !/^[ \t]*$/.test(text.slice(text.lastIndexOf("\n", at - 1) + 1, at)))
+      return undefined
+    const line = this.getLineAtHead(text, at, end).trimEnd()
+    return new P.JSXCommentToken({
+      start,
+      raw: text.slice(start, at + line.length),
+      value: line.replace(/^\/\/+/, "").trim(),
+      commentSymbol: "//"
+    })
+  }
+
+  /**
    * Match JSXText until one of `{`, `<`, `>` or `}`.
    * - NOTE: INCLUDES leading / trailing whitespace.
+   * - With `markupComments`, it also ends before a line starting `//`:  a comment (`matchJSXComment()`).
    */
   matchJSXText = (text: string, start = 0, end?: number): P.JSXTextToken | undefined => {
     if (typeof end !== "number" || end > text.length) end = text.length
@@ -857,7 +899,11 @@ export class Tokenizer {
 
     // temporarily advance past whitespace (we'll include it in the output).
     const nextStart = this.eatWhitespace(text, start, end)
-    const endIndex = this.findFirstAtHead(this.JSX_TEXT_END_CHARS, text, nextStart, end)
+    let endIndex = this.findFirstAtHead(this.JSX_TEXT_END_CHARS, text, nextStart, end)
+    if (this.markupComments && endIndex !== undefined) {
+      const comment = /\n[ \t]*\/\//.exec(text.slice(nextStart, endIndex))
+      if (comment) endIndex = nextStart + comment.index + comment[0].length - 2
+    }
     // If the first non-whitespace char is in our END_CHARS, forget it.
     if (endIndex === nextStart) return undefined
 
@@ -1226,6 +1272,8 @@ export type TokenizerProps = {
   emptyEndTagCloses?: boolean
   /** See `Tokenizer.chainTags`. */
   chainTags?: Record<string, P.JSXChainKind>
+  /** See `Tokenizer.markupComments`. */
+  markupComments?: boolean
 }
 
 /** How `Tokenizer.findPhraseEnd()` finds a phrase's end. */
@@ -1235,6 +1283,12 @@ export type PhraseEndOptions = {
   /** Does a line break outside brackets end it too? */
   lineEnds?: boolean
 }
+
+/** What starts a comment in markup, as the web writes one:  see `Tokenizer.markupComments`. */
+export const HTML_COMMENT_START = "<!--"
+
+/** What ends one. */
+export const HTML_COMMENT_END = "-->"
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */
 const SPACES_BEFORE_TAB = / {1,3}\t/g

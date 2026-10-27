@@ -393,6 +393,8 @@ export class SpellxView {
         } else nodes.push((choice = { kind: "choice", branches: [branch], span: { ...branch.span } }))
         continue
       }
+      // a comment, never drawn, is no node (Owen, 2026-10-26):  its text stays where it's written
+      if (token instanceof P.JSXCommentToken) continue
       // the indent between branches leaves the chain open;  anything else ends it
       if (!(token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())) choice = undefined
       if (token instanceof P.JSXFragmentToken) nodes.push(...this.markupOf(token.children ?? []))

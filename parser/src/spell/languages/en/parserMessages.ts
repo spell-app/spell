@@ -170,6 +170,7 @@ export const PARSER_MESSAGES = {
   "spellx-unclosed-tag": '{tag} is never closed:  end it with "</>"',
   /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
   "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
+  "spellx-unclosed-comment": '"<!--" is never closed:  end the comment with "-->"',
   /** An `<otherwise>` with no `<if>` before it. */
   /** An if-chain's branch in markup with no element around it (epic `elemental-spell`, Owen 2026-10-25). */
   "chain-outside-markup":

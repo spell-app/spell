@@ -529,7 +529,13 @@ export class SpellxWriter {
         if (inline !== undefined) return [`${open}>${inline}</>`]
         if (!body) return [`${open} />`]
         const items = body instanceof P.BlockToken ? body.tokens : body
-        return [`${open}>`, ...items.flatMap((item) => this.sourceOf(item)), `${indent}${closer ?? `</${word}>`}`]
+        // a drawing's comments as markup's own, `<!-- ... -->` (Owen, 2026-10-26)
+        const comments = word === keyFor(this.words.declarations, "draw") ? this.commentLinesIn(items) : new Set()
+        const written = items.flatMap((item) => {
+          const from = this.lineOf(firstStart(item))
+          return this.sourceOf(item).map((line, index) => (comments.has(from + index) ? htmlComment(line) : line))
+        })
+        return [`${open}>`, ...written, `${indent}${closer ?? `</${word}>`}`]
       }
     }
   }
@@ -570,6 +576,24 @@ export class SpellxWriter {
   /** `line`'s text, trimmed:  its first source line. */
   private lineText(line: P.LineToken): string {
     return this.lines[this.lineOf(line.start)]!.trim()
+  }
+
+  /**
+   * The source lines in `items` that are `//` comments alone:  a line of its own in a drawing, or one inside its
+   * markup (`P.JSXCommentToken`).  Never one inside a `<markdown>` or `<css>` block, whose `//` is its own text.
+   */
+  private commentLinesIn(items: P.Token[]): Set<number> {
+    const lines = new Set<number>()
+    P.Tokenizer.forEachToken(items, (token) => {
+      const isLine =
+        token instanceof P.LineToken &&
+        token.tokens.length === 1 &&
+        token.tokens[0] instanceof P.CommentToken &&
+        token.tokens[0].commentSymbol.startsWith("//")
+      if (isLine) lines.add(this.lineOf(token.tokens[0]!.start))
+      if (token instanceof P.JSXCommentToken && token.commentSymbol === "//") lines.add(this.lineOf(token.end - 1))
+    })
+    return lines
   }
 
   /** Is `line` blank, or only a comment? */
@@ -656,6 +680,12 @@ function normal(text: string): string {
 /** The key of `table` whose value is `value`:  the word written for it;  `value` itself if none. */
 function keyFor(table: Record<string, string>, value: string): string {
   return Object.keys(table).find((key) => table[key] === value) ?? value
+}
+
+/** A `//` comment `line` as markup's comment, at its indent:  `\t// note` => `\t<!-- note -->`. */
+function htmlComment(line: string): string {
+  const [, indent, text] = /^(\s*)\/\/+\s?(.*)$/.exec(line) ?? [undefined, "", line]
+  return text!.trim() ? `${indent}<!-- ${text!.trim()} -->` : `${indent}<!-- -->`
 }
 
 /** `text` in double quotes. */
