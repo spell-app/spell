@@ -19,30 +19,44 @@
 	</section>
 
 	<section label="Tags">
-		<docs-api family="ui-button" only="tags"/>
+		<html>
+			<ui-docs-api family="ui-button" only="tags"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="Attributes">
-		<docs-api family="ui-button" only="attributes"/>
+		<html>
+			<ui-docs-api family="ui-button" only="attributes"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="Events">
-		<docs-api family="ui-button" only="events"/>
+		<html>
+			<ui-docs-api family="ui-button" only="events"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="Slots">
-		<docs-api family="ui-button" only="slots"/>
+		<html>
+			<ui-docs-api family="ui-button" only="slots"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="Parts">
-		<docs-api family="ui-button" only="parts"/>
+		<html>
+			<ui-docs-api family="ui-button" only="parts"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="States">
-		<docs-api family="ui-button" only="states"/>
+		<html>
+			<ui-docs-api family="ui-button" only="states"></ui-docs-api>
+		</html>
 	</section>
 
 	<section label="Texts">
-		<docs-api family="ui-button" only="texts"/>
+		<html>
+			<ui-docs-api family="ui-button" only="texts"></ui-docs-api>
+		</html>
 	</section>
 </spell-notebook>

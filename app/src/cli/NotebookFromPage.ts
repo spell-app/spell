@@ -395,10 +395,14 @@ export class NotebookFromPage {
     return `<${[this.bareNameOf(element.localName), ...attributes].join(" ")}>`
   }
 
-  /** The bare name of Spell UI's `tag`, `ui-button` => `button`, when the pack finds it so;  else `undefined`. */
+  /**
+   * The bare name of Spell UI's `tag`, `ui-button` => `button`, when the pack finds it so;  else `undefined`.
+   * - Never a docs element's (`<ui-docs-api>`):  the notebook's page loads them for its `<html>` blocks
+   *   (`NotebookDocs`), so a bare `<docs-api>` would draw nothing.
+   */
   private bareNameOf(tag: string): string | undefined {
     const bare = tag.replace(/^ui-/, "")
-    if (bare === tag) return undefined
+    if (bare === tag || bare.startsWith("docs-")) return undefined
     return (this.options.tagFor ?? defaultTagFor)(bare) === tag ? bare : undefined
   }
 
