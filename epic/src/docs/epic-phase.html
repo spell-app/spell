@@ -549,6 +549,16 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>plan</code></td>
+                    <td><code>waiting</code> | <code>accepted</code></td>
+                    <td>
+                      Claude's build plan, written by the epic tool: <code>waiting</code> for Owen's Accept (its review
+                      buttons Accept, Revisit and Defer, the group ringed), or <code>accepted</code>. Still to do and
+                      accepted, its review group ends in a green check: good to go (epic <code>epic-engine</code> I140).
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>changes</code></td>
                     <td>a number</td>
                     <td>
@@ -646,7 +656,10 @@
                         At the title's end: the page's own buttons (the <code>actions</code> slot), then its estimate
                         (once done and timed, what it took), then its review buttons, while the page is reviewed: Make Todo, Revisit; while the page's phases are
                         agreed (<code>&lt;epic-page stage="phases"&gt;</code>, epic <code>epic-engine</code> P29), an
-                        open phase's are Looks good and Defer (after the others, still to do).
+                        open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept,
+                        Revisit and Defer; still to do with its plan accepted, Make Todo, Revisit and a green check, a
+                        state saying it's ready to build. Revisit on a phase with your comments in its text marks it at
+                        once: those comments are its note.
                       </td>
                     </tr>
                     <tr>

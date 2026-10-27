@@ -323,7 +323,6 @@ body.spell-doc-page .spell-doc-main .spell-page-head > .spell-head-tools {
 }
 body.spell-doc-page .spell-doc-main ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 8px;
-  --spell-fold-end: calc(var(--spell-column-inset) + 4px);
 }
 body.spell-doc-page .spell-doc-main ui-section ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 6px;
@@ -495,19 +494,13 @@ body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-head-tools {
   flex: none;
 }
 /*
- * phone width, three tools or more (the Epics page's Send, New epic, sort and bullhorn):  too wide to lie over the
- * title, they take a line of their own under it, at its right, wrapping if they must:  never past the window
+ * phone width:  over the title's end however many there are, the head's own fill under them, fading left, as an epic
+ * page's labels (`EpicPage.css`, `.status`;  Owen, 2026-10-26, epic `epic-engine` I138:  a row of their own before,
+ * from three tools)
  */
 @media (max-width: 600px) {
-  body.spell-doc-page .spell-doc-main .spell-page-head > .spell-head-tools:has(> :nth-child(3)) {
-    position: static;
-    flex: 1 0 100%;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    height: auto;
-    min-height: 28px;
-    max-width: none;
-    padding-inline-start: 0;
+  .spell-doc-main .spell-page-head > .spell-head-tools {
+    box-shadow: -10px 0 8px -2px var(--spell-head-fill, var(--spell-bg));
   }
 }
 /*
@@ -650,6 +643,13 @@ ui-button.spell-fold {
   --ui-section-margin: 6px;
 }
 /*
+ * nor a folded top-level one:  the section after it starts right under its rule, no empty band between folded rows
+ * (epic `epic-engine` I138);  after an open one, its room stays
+ */
+.spell-doc-main ui-section:not(:state(nested)):state(collapsed) + ui-section {
+  --ui-section-margin: 0px;
+}
+/*
  * - prose inside keeps the page's line height (the section box sets UI's)
  * - space goes ABOVE a section only, as the `section.s2` pages':  `--ui-section-margin` is both edges, and a
  *   bottom margin would come between the content and what the page adds after it (epic pages' "none yet")
@@ -668,39 +668,19 @@ ui-button.spell-fold {
   color: var(--spell-doc-accent);
 }
 /*
- * The fold chevron at the title's FAR end, after the count and the actions, so the section icons line up at the
- * start (Owen, epic `review-review`).  Plan items (`ui-accordion.plan-item`) keep theirs in front.
- * - it stays INSIDE the toggle `<button>` (clicks on it still fold):  only its box moves, `position: absolute`
- *   against the title, which is positioned already when `sticky` (every page section);  `relative` otherwise
- * - the title keeps room at its end for it:  `--spell-fold-end` (where it sits) plus its width
- * - on the title's FIRST line (`lh`:  the heading's line height), so a narrow title whose count and actions wrap
- *   to a second line (below) keeps it beside the text
- * - Material's convention (Owen, J5):  open, it points UP (it folds up);  folded, DOWN (it opens down)
+ * The fold chevron at the title's START, before its icon, as an epic page's sections and items have it, turning as
+ * the theme turns it there:  Spell UI's own, right folded and down open;  the Spell theme's, down and up (epic
+ * `epic-engine` I138:  one way on every page, as Owen moved the epic pages' there, 2026-10-25:  "put it on the left";
+ * at the far end, up when open, before:  J5 of `review-review`)
  */
 .spell-doc-main ui-section {
-  --spell-fold-end: 8px;
-}
-.spell-doc-main ui-section::part(title) {
-  padding-inline-end: calc(var(--spell-fold-end) + 22px);
-}
-.spell-doc-main ui-section:not([sticky])::part(title) {
-  position: relative;
+  --ui-section-fold-icon-size: 12px;
 }
 .spell-doc-main ui-section::part(fold-icon) {
-  position: absolute;
-  inset-inline-end: var(--spell-fold-end);
-  top: calc(var(--spell-title-top) + 0.5lh);
-  margin-top: calc(var(--ui-section-fold-icon-size, 0.75em) / -2);
   color: var(--spell-muted);
 }
-.spell-doc-main ui-section::part(fold-icon) {
-  rotate: 180deg;
-}
-.spell-doc-main ui-section:state(collapsed)::part(fold-icon) {
-  rotate: 0deg;
-}
 /*
- * a narrow title keeps its count, actions and fold arrow in place, on its row:  its text runs on under them, fading
+ * a narrow title keeps its count and actions in place, on its row:  its text runs on under them, fading
  * out, rather than wrapping them onto a row of their own (Owen, 2026-10-10:  "stay in place and overlap")
  * - NOT on a DETAILS PAGE (`epic ask`'s):  Owen answers there, so a title shows IN FULL, wrapped, as an epic page's
  *   titles do (Owen, 2026-10-19:  "make it always show the full title, wrapped";  epic `epic-engine` I21)
@@ -713,7 +693,10 @@ ui-button.spell-fold {
   .spell-doc-main ui-section::part(heading) {
     min-width: 0;
   }
+  /* the fade at the ROW's end, by the count and actions:  as wide as the room, not only its words (a short title's
+     own last letters faded:  "1. Summar(y)") */
   body:not(.spell-details-page, .spell-choices-page, :has(epic-ask)) .spell-doc-main ui-section::part(header) {
+    flex: 1;
     overflow: hidden;
     white-space: nowrap;
     mask-image: linear-gradient(to left, transparent, black 20px);

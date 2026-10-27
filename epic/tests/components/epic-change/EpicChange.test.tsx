@@ -44,6 +44,7 @@ class FakeRoutes {
     working: {},
     listening: null,
     unsentComments: [],
+    waitingComments: [],
     woken: null,
     doing: null
   }

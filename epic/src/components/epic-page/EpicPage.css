@@ -57,6 +57,12 @@
     --epic-drawer-fill: light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02));
     --epic-drawer-inset: 4px;
     --epic-drawer-radius: 8px;
+    /*
+     * a top-level section title's end:  its last control as far from its right as its controls (26px tall) sit from
+     * its top, 10px of padding and half of what its 30px line has over them (Owen, 2026-10-26:  "why so much
+     * whitespace on the right side of headers?");  the toolbar's collapse-all lines up with it
+     */
+    --epic-title-end: 12px;
     --epic-toolbar-edge: var(--spell-rail-edge, color-mix(in oklab, var(--epic-ink) 22%, var(--epic-warm)));
 
     /* ## Type */
@@ -298,8 +304,12 @@
     align-items: center;
     gap: 4px;
     margin-inline-start: auto;
-    /* its toggle in the sections' toggle column:  in by the cards' inset and the fold chevron's column (EpicFold.css) */
-    padding: 4px calc(var(--epic-inset) + var(--epic-controls-in, 26px) + 22px) 4px 8px;
+    /*
+     * its collapse-all in the sections' expand-all column:  as far in as theirs, a section title's margin and end
+     * padding (`EpicSection.css`, `EpicFold.css`;  Owen, 2026-10-26:  "why so much whitespace on the right side of
+     * headers?";  26px more and a column of its own before)
+     */
+    padding: 4px calc(max(0px, var(--epic-inset) - var(--epic-card-inset, 16px)) + var(--epic-title-end, 12px)) 4px 8px;
   }
   .toolbar-tools:empty {
     display: none;
@@ -630,9 +640,13 @@
 
   /* ## Narrow (VS Code's side bar, a phone):  a smaller h1, so the stuck header leaves room to read */
   @container epic-page (max-width: 480px) {
-    /* the sections' narrow columns (EpicFold.css):  controls in by 16px, the chevron's column 20px */
+    /*
+     * a section title's line is 25px here (EpicFold.css):  its controls 9.5px from its top, and from its end;  on the
+     * slots (the sections inherit it from theirs) and the toolbar:  the container can't style itself
+     */
+    slot,
     .toolbar-tools {
-      padding-inline-end: calc(var(--epic-inset) + 16px + 20px);
+      --epic-title-end: 9.5px;
     }
     /* the h1 shares its row with the labels while they fit (no row of their own:  the stuck header stays short) */
     .heading {

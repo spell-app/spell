@@ -1503,7 +1503,17 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
+    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  Make Todo, Revisit, then a green
+      check, drawn as a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing
     - else Make Todo, Revisit:  notes on the plan, no Approve
+  - REVISIT ON A PART WITH OWEN'S COMMENTS IN ITS TEXT (an item, a phase, an Overview part;  epic `epic-engine` I140;
+    Owen, 2026-10-26:  "The inline mark(s) are my comment"):  nothing typed, it opens no box
+    - it marks at once (`ReviewClient.press()`, `commentsIn()`):
+      `{ action: "revisit", when: "soon", note: "see my comments in its text:  C1", comments: ["c1"] }`
+    - which comments:  those waiting for Claude whose anchor is the part's (`<id>` or `<id>#<kind>-<n>`), from the
+      routes' `waitingComments`
+    - `wait` prints them under the revisit, its content (`takeWork()`'s `inlineComments`);  `inbox` names them
+    - NOT the phase's orange pen:  that counts its plan changes (`changes`, `<epic-update>` blocks)
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every

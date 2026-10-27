@@ -111,8 +111,9 @@ export const epicPhaseVocabulary = {
       values: ["waiting", "accepted"],
       description:
         "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review " +
-        "buttons Accept plan and Revisit), or `accepted`;  written by the epic tool, so the title row knows with its " +
-        "body not loaded."
+        "buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  " +
+        "good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not " +
+        "loaded."
     },
     {
       name: "changes",

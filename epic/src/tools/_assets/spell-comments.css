@@ -141,6 +141,15 @@
 :is(.spell-doc-main, .site-main) .spell-comment-mark {
   position: relative;
 }
+/*
+ * the bullhorns, in a block's title or actions row and floating by selected text:  a bare icon, no circle round it,
+ * a tint under the pointer (designer rule T22;  Owen, 2026-10-26, epic `epic-engine` I138).  Send keeps its ring
+ * while plans wait for his Accept (`EpicSendButtons.css`).
+ */
+.spell-comment-mark ui-button,
+ui-button.spell-comment-float {
+  --ui-button-basic-border-width: 0px;
+}
 :is(.spell-doc-main, .site-main)
   :is(
     ui-section:hover:not(:has(ui-section:hover)) > .spell-comment-mark,

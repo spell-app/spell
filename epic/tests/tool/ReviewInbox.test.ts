@@ -402,7 +402,7 @@ describe("ReviewInbox, Claude's side", () => {
     inbox.setMark("j1", { action: "approve" }, M1)
     inbox.setListening("abc", M1)
     const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
-    expect(late).toEqual({ ...inbox.toRecord(), listening: null, unsentComments: [] })
+    expect(late).toEqual({ ...inbox.toRecord(), listening: null, unsentComments: [], waitingComments: [] })
     expect(inbox.listening!.session).toBe("abc")
     expect(inbox.forPage(Date.parse(M1)).listening!.session).toBe("abc")
   })
@@ -541,6 +541,32 @@ describe("ReviewInbox comments and Send", () => {
     expect(inbox.unsentComments).toEqual([])
     expect(inbox.sentComments.map((comment) => comment.id)).toEqual([id])
     expect(inbox.forPage().unsentComments).toEqual([])
+  })
+
+  // epic `epic-engine` I140:  Revisit on a part whose text holds Owen's comments makes them its content
+  test("a revisit's `comments`:  checked;  the page hears where each waiting comment is;  wait hands them over with it", () => {
+    const inbox = new ReviewInbox()
+    const id = inbox.commentList.add(PLACE, "should run in the browser too", new Date(M1))
+    expect(inbox.forPage().waitingComments).toEqual([{ id, anchor: "p1#field-1" }])
+    expect(ReviewInbox.toMark({ action: "revisit", note: "see C1", comments: ["C1", "c1"] })).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "see C1",
+      comments: ["c1"]
+    })
+    expect(() => ReviewInbox.toMark({ action: "revisit", comments: ["q3"] })).toThrow(InboxError)
+    inbox.setMark(
+      "p1",
+      { action: "revisit", when: "soon", note: "see my comments in its text:  C1", comments: [id] },
+      M2
+    )
+    inbox.markSent(M3)
+    const [mark] = inbox.takeWork(M3)!.sent!.marks
+    expect(mark).toMatchObject({
+      id: "p1",
+      comments: [id],
+      inlineComments: [{ id, text: "should run in the browser too" }]
+    })
   })
 
   test("a send with ONLY comments wakes a waiting session, and hands them over once", () => {

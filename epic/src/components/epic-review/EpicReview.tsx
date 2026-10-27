@@ -9,6 +9,7 @@ import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, clockOf, isImmediate, type InboxMark } fr
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
 import {
+  ACCEPTED_CHECK,
   BUTTONS_OF,
   CHOSEN,
   DO_IT_ID,
@@ -193,6 +194,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           }
         >
           <For each={group()}>{(spec) => this.button(spec)}</For>
+          <Show when={this.buttons === "accepted"}>{this.acceptedCheck()}</Show>
         </ui-buttons>
       </span>
     )
@@ -238,6 +240,36 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     event.preventDefault()
     event.stopPropagation()
     this.send(THREAD_ANSWER, { act: spec.act })
+  }
+
+  /**
+   * A to-do phase's plan accepted (`buttons="accepted"`, epic `epic-engine` I140):  the green check, drawn as a chosen
+   * Approve whose mark is sent (outlined green), so Owen sees it's good to go.
+   * - a STATE, not a mark:  a click does nothing, and goes no further (its title row would fold);  Revisit is how
+   *   the plan is talked over again
+   */
+  private acceptedCheck(): JSX.Element {
+    const tip = () => {
+      const said = this.translationForKey("buttonTip", {
+        label: this.translationForKey(ACCEPTED_CHECK.label),
+        what: this.translationForKey(ACCEPTED_CHECK.tip)
+      })
+      return this.tip ? `${said} · ${this.tip}` : said
+    }
+    return (
+      <ui-button
+        icon={ACCEPTED_CHECK.icon}
+        data-state="accepted"
+        data-color={ACCEPTED_CHECK.color}
+        data-fill="outline"
+        title={tip()}
+        aria-label={tip()}
+        onClick={(event: MouseEvent) => {
+          event.preventDefault()
+          event.stopPropagation()
+        }}
+      />
+    )
   }
 
   /** One review button, as its action stands. */
@@ -287,9 +319,20 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   private tipOf(spec: ReviewButtonSpec): string {
     const said = this.translationForKey("buttonTip", {
       label: this.translationForKey(spec.label),
-      what: this.stateOf(spec)
+      what: this.inlineCommentsTip(spec) ?? this.stateOf(spec)
     })
     return this.tip ? `${said} · ${this.tip}` : said
+  }
+
+  /**
+   * Revisit's tooltip while a click would mark it at once:  Owen's comments waiting in its text are the note
+   * (`ReviewClient.commentsIn()`, epic `epic-engine` I140);  else `undefined`.
+   */
+  private inlineCommentsTip(spec: ReviewButtonSpec): string | undefined {
+    if (spec.action !== "revisit" || this.fillOf(spec) !== "none") return undefined
+    const ids = this.review.inlineComments()
+    if (!ids.length) return undefined
+    return this.translationForKey("revisitCommentsTip", { ids: ids.map((id) => id.toUpperCase()).join(", ") })
   }
 
   /** A button's state, for a screen reader. */

@@ -135,7 +135,8 @@
     margin: 8px 0 0;
     /* its frame all round, light (the answer-look page's Q2:  "lose heavy border on top") */
     /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
-    border-radius: 10px 10px var(--_epic-item-bottom-radius) var(--_epic-item-bottom-radius);
+    --epic-note-radius-top: 10px;
+    --epic-note-radius-bottom: var(--_epic-item-bottom-radius);
     /* its paper ring only above, 1px in at the sides:  the drawer's side rules show down to its rounded corners */
     box-shadow: 0 -4px 0 -1px var(--ui-background, Canvas);
     /* one line of shadow, its own (EpicReview.css) */
@@ -255,6 +256,13 @@
   }
   ::slotted([slot="actions"]) {
     flex: none;
+  }
+  /*
+   * the review buttons' group, 1px from the line's end:  its end squared to the line's run corner less that 1px, its
+   * start still a pill (designer rule T68;  Owen, 2026-10-26, I138:  "keep the 1px gap")
+   */
+  .extras > [part~="review-buttons"] {
+    --epic-review-end-radius: calc(var(--epic-section-run-radius, 8px) - 1px);
   }
   .extras[hidden] {
     display: none;

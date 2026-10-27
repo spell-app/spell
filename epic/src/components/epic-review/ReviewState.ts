@@ -93,6 +93,13 @@ export class ReviewState {
   /** Has Claude taken its request (an agent at work on it), rather than it waiting to be taken? */
   readonly workedOn = (): boolean => this.read((client, id) => client.isWorkedOn(id)) ?? false
 
+  /**
+   * The comments waiting for Claude in its text (`ReviewClient.commentsIn()`, epic `epic-engine` I140), while nothing
+   * is typed in its note box:  what a click on Revisit would mark at once;  `[]` otherwise.
+   */
+  readonly inlineComments = (): string[] =>
+    this.read((client, id) => (client.typedOf(id).trim() ? [] : client.commentsIn(id))) ?? []
+
   /** Its pick Claude took off the inbox since the page loaded (`ReviewClient.takenPickOf()`), if any. */
   readonly takenPick = (): PickFields | undefined => this.read((client, id) => client.takenPickOf(id))
 

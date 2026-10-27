@@ -107,6 +107,7 @@ function titleWithKey(title, letter) {
  *     one `...` button whose menu holds every section (Owen, 2026-10-10:  "remove the titles entirely if they each
  *     only get less than 50px")
  *   - except a `segmented` one:  it scrolls, every title whole, its `‹` / `›` showing what's past either end
+ * - an epic page's:  it scrolls too, its `‹` / `›` showing what's past either end
  * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
  *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-toolbar.css`)
  * - `segmented`:  the toolbar under a page's tabs (Spell UI's components pages) is a SEGMENTED menu, as the tabs are:
@@ -116,8 +117,9 @@ function titleWithKey(title, letter) {
  */
 export function toolbarMenu(items, { titled, segmented = false }) {
   const kept = removeToolbar()
-  // a titled toolbar is Spell UI's `<ui-toolbar>` where the page has it:  `‹` / `›` buttons while its items overflow
-  const tag = titled && customElements.get("ui-toolbar") ? "ui-toolbar" : "ui-menu"
+  // Spell UI's `<ui-toolbar>` where the page has it:  `‹` / `›` buttons while its items overflow (an epic page's
+  // marks on a phone too, epic `epic-engine` I138:  the 6th was cut, nothing saying more was past it)
+  const tag = customElements.get("ui-toolbar") ? "ui-toolbar" : "ui-menu"
   const toolbar = el(tag, {
     class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"]
       .filter(Boolean)

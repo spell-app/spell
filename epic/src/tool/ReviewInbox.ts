@@ -41,6 +41,9 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
+ *     - a revisit whose content is Owen's comments in the part's text (epic `epic-engine` I140):
+ *       `{ action: "revisit", when, note, comments: ["c1", "c3"] }`, the note pointing at them;
+ *       `takeWork()` hands the comments over with it (`inlineComments`)
  *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`m3`) only:
  *       `{ action: "test", result, note?, shot? }`
  *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
@@ -638,8 +641,18 @@ export class ReviewInbox {
       doing: listening ? this.doing : null,
       // a wake under way has nothing to say yet
       woken: woken?.state === "waking" ? null : woken,
-      unsentComments: this.unsentComments.map((comment) => comment.id)
+      unsentComments: this.unsentComments.map((comment) => comment.id),
+      waitingComments: this.commentList.waiting.map(({ id, anchor }) => ({ id, anchor }))
     }
+  }
+
+  /**
+   * The comments a revisit's `comments` names (Owen's comments in its part's text, epic `epic-engine` I140), as the
+   * inbox holds them now;  one gone since (cleared) is left out.
+   */
+  commentsOf(mark: { comments?: string[] }): IdentifiedComment[] {
+    const all = new Map(this.commentList.all.map((comment) => [comment.id, comment]))
+    return (mark.comments ?? []).flatMap((id) => all.get(id) ?? [])
   }
 
   /**
@@ -687,7 +700,11 @@ export class ReviewInbox {
     let sent: TakenWork["sent"] = null
     if (this.hasNewSend) {
       const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
-      const marks = this.sentMarks.map((mark) => ({ ...mark, again: Date.parse(mark.at) <= before }))
+      const marks = this.sentMarks.map((mark) => ({
+        ...mark,
+        again: Date.parse(mark.at) <= before,
+        ...(mark.comments?.length && { inlineComments: this.commentsOf(mark) })
+      }))
       const urgency = this.sentUrgency
       const comments = this.sentComments.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) > before)
       this.handedOver = this.sent
@@ -850,8 +867,17 @@ export class ReviewInbox {
       if (!REVISIT_WHEN.includes(when as RevisitWhen))
         throw new InboxError(`revisit when?  ${REVISIT_WHEN.join(" | ")}`)
       if (typeof note !== "string") throw new InboxError("a revisit's note is text")
-      if (pick === undefined || pick === null) return { action, when: when as RevisitWhen, note: note.trim() }
-      return { action, when: when as RevisitWhen, note: note.trim(), pick: toLetter(pick), ...toChoices(choices) }
+      const inline = toCommentIds((mark as Record<string, unknown>).comments)
+      if (pick === undefined || pick === null)
+        return { action, when: when as RevisitWhen, note: note.trim(), ...inline }
+      return {
+        action,
+        when: when as RevisitWhen,
+        note: note.trim(),
+        pick: toLetter(pick),
+        ...toChoices(choices),
+        ...inline
+      }
     }
     if (action === "pick") return { action, pick: toLetter(pick), ...toChoices(choices) }
     if (action === "accept") {
@@ -991,7 +1017,14 @@ export type DoingItem = { id: string; title: string }
  * The inbox as the routes answer (`ReviewInbox.forPage()`):
  * the file's JSON, plus `unsentComments`, the ids of the comments the page's Send would hand over.
  */
-export type PageInbox = InboxRecord & { unsentComments: string[] }
+export type PageInbox = InboxRecord & { unsentComments: string[]; waitingComments: WaitingComment[] }
+
+/**
+ * A comment waiting for Claude, as the page reads it (`PageInbox.waitingComments`):  its id and where it is
+ * (`p-themes-as-data#field-4`), so Revisit on a part with Owen's comments in its text marks them at once
+ * (epic `epic-engine` I140).
+ */
+export type WaitingComment = { id: string; anchor: string }
 
 /** One item's mark, as stored:  checked (`ReviewInbox.toMark()`) and stamped. */
 export type InboxMark = CheckedMark & { at: string }
@@ -1005,11 +1038,13 @@ export type InboxMark = CheckedMark & { at: string }
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
+ * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140)
  */
 export type CheckedMark = {
   action: MarkAction
   when?: RevisitWhen
   note?: string
+  comments?: string[]
   stage?: PageStage
   to?: number
 } & PickFields &
@@ -1094,7 +1129,8 @@ export type TakenWork = {
   now: NowRequest[]
   sent: {
     at: string
-    marks: (ListedMark & { again: boolean })[]
+    /** `inlineComments`:  a revisit's comments (its `comments`), as the inbox holds them (I140) */
+    marks: (ListedMark & { again: boolean; inlineComments?: IdentifiedComment[] })[]
     urgency: ListedUrgency[]
     comments: IdentifiedComment[]
   } | null
@@ -1339,6 +1375,19 @@ function toChoices(choices: unknown): { choices?: number } {
   if (!Number.isInteger(choices) || (choices as number) < 0 || (choices as number) > MAX_CHOICES)
     throw new InboxError(`pick from which option cards?  ${JSON.stringify(choices)}`)
   return { choices: choices as number }
+}
+
+/**
+ * A revisit's `comments` (epic `epic-engine` I140), checked:  `{ comments: ["c1", "c3"] }`, each as the file keys it
+ * (`CommentList.idOf()`), or `{}` for none.
+ * - throws an `InboxError` unless it's a list of comment ids
+ */
+function toCommentIds(comments: unknown): { comments?: string[] } {
+  if (comments === undefined || comments === null) return {}
+  if (!Array.isArray(comments) || !comments.every((id) => CommentList.isCommentId(id)))
+    throw new InboxError(`a revisit's comments are comment ids (C3):  ${JSON.stringify(comments)}`)
+  const ids = [...new Set(comments.map((id: string) => CommentList.idOf(id)))]
+  return ids.length ? { comments: ids } : {}
 }
 
 /**

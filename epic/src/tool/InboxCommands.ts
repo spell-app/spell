@@ -243,6 +243,7 @@ export class InboxCommands {
       if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
       if (mark.shot) parts.push(`screenshot ${mark.shot}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
+      if (mark.comments?.length) parts.push(`his comments ${upper(mark.comments)}`)
       if (!mark.sent) parts.push("unsent")
       else if (ReviewInbox.isImmediate(mark)) parts.push("requested now")
       return parts.length ? `  · ${parts.join(" · ")}` : ""
@@ -372,6 +373,11 @@ export class InboxCommands {
             // a test's note is Owen's COMMENT on it, with any result (it may still need work:  read every one)
             if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
             if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
+          }
+          // a revisit whose content is Owen's comments in its text (epic `epic-engine` I140):  they ARE his note
+          if (mark.inlineComments?.length) {
+            lines.push(`        his comments in its text, the revisit's content (${mark.inlineComments.length}):`)
+            for (const comment of mark.inlineComments) lines.push(...commentLines(comment, "          "))
           }
         }
       }
