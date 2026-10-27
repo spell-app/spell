@@ -10,7 +10,7 @@ import type { Browser, Page } from "playwright"
 
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 import { KIT_ROOT, SPELL_CLI } from "./pageServer.ts"
 import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
@@ -35,7 +35,7 @@ import { Terminal } from "spell/element-tools/Terminal"
  *   - components pages (`ui-*.html`):
  *     - not exactly one `ui-tabs.site-tabs` with panes `examples`, `usage`, `api`, `theming` (`theming` optional)
  *     - a pane that isn't the shown one when loaded with its `#hash`, or shows under 50px
- *   - `ui-docs-toc`:  hidden or empty on desktop, visible on phone
+ *   - `ui-toc`:  hidden or empty on desktop, visible on phone
  *   - sections (`yarn site:sections`):
  *     - an id that doesn't follow its nesting
  *     - a flat level 2 header left
@@ -390,7 +390,7 @@ export class SiteCheck {
         )
       }
       const toc = await page.evaluate(tocState)
-      if (toc?.isVisible) problem("ui-docs-toc visible at phone width (should be hidden)")
+      if (toc?.isVisible) problem("ui-toc visible at phone width (should be hidden)")
       await this.shoot(page, check, `${name}-phone-top.png`)
       await page.evaluate(() => window.scrollTo(0, (document.documentElement.scrollHeight - window.innerHeight) / 2))
       await page.waitForTimeout(SCROLL_SETTLE_MS)
@@ -489,7 +489,7 @@ export class SiteCheck {
   }
 
   /**
-   * The contents list (`ui-docs-toc`), if the page has one:  visible on desktop while it has entries.
+   * The contents list (`ui-toc`), if the page has one:  visible on desktop while it has entries.
    * - `where` labels the problem;  `isRequired` makes zero entries a problem (the first pane), else a note.
    */
   private async tocCheck(page: Page, check: CheckContext, { where, isRequired }: TocCheckParams): Promise<void> {
@@ -498,10 +498,10 @@ export class SiteCheck {
     const counts = (check.report.counts.toc ??= {})
     counts[where] = toc.entries
     // an EMPTY toc's rail is hidden on purpose (site.css:  the content takes its room, e.g. the API tab)
-    if (!toc.isVisible && toc.entries) check.problem(`ui-docs-toc hidden on desktop (${where})`)
+    if (!toc.isVisible && toc.entries) check.problem(`ui-toc hidden on desktop (${where})`)
     if (!toc.entries) {
-      if (isRequired) check.problem(`ui-docs-toc has no entries (${where})`)
-      else check.report.notes.push(`ui-docs-toc has no entries (${where})`)
+      if (isRequired) check.problem(`ui-toc has no entries (${where})`)
+      else check.report.notes.push(`ui-toc has no entries (${where})`)
     }
   }
 
@@ -828,7 +828,7 @@ function sectionsState(): { sections: SectionState[]; flat: string[] } {
   const main = document.querySelector("main#main")
   const tabs = main?.querySelector("ui-tabs.site-tabs")
   // a demo inside an example or a Theming playground (its family's main example) isn't the page's
-  const page = (element: Element) => !element.parentElement?.closest("ui-docs-example, ui-docs-tokens, template")
+  const page = (element: Element) => !element.parentElement?.closest("ui-example, ui-docs-tokens, template")
   const sections = [...(main?.querySelectorAll("ui-section") ?? [])].filter(page).map((section) => {
     const pane = section.closest("ui-tab")
     const slotted = section.querySelector(':scope > [slot="label"]')
@@ -889,9 +889,12 @@ function landedState(id: string): LandedState | undefined {
   }
 }
 
-/** The `ui-docs-toc`, or `undefined`:  whether it has a box, and its entries (`ui-item` / `a` in its shadow root). */
+/**
+ * The site's `ui-toc` (the layout's, `.site-toc`;  a components page's examples may show tocs of their own), or
+ * `undefined`:  whether it has a box, and its entries (`ui-item` / `a` in its shadow root).
+ */
 function tocState() {
-  const toc = document.querySelector("ui-docs-toc")
+  const toc = document.querySelector("ui-toc.site-toc")
   if (!toc) return undefined
   const rect = toc.getBoundingClientRect()
   const style = getComputedStyle(toc)

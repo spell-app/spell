@@ -1,6 +1,7 @@
 import { withoutAccents } from "spell-ui/util"
 import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
-import { PageOutline } from "./PageOutline"
+// A leaf, not the barrel:  the barrel defines `<ui-toc>`
+import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
 import {
   GROUP_LIMIT,
   INSIDE_MIN,
@@ -18,7 +19,7 @@ import {
  * ### `SearchIndex`
  * What `<ui-docs-search>` searches, and how it ranks:  every component tag, every attribute, every page and every
  * page's sections, built once from the site's data (`components.json5` + `search.json5`);  the page shown's sections
- * come live, per search (`PageOutline`).
+ * come live, per search (`here()`, on the table of contents' `PageOutline`).
  * - Matching is blind to case and accents.  The WHOLE query is tried against the title (exact, start,
  *   a word's start, inside), then against each term (a tag, another name, a topic ...);  failing those,
  *   every WORD of the query must start a word somewhere (title or terms), so `button circular` finds `circular` on
@@ -88,7 +89,7 @@ export class SearchIndex {
 
   /**
    * The groups `query` finds, best first.
-   * - `here`:  the page shown's sections (`PageOutline.read()`), searched like the rest
+   * - `here`:  the page shown's sections (`SearchIndex.here()`), searched like the rest
    * - `current`:  the page shown's path from the site root (`components/ui-divider.html`):
    *   its search-file sections are skipped (`here` has them, live), its attributes boosted
    */
@@ -124,6 +125,22 @@ export class SearchIndex {
   ////////////////
   // ## Matching
   ////////////////
+
+  /** `root`'s sections as search entries of the page shown, in document order (`PageOutline`);  none without a root. */
+  static here(root: Element | undefined): SearchEntry[] {
+    if (!root) return []
+    const { sections, tabs } = PageOutline.sections(root)
+    return sections.map((section, at) => {
+      const trail = PageOutline.trail(sections, at, tabs)
+      return {
+        kind: "here" as const,
+        title: section.title,
+        ...(trail.length && { context: trail.join(TRAIL) }),
+        href: `#${section.id}`,
+        terms: [section.id, ...trail]
+      }
+    })
+  }
 
   /** `text` folded for matching:  lower case, no accents, single spaces. */
   static fold(text: string): string {

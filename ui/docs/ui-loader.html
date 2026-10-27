@@ -60,7 +60,7 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <!-- GAP I43:  an active <ui-dimmer> neither shows nor inverts its <ui-loader>:  every loader in a dimmer says `visible` (and `inverted` in a dark one). -->
               <ui-section id="examples-types-loader" label="Loader" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A loader.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Loaders are hidden unless <code>visible</code>, even inside a
@@ -72,43 +72,43 @@
                       <ui-loader visible inverted></ui-loader>
                     </ui-dimmer>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-text-loader" label="Text Loader" sticky collapsible dividing>
-                <ui-docs-example description="A loader can contain text:  add `text` and put the words inside.">
+                <ui-example description="A loader can contain text:  add `text` and put the words inside.">
                   <ui-segment>
                     <ui-dimmer visible>
                       <ui-loader visible inverted text>Loading</ui-loader>
                     </ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment>
                     <ui-dimmer visible inverted>
                       <ui-loader visible text>Loading</ui-loader>
                     </ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-indeterminate" label="Indeterminate" sticky collapsible dividing>
-                <ui-docs-example description="A loader can show it's unsure of how long a task will take.">
+                <ui-example description="A loader can show it's unsure of how long a task will take.">
                   <ui-segment>
                     <ui-dimmer visible>
                       <ui-loader visible inverted indeterminate text>Preparing Files</ui-loader>
                     </ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A loader can be active (<code>visible</code>).</p>
                   <ui-message slot="description" state="info" size="small"
                     >An active loader may not be easy to see without a <code>&lt;ui-dimmer&gt;</code>.</ui-message
@@ -117,44 +117,44 @@
                     <ui-loader visible></ui-loader>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A loader can be disabled or hidden, even while `visible`.">
+                <ui-example description="A loader can be disabled or hidden, even while `visible`.">
                   <ui-segment>
                     <ui-loader visible disabled></ui-loader>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-inline" label="Inline" sticky collapsible dividing>
-                <ui-docs-example description="Loaders can appear inline with content.">
+                <ui-example description="Loaders can appear inline with content.">
                   <ui-loader visible inline></ui-loader>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inline-center" label="Inline Center" sticky collapsible dividing>
-                <ui-docs-example description="Loaders can appear inline centered with content.">
+                <ui-example description="Loaders can appear inline centered with content.">
                   <ui-loader visible align="center" inline></ui-loader>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-speed" label="Speed" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='Loaders can appear slow, normal or fast:  `speed="slow"`, `speed="fast"`.'
                 >
                   <ui-loader visible inline speed="slow"></ui-loader>
                   <ui-loader visible inline></ui-loader>
                   <ui-loader visible inline speed="fast"></ui-loader>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colors" label="Colors" sticky collapsible dividing>
-                <ui-docs-example description="Loaders can be different colors.">
+                <ui-example description="Loaders can be different colors.">
                   <ui-loader visible inline color="primary"></ui-loader>
                   <ui-loader visible inline color="secondary"></ui-loader>
                   <ui-loader visible inline color="red"></ui-loader>
@@ -170,11 +170,11 @@
                   <ui-loader visible inline color="brown"></ui-loader>
                   <ui-loader visible inline color="grey"></ui-loader>
                   <ui-loader visible inline color="black"></ui-loader>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="Loaders can have different sizes.">
+                <ui-example description="Loaders can have different sizes.">
                   <ui-segment>
                     <ui-dimmer visible>
                       <ui-loader visible inverted size="mini" text>Loading</ui-loader>
@@ -232,16 +232,16 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="Loaders can have their colors inverted.">
+                <ui-example description="Loaders can have their colors inverted.">
                   <ui-segment inverted padding="lg">
                     <ui-loader visible inverted></ui-loader>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" state="info" size="small"
                     >Inside an <code>inverted</code> (light) dimmer a loader keeps its normal colours: no
                     <code>inverted</code> on the loader.</ui-message
@@ -273,11 +273,11 @@
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-styles" label="Styles" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Loaders can also appear in `double` or `elastic` animation style.  Can be combined with any color or speed."
                 >
                   <ui-segment padding="lg">
@@ -286,7 +286,7 @@
                   <ui-segment padding="lg">
                     <ui-loader visible elastic color="blue"></ui-loader>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

@@ -143,7 +143,8 @@ export class UIAction extends UIItem {
     return UIKeys.keysOf(shortcut.trim()).map((key) => {
       const name = UIKeys.nameOf(key)
       const text = name === "space" || !isApple ? WORD_TEXTS[name] : undefined
-      return text ? this.translationForKey(text) : UIKeys.capOf(key, isApple)
+      // its vocabulary adds these texts to the item's, which TypeScript knows
+      return text ? this.translationForKey(text as never) : UIKeys.capOf(key, isApple)
     })
   }
 

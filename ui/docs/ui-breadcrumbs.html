@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-breadcrumb" label="Breadcrumb" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A standard breadcrumb. Each <code>&lt;ui-breadcrumb&gt;</code> draws its own divider, so
                     there is nothing to write between them.
@@ -71,20 +71,20 @@
                     <ui-breadcrumb link="#store">Store</ui-breadcrumb>
                     <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs aria-label="Breadcrumb with icon dividers" divider-icon="angle right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#store">Store</ui-breadcrumb>
                     <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-divider" label="Divider" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A breadcrumb can contain a divider to show the relationship between sections, this can be formatted as an icon or text:  `divider` sets the text (`/` when unset), `divider-icon` an icon."
                 >
                   <ui-breadcrumbs aria-label="Text divider" divider="/">
@@ -92,76 +92,76 @@
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I28:  Fomantic mixes a `right chevron` and a `right arrow` divider in one breadcrumb;  ours has one divider per breadcrumb. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-breadcrumbs aria-label="Chevron dividers" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs aria-label="Arrow dividers" divider-icon="arrow right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example description="Any text works as a divider, e.g. a guillemet or a pipe.">
+                </ui-example>
+                <ui-example description="Any text works as a divider, e.g. a guillemet or a pipe.">
                   <ui-breadcrumbs aria-label="Guillemet divider" divider="›">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#store">Store</ui-breadcrumb>
                     <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs aria-label="Pipe divider" divider="|">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb selected>Search</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-section" label="Section" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A breadcrumb can contain sections that can either be formatted as a link (`link`) or text."
                 >
                   <ui-breadcrumbs aria-label="Text sections">
                     <ui-breadcrumb>Home</ui-breadcrumb>
                     <ui-breadcrumb selected>Search</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example description="A section may be linkable or contain a link.">
+                <ui-example description="A section may be linkable or contain a link.">
                   <ui-breadcrumbs aria-label="Section holding a link">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb selected
                       >Search for: <a href="#paper-towels">paper towels</a></ui-breadcrumb
                     >
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A section can be active:  the current page, bold, never a link, with `aria-current="page"`.'
                 >
                   <ui-breadcrumbs aria-label="Active section">
                     <ui-breadcrumb link="#products">Products</ui-breadcrumb>
                     <ui-breadcrumb selected>Paper Towels</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A breadcrumb can be inverted.">
+                <ui-example description="A breadcrumb can be inverted.">
                   <ui-segment inverted>
                     <ui-breadcrumbs inverted aria-label="Inverted links" divider-icon="chevron right">
                       <ui-breadcrumb link="#home">Home</ui-breadcrumb>
@@ -175,59 +175,59 @@
                       <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                     </ui-breadcrumbs>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A breadcrumb can vary in size.">
+                <ui-example description="A breadcrumb can vary in size.">
                   <ui-breadcrumbs size="mini" aria-label="Mini" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="tiny" aria-label="Tiny" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="small" aria-label="Small" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="large" aria-label="Large" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="big" aria-label="Big" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="huge" aria-label="Huge" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-breadcrumbs size="massive" aria-label="Massive" divider-icon="chevron right">
                     <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                     <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                     <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                   </ui-breadcrumbs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

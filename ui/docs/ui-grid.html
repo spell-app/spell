@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-introduction" label="Introduction" sticky collapsible dividing>
               <ui-section id="examples-introduction-grids" label="Grids" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A grid is a structure with a
                     <a href="https://99designs.com/designer-blog/2013/03/21/history-of-the-grid-part-1/" target="_blank"
@@ -76,10 +76,10 @@
                     <ui-column width="4"><ui-segment></ui-segment></ui-column>
                     <ui-column width="4"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-introduction-columns" label="Columns" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Grids divide horizontal space into indivisible units called "columns". All columns in a grid must
                     specify their width as proportion of the total available row width.
@@ -106,10 +106,10 @@
                     <ui-column width="8"><ui-segment></ui-segment></ui-column>
                     <ui-column width="6"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-introduction-rows" label="Rows" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">Rows are groups of columns which are aligned horizontally.</p>
                   <p slot="description">
                     Rows can either be <em>explicit</em>, marked with an additional <code>row</code> element, or
@@ -130,10 +130,10 @@
                     <ui-column><ui-segment></ui-segment></ui-column>
                     <ui-column><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-introduction-gutters" label="Gutters" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Grid columns are separated by areas of white space referred to as "gutters". Gutters improve
                     legibility by providing,
@@ -179,7 +179,7 @@
                       <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-introduction-negative-margins"
@@ -188,7 +188,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Since all grid columns include gutters, grids use
                     <a href="https://csswizardry.com/2011/08/building-better-grid-systems/">negative margins</a> to make
@@ -214,7 +214,7 @@
                     <ui-column width="16"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
                   <ui-button attach="bottom">Button after grid</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's deprecated page grids (<code>ui page grid</code>) -- put the grid in a
@@ -224,7 +224,7 @@
 
             <ui-section id="examples-columns" label="Columns" sticky collapsible dividing>
               <ui-section id="examples-columns-automatic-flow" label="Automatic Flow" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Most grids do not need to specify rows. Content will automatically flow to the next row when all the grid columns are taken in the current row."
                 >
                   <ui-grid>
@@ -237,10 +237,10 @@
                     <ui-column width="4"><ui-segment></ui-segment></ui-column>
                     <ui-column width="4"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-columns-column-content" label="Column Content" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Since columns use padding to create gutters, content stylings should not be applied directly to columns, but to elements inside of columns."
                 >
                   <ui-grid columns="3">
@@ -260,10 +260,10 @@
                       </ui-segment>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-columns-column-widths" label="Column Widths" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Column widths can be specified using <a href="#examples-variations-column-width"><code>width</code></a
                     >. If a column cannot fit in a row it will automatically flow to the next row
@@ -279,7 +279,7 @@
                     <ui-column width="14"><ui-segment></ui-segment></ui-column>
                     <ui-column width="16"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-columns-left-right-attached-column"
@@ -288,7 +288,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A column can be attached to the left or right without any padding. This is especially useful when
                     working with a <a href="ui-menu.html#examples-types-tabbed"><code>vertical tabular</code> menu</a>
@@ -297,13 +297,13 @@
                     <ui-column attach="left"><ui-segment></ui-segment></ui-column>
                     <ui-column attach="right"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-rows" label="Rows" sticky collapsible dividing>
               <ui-section id="examples-rows-grouping" label="Grouping" sticky collapsible dividing>
-                <ui-docs-example description="Row wrappers allow you to apply variations to a group of columns.">
+                <ui-example description="Row wrappers allow you to apply variations to a group of columns.">
                   <ui-grid columns="4">
                     <ui-row columns="2">
                       <ui-column><ui-segment></ui-segment></ui-column>
@@ -313,10 +313,10 @@
                     <ui-column><ui-segment></ui-segment></ui-column>
                     <ui-column><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-rows-clearing-content" label="Clearing Content" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Row wrappers will automatically clear previous columns:  the next row starts on a line of its own,
                     even when this one isn't full.  Here empty columns push the second one to the right
@@ -335,10 +335,10 @@
                       <ui-column width="5"><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-rows-special-grids" label="Special Grids" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Additionally, some types of grids, like <a href="#examples-types-divided"><code>divided</code></a> or
                     <a href="#examples-types-celled"><code>celled</code></a> require row wrappers to apply formatting correctly.
@@ -367,13 +367,13 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-varying-grids" label="Varying Grids" sticky collapsible dividing>
               <ui-section id="examples-varying-grids-nesting-grids" label="Nesting Grids" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Grids can be placed inside of other grids, letting you sub-divide columns."
                 >
                   <ui-grid columns="2">
@@ -393,10 +393,10 @@
                       </ui-grid>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-varying-grids-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Grids can use named <a href="#colored-2"><code>color</code></a> to add background colors, but only
                     with <a href="#examples-variations-padded"><code>padded</code></a> that do not include negative margins.
@@ -415,7 +415,7 @@
                       <ui-column color="olive">Olive</ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-varying-grids-automatic-column-count"
@@ -424,7 +424,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     The <a href="#examples-variations-equal-width"><code>equal-width</code></a> variation will automatically divide column
                     width evenly. This is useful with dynamic content where you do not know the column count in advance.
@@ -438,7 +438,7 @@
                       <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-varying-grids-centering-content"
@@ -447,7 +447,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     If a row does not take up all sixteen grid columns, you can use a
                     <a href="#examples-variations-centered"><code>centered</code></a> variation to center the column contents inside the
@@ -460,7 +460,7 @@
                       <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-varying-grids-significant-word-order"
@@ -469,7 +469,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Grids include many variations for adjusting things like vertical or horizontal alignment, text
                     alignment, or default gutter sizes.
@@ -500,13 +500,13 @@
                       <ui-segment>Right Aligned Column</ui-segment>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-responsive-grids" label="Responsive Grids" sticky collapsible dividing>
               <ui-section id="examples-responsive-grids-containers" label="Containers" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A <a href="ui-container.html">container</a> can be used alongside a grid to provide a responsive,
                     fixed width container for wrapping the contents of a page.
@@ -523,10 +523,10 @@
                       <ui-column width="4"><ui-segment></ui-segment></ui-column>
                     </ui-grid>
                   </ui-container>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-responsive-grids-stackable" label="Stackable" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A <a href="#examples-responsive-grids-stackable"><code>stackable</code></a> will automatically stack rows to a single columns
                     on mobile devices
@@ -537,7 +537,7 @@
                     <ui-column><ui-segment></ui-segment></ui-column>
                     <ui-column><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-responsive-grids-reverse-order"
@@ -546,7 +546,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Grids include special <a href="#examples-responsive-variations-reversed"><code>reversed</code></a> variations that allow you to
                     reverse the order of columns or rows by device
@@ -556,10 +556,10 @@
                     <ui-column>Second</ui-column>
                     <ui-column>Third</ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-responsive-grids-doubling" label="Doubling" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A <a href="#examples-responsive-grids-doubling"><code>doubling</code></a> grid will double column widths for each device jump.
                   </p>
@@ -589,7 +589,7 @@
                       <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-responsive-grids-manual-tweaks"
@@ -598,7 +598,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Although design patterns like <a href="#examples-responsive-grids-doubling"><code>doubling</code></a> or
                     <a href="#examples-responsive-grids-stackable"><code>stackable</code></a> are useful at simplifying responsive styling, you
@@ -616,13 +616,13 @@
                     <ui-column width-tablet="6" width-computer="8"><ui-segment></ui-segment></ui-column>
                     <ui-column width-tablet="6" width-computer="8"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-grid" label="Grid" sticky collapsible dividing>
-                <ui-docs-example description="A basic grid.">
+                <ui-example description="A basic grid.">
                   <ui-grid>
                     <ui-column><ui-segment></ui-segment></ui-column>
                     <ui-column><ui-segment></ui-segment></ui-column>
@@ -641,10 +641,10 @@
                     <ui-column><ui-segment></ui-segment></ui-column>
                     <ui-column><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-divided" label="Divided" sticky collapsible dividing>
-                <ui-docs-example description="A grid can have dividers between its columns.">
+                <ui-example description="A grid can have dividers between its columns.">
                   <ui-grid columns="3" divided>
                     <ui-row>
                       <ui-column>
@@ -669,7 +669,7 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-types-vertically-divided"
@@ -678,7 +678,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A grid can have dividers between rows.">
+                <ui-example description="A grid can have dividers between rows.">
                   <ui-grid divided="vertically">
                     <ui-row columns="2">
                       <ui-column>
@@ -700,10 +700,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-celled" label="Celled" sticky collapsible dividing>
-                <ui-docs-example description="A grid can have rows divided into cells.">
+                <ui-example description="A grid can have rows divided into cells.">
                   <ui-grid celled>
                     <ui-row>
                       <ui-column width="3">
@@ -725,10 +725,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-internally-celled" label="Internally Celled" sticky collapsible dividing>
-                <ui-docs-example description="A grid can have rows divisions only between internal rows.">
+                <ui-example description="A grid can have rows divisions only between internal rows.">
                   <ui-grid celled="internally">
                     <ui-row>
                       <ui-column width="3">
@@ -753,13 +753,13 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-rows" label="Rows" sticky collapsible dividing>
-                <ui-docs-example description="A row is a horizontal grouping of columns.">
+                <ui-example description="A row is a horizontal grouping of columns.">
                   <ui-grid columns="3">
                     <ui-row>
                       <ui-column>
@@ -781,10 +781,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-content-columns" label="Columns" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Columns each contain gutters giving them equal spacing from other columns."
                 >
                   <ui-grid>
@@ -801,13 +801,13 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A column has no `floated` any more:  an empty column between two others pushes them to the left and right edges of the row."
                 >
                   <ui-grid>
@@ -819,10 +819,10 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-column-width" label="Column Width" sticky collapsible dividing>
-                <ui-docs-example description="A column can vary in width taking up more than a single grid column.">
+                <ui-example description="A column can vary in width taking up more than a single grid column.">
                   <ui-grid>
                     <ui-column width="4">
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
@@ -834,10 +834,10 @@
                       <ui-image src="images/wireframe/media-paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-column-count" label="Column Count" sticky collapsible dividing>
-                <ui-docs-example description="A grid can have a different number of columns per row.">
+                <ui-example description="A grid can have a different number of columns per row.">
                   <ui-grid>
                     <ui-row columns="3">
                       <ui-column>
@@ -882,10 +882,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-equal-width" label="Equal Width" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A grid can automatically resize all elements to split the available width evenly."
                 >
                   <ui-grid equal-width>
@@ -899,8 +899,8 @@
                       <ui-segment>3</ui-segment>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid equal-width>
                     <ui-row>
                       <ui-column>
@@ -936,11 +936,11 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <!-- GAP I79:  a stretched row doesn't grow the `<ui-segment>`s inside its columns. -->
               <ui-section id="examples-variations-stretched" label="Stretched" sticky collapsible dividing>
-                <ui-docs-example description="A row can stretch its contents to take up the entire column height.">
+                <ui-example description="A row can stretch its contents to take up the entire column height.">
                   <ui-grid columns="3" divided>
                     <ui-row stretched>
                       <ui-column>
@@ -957,8 +957,8 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid equal-width>
                     <ui-row stretched>
                       <ui-column>
@@ -991,10 +991,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-padded" label="Padded" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A grid can preserve its vertical and horizontal gutters on first and last columns
                   </p>
@@ -1008,8 +1008,8 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example description="The following grid has vertical gutters.">
+                </ui-example>
+                <ui-example description="The following grid has vertical gutters.">
                   <ui-divider></ui-divider>
                   <ui-grid columns="2" padding="md-y">
                     <ui-column>
@@ -1019,8 +1019,8 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example description="The following grid has horizontal gutters.">
+                </ui-example>
+                <ui-example description="The following grid has horizontal gutters.">
                   <ui-divider></ui-divider>
                   <ui-grid columns="2" padding="md-x">
                     <ui-column>
@@ -1030,10 +1030,10 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A grid can appear compact with no or very little padding</p>
                   <p slot="description">The following grid is compact.</p>
                   <ui-divider></ui-divider>
@@ -1055,8 +1055,8 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example description="The following grid is very compact.">
+                </ui-example>
+                <ui-example description="The following grid is very compact.">
                   <ui-divider></ui-divider>
                   <ui-grid columns="2" celled="internally" spacing="xs">
                     <ui-row>
@@ -1076,10 +1076,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-relaxed" label="Relaxed" sticky collapsible dividing>
-                <ui-docs-example description="A grid can increase its gutters to allow for more negative space.">
+                <ui-example description="A grid can increase its gutters to allow for more negative space.">
                   <ui-grid columns="4" spacing="lg">
                     <ui-column>
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
@@ -1094,8 +1094,8 @@
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid columns="4" spacing="xl">
                     <ui-column>
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
@@ -1110,10 +1110,10 @@
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A row or column can be colored.">
+                <ui-example description="A row or column can be colored.">
                   <ui-grid columns="5" padding="md">
                     <ui-column color="red">Red</ui-column>
                     <ui-column color="orange">Orange</ui-column>
@@ -1129,8 +1129,8 @@
                     <ui-column color="grey">Grey</ui-column>
                     <ui-column color="black">Black</ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid padding="md">
                     <ui-row color="red">
                       <ui-column>Red</ui-column>
@@ -1172,10 +1172,10 @@
                       <ui-column>Black</ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
-                <ui-docs-example description="A grid can have its columns centered.">
+                <ui-example description="A grid can have its columns centered.">
                   <ui-grid columns="2" centered>
                     <ui-column>
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
@@ -1206,10 +1206,10 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
-                <ui-docs-example description="A grid, row, or column can specify its text alignment.">
+                <ui-example description="A grid, row, or column can specify its text alignment.">
                   <ui-grid columns="3" align="center">
                     <ui-row>
                       <ui-column>
@@ -1231,8 +1231,8 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid align="center">
                     <ui-row columns="3">
                       <ui-column>
@@ -1266,8 +1266,8 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid columns="3" align="right">
                     <ui-row>
                       <ui-column>
@@ -1289,7 +1289,7 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-variations-vertical-alignment"
@@ -1298,7 +1298,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A grid, row, or column can specify its vertical alignment to have all its columns vertically centered."
                 >
                   <ui-grid columns="4" vertical-align="middle" centered>
@@ -1315,8 +1315,8 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid columns="4" centered>
                     <ui-row vertical-align="top">
                       <ui-column>
@@ -1355,13 +1355,13 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-responsive-variations" label="Responsive Variations" sticky collapsible dividing>
               <ui-section id="examples-responsive-variations-doubling" label="Doubling" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A grid can double its column width on tablet and mobile sizes</p>
                   <ui-message slot="description" state="info" size="small"
                     >A grid will round its columns to the closest reasonable value when doubling, for example a
@@ -1385,10 +1385,10 @@
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-responsive-variations-stackable" label="Stackable" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A grid can have its columns stack on-top of each other after reaching mobile breakpoints
                   </p>
@@ -1409,10 +1409,10 @@
                       </ui-segment>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-responsive-variations-reversed" label="Reversed" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A grid or row can specify that its columns should reverse order at different device sizes
                   </p>
@@ -1446,8 +1446,8 @@
                     <ui-column>Mobile Second</ui-column>
                     <ui-column>Mobile First</ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid reversed="computer vertically">
                     <ui-row>
                       <ui-column>Computer Row 4</ui-column>
@@ -1462,8 +1462,8 @@
                       <ui-column>Computer Row 1</ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid reversed="tablet vertically">
                     <ui-row>
                       <ui-column>Tablet Row 4</ui-column>
@@ -1478,8 +1478,8 @@
                       <ui-column>Tablet Row 1</ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid reversed="mobile vertically">
                     <ui-row>
                       <ui-column>Mobile Row 4</ui-column>
@@ -1494,7 +1494,7 @@
                       <ui-column>Mobile Row 1</ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-responsive-variations-device-visibility"
@@ -1503,7 +1503,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A columns or row can appear only for a specific device, or screen sizes</p>
                   <ui-message slot="description" state="info" size="small"
                     >See the <a href="ui-container.html">container</a> page for the breakpoints.</ui-message
@@ -1573,7 +1573,7 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section
                 id="examples-responsive-variations-responsive-width"
@@ -1582,7 +1582,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A column can specify a width for a specific device</p>
                   <ui-message slot="description" state="info" size="small"
                     ><p>
@@ -1608,8 +1608,8 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid>
                     <ui-column width-large="2" width-widescreen="1" width="4">
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -1624,7 +1624,7 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

@@ -66,34 +66,34 @@
           </ui-markdown>
           <ui-sticky class="site-sticky-bar">
             <ui-segment appearance="secondary">
-              <ui-docs-themes></ui-docs-themes>
+              <ui-theme-menu></ui-theme-menu>
             </ui-segment>
           </ui-sticky>
 
           <!-- kitchen:start -->
           <ui-section id="elements" label="Elements" sticky collapsible dividing>
             <ui-section id="elements-button" label="Button" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A button indicates a possible user action.
                   <a href="ui-button.html">Button page</a>
                 </p>
                 <ui-button>Follow</ui-button>
-              </ui-docs-example>
-              <ui-docs-example description="Emphasis">
+              </ui-example>
+              <ui-example description="Emphasis">
                 <ui-button color="primary">Save</ui-button>
                 <ui-button color="secondary">Okay</ui-button>
                 <ui-button>Cancel</ui-button>
-              </ui-docs-example>
-              <ui-docs-example description="Animated">
+              </ui-example>
+              <ui-example description="Animated">
                 <ui-button reveal="slide" icon="arrow-right">Next</ui-button>
                 <ui-button reveal="vertical" icon="cart-shopping">Shop</ui-button>
                 <ui-button reveal="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-container" label="Container" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A container limits content to a maximum width.
                   <a href="ui-container.html">Container page</a>
@@ -108,8 +108,8 @@
                     Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
                   </p>
                 </ui-container>
-              </ui-docs-example>
-              <ui-docs-example description="Text container">
+              </ui-example>
+              <ui-example description="Text container">
                 <ui-container text>
                   <h2>Header</h2>
                   <p>
@@ -121,11 +121,11 @@
                     Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
                   </p>
                 </ui-container>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-content-parts" label="Content parts" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Headers, content, descriptions, metas and the other generic parts that cards, items, modals and messages share.
                   <a href="ui-header.html">Content parts page</a>
@@ -148,8 +148,8 @@
                 <ui-header level="4">Fourth header</ui-header>
                 <ui-header level="5">Fifth header</ui-header>
                 <ui-header level="6">Sixth header</ui-header>
-              </ui-docs-example>
-              <ui-docs-example description="Content headers">
+              </ui-example>
+              <ui-example description="Content headers">
                 <ui-header size="huge">Huge header</ui-header>
                 <ui-header size="large">Large header</ui-header>
                 <ui-header>Plain header</ui-header>
@@ -158,8 +158,8 @@
                 <ui-header size="tiny">Tiny header</ui-header>
                 <ui-header size="mini">Mini header</ui-header>
                 <ui-header size="massive" level="2">A sized page header</ui-header>
-              </ui-docs-example>
-              <ui-docs-example description="Icon headers">
+              </ui-example>
+              <ui-example description="Icon headers">
                 <ui-header align="center" icon level="2">
                   <ui-icon name="users" appearance="circular"></ui-icon>
                   Friends
@@ -171,11 +171,11 @@
                     <ui-header sub>Manage your account settings and set e-mail preferences.</ui-header>
                   </ui-content>
                 </ui-header>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-divider" label="Divider" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A divider visually segments content into groups.
                   <a href="ui-divider.html">Divider page</a>
@@ -183,8 +183,8 @@
                 <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
                 <ui-divider></ui-divider>
                 <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
-              </ui-docs-example>
-              <ui-docs-example description="Vertical divider">
+              </ui-example>
+              <ui-example description="Vertical divider">
                 <div
                   style="
                     position: relative;
@@ -203,8 +203,8 @@
                     <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
                   </div>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Horizontal divider">
+              </ui-example>
+              <ui-example description="Horizontal divider">
                 <div style="text-align: center">
                   <button type="button">Search</button>
                   <ui-divider direction="horizontal">Or</ui-divider>
@@ -213,11 +213,11 @@
                 <ui-divider direction="horizontal" icon="tag">Description</ui-divider>
                 <p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
                 <ui-divider direction="horizontal" icon="chart-column">Specifications</ui-divider>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-emoji" label="Emoji" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An emoji is a glyph used to represent something else.
                   <a href="ui-emoji.html">Emoji page</a>
@@ -228,20 +228,20 @@
                   <ui-emoji name="flag_united_states"></ui-emoji> <ui-emoji name="keycap_1"></ui-emoji>
                   <ui-emoji name="woman_technologist"></ui-emoji>
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="In text">
+              </ui-example>
+              <ui-example description="In text">
                 <p>
                   That was <ui-emoji name=":face_with_tears_of_joy:"></ui-emoji> hilarious, thanks
                   <ui-emoji name="thumbs_up" label="Approved"></ui-emoji>
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="Decorative">
+              </ui-example>
+              <ui-example description="Decorative">
                 <p><ui-emoji name="sparkles" label></ui-emoji> New features</p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-flag" label="Flag" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A flag is used to represent a political state.
                   <a href="ui-flag.html">Flag page</a>
@@ -258,8 +258,8 @@
                   <ui-flag country="eu"></ui-flag>
                   <ui-flag country="un"></ui-flag>
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="Other flags">
+              </ui-example>
+              <ui-example description="Other flags">
                 <p>
                   <ui-flag country="pride"></ui-flag>
                   <ui-flag country="transgender"></ui-flag>
@@ -268,11 +268,11 @@
                   <ui-flag country="scotland"></ui-flag>
                   <ui-flag country="wales"></ui-flag>
                 </p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-icon" label="Icon" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An icon is a glyph used to represent something else.
                   <a href="ui-icon.html">Icon page</a>
@@ -282,22 +282,22 @@
                 <ui-icon name="cloud"></ui-icon>
                 <ui-icon name="puzzle-piece"></ui-icon>
                 <ui-icon name="heart"></ui-icon>
-              </ui-docs-example>
-              <ui-docs-example description="Regular (outline)">
+              </ui-example>
+              <ui-example description="Regular (outline)">
                 <ui-icon name="heart outline"></ui-icon>
                 <ui-icon name="bell outline"></ui-icon>
                 <ui-icon name="envelope outline"></ui-icon>
                 <ui-icon name="circle outline"></ui-icon>
-              </ui-docs-example>
-              <ui-docs-example description="Brands">
+              </ui-example>
+              <ui-example description="Brands">
                 <ui-icon name="github"></ui-icon>
                 <ui-icon name="discord"></ui-icon>
                 <ui-icon name="medium"></ui-icon>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-image" label="Image" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An image is a graphic representation of something.
                   <a href="ui-image.html">Image page</a>
@@ -306,40 +306,40 @@
                   src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                   alt=""
                 ></ui-image>
-              </ui-docs-example>
-              <ui-docs-example description="Image link">
+              </ui-example>
+              <ui-example description="Image link">
                 <ui-image
                   link="#image-link"
                   src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                   alt="A landscape"
                 ></ui-image>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-input" label="Input" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An input is a field used to elicit a response from a user.
                   <a href="ui-input.html">Input page</a>
                   &middot; <a href="ui-textarea.html">Textarea page</a>
                 </p>
                 <ui-input placeholder="Search..." aria-label="Search"></ui-input>
-              </ui-docs-example>
-              <ui-docs-example description="Native types">
+              </ui-example>
+              <ui-example description="Native types">
                 <div class="ui-cluster">
                   <ui-input type="password" placeholder="Password" aria-label="Password"></ui-input>
                   <ui-input type="email" placeholder="E-mail" aria-label="E-mail"></ui-input>
                   <ui-input type="number" placeholder="Quantity" aria-label="Quantity"></ui-input>
                   <ui-input type="date" aria-label="Date"></ui-input>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Textarea">
+              </ui-example>
+              <ui-example description="Textarea">
                 <ui-textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"></ui-textarea>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-label" label="Label" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A label displays content classification.
                   <a href="ui-label.html">Label page</a>
@@ -351,8 +351,8 @@
                   ><kbd><ui-label appearance="basic">A</ui-label></kbd
                   ><kbd><ui-label appearance="basic">S</ui-label></kbd>
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="Image">
+              </ui-example>
+              <ui-example description="Image">
                 <ui-label
                   link="#joe"
                   image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
@@ -375,8 +375,8 @@
                   removable
                   >Zoe</ui-label
                 >
-              </ui-docs-example>
-              <ui-docs-example description="Pointing">
+              </ui-example>
+              <ui-example description="Pointing">
                 <div class="ui-stack">
                   <div>
                     <input type="text" placeholder="First name" aria-label="First name" /><br /><ui-label pointing
@@ -401,11 +401,11 @@
                     >
                   </div>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-list" label="List" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A list is used to group related content.
                   <a href="ui-list.html">List page</a>
@@ -415,8 +415,8 @@
                   <ui-item>Pears</ui-item>
                   <ui-item>Oranges</ui-item>
                 </ui-list>
-              </ui-docs-example>
-              <ui-docs-example description="Icons">
+              </ui-example>
+              <ui-example description="Icons">
                 <ui-list>
                   <ui-item icon="users">
                     <ui-content> Fomantic UI </ui-content>
@@ -435,8 +435,8 @@
                     </ui-content>
                   </ui-item>
                 </ui-list>
-              </ui-docs-example>
-              <ui-docs-example description="Relaxed, divided, with headers">
+              </ui-example>
+              <ui-example description="Relaxed, divided, with headers">
                 <ui-list spacing="lg" divided>
                   <ui-item icon="github">
                     <ui-content>
@@ -457,11 +457,11 @@
                     </ui-content>
                   </ui-item>
                 </ui-list>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-loader" label="Loader" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A loader alerts a user to wait for an activity to complete.
                   <a href="ui-loader.html">Loader page</a>
@@ -471,18 +471,18 @@
                 >
                   <ui-loader visible></ui-loader>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Text loader">
+              </ui-example>
+              <ui-example description="Text loader">
                 <div
                   style="position: relative; height: 8em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)"
                 >
                   <ui-loader visible text>Loading</ui-loader>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-placeholder" label="Placeholder" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A placeholder is used to reserve space for content that soon will appear in a layout.
                   <a href="ui-placeholder.html">Placeholder page</a>
@@ -497,8 +497,8 @@
                     <ui-placeholder-line length="short"></ui-placeholder-line>
                   </ui-placeholder-paragraph>
                 </ui-placeholder>
-              </ui-docs-example>
-              <ui-docs-example description="Cards">
+              </ui-example>
+              <ui-example description="Cards">
                 <div class="ui-grid" style="--min-column-size: 12em">
                   <div style="padding: 1em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
                     <ui-placeholder fluid>
@@ -537,8 +537,8 @@
                     </ui-placeholder>
                   </div>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Consecutive placeholders">
+              </ui-example>
+              <ui-example description="Consecutive placeholders">
                 <div>
                   <ui-placeholder>
                     <ui-placeholder-header image>
@@ -559,11 +559,11 @@
                     </ui-placeholder-header>
                   </ui-placeholder>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-rail" label="Rail" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A rail is used to show accompanying content outside the boundaries of the main view of a site.
                   <a href="ui-rail.html">Rail page</a>
@@ -575,15 +575,15 @@
                     <p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
                   </ui-segment>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Internal">
+              </ui-example>
+              <ui-example description="Internal">
                 <ui-segment>
                   <ui-rail position="left" internal><ui-segment>Left rail content</ui-segment></ui-rail>
                   <ui-rail position="right" internal><ui-segment>Right rail content</ui-segment></ui-rail>
                   <p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
                 </ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="Dividing">
+              </ui-example>
+              <ui-example description="Dividing">
                 <div style="margin-inline: 20em">
                   <ui-segment>
                     <ui-rail position="left" dividing><ui-segment>Left rail content</ui-segment></ui-rail>
@@ -591,11 +591,11 @@
                     <p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
                   </ui-segment>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-reveal" label="Reveal" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A reveal displays additional content in place of previous content when activated.
                   <a href="ui-reveal.html">Reveal page</a>
@@ -616,8 +616,8 @@
                     height="150"
                   />
                 </ui-reveal>
-              </ui-docs-example>
-              <ui-docs-example description="Move">
+              </ui-example>
+              <ui-example description="Move">
                 <ui-reveal move>
                   <img
                     slot="visible"
@@ -682,8 +682,8 @@
                     height="150"
                   />
                 </ui-reveal>
-              </ui-docs-example>
-              <ui-docs-example description="Rotate">
+              </ui-example>
+              <ui-example description="Rotate">
                 <ui-reveal rotate>
                   <img
                     slot="visible"
@@ -720,30 +720,30 @@
                     style="border-radius: 50%"
                   />
                 </ui-reveal>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-segment" label="Segment" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A segment is used to create a grouping of related content.
                   <a href="ui-segment.html">Segment page</a>
                 </p>
                 <ui-segment><p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p></ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="Placeholder segment">
+              </ui-example>
+              <ui-example description="Placeholder segment">
                 <ui-segment placeholder>
                   <p style="text-align: center">No documents are listed for this customer.</p>
                   <button type="button">Add document</button>
                 </ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="Raised">
+              </ui-example>
+              <ui-example description="Raised">
                 <ui-segment appearance="raised"><p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p></ui-segment>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-step" label="Step" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A step shows the completion status of an activity in a series of activities.
                   <a href="ui-step.html">Step page</a>
@@ -751,25 +751,25 @@
                 <ui-steps>
                   <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                 </ui-steps>
-              </ui-docs-example>
-              <ui-docs-example description="Steps">
+              </ui-example>
+              <ui-example description="Steps">
                 <ui-steps>
                   <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                   <ui-step selected icon="credit-card" heading="Billing" description="Enter billing information"></ui-step>
                   <ui-step disabled icon="circle-info" heading="Confirm Order"></ui-step>
                 </ui-steps>
-              </ui-docs-example>
-              <ui-docs-example description="Ordered">
+              </ui-example>
+              <ui-example description="Ordered">
                 <ui-steps ordered>
                   <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
                   <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
                   <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                 </ui-steps>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-text" label="Text" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A text is used to style some inline text with a simple color.
                   <a href="ui-text.html">Text page</a>
@@ -786,19 +786,19 @@
                   <ui-text color="violet">Violet</ui-text> <ui-text color="pink">Pink</ui-text>
                   <ui-text color="brown">Brown</ui-text> <ui-text color="grey">Grey</ui-text> <ui-text color="black">Black</ui-text>
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="Semantic colors">
+              </ui-example>
+              <ui-example description="Semantic colors">
                 <p>
                   This is <ui-text state="info">info inline text</ui-text> and
                   <ui-text state="success">this is success inline text</ui-text> and
                   <ui-text state="warning">this is warning inline text</ui-text> and
                   <ui-text state="error">this is error inline text</ui-text>.
                 </p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="elements-video" label="Video" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A video plays a video file in the browser&#39;s own player.
                   <a href="ui-video.html">Video page</a>
@@ -811,16 +811,16 @@
                   label="A ball rolls across the screen"
                   style="max-width: 32em"
                 ></ui-video>
-              </ui-docs-example>
-              <ui-docs-example description="Audio">
+              </ui-example>
+              <ui-example description="Audio">
                 <ui-audio src="examples/media/chime.wav" controls label="A chime"></ui-audio>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
           <ui-section id="collections" label="Collections" sticky collapsible dividing>
             <ui-section id="collections-breadcrumb" label="Breadcrumb" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A breadcrumb is used to show hierarchy between content.
                   <a href="ui-breadcrumbs.html">Breadcrumb page</a>
@@ -830,8 +830,8 @@
                   <ui-breadcrumb link="#store">Store</ui-breadcrumb>
                   <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
                 </ui-breadcrumbs>
-              </ui-docs-example>
-              <ui-docs-example description="Semantic list, token divider">
+              </ui-example>
+              <ui-example description="Semantic list, token divider">
                 <ui-breadcrumbs aria-label="Token divider demo">
                   <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                   <ui-breadcrumb link="#store">Store</ui-breadcrumb>
@@ -842,18 +842,18 @@
                   <ui-breadcrumb link="#store">Store</ui-breadcrumb>
                   <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
                 </ui-breadcrumbs>
-              </ui-docs-example>
-              <ui-docs-example description="Icon divider">
+              </ui-example>
+              <ui-example description="Icon divider">
                 <ui-breadcrumbs aria-label="Icon divider demo" divider-icon="chevron right">
                   <ui-breadcrumb link="#home">Home</ui-breadcrumb>
                   <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
                   <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
                 </ui-breadcrumbs>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-form" label="Form" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A form displays a set of related user input fields in a structured way.
                   <a href="ui-form.html">Form page</a>
@@ -874,11 +874,11 @@
                     <ui-button type="submit">Submit</ui-button>
                   </form>
                 </ui-form>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-grid" label="Grid" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A grid is used to harmonize negative space in a layout.
                   <a href="ui-grid.html">Grid page</a>
@@ -891,8 +891,8 @@
                   <ui-column width="8"><p>Eight wide</p></ui-column>
                   <ui-column width="8"><p>Eight wide</p></ui-column>
                 </ui-grid>
-              </ui-docs-example>
-              <ui-docs-example description="Divided">
+              </ui-example>
+              <ui-example description="Divided">
                 <ui-grid divided columns="3">
                   <ui-row>
                     <ui-column><p>One</p></ui-column>
@@ -905,8 +905,8 @@
                     <ui-column><p>Six</p></ui-column>
                   </ui-row>
                 </ui-grid>
-              </ui-docs-example>
-              <ui-docs-example description="Vertically divided">
+              </ui-example>
+              <ui-example description="Vertically divided">
                 <ui-grid divided="vertically">
                   <ui-row columns="2">
                     <ui-column><p>One</p></ui-column>
@@ -918,11 +918,11 @@
                     <ui-column><p>Five</p></ui-column>
                   </ui-row>
                 </ui-grid>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-menu" label="Menu" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A menu displays grouped navigation actions.
                   <a href="ui-menu.html">Menu page</a>
@@ -932,8 +932,8 @@
                   <ui-item link="#reviews">Reviews</ui-item>
                   <ui-item link="#events">Upcoming Events</ui-item>
                 </ui-menu>
-              </ui-docs-example>
-              <ui-docs-example description="Secondary menu">
+              </ui-example>
+              <ui-example description="Secondary menu">
                 <ui-menu appearance="secondary" aria-label="Secondary demo">
                   <ui-item link="#home" active>Home</ui-item>
                   <ui-item link="#messages">Messages</ui-item>
@@ -942,8 +942,8 @@
                     <ui-item link="#logout">Logout</ui-item>
                   </ui-menu>
                 </ui-menu>
-              </ui-docs-example>
-              <ui-docs-example description="Pointing">
+              </ui-example>
+              <ui-example description="Pointing">
                 <ui-menu appearance="pointing" aria-label="Pointing demo">
                   <ui-item link="#home">Home</ui-item>
                   <ui-item link="#messages" selected>Messages</ui-item>
@@ -960,11 +960,11 @@
                     <ui-item link="#logout">Logout</ui-item>
                   </ui-menu>
                 </ui-menu>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-message" label="Message" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A message displays information that explains nearby content.
                   <a href="ui-message.html">Message page</a>
@@ -975,25 +975,25 @@
                     We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.
                   </p>
                 </ui-message>
-              </ui-docs-example>
-              <ui-docs-example description="List message">
+              </ui-example>
+              <ui-example description="List message">
                 <ui-message heading="New site features">
                   <ul>
                     <li>You can now have cover images on blog pages</li>
                     <li>Drafts will now auto-save while writing</li>
                   </ul>
                 </ui-message>
-              </ui-docs-example>
-              <ui-docs-example description="Icon message">
+              </ui-example>
+              <ui-example description="Icon message">
                 <ui-message heading="Have you heard about our mailing list?">
                   <ui-icon slot="icon" name="envelope"></ui-icon>
                   <p>Get the best news in your e-mail every day.</p>
                 </ui-message>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-table" label="Table" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A table displays a collection of data grouped into rows.
                   <a href="ui-table.html">Table page</a>
@@ -1033,8 +1033,8 @@
                     </tfoot>
                   </table>
                 </ui-table>
-              </ui-docs-example>
-              <ui-docs-example description="Definition">
+              </ui-example>
+              <ui-example description="Definition">
                 <ui-table definition celled>
                   <table>
                     <thead>
@@ -1058,8 +1058,8 @@
                     </tbody>
                   </table>
                 </ui-table>
-              </ui-docs-example>
-              <ui-docs-example description="Structured">
+              </ui-example>
+              <ui-example description="Structured">
                 <ui-table appearance="structured" celled>
                   <table>
                     <thead>
@@ -1102,11 +1102,11 @@
                     </tbody>
                   </table>
                 </ui-table>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-terms" label="Terms" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Terms list facts as a label and a value each, lined up.
                   <a href="ui-terms.html">Terms page</a>
@@ -1116,18 +1116,18 @@
                   <ui-term label="Rank" value="queen"></ui-term>
                   <ui-term label="Played by"><ui-label color="blue">Jamie</ui-label></ui-term>
                 </ui-terms>
-              </ui-docs-example>
-              <ui-docs-example description="Horizontal">
+              </ui-example>
+              <ui-example description="Horizontal">
                 <ui-terms direction="horizontal">
                   <ui-term label="Score" value="42"></ui-term>
                   <ui-term label="Moves" value="17"></ui-term>
                   <ui-term label="Time" value="3:05"></ui-term>
                 </ui-terms>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="collections-toolbar" label="Toolbar" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A toolbar is a horizontal menu whose items scroll sideways when they don&#39;t fit, with a button at each end while there&#39;s more to see that way.
                   <a href="ui-toolbar.html">Toolbar page</a>
@@ -1140,8 +1140,8 @@
                   <ui-item link="#variations">Variations</ui-item>
                   <ui-item link="#group-variations">Group Variations</ui-item>
                 </ui-toolbar>
-              </ui-docs-example>
-              <ui-docs-example description="Segmented">
+              </ui-example>
+              <ui-example description="Segmented">
                 <ui-toolbar appearance="segmented" aria-label="Segmented demo" style="max-width: 320px">
                   <ui-item selected>Examples</ui-item>
                   <ui-item>Usage</ui-item>
@@ -1150,36 +1150,36 @@
                   <ui-item>Accessibility</ui-item>
                   <ui-item>History</ui-item>
                 </ui-toolbar>
-              </ui-docs-example>
-              <ui-docs-example description="Everything fits">
+              </ui-example>
+              <ui-example description="Everything fits">
                 <ui-toolbar appearance="secondary" aria-label="Short demo">
                   <ui-item link="#one" selected>One</ui-item>
                   <ui-item link="#two">Two</ui-item>
                   <ui-item link="#three">Three</ui-item>
                 </ui-toolbar>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
           <ui-section id="views" label="Views" sticky collapsible dividing>
             <ui-section id="views-advertisement" label="Advertisement" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An ad displays third-party promotional content.
                   <a href="ui-ad.html">Advertisement page</a>
                 </p>
                 <ui-ad unit="medium rectangle" test="Medium rectangle"></ui-ad>
-              </ui-docs-example>
-              <ui-docs-example description="Large rectangle">
+              </ui-example>
+              <ui-example description="Large rectangle">
                 <ui-ad unit="large rectangle" test="Large rectangle"></ui-ad>
-              </ui-docs-example>
-              <ui-docs-example description="Small rectangle">
+              </ui-example>
+              <ui-example description="Small rectangle">
                 <ui-ad unit="small rectangle" test="Small rectangle"></ui-ad>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-card" label="Card" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A card displays site content in a manner similar to a playing card.
                   <a href="ui-card.html">Card page</a>
@@ -1198,8 +1198,8 @@
                     ><a href="#kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a></ui-extra
                   >
                 </ui-card>
-              </ui-docs-example>
-              <ui-docs-example description="Cards">
+              </ui-example>
+              <ui-example description="Cards">
                 <ui-cards>
                   <ui-card>
                     <img
@@ -1244,8 +1244,8 @@
                     >
                   </ui-card>
                 </ui-cards>
-              </ui-docs-example>
-              <ui-docs-example description="Horizontal card">
+              </ui-example>
+              <ui-example description="Horizontal card">
                 <ui-card direction="horizontal">
                   <img
                     src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M1 9l3-4 2 3 1-1 2 2z%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
@@ -1257,11 +1257,11 @@
                     <ui-description>Jenny is a student studying Media Management.</ui-description>
                   </ui-content>
                 </ui-card>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-comment" label="Comment" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A comment displays user feedback to site content.
                   <a href="ui-comment.html">Comment page</a>
@@ -1321,11 +1321,11 @@
                     </form></ui-form
                   >
                 </ui-comments>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-feed" label="Feed" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A feed presents user activity chronologically.
                   <a href="ui-feed.html">Feed page</a>
@@ -1374,11 +1374,11 @@
                     </ui-content>
                   </ui-event>
                 </ui-feed>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-items" label="Items" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A group of items presents a set of site content for display, each an image beside its text.
                   <a href="ui-items.html">Items page</a>
@@ -1409,8 +1409,8 @@
                     </ui-content>
                   </ui-item>
                 </ui-items>
-              </ui-docs-example>
-              <ui-docs-example description="Image shorthand">
+              </ui-example>
+              <ui-example description="Image shorthand">
                 <ui-items>
                   <ui-item
                     image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
@@ -1422,18 +1422,18 @@
                     </ui-content>
                   </ui-item>
                 </ui-items>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-statistic" label="Statistic" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A statistic emphasizes the current value of an attribute.
                   <a href="ui-statistic.html">Statistic page</a>
                 </p>
                 <ui-statistic value="5,550" label="Downloads"></ui-statistic>
-              </ui-docs-example>
-              <ui-docs-example description="Statistic group">
+              </ui-example>
+              <ui-example description="Statistic group">
                 <ui-statistics>
                   <ui-statistic value="22" label="Saves"></ui-statistic>
                   <ui-statistic>
@@ -1443,11 +1443,11 @@
                   <ui-statistic value="5" label="Flights"></ui-statistic>
                   <ui-statistic value="42" label="Team members"></ui-statistic>
                 </ui-statistics>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="views-tree-diagram" label="Tree diagram" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.
                   <a href="ui-tree-diagram.html">Tree diagram page</a>
@@ -1487,20 +1487,20 @@
                     }
                   </script>
                 </ui-tree-diagram>
-              </ui-docs-example>
-              <ui-docs-example description="Labels only">
+              </ui-example>
+              <ui-example description="Labels only">
                 <ui-tree-diagram>
                   <script type="application/json">
                     { "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
                   </script>
                 </ui-tree-diagram>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
           <ui-section id="modules" label="Modules" sticky collapsible dividing>
             <ui-section id="modules-accordion" label="Accordion" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An accordion allows users to toggle the display of sections of content.
                   <a href="ui-accordion.html">Accordion page</a>
@@ -1527,8 +1527,8 @@
                     </p>
                   </ui-content>
                 </ui-accordion>
-              </ui-docs-example>
-              <ui-docs-example description="Styled">
+              </ui-example>
+              <ui-example description="Styled">
                 <ui-accordion appearance="styled" open="0">
                   <ui-title>What is a dog?</ui-title>
                   <ui-content><p>A dog is a type of domesticated animal.</p></ui-content>
@@ -1537,56 +1537,56 @@
                   <ui-title>How do you acquire a dog?</ui-title>
                   <ui-content><p>From pet shops, private owners, or shelters.</p></ui-content>
                 </ui-accordion>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-calendar" label="Calendar" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A calendar lets a user pick a date, a time, or both.
                   <a href="ui-calendar.html">Calendar page</a>
                 </p>
                 <ui-calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today></ui-calendar>
-              </ui-docs-example>
-              <ui-docs-example description="Date, time, month, year">
+              </ui-example>
+              <ui-example description="Date, time, month, year">
                 <div class="ui-cluster">
                   <ui-calendar type="date" locale="en-US" placeholder="Date"></ui-calendar>
                   <ui-calendar type="time" locale="en-US" placeholder="Time"></ui-calendar>
                   <ui-calendar type="month" locale="en-US" placeholder="Month"></ui-calendar>
                   <ui-calendar type="year" locale="en-US" placeholder="Year"></ui-calendar>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Inline">
+              </ui-example>
+              <ui-example description="Inline">
                 <div class="ui-cluster">
                   <ui-calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"></ui-calendar>
                   <ui-calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"></ui-calendar>
                   <ui-calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"></ui-calendar>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-checkbox" label="Checkbox" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A checkbox allows a user to select a value from a small set of options, often binary.
                   <a href="ui-checkbox.html">Checkbox page</a>
                   &middot; <a href="ui-radio.html">Radio page</a>
                 </p>
                 <ui-checkbox>Make my profile visible</ui-checkbox>
-              </ui-docs-example>
-              <ui-docs-example description="Radio">
+              </ui-example>
+              <ui-example description="Radio">
                 <div class="ui-stack" role="radiogroup" aria-label="How often?">
                   <ui-radio name="often" value="week" selected>Once a week</ui-radio>
                   <ui-radio name="often" value="day">Once a day</ui-radio>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Slider">
+              </ui-example>
+              <ui-example description="Slider">
                 <ui-checkbox appearance="slider">Accept terms and conditions</ui-checkbox>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-dimmer" label="Dimmer" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A dimmer hides distractions to focus attention on particular content.
                   <a href="ui-dimmer.html">Dimmer page</a>
@@ -1597,8 +1597,8 @@
                   <p>Another paragraph, so the segment has some height.</p>
                   <ui-dimmer id="dimmer-types-plain" visible></ui-dimmer>
                 </ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="Content dimmer">
+              </ui-example>
+              <ui-example description="Content dimmer">
                 <ui-segment>
                   <p style="min-height: 12em">A dimmer can show content, centred over what it dims.</p>
                   <ui-dimmer visible>
@@ -1606,18 +1606,18 @@
                     <ui-button inverted>Add</ui-button>
                   </ui-dimmer>
                 </ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="Page dimmer">
+              </ui-example>
+              <ui-example description="Page dimmer">
                 <button type="button" class="ui button" commandfor="dimmer-types-page" command="--show">Dim the page</button>
                 <ui-dimmer id="dimmer-types-page" page aria-label="Dark page dimmer">
                   <ui-header level="2">Dark page dimmer</ui-header>
                   <p>A click anywhere, or Escape, brings the page back.</p>
                 </ui-dimmer>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-dropdown" label="Dropdown" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A dropdown allows a user to select a value from a series of options.
                   <a href="ui-dropdown.html">Dropdown page</a>
@@ -1630,24 +1630,24 @@
                   <ui-item>Edit</ui-item>
                   <ui-item>Share</ui-item>
                 </ui-dropdown>
-              </ui-docs-example>
-              <ui-docs-example description="Selection">
+              </ui-example>
+              <ui-example description="Selection">
                 <ui-dropdown selection placeholder="Gender" name="gender">
                   <ui-item value="male">Male</ui-item>
                   <ui-item value="female">Female</ui-item>
                 </ui-dropdown>
-              </ui-docs-example>
-              <ui-docs-example description="Search selection">
+              </ui-example>
+              <ui-example description="Search selection">
                 <ui-dropdown search selection placeholder="Select Country">
                   <ui-item value="af" flag="af">Afghanistan</ui-item>
                   <ui-item value="ax" flag="ax">Aland Islands</ui-item>
                   <ui-item value="al" flag="al">Albania</ui-item>
                 </ui-dropdown>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-embed" label="Embed" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An embed displays content from other websites, like YouTube videos, loaded only when asked for.
                   <a href="ui-embed.html">Embed page</a>
@@ -1658,8 +1658,8 @@
                   placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23456'/%3E%3Ccircle cx='12' cy='3' r='1.5' fill='%23fc6'/%3E%3Cpath d='M0 9 5 4l3 3 2-2 6 4z' fill='%23234'/%3E%3C/svg%3E"
                   label="Fomantic UI intro"
                 ></ui-embed>
-              </ui-docs-example>
-              <ui-docs-example description="Aspect ratios">
+              </ui-example>
+              <ui-example description="Aspect ratios">
                 <ui-embed source="vimeo" video-id="125292332" aspect-ratio="4:3" style="max-width: 16em"></ui-embed>
                 <ui-embed url="https://example.com/" aspect-ratio="21:9" label="Example page" style="max-width: 24em"></ui-embed>
                 <ui-embed source="youtube" video-id="O6Xo21L0ybE" aspect-ratio="square" style="max-width: 10em">
@@ -1675,11 +1675,11 @@
                     >Watch</span
                   >
                 </ui-embed>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-flyout" label="Flyout" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A flyout is a modal that slides in from a side of the page.
                   <a href="ui-flyout.html">Flyout page</a>
@@ -1695,8 +1695,8 @@
                     <ui-button class="ok" color="green">Yes</ui-button>
                   </ui-actions>
                 </ui-flyout>
-              </ui-docs-example>
-              <ui-docs-example description="Right, shorthands">
+              </ui-example>
+              <ui-example description="Right, shorthands">
                 <button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
                 <ui-flyout
                   id="flyout-types-right"
@@ -1707,17 +1707,17 @@
                   closable
                 >
                 </ui-flyout>
-              </ui-docs-example>
-              <ui-docs-example description="Top, inverted">
+              </ui-example>
+              <ui-example description="Top, inverted">
                 <button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
                 <ui-flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
                   <ui-content><p>A top flyout is full width, as tall as its content.</p></ui-content>
                 </ui-flyout>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-include" label="Include" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view.
                   <a href="ui-include.html">Include page</a>
@@ -1725,21 +1725,21 @@
                 <ui-include source="examples/release-notes.html"
                   >Loading the release notes...</ui-include
                 >
-              </ui-docs-example>
-              <ui-docs-example description="One part, with the page&#39;s styles">
+              </ui-example>
+              <ui-example description="One part, with the page&#39;s styles">
                 <ui-include
                   source="examples/release-notes.html"
                   selector="#notes"
                   page-styles
                 ></ui-include>
-              </ui-docs-example>
-              <ui-docs-example description="Another site">
+              </ui-example>
+              <ui-example description="Another site">
                 <ui-include source="https://example.com/"></ui-include>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-modal" label="Modal" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A modal displays content that temporarily blocks interactions with the main view of a site.
                   <a href="ui-modal.html">Modal page</a>
@@ -1758,8 +1758,8 @@
                     <ui-button class="approve" color="positive">Yep, that's me</ui-button>
                   </ui-actions>
                 </ui-modal>
-              </ui-docs-example>
-              <ui-docs-example description="Basic">
+              </ui-example>
+              <ui-example description="Basic">
                 <button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
                 <ui-modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
                   <ui-content>
@@ -1770,85 +1770,85 @@
                     <ui-button class="ok" color="green" inverted>Yes</ui-button>
                   </ui-actions>
                 </ui-modal>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-nag" label="Nag" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A nag is a persistent message that stays until dismissed, and can remember the dismissal.
                   <a href="ui-nag.html">Nag page</a>
                 </p>
                 <ui-nag><span class="title">We have updated our privacy policy.</span></ui-nag>
-              </ui-docs-example>
-              <ui-docs-example description="Overlay, bottom">
+              </ui-example>
+              <ui-example description="Overlay, bottom">
                 <div style="position: relative; height: 6em; border: 1px dashed var(--ui-border-color)">
                   <ui-nag overlay closable="false"><span class="title">Over the top of the frame</span></ui-nag>
                   <ui-nag bottom overlay closable="false"><span class="title">Over its bottom</span></ui-nag>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Inverted">
+              </ui-example>
+              <ui-example description="Inverted">
                 <ui-nag inverted closable="false"><span class="title">A light nag</span></ui-nag>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-popup" label="Popup" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A popup displays additional information on top of a page.
                   <a href="ui-popup.html">Popup page</a>
                 </p>
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
                 <ui-popup label="Add users to your feed"></ui-popup>
-              </ui-docs-example>
-              <ui-docs-example description="Titled">
+              </ui-example>
+              <ui-example description="Titled">
                 <ui-button id="popup-types-rating">Rating</ui-button>
                 <ui-popup for="popup-types-rating" heading="User Rating" label="A popup can have a header and content."></ui-popup>
-              </ui-docs-example>
-              <ui-docs-example description="HTML content, on click">
+              </ui-example>
+              <ui-example description="HTML content, on click">
                 <ui-button id="popup-types-plan">Choose a plan</ui-button>
                 <ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
                   <p>Does not include upload or chat.</p>
                   <ui-button size="small" color="primary">Choose</ui-button>
                 </ui-popup>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-progress" label="Progress" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A progress bar shows the progression of a task.
                   <a href="ui-progress.html">Progress page</a>
                 </p>
                 <ui-progress value="74" bar-text="percent" aria-label="Standard"></ui-progress>
-              </ui-docs-example>
-              <ui-docs-example description="Indicating">
+              </ui-example>
+              <ui-example description="Indicating">
                 <div class="ui-stack">
                   <ui-progress indicating value="12" label="{percent}% funded"></ui-progress>
                   <ui-progress indicating value="47" label="{percent}% funded"></ui-progress>
                   <ui-progress indicating value="91" label="{percent}% funded"></ui-progress>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-rating" label="Rating" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A rating indicates user interest in content.
                   <a href="ui-rating.html">Rating page</a>
                 </p>
                 <ui-rating value="3" aria-label="Rating"></ui-rating>
-              </ui-docs-example>
-              <ui-docs-example description="Star">
+              </ui-example>
+              <ui-example description="Star">
                 <ui-rating color="yellow" value="3" max-rating="5" aria-label="Stars"></ui-rating>
-              </ui-docs-example>
-              <ui-docs-example description="Heart">
+              </ui-example>
+              <ui-example description="Heart">
                 <ui-rating icon="heart" color="red" value="1" max-rating="3" clearable aria-label="Hearts"></ui-rating>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-search" label="Search" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A search module allows a user to query for results from a selection of data.
                   <a href="ui-search.html">Search page</a>
@@ -1857,25 +1857,25 @@
                   placeholder="Common passwords..."
                   source='[{"title":"123456"},{"title":"password"},{"title":"qwerty"},{"title":"letmein"},{"title":"dragon"}]'
                 ></ui-search>
-              </ui-docs-example>
-              <ui-docs-example description="With descriptions, prices and links">
+              </ui-example>
+              <ui-example description="With descriptions, prices and links">
                 <ui-search
                   aria-label="Fruit"
                   highlight-matches
                   source='[{"title":"Apple","description":"Crisp and sweet"},{"title":"Apricot","description":"Soft, from Valencia","price":"$2.00"},{"title":"Grape","url":"#grape"}]'
                 ></ui-search>
-              </ui-docs-example>
-              <ui-docs-example description="Category">
+              </ui-example>
+              <ui-example description="Category">
                 <ui-search
                   category
                   aria-label="Food"
                   source='[{"title":"Apple","category":"Fruit"},{"title":"Banana","category":"Fruit"},{"title":"Asparagus","category":"Vegetables"}]'
                 ></ui-search>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-select" label="Select" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A select lets a user choose a value from a list, with the platform&#39;s own picker.
                   <a href="ui-select.html">Select page</a>
@@ -1884,15 +1884,15 @@
                   <ui-item value="male">Male</ui-item>
                   <ui-item value="female">Female</ui-item>
                 </ui-select>
-              </ui-docs-example>
-              <ui-docs-example description="Chosen value">
+              </ui-example>
+              <ui-example description="Chosen value">
                 <ui-select aria-label="Fruit" value="banana">
                   <ui-item value="apple">Apple</ui-item>
                   <ui-item value="banana">Banana</ui-item>
                   <ui-item value="cherry">Cherry</ui-item>
                 </ui-select>
-              </ui-docs-example>
-              <ui-docs-example description="Groups and dividers">
+              </ui-example>
+              <ui-example description="Groups and dividers">
                 <ui-select placeholder="Choose food">
                   <ui-item kind="header">Fruit</ui-item>
                   <ui-item value="apple">Apple</ui-item>
@@ -1902,11 +1902,11 @@
                   <ui-item kind="divider"></ui-item>
                   <ui-item value="none">Nothing</ui-item>
                 </ui-select>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-shape" label="Shape" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A shape is a three dimensional object displayed on a two dimensional plane.
                   <a href="ui-shape.html">Shape page</a>
@@ -1917,8 +1917,8 @@
                   <ui-side><p>This is yet another side.</p></ui-side>
                   <ui-side><p>This is the last side.</p></ui-side>
                 </ui-shape>
-              </ui-docs-example>
-              <ui-docs-example description="Cube">
+              </ui-example>
+              <ui-example description="Cube">
                 <button type="button" class="ui button" commandfor="shape-demo-cube" command="--next">Flip up</button>
                 <button type="button" class="ui button" commandfor="shape-demo-cube" command="--previous">Back</button>
                 <ui-shape id="shape-demo-cube" cube direction="up">
@@ -1926,8 +1926,8 @@
                   <ui-side><span>2</span></ui-side>
                   <ui-side><span>3</span></ui-side>
                 </ui-shape>
-              </ui-docs-example>
-              <ui-docs-example description="Text">
+              </ui-example>
+              <ui-example description="Text">
                 <button type="button" class="ui button" commandfor="shape-demo-text" command="--next">Flip down</button>
                 <p>
                   Flip to
@@ -1936,11 +1936,11 @@
                     <ui-side>Fade</ui-side>
                   </ui-shape>
                 </p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-sidebar" label="Sidebar" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A sidebar hides additional content beside a page.
                   <a href="ui-sidebar.html">Sidebar page</a>
@@ -1960,8 +1960,8 @@
                     </ui-segment>
                   </ui-pusher>
                 </ui-pushable>
-              </ui-docs-example>
-              <ui-docs-example description="Overlay, right, thin">
+              </ui-example>
+              <ui-example description="Overlay, right, thin">
                 <button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
                 <ui-pushable style="height: 12em">
                   <ui-sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
@@ -1974,8 +1974,8 @@
                     <ui-segment appearance="basic"><p>An overlay sidebar covers the content without moving it.</p></ui-segment>
                   </ui-pusher>
                 </ui-pushable>
-              </ui-docs-example>
-              <ui-docs-example description="Persistent">
+              </ui-example>
+              <ui-example description="Persistent">
                 <ui-pushable style="height: 10em">
                   <ui-sidebar position="left" width="thin" transition="push" persistent visible aria-label="Sections">
                     <ui-menu direction="vertical" fluid aria-label="Sections">
@@ -1989,27 +1989,27 @@
                     >
                   </ui-pusher>
                 </ui-pushable>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-slider" label="Slider" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A slider allows users to select values within a range.
                   <a href="ui-slider.html">Slider page</a>
                 </p>
                 <ui-slider value="5" aria-label="Volume"></ui-slider>
-              </ui-docs-example>
-              <ui-docs-example description="Range">
+              </ui-example>
+              <ui-example description="Range">
                 <ui-slider range value="5" end="15" aria-label="Price"></ui-slider>
-              </ui-docs-example>
-              <ui-docs-example description="Labeled">
+              </ui-example>
+              <ui-example description="Labeled">
                 <ui-slider labeled max="10" value="3" aria-label="Rating"></ui-slider>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-sticky" label="Sticky" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Sticky content stays fixed to the viewport while its container is on screen.
                   <a href="ui-sticky.html">Sticky page</a>
@@ -2050,8 +2050,8 @@
                     </div>
                   </div>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Pushing">
+              </ui-example>
+              <ui-example description="Pushing">
                 <div
                   style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)"
                   tabindex="0"
@@ -2088,11 +2088,11 @@
                     </p>
                   </div>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-tab" label="Tab" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A tab is a hidden section of content activated by a menu.
                   <a href="ui-tab.html">Tab page</a>
@@ -2102,43 +2102,43 @@
                   <ui-tab label="Second">Second</ui-tab>
                   <ui-tab label="Third">Third</ui-tab>
                 </ui-tabs>
-              </ui-docs-example>
-              <ui-docs-example description="Pointing">
+              </ui-example>
+              <ui-example description="Pointing">
                 <ui-tabs appearance="pointing secondary" aria-label="Pointing demo">
                   <ui-tab label="First">First</ui-tab>
                   <ui-tab label="Second">Second</ui-tab>
                   <ui-tab label="Third">Third</ui-tab>
                 </ui-tabs>
-              </ui-docs-example>
-              <ui-docs-example description="Basic menu">
+              </ui-example>
+              <ui-example description="Basic menu">
                 <ui-tabs aria-label="Basic demo">
                   <ui-tab label="First">First</ui-tab>
                   <ui-tab label="Second">Second</ui-tab>
                 </ui-tabs>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-toast" label="Toast" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A toast allows users to receive a short, non-blocking notification.
                   <a href="ui-toast.html">Toast page</a>
                 </p>
                 <ui-toast message="I am a toast, nice to meet you!"></ui-toast>
-              </ui-docs-example>
-              <ui-docs-example description="Titled">
+              </ui-example>
+              <ui-example description="Titled">
                 <ui-toast heading="Better?" message="Hey, I am a nice message!"></ui-toast>
-              </ui-docs-example>
-              <ui-docs-example description="Consequences">
+              </ui-example>
+              <ui-example description="Consequences">
                 <ui-toast type="info" icon message="An info toast, with its icon."></ui-toast>
                 <ui-toast type="success" message="You're using the good framework!"></ui-toast>
                 <ui-toast type="warning" message="Your battery is running low."></ui-toast>
                 <ui-toast type="error" message="We couldn't save your changes."></ui-toast>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-transition" label="Transition" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A transition is an animation used to show or hide content, or to draw attention to it.
                   <a href="ui-transition.html">Transition page</a>
@@ -2159,8 +2159,8 @@
                     <ui-segment>Horizontal flip</ui-segment>
                   </ui-transition>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Attention">
+              </ui-example>
+              <ui-example description="Attention">
                 <button type="button" class="ui button" commandfor="transition-demo-shake" command="--transition">Shake</button>
                 <button type="button" class="ui button" commandfor="transition-demo-tada" command="--transition">Tada</button>
                 <div class="ui-cluster">
@@ -2171,17 +2171,17 @@
                     <ui-segment>Tada</ui-segment>
                   </ui-transition>
                 </div>
-              </ui-docs-example>
-              <ui-docs-example description="Hidden">
+              </ui-example>
+              <ui-example description="Hidden">
                 <button type="button" class="ui button" commandfor="transition-demo-hidden" command="--show">Show</button>
                 <ui-transition id="transition-demo-hidden" animation="drop">
                   <ui-segment>Hidden until shown</ui-segment>
                 </ui-transition>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="modules-visibility" label="Visibility" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Visibility provides a set of callbacks for when content appears in the viewport.
                   <a href="ui-visibility.html">Visibility page</a>
@@ -2189,8 +2189,8 @@
                 <ui-visibility once="false" offset="0">
                   <p>I fire <code>ui-in-view</code> and <code>ui-out-of-view</code> each time I come and go.</p>
                 </ui-visibility>
-              </ui-docs-example>
-              <ui-docs-example description="Lazy loading images">
+              </ui-example>
+              <ui-example description="Lazy loading images">
                 <ui-visibility type="image" animation="fade" duration="500">
                   <div style="display: flex; gap: 1em; flex-wrap: wrap">
                     <img
@@ -2216,13 +2216,13 @@
                     />
                   </div>
                 </ui-visibility>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
           <ui-section id="spell-ui-s-own" label="Spell UI's own" sticky collapsible dividing>
             <ui-section id="spell-ui-s-own-code" label="Code" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site.
                   <a href="ui-code.html">Code page</a>
@@ -2233,75 +2233,99 @@
                     // one line each
                   </script>
                 </ui-code>
-              </ui-docs-example>
-              <ui-docs-example description="Line numbers, wrapping, a copy button">
+              </ui-example>
+              <ui-example description="Line numbers, wrapping, a copy button">
                 <ui-code language="bash" line-numbers start="10" wrap copy>
                   <script type="text/plain">
                     echo "line ten"
                     echo "a long line that wraps once the box is too narrow to hold it, hanging past the line number"
                   </script>
                 </ui-code>
-              </ui-docs-example>
-              <ui-docs-example description="From a file, language guessed">
+              </ui-example>
+              <ui-example description="From a file, language guessed">
                 <ui-code source="examples/sample.json" line-numbers></ui-code>
-              </ui-docs-example>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-example" label="Example" sticky collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.
+                  <a href="ui-example.html">Example page</a>
+                </p>
+                <div class="ui-stack">
+                  <ui-example heading="Button" description="A standard button.">
+                    <ui-button>Follow</ui-button>
+                  </ui-example>
+
+                  <ui-example heading="Emphasis" description="A button can be formatted to show different levels of emphasis." code>
+                    <ui-button color="primary">Save</ui-button>
+                    <ui-button>Discard</ui-button>
+                  </ui-example>
+
+                  <ui-example heading="Rich description">
+                    <p slot="description">A description with a <a href="#rich">link</a>, from the <code>description</code> slot.</p>
+                    <ui-button color="secondary">Okay</ui-button>
+                  </ui-example>
+                </div>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-icon-picker" label="Icon Picker" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   An icon picker lets people choose an icon by searching for it and clicking its glyph.
                   <a href="ui-icon-picker.html">Icon Picker page</a>
                 </p>
                 <ui-icon-picker value="star" aria-label="Icon"></ui-icon-picker>
-              </ui-docs-example>
-              <ui-docs-example description="None chosen">
+              </ui-example>
+              <ui-example description="None chosen">
                 <ui-icon-picker aria-label="Icon"></ui-icon-picker>
-              </ui-docs-example>
-              <ui-docs-example description="Sizes">
+              </ui-example>
+              <ui-example description="Sizes">
                 <ui-icon-picker size="small" value="heart" aria-label="Small icon"></ui-icon-picker>
                 <ui-icon-picker size="large" value="heart" aria-label="Large icon"></ui-icon-picker>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-keys" label="Keys" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it.
                   <a href="ui-keys.html">Keys page</a>
                 </p>
                 <p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
-              </ui-docs-example>
-              <ui-docs-example description="On a Mac, and elsewhere">
+              </ui-example>
+              <ui-example description="On a Mac, and elsewhere">
                 <p>
                   <ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac,
                   <ui-keys shortcut="shift+mod+P" platform="other"></ui-keys> elsewhere.
                 </p>
-              </ui-docs-example>
-              <ui-docs-example description="Two shortcuts">
+              </ui-example>
+              <ui-example description="Two shortcuts">
                 <p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-markdown" label="Markdown" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site.
                   <a href="ui-markdown.html">Markdown page</a>
                 </p>
                 <ui-markdown source="examples/readme.md" heading-offset="4"></ui-markdown>
-              </ui-docs-example>
-              <ui-docs-example description="Small">
+              </ui-example>
+              <ui-example description="Small">
                 <ui-markdown size="small">
                   <script type="text/markdown">
                     Smaller text, the _same_ look.
                   </script>
                 </ui-markdown>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-page" label="Page" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A page frames a whole window:  a header, navigation, the main content, a side column and a footer.
                   <a href="ui-page.html">Page page</a>
@@ -2319,11 +2343,11 @@
                     <ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
                   </ui-page>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-panel" label="Panel" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.
                   <a href="ui-panel.html">Panel page</a>
@@ -2332,8 +2356,8 @@
                   <ui-input placeholder="Name, e.g. sunrise" aria-label="Name"></ui-input>
                   <ui-slider min="13" max="19" value="16" aria-label="Text size"></ui-slider>
                 </ui-panel>
-              </ui-docs-example>
-              <ui-docs-example description="Sub-panels">
+              </ui-example>
+              <ui-example description="Sub-panels">
                 <ui-panel label="Color Set" level="5" collapsible style="max-width: 320px">
                   <ui-input placeholder="Name, e.g. brand" aria-label="Set name"></ui-input>
                   <ui-panel label="Tweak" collapsible>
@@ -2343,8 +2367,8 @@
                     <p>Six preset chips.</p>
                   </ui-panel>
                 </ui-panel>
-              </ui-docs-example>
-              <ui-docs-example description="Colors">
+              </ui-example>
+              <ui-example description="Colors">
                 <div class="ui-cluster" style="align-items: start">
                   <ui-panel label="Violet" level="5" color="violet" style="width: 200px">
                     <ui-panel label="Tweak"><p>Any hue.</p></ui-panel>
@@ -2353,11 +2377,11 @@
                     <ui-panel label="Tweak"><p>Sub-panels follow.</p></ui-panel>
                   </ui-panel>
                 </div>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-quote" label="Quote" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence.
                   <a href="ui-quote.html">Quote page</a>
@@ -2365,14 +2389,14 @@
                 <ui-quote cite="https://en.wikipedia.org/wiki/Alan_Kay">
                   The best way to predict the future is to invent it.
                 </ui-quote>
-              </ui-docs-example>
-              <ui-docs-example description="Inline">
+              </ui-example>
+              <ui-example description="Inline">
                 <p>She looked up and said <ui-quote inline>not today</ui-quote>, then went back to her book.</p>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-root" label="Root" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows them once they&#39;re ready.
                   <a href="ui-root.html">Root page</a>
@@ -2384,8 +2408,8 @@
                     <ui-button color="primary">Save</ui-button>
                   </ui-segment>
                 </ui-root>
-              </ui-docs-example>
-              <ui-docs-example description="Theme and size">
+              </ui-example>
+              <ui-example description="Theme and size">
                 <ui-root theme="dark" size="small" width="100%" aria-label="Dark report">
                   <ui-segment>
                     <ui-header>Report</ui-header>
@@ -2393,8 +2417,8 @@
                     <ui-button color="primary">Save</ui-button>
                   </ui-segment>
                 </ui-root>
-              </ui-docs-example>
-              <ui-docs-example description="A box that scrolls">
+              </ui-example>
+              <ui-example description="A box that scrolls">
                 <ui-root height="8em" aria-label="Numbers">
                   <ui-list bulleted>
                     <ui-item>One</ui-item>
@@ -2407,11 +2431,11 @@
                     <ui-item>Eight</ui-item>
                   </ui-list>
                 </ui-root>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-section" label="Section" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A section is a titled block of content that can fold away and keep its title in view.
                   <a href="ui-section.html">Section page</a>
@@ -2419,21 +2443,21 @@
                 <ui-section label="Getting started">
                   <p>A titled block of content. Its title is a real heading: an <code>h2</code> at the top level.</p>
                 </ui-section>
-              </ui-docs-example>
-              <ui-docs-example description="Dividing">
+              </ui-example>
+              <ui-example description="Dividing">
                 <ui-section label="Installation" dividing>
                   <p>A rule under the title.</p>
                 </ui-section>
-              </ui-docs-example>
-              <ui-docs-example description="Block">
+              </ui-example>
+              <ui-example description="Block">
                 <ui-section label="Configuration" block>
                   <p>The title bar sits in a tinted box.</p>
                 </ui-section>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-stack" label="Stack" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A stack lays its children out in a column, or a row that wraps, evenly spaced.
                   <a href="ui-stack.html">Stack page</a>
@@ -2443,35 +2467,61 @@
                   <ui-segment>Second</ui-segment>
                   <ui-segment>Third</ui-segment>
                 </ui-stack>
-              </ui-docs-example>
-              <ui-docs-example description="Horizontal, wrapping">
+              </ui-example>
+              <ui-example description="Horizontal, wrapping">
                 <ui-stack direction="horizontal" wrap spacing="sm">
                   <ui-label>Design</ui-label>
                   <ui-label>Engineering</ui-label>
                   <ui-label>Research</ui-label>
                   <ui-label>Writing</ui-label>
                 </ui-stack>
-              </ui-docs-example>
-              <ui-docs-example description="One left, one right">
+              </ui-example>
+              <ui-example description="One left, one right">
                 <ui-stack direction="horizontal" justify="between">
                   <ui-header level="4">Inbox</ui-header>
                   <ui-button color="primary">New message</ui-button>
                 </ui-stack>
-              </ui-docs-example>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-table-of-contents" label="Table of contents" sticky collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A table of contents lists the page&#39;s sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.
+                  <a href="ui-toc.html">Table of contents page</a>
+                </p>
+                <div class="ui-cluster ui-gap-l" style="align-items: flex-start">
+                  <ui-toc for="toc-example-content" heading="Button" style="width: 12em"></ui-toc>
+
+                  <section id="toc-example-content" style="flex: 1">
+                    <ui-header level="2" dividing>Types</ui-header>
+                    <ui-example heading="Button" description="A standard button.">
+                      <ui-button>Follow</ui-button>
+                    </ui-example>
+                    <ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+                      <ui-button color="primary">Save</ui-button>
+                    </ui-example>
+                    <ui-header level="2" dividing>States</ui-header>
+                    <ui-example heading="Disabled" description="A button can't be used.">
+                      <ui-button disabled>Followed</ui-button>
+                    </ui-example>
+                  </section>
+                </div>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-theme-editor" label="Theme Editor" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.
                   <a href="ui-theme-editor.html">Theme Editor page</a>
                 </p>
                 <ui-theme-editor></ui-theme-editor>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-theme-menu" label="Theme Menu" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A theme menu picks the page&#39;s theme from Spell&#39;s own, and its light, dark or system colour scheme, and remembers both for the next page.
                   <a href="ui-theme-menu.html">Theme Menu page</a>
@@ -2479,17 +2529,17 @@
                 <ui-segment inverted>
                   <ui-theme-menu inverted size="small"></ui-theme-menu>
                 </ui-segment>
-              </ui-docs-example>
-              <ui-docs-example description="A theme dropdown">
+              </ui-example>
+              <ui-example description="A theme dropdown">
                 <ui-theme-menu show="theme"></ui-theme-menu>
-              </ui-docs-example>
-              <ui-docs-example description="Light / dark only">
+              </ui-example>
+              <ui-example description="Light / dark only">
                 <ui-theme-menu show="scheme"></ui-theme-menu>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="spell-ui-s-own-zoom" label="Zoom" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   A zoom shows something small in the page, and full size over it on a click.
                   <a href="ui-zoom.html">Zoom page</a>
@@ -2501,8 +2551,8 @@
                     <ui-button color="primary">Read more</ui-button>
                   </ui-segment>
                 </ui-zoom>
-              </ui-docs-example>
-              <ui-docs-example description="Cut off">
+              </ui-example>
+              <ui-example description="Cut off">
                 <ui-zoom max-height="120px" shrink="100%">
                   <ui-list bulleted>
                     <ui-item>Zoom</ui-item>
@@ -2513,15 +2563,15 @@
                     <ui-item>Theme menu</ui-item>
                   </ui-list>
                 </ui-zoom>
-              </ui-docs-example>
-              <ui-docs-example description="A picture">
+              </ui-example>
+              <ui-example description="A picture">
                 <ui-zoom shrink="33%">
                   <img
                     src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22960%22 height=%22640%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
                     alt="A landscape"
                   />
                 </ui-zoom>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
           <!-- kitchen:end -->

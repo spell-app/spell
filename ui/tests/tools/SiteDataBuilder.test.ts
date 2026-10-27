@@ -47,7 +47,7 @@ describe("SiteDataBuilder.build()", () => {
     })
     expect(data.components.find((entry) => entry.tag === "ui-or")!.href).toBe("ui-button.html#ui-or")
     expect(data.components.some((entry) => entry.tag.startsWith("ui-docs-"))).toBe(false)
-    expect(data.docs.map((entry) => entry.tag)).toContain("ui-docs-example")
+    expect(data.docs.map((entry) => entry.tag)).toContain("ui-docs-api")
     expect(data.docs.every((entry) => entry.href === undefined)).toBe(true)
     expect(data.families["ui-parts"]!.mainTag).toBe("ui-header")
     expect(data.topics[0]).toEqual({ id: "basic", title: "Basic" })

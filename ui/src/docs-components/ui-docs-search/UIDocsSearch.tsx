@@ -4,7 +4,6 @@ import type { JSX } from "@solidjs/web"
 import { E, UIT } from "spell-ui/core"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { docsSearchVocabulary } from "./UIDocsSearch.en"
-import { PageOutline } from "./PageOutline"
 import { SearchData } from "./SearchData"
 import { SearchIndex } from "./SearchIndex"
 import {
@@ -84,7 +83,7 @@ export class DOMDocsSearchElement extends E.DOMElement<UIDocsSearch> {
  *     closing the drawer the field is in (the site's landing scrolls)
  *   - and any other loads its page
  *   - then the field empties
- * - Data:  the page shown's sections are read live from its DOM on every focus (`PageOutline`, `page`);
+ * - Data:  the page shown's sections are read live from its DOM on every focus (`SearchIndex.here()`, `page`);
  *   the rest come from the site's data, fetched on the FIRST focus or keystroke
  *   (`SiteData` + `SearchData`, `SearchIndex`).
  *   - Until it's in, or if it fails, only the page shown is searched.
@@ -168,7 +167,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
   /** Read the page shown:  its sections and its path. */
   private readPageShown() {
     const page = this.page || DEFAULT_PAGE
-    this.pageOutline = PageOutline.read(document.querySelector(page) ?? undefined)
+    this.pageOutline = SearchIndex.here(document.querySelector(page) ?? undefined)
     this.currentPagePath = this.pagePath()
   }
 

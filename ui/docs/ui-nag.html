@@ -71,25 +71,25 @@
               >
 
               <ui-section id="examples-types-nag" label="Nag" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A simple nag appears in the DOM where it is declared.  Closing it hides it for this visit."
                 >
                   <ui-nag>Look, I am a nag!</ui-nag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-title" label="Title" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A nag can have a title:  a `<span class="title">` inside is set off in the title colour.'
                 >
                   <ui-nag closable="false"
                     ><span class="title">Welcome to the nag module</span> Look, I am a nag!</ui-nag
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-fixed-nag" label="Fixed Nag" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A fixed nag appears at the top of the screen:  this one starts <code>hidden</code>, and a button
                     shows it (<code>command="--show"</code>). <code>persist</code> ignores the stored dismissal, for the
@@ -97,15 +97,15 @@
                   </p>
                   <ui-button commandfor="nag-fixed" command="--show" icon="eye">Show fixed nag</ui-button>
                   <ui-nag id="nag-fixed" fixed hidden persistent="">Look, I am a fixed nag!</ui-nag>
-                </ui-docs-example>
-                <ui-docs-example description="A fixed nag can appear at the bottom of the screen:  `fixed bottom`.">
+                </ui-example>
+                <ui-example description="A fixed nag can appear at the bottom of the screen:  `fixed bottom`.">
                   <ui-button commandfor="nag-bottom-fixed" command="--show" icon="eye">Show bottom fixed nag</ui-button>
                   <ui-nag id="nag-bottom-fixed" fixed bottom hidden persistent="">Look, I am a bottom fixed nag!</ui-nag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-overlay-nag" label="Overlay Nag" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An overlay nag is absolute positioned and appears at the top of the parent element, over its content."
                 >
                   <ui-segment>
@@ -114,8 +114,8 @@
                     >
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description="An overlay nag can appear at the bottom of the parent element:  `overlay bottom`."
                 >
                   <ui-segment>
@@ -124,13 +124,13 @@
                     >
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
               <ui-section id="examples-groups-nags" label="Nags" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A group of nags can be formatted to appear together.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: the <code>.ui.nags</code> group (several nags joined in one bar) -- here they simply
@@ -139,13 +139,13 @@
                   <ui-nag><span class="title">First nag</span></ui-nag>
                   <ui-nag><span class="title">Second nag</span></ui-nag>
                   <ui-nag><span class="title">Third nag</span></ui-nag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A nag can be formatted to be different colors.">
+                <ui-example description="A nag can be formatted to be different colors.">
                   <ui-nag color="red" closable="false"><span class="title">Red</span></ui-nag>
                   <ui-nag color="orange" closable="false"><span class="title">Orange</span></ui-nag>
                   <ui-nag color="yellow" closable="false"><span class="title">Yellow</span></ui-nag>
@@ -158,11 +158,11 @@
                   <ui-nag color="pink" closable="false"><span class="title">Pink</span></ui-nag>
                   <ui-nag color="brown" closable="false"><span class="title">Brown</span></ui-nag>
                   <ui-nag color="black" closable="false"><span class="title">Black</span></ui-nag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A nag can be formatted to appear inverted:  a nag is dark by default, `inverted` makes it light;  a coloured one takes its tint."
                 >
                   <ui-nag inverted closable="false"
@@ -171,11 +171,11 @@
                   <ui-nag inverted color="red" closable="false"
                     ><span class="title">Inverted red</span> A tinted nag</ui-nag
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A nag can have different sizes.">
+                <ui-example description="A nag can have different sizes.">
                   <ui-nag size="mini" closable="false"><span class="title">Mini nag</span></ui-nag>
                   <ui-nag size="tiny" closable="false"><span class="title">Tiny nag</span></ui-nag>
                   <ui-nag size="small" closable="false"><span class="title">Small nag</span></ui-nag>
@@ -183,7 +183,7 @@
                   <ui-nag size="big" closable="false"><span class="title">Big nag</span></ui-nag>
                   <ui-nag size="huge" closable="false"><span class="title">Huge nag</span></ui-nag>
                   <ui-nag size="massive" closable="false"><span class="title">Massive nag</span></ui-nag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -233,7 +233,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='Dismiss it, then reload:  it stays dismissed for this session (`storage="session"`).'
                 >
                   <ui-nag key="site-cookie-nag" storage="session"
@@ -241,7 +241,7 @@
                       >We use cookies to ensure you get the best experience on our website</span
                     ></ui-nag
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-code language="js">
                 <script type="text/plain">

@@ -62,7 +62,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-feed" label="Feed" sticky collapsible dividing>
-                <ui-docs-example description="A feed:  a list of `<ui-event>`s.">
+                <ui-example description="A feed:  a list of `<ui-event>`s.">
                   <ui-feed>
                     <ui-event image="../images/avatar/small/elliot.jpg">
                       <ui-content>
@@ -137,13 +137,13 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-label" label="Label" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An event label can contain an image, icon, text or label.  `image` is the shorthand for a picture;  the `label` slot takes anything."
                 >
                   <ui-feed>
@@ -151,9 +151,9 @@
                       <ui-content> You added Elliot Fu to the group <a href="#">Coworkers</a> </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example description="`icon` takes an icon name.">
+                <ui-example description="`icon` takes an icon name.">
                   <ui-feed>
                     <ui-event icon="pencil">
                       <ui-content>
@@ -164,9 +164,9 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A <code>&lt;ui-text&gt;</code> in the <code>label</code> slot.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's <code>multiline</code> label text (a nudge for a text label that wraps) --
@@ -182,18 +182,18 @@
                       <ui-content> Only in selected theaters! </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example description="A `<ui-label>` in the `label` slot.">
+                <ui-example description="A `<ui-label>` in the `label` slot.">
                   <ui-feed>
                     <ui-event>
                       <ui-label slot="label" size="small" color="green">OK</ui-label>
                       <ui-content> Deployment was successful </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>label</code> (Fomantic's <code>data-text</code>) makes a round label holding the given text.
                   </p>
@@ -212,11 +212,11 @@
                       <ui-content> Nap time </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-date" label="Date" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An event or an event summary can contain a date:  on its own a `<ui-date>` sits above the summary."
                 >
                   <ui-feed>
@@ -229,9 +229,9 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example description="Inside the summary it sits inline after the text.">
+                <ui-example description="Inside the summary it sits inline after the text.">
                   <ui-feed>
                     <ui-event image="../images/avatar/small/jenny.jpg">
                       <ui-content>
@@ -242,7 +242,7 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I42:  `<ui-date>` has no `floated`, so Fomantic's right floated date sits above the summary. -->
@@ -253,7 +253,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An event can contain additional information like a set of images or text.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Fomantic's <code>right floated</code> date (to the right of the content block) has no attribute
@@ -280,13 +280,13 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A feed or a single event can be disabled.">
+                <ui-example description="A feed or a single event can be disabled.">
                   <ui-feed>
                     <ui-event disabled image="../images/avatar/small/elliot.jpg">
                       <ui-content>
@@ -305,9 +305,9 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <ui-feed disabled>
                     <ui-event image="../images/avatar/small/elliot.jpg">
                       <ui-content>
@@ -328,13 +328,13 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-connected" label="Connected" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">Feed events can be connected to visualize a linear timeline.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Add a <code>color</code>, <code>&lt;ui-feed connected color="blue"&gt;</code>, to colour the
@@ -380,11 +380,11 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-ordered" label="Ordered" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Ordered feeds number their events' labels by themselves. You can again colour the whole feed or each
                     event, and a basic variant is available too.
@@ -416,11 +416,11 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-divided" label="Divided" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Feed events can be divided to better distinguish between grouped content."
                 >
                   <ui-feed divided>
@@ -449,11 +449,11 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A feed can have different sizes.">
+                <ui-example description="A feed can have different sizes.">
                   <ui-feed size="small">
                     <ui-header level="4">Followers Activity</ui-header>
                     <ui-event>
@@ -481,9 +481,9 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <ui-feed size="large">
                     <ui-event image="../images/avatar/small/elliot.jpg">
                       <ui-content>
@@ -524,11 +524,11 @@
                       </ui-content>
                     </ui-event>
                   </ui-feed>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A feed's color can be inverted.">
+                <ui-example description="A feed's color can be inverted.">
                   <ui-segment inverted>
                     <ui-feed inverted>
                       <ui-event image="../images/avatar/small/elliot.jpg">
@@ -609,7 +609,7 @@
                       </ui-event>
                     </ui-feed>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

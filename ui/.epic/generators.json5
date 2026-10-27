@@ -12,6 +12,16 @@
 {
   "generators": [
     {
+      "name": "Spell UI theme sheets",
+      "outputs": [
+        "src/styles/themes/{spell,glass,fruity,merlot}.css",
+        "src/styles/themes/palettes/apple.css",
+        "src/styles/themes/theme.schema.json"
+      ],
+      "cwd": ".",
+      "run": ["yarn", "gen:styles"]
+    },
+    {
       "name": "Spell UI site data",
       "outputs": [
         "docs/__data/{components,icons,search}.json5",

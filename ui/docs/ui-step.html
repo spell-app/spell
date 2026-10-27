@@ -64,15 +64,15 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-step" label="Step" sticky collapsible dividing>
-                <ui-docs-example description="A single step.">
+                <ui-example description="A single step.">
                   <ui-steps>
                     <ui-step>Shipping</ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-circular-step" label="Circular Step" sticky collapsible dividing>
-                <ui-docs-example description="A single circular step.">
+                <ui-example description="A single circular step.">
                   <ui-steps appearance="circular">
                     <ui-step>
                       <ui-content align="center">
@@ -80,13 +80,13 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
               <ui-section id="examples-groups-steps" label="Steps" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A set of steps: <code>&lt;ui-steps&gt;</code>.</p>
                   <ui-message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element"
                     >Steps will automatically stack on mobile. To make steps automatically stack for tablet use
@@ -97,11 +97,11 @@
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-flat-markup" label="Flat markup" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A step can be written outside its steps:  <code>parent</code> names the steps' id, and the step
                     joins them, in page order, as if it were nested there.
@@ -110,11 +110,11 @@
                   <ui-step parent="demo-order-steps" completed heading="Shipping"></ui-step>
                   <ui-step parent="demo-order-steps" selected heading="Billing"></ui-step>
                   <ui-step parent="demo-order-steps" heading="Confirm"></ui-step>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-circular-steps" label="Circular Steps" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Circular steps show a series of steps with a connection line between them."
                 >
                   <ui-steps appearance="circular" stackable>
@@ -136,11 +136,11 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-ordered" label="Ordered" sticky collapsible dividing>
-                <ui-docs-example description="A step can show an ordered sequence of steps.">
+                <ui-example description="A step can show an ordered sequence of steps.">
                   <ui-steps ordered>
                     <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
@@ -148,8 +148,8 @@
                     <ui-step heading="Transfer" description="Package on its way"></ui-step>
                     <ui-step heading="Delivered" description="Package received"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular" ordered stackable>
                     <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
@@ -157,11 +157,11 @@
                     <ui-step heading="Transfer" description="Package on its way"></ui-step>
                     <ui-step heading="Delivered" description="Package received"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-vertical" label="Vertical" sticky collapsible dividing>
-                <ui-docs-example description="A step can be displayed stacked vertically.">
+                <ui-example description="A step can be displayed stacked vertically.">
                   <ui-steps direction="vertical">
                     <ui-step
                       completed
@@ -177,8 +177,8 @@
                     ></ui-step>
                     <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description='Right vertical steps will show the active arrow to the left:  `vertical="right"`.'
                 >
                   <ui-steps direction="vertical-right">
@@ -196,11 +196,11 @@
                     ></ui-step>
                     <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-vertical-circular" label="Vertical Circular" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Vertical circular steps show a series of steps with the connection line between them vertically next to the title and description of each step, similar to a connected feed."
                 >
                   <ui-steps appearance="circular" direction="vertical">
@@ -208,18 +208,18 @@
                     <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-description" label="Description" sticky collapsible dividing>
-                <ui-docs-example description="A step can contain a description.">
+                <ui-example description="A step can contain a description.">
                   <ui-steps>
                     <ui-step heading="Shipping" description="Choose your shipping options"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description="The parts work too:  a `<ui-content>` with a `<ui-title>` and a `<ui-description>`."
                 >
                   <ui-steps appearance="circular">
@@ -230,12 +230,12 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I88:  `text-align` / `vertical-align` on a circular step's content change nothing yet. -->
               <ui-section id="examples-content-center-aligned" label="Center Aligned" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Horizontal circular steps can show their title center aligned next to the connection line.  The last step will not show the connection line anymore."
                 >
                   <ui-steps appearance="circular">
@@ -250,11 +250,11 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-bottom-aligned" label="Bottom Aligned" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Horizontal circular steps can also show their title and/or description under the connection line."
                 >
                   <ui-steps appearance="circular">
@@ -271,16 +271,16 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-icon" label="Icon" sticky collapsible dividing>
-                <ui-docs-example description="A step can contain an icon.">
+                <ui-example description="A step can contain an icon.">
                   <ui-steps>
                     <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example description="Icons in circular steps are part of the title or description.">
+                </ui-example>
+                <ui-example description="Icons in circular steps are part of the title or description.">
                   <ui-steps appearance="circular">
                     <ui-step>
                       <ui-content>
@@ -289,11 +289,11 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A step can link with `link` (a real link), or with `appearance="link"` (a button the page handles).'
                 >
                   <ui-steps>
@@ -306,14 +306,14 @@
                     ></ui-step>
                     <ui-step link="#link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps>
                     <ui-step appearance="link" icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step appearance="link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular">
                     <ui-step
                       link="#link"
@@ -323,34 +323,34 @@
                     ></ui-step>
                     <ui-step link="#link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular">
                     <ui-step appearance="link" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step appearance="link" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A step can be highlighted as active:  `selected` (or Fomantic's `active`), the current step."
                 >
                   <ui-steps>
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular">
                     <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-completed" label="Completed" sticky collapsible dividing>
-                <ui-docs-example description="A step can show that a user has completed it.">
+                <ui-example description="A step can show that a user has completed it.">
                   <ui-steps>
                     <ui-step
                       completed
@@ -359,21 +359,21 @@
                       description="Enter billing information"
                     ></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular">
                     <ui-step completed heading="Billing" description="Enter billing information"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A step can show that it cannot be selected.">
+                <ui-example description="A step can show that it cannot be selected.">
                   <ui-steps>
                     <ui-step disabled>Billing</ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps appearance="circular">
                     <ui-step disabled>
                       <ui-content align="center">
@@ -381,13 +381,13 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-stackable" label="Stackable" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A step can stack vertically only on smaller screens:  steps stack below 768px of the group&apos;s width by default, `stackable="tablet"` below 992px.'
                 >
                   <ui-steps stackable="tablet">
@@ -400,9 +400,9 @@
                       description="Verify order details"
                     ></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
                 <!-- Fomantic's JS snippet that turns circular steps vertical on phones isn't needed:  see the description. -->
-                <ui-docs-example
+                <ui-example
                   description='Circular steps never stack by width;  set `direction="vertical"` on them yourself for phones.'
                 >
                   <ui-steps appearance="circular">
@@ -410,11 +410,11 @@
                     <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="A fluid step takes up the width of its container.">
+                <ui-example description="A fluid step takes up the width of its container.">
                   <ui-grid columns="2">
                     <ui-column>
                       <ui-steps fluid direction="vertical">
@@ -436,11 +436,11 @@
                       <p>The steps take up the entire column width</p>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-unstackable" label="Unstackable" sticky collapsible dividing>
-                <ui-docs-example description="A step can prevent itself from stacking on mobile.">
+                <ui-example description="A step can prevent itself from stacking on mobile.">
                   <ui-steps unstackable>
                     <ui-step icon="plane" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step selected icon="dollar" heading="Billing" description="Enter billing information"></ui-step>
@@ -451,11 +451,11 @@
                       description="Verify order details"
                     ></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
-                <ui-docs-example description="Steps can be attached to other elements.">
+                <ui-example description="Steps can be attached to other elements.">
                   <ui-steps widths="3" attach="top">
                     <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
@@ -469,11 +469,11 @@
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-evenly-divided" label="Evenly Divided" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Steps can be divided evenly inside their parent:  `widths` is the number of steps."
                 >
                   <ui-steps widths="3">
@@ -481,16 +481,16 @@
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps widths="2">
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-equal" label="Equal" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`equal` makes every step the same width, counted from the steps themselves:  each as wide as the widest;  with `fluid`, an equal share of the row each.  `widths` above is the older, count-based spelling of `equal fluid`.'
                 >
                   <ui-steps equal>
@@ -498,8 +498,8 @@
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example description="Horizontal circular steps are always evenly divided.">
+                </ui-example>
+                <ui-example description="Horizontal circular steps are always evenly divided.">
                   <ui-steps appearance="circular">
                     <ui-step completed>
                       <ui-content align="center">
@@ -517,18 +517,18 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="Steps can have different sizes.">
+                <ui-example description="Steps can have different sizes.">
                   <ui-steps size="mini">
                     <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="mini" appearance="circular">
                     <ui-step>
                       <ui-content>
@@ -549,15 +549,15 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="tiny">
                     <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="tiny" appearance="circular">
                     <ui-step>
                       <ui-content>
@@ -578,15 +578,15 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="small">
                     <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
                     <ui-step selected icon="payment" heading="Billing" description="Enter billing information"></ui-step>
                     <ui-step disabled icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="small" appearance="circular">
                     <ui-step>
                       <ui-content>
@@ -607,14 +607,14 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="large">
                     <ui-step icon="truck" heading="Shipping"></ui-step>
                     <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="large" appearance="circular">
                     <ui-step>
                       <ui-content align="center">
@@ -627,14 +627,14 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="big">
                     <ui-step icon="truck" heading="Shipping"></ui-step>
                     <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="big" appearance="circular">
                     <ui-step>
                       <ui-content align="center">
@@ -647,14 +647,14 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="huge">
                     <ui-step icon="truck" heading="Shipping"></ui-step>
                     <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="huge" appearance="circular">
                     <ui-step>
                       <ui-content align="center">
@@ -667,14 +667,14 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="massive">
                     <ui-step icon="truck" heading="Shipping"></ui-step>
                     <ui-step selected icon="payment" heading="Billing"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps size="massive" appearance="circular" stackable>
                     <ui-step>
                       <ui-content align="center">
@@ -687,11 +687,11 @@
                       </ui-content>
                     </ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A step's color can be inverted.">
+                <ui-example description="A step's color can be inverted.">
                   <ui-segment inverted>
                     <ui-steps inverted>
                       <ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
@@ -704,8 +704,8 @@
                       <ui-step disabled icon="info" heading="Confirm Order"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-steps inverted appearance="circular" stackable>
                       <ui-step heading="Shipping" description="Choose your shipping options"></ui-step>
@@ -713,8 +713,8 @@
                       <ui-step disabled heading="Confirm Order"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-steps inverted ordered>
                       <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
@@ -724,8 +724,8 @@
                       <ui-step heading="Delivered" description="Package received"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-steps inverted ordered appearance="circular" stackable>
                       <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
@@ -735,8 +735,8 @@
                       <ui-step heading="Delivered" description="Package received"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-steps inverted direction="vertical">
                       <ui-step
@@ -754,8 +754,8 @@
                       <ui-step selected icon="info" heading="Confirm Order" description="Verify order details"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-steps inverted direction="vertical" appearance="circular">
                       <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
@@ -763,11 +763,11 @@
                       <ui-step selected heading="Confirm Order" description="Verify order details"></ui-step>
                     </ui-steps>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-color" label="Color" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Circular steps can be shown in different colors for active and completed steps of the whole step group."
                 >
                   <ui-steps color="primary" size="small" appearance="circular" ordered stackable>
@@ -791,8 +791,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="secondary" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -814,8 +814,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="red" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -837,8 +837,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="orange" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -860,8 +860,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="yellow" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -883,8 +883,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="olive" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -906,8 +906,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="green" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -929,8 +929,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="teal" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -952,8 +952,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="blue" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -975,8 +975,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="violet" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -998,8 +998,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="purple" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -1021,8 +1021,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="pink" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -1044,8 +1044,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="brown" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -1067,8 +1067,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="grey" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -1090,8 +1090,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-steps color="black" size="small" appearance="circular" ordered stackable>
                     <ui-step completed>
                       <ui-content align="center">
@@ -1113,8 +1113,8 @@
                     </ui-step>
                     <ui-step heading="Default"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
-                <ui-docs-example description="Single steps of a circular steps group can have a separate color.">
+                </ui-example>
+                <ui-example description="Single steps of a circular steps group can have a separate color.">
                   <ui-steps color="red" appearance="circular" ordered>
                     <ui-step completed></ui-step>
                     <ui-step completed color="orange"></ui-step>
@@ -1130,7 +1130,7 @@
                     <ui-step color="purple"></ui-step>
                     <ui-step color="pink"></ui-step>
                   </ui-steps>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

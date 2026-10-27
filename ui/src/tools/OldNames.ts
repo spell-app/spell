@@ -21,6 +21,7 @@ import { SharedVocabulary } from "spell-ui/vocabulary"
  *   - the breadcrumb tags (epic `ui-gaps` P5):  only on a page that still writes `<ui-breadcrumb-section>`,
  *     since the old box's name is now the step's
  *   - a renamed tag (`RENAMED_TAGS`):  `<ui-docs-themes>` => `<ui-theme-menu>` (epic `debut` P17),
+ *     `<ui-docs-toc>` => `<ui-toc>`, `<ui-docs-example>` => `<ui-example>` (epic `ui-gaps` P14),
  *     wherever the tag's name is written (markup, CSS selectors, its `--ui-docs-themes-*` tokens, query strings),
  *     dropping the attributes the new tag no longer takes (`for`)
  *   - the button's old `label` (a joined badge) is `badge`, where the same button still writes `content`
@@ -64,14 +65,14 @@ export class OldNames {
    * - `renames`:  one line per rewrite, `<ui-button> primary => color="primary"`
    * - `manual`:  what it left for a person, and why
    * - `markupOnly`:  only tags a browser draws, never escaped markup (`&lt;ui-button primary&gt;`):  for a page that
-   *   QUOTES old names on purpose, a record of what was decided, say;  and no breadcrumb swap or tag rename, which
-   *   can't tell a quoted tag from a drawn one
+   *   QUOTES old names on purpose, a record of what was decided, say;  no breadcrumb swap, which can't tell a quoted
+   *   tag from a drawn one;  a renamed tag only where it's drawn (`renameDrawnTags()`)
    */
   rewrite(text: string, { markupOnly = false }: OldNamesOptions = {}): OldNamesResult {
     const renames: string[] = []
     const manual: string[] = []
     let rewritten = OLD_BREADCRUMB_STEP.test(text) && !markupOnly ? OldNames.swapBreadcrumbs(text, renames) : text
-    if (!markupOnly) rewritten = OldNames.renameTags(rewritten, renames)
+    rewritten = markupOnly ? OldNames.renameDrawnTags(rewritten, renames) : OldNames.renameTags(rewritten, renames)
     const quoted = OldNames.quotedValues(rewritten)
     rewritten = rewritten.replace(
       START_TAG,
@@ -264,6 +265,59 @@ export class OldNames {
   }
 
   /**
+   * Every renamed tag (`RENAMED_TAGS`) under its new name, only where a browser DRAWS it (`markupOnly`):
+   * its start and end tags written as markup, `<ui-docs-example ...>` and `</ui-docs-example>`.
+   * - Left as written:  escaped markup (`&lt;ui-docs-example&gt;`), a tag quoted in an attribute's value, a Markdown
+   *   code span or fence, and every other mention (a selector, a token, a path):  a page's record of what was decided.
+   * - Why (epic `ui-gaps` P14):  the content folder's epic pages and details pages draw live examples
+   *   among the record, and an old tag draws nothing.
+   */
+  private static renameDrawnTags(text: string, renames: string[]): string {
+    let rewritten = text
+    for (const [old, { tag, dropped }] of Object.entries(RENAMED_TAGS)) {
+      // offsets of THIS text:  a rename before changed its length
+      const quoted = [...OldNames.quotedValues(rewritten), ...OldNames.codeSpans(rewritten)]
+      const isQuoted = (at: number) => quoted.some(([start, end]) => at >= start && at < end)
+      const drawn = new RegExp(`<(/?)${old}(?=[\\s>/])`, "g")
+      let count = 0
+      rewritten = rewritten.replace(drawn, (whole, slash: string, at: number) => {
+        if (isQuoted(at)) return whole
+        count++
+        return `<${slash}${tag}`
+      })
+      if (!count) continue
+      renames.push(`<${old}> => <${tag}>`)
+      if (dropped.length) {
+        rewritten = rewritten.replace(
+          START_TAG,
+          (whole, open: string, name: string, attributes: string, close: string) => {
+            if (name !== tag || open === ESCAPED_OPEN) return whole
+            const parsed = OldNames.parse(attributes)
+            if (!parsed) return whole
+            const kept = parsed.attributes.filter((attribute) => !dropped.includes(attribute.name))
+            if (kept.length === parsed.attributes.length) return whole
+            renames.push(`<${tag}> ${dropped.join(", ")} dropped`)
+            return `${open}${name}${OldNames.unparse({ attributes: kept, trailing: parsed.trailing })}${close}`
+          }
+        )
+      }
+    }
+    return rewritten
+  }
+
+  /**
+   * Where `text`'s Markdown code is, as `[start, end)` offsets:  its fenced blocks (```` ``` ````) and its inline
+   * spans (`` `x` ``, on one line).
+   * - Static:  pure, of the text alone.
+   */
+  private static codeSpans(text: string): [number, number][] {
+    const ranges: [number, number][] = []
+    for (const fence of text.matchAll(CODE_FENCE)) ranges.push([fence.index, fence.index + fence[0].length])
+    for (const span of text.matchAll(CODE_SPAN)) ranges.push([span.index, span.index + span[0].length])
+    return ranges
+  }
+
+  /**
    * A tag's attribute text as attributes, each keeping the space before it;  `undefined` when it isn't plain
    * attributes (a JSX spread, `{...props}`):  such a tag is left as it is.
    */
@@ -371,10 +425,21 @@ const BREADCRUMB_PLACEHOLDER = "\u0001breadcrumbs"
  * Tags renamed:  old tag => its new name, and the attributes it no longer takes.
  * - `<ui-docs-themes>`, the docs site's widget, became the real element `<ui-theme-menu>` (epic `debut` P17);
  *   its `for` (a family's themes, Fomantic's per-page filter) went with Fomantic's themes.
+ * - `<ui-docs-toc>` and `<ui-docs-example>` became the real elements `<ui-toc>` and `<ui-example>` (epic `ui-gaps`
+ *   P14);  each keeps every attribute, and its old `header` is `heading` (their vocabularies' `replaces`).
+ * - The old names stay here only so a page another branch adds is rewritten once it merges:  out once those have.
  */
 const RENAMED_TAGS: Readonly<Record<string, RenamedTag>> = {
-  "ui-docs-themes": { tag: "ui-theme-menu", dropped: ["for"] }
+  "ui-docs-themes": { tag: "ui-theme-menu", dropped: ["for"] },
+  "ui-docs-toc": { tag: "ui-toc", dropped: [] },
+  "ui-docs-example": { tag: "ui-example", dropped: [] }
 }
+
+/** A Markdown fenced code block, its fences included. */
+const CODE_FENCE = /^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[ \t]*$/gm
+
+/** A Markdown code span on one line, its backticks included. */
+const CODE_SPAN = /`[^`\n]+`/g
 
 /** One old name of one tag, and what it becomes. */
 export type OldNameRule = {

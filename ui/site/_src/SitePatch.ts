@@ -1,6 +1,6 @@
 import { UI } from "spell-ui/core"
-// A leaf, not the barrel:  the barrel defines `<ui-docs-example>`, which `<ui-root>` does on first use
-import { ExampleSource } from "spell-ui/docs-components/ui-docs-example/ExampleSource"
+// A leaf, not the barrel:  the barrel defines `<ui-example>`, which `<ui-root>` does on first use
+import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
 import { PagePatch } from "spell/server/site"
 import { SiteSections } from "./SiteSections"
 import { SiteShell } from "./SiteShell"
@@ -15,7 +15,7 @@ import { PAGE_MAIN } from "./site.types"
  *   from the page's source as it LOADED (`shown()`)
  *   - scroll, folds, the tab shown, focus and typed text stay
  * - The site's rules, over the shared ones:
- *   - `<ui-docs-example>` and `<ui-docs-api>` are replaced whole when they change:
+ *   - `<ui-example>` and `<ui-docs-api>` are replaced whole when they change:
  *     an example draws its live demo and its code from its markup once (`ExampleSource.keep()`, on the copy)
  *   - what the site adds in `main` (`data-spell-added`:  the page's subtitle, the comments' threads) is stepped around
  *   - a copy brought in gets absolute URLs (`SiteShell.absolutize()`), as the router's pages do
@@ -28,7 +28,7 @@ export class SitePatch {
   /** The patcher, with the site's rules. */
   private readonly patcher = new PagePatch({
     skip: "[data-spell-added]",
-    replacedWhole: "ui-docs-example, ui-docs-api, ui-select, ui-dropdown, ui-accordion",
+    replacedWhole: "ui-example, ui-docs-api, ui-select, ui-dropdown, ui-accordion",
     prepare: (copy) => {
       SiteShell.absolutize(copy, location.href)
       ExampleSource.keep(copy)
@@ -112,7 +112,7 @@ export type SitePatchProps = {
 type PageChange = { html?: string; own?: boolean; reload?: () => void }
 
 /** The example tag:  a copy that IS an example is kept by itself (`ExampleSource.keep()` looks inside). */
-const EXAMPLE_TAG = "ui-docs-example"
+const EXAMPLE_TAG = "ui-example"
 
 /**
  * Keep `example`'s authored markup, as `ExampleSource.keep()` does for the examples inside a root:

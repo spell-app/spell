@@ -3,18 +3,11 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import type { UILabelAttributes } from "spell-ui/jsx"
-import {
-  HeadingLevels,
-  TOC_ENTRY_ATTRIBUTE,
-  TOC_GROUP_ATTRIBUTE,
-  type HeadingBounds,
-  type SiteDataFile,
-  type SiteTag
-} from "spell-ui/docs-components/docs-components.types"
+import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-// Leaves, not the barrel, which would define `<ui-docs-toc>`:  the landing, and the slugs the page's section ids use
-import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+// Leaves, not the barrel, which would define `<ui-toc>`:  the landing, and the slugs the page's section ids use
+import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
 import {
@@ -56,7 +49,7 @@ import apiCSS from "./UIDocsApi.css?inline"
  *     each with its summary, its name a link to its first table below (`#ui-or`, which the page lands on).
  *     Drawn only for a family of 2+ tags, so it's a family page's first API section.
  *   - Every row's name cell has an id, `<anchor>-<name>` (`anchorFor()`), and marks itself an entry of the page's
- *     "On this page" list (`TOC_ENTRY_ATTRIBUTE`);  so do the tag headers, as groups.
+ *     "On this page" list (`UIT.TocMarks.entry`);  so do the tag headers, as groups.
  *   - The page lands on them (the site's `SiteSections`):  the browser can't reach an id in a shadow root.
  *     This element only FLASHES the row the hash names (`landedId`), when its tables are drawn and on `hashchange`.
  * - Descriptions:  `` `code` `` spans become `<code>` (`InlineCode`), as text nodes, never HTML.
@@ -163,7 +156,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
 
   /** Heading level of the topmost headers, clamped. */
   get headingLevel(): number {
-    return HeadingLevels.levelFor(this.level, LEVELS)
+    return UIT.HeadingLevels.levelFor(this.level, LEVELS)
   }
 
   /** Drawn (`isReady`) with tables:  announce them, and scroll to `location.hash` if it names one of them. */
@@ -209,9 +202,9 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
         <ui-header
           part={this.partForName("header")}
           id={only ? this.anchorFor(item) : item.tag.tag}
-          level={HeadingLevels.attributeFor(this.headingLevel)}
+          level={UIT.HeadingLevels.attributeFor(this.headingLevel)}
           dividing=""
-          {...(only ? { [TOC_ENTRY_ATTRIBUTE]: tag, [TOC_GROUP_ATTRIBUTE]: "" } : {})}
+          {...(only ? { [UIT.TocMarks.entry]: tag, [UIT.TocMarks.group]: "" } : {})}
         >
           <a href={`#${item.tag.tag}`}>
             <code>{tag}</code>
@@ -250,7 +243,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     return (
       <>
         <Show when={!this.onlyId}>
-          <ui-header part={this.partForName("title")} level={HeadingLevels.attributeFor(owner.level)} size={SMALL}>
+          <ui-header part={this.partForName("title")} level={UIT.HeadingLevels.attributeFor(owner.level)} size={SMALL}>
             {this.translationForKey(section.id)}
           </ui-header>
         </Show>
@@ -306,7 +299,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           scope="row"
           id={member ? member.id : undefined}
           part={member ? this.partForName("member") : undefined}
-          {...(member ? { [TOC_ENTRY_ATTRIBUTE]: member.name } : {})}
+          {...(member ? { [UIT.TocMarks.entry]: member.name } : {})}
         >
           {cell.code === undefined ? (
             <em>{cell.label ? this.translationForKey(cell.label) : ""}</em>
@@ -538,4 +531,4 @@ const WARNING = "warning"
  * `level`:  a heading level, leaving room for the table titles one level deeper;
  * unset, `3`, under the page's `h2` "API" section.
  */
-const LEVELS: HeadingBounds = { min: 1, max: 5, fallback: 3 }
+const LEVELS: UIT.HeadingBounds = { min: 1, max: 5, fallback: 3 }

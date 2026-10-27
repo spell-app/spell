@@ -82,7 +82,7 @@
   }
 
   /* A tag header's self-link keeps the header's colour
-     (a gap the epic page records:  `<ui-header href>` isn't a heading). */
+     (a gap the epic page records:  `<ui-header link>` isn't a heading). */
   [part~="header"] > a {
     color: inherit;
     text-decoration-line: none;

@@ -55,36 +55,36 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-stack" label="Stack" sticky collapsible dividing>
-                <ui-docs-example description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
+                <ui-example description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
                   <ui-stack>
                     <ui-segment>First</ui-segment>
                     <ui-segment>Second</ui-segment>
                     <ui-segment>Third</ui-segment>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-row" label="Row" sticky collapsible dividing>
-                <ui-docs-example description="`direction=&quot;horizontal&quot;`:  a row, its children centred on its middle.">
+                <ui-example description="`direction=&quot;horizontal&quot;`:  a row, its children centred on its middle.">
                   <ui-stack direction="horizontal">
                     <ui-icon name="inbox" size="large"></ui-icon>
                     <ui-text>3 new messages</ui-text>
                     <ui-button size="small">Open</ui-button>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-wrapping-row" label="Wrapping row" sticky collapsible dividing>
-                <ui-docs-example description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
+                <ui-example description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
                   <ui-stack direction="horizontal" wrap spacing="sm">
                     <ui-label>Design</ui-label>
                     <ui-label>Engineering</ui-label>
@@ -93,12 +93,12 @@
                     <ui-label>Support</ui-label>
                     <ui-label>Sales</ui-label>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-spacing" label="Spacing" sticky collapsible dividing>
-                <ui-docs-example description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
+                <ui-example description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
                   <ui-stack spacing="lg">
                     <ui-stack direction="horizontal" spacing="none">
                       <ui-button>none</ui-button>
@@ -113,24 +113,24 @@
                       <ui-button>xl</ui-button>
                     </ui-stack>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-one-left-one-right" label="One left, one right" sticky collapsible dividing>
-                <ui-docs-example description="`justify=&quot;between&quot;`:  the first child at the start, the last at the end.  What `floated=&quot;right&quot;` used to do.">
+                <ui-example description="`justify=&quot;between&quot;`:  the first child at the start, the last at the end.  What `floated=&quot;right&quot;` used to do.">
                   <ui-stack direction="horizontal" justify="between">
                     <ui-header level="4">Inbox</ui-header>
                     <ui-button color="primary">New message</ui-button>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-centred" label="Centred" sticky collapsible dividing>
-                <ui-docs-example description="`align=&quot;center&quot;`:  a column's children centred across it.">
+                <ui-example description="`align=&quot;center&quot;`:  a column's children centred across it.">
                   <ui-stack align="center" spacing="sm">
                     <ui-icon name="inbox" size="huge"></ui-icon>
                     <ui-text>No messages yet</ui-text>
                     <ui-button size="small">Write one</ui-button>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

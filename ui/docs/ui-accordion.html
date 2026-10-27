@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-accordion" label="Accordion" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A standard accordion:  each <code>&lt;ui-title&gt;</code> starts a panel, and the element after it
                     is that panel's content. <code>open</code> lists the panels open at the start.
@@ -96,11 +96,11 @@
                       </p>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-styled" label="Styled" sticky collapsible dividing>
-                <ui-docs-example description="A styled accordion adds basic formatting.">
+                <ui-example description="A styled accordion adds basic formatting.">
                   <ui-accordion appearance="styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
@@ -131,11 +131,11 @@
                       </p>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-basic-styled" label="Basic Styled" sticky collapsible dividing>
-                <ui-docs-example description="A basic styled accordion limits the formatting to the header only.">
+                <ui-example description="A basic styled accordion limits the formatting to the header only.">
                   <ui-accordion appearance="basic styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
@@ -166,11 +166,11 @@
                       </p>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-tree" label="Tree" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A tree accordion using <a href="#examples-examples-nested-accordions">nested accordions</a>: each panel's content is
                     indented under its title, like a file tree.
@@ -213,13 +213,13 @@
                       </ui-accordion>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-open" label="Open" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An open panel shows its content;  its title is the active one.  `open` counts from 0."
                 >
                   <ui-accordion appearance="styled" open="1">
@@ -228,11 +228,11 @@
                     <ui-title>Open panel</ui-title>
                     <ui-content><p>Shown: its title is the active one.</p></ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-not-exclusive" label="Not exclusive" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='By default opening one panel closes the others.  `exclusive="no"` lets any number stay open, so `open` can list several:  `open="0 1"`.'
                 >
                   <ui-accordion appearance="styled" exclusive="no" open="0 1">
@@ -241,11 +241,11 @@
                     <ui-title>Second</ui-title>
                     <ui-content><p>Still open.</p></ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-not-collapsible" label="Not collapsible" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`collapsible="no"` keeps one panel open:  activating the open title does nothing.'
                 >
                   <ui-accordion appearance="styled" collapsible="no" open="0">
@@ -254,13 +254,13 @@
                     <ui-title>Another panel</ui-title>
                     <ui-content><p>Now this one stays open.</p></ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="An accordion can take up the width of its container.">
+                <ui-example description="An accordion can take up the width of its container.">
                   <ui-accordion appearance="styled" fluid open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
@@ -291,11 +291,11 @@
                       </p>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="An accordion can be formatted to appear on dark backgrounds.">
+                <ui-example description="An accordion can be formatted to appear on dark backgrounds.">
                   <ui-segment inverted>
                     <ui-accordion inverted open="0">
                       <ui-title>What is a dog?</ui-title>
@@ -328,8 +328,8 @@
                       </ui-content>
                     </ui-accordion>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example description="A styled accordion can be inverted too.">
+                </ui-example>
+                <ui-example description="A styled accordion can be inverted too.">
                   <ui-accordion inverted appearance="styled" open="0">
                     <ui-title>What is a dog?</ui-title>
                     <ui-content>
@@ -360,11 +360,11 @@
                       </p>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example description="An accordion can reduce its padding to appear compact.">
+                <ui-example description="An accordion can reduce its padding to appear compact.">
                   <ui-segment>
                     <ui-accordion padding="compact" open="0">
                       <ui-title>What is a dog?</ui-title>
@@ -397,8 +397,8 @@
                       </ui-content>
                     </ui-accordion>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example description='The following accordion appears very compact:  `padding="xs"`.'>
+                </ui-example>
+                <ui-example description='The following accordion appears very compact:  `padding="xs"`.'>
                   <ui-segment>
                     <ui-accordion padding="xs" open="0">
                       <ui-title>What is a dog?</ui-title>
@@ -431,7 +431,7 @@
                       </ui-content>
                     </ui-accordion>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -443,7 +443,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     An accordion can have multiple levels of nested content: a nested
                     <code>&lt;ui-accordion&gt;</code> inside a panel's content. It takes its parent's look; its own
@@ -491,7 +491,7 @@
                       </ui-accordion>
                     </ui-content>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Changing Trigger (<code>selector.trigger</code> / <code>selector.ignore</code>). The
@@ -500,7 +500,7 @@
               >
 
               <ui-section id="examples-examples-form-fields" label="Form Fields" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An accordion can be used anywhere where content can be shown or hidden.  For example, to show optional form fields."
                 >
                   <ui-segment>
@@ -527,7 +527,7 @@
                       </form>
                     </ui-form>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -537,7 +537,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     The content of a panel is simply the element after its title: a <code>&lt;ui-content&gt;</code> is
                     usual, but any element works.
@@ -551,7 +551,7 @@
                     <ui-title>A form field</ui-title>
                     <ui-input placeholder="Name" aria-label="Name"></ui-input>
                   </ui-accordion>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I15:  no accordion menu (`ui vertical accordion menu`, a menu item holding a title + drawer);  left out. -->
@@ -633,11 +633,11 @@
                   line in the panel (`:state(error)`). `load()` fetches it now, `reload()` again past the cache.
                 </script>
               </ui-markdown>
-              <ui-docs-example description="Open the question:  its answer comes from `examples/answer.html`.">
+              <ui-example description="Open the question:  its answer comes from `examples/answer.html`.">
                 <ui-accordion appearance="styled" source="examples/answer.html">
                   <ui-title>What is a dog?</ui-title>
                 </ui-accordion>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
 
             <ui-section id="usage-without-javascript" label="Without JavaScript" sticky collapsible dividing>

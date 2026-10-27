@@ -24,9 +24,12 @@ import type { Styles } from "./Styles"
  *     (epic `debut` P17):
  *     - `spell`:  the Spell brand, as Claude Design draws it
  *     - `glass`:  macOS's look today, translucent glass surfaces on a solid page
- *     - `fruity`:  Glass on a pastel wallpaper (its sheet imports `glass.css`)
+ *     - `fruity`:  Glass on a pastel wallpaper (it extends `glass`:  its sheet imports `glass.css`)
  *     - `merlot`:  a code studio in wine reds, flat panels a step off the page
  *     - applied exactly like a Fomantic theme (on `classic`), but a picker lists them apart
+ *     - written as DATA (epic `debut` P18):  each a theme file, `<name>.theme.json5`, its values in the theme tree's
+ *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
+ *       reads only sheets
  *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
  * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current theme).  ONE
  *   `theme` slot, so switching themes replaces its text in place.

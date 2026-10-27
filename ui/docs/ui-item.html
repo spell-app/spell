@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-in-a-dropdown" label="In a dropdown" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself."
                 >
                   <ui-dropdown selection placeholder="Fruit">
@@ -69,31 +69,31 @@
                     <ui-item value="pear" selected>Pear</ui-item>
                     <ui-item value="plum" description="in season">Plum</ui-item>
                   </ui-dropdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-in-a-list" label="In a list" sticky collapsible dividing>
-                <ui-docs-example description="Inside a list an item is a list row.">
+                <ui-example description="Inside a list an item is a list row.">
                   <ui-list divided>
                     <ui-item icon="users">Friends</ui-item>
                     <ui-item icon="map marker">Worldwide</ui-item>
                     <ui-item icon="mail">Messages</ui-item>
                   </ui-list>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-in-a-menu" label="In a menu" sticky collapsible dividing>
-                <ui-docs-example description="Inside a menu an item is a menu item.">
+                <ui-example description="Inside a menu an item is a menu item.">
                   <ui-menu appearance="pointing" aria-label="Item in a menu demo">
                     <ui-item link="#inbox" selected>Inbox</ui-item>
                     <ui-item link="#starred">Starred</ui-item>
                     <ui-item link="#sent">Sent</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-in-an-items-view" label="In an Items view" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra."
                 >
                   <ui-items>
@@ -108,7 +108,7 @@
                       </ui-content>
                     </ui-item>
                   </ui-items>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -120,7 +120,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='In a list or menu, `link` renders a link;  `appearance="link"` (or a `selection` list, or an `appearance="link"`, `pagination` or `interactive` menu) renders a button;  anything else is a plain block.'
                 >
                   <ui-list>
@@ -128,11 +128,11 @@
                     <ui-item appearance="link" icon="hand pointer">A button</ui-item>
                     <ui-item icon="square outline">A plain block</ui-item>
                   </ui-list>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-icon-and-image" label="Icon and image" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar."
                 >
                   <ui-list>
@@ -140,11 +140,11 @@
                     <ui-item><ui-icon slot="icon" name="heart" color="red"></ui-icon>Icon slot</ui-item>
                     <ui-item image="../images/avatar/small/helen.jpg">Image attribute</ui-item>
                   </ui-list>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-content-parts" label="Content parts" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look."
                 >
                   <ui-list spacing="lg">
@@ -161,7 +161,7 @@
                       </ui-content>
                     </ui-item>
                   </ui-list>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -171,7 +171,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="`kind` picks the row kind:  an `item`, a group `header` (dropdown, menu) or a `divider` line (dropdown).  Open the dropdown to see its header and divider."
                 >
                   <ui-menu appearance="text" aria-label="Header item demo">
@@ -185,7 +185,7 @@
                     <ui-item kind="divider"></ui-item>
                     <ui-item description="ctrl + o">Open...</ui-item>
                   </ui-dropdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -195,7 +195,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A `<ui-list>` or `<ui-menu>` inside an item is its sub list or sub menu.">
+                <ui-example description="A `<ui-list>` or `<ui-menu>` inside an item is its sub list or sub menu.">
                   <ui-list bulleted>
                     <ui-item>
                       Benefits
@@ -214,13 +214,13 @@
                       </ui-menu>
                     </ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-selected" label="Selected" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus."
                 >
                   <ui-menu appearance="secondary" aria-label="Selected demo">
@@ -231,11 +231,11 @@
                     <ui-item link="#selected" active>active</ui-item>
                     <ui-item link="#selected">Other</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A disabled item can't be chosen or followed.">
+                <ui-example description="A disabled item can't be chosen or followed.">
                   <ui-list appearance="link">
                     <ui-item link="#disabled">Enabled</ui-item>
                     <ui-item link="#disabled" disabled>Disabled</ui-item>
@@ -244,34 +244,34 @@
                     <ui-item link="#disabled">Enabled</ui-item>
                     <ui-item link="#disabled" disabled>Disabled</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="In a menu, an item's `color` tints it while selected.">
+                <ui-example description="In a menu, an item's `color` tints it while selected.">
                   <ui-menu appearance="pointing" aria-label="Colored item demo">
                     <ui-item link="#colored" color="red" selected>Red</ui-item>
                     <ui-item link="#colored" color="blue">Blue</ui-item>
                     <ui-item link="#colored" color="green">Green</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-position" label="Position" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='In a menu, `position="right"` pushes an item (and those after it) to the far end.'
                 >
                   <ui-menu aria-label="Positioned item demo">
                     <ui-item link="#position">Home</ui-item>
                     <ui-item link="#position" position="right">Logout</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='In a menu, `padding="none"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.'
                 >
                   <ui-menu aria-label="Fitted item demo">
@@ -279,7 +279,7 @@
                     <ui-item link="#fitted" padding="none-x">No horizontal padding</ui-item>
                     <ui-item link="#fitted" padding="none-y">No vertical padding</ui-item>
                   </ui-menu>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

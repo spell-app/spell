@@ -61,18 +61,18 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-rating" label="Rating" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A basic rating.  Fomantic's default is 4 icons;  `max-rating` changes it, here to one."
                 >
                   <ui-rating max-rating="1" aria-label="Favourite"></ui-rating>
-                </ui-docs-example>
-                <ui-docs-example description="Four icons, the first three filled by `value`.">
+                </ui-example>
+                <ui-example description="Four icons, the first three filled by `value`.">
                   <ui-rating value="3" aria-label="Rating"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-icon" label="Icon" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="You can use any available icon as rating indicator:  `icon` takes an icon name."
                 >
                   <ui-rating color="yellow" icon="star" value="2" aria-label="Stars"></ui-rating>
@@ -88,11 +88,11 @@
                   <ui-rating color="pink" icon="cat" value="2" aria-label="Cats"></ui-rating>
                   <br />
                   <ui-rating color="orange" icon="circle" value="2" aria-label="Circles"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-color" label="Color" sticky collapsible dividing>
-                <ui-docs-example description="You can specify any color of the palette with `color`.">
+                <ui-example description="You can specify any color of the palette with `color`.">
                   <ui-rating color="red" value="1" max-rating="7" aria-label="Red"></ui-rating>
                   <br />
                   <ui-rating color="orange" value="2" max-rating="7" aria-label="Orange"></ui-rating>
@@ -118,11 +118,11 @@
                   <ui-rating color="grey" value="1" max-rating="7" aria-label="Grey"></ui-rating>
                   <br />
                   <ui-rating color="black" value="1" max-rating="7" aria-label="Black"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-partial-ratings" label="Partial Ratings" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">You can use decimal values for showing partially filled ratings.</p>
                   <ui-message slot="description" state="info" size="small"
                     >A fractional <code>value</code> only draws a partly filled icon: no radio is chosen until the user
@@ -144,32 +144,32 @@
                   <ui-rating color="blue" value="4.375" max-rating="5" aria-label="Blue"></ui-rating>
                   <br />
                   <ui-rating color="brown" value="4.75" max-rating="5" aria-label="Brown"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A rating can be non-interactive with `disabled`:  it shows its value, can't be focused and isn't submitted."
                 >
                   <ui-rating color="yellow" disabled value="3" max-rating="5" aria-label="Disabled"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-read-only" label="Read-only" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A `readonly` rating shows its value and can't be changed, but is still focusable and submitted.  A `<label for>` names it."
                 >
                   <label for="rating-readonly">Read-only</label>
                   <ui-rating id="rating-readonly" color="yellow" readonly value="3" max-rating="5"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A rating can vary in size.">
+                <ui-example description="A rating can vary in size.">
                   <ui-rating size="mini" color="yellow" value="3" aria-label="Mini"></ui-rating>
                   <br />
                   <ui-rating size="tiny" color="yellow" value="3" aria-label="Tiny"></ui-rating>
@@ -183,7 +183,7 @@
                   <ui-rating size="huge" color="yellow" value="3" aria-label="Huge"></ui-rating>
                   <br />
                   <ui-rating size="massive" color="yellow" value="3" aria-label="Massive"></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -195,7 +195,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>icon</code> picks the icon, and <code>value</code> the starting rating.
                     <code>max-rating</code> is the number of icons;  Fomantic's are data-icon, data-rating and
@@ -223,7 +223,7 @@
                       </ui-content>
                     </ui-item>
                   </ui-list>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -233,7 +233,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     You can disable or enable interactive rating: set or remove <code>readonly</code> (or
                     <code>disabled</code>), as an attribute or a property. Fomantic's <code>disable</code> /
@@ -247,7 +247,7 @@
                     readonly
                     aria-label="Read-only hearts"
                   ></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -257,7 +257,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="With `clearable` you can clear the rating by choosing the current rating again (or with Backspace / Delete)."
                 >
                   <ui-rating
@@ -268,7 +268,7 @@
                     clearable
                     aria-label="Clearable hearts"
                   ></ui-rating>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -325,7 +325,7 @@
                 </script>
               </ui-markdown>
               <ui-section id="usage-forms-in-a-form" label="In a form" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value."
                 >
                   <ui-form>
@@ -342,7 +342,7 @@
                       <ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 

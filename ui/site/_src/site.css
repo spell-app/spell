@@ -15,6 +15,8 @@
 @import "../../src/styles/media.css";
 /* the section titles' look, shared with other pages drawn like a component page */
 @import "../../src/docs-components/docs-sections.css";
+/* the head's:  the subtitle, the tabs panel's measures (`--ui-docs-tabs-*`) */
+@import "../../src/docs-components/docs-page.css";
 
 @layer ui.app {
   :root {
@@ -538,11 +540,12 @@
   /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
   .site-subtitle {
     /* the gutter in the page's ems, not this larger text's:  its left edge the title's */
-    margin: 0 calc(var(--site-gutter) / 1.34);
+    margin: 0 calc(var(--site-gutter) / var(--ui-docs-subtitle-scale));
     /* 8px more under it (Owen:  "8px additional space below breadcrumb and subhead") */
     padding-block-end: calc(0.25em + 8px);
     font-family: var(--ui-font-family-heading);
-    font-size: 1.34em;
+    /* `docs-page.css`'s measure, shared with pages drawn like this one */
+    font-size: calc(var(--ui-docs-subtitle-scale) * 1em);
     line-height: 1.2;
     color: var(--ui-text-muted);
     transition: opacity var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
@@ -659,7 +662,7 @@
   .site-tabs::part(menu) {
     /* the panel's own glass, as its ring is:  an unselected tab shows the panel (r25:  transparent showed the page,
        and while stuck the page scrolling under) */
-    --ui-menu-segmented-background: var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)));
+    --ui-menu-segmented-background: var(--ui-docs-tabs-glass);
   }
   .site-tabs > ui-tab::part(tab) {
     margin-block-start: 0;
@@ -727,23 +730,15 @@
    * - Section titles reach the side columns' cards, their text where it was (`--_site-band-start` / `-end`).
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
+  /*
+   * the panel's measures are `docs-page.css`'s (one home, shared with pages drawn like this one):  its band (10px, 6px
+   * on phones), its gap, its inset (40px, the band on phones);  named again here for spell-epic's section toolbar
+   */
   .site-main {
-    --site-tabs-band: 10px;
-    --site-tabs-gap: 10px;
+    --site-tabs-band: var(--ui-docs-tabs-band);
+    --site-tabs-gap: var(--ui-docs-tabs-gap);
     /* the tabs' panel, in from the column's edges (its band reaching out past this) */
-    --site-tabs-inset: 40px;
-  }
-  /* phones:  the tabs need the width */
-  @media (--ui-mobile) {
-    .site-main {
-      /*
-       * a thinner band round the tabs (Owen, 2026-10-25, the tabs' picture page:  "Phone, at the top ... Thinner border
-       * around the tabs");  wider screens keep 10px, which he didn't ask to change
-       */
-      --site-tabs-band: 6px;
-      /* the band's width:  its glass then starts at the gutter, never closer to the screen's edge (the designer, T5) */
-      --site-tabs-inset: var(--site-tabs-band);
-    }
+    --site-tabs-inset: var(--ui-docs-tabs-inset);
   }
   .site-main {
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
@@ -761,7 +756,7 @@
     /* in from the column's edges (Owen, 2026-10-23:  "Add 40px margin on left/right of this section") */
     margin-inline: var(--site-tabs-inset);
     /* the top row a little larger than the section toolbar's row under it */
-    font-size: calc(var(--ui-font-size) * 1.0667);
+    font-size: calc(var(--ui-font-size) * var(--ui-docs-tabs-scale));
   }
   /*
    * phones:  the tabs and their section toolbar scroll away with the page, never stick (Owen, 2026-10-25:  "Phone,
@@ -829,20 +824,20 @@
    * - Owen, 2026-10-23:  "Uneven amount of space above and below the breadcrumbs here, bottom looks good"
    * - measured:  18.9px over the capitals, 18px under the baseline
    */
-  ui-docs-example:has(> ui-breadcrumbs) {
-    --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
+  ui-example:has(> ui-breadcrumbs) {
+    --ui-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
   /*
    * an example's buttons that wrap keep apart, row from row:  their rows touched
    * - also inside the example's own segment (Button's Inverted example:  0px between rows, 8px between columns)
    */
-  ui-docs-example > :is(ui-button, ui-buttons, ui-label),
-  ui-docs-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
+  ui-example > :is(ui-button, ui-buttons, ui-label),
+  ui-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
     margin-block: 0.25em;
   }
   /* a message given as an example's description runs the frame's width, as every other message does */
-  ui-docs-example:has(> ui-message[slot="description"])::part(description) {
+  ui-example:has(> ui-message[slot="description"])::part(description) {
     max-width: none;
   }
 

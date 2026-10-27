@@ -62,27 +62,6 @@ describe("the kit's colour maths", () => {
 /** The themes it's measured in:  none (Spell UI's own look), then each theme of the set. */
 const THEMES: readonly (string | undefined)[] = [undefined, ...(await UI.load()).themes.own]
 
-/**
- * What fails in the Spell theme today, pinned so the test still guards the rest:  its facelift, epic `debut` P18,
- * fixes them, and empties this list (its item T).
- */
-const SPELL_FAILURES_FOR_P18: Readonly<Record<Check, readonly string[]>> = {
-  solids: [
-    "ui-light orange: --ui-color-on on --ui-color-down is 4.25:1 < 4.5",
-    "ui-light olive: --ui-color-on on --ui-color-down is 4.32:1 < 4.5",
-    "ui-light secondary: --ui-color-on on --ui-color-focus is 4.23:1 < 4.5",
-    "ui-light secondary: --ui-color-on on --ui-color-down is 3.90:1 < 4.5",
-    "ui-light info: --ui-color-on on --ui-color-focus is 4.44:1 < 4.5",
-    "ui-light info: --ui-color-on on --ui-color-down is 4.16:1 < 4.5",
-    "ui-dark purple: --ui-color-on on --ui-color-down is 4.43:1 < 4.5"
-  ],
-  roles: ["ui-light primary: --ui-color-border on --ui-background is 2.80:1 < 3"],
-  text: []
-}
-
-/** Which of the checks below a failure is pinned under. */
-type Check = "solids" | "roles" | "text"
-
 for (const theme of THEMES) {
   describe(`contrast (WCAG AA), ${theme ?? "no theme"}`, () => {
     it.each(SCHEMES)("puts readable text on every solid colour and state (%s)", async (scheme) => {
@@ -93,7 +72,7 @@ for (const theme of THEMES) {
         for (const solid of SOLIDS) failures.push(...check(probe, name, "--ui-color-on", [solid], CONTRAST_TEXT))
         failures.push(...check(probe, name, "--ui-color-inverted-on", ["--ui-color-inverted"], CONTRAST_TEXT))
       }
-      expectFailures(theme, scheme, "solids", failures)
+      expect(failures).toEqual([])
     })
 
     it.each(SCHEMES)("keeps the text roles readable on the page and the tinted background (%s)", async (scheme) => {
@@ -111,7 +90,7 @@ for (const theme of THEMES) {
         // outlines -- need the 3:1 of a UI component boundary
         if (HUE_NAMES.has(name)) failures.push(...check(probe, name, "--ui-color-border", [], CONTRAST_LARGE))
       }
-      expectFailures(theme, scheme, "roles", failures)
+      expect(failures).toEqual([])
     })
 
     it.each(SCHEMES)("keeps text and muted text readable on the page and on its panels (%s)", async (scheme) => {
@@ -121,7 +100,7 @@ for (const theme of THEMES) {
       for (const text of ["--ui-text-color", "--ui-text-muted"]) {
         for (const surface of TEXT_GROUNDS) failures.push(...check(probe, "text", text, surface, CONTRAST_TEXT))
       }
-      expectFailures(theme, scheme, "text", failures)
+      expect(failures).toEqual([])
     })
   })
 }
@@ -136,13 +115,6 @@ const TEXT_GROUNDS: readonly (readonly string[])[] = [
   ["--ui-surface-muted"],
   ["--ui-surface-strong"]
 ]
-
-/** `failures` are exactly what's pinned for `theme` and `kind`:  none, but the Spell theme's for P18. */
-function expectFailures(theme: string | undefined, scheme: string, kind: Check, failures: string[]) {
-  const pinned =
-    theme === "spell" ? SPELL_FAILURES_FOR_P18[kind].filter((failure) => failure.startsWith(`${scheme} `)) : []
-  expect(failures.map((failure) => `${scheme} ${failure}`)).toEqual(pinned)
-}
 
 /**
  * Adopt the raw foundation into the document for the current test, and theme `theme` (none:  our own look).

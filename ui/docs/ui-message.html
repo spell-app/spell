@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-message" label="Message" sticky collapsible dividing>
-                <ui-docs-example description="A basic message.">
+                <ui-example description="A basic message.">
                   <ui-message>
                     <ui-header>Changes in Service</ui-header>
                     <p>
@@ -69,38 +69,38 @@
                       the changes.
                     </p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-list-message" label="List Message" sticky collapsible dividing>
-                <ui-docs-example description="A message with a list.  `heading` is the shorthand for a header.">
+                <ui-example description="A message with a list.  `heading` is the shorthand for a header.">
                   <ui-message heading="New Site Features">
                     <ul>
                       <li>You can now have cover images on blog pages</li>
                       <li>Drafts will now auto-save while writing</li>
                     </ul>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-icon-message" label="Icon Message" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A message can contain an icon:  the `icon` attribute takes a name, the `icon` slot any markup."
                 >
                   <ui-message icon="inbox" heading="Have you heard about our mailing list?">
                     <p>Get the best news in your e-mail every day.</p>
                   </ui-message>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message heading="Just one second">
                     <ui-icon slot="icon" name="circle notch" loading></ui-icon>
                     <p>We're fetching that content for you.</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-dismissable-block" label="Dismissable Block" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A message that the user can choose to hide: <code>dismissible</code> adds a close button.
                   </p>
@@ -112,45 +112,45 @@
                   <ui-message dismissible heading="Welcome back!">
                     <p>This is a special notification which you can dismiss if you're bored with it.</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
-                <ui-docs-example description="A message can contain a header:  a slotted `<ui-header>`.">
+                <ui-example description="A message can contain a header:  a slotted `<ui-header>`.">
                   <ui-message>
                     <ui-header>Email Confirmed</ui-header>
                     <p>You're all signed up for the newsletter</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-list" label="List" sticky collapsible dividing>
-                <ui-docs-example description="A message can contain a list of items:  a plain `<ul>`.">
+                <ui-example description="A message can contain a list of items:  a plain `<ul>`.">
                   <ui-message>
                     <ul>
                       <li>No header, just a list</li>
                       <li>It is a list of items</li>
                     </ul>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-hidden" label="Hidden" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A message can be hidden:  the standard `hidden` attribute.  The message below is in the example, unseen."
                 >
                   <ui-message hidden>
                     <p>You can't see me</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-visible" label="Visible" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A message can be set to visible to force itself to be shown.</p>
                   <ui-message size="small" slot="description" class="site-not-ported"
                     >Not ported: the <code>visible</code> class -- a message without <code>hidden</code> is always
@@ -159,53 +159,53 @@
                   <ui-message>
                     <p>You can always see me</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
-                <ui-docs-example description='A message can be displayed center aligned:  `text-align="center"`.'>
+                <ui-example description='A message can be displayed center aligned:  `text-align="center"`.'>
                   <ui-message align="center" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-right-aligned" label="Right Aligned" sticky collapsible dividing>
-                <ui-docs-example description='A message can be displayed right aligned:  `text-align="right"`.'>
+                <ui-example description='A message can be displayed right aligned:  `text-align="right"`.'>
                   <ui-message align="right" heading="New Version is available!">
                     <p>When are you going to update?</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
-                <ui-docs-example description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
+                <ui-example description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
                   <ui-message centered icon="envelope" heading="Centered icon">
                     <p>Icon and content centred together.</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-floating" label="Floating" sticky collapsible dividing>
-                <ui-docs-example description="A message can float above content that it is related to.">
+                <ui-example description="A message can float above content that it is related to.">
                   <ui-message floating>
                     <p>Way to go!</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example description="A message can only take up the width of its content.">
+                <ui-example description="A message can only take up the width of its content.">
                   <ui-message padding="compact">
                     <p>Get all the best inventions in your e-mail every day. Sign up now!</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A message can be formatted to attach itself to other content:  `attach="both"` or `attach="top"` joins the content below, `attach="bottom"` the content above.'
                 >
                   <ui-message attach="both" heading="Welcome to our site!">
@@ -242,28 +242,28 @@
                   <ui-message attach="bottom" state="warning" icon="help">
                     Already signed up? <a href="#login">Login here</a> instead.
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-warning" label="Warning" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A message may be formatted to display warning messages:  `state="warning"`.'
                 >
                   <ui-message state="warning" dismissible heading="You must register before you can do that!">
                     Visit our registration page, then try again
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-info" label="Info" sticky collapsible dividing>
-                <ui-docs-example description="A message may be formatted to display information.">
+                <ui-example description="A message may be formatted to display information.">
                   <ui-message state="info" dismissible heading="Was this what you wanted?">
                     <ul>
                       <li>It's good to see you again.</li>
                       <li>Did you know it's been a while?</li>
                     </ul>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -273,7 +273,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A message may be formatted to display a positive message.</p>
                   <ui-message slot="description" state="info" size="small" icon="attention"
                     >Positive / success and negative / error messages use the same colours by default, but each has its
@@ -282,32 +282,32 @@
                   <ui-message state="positive" dismissible heading="You are eligible for a reward">
                     <p>Go to your <b>special offers</b> page to see now.</p>
                   </ui-message>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message state="success" dismissible heading="Your user registration was successful.">
                     <p>You may now log-in with the username you have chosen</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-negative-error" label="Negative / Error" sticky collapsible dividing>
-                <ui-docs-example description="A message may be formatted to display a negative message.">
+                <ui-example description="A message may be formatted to display a negative message.">
                   <ui-message state="negative" dismissible heading="We're sorry we can't apply that discount">
                     <p>That offer has expired</p>
                   </ui-message>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message state="error" dismissible heading="There were some errors with your submission">
                     <ul>
                       <li>You must include both a upper and lower case letters in your password.</li>
                       <li>You need to select your home country.</li>
                     </ul>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A message can be formatted to be different colors.">
+                <ui-example description="A message can be formatted to be different colors.">
                   <ui-message color="red">Red</ui-message>
                   <ui-message color="orange">Orange</ui-message>
                   <ui-message color="yellow">Yellow</ui-message>
@@ -320,11 +320,11 @@
                   <ui-message color="pink">Pink</ui-message>
                   <ui-message color="brown">Brown</ui-message>
                   <ui-message color="black">Black</ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A message can have different sizes.">
+                <ui-example description="A message can have different sizes.">
                   <ui-message size="mini">This is a mini message.</ui-message>
                   <ui-message size="tiny">This is a tiny message.</ui-message>
                   <ui-message size="small">This is a small message.</ui-message>
@@ -332,11 +332,11 @@
                   <ui-message size="big">This is big</ui-message>
                   <ui-message size="huge">This is huge</ui-message>
                   <ui-message size="massive">This is massive</ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A message can use the dark scheme;  a coloured one keeps its hue in the text."
                 >
                   <ui-message inverted heading="Inverted">
@@ -348,7 +348,7 @@
                   <ui-message state="positive" inverted icon="envelope" heading="Inverted positive">
                     <p>With an icon.</p>
                   </ui-message>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

@@ -62,17 +62,17 @@
             -->
             <ui-section id="examples-definition" label="Definition" sticky collapsible dividing>
               <ui-section id="examples-definition-flag" label="Flag" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A flag can use the two digit country code, the full name, or a common alias."
                 >
                   <ui-flag country="ae"></ui-flag>
                   <ui-flag country="france"></ui-flag>
                   <ui-flag country="myanmar"></ui-flag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-definition-names" label="Names" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Case, underscores and extra spaces don't matter:  `America`, `United_Kingdom`, `uk` all work."
                 >
                   <ui-flag country="fr"></ui-flag>
@@ -82,11 +82,11 @@
                   <ui-flag country="United_Kingdom"></ui-flag>
                   <ui-flag country="uk"></ui-flag>
                   <ui-flag country="south africa"></ui-flag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-definition-other-flags" label="Other flags" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Flags that aren't a country:  `rainbow` (`pride`, `lgbt`), `transgender`, `pirate`, and the `england`, `scotland` and `wales` subdivision flags."
                 >
                   <ui-flag country="pride"></ui-flag>
@@ -95,7 +95,7 @@
                   <ui-flag country="england"></ui-flag>
                   <ui-flag country="scotland"></ui-flag>
                   <ui-flag country="wales"></ui-flag>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -1717,7 +1717,7 @@
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A flag can vary in size.</p>
                   <ui-message slot="description" size="small"
                     >Sizes are ratios of the surrounding text, <code>small</code> (1.5em) ...
@@ -1737,10 +1737,10 @@
                     <br />
                     <ui-flag country="un" size="massive"></ui-flag> Massive
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-autosizing" label="Autosizing" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="If no specific size is given, every flag is sized by the current element's font size."
                 >
                   <ui-segment appearance="basic">
@@ -1751,7 +1751,7 @@
                     <ui-divider spacer></ui-divider>
                     <ui-text size="small" color="orange">Within a text <ui-flag country="rainbow"></ui-flag></ui-text>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

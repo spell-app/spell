@@ -1,6 +1,6 @@
 # Spell UI's components
 
-```html
+```html example
 <ui-form>
   <form method="dialog">
     <ui-field>
@@ -19,10 +19,10 @@
 </ui-form>
 ```
 
-<img src="docs/images/components/ui-form.png" width="489" height="190"
-  alt="What that markup draws:  First Name and Last Name fields, a checkbox for the terms, and a Submit button">
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/readme/README-components.1.dark.png"><img src="images/readme/README-components.1.png" width="840" height="275" alt="What that markup draws:  First Name and Last Name fields, a checkbox for the terms, and a Submit button"></picture>
+<!-- picture of the example above: 31a4dba2bbc7 -->
 
-_The first example on Form's docs page, and the picture of it in the catalogue below._
+_The first example on Form's docs page, drawn by `spell readme pictures`:  GitHub shows the picture, as it runs no elements._
 
 That form is four families, not one:  Form, Input, Checkbox and Button.
 Inside a `<ui-root>`, each loads the first time the page uses one of its tags.
@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-73 families, 119 tags;  3 families in progress.
+76 families, 122 tags;  3 families in progress.
 
 ### Elements
 
@@ -272,7 +272,7 @@ Pieces made of several kinds of part.
 | <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) *(In progress)* | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
 | <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` `<ui-cell>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
 |  | [Terms](docs/ui-terms.html) | `<ui-terms>` `<ui-term>` | Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen. | dl, definition list, description list, key value list |
-|  | [Toolbar](docs/ui-toolbar.html) | `<ui-toolbar>` | A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute. | toolbar, tool bar, scrolling tabs, overflow menu |
+|  | [Toolbar](docs/ui-toolbar.html) | `<ui-toolbar>` | A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute. | toolbar, tool bar, scrolling tabs, overflow menu |
 
 ### Views
 
@@ -336,6 +336,7 @@ Elements with no Fomantic counterpart.
 | --- | --- | --- | --- | --- |
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 |  | [Keys](docs/ui-keys.html) | `<ui-keys>` | Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. | kbd, keyboard shortcut, key caps, hotkey |
 | <img src="docs/images/components/ui-markdown.png" alt="Markdown, its first example" width="131" height="96"> | [Markdown](docs/ui-markdown.html) | `<ui-markdown>` | Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. | markdown, md, gfm, readme |
@@ -345,20 +346,20 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
+|  | [Table of contents](docs/ui-toc.html) | `<ui-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
 |  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser. | theme editor, theme builder, theme creator, theme generator |
 |  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
+|  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
 <details>
-<summary>The docs site's own elements:  7 families, never in the library</summary>
+<summary>The docs site's own elements:  5 families, never in the library</summary>
 
 | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- |
 | Docs api | `<ui-docs-api>` | An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn;  for a family, its tags. | api reference, api table, props table, properties table |
-| Docs example | `<ui-docs-example>` | An example shows its own markup live, under a header and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
-| Docs table of contents | `<ui-docs-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |
 
 </details>

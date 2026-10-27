@@ -1,0 +1,1445 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Spell UI theme",
+  "description": "A theme's values in nested groups (spell-ui's themeTree);  `yarn gen:styles` writes its sheet.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "its name, for a theme a person names"
+    },
+    "extends": {
+      "type": "string",
+      "description": "the theme it builds on"
+    },
+    "palette": {
+      "type": "string",
+      "description": "the palette whose hues it borrows"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "its rules sheets, in themes/rules/"
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "$ref": "#/definitions/value"
+        },
+        "family": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "$ref": "#/definitions/value"
+            },
+            "heading": {
+              "$ref": "#/definitions/value"
+            },
+            "mono": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "weight": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "light": {
+              "$ref": "#/definitions/value"
+            },
+            "normal": {
+              "$ref": "#/definitions/value"
+            },
+            "semibold": {
+              "$ref": "#/definitions/value"
+            },
+            "bold": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "line-height": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "$ref": "#/definitions/value"
+            },
+            "heading": {
+              "$ref": "#/definitions/value"
+            },
+            "tight": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "ratio": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "heading": {
+              "$ref": "#/definitions/value"
+            },
+            "caption": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        }
+      }
+    },
+    "sizes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mini": {
+          "$ref": "#/definitions/value"
+        },
+        "tiny": {
+          "$ref": "#/definitions/value"
+        },
+        "small": {
+          "$ref": "#/definitions/value"
+        },
+        "medium": {
+          "$ref": "#/definitions/value"
+        },
+        "large": {
+          "$ref": "#/definitions/value"
+        },
+        "big": {
+          "$ref": "#/definitions/value"
+        },
+        "huge": {
+          "$ref": "#/definitions/value"
+        },
+        "massive": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "3xs": {
+          "$ref": "#/definitions/value"
+        },
+        "2xs": {
+          "$ref": "#/definitions/value"
+        },
+        "xs": {
+          "$ref": "#/definitions/value"
+        },
+        "s": {
+          "$ref": "#/definitions/value"
+        },
+        "m": {
+          "$ref": "#/definitions/value"
+        },
+        "l": {
+          "$ref": "#/definitions/value"
+        },
+        "xl": {
+          "$ref": "#/definitions/value"
+        },
+        "2xl": {
+          "$ref": "#/definitions/value"
+        },
+        "3xl": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "radii": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "$ref": "#/definitions/value"
+        },
+        "s": {
+          "$ref": "#/definitions/value"
+        },
+        "m": {
+          "$ref": "#/definitions/value"
+        },
+        "l": {
+          "$ref": "#/definitions/value"
+        },
+        "pill": {
+          "$ref": "#/definitions/value"
+        },
+        "circle": {
+          "$ref": "#/definitions/value"
+        },
+        "square": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ink": {
+          "$ref": "#/definitions/value"
+        },
+        "body": {
+          "$ref": "#/definitions/value"
+        },
+        "strong": {
+          "$ref": "#/definitions/value"
+        },
+        "muted": {
+          "$ref": "#/definitions/value"
+        },
+        "light": {
+          "$ref": "#/definitions/value"
+        },
+        "unselected": {
+          "$ref": "#/definitions/value"
+        },
+        "hovered": {
+          "$ref": "#/definitions/value"
+        },
+        "pressed": {
+          "$ref": "#/definitions/value"
+        },
+        "selected": {
+          "$ref": "#/definitions/value"
+        },
+        "disabled": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "surfaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "$ref": "#/definitions/value"
+        },
+        "panel": {
+          "$ref": "#/definitions/value"
+        },
+        "inset": {
+          "$ref": "#/definitions/value"
+        },
+        "strong": {
+          "$ref": "#/definitions/value"
+        },
+        "bar": {
+          "$ref": "#/definitions/value"
+        },
+        "code": {
+          "$ref": "#/definitions/value"
+        },
+        "highlight": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "borders": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "$ref": "#/definitions/value"
+        },
+        "color": {
+          "$ref": "#/definitions/value"
+        },
+        "strong": {
+          "$ref": "#/definitions/value"
+        },
+        "internal": {
+          "$ref": "#/definitions/value"
+        },
+        "selected": {
+          "$ref": "#/definitions/value"
+        },
+        "selected-strong": {
+          "$ref": "#/definitions/value"
+        },
+        "disabled": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "secondary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "accent": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "link": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "focus": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "$ref": "#/definitions/value"
+            },
+            "offset": {
+              "$ref": "#/definitions/value"
+            },
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        }
+      }
+    },
+    "semantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "positive": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "negative": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "info": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "warning": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "success": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        }
+      }
+    },
+    "hues": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "red": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "orange": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "yellow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "olive": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "green": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "teal": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "blue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "violet": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "purple": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "pink": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "brown": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "grey": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "black": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/value"
+            },
+            "base": {
+              "$ref": "#/definitions/value"
+            },
+            "on": {
+              "$ref": "#/definitions/value"
+            },
+            "text": {
+              "$ref": "#/definitions/value"
+            },
+            "header": {
+              "$ref": "#/definitions/value"
+            },
+            "border": {
+              "$ref": "#/definitions/value"
+            },
+            "background": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted": {
+              "$ref": "#/definitions/value"
+            },
+            "inverted-on": {
+              "$ref": "#/definitions/value"
+            },
+            "hover": {
+              "$ref": "#/definitions/value"
+            },
+            "focus": {
+              "$ref": "#/definitions/value"
+            },
+            "down": {
+              "$ref": "#/definitions/value"
+            },
+            "active": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        }
+      }
+    },
+    "shadows": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ink": {
+          "$ref": "#/definitions/value"
+        },
+        "subtle": {
+          "$ref": "#/definitions/value"
+        },
+        "bottom": {
+          "$ref": "#/definitions/value"
+        },
+        "raised": {
+          "$ref": "#/definitions/value"
+        },
+        "floating": {
+          "$ref": "#/definitions/value"
+        },
+        "floating-hover": {
+          "$ref": "#/definitions/value"
+        },
+        "overlay": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fast": {
+              "$ref": "#/definitions/value"
+            },
+            "normal": {
+              "$ref": "#/definitions/value"
+            },
+            "slow": {
+              "$ref": "#/definitions/value"
+            },
+            "slower": {
+              "$ref": "#/definitions/value"
+            },
+            "slowest": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "ease": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "default": {
+              "$ref": "#/definitions/value"
+            },
+            "in": {
+              "$ref": "#/definitions/value"
+            },
+            "out": {
+              "$ref": "#/definitions/value"
+            },
+            "in-out": {
+              "$ref": "#/definitions/value"
+            },
+            "spring": {
+              "$ref": "#/definitions/value"
+            },
+            "decelerate": {
+              "$ref": "#/definitions/value"
+            },
+            "expo": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        },
+        "hover-delay": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "description": "a family's own tokens, under its name:  menu > radius is --ui-menu-radius",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
+    "own": {
+      "type": "object",
+      "description": "the theme's private tokens:  glass-blur is --glass-blur",
+      "additionalProperties": {
+        "$ref": "#/definitions/value"
+      }
+    }
+  },
+  "definitions": {
+    "value": {
+      "description": "CSS text (a \"{group.name}\" points at another value), a number, or one per scheme",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["light", "dark"],
+          "properties": {
+            "light": {
+              "type": ["string", "number"]
+            },
+            "dark": {
+              "type": ["string", "number"]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,104 @@
+/*
+ * Glass's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P18).
+ * - A rules sheet of the Glass theme (`glass.theme.json5`, `"rules": ["modern", "glass"]`);  Fruity's through it.
+ *   Its sheet, `glass.css`, imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:  the page's wallpaper, the secondary grey's states, the blur behind every glass surface,
+ *   the dark inverted segment, the docs' flyout, the tight San Francisco headings, long words that break.
+ */
+
+@layer ui.theme {
+  /*******************************
+         The page's wallpaper
+  *******************************/
+
+  /* page only:  `:root` and the page's own `.ui-typography` box match nothing inside a shadow root */
+  :root,
+  :root :where(.ui-typography) {
+    background-color: var(--ui-background);
+    background-image: var(--glass-wallpaper);
+    background-attachment: fixed;
+  }
+
+  /*
+   * The secondary grey:  white on it in both schemes, so its states darken, as the hues' do
+   * (`colors.css` lightens it, as black;  epic `debut` P17, J76)
+   */
+  .ui.secondary,
+  .ui-secondary {
+    --ui-color-hover: oklch(from var(--ui-color) calc(l - 0.05) c h);
+    --ui-color-focus: oklch(from var(--ui-color) calc(l - 0.08) c h);
+    --ui-color-down: oklch(from var(--ui-color) calc(l - 0.1) c h);
+    --ui-color-active: oklch(from var(--ui-color) calc(l - 0.05) c h);
+  }
+
+  /*******************************
+                Glass
+  *******************************/
+
+  /* the blur behind every translucent surface;  plain surfaces (`basic`, `text`, `secondary` menus) stay clear */
+  .ui.card,
+  .ui.segment:not(.basic),
+  .ui.section:is(.bordered, .styled),
+  .ui.section:is(.block, .styled) > .title,
+  .ui.menu:not(.secondary, .text, .tabular),
+  .ui.popup,
+  .ui.dropdown .menu[role="listbox"],
+  .ui.modal,
+  .ui.toast {
+    backdrop-filter: var(--glass-blur);
+  }
+  /*
+   * an INVERTED surface on a light page (a dark segment, the inverted examples):  dark glass that reads as dark,
+   * not the translucent grey the dark scheme's glass makes over a light wallpaper
+   * (Owen:  "inversion surround should be darker";  2026-10-25, again:  "inverted background panel should be darker")
+   */
+  .ui.inverted.segment:not(.basic) {
+    background-color: rgb(16 15 22 / 0.96);
+  }
+  /*
+   * the docs' side column in its flyout, over the page (page only:  the panel is the element's own box)
+   * - NOT docked:  there it sits on the smooth wallpaper, and the blur's saturation drew a second, deeper gradient
+   *   under it, a seam at its edges (Owen:  "I'm seeing lines in the gradients")
+   */
+  ui-flyout ui-docs-nav {
+    backdrop-filter: var(--glass-blur);
+  }
+  /* a flyout blurs the page it covers, as a modal does */
+  dialog.ui.flyout::backdrop {
+    backdrop-filter: var(--ui-dimmer-blur);
+  }
+
+  /*******************************
+           Headings, ledes
+  *******************************/
+
+  .ui.header,
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap-style: balance;
+  }
+  /* a segmented menu's focus ring:  the violet focus colour, not its chosen segment's text colour (black) */
+  .ui.segmented.menu {
+    --_ui-menu-active-focus-color: var(--ui-focus-color);
+  }
+
+  :is(h1, h2).ui.header,
+  .ui.header:is(.huge, .massive) {
+    font-weight: var(--ui-font-weight-bold);
+    letter-spacing: -0.02em;
+  }
+  :where(.ui-typography) :where(h1, h2) {
+    letter-spacing: -0.02em;
+  }
+  /* the tight tracking is the heading's, not its lede's;  a lede wraps `pretty` (no lone last word) */
+  :host(:state(in-header)) > .header,
+  .in-header.header {
+    letter-spacing: normal;
+    text-wrap-style: pretty;
+  }
+
+  /* long words, links and ids break rather than run off the page */
+  :where(.ui-typography) {
+    overflow-wrap: break-word;
+  }
+}

@@ -189,7 +189,7 @@ class ComponentThumbnails {
     await page.waitForFunction(() => document.querySelector("ui-root")?.matches(":state(ready)"), undefined, {
       timeout: READY_TIMEOUT
     })
-    const example = page.locator("ui-docs-example").first()
+    const example = page.locator("ui-example").first()
     await example.scrollIntoViewIfNeeded()
     await page.waitForTimeout(SETTLE_MS)
     const clip = await example.evaluate(contentBox, { maxWidth: MAX_SHOT.width, maxHeight: MAX_SHOT.height })
@@ -216,7 +216,7 @@ class ComponentThumbnails {
 type Box = { x: number; y: number; width: number; height: number }
 
 /**
- * Runs IN THE PAGE:  the box around what a `<ui-docs-example>`'s own children draw (not its slotted description),
+ * Runs IN THE PAGE:  the box around what a `<ui-example>`'s own children draw (not its slotted description),
  * padded, capped at `maxWidth` x `maxHeight`;  `undefined` when they draw nothing.
  * - A child with no box of its own (`display: contents`) counts its children, light and shadow.
  */

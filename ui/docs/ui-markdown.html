@@ -59,18 +59,18 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-markdown" label="Markdown" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Markdown renders <code>source</code> as GitHub does: tables, task lists, strikethrough, autolinks,
                     and code blocks as <code>&lt;ui-code&gt;</code>. <code>heading-offset</code> puts its headings under
                     the page's:  here <code>#</code> becomes an h4, below this example's h3.
                   </p>
                   <ui-markdown source="examples/readme.md" heading-offset="3"></ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-inline-text" label="Inline text" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='Without `source`, markdown renders its own text:  a `<script type="text/markdown">` child keeps it exact, then dedented.'
                 >
                   <ui-markdown>
@@ -81,20 +81,20 @@
                       - [ ] nothing to escape
                     </script>
                   </ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="Markdown can be smaller or larger, as text is.">
+                <ui-example description="Markdown can be smaller or larger, as text is.">
                   <ui-markdown size="small">Smaller text, the *same* look.</ui-markdown>
                   <ui-markdown size="large">Larger text, the *same* look.</ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-line-breaks" label="Line breaks" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`breaks` makes a single newline a line break, as in GitHub comments;  by default it isn't, as in GitHub files."
                 >
                   <ui-markdown breaks>
@@ -110,11 +110,11 @@
                       violets are blue.
                     </script>
                   </ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-editable" label="Editable" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws."
                 >
                   <ui-markdown editable>
@@ -132,11 +132,11 @@
                       | Preview | the markdown     |
                     </script>
                   </ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-sanitized" label="Sanitized" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Raw HTML is kept as written, `<ui-*>` elements included.  `sanitized` runs it through DOMPurify, loaded only then:  set it for text you didn't write."
                 >
                   <ui-markdown>
@@ -150,7 +150,7 @@
                       Version **2** adds <ui-label size="mini" color="teal">include</ui-label> and <ui-label size="mini">code</ui-label>.
                     </script>
                   </ui-markdown>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

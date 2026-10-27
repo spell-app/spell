@@ -62,7 +62,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-flyout" label="Flyout" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A flyout: a modal panel that slides in from the left, with a header, content and actions. The
                     approve / deny buttons close it.
@@ -87,11 +87,11 @@
                       <ui-button class="ok" color="green" icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-shorthands" label="Shorthands" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`header` and `content` are shorthands for a header and a block of text;  `closable` adds a close icon."
                 >
                   <ui-button commandfor="flyout-types-shorthand" command="--show">Show</ui-button>
@@ -101,13 +101,13 @@
                     content="A flyout from its attributes alone."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-width" label="Width" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A flyout can specify its width:  `very thin`, `thin`, the default, `wide` or `very wide`."
                 >
                   <ui-button commandfor="flyout-width-very-thin" command="--show">Very thin</ui-button>
@@ -143,8 +143,8 @@
                     content="A very wide flyout."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <p slot="description">
                     Width can also be defined like the grid system: columns of sixteen (<code>width="5"</code>), a
                     fraction (<code>1/4</code>) or a percentage (<code>25%</code>).
@@ -178,11 +178,11 @@
                     content="Three quarters of the viewport."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-position" label="Position" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A flyout can specify its display position:  <code>position</code> is left (the default), right, top
                     or bottom.
@@ -219,11 +219,11 @@
                     <ui-content><p>This page uses no cookies.</p></ui-content>
                     <ui-actions><ui-button class="approve" color="primary">Got it</ui-button></ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fullscreen" label="Fullscreen" sticky collapsible dividing>
-                <ui-docs-example description="A flyout can take all the entire screen if needed.">
+                <ui-example description="A flyout can take all the entire screen if needed.">
                   <ui-button commandfor="flyout-fullscreen" command="--show">Show</ui-button>
                   <ui-flyout
                     id="flyout-fullscreen"
@@ -232,7 +232,7 @@
                     content="The whole viewport wide."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -242,7 +242,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A flyout can have a scrolling content.</p>
                   <ui-message slot="description" size="small" state="info"
                     >The flyout is a column: header at the top, actions at the bottom, and the content grows between
@@ -263,12 +263,12 @@
                     </ui-content>
                     <ui-actions><ui-button class="approve" color="primary">I agree</ui-button></ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99, I110:  no centred actions (`<ui-actions>` has no text-align), and the header ignores its text-align;  only the content centres. -->
               <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='You can center align the header, the content or even actions individually:  `text-align="center"`.'
                 >
                   <ui-button commandfor="flyout-center" command="--show">Show</ui-button>
@@ -280,12 +280,12 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99:  no left actions;  they stay on the right. -->
               <ui-section id="examples-variations-left-actions" label="Left Actions" sticky collapsible dividing>
-                <ui-docs-example description="You can also place the action buttons to the left.">
+                <ui-example description="You can also place the action buttons to the left.">
                   <ui-button commandfor="flyout-left-actions" command="--show">Show</ui-button>
                   <ui-flyout id="flyout-left-actions">
                     <ui-header>Look at the Actions</ui-header>
@@ -295,7 +295,7 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I99:  no basic header or actions;  they keep their tinted backgrounds and rules. -->
@@ -306,7 +306,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="Header and/or Actions can also appear on the same basic background as the content."
                 >
                   <ui-button commandfor="flyout-basic-parts" command="--show">Show</ui-button>
@@ -318,22 +318,22 @@
                       <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A flyout can use the dark scheme:  `inverted` replaces the background, the header colour and the actions background."
                 >
                   <ui-button commandfor="flyout-inverted" command="--show">Show</ui-button>
                   <ui-flyout id="flyout-inverted" position="top" inverted heading="Notice" closable>
                     <ui-content><p>A top flyout in the dark scheme.</p></ui-content>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-blurring" label="Blurring" sticky collapsible dividing>
-                <ui-docs-example description="`blurring` blurs and greys the page behind the flyout's dimmer.">
+                <ui-example description="`blurring` blurs and greys the page behind the flyout's dimmer.">
                   <ui-button commandfor="flyout-blurring" command="--show">Show</ui-button>
                   <ui-flyout
                     id="flyout-blurring"
@@ -343,10 +343,10 @@
                     content="The page behind is blurred."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-modeless" label="Modeless" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`modeless` leaves the page usable while it shows:  no dimmer, and a click on the page lands where it went, closing the flyout as it does (as Escape and its close icon do).  The docs' own side column opens this way on narrow screens."
                 >
                   <ui-button commandfor="flyout-modeless" command="--toggle">Toggle</ui-button>
@@ -359,7 +359,7 @@
                     content="Scroll the page:  this stays open.  A click on the page closes it, and still lands."
                     closable
                   ></ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -399,7 +399,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='A menu item drives the flyout through a button with `command="--toggle"`.'
                 >
                   <ui-menu attach="top">
@@ -427,7 +427,7 @@
                       <ui-button class="ok" color="green" icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-flyout>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: a custom <code>context</code> (a flyout inside a segment instead of the page) -- the

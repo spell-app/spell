@@ -155,12 +155,20 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   - `glass`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
     and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, on a solid page.
     - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
-  - `fruity`:  `glass` over a soft pastel wallpaper, three colour washes:  its sheet imports `glass.css`.
+  - `fruity`:  `glass` over a soft pastel wallpaper, three colour washes:  its file extends `glass`.
   - `merlot`:  a code studio in wine reds:  flat panels on hairlines a step off the page, no glass,
     a warm gold primary on deep wine in dark, a maroon one on rose-grey in light.
     It's tokens only so far:  every family keeps `classic`'s shapes.
   - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
     `studio` as `merlot`, `spell-brand` as `spell`.
+- Spell's own four are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
+  - Its values sit in nested groups, as the token tables group them:  `surfaces > page`, `typography > family > body`.
+    Each is one value, or a light one and a dark one.
+  - A colour is written as hex, `#rrggbb`, or `#rrggbbaa` with its alpha:  `#ffffff59`, not `rgb(255 255 255 / 0.35)`.
+    The writer refuses a plain `rgb()`, and names the hex to write.
+  - `yarn gen:styles` writes the sheet from the file, and the sheet is committed:  edit the file, never the sheet.
+  - What a value can't say (selectors, the glass blur, motion) stays CSS, in a rules sheet the file names.
+  - VS Code completes and checks a theme file's names, from `theme.schema.json` beside it.
 - Not a theme:  the dark sheet, a colour scheme you put on top of any of them (above).
   `classic` has no dark of its own, since Fomantic had none:  its dark colours are Fomantic's light hues.
 
