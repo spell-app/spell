@@ -5,7 +5,7 @@ import type { E } from "spell-ui/core"
  * - The names it shares with other tags (`size`, `inverted`, `compact`, `ui-changed` ...) are translated once,
  *   for every tag:  in `components.es.ts`, with the values every tag shares.
  * - Names stay ASCII (no accents):  tags and attributes are typed, and a tag can't hold every letter safely.
- * - The themes' own names (Spell, Glass, Fruity, Merlot) stay as they are:  they're names.
+ * - The themes' own names (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop) stay as they are:  they're names.
  */
 export const themeMenuEs = {
   lang: "es",
@@ -33,6 +33,10 @@ export const themeMenuEs = {
     glassDescription: "Cristal translúcido sobre una página lisa",
     fruityDescription: "Cristal sobre un fondo pastel",
     merlotDescription: "Un estudio color vino",
+    paperDescription: "Cálido y de libro, para leer",
+    midnightDescription: "Oscuro ante todo, sereno y luminoso",
+    crispDescription: "Alto contraste, para quien lo necesite",
+    popDescription: "Alegre y colorido",
     toDark: "Pasar a oscuro",
     toLight: "Pasar a claro",
     palette: "Tema y claro / oscuro:  {title}, {scheme}",

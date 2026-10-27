@@ -32419,6 +32419,26 @@
           "description": "Under `Merlot` in the list."
         },
         {
+          "key": "paperDescription",
+          "text": "Warm and bookish, for reading",
+          "description": "Under `Paper` in the list."
+        },
+        {
+          "key": "midnightDescription",
+          "text": "Dark first, calm and glowing",
+          "description": "Under `Midnight` in the list."
+        },
+        {
+          "key": "crispDescription",
+          "text": "High contrast, for anyone who needs it",
+          "description": "Under `Crisp` in the list."
+        },
+        {
+          "key": "popDescription",
+          "text": "Playful and colourful",
+          "description": "Under `Pop` in the list."
+        },
+        {
           "key": "toDark",
           "text": "Switch to dark",
           "description": "The light / dark button's name, while the page is light."
@@ -46540,6 +46560,18 @@
           "name": "--ui-font-family-mono",
           "default": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
           "description": "Font stack for code.",
+          "type": "other"
+        },
+        {
+          "name": "--ui-font-family-serif",
+          "default": "Palatino, \"Palatino Linotype\", \"Book Antiqua\", P052, \"URW Palladio L\", Georgia, serif",
+          "description": "Font stack for serifs.",
+          "type": "other"
+        },
+        {
+          "name": "--ui-font-family-rounded",
+          "default": "ui-rounded, \"SF Pro Rounded\", \"Arial Rounded MT\", \"Varela Round\", Quicksand, Nunito, system-ui, sans-serif",
+          "description": "Font stack for roundeds.",
           "type": "other"
         },
         {

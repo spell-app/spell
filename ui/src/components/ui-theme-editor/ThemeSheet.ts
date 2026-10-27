@@ -249,11 +249,14 @@ const PRIMARY_FOCUS_BORDER =
   "light-dark(oklch(from var(--ui-primary) calc(l + 0.18) calc(c * 0.5) h), " +
   "oklch(from var(--ui-primary) calc(l - 0.1) calc(c * 0.7) h))"
 
-/** Each font's stack:  the platform's own faces first, nothing to download. */
+/**
+ * Each font's stack:  the platform's own faces first, nothing to download.
+ * - Rounded and Palatino are Spell UI's own stacks, the tokens every theme may read (epic `debut` P20, J77)
+ */
 const FONT_STACKS: Readonly<Record<UIT.ThemeFont, string>> = {
   system: '-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Noto Sans", Ubuntu, Cantarell, sans-serif',
-  rounded: 'ui-rounded, "SF Pro Rounded", "Arial Rounded MT", "Varela Round", Quicksand, Nunito, system-ui, sans-serif',
-  serif: 'Palatino, "Palatino Linotype", "Book Antiqua", P052, "URW Palladio L", serif',
+  rounded: "var(--ui-font-family-rounded)",
+  serif: "var(--ui-font-family-serif)",
   georgia: 'Georgia, "DejaVu Serif", "Noto Serif", serif',
   humanist: 'Optima, Candara, "Noto Sans", "Segoe UI", sans-serif',
   verdana: 'Verdana, "DejaVu Sans", "Bitstream Vera Sans", sans-serif',
@@ -287,38 +290,21 @@ const RADIUS_TOKENS: readonly (readonly [string, "s" | "m" | "l"])[] = [
 const SHADOWS: Readonly<Record<UIT.ThemeDepth, readonly [string, string]>> = {
   flat: [
     "0 0 0 1px light-dark(#0000000f, #ffffff14)",
-    "0 0 0 1px light-dark(#00000014, #ffffff1a), " +
-      "0 4px 12px light-dark(#00000014, #00000059)"
+    "0 0 0 1px light-dark(#00000014, #ffffff1a), 0 4px 12px light-dark(#00000014, #00000059)"
   ],
   soft: [
-    "0 1px 2px light-dark(#281e500f, #00000040), " +
-      "0 8px 30px light-dark(#281e501f, #00000059)",
-    "0 2px 4px light-dark(#281e500f, #0000004d), " +
-      "0 16px 40px light-dark(#281e5029, #00000073)"
+    "0 1px 2px light-dark(#281e500f, #00000040), 0 8px 30px light-dark(#281e501f, #00000059)",
+    "0 2px 4px light-dark(#281e500f, #0000004d), 0 16px 40px light-dark(#281e5029, #00000073)"
   ],
   lifted: [
-    "0 2px 4px light-dark(#281e5014, #0000004d), " +
-      "0 14px 40px light-dark(#281e5033, #00000080)",
-    "0 4px 8px light-dark(#281e501a, #00000059), " +
-      "0 28px 64px light-dark(#281e5042, #00000099)"
+    "0 2px 4px light-dark(#281e5014, #0000004d), 0 14px 40px light-dark(#281e5033, #00000080)",
+    "0 4px 8px light-dark(#281e501a, #00000059), 0 28px 64px light-dark(#281e5042, #00000099)"
   ]
 }
 
 /** Each glass choice:  `[surface, strong surface, what's behind it]`;  `frosted` is the glass themes' own. */
 const GLASS: Readonly<Record<UIT.ThemeGlass, readonly [string, string, string]>> = {
-  clear: [
-    "light-dark(#ffffff40, #26243047)",
-    "light-dark(#ffffff66, #1e1c2666)",
-    "blur(18px) saturate(1.8)"
-  ],
-  frosted: [
-    "light-dark(#ffffff73, #26243073)",
-    "light-dark(#ffffff9e, #1e1c2694)",
-    "blur(28px) saturate(1.7)"
-  ],
-  solid: [
-    "light-dark(#ffffffe6, #262430eb)",
-    "light-dark(#fffffff7, #1e1c26f7)",
-    "none"
-  ]
+  clear: ["light-dark(#ffffff40, #26243047)", "light-dark(#ffffff66, #1e1c2666)", "blur(18px) saturate(1.8)"],
+  frosted: ["light-dark(#ffffff73, #26243073)", "light-dark(#ffffff9e, #1e1c2694)", "blur(28px) saturate(1.7)"],
+  solid: ["light-dark(#ffffffe6, #262430eb)", "light-dark(#fffffff7, #1e1c26f7)", "none"]
 }
