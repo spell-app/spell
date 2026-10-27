@@ -40,6 +40,10 @@ a "card" is a two sided view:
 
 	// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 	- group "drawing"
+	// Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns
+	- to draw it:
+		draw its front
+		draw its back
 	// Its face:  https://www.compart.com/en/unicode/block/U+1F0A0
 	- its "picture" is:
 		set column to its value

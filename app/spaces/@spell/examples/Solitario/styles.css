@@ -97,6 +97,43 @@
   border-radius: 0.035em;
 }
 
+/****************
+ * Turning over:  a card draws both its sides (Carta.es.spell), its frente and its dorso, and shows the one turned up
+ * - As its dirección changes it turns about its middle, edge-on halfway, where the other side takes over:
+ *   --card-flip runs 0 (face up) to 1 (face down), and its angle is 90° at 0.5, none at either end.
+ * - A card that's drawn already turned shows that side at once:  only a change turns it.
+ * - 0.3s, as long as the card's own turn waits (its pausar 300 mseg), so "esperar a: voltear la carta" waits for it.
+ ****************/
+
+@property --card-flip {
+  syntax: "<number>";
+  /* its sides read it too */
+  inherits: true;
+  initial-value: 0;
+}
+[disposición] > * {
+  --card-flip: 0;
+  transform: perspective(3em) rotateY(calc(90deg * (1 - max(1 - 2 * var(--card-flip), 2 * var(--card-flip) - 1))));
+  transition: --card-flip 0.3s ease-in-out;
+  /* both sides on one line, so the one drawn sits at the card's top */
+  white-space: nowrap;
+}
+[disposición] > :not([dirección="arriba"]) {
+  --card-flip: 1;
+}
+/* each side is drawn only while the card is turned its way:  the other shrinks to nothing as it passes edge-on */
+[disposición] > *::part(frente) {
+  font-size: calc(1em * clamp(0, (0.5 - var(--card-flip)) * 1000, 1));
+}
+[disposición] > *::part(dorso) {
+  font-size: calc(1em * clamp(0, (var(--card-flip) - 0.5) * 1000, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  [disposición] > * {
+    transition: none;
+  }
+}
+
 /* An empty pile's placeholder:  a faint card in the page's text colour, so it shows on a dark page too */
 [disposición]::part(marcador) {
   color: var(--ui-text-color, #000);

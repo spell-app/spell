@@ -15,6 +15,7 @@ export const words = {
       name: "name",
       isTheRankOfSuit: "is the (rank) of (suit)",
       state: "state",
+      draw: "draw it",
       picture: "picture",
       play: "play a card",
       putOnPile: "put a card on a pile",

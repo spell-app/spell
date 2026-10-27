@@ -62,7 +62,7 @@
 				esperar a: rehacer la reserva
 
 			obtener la última carta de su reserva
-			voltear eso boca arriba
+			esperar a: voltear eso boca arriba
 			agregar eso a los descartes del solitario
 
 		// junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
@@ -75,10 +75,12 @@
 					pausar 50 mseg
 			barajar su reserva
 
+			// la primera carta de cada fila cae boca abajo, y se voltea donde queda
 			para fila desde 1 hasta 7
-				voltear la última carta de su reserva boca arriba
 				para lugar desde fila hasta 7
 					agregar la última carta de su reserva al elemento lugar de las columnas
+					si lugar es fila
+						voltear la última carta de (el elemento lugar de las columnas) boca arriba
 					pausar 50 mseg
 
 			esperar a: robar de la reserva
@@ -96,7 +98,7 @@
 		poner la pila a una pila al azar de pilas restantes
 		poner cartas ocultas a las cartas en la pila donde la carta está boca abajo
 		poner la carta a una carta al azar de cartas ocultas
-		voltear la carta boca arriba
+		esperar a: voltear la carta boca arriba
 		pausar 30 tics
 		agregar la carta a los descartes del solitario
 	</acción>

@@ -38,6 +38,10 @@ On the page each card is its own element, `<solitaire-card>`.
 	</spell>
 
 	<group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
+	<draw description="Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns">
+		<draw "front" />
+		<draw "back" />
+	</draw>
 	<property "picture" description="Its face:  https://www.compart.com/en/unicode/block/U+1F0A0">
 		set column to its value
 		if it is a club
