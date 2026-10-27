@@ -21,8 +21,9 @@ import { SP } from "spell-parser/spell"
  * - Links to the page's own sections point into the notebook that holds them:
  *   `#examples-types-labeled` => `#types-labeled` in the Examples notebook, its full address from the others.
  *   A sub-section keeps an `id` only when something links to it.
- * - The page's comments:  a `GAP` note becomes a small `<message>`, where it was, as spellx has no comment inside
- *   markup;  the others (each tab's notes on how the page is written, the playground's markers) are left out.
+ * - The page's comments between its sections, prose and examples (each tab's notes on how the page is written, the
+ *   `GAP` notes) are spellx comments, `<!-- ... -->`, where they were:  never drawn (Owen, 2026-10-26).
+ *   Those inside an example's markup (the playground's markers) are left out.
  * - What it couldn't write as the page has it is in `warnings`, for a person to tidy by hand.
  * - Pure:  given the page's text, it returns the files' text, and writes nothing.
  *   Its bare names come from Spell UI's pack (`SP.ComponentPacks`), registered by `spell-app/spaces`.
@@ -181,10 +182,9 @@ export class NotebookFromPage {
   // ## Sections, prose, examples
   ////////////////
 
-  /** `parent`'s children, at `indent`:  sections, prose, code, examples and markup;  its GAP notes where they were. */
+  /** `parent`'s children, at `indent`:  sections, prose, code, examples and markup;  its comments where they were. */
   private writeChildren(out: Writer, parent: Element, indent: number, place: Place) {
     const children = [...parent.childNodes]
-    const pendingNotes: string[] = []
     let markup: Element[] = []
     const flushMarkup = () => {
       if (markup.length) this.writeMarkup(out, markup, indent, place)
@@ -192,8 +192,8 @@ export class NotebookFromPage {
     }
     for (const node of children) {
       if (node.nodeType === COMMENT) {
-        const note = gapNoteOf(node.textContent ?? "")
-        if (note) pendingNotes.push(note)
+        flushMarkup()
+        this.writeComment(out, node.textContent ?? "", indent)
         continue
       }
       if (node.nodeType === TEXT) {
@@ -205,10 +205,9 @@ export class NotebookFromPage {
       const special = [SECTION, EXAMPLE, MARKDOWN, CODE].includes(element.localName)
       if (special || element.localName === "ui-header") flushMarkup()
       if (element.localName === SECTION) {
-        this.writeSection(out, element, indent, place, pendingNotes.splice(0))
+        this.writeSection(out, element, indent, place)
         continue
       }
-      for (const note of pendingNotes.splice(0)) this.writeGapNote(out, note, indent)
       if (element.localName === EXAMPLE) this.writeExample(out, element, indent, place)
       else if (element.localName === MARKDOWN) this.writeMarkdown(out, [markdownOf(element)], indent, place)
       else if (element.localName === CODE) this.writeMarkdown(out, [fenceOf(element)], indent, place)
@@ -218,15 +217,13 @@ export class NotebookFromPage {
       } else markup.push(element)
     }
     flushMarkup()
-    for (const note of pendingNotes) this.writeGapNote(out, note, indent)
   }
 
   /**
    * A section:  at the tab's top, `<section label="Types">`, which the notebook draws as its page's section
    * (its id the label's slug);  deeper, the page's attributes kept, its id only when something links to it.
-   * - `notes`:  GAP notes the page wrote just above it, written first inside it.
    */
-  private writeSection(out: Writer, section: Element, indent: number, place: Place, notes: string[]) {
+  private writeSection(out: Writer, section: Element, indent: number, place: Place) {
     const label = section.getAttribute("label") ?? ""
     const id = section.getAttribute("id") ?? ""
     const ownId = this.ownIdOf(id, place.tab)
@@ -249,7 +246,6 @@ export class NotebookFromPage {
     }
     out.blankLine()
     out.line(indent, head)
-    for (const note of notes) this.writeGapNote(out, note, indent + 1)
     this.writeChildren(out, section, indent + 1, { ...place, depth: place.depth + 1 })
     out.line(indent, "</section>")
   }
@@ -310,11 +306,22 @@ export class NotebookFromPage {
     out.line(indent, "</markdown>")
   }
 
-  /** A GAP note:  a small message where the page's comment was, as spellx has no comment inside markup. */
-  private writeGapNote(out: Writer, note: string, indent: number) {
-    out.line(indent, `<message size="small" state="warning">`)
-    out.line(indent + 1, `<markdown>${note}</markdown>`)
-    out.line(indent, "</message>")
+  /**
+   * One of the page's comments, `comment` its text:  a spellx comment, never drawn.
+   * - One line:  `<!-- GAP I23:  ... -->`;  several:  `<!--`, its lines one tab in, `-->`.
+   */
+  private writeComment(out: Writer, comment: string, indent: number) {
+    const text = dedented(comment)
+    if (!text.trim()) return
+    out.blankLine()
+    const lines = text.split("\n")
+    if (lines.length === 1) {
+      out.line(indent, `<!-- ${text.trim()} -->`)
+      return
+    }
+    out.line(indent, "<!--")
+    for (const line of lines) out.line(line ? indent + 1 : 0, line)
+    out.line(indent, "-->")
   }
 
   ////////////////
@@ -518,10 +525,11 @@ class Writer {
     this.lines.push(text ? "\t".repeat(indent) + text : "")
   }
 
-  /** A blank line, unless the last one is, or it's just after an opening tag. */
+  /** A blank line, unless the last one is, or it's just after an opening tag or a comment (which goes with what's next). */
   blankLine() {
-    const last = this.lines.at(-1)
-    if (last === undefined || !last.trim() || (/<[^/][^>]*[^/]>$/.test(last.trim()) && !last.includes("</"))) return
+    const last = this.lines.at(-1)?.trim()
+    if (last === undefined || !last || last.endsWith(HTML_COMMENT_END)) return
+    if (/<[^/][^>]*[^/]>$/.test(last) && !last.includes("</")) return
     this.lines.push("")
   }
 
@@ -601,12 +609,6 @@ function dedented(text: string): string {
   return lines.map((line) => line.slice(Number.isFinite(shared) ? shared : 0)).join("\n")
 }
 
-/** A GAP comment's note, `GAP I23:  ...`, its words as written;  `undefined` for any other comment. */
-function gapNoteOf(comment: string): string | undefined {
-  const text = collapsed(comment)
-  return /^GAP\b/.test(text) ? text : undefined
-}
-
 /** A label as an id:  `Group Variations` => `group-variations`, as the notebook's page makes its sections' ids. */
 function slugOf(text: string): string {
   return text
@@ -628,6 +630,9 @@ function fileNameOf(label: string): string {
 function listOf(items: string[], last = "and"): string {
   return items.length < 2 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} ${last} ${items.at(-1)}`
 }
+
+/** How a comment ends, in HTML and in spellx. */
+const HTML_COMMENT_END = "-->"
 
 /** Node types. */
 const ELEMENT = 1

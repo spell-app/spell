@@ -4,11 +4,20 @@
   "scopeName": "source.spellx",
   "comment": "Coarse colouring of spellx, spell's tag-shaped form (`Card.spellx`, epic elemental-spell P8), until the language server's semantic tokens arrive:  its tags, their attributes and closers;  everything else is spell's (source.spell).",
   "patterns": [
+    { "include": "#comment" },
     { "include": "#closer" },
     { "include": "#tag" },
     { "include": "source.spell" }
   ],
   "repository": {
+    "comment": {
+      "comment": "<!-- ... -->, anywhere, over as many lines as it takes:  never drawn (Owen, 2026-10-26).",
+      "begin": "<!--",
+      "end": "-->",
+      "name": "comment.block.html.spellx",
+      "beginCaptures": { "0": { "name": "punctuation.definition.comment.spellx" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.comment.spellx" } }
+    },
     "closer": {
       "comment": "</>, or a named closer, </property>.",
       "match": "(</)([\\p{L}][\\p{L}\\p{N}-]*)?(>)",
