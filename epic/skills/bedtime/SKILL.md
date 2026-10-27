@@ -57,7 +57,7 @@ so he answers everything in one sitting.
 - `--epic <name>`, slug `bedtime-<date>`, so the page stays with the epic page.
 - Make it, show it, and END THE TURN with the page's link pair (`epic pages link <page>`):
   - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
-    Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
+    Its shape:  `DetailsSpec`, in [details.js](https://github.com/spell-app/spell/blob/main/epic/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
   - Owen's Send wakes the session with the answers as text.
     See [the details skill](../details/SKILL.md);  write it as "Writing for Owen" there says.

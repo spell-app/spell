@@ -10,7 +10,7 @@ Rewrite guides in a voice (epic `readme` P14):  how they READ, never what they S
 - The voice:  `epic voice --for guide` (the repo's choice;  spell-epic ships `readme`), or `--voice <name>`.
 - On top of it, everywhere, the repo's CODE voice, its house style's writing rules (`epic voice code`):
   it wins where the two differ.
-- The list and the stamps:  `epic pages voice` ([voice.ts](${CLAUDE_PLUGIN_ROOT}/src/tools/voice.ts)).
+- The list and the stamps:  `epic pages voice` ([voice.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/voice.ts)).
   - A guide gone over gets `<meta name="spell-voice" content="readme 2026-10-22">` in its head:
     `epic pages voice` lists only the ones without it.
 - Not `/docs-check`:  that one fixes what docs SAY against an epic's decisions;  this one, how they read.
@@ -63,7 +63,7 @@ Change, where the voice says to:
 - "Spell" capitalised in prose (lowercase only in code)
 
 Edit each guide at its real path (given below).  Never run git in the content folder:  its commits are automatic.
-Then, for each guide, from spell-epic's root:
+Then, for each guide, from the plugin's folder (`epic/` in the kit):
   1. yarn tsx src/tools/doc-links.js <page>
   2. yarn vp fmt <page>
   3. yarn tsx src/tools/doc-links.js --check <page>

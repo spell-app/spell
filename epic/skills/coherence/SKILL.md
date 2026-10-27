@@ -8,7 +8,7 @@ description: Find where the code does one thing more than one way, or where a pl
 A reviewer for ONE way of doing each thing (epic `coherence`).
 - It reads, holds what it reads up against the repo's catalog and word list, and asks the code map;  it changes no
   code.
-- The work is the coherence agent's (`coherence`, spell-epic's plugin);  this skill runs it and lands what it finds.
+- The work is the coherence agent's (`coherence`, the epic plugin's);  this skill runs it and lands what it finds.
 - Its rules:  [procedures.md](../../coherence/procedures.md).
 - The repo's facts, at the checkout's root:  `agents/coherence/catalog.md` (the mechanisms it has, the areas to
   sweep) and `agents/coherence/words.md` (one word per idea).

@@ -33,7 +33,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
 2. The shots, from the checkout the page is in:
 
    ```sh
-   node ${CLAUDE_PLUGIN_ROOT}/src/tools/designer-shots.js <page | URL> --full --out <scratch>/designer \
+   epic pages shots <page | URL> --full --out <scratch>/designer \
      --scroll <px | selector>  [--hover "<selector>"]... [--click "<selector>"]...
    ```
 

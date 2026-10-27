@@ -6,7 +6,7 @@ argument-hint: "[<title>]"
 
 # /title
 
-The command:  `epic session title [<title>]` ([Sessions.ts](${CLAUDE_PLUGIN_ROOT}/src/command/Sessions.ts)).
+The command:  `epic session title [<title>]` ([Sessions.ts](https://github.com/spell-app/spell/blob/main/epic/src/command/Sessions.ts)).
 Other skills that rename a session run the same command:  `/isolate`, `/park`, `/unpark` and `/session`.
 
 ## 1. With a title:  `/title <title>`

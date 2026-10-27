@@ -36,6 +36,8 @@ import {
  *   network).
  * - `--dry-run`:  stops there;  publishes nothing.
  *   Without it, and only when every check passed:  `npm publish <tgz>` for each.
+ *   - `spell-epic` published:  the root marketplace's `epic` entry turns from `./epic` to it
+ *     (`PluginPackage.sourceToNpm()`, epic `epic-engine` P49), to commit
  *   NOTE: `npm login` first;  npm asks for a one-time password itself when the account has one.
  * - Which kit:  the nearest from the current folder (`findCheckout(KIT_MARKER)`).
  * - Exits 1 when a check fails or a publish does.
@@ -92,6 +94,9 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
       }
       published.push(`${pkg.name}@${pkg.version}`)
     }
+    // the plugin out on npm:  the root marketplace's `epic` names it, no longer the checkout's `./epic`
+    if (published.some((name) => name.startsWith(`${PLUGIN}@`)) && PluginPackage.sourceToNpm(kit, PLUGIN))
+      say(`.claude-plugin/marketplace.json:  epic's source is npm's ${PLUGIN} now;  commit it`)
   }
 
   if (options.json) CLI.out(JSON.stringify({ version, packed, checks, published }, null, 2))
