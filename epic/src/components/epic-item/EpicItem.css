@@ -77,7 +77,7 @@
      * - 1px more below than above:  the shadow over its top reads as a border
      * - no right padding:  the review buttons sit as far from its right as from its top, 2px (Owen, 2026-10-25)
      */
-    padding: 5px 0 6px 6px;
+    padding: 5px 0 8px 6px;
     border-start-start-radius: var(--_epic-item-top-radius);
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
@@ -251,6 +251,9 @@
     margin-inline-start: auto;
     /* 1px of the line's fill right of the review buttons' ring (Owen, 2026-10-25:  "1px white gap, not 3ish px like now") */
     margin-inline-end: -1.34px;
+    /* 2px lower than the line's first line puts it (Owen, 2026-10-26:  "move bullhorn/button group down 2px");  drawn, not laid
+       out;  the line's bottom padding 2px more to keep room under it */
+    translate: 0 2px;
   }
   ::slotted([slot="actions"]) {
     flex: none;
