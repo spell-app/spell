@@ -74,6 +74,89 @@ export class ItemAge {
   }
 }
 
+/** An item's attributes its drawn state reads (`DrawnState.of()`):  the component's own, or read off its element. */
+export type StateFields = {
+  /** its id:  `I3` */
+  id?: string | null
+  /** `state` as the tool wrote it */
+  state?: string | null
+  /** `status` */
+  status?: string | null
+  /** when a command last changed it (ISO) */
+  changed?: string | null
+  /** the day Owen went through it */
+  reviewed?: string | null
+  /** the day a review decided on work for it */
+  queued?: string | null
+  /** work on it under way */
+  working?: boolean
+}
+
+/** What the page's review inbox says of an item now (`ReviewState.liveOf()`), for `DrawnState.of()`. */
+export type LiveReview = {
+  /** Claude's agent at work on it (the inbox's `working`) */
+  workedOn: boolean
+  /** Owen's urgency, not applied yet (its id chip clicked):  `calm` true, not urgent */
+  urgency?: { calm: boolean }
+  /** his check pressed (an `approve` mark), not applied yet */
+  approved: boolean
+}
+
+/** No live review:  outside a review, or a server render. */
+export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
+
+/**
+ * An item's state as DRAWN:  what its id chip shows, and what EVERY count of it counts --
+ * its section's state chips and blue badge, the page's toolbar and its badges (Owen, 2026-10-26:  "badges don't match
+ * up":  a worked-on item drew blue, yet counted red).
+ * - Claude's agent at work on it (the inbox's `working`):  `progress` (blue), at once, before the tool rewrites `state`
+ * - Owen's urgency, not applied yet:  `open` (yellow) when not urgent, `attention` (red) when urgent, at once
+ * - else `state` as the tool wrote it, else by its status (`STATUS_STATES`), greyed with age (`ItemAge`)
+ * - his check pressed, not applied yet:  a green one grey at once
+ * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
+ */
+export class DrawnState {
+  /** `fields`'s state as drawn, with the inbox saying `live`. */
+  static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
+    if (live.workedOn) return "progress"
+    if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? "open" : "attention"
+    const state = fields.state
+    const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
+    const shown = ItemAge.shown(
+      written ?? STATUS_STATES[fields.status ?? ""] ?? "open",
+      fields.changed,
+      fields.reviewed,
+      now
+    )
+    return shown === "recent" && live.approved ? "old" : shown
+  }
+
+  /**
+   * May Owen call it urgent or not (its id chip, while the page is reviewed)?
+   * - yes for an open judgement call or issue, not reviewed, nothing queued or under way:
+   *   the items red for want of a review (`PlanReader.itemState()`)
+   */
+  static canCalm({ id, status, reviewed, queued, working }: StateFields): boolean {
+    return CALM_ID.test(id ?? "") && status === "open" && !reviewed && !queued && !working
+  }
+
+  /**
+   * The fields of `item`, an `<epic-item>`, read off its attributes as they are now.
+   * - a section re-counts when any of them changes (`COUNT_ATTRIBUTES`, `EpicSection.types.ts`)
+   */
+  static fieldsOf(item: Element): StateFields {
+    return {
+      id: item.id,
+      state: item.getAttribute("state"),
+      status: item.getAttribute("status"),
+      changed: item.getAttribute("changed"),
+      reviewed: item.getAttribute("reviewed"),
+      queued: item.getAttribute("queued"),
+      working: item.hasAttribute("working")
+    }
+  }
+}
+
 /**
  * How long a decided or done item stays green, in days.
  * - Owen, 2026-10-25:  "make it grey after one day.  If I haven't seen it by then, I don't care."

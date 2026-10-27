@@ -1133,9 +1133,13 @@ In `tools/`:
     - One button per top-level block:  its icon ONLY, the title its tooltip (Owen, 2026-10-10:  "lose the titles").
       - the current one a deeper ivory
       - every button the same width, badges or not
-    - Badges count the block's items waiting on Owen:
+    - Badges count the block's items waiting on Owen, by each item's state AS DRAWN (`DrawnState`, `EpicItem.types.ts`:
+      the one rule its id chip, its section's chips and blue badge and the toolbar share;  an item being worked on is
+      blue, never red;  Owen, 2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`)
       - orange:  Claude replied with options for him to pick (`state="replied"`)
+      - blue, on the Phases button:  phases under way, or being worked on
+      - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
       - both kinds, both badges;  none, none
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
@@ -1609,7 +1613,13 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `apply [ids]`:  the sent approve / pick / Make Todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
     then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
     - A revisit with a pick is left, "to talk over".
-  - `<name>#<id> working on|off`
+  - `<name>#<id> working on|off`:  an item, a comment, or a PHASE by number or id (`P20`, `p-one-repo`;  epic
+    `epic-engine` I147), kept under its stable id
+    - a phase worked on (not done):  its status icon a blue turning spinner, the header's, its tooltip "Claude is
+      writing this phase's plan" (to do, plan not accepted) or "Claude is working on it";  counted in the Phases
+      section's blue badge and the toolbar's
+    - Claude writing a phase's plan:  `epic phase <name>#P20 planning [off]`;  `update #P20 --goal ...` on a phase
+      whose plan isn't accepted sets it by itself, and `--plan` (now waiting for Owen) ends it
   - `<name>#<id> done`:  keeps a mark Owen changed meanwhile
   - `<name>#<id> clear`
   - These and `apply` stamp the heartbeat too.

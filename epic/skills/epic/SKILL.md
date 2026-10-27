@@ -382,6 +382,10 @@ than just being able to move on").
   phase for Owen's Accept.
 - Each one:  `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
   left out;  short, in Owen's terms.
+  - FIRST, before reading for it:  `epic phase <name>#P<N> planning`, so its page shows a blue spinner on the phase,
+    "Claude is writing this phase's plan" (epic `epic-engine` I147;  Owen, 2026-10-26:  "no indication in the phase
+    header").  The `--plan` write ends it;  given up, `epic phase <name>#P<N> planning off`.
+    - `epic update <name>#P<N> --goal ...` on a phase whose plan isn't accepted turns it on by itself.
   - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
   - Each phase shows "Claude's plan:" with an orange rule, and its buttons are Accept Phase and Revisit
     (`<epic-phase plan="waiting">`).
@@ -740,7 +744,7 @@ epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Revi
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
 epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
-epic inbox working <name>#<id> on|off      the page's spinner on an item
+epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
 epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
@@ -1149,6 +1153,8 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
 - The work goes to a background `<name>-plan-doc` agent (root `CLAUDE.md`, "Delegated work").
   - Reply one line, `adding:  P<n> · <Name> (from J1, J5, T3)`, and end the turn.
   - Its prompt:
+    0. once the phase is added (step 3 prints its number), `epic phase <name>#P<n> planning`:  its page shows the
+       plan being written (a blue spinner on its title row, I147), until step 6's `--plan` ends it
     1. read each antecedent whole (`epic items <name> --json`, its part file), and the code it names
     2. draft the phase as "4. Fill the doc" does:
        - symptom (one line), changes (two or three)
@@ -1171,6 +1177,7 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
     4. each antecedent:  `epic queue <name>#<id> "P<n> · <Name>"`.
        It's that phase's work now;  closed when the phase does it.
     5. `epic log <name> "P<n> added from <ids>:  <Name> (Owen)"`, `check`, `open`
+    6. its build plan ("4b. Build plans"):  `epic update <name>#P<n> --plan "<ol>..</ol>"`, which ends the spinner
 - When its report comes back:
   - the new phase's link pair (`epic pages link <doc> --hash p<n> --review`)
   - and the next step, as "5. Each phase", step 6's modal ("Start P<n> · <Name>" among them)
@@ -1231,10 +1238,13 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
    Its prompt, per request (Q3 of `epic-workflow`:  join a matching phase, else a new one):
    1. read the request, and every to-do phase (`epic summary <epic> --json`, each one's part file)
    2. a phase still TO DO (never active or done) about the SAME thing:  the request JOINS it
+      - first `epic phase <epic>#P<N> planning`:  its page shows its plan being rewritten (I147), until the new
+        `--plan` (step 4b's) ends it
       - its goal gets a bullet, Owen's ask in short, linked:  `<a href="requests/r3/request.md">r3</a>`
         - `update <epic>#P<N> --goal ...`, the old bullets kept
       - `updated <epic>#P<N> "<p>r3 joined:  ...</p>"`
-   3. else a NEW phase, drafted as "10. Add a phase" drafts one, his words as Owen's input
+   3. else a NEW phase, drafted as "10. Add a phase" drafts one, his words as Owen's input, marked `planning` as
+      soon as it's added, as there
       - where "10. Add a phase" puts one:  `add-phase` with no place goes before a last Doc Review by itself, the
         Doc Review moving down one
    4. `epic file <epic>#P<N> r3`:  his words, the context and the screenshots go into phase N's Requests field,
@@ -1314,6 +1324,8 @@ file <name>#P<N> <rN>                               a request into phase N's Req
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
+phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
+inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (T3)
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, for Owen's test run

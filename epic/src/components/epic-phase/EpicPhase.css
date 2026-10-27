@@ -107,6 +107,35 @@
   .icon.done {
     color: var(--ui-green-text, var(--ui-green));
   }
+  /*
+   * Claude at work on it (`:state(working)`, I147):  the header's turning spinner (`EpicAgents.css`), in blue,
+   * a glyph's size in the icon's box
+   */
+  .icon.working {
+    color: var(--ui-blue-text, var(--ui-blue));
+    cursor: help;
+  }
+  .spinner {
+    display: block;
+    flex: none;
+    width: 1em;
+    height: 1em;
+    box-sizing: border-box;
+    border: 1.5px solid color-mix(in oklab, currentColor 25%, transparent);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: epic-phase-turn 1.1s linear infinite;
+  }
+  @keyframes epic-phase-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: none;
+    }
+  }
   .id {
     font-variant-numeric: tabular-nums;
   }
