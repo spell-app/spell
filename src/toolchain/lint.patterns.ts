@@ -195,10 +195,10 @@ function isDomElement(node: ESTree.Node): boolean {
 
 /** The timer `callee` calls (`setTimeout`, `window.setTimeout` ...), if it's one of `TIMERS`. */
 function timerName(callee: ESTree.Node): string | undefined {
-  if (callee.type === "Identifier") return callee.name in TIMERS ? callee.name : undefined
+  if (callee.type === "Identifier") return Object.hasOwn(TIMERS, callee.name) ? callee.name : undefined
   if (callee.type !== "MemberExpression" || callee.object.type !== "Identifier") return undefined
   const name = nameOf(callee.property)
-  return GLOBALS.has(callee.object.name) && name in TIMERS ? name : undefined
+  return GLOBALS.has(callee.object.name) && Object.hasOwn(TIMERS, name) ? name : undefined
 }
 
 /** The named functions an `export` declares:  `export function X`, `export const X = () => ...`. */
