@@ -94,6 +94,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a phase's plan-changed pen comes after it, on its first line (`FoldPieces.mark`)
       - everything in the row sits on the title's FIRST line, so nothing moves as it folds
         (`--_epic-fold-line` in `EpicFold.css`;  the item's line is one-line cells)
+      - a section's badge and tools stay beside its title while the title fits on one line beside them;  only when it
+        doesn't (the side bar, a phone) do they wrap, together, onto a row of their own at its end (epic `epic-engine`
+        I149:  under 480px they always did before)
       - collapse-all still shows only while open, before the chevron, as it did:  it moves the buttons before it
       - expand-all (a fold's:  the Overview, a section, a phase;  Owen, 2026-10-20) shows folded or open, just before
         collapse-all:  it opens the block and everything in it, cards too, parts loading as they open (`expandAll()`)

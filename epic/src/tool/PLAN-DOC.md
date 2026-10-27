@@ -560,13 +560,16 @@ The blocks prose used to shape by hand, now each an element (epic `epic-componen
 What Claude took each of Owen's review marks to mean, and that it's done or noted (P13).
 - A card per mark, on what the mark is on:  the item, the Overview sub-section, the phase, the summary.
 
-Two kinds of finished card, so a card that only RECORDS Owen's choice never reads as work done.
-In Owen's words (2026-10-10):  "Claude Done entries are confusing ... you haven't apparently done anything".
+Two kinds of finished card, so a card for one STEP never reads as the item finished.
+- Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything".
+- Owen, 2026-10-26 (epic `epic-engine` I148), on repo-split's I65, two Done cards and still red:
+  "why is this showing as red if it is fixed?"  So Done FINISHES the item;  every other step is Noted.
 
 | card             | when                                                                  | says, in one line                                   |
 | ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
-| `Claude • Noted` | Claude RECORDED what Owen chose, nothing built yet:  a pick, a todo made or queued, a new item made, a choice talked over | what was recorded, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
-| `Claude • Done`  | WORK was done:  an answer or reply written, code changed, a phase built | the reading kept, a summary when worth saying     |
+| `Claude • Underway` | Claude is on it                                                     | what Claude took the task to be                     |
+| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a pick, a todo made or queued, a new item made, a choice talked over), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
+| `Claude • Done`  | the item's WORK is finished:  an issue fixed, a todo built;  an open issue or todo CLOSES with it | the reading kept, a summary when worth saying     |
 
 ```html
 <epic-status slot="status" state="underway" at="2026-10-08 14:20">
@@ -600,10 +603,16 @@ In Owen's words (2026-10-10):  "Claude Done entries are confusing ... you haven'
 - A later mark on the same item:  a new card after the old ones, which stay, as the record.
 - Written by the tool only:
   - `update <name>#<id> underway "<reading>"`:  a new underway card, stamped now;  the page's spinner on.
-  - `update <name>#<id> done ["<summary>"]`:  WORK was done.
+  - `update <name>#<id> done ["<summary>"]`:  the item's WORK is finished.
     - The LATEST underway card turns done (`done-at`), the reading kept;  spinner off.
+    - An open ISSUE or TODO (not a `limit`) closes in the same write, as `close` does (`PlanDoc.finishWork()`):
+      `done`, green, `taken-in` its phase, the log's `I3 closed:  <title>`.
+    - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is Owen's to
+      close (Approve, his test run);  a `limit` has nothing to do.
     - Refused with no underway card.
-  - `update <name>#<id> noted "<what>"`:  Claude only RECORDED Owen's choice.
+    - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
+  - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:
+    Owen's choice recorded, an answer, details or a summary written, a request called off.
     - The latest underway card turns noted, `what` its summary.
     - None:  a card born noted (`at` alone).
     - Spinner off.
@@ -904,6 +913,14 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - a link that climbs above the root is left, and listed;  a second run writes nothing
     - it retired `caveats-and-tests`:  no page needed it any more, and it would read the new Todo section's `t` ids
       as old todos
+  - `done-cards-close` (2026-10-26, on command;  epic `epic-engine` I148):  an open issue or todo (not a `limit`)
+    whose work a Done card said was finished is closed (`DoneCardsClose`), as `update ... done` closes one since
+    - which:  a Done card NEWER than its last reopening (the log's `I3 reopened:  ...`), and no underway card
+    - closed as `close` does:  `done`, a log line each (`I3 closed:  its Done card (2026-10-24 10:00) said the work was
+      finished`);  the write recolours it and stamps its phase (`updateStates()`)
+    - each one a note in the report, with its card's time and title:  an older page's Done card may have meant only
+      "this step done" (an answer written), Noted today, so read the dry run's list before running it
+    - idempotent:  a closed item is left
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

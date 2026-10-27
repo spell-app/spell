@@ -756,11 +756,14 @@ export class PlanDocCommands {
    * - `epic update <name>#<id> underway ...` runs it (Owen, epic `repo-split` J140:  `epic status` takes stock)
    * - `underway`:  a new blue card (`PlanDoc.addStatus()`), stamped now
    *   - the spinner on (`inbox working`), so one call does both
-   * - `done`:  WORK was done (an answer written, code changed, a phase built)
-   *   - its latest underway card turns green (`PlanDoc.finishStatus()`), the summary under its reading when given
+   * - `done`:  the item's WORK is finished (an issue fixed, a todo built;  epic `epic-engine` I148)
+   *   - its latest underway card turns green, the summary under its reading when given
+   *   - an open issue or todo closes in the same write, as `close` does (`PlanDoc.finishWork()`);
+   *     a question, judgement call or test keeps its status
    *   - the spinner off
    *   - refused on an item with no underway card
-   * - `noted`:  Claude only RECORDED what Owen chose (Owen, 2026-10-10)
+   * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
+   *   answered, added details, condensed it, called a request off
    *   - a calm Noted card, `what` saying what was recorded and what happens next
    *     (`PlanDoc.noteStatus()`:  an underway card turns noted, else one born noted)
    *   - the spinner off
@@ -781,8 +784,11 @@ export class PlanDocCommands {
       const what = state === "noted" ? need(text, "what was recorded (html)") : String(filed)
       title = await this.edit(file, (plan) => plan.noteStatus(id, what))
       said = "noted"
-    } else if (state === "done") title = await this.edit(file, (plan) => plan.finishStatus(id, text))
-    else
+    } else if (state === "done") {
+      const done = await this.edit(file, (plan) => plan.finishWork(id, text))
+      title = done.title
+      if (done.closed) said = "done, closed"
+    } else
       throw new PlanDocError(`epic update <name>#${id} underway | done | noted, not '${state ?? ""}'  (${USAGE_HINT})`)
     this.inbox.setWorking(file, id, state === "underway")
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
@@ -1368,12 +1374,15 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   status <name> <id> underway "html"              Claude took Owen's mark on an item (or an Overview section):
                                                    a blue "Claude • Underway" card with Claude's reading of
                                                    the task (a sentence or two, no file names);  spinner on
-  status <name> <id> done ["html"]                 WORK was done (an answer written, code changed):  that card
-                                                   turns green "Claude • Done", the reading kept, the summary
-                                                   under it when there's something worth saying;  spinner off.
+  status <name> <id> done ["html"]                 the item's WORK is finished (an issue fixed, a todo built):
+                                                   that card turns green "Claude • Done", the reading kept, the
+                                                   summary under it when there's something worth saying;  an
+                                                   open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
-  status <name> <id> noted "html"                  Claude only RECORDED Owen's choice:  a calm "Claude • Noted"
-                                                   card saying what was recorded and what happens next ("Chose
+  status <name> <id> noted "html"                  a STEP done, the item not finished:  Owen's choice recorded,
+                                                   an answer, details or a summary written, a request called
+                                                   off:  a calm "Claude • Noted" card saying what was done and
+                                                   what happens next ("Chose
                                                    B · ...:  recorded;  waiting for the next phase, P9 · ...");
                                                    an underway card turns noted;  spinner off.  inbox apply
                                                    writes these for picks, todos and new items itself
