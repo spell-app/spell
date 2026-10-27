@@ -1,5 +1,5 @@
 /*
- * `<epic-sort>` (`EpicSort.tsx`):  the Epics page's sort pill, A–Z and Date:  `<ui-buttons circular basic
+ * `<epic-sort>` (`EpicSort.tsx`):  the Epics page's sort pill, A–Z and Date:  `<ui-buttons appearance="circular basic"
  * size="tiny">`, the component's look;  the one in use `active`.
  * - Units:  px and em, never rem (WWOD §18).
  */

@@ -977,7 +977,7 @@
               ><epic-question>
                 <p><b>P6.</b></p>
                 <p>
-                  Chose: <code>&lt;ui-docs-example header=X&gt;</code> becomes
+                  Chose: <code>&lt;ui-example heading=X&gt;</code> becomes
                   <code>&lt;ui-section id="&lt;parent&gt;-x" header=X&gt;</code> around the example (its
                   <code>header</code> removed, <code>description</code> kept); following header-less examples
                   (Fomantic's <code>.another.example</code>) join that section; any other content (a markdown paragraph,
@@ -1125,8 +1125,8 @@
                   With the example's name now on its section's title, every example is header-less, and its code button
                   took a row of its own above the description. Changed
                   <a
-                    href="/spell-ui/src/docs-components/ui-docs-example/UIDocsExample.css"
-                     target="src-packages-ui-src-docs-components-ui-docs-example-uidocsexample-css"><code>UIDocsExample.css</code></a
+                    href="/spell-ui/src/components/ui-example/UIExample.css"
+                     target="src-spell-ui-src-components-ui-example-uiexample-css"><code>UIExample.css</code></a
                   >: a header-less example WITH a description puts the button at the top right, beside the description
                   (which keeps 3em clear for it); without a description the button keeps its row (it would cover the
                   demo). Also helps Fomantic's <code>.another.example</code> continuations. Alternative: move the button
@@ -1190,7 +1190,7 @@
               ><epic-question>
                 <p><b>P6.</b></p>
                 <p>
-                  Chose: <code>&lt;ui-docs-toc&gt;</code> lists top-level <code>&lt;ui-section&gt;</code>s as its
+                  Chose: <code>&lt;ui-toc&gt;</code> lists top-level <code>&lt;ui-section&gt;</code>s as its
                   sections and what each nests (sections, examples, level 3 headers) as entries, as a tree; a level
                   opens when the entry in view is in it (as the top level already did), or always with
                   <code>expanded</code>. Entries inside a folded section are skipped when following the scroll. Level 2
