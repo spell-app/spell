@@ -73,7 +73,16 @@ export class RootLinks implements Migration {
     linker: SRV.Linker,
     { dryRun = false, folders = AREAS, skip = [] }: RootLinksRun = {}
   ): RootLinksCensus {
-    const census: RootLinksCensus = { files: 0, changed: 0, links: 0, byFolder: {}, byTarget: {}, mended: [], broken: [], outside: [] }
+    const census: RootLinksCensus = {
+      files: 0,
+      changed: 0,
+      links: 0,
+      byFolder: {},
+      byTarget: {},
+      mended: [],
+      broken: [],
+      outside: []
+    }
     const skipped = skip.map((folder) => join(content, folder))
     for (const folder of folders) {
       const dir = join(content, folder)
@@ -90,7 +99,7 @@ export class RootLinks implements Migration {
           if (!dryRun) writeFileSync(file, text)
           return true
         }
-        const changed = dryRun ? write() : SRV.FileLock.run(RootLinks.lockOf(file), write, LOCK)
+        const changed = dryRun ? write() : SRV.FileLock.run(RootLinks.lockOf(file), write, RootLinks.LOCK)
         if (changed) census.changed++
       }
     }
@@ -134,7 +143,8 @@ export class RootLinks implements Migration {
       }
       census.links++
       census.byFolder[folder] = (census.byFolder[folder] ?? 0) + 1
-      const target = change.kind === "dropped" ? "(site header root)" : (/^\/([^/?#]+)/.exec(change.to)?.[1] ?? "(other)")
+      const target =
+        change.kind === "dropped" ? "(site header root)" : (/^\/([^/?#]+)/.exec(change.to)?.[1] ?? "(other)")
       census.byTarget[target] = (census.byTarget[target] ?? 0) + 1
       const line = `${path}:  ${change.from} -> ${change.to}`
       if (change.kind === "mended") census.mended.push(line)
@@ -155,14 +165,25 @@ export class RootLinks implements Migration {
     return `${area} (other)`
   }
 
-  /** The lock a write of `file` takes:  a part's page's (`epics/seo/parts/p1.html` => `epics/seo/seo.plan.html`), else its own. */
-  private static lockOf(file: string): string {
+  /**
+   * The lock a write of content file `file` takes:  a part's page's (`epics/seo/parts/p1.html` =>
+   * `epics/seo/seo.plan.html`), else its own;  as the page's writers take it.
+   * - every content-folder pass takes it (`run()`, `ContentRelink.run()`), so a session writing the page meanwhile
+   *   loses no write
+   */
+  static lockOf(file: string): string {
     const parts = dirname(file)
     if (basename(parts) !== "parts") return file
     const folder = dirname(parts)
     const name = basename(folder)
     return [join(folder, `${name}.plan.html`), join(folder, `${name}.saga.html`)].find(existsSync) ?? file
   }
+
+  /**
+   * How long a content file's lock (`lockOf()`) is waited for, and when a holder counts as crashed, in ms
+   * (`migrate.js` `withLocks()`'s):  static, the same for every pass.
+   */
+  static readonly LOCK = { wait: 30_000, stale: 60_000 };
 
   /** Every HTML and Markdown file under `dir`, sorted, but in `.git`, `node_modules` and dot folders. */
   private static *files(dir: string): Generator<string> {
@@ -192,9 +213,6 @@ export const AREAS = ["epics", "guides", "pages", "sagas", "goals", "brand"]
 
 /** The files a link may be in:  pages, part files, Markdown. */
 const TEXT_FILE = /\.(html|md)$/
-
-/** How long a file's lock is waited for, and when a holder counts as crashed (`migrate.js` `withLocks()`'s). */
-const LOCK = { wait: 30_000, stale: 60_000 }
 
 /**
  * `RootLinks.run()` options.

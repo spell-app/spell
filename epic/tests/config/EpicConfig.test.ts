@@ -79,6 +79,14 @@ describe("EpicConfig", () => {
     expect(EpicConfig.parse(text)).toEqual(JSON5.parse(text))
   })
 
+  test("ANY valid JSON5 reads, as the page server reads the same file:  unquoted keys, single quotes", () => {
+    expect(EpicConfig.parse("{ contentFolder: '../spell.epics', /* why */ baseBranch: \"main\", }")).toEqual({
+      contentFolder: "../spell.epics",
+      baseBranch: "main"
+    })
+    expect(() => EpicConfig.parse("{ contentFolder: ", "x/config.json5")).toThrow(/x\/config\.json5 won't read/)
+  })
+
   test("a worktree reads the MAIN checkout's file, from any folder in it", () => {
     const other = fakeMainCheckout(join(TOP, "other"))
     const beside = fakeWorktree(other, join(TOP, "other.worktrees", "vite"))
