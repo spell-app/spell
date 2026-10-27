@@ -1,0 +1,20 @@
+/*
+ * The secondary colour's own states:  what its values can't say, `@layer ui.theme` (epic `debut` P20).
+ * - A rules sheet several themes name (`"rules": [..., "states"]`):  Spell, Paper, Midnight, Crisp and Pop.
+ * - `colors.css` works out a coloured element's hovered, focused and pressed colours (`--ui-color-hover` ...) from its
+ *   colour, with one recipe for every colour;  a theme that sets its secondary's own states
+ *   (`brand.secondary.hover`, `focus`, `down`, `active`) names this sheet, so a secondary element takes them,
+ *   and its text reads on every state (4.5:1, the contrast test).
+ * - Spell's was in its own rules sheet (P19);  ONE copy here since the new themes needed it too.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ */
+
+@layer ui.theme {
+  .ui.secondary,
+  .ui-secondary {
+    --ui-color-hover: var(--ui-secondary-hover);
+    --ui-color-focus: var(--ui-secondary-focus);
+    --ui-color-down: var(--ui-secondary-down);
+    --ui-color-active: var(--ui-secondary-active);
+  }
+}

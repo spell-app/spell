@@ -3,7 +3,8 @@
 //   so every classic token a brand value replaces is restated here:
 //   type, the size ladder, radii, ink, borders, shadows, the whole palette, the message colours, links, focus, highlight.
 // - Its sheet, `spell.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
-//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/spell.css` (its fonts, headings, states,
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states),
+//   `rules/spell.css` (its fonts, headings, states,
 //   the `accent` hue's remap).
 // - The ONE Spell theme (epic `debut` P17, J88):  the Spell Brand theme (`spell-brand.css`) folded in.
 //   - A theme remembered as `spell-brand` comes back as `spell` (`Themes.RENAMED`).
@@ -43,7 +44,7 @@
 //   white-with-hairline DEFAULT button (ours stays a quiet tinted fill:  a button has no border token)
 {
   "$schema": "./theme.schema.json",
-  "rules": ["modern", "spell"],
+  "rules": ["modern", "states", "spell"],
   "own": {
     // Violet:  Spell Purple (600), lilac (300), lavender (150), aubergine (900 / 950)
     "spell-violet-25": "#fcfcff",
@@ -95,7 +96,7 @@
     "spell-surface-tint": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
     "spell-surface-selected": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
     "spell-surface-warm": { "light": "{own.spell-accent-75}", "dark": "#2c2152" },
-    "spell-surface-code": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-975}" },
+    "spell-surface-code": { "light": "{own.spell-brand-100}", "dark": "{own.spell-violet-975}" },
     "spell-surface-inverse": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-50}" },
     // Text
     "spell-text-strong": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-25}" },
@@ -205,7 +206,9 @@
     }
   },
   "surfaces": {
-    "page": { "light": "{own.spell-brand-25}", "dark": "{own.spell-violet-950}" },
+    // light:  `brand-75`, a shade darker than the brand's `brand-25`, so white panels stand off it as they do in dark
+    // (Owen, epic `debut` I45:  "a shade darker is good")
+    "page": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-950}" },
     // dark:  panels a clear step off the page (1.21:1), as the brand's raised surface;  each tint a step up from them
     "panel": { "light": "oklch(1 0 0)", "dark": "{own.spell-violet-900}" },
     "inset": { "light": "{own.spell-brand-50}", "dark": "{own.spell-violet-850}" },
@@ -214,7 +217,8 @@
     // its cool grey-blue, and its ink;  without them a page fell back to an ivory band (`--ui-brown-background`)
     "bar": "{surfaces.page}",
     // Code wells:  the brand's `--surface-code` (also the docs pages' inline code and `pre`)
-    "code": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-975}" },
+    // light:  `brand-100`, a step under the page (I45), so code on the page itself keeps its fill
+    "code": { "light": "{own.spell-brand-100}", "dark": "{own.spell-violet-975}" },
     // selection and highlighted rows:  lavender
     "highlight": { "light": "{own.spell-violet-150}", "dark": "{own.spell-violet-800}" }
   },
@@ -244,16 +248,23 @@
       "active": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" }
     },
     "secondary": {
-      // Secondary:  the brand's grey-blue
-      "color": "{hues.grey.color}",
-      "on": "{hues.grey.on}",
-      "inverted": "{hues.grey.inverted}",
-      "inverted-on": "{hues.grey.inverted-on}",
-      // its states darken, as grey's do (the remap, "States", below)
-      "hover": "{hues.grey.hover}",
-      "focus": "{hues.grey.focus}",
-      "down": "{hues.grey.down}",
-      "active": "{hues.grey.active}"
+      // Secondary:  a pale violet, almost white, with dark violet text (Owen, epic `debut` I46:  "lighter purple, almost
+      // white");  quieter than the violet primary, and filled, unlike a basic button
+      // - `violet-100`, not `-50` / `-75`:  it stands off a white panel by its fill alone (1.17:1), no edge needed
+      // - dark:  a deep violet a step off the aubergine panels, lilac text on it
+      // - its states each a step darker in light, a step lighter in dark (the remap, "States", in its rules sheet)
+      "color": { "light": "{own.spell-violet-100}", "dark": "{own.spell-violet-850}" },
+      "on": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-100}" },
+      "text": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+      "header": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-150}" },
+      "border": { "light": "{own.spell-violet-500}", "dark": "{own.spell-violet-400}" },
+      "background": { "light": "{own.spell-violet-75}", "dark": "{own.spell-lilac-soft}" },
+      "inverted": "{own.spell-violet-200}",
+      "inverted-on": "{own.spell-violet-900}",
+      "hover": { "light": "{own.spell-violet-150}", "dark": "{own.spell-violet-800}" },
+      "focus": { "light": "{own.spell-violet-150}", "dark": "{own.spell-violet-800}" },
+      "down": { "light": "{own.spell-violet-200}", "dark": "{own.spell-violet-700}" },
+      "active": { "light": "{own.spell-violet-200}", "dark": "{own.spell-violet-700}" }
     },
     "accent": {
       "color": { "light": "var(--ui-accent-on-light)", "dark": "var(--ui-accent-on-dark)" },
