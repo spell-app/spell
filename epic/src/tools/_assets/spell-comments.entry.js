@@ -226,7 +226,7 @@ function topSections(main) {
   const own = article ? [...article.querySelectorAll(":scope > ui-section[id]")] : []
   if (own.length) return own
   return [...main.querySelectorAll("ui-section[id]")].filter(
-    (section) => !section.parentElement?.closest("ui-section, ui-docs-example, template")
+    (section) => !section.parentElement?.closest("ui-section, ui-example, template")
   )
 }
 

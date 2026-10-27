@@ -5,6 +5,8 @@ import type { E } from "spell-ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
+import { ReviewClient, type Inbox } from "spell-epic/review"
+
 import "spell-ui/components/ui-section"
 import "spell-epic/components/epic-section"
 import "spell-epic/components/epic-phase"
@@ -114,6 +116,66 @@ describe("<epic-phase>", () => {
     const stack = parseFloat(body.style.getPropertyValue("--epic-stack"))
     expect(stack).toBeGreaterThan(0)
     await expectAccessible(host)
+  })
+})
+
+/** A started review client adopted as the page's, its inbox `working` on `ids` (phase ids). */
+async function adoptWorking(ids: string[]): Promise<ReviewClient> {
+  const since = new Date().toISOString()
+  const inbox = {
+    marks: {},
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: Object.fromEntries(ids.map((id) => [id, { action: "details", since }])),
+    listening: null,
+    unsentComments: [],
+    waitingComments: [],
+    woken: null,
+    doing: null
+  } as unknown as Inbox
+  const client = new ReviewClient({
+    page: "/epics/demo/demo.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: (async () =>
+      new Response(JSON.stringify(inbox), { headers: { "content-type": "application/json" } })) as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+  return client
+}
+
+// Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the phase
+// header" (epic `epic-engine` I147)
+describe("<epic-phase> while Claude works on it", () => {
+  test("its status icon is a blue turning spinner, saying what he does;  a done phase's never;  passes axe", async () => {
+    await adoptWorking(["p-one-repo", "p-old"])
+    try {
+      const section = await render(
+        `<epic-section id="phases" kind="phases">` +
+          `<epic-phase id="p-old" title="Old" status="done"></epic-phase>` +
+          `<epic-phase id="p-one-repo" title="One Repo" status="todo"></epic-phase>` +
+          `<epic-phase id="p-built" title="Built" status="active" plan="accepted"></epic-phase></epic-section>`
+      )
+      const phase = section.querySelector("#p-one-repo")!
+      const status = () => phase.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+      await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+      expect([status().title, status().getAttribute("aria-label")]).toEqual([
+        "Claude is writing this phase's plan",
+        "Claude is writing this phase's plan"
+      ])
+      expect(phase.matches(":state(working)")).toBe(true)
+      // blue, as the header's step label under way:  not the grey of a to-do phase
+      const blue = getComputedStyle(section.querySelector("#p-built")!.shadowRoot!.querySelector('[part~="status"]')!)
+      expect(getComputedStyle(status()).color).toBe(blue.color)
+      expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+      await expectAccessible(phase)
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
   })
 })
 

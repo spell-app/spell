@@ -922,3 +922,53 @@ test("a stale line never lingers:  ignore clears it;  the page reads none once t
   inbox.setListening(null)
   expect(inbox.doing).toBeNull()
 })
+
+////////////////
+// ## A phase being worked on (epic `epic-engine` I147)
+////////////////
+
+/** The scratch doc with two phases, `P1 · One Repo` and `P2 · Docs`. */
+function withPhases() {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("One Repo", { symptom: "two repos", changes: "one" })
+  plan.addPhase("Docs", { symptom: "stale", changes: "fresh" })
+  writeFileSync(file, plan.toString())
+}
+
+// Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the phase
+// header"
+test("working P1 on | off:  a phase by number or id, kept under its stable id, which `<epic-phase>` reads", async () => {
+  withPhases()
+  await commands().inbox.run("x", file, ["working", "P1", "on"], {})
+  expect(Object.keys(ReviewInbox.read(inboxFile).working)).toEqual(["p-one-repo"])
+  await commands().inbox.run("x", file, ["working", "p-one-repo", "off"], {})
+  expect(ReviewInbox.read(inboxFile).working).toEqual({})
+  await commands().inbox.run("x", file, ["working", "p2", "on"], {})
+  expect(Object.keys(ReviewInbox.read(inboxFile).working)).toEqual(["p-docs"])
+  expect(printed).toEqual(["P-ONE-REPO working:  on", "P-ONE-REPO working:  off", "P-DOCS working:  on"])
+  await expect(commands().inbox.run("x", file, ["working", "P9", "on"], {})).rejects.toThrow(/no phase P9/)
+})
+
+test("phase P1 planning [off];  phase-body sets it by itself while the plan isn't accepted;  --plan written ends it", async () => {
+  withPhases()
+  const owner = commands()
+  const working = () => Object.keys(ReviewInbox.read(inboxFile).working)
+  expect(await owner.run(["phase", "x", "P1", "planning"])).toBe(0)
+  expect(working()).toEqual(["p-one-repo"])
+  expect(await owner.run(["phase", "x", "P1", "planning", "off"])).toBe(0)
+  expect(working()).toEqual([])
+  // `epic update x#P2 --goal ...`:  Claude writing its plan, so the page says so
+  expect(await owner.run(["phase-body", "x", "P2", "--goal", "<ul><li>fresh</li></ul>"])).toBe(0)
+  expect(working()).toEqual(["p-docs"])
+  // the plan written, waiting for Owen's Accept:  nothing more to write
+  expect(await owner.run(["phase-body", "x", "P2", "--plan", "<ol><li>Rewrite it.</li></ol>"])).toBe(0)
+  expect(working()).toEqual([])
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).phase(2).getAttribute("plan")).toBe("waiting")
+  // accepted:  a later edit of its fields is no planning
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.acceptPlan(plan.phase(2))
+  writeFileSync(file, plan.toString())
+  expect(await owner.run(["phase-body", "x", "P2", "--goal", "<ul><li>fresher</li></ul>"])).toBe(0)
+  expect(working()).toEqual([])
+  expect(printed.slice(0, 2)).toEqual(["P1 planning:  on", "P1 planning:  off"])
+})

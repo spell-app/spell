@@ -228,6 +228,40 @@
                 </ui-content>
               </ui-accordion>
             </ui-section>
+            <ui-section id="epic-phase-working" label="While Claude works on it" sticky collapsible dividing open="false">
+              <p>
+                While Claude is at work on a phase that isn't done, its status icon turns into the header's turning
+                spinner, in blue. Epic <code>epic-engine</code> I147 (Owen, 2026-10-26: "repo-split is actively
+                planning this (writing the plan) but there is no indication in the phase header").
+              </p>
+              <ul>
+                <li>
+                  Its tooltip says what he's doing: "Claude is writing this phase's plan" while it's to do and its plan
+                  isn't accepted yet, else "Claude is working on it".
+                </li>
+                <li>
+                  It counts in the Phases section's blue badge ("with Claude") and the toolbar's: the Phases button's
+                  blue badge, the page's state filter.
+                </li>
+                <li>
+                  Where it comes from: the review inbox's <code>working</code>, under the phase's id, page state that's
+                  never in the file. So it shows only on a page the page server serves.
+                </li>
+              </ul>
+              <ui-accordion class="spell-code" appearance="styled">
+                <ui-title>Turning it on and off · 4 lines</ui-title>
+                <ui-content>
+                  <ui-code language="sh"
+                    ><script type="text/plain">
+                      epic phase repo-split#P20 planning        # Claude starts writing its plan
+                      epic update repo-split#P20 --plan "..."   # the plan written, waiting for Owen:  off by itself
+                      epic phase repo-split#P20 planning off    # given up
+                      epic inbox working repo-split#P20 on      # any other work on it;  off ends it
+                    </script></ui-code
+                  >
+                </ui-content>
+              </ui-accordion>
+            </ui-section>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
@@ -671,7 +705,10 @@
                     </tr>
                     <tr>
                       <td><code>status</code></td>
-                      <td>Its status icon, in its status's colour.</td>
+                      <td>
+                        Its status icon, in its status's colour; while Claude is at work on it
+                        (<code>:state(working)</code>), a blue turning spinner instead.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>changed</code></td>
@@ -707,6 +744,13 @@
                     <tr>
                       <td><code>:state(error)</code></td>
                       <td>Its <code>source</code> part couldn't be loaded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>:state(working)</code></td>
+                      <td>
+                        Claude is at work on it, and it isn't done: the review inbox's <code>working</code>, under its id
+                        (writing its plan, or building it). Its status icon is a blue turning spinner.
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -766,6 +810,10 @@
                   >the colour scheme</a
                 >: to do, an empty grey circle; under way, a half-filled BLUE circle (Claude is working on it); done, a
                 GREEN circle with a check. A done phase's title reads quieter (muted).
+              </li>
+              <li>
+                <b>Claude at work on it:</b> the status icon is a blue turning spinner, the header's, its tooltip saying
+                whether he's writing its plan or working on it.
               </li>
               <li><b>The estimate</b> as a badge at the title's end.</li>
               <li>

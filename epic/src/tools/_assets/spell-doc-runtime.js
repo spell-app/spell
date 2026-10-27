@@ -96,14 +96,7 @@ import {
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
-import {
-  removeToolbar,
-  shortLabel,
-  titledItems,
-  toolbarItem,
-  toolbarMenu,
-  wireJumpKey
-} from "./spell-doc-toolbar.js"
+import { removeToolbar, shortLabel, titledItems, toolbarItem, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
 import { readingTime } from "spell-epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell-epic/links"
 import { PageStages } from "spell-epic/phases"
@@ -113,8 +106,8 @@ import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 // the doc-only families' plain-DOM leaves, bundled from source (`bundle-spell-ui.js`):  Spell UI's docs land links and
 // follow the scroll the same way (epic `coherence` P11)
-import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -320,6 +313,7 @@ async function start() {
   wireJumpKey(go, canGo)
   wireFilter(main)
   wireTableWidths(main)
+  wireTwoColumnTables(main)
   wireTableHeads(main)
   wireStuckTrail(main)
   // UI renders its shadow content a little after the definitions:  land once it has
@@ -527,6 +521,97 @@ function wireTableWidths(main) {
   watch()
   new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
   addEventListener("resize", () => requestAnimationFrame(() => toggles.forEach((_toggle, box) => place(box))))
+}
+
+/**
+ * A TWO-COLUMN table's first column WRAPS once it would take more than 40% of the table, so the second keeps a
+ * readable measure (epic `epic-engine` I145;  Owen, 2026-10-26:  "table layout sucks").
+ * - its first column never wraps otherwise (`spell-doc.css`, "A TWO-COLUMN table")
+ * - at the side bar's width, a long first column held whole squeezed the second to a word per line
+ * - CSS can't say "no wider than its words, nor than 40%" for a table's cell, so this measures:
+ *   - each column's width with nothing wrapped (`data-spell-measuring`, for that moment only), and the room the table
+ *     has (its box's width, wide or not)
+ *   - the first column whole still leaves the second a readable measure (its words whole, or 24em):  nothing to do
+ *   - else, a first column wider than 40% of the room wraps (`data-spell-wrap-first`), at the wider of:
+ *     - 40% of the room
+ *     - the room less that readable measure (so the first wraps no more than it must)
+ *     - but never so wide that the second gets less than `TWO_COLUMN_MIN_SECOND` (12em of its type)
+ *     - the width:  `--spell-first-column`, on the table
+ *     - and only when that takes 2em or more off it (`TWO_COLUMN_LEAST_GAIN`):  never a word wrapped for a few px
+ * - too narrow even then (a phone):  the table scrolls sideways inside its own box, as every table does
+ * - again whenever its box changes size (a section or item opening, the side bar or window resizing, the expand
+ *   button);  tables a part's body or a live update adds later get theirs too
+ */
+function wireTwoColumnTables(main) {
+  const watched = new WeakSet()
+  let pending = new Set()
+  let frame = 0
+  const schedule = (box) => {
+    pending.add(box)
+    frame ||= requestAnimationFrame(() => {
+      frame = 0
+      const boxes = pending
+      pending = new Set()
+      for (const each of boxes) fitTwoColumns(each)
+    })
+  }
+  const sizes = new ResizeObserver((entries) => entries.forEach((entry) => schedule(entry.target)))
+  const watch = () => {
+    for (const box of tableBoxes(main)) {
+      if (watched.has(box)) continue
+      watched.add(box)
+      // its first notice comes at once:  the first fit
+      sizes.observe(box)
+    }
+  }
+  watch()
+  new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
+}
+
+/** How much of a two-column table's room its first column may take before it wraps (`wireTwoColumnTables()`). */
+const TWO_COLUMN_FIRST_SHARE = 0.4
+
+/** The least a two-column table's second column keeps before the table scrolls, in ems of its own type. */
+const TWO_COLUMN_MIN_SECOND = 12
+
+/** The least a two-column table's first column must give up to wrap at all, in ems of the body's type. */
+const TWO_COLUMN_LEAST_GAIN = 2
+
+/**
+ * Fit one table's box (`tableBoxes()`) as `wireTwoColumnTables()` says:  wrap its first column, or not.
+ * - SIDE EFFECT:  `data-spell-wrap-first` and `--spell-first-column` on its `<table>`, set or removed
+ * - a table that isn't two columns, or isn't shown, is left alone
+ */
+function fitTwoColumns(box) {
+  const table = tableOf(box)
+  if (!table?.isConnected || !table.getClientRects().length) return
+  const rows = [...table.rows]
+  const pair = rows.find((row) => row.cells.length === 2 && row.cells[0].colSpan === 1)
+  if (!pair || rows.some((row) => row.cells.length > 2)) return
+  // with nothing wrapped:  a `display: block` table is as wide as its room, its cells as wide as their words
+  table.setAttribute("data-spell-measuring", "")
+  const room = table.clientWidth
+  const [first, second] = [...pair.cells].map((cell) => cell.getBoundingClientRect().width)
+  // a body cell's type, not the header's small capitals
+  const style = getComputedStyle(rows.find((row) => row.cells[1]?.localName === "td")?.cells[1] ?? pair.cells[1])
+  table.removeAttribute("data-spell-measuring")
+  const minSecond =
+    parseFloat(style.fontSize) * TWO_COLUMN_MIN_SECOND +
+    parseFloat(style.paddingLeft) +
+    parseFloat(style.paddingRight) +
+    parseFloat(style.borderLeftWidth) +
+    parseFloat(style.borderRightWidth)
+  // what the second column needs to read well:  its words whole, or twice its least, if less
+  const readable = Math.min(second, minSecond * 2)
+  const width = Math.max(0, Math.min(Math.max(room * TWO_COLUMN_FIRST_SHARE, room - readable), room - minSecond))
+  // and only for a real gain:  not to take a word or two off it
+  const wraps =
+    first > room * TWO_COLUMN_FIRST_SHARE &&
+    room - first < readable &&
+    first + second > room + 1 &&
+    first - width >= parseFloat(style.fontSize) * TWO_COLUMN_LEAST_GAIN
+  table.toggleAttribute("data-spell-wrap-first", wraps)
+  setStyle(table, "--spell-first-column", wraps ? `${Math.floor(width)}px` : "")
 }
 
 /**
@@ -1024,6 +1109,7 @@ function wireLiveUpdate(main) {
   let queue = Promise.resolve()
   const live = { ready, refresh }
   wireSourceBodies(main, live, enqueue)
+  wireLiveCounts(main, refresh)
   if (!server?.readPage || !canPatch(main)) return live
   // the source as loaded:  null when it can't be trusted (the file changed before it was read)
   let base = server.readPage().then(
@@ -1086,6 +1172,24 @@ function wireLiveUpdate(main) {
   function enqueue(job) {
     queue = queue.then(job).catch(() => undefined)
   }
+}
+
+/**
+ * An epic page's blocks' counts changing with no change to the markup (`epic-count-changed`, epic `epic-engine` I147):
+ * an item or phase being worked on, an urgency not applied yet -- the review inbox's, which the blocks follow live.
+ * - the page is re-wired once per frame of such changes (`refresh([])`):  the toolbar's badges counted again from each
+ *   block's `contentsEntry`, the same live state its chips draw (Owen, 2026-10-26:  "badges don't match up")
+ */
+function wireLiveCounts(main, refresh) {
+  let queued = false
+  main.addEventListener("epic-count-changed", () => {
+    if (queued) return
+    queued = true
+    requestAnimationFrame(() => {
+      queued = false
+      refresh([])
+    })
+  })
 }
 
 /**
@@ -1587,8 +1691,10 @@ function needYou({ attention }) {
  * - an epic page's sections count themselves (`<epic-section>`, on their titles):  their count is read from their
  *   hosts' `contentsEntry`, never written;
  *   its `attention` too, else the items' `state="attention"` (`EPIC_ATTENTION`);
- *   and `replied`, how many of those wait on Owen's pick (`EPIC_REPLIED`:  the toolbar's orange badge);
- *   and `running`, the Phases section's phases at work now (`EPIC_RUNNING`:  the toolbar's blue badge, P43)
+ *   and `replied`, how many of those wait on Owen's pick (else `EPIC_REPLIED`:  the toolbar's orange badge);
+ *   and `running`, the Phases section's phases at work now (else `EPIC_RUNNING`:  the toolbar's blue badge, P43;
+ *   the host's own counts a phase being worked on too, I147)
+ *   - the host's counts are its items AS DRAWN (`DrawnState`):  an item being worked on counts blue, never red
  * - SIDE EFFECT:  writes `open/total` on the section's title:  its `badge` (SECTIONS), or a `ui-label.spell-count`
  *   at the right of the h2 (HEADINGS);  callable again (it replaces both)
  */
@@ -1598,9 +1704,11 @@ function countItems(outline) {
     if (element.matches(EPIC_FOLDS)) {
       const count = element.contentsEntry?.count
       if (count) {
+        // the block's own, as drawn (`EpicSection.countOf()`:  live, an item being worked on blue, not red);  else
+        // the markup's
         const attention = count.attention ?? element.querySelectorAll(EPIC_ATTENTION).length
-        const replied = Math.min(attention, element.querySelectorAll(EPIC_REPLIED).length)
-        const running = element.querySelectorAll(EPIC_RUNNING).length
+        const replied = count.replied ?? Math.min(attention, element.querySelectorAll(EPIC_REPLIED).length)
+        const running = count.running ?? element.querySelectorAll(EPIC_RUNNING).length
         counts.set(element, { ...count, attention, replied, running })
       }
       continue
@@ -2427,7 +2535,7 @@ function h2HeightAbove(sticky) {
  *   folded sections around the target unfold first, and a target that is a folded item opens (`folds.reveal()`);
  *   an unfolded `<ui-section>` draws on the next frames, so the jump lands once it has, and once more as the page
  *   settles (`SETTLE_MS` twice) unless the reader moved meanwhile
- *   - the page lands its hashes itself:  a `<ui-docs-toc>` or `<ui-docs-api>` on it leaves them to it
+ *   - the page lands its hashes itself:  a `<ui-toc>` or `<ui-docs-api>` on it leaves them to it
  * - the target's entry becomes the current one even when the page can't scroll it up to its line (the last
  *   short sections), until the user scrolls on (`follow.pin()`)
  * - `hashchange` / `popstate` (back, forward, a typed hash) jump the same way

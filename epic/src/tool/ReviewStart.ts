@@ -5,16 +5,23 @@
  * - Owen clicks the "No Claude session is reviewing" pill, or the review line.
  * - The page server looks for the ONE running Claude session titled for the epic (`🚧 <epic>`, or the epic's name
  *   as a word in its title:  `RunningEpics`' `sessionsTitledFor()`).
- * - Found one:  it asks the VS Code window that session runs in (the spell extension's window bridge,
+ * - Found one, and its inbox POLLER runs (`InboxPoller`, `listenerOf()`;  epic `epic-engine` I144):  it asks through the
+ *   epic's inbox (`ReviewInbox.askReview()`), and the poller's `📬` line wakes the session.  Nothing typed.
+ * - Found one with no poller:  it asks the VS Code window that session runs in (the spell extension's window bridge,
  *   `~/.spell-epic/windows/<pid>.json`, or the spell language extension's `~/.spell/windows/`) to open the session's
  *   tab with `/epic review <epic>` typed into its input.
- *   The bridge can only TYPE a prompt (Claude Code's extension has no "send"):  Owen presses Enter.
+ *   - The bridge can only TYPE a prompt (Claude Code's extension has no "send"):  Owen presses Enter.
+ *   - VS Code types only into a session it OPENS:  with the session's tab open already it refuses ("Session is already
+ *     open.  Your prompt was not applied").  The bridge sees the tab first and types nothing (`typed: false`):
+ *     the page says so, and the command is on the clipboard (`tab-open`).
  * - None, or several:  sends nothing, and says which sessions it found.
  *
  * Waking (epic `epic-workflow` P16):  Send, Review Now or Do Now pressed while NO session listens, `changeAndWake()`.
  * - The page server wakes the epic inside that request:  no process runs while Owen isn't working.
  * - Who, first match wins (`wake()`):
- *   1. the ONE running session titled for the epic:  the command typed into its tab, as `start()` does
+ *   1. the ONE running session titled for the epic:
+ *      - its inbox poller runs:  nothing to do, the poller hears the Send and wakes it (`told`;  I144)
+ *      - else the command typed into its tab, as `start()` does;  its tab open already, nothing (`tab-open`)
  *   2. the epic's worktree (`.claude/worktrees/<epic>`) has a window open:  a NEW session there, the command typed in,
  *      through that window's bridge
  *      - straight to the bridge, not through `window launch`:  launch rewrote an open window's file and colours
@@ -40,6 +47,7 @@ import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
 
 import { RunningEpics, sessionsTitledFor, type LiveSession } from "spell-epic/list/RunningEpics"
+import { listenerOf } from "./InboxPoller.mjs"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
 
 /** The window script beside this code, spell-epic's `src/window.mjs`:  `epic window launch` (`launch()`). */
@@ -50,13 +58,15 @@ const BRIDGE_TIMEOUT = 5000
 
 /**
  * What a start came to.
- * - `sent`:  typed into the one session's tab
+ * - `asked`:  the one session's inbox poller runs:  asked through the inbox, the poller wakes it (I144)
+ * - `sent`:  typed into the one session's tab (or, an older bridge, asked to:  it can't tell)
+ * - `tab-open`:  the session's tab is open, and VS Code types only into a session it opens:  nothing typed
  * - `none` / `several`:  nothing sent;  `sessions` the titles found (several:  the matching ones)
  * - `no-window`:  one session, but no window bridge for it (a terminal session, or no spell extension):
  *   type `command` there by hand
  */
 export type StartResult = {
-  state: "sent" | "none" | "several" | "no-window"
+  state: "asked" | "sent" | "tab-open" | "none" | "several" | "no-window"
   command: string
   /** the matching sessions' titles */
   sessions: string[]
@@ -66,8 +76,9 @@ export type StartResult = {
 
 /**
  * What a wake came to (`ReviewStart.wake()`, `wakeFor()`), for the page's notice.
- * - did something, kept in the inbox for the cooldown:  `typed`, `opened`, `launched` (`WokenState`)
+ * - did something, kept in the inbox for the cooldown:  `typed`, `opened`, `launched`, `told` (`WokenState`)
  * - did nothing:
+ *   - `tab-open`:  the session's tab is open, so VS Code wouldn't type into it (I144)
  *   - `several`:  several sessions are titled for the epic (`sessions`):  guessing could type into the wrong tab
  *   - `no-window`:  the one session titled for it has no window bridge (a terminal session)
  *   - `no-vscode`:  no VS Code window is open to start a session in
@@ -75,7 +86,16 @@ export type StartResult = {
  * - didn't try (`wakeFor()`'s claim):  `airplane`, `nothing-new`, or `already` (woken at `at`, nobody listening since)
  */
 export type WakeResult = {
-  state: WokenState | "several" | "no-window" | "no-vscode" | "failed" | "airplane" | "nothing-new" | "already"
+  state:
+    | WokenState
+    | "several"
+    | "no-window"
+    | "tab-open"
+    | "no-vscode"
+    | "failed"
+    | "airplane"
+    | "nothing-new"
+    | "already"
   command: string
   /** the sessions titled for the epic, when that's why */
   sessions: string[]
@@ -96,7 +116,12 @@ export type ReviewStartOptions = {
   launch?: (args: string[], cwd: string) => void
   /** is airplane mode on?  Default:  `AirplaneMode.isOn` */
   airplane?: () => boolean
+  /** the inbox poller running for session process `pid`, else `undefined`;  default `listenerOf()` */
+  pollerOf?: (pid: number) => number | undefined
 }
+
+/** A window bridge's answer to `open-session`:  `typed` false when the session's tab was open (an older bridge:  none). */
+type BridgeReply = { ok?: boolean; error?: string; typed?: boolean }
 
 /** A window bridge's registry entry (`packages/vscode/src/WindowBridge.ts`). */
 type WindowEntry = { pid: number; port: number; token: string; workspaceFile?: string | null; folders?: string[] }
@@ -121,8 +146,12 @@ export class ReviewStart {
     this.options = options
   }
 
-  /** Start `/epic review <epic>` in the session titled for `epic`, or say why not. */
-  async start(epic: string): Promise<StartResult> {
+  /**
+   * Start `/epic review <epic>` in the session titled for `epic`, or say why not.
+   * - `planDoc`:  the epic's page, whose inbox asks the session's poller (I144);  none:  never asked that way
+   * - SIDE EFFECT:  writes the inbox's `reviewAsked`, or types into the session's tab
+   */
+  async start(epic: string, planDoc?: string): Promise<StartResult> {
     const command = ReviewStart.commandFor(epic)
     const found = sessionsTitledFor(epic, this.sessions())
     const titles = found.map((session) => session.title)
@@ -136,16 +165,36 @@ export class ReviewStart {
     }
     if (found.length > 1) return { ...ReviewStart.several(epic, titles), state: "several" }
     const session = found[0]!
+    const busy = session.status && session.status !== "idle" ? "  It starts once its turn ends." : ""
+    if (planDoc && this.pollerOf(session.pid)) {
+      await ReviewInbox.updateAsync(ReviewInbox.pathFor(planDoc), (inbox) => inbox.askReview())
+      return {
+        state: "asked",
+        command,
+        sessions: titles,
+        message: `Asked ${session.title} to start the review:  its inbox poller wakes it in a few seconds, nothing typed.${busy}`
+      }
+    }
     const window = this.windowOf(session.pid)
     if (!window) return { ...ReviewStart.noWindow(session, command), state: "no-window" }
-    await ReviewStart.request(window, "open-session", { sessionId: session.sessionId, prompt: command })
-    const busy = session.status && session.status !== "idle" ? "  It starts once its turn ends." : ""
+    const reply = await ReviewStart.request(window, "open-session", {
+      sessionId: session.sessionId,
+      prompt: command,
+      title: session.title
+    })
+    if (reply.typed === false) {
+      return { state: "tab-open", command, sessions: titles, message: ReviewStart.tabOpen(session, command) }
+    }
     return {
       state: "sent",
       command,
       sessions: titles,
-      // VS Code refuses a prompt for a session whose tab is open ("Session is already open"):  the page copied it
-      message: `Typed ${command} into ${session.title}:  press Enter there.${busy}  It's copied too, to paste if VS Code says the session is already open.`
+      message:
+        reply.typed === true
+          ? `Typed ${command} into ${session.title}:  press Enter there.${busy}`
+          : // an older bridge can't tell:  VS Code refuses a prompt for a session whose tab is open
+            `Asked VS Code to type ${command} into ${session.title}:  press Enter there.${busy}  ` +
+            `If VS Code says the session is already open, nothing was typed:  paste it there, it's copied.`
     }
   }
 
@@ -212,9 +261,18 @@ export class ReviewStart {
         }
       const session = found[0]
       if (session) {
+        if (this.pollerOf(session.pid)) {
+          const did = `told ${session.title} through its inbox poller`
+          return result("told", did, `${sentence(did)}:  it wakes in a few seconds, nothing typed.`, [session.title])
+        }
         const window = this.windowOf(session.pid)
         if (!window) return { ...ReviewStart.noWindow(session, command), did: "" }
-        await ReviewStart.request(window, "open-session", { sessionId: session.sessionId, prompt: command })
+        const reply = await ReviewStart.request(window, "open-session", {
+          sessionId: session.sessionId,
+          prompt: command,
+          title: session.title
+        })
+        if (reply.typed === false) return result("tab-open", "", ReviewStart.tabOpen(session, command), [session.title])
         const did = `typed ${command} into ${session.title}`
         const busy = session.status && session.status !== "idle" ? "  It reads it once its turn ends." : ""
         return result("typed", did, `${sentence(did)}:  press Enter there.${busy}`, [session.title])
@@ -385,8 +443,8 @@ export class ReviewStart {
     return parents
   }
 
-  /** Ask `window`'s bridge to run `op` with `body`;  throws saying what went wrong. */
-  static async request(window: WindowEntry, op: string, body: object): Promise<void> {
+  /** Ask `window`'s bridge to run `op` with `body`;  its answer, or throws saying what went wrong. */
+  static async request(window: WindowEntry, op: string, body: object): Promise<BridgeReply> {
     const response = await fetch(`http://127.0.0.1:${window.port}/${op}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${window.token}` },
@@ -395,8 +453,9 @@ export class ReviewStart {
     }).catch((error: Error) => {
       throw new Error(`the session's window didn't answer (${error.message})`)
     })
-    const reply = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string }
+    const reply = (await response.json().catch(() => ({}))) as BridgeReply
     if (!response.ok || !reply.ok) throw new Error(`the session's window refused:  ${reply.error ?? response.status}`)
+    return reply
   }
 
   ////////////////
@@ -406,6 +465,11 @@ export class ReviewStart {
   /** The command a review starts with:  `/epic review <epic>`. */
   static commandFor(epic: string): string {
     return `/epic review ${epic}`
+  }
+
+  /** The inbox poller running for session process `pid` (or the test's word for it), else `undefined`. */
+  private pollerOf(pid: number): number | undefined {
+    return (this.options.pollerOf ?? listenerOf)(pid)
   }
 
   /** Is airplane mode on (or the test's word for it)? */
@@ -455,6 +519,17 @@ export class ReviewStart {
     }
   }
 
+  /**
+   * `session`'s tab is open, so VS Code wouldn't type `command` into it ("Session is already open"):  says so, plainly.
+   * - the page has the command on the clipboard
+   */
+  private static tabOpen(session: LiveSession, command: string): string {
+    return (
+      `${session.title}'s tab is open, and VS Code types only into a session it opens:  nothing typed.  ` +
+      `Paste ${command} there:  it's copied.`
+    )
+  }
+
   /** A wake inside the cooldown:  says what `woken` did, and when. */
   private static already(woken: InboxWoken, command: string): WakeResult {
     const did = woken.did || `woke it`
@@ -471,7 +546,7 @@ export class ReviewStart {
 
 /** Is `state` a wake that did something, kept for the cooldown? */
 function isWoken(state: WakeResult["state"]): state is WokenState {
-  return state === "typed" || state === "opened" || state === "launched"
+  return state === "typed" || state === "opened" || state === "launched" || state === "told"
 }
 
 /** `words` with a capital first:  `typed ...` -> `Typed ...`. */

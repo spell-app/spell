@@ -524,10 +524,11 @@ function isObject(value: unknown): boolean {
 /**
  * The page server's answer to "start a review" (`POST /api/epics/review/start`, epic `airplane` P12):
  * its `StartResult`.
- * - `sent`:  typed into the one session titled for the epic;  `none` / `several` / `no-window`:  nothing sent
+ * - `asked`:  told through its inbox poller (epic `epic-engine` I144);  `sent`:  typed into the one session titled for
+ *   the epic;  `tab-open` / `none` / `several` / `no-window`:  nothing sent
  */
 export type StartAnswer = {
-  state: "sent" | "none" | "several" | "no-window"
+  state: "asked" | "sent" | "tab-open" | "none" | "several" | "no-window"
   command: string
   sessions: string[]
   message: string

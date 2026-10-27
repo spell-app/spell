@@ -1345,6 +1345,11 @@
           "parent": 0
         },
         {
+          "id": "epic-phase-working",
+          "title": "While Claude works on it",
+          "parent": 0
+        },
+        {
           "id": "2-markup",
           "title": "2. Markup"
         },
@@ -1355,12 +1360,12 @@
         {
           "id": "epic-phase-parents",
           "title": "Its parents",
-          "parent": 4
+          "parent": 5
         },
         {
           "id": "epic-phase-children",
           "title": "Its children",
-          "parent": 4
+          "parent": 5
         },
         {
           "id": "4-attributes",
@@ -1369,22 +1374,22 @@
         {
           "id": "epic-phase-slots",
           "title": "Slots",
-          "parent": 7
+          "parent": 8
         },
         {
           "id": "epic-phase-parts",
           "title": "Parts",
-          "parent": 7
+          "parent": 8
         },
         {
           "id": "epic-phase-states",
           "title": "States",
-          "parent": 7
+          "parent": 8
         },
         {
           "id": "epic-phase-events",
           "title": "Events",
-          "parent": 7
+          "parent": 8
         },
         {
           "id": "5-how-it-looks",

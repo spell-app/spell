@@ -16,8 +16,10 @@ import { LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
  * ### `InboxMonitor`
  * Keeps an epic's session listening to its epic page whenever the session is open (epic `epic-engine` P18):
  * ONE look at the page's inbox for the session, `epic session listen`.
- * - The spell-epic plugin's MONITOR (`monitors/monitors.json`) runs a small poller beside every session,
- *   `InboxPoller` (`monitors/listen.mjs`), which runs this look whenever a file it names changes, or when it asks to be run again.
+ * - A small poller beside every session, `InboxPoller` (`monitors/listen.mjs`), runs this look whenever a file it
+ *   names changes, or when it asks to be run again.
+ *   - started by the plugin's `asyncRewake` `Stop` hook at each turn's end, in every session;  by the plugin's
+ *     MONITOR too in a terminal session, the only kind Claude Code starts monitors in (epic `epic-engine` I144)
  *   - Why two parts (epic `epic-engine` P19):  this code, with the epic tool it reads the pages with, takes about
  *     150MB while it runs;  the poller is plain node, about 45MB, and runs it for a fraction of a second.
  *   - The poller prints the line this look gives (`notice`), once per batch of work, and nothing else:
@@ -30,12 +32,20 @@ import { LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
  *   - nobody listening:  it takes the listener's place, with the MONITOR's process id (`monitor`, the poller's):
  *     live while the poller runs, so it needs no heartbeat;  a poller that dies takes it with it, and a Send wakes
  *     the session the old way
- *   - another listener, live:  another session's, this session's own `/epic review` wait, or another poller:
- *     that one hears the work;  this look says to look again when it would go stale, and watches nothing till then
+ *   - another listener, live:  another session's, this session's own `/epic review` wait, or another session's
+ *     poller:  that one hears the work;  this look says to look again when it would go stale, and watches nothing
+ *     till then
+ *   - this session's OLDER poller (the last turn's hook, I144):  this one takes its place, and the older one ends
+ *     (`InboxPoller.claim()`)
  *   - run by hand, with no `monitor`:  it listens as `epic inbox watch` does, stale in `LISTEN_STALE_MS`
  * - Work waiting (`ReviewInbox.hasWork`, or a Send on a page the epic owns):  `waiting`, with the line to print,
  *   `📬 ...`, saying how to take it (`epic inbox wait <epic>`).
  *   - Never TAKES it:  the session does, with its own `wait`, so what Owen sent reaches the session's context.
+ *   - A review asked for from the page while the poller runs (`ReviewInbox.reviewAsked`, epic `epic-engine` I144):
+ *     waiting too, its line asking for `/epic review <epic>` (`askNotice()`):  the page server tells the session
+ *     through its poller rather than typing into its tab, which VS Code refuses while the tab is open.
+ *   - `batch`:  what's waiting, as one string, so a poller started after the line (the next turn's hook) never
+ *     announces the same work twice
  * - NEVER throws:  a page or inbox it can't read is looked at again next time.
  ****************/
 export class InboxMonitor {
@@ -84,21 +94,48 @@ export class InboxMonitor {
     const inbox = ReviewInbox.read(epic.inbox)
     const live = inbox.liveListener(now)
     const mine = live?.session === session.sessionId && Boolean(monitor) && live.pid === monitor
-    if (live && !mine) {
+    // the same session's older poller (the last turn's hook):  this newer one takes over, and the old one ends
+    const older = live?.session === session.sessionId && Boolean(monitor && live.pid) && !mine
+    if (live && !mine && !older) {
       const seen = Date.parse(live.seen ?? live.since)
       const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + LISTEN_STALE_MS - now, 0) + STALE_MARGIN_MS
       return { watch: [], waiting: false, recheckMs }
     }
-    if (!live) {
+    if (!live || older) {
       ReviewInbox.update(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
     }
-    const waiting = inbox.hasWork || epic.guides.hasNewSend
+    const guideSends = epic.guides.newSends
+    const hasWork = inbox.hasWork || Boolean(guideSends)
+    const waiting = hasWork || Boolean(inbox.reviewAsked)
     return {
       watch: [epic.inbox, ...epic.guides.files],
       waiting,
-      ...(waiting ? { notice: InboxMonitor.notice(epic.name) } : {}),
+      ...(waiting && {
+        notice: hasWork ? InboxMonitor.notice(epic.name) : InboxMonitor.askNotice(epic.name),
+        batch: InboxMonitor.batchOf(inbox, guideSends)
+      }),
       recheckMs: RECHECK_MS
     }
+  }
+
+  /**
+   * What's waiting in `inbox` (and on the epic's pages, `guideSends`), as one string:  the Send, the requests for
+   * now, the calls-off not told yet, the review asked for.  New work, a new string.
+   */
+  static batchOf(inbox: ReviewInbox, guideSends = ""): string {
+    const now = inbox.now.map((request) => `${request.id}@${request.at}`).join(",")
+    const canceled = Object.entries(inbox.canceled)
+      .filter(([, each]) => !each.told)
+      .map(([id, each]) => `${id}@${each.at}`)
+      .join(",")
+    const sent = inbox.hasNewSend ? inbox.sent : ""
+    return [
+      `sent=${sent ?? ""}`,
+      `now=${now}`,
+      `cancel=${canceled}`,
+      `ask=${inbox.reviewAsked ?? ""}`,
+      guideSends
+    ].join(";")
   }
 
   ////////////////
@@ -147,6 +184,11 @@ export class InboxMonitor {
       `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken".`
     )
   }
+
+  /** The one line that tells the session Owen asked for a review from epic `name`'s page (I144). */
+  static askNotice(name: string): string {
+    return `📬 ${name}:  Owen pressed "start review" on the epic page.  Start it:  the /epic skill, \`/epic review ${name}\`.`
+  }
 }
 
 /** `InboxMonitor`'s constructor options. */
@@ -174,12 +216,14 @@ export type MonitorCheck = {
   waiting: boolean
   /** the line to print, once per batch, while `waiting` */
   notice?: string
+  /** what's waiting, as one string (`InboxMonitor.batchOf()`):  a poller announces each batch once */
+  batch?: string
   /** look again after this long, ms, whatever changed */
   recheckMs: number
 }
 
 /** `listen()`'s part of a look. */
-type ListenResult = Pick<MonitorCheck, "watch" | "waiting" | "notice" | "recheckMs">
+type ListenResult = Pick<MonitorCheck, "watch" | "waiting" | "notice" | "batch" | "recheckMs">
 
 /** The epic a monitor listens to:  its name, its inbox file, the pages it owns. */
 export type MonitoredEpic = { name: string; inbox: string; guides: GuideSends }

@@ -26,7 +26,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon in its colour (grey to do, blue under way, green done)
+ *   - the status icon in its colour (grey to do, blue under way, green done);  while Claude is at work on it (the
+ *     review inbox's `working`, I147), a blue turning spinner, its tooltip "Claude is writing this phase's plan" or
+ *     "Claude is working on it"
  *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
@@ -145,6 +147,28 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return this.plan === "accepted" && this.shownStatus === "todo"
   }
 
+  /**
+   * Claude is at work on it, and it isn't done (the review inbox's `working`, keyed by its id:  `epic inbox working
+   * <epic>#P20 on`, or `epic update <epic>#P20 --plan ...` by itself;  epic `epic-engine` I147).
+   * - Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the
+   *   phase header"
+   * - its status icon turns into the header's turning spinner, in blue;  it counts in the Phases section's blue badge
+   *   and the toolbar's
+   */
+  @E.cssState("working")
+  get isWorkedOn(): boolean {
+    return this.shownStatus !== "done" && this.reviewState.workedOn()
+  }
+
+  /**
+   * While it's worked on, what Claude is doing:  writing its plan (still to do, the plan not accepted yet), else
+   * working on it (the plan accepted, or the phase under way).
+   */
+  get workingText(): string {
+    const planning = this.shownStatus === "todo" && this.plan !== "accepted"
+    return this.translationForKey(planning ? "workingPlan" : "workingOn")
+  }
+
   /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
   get reviewKind(): "proposal" | "plan" | "accepted" | "part" {
     if (this.isProposed) return "proposal"
@@ -193,14 +217,30 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
       // after the title, on its first line:  a folded phase is where the pen matters
       mark: () => this.changedMark(),
       icon: () => (
-        <span
-          class={[ICON, this.shownStatus]}
-          part={this.partForName("status")}
-          role="img"
-          aria-label={this.translationForKey(STATUS_TEXTS[this.shownStatus])}
+        <Show
+          when={this.isWorkedOn}
+          fallback={
+            <span
+              class={[ICON, this.shownStatus]}
+              part={this.partForName("status")}
+              role="img"
+              aria-label={this.translationForKey(STATUS_TEXTS[this.shownStatus])}
+            >
+              {this.glyph.svg}
+            </span>
+          }
         >
-          {this.glyph.svg}
-        </span>
+          {/* Claude at work on it:  the header's turning spinner, blue (I147) */}
+          <span
+            class={[ICON, WORKING]}
+            part={this.partForName("status")}
+            role="img"
+            aria-label={this.workingText}
+            title={this.workingText}
+          >
+            <span class={SPINNER} aria-hidden="true" />
+          </span>
+        </Show>
       ),
       // its time pill (the estimate, or what a done phase took) just BEFORE the review controls (Owen, 2026-10-25:
       // "time moved to the right, I preferred it to the left so the buttons lined up row to row";  I123 had it after
@@ -315,6 +355,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary> {}
+
+/** Class of its status icon's box while Claude is at work on it, and of the spinner in it (I147). */
+const WORKING = "working"
+const SPINNER = "spinner"
 
 /** Class of the shadow markup:  the title's mark, its plan changed. */
 const CHANGED = "changed"

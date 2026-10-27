@@ -534,7 +534,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * Each section's `markedCount`, as one string (`"2 0 1"`):  what `followMarks()` follows.
+   * Each section's `markedCount` and chip counts, as one string (`"2/open:3 0/ 1/attention:1"`):  what
+   * `followMarks()` follows.
    * - read again on every layout change and section filter change too:  a section drawn later counts from then
    * - a string, so an unchanged one stops there (the memo's `===`), and the bump it causes ends
    */
@@ -542,8 +543,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     this.signals.layout.get()
     void this.filterTick
     if (isServer) return ""
+    // each section's chip counts too:  an item being worked on moves from red to blue (I147)
     return this.filterHosts()
-      .map((section) => section.markedCount ?? 0)
+      .map((section) => `${section.markedCount ?? 0}/${section.chipCounts ?? ""}`)
       .join(" ")
   })
 
@@ -554,7 +556,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   readonly markedTotal = createMemo((): number =>
     this.markedCounts()
       .split(" ")
-      .reduce((total, count) => total + Number(count || 0), 0)
+      .reduce((total, entry) => total + (Number.parseInt(entry, 10) || 0), 0)
   )
 
   ////////////////
@@ -1474,6 +1476,7 @@ export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}
 type FilterHost = E.DOMElement & {
   readonly stateFilter?: readonly StateFilterEntry[]
   readonly markedCount?: number
+  readonly chipCounts?: string
   showStates?(states: readonly string[] | undefined): void
 }
 
