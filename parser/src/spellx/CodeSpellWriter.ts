@@ -30,7 +30,9 @@ export class CodeSpellWriter {
     const parser = language.parser.clone({ module: "code spell writer", form: "spellx" } as P.ParserProps)
     const componentTag =
       options.componentTag ?? ((word: string) => SP.ComponentPacks.tagFor(word, language.lang, options.packs))
-    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag)
+    // the language's example word is a block of Spell's own too (`<example>`, `<ejemplo>`):  never `<ui-example>`
+    const blocks = new Set([...SPELL_BLOCK_TAGS, language.words.exampleTag])
+    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag, blocks)
     const { tokenizer } = writer.parser
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeItems(root?.tokens ?? [], 0, "file")
@@ -46,7 +48,9 @@ export class CodeSpellWriter {
     /** the file's text */
     readonly text: string,
     /** the tag a bare component name stands for, if any */
-    readonly componentTag: (word: string, start: number) => string | undefined
+    readonly componentTag: (word: string, start: number) => string | undefined,
+    /** Spell's own block words in a drawing, written as they are (`SPELL_BLOCK_TAGS`, the language's example word) */
+    readonly blocks: ReadonlySet<string>
   ) {}
 
   /** Write `items`, a block's lines and blocks, `depth` tabs in;  `where` says whether a tag there is bulleted. */
@@ -136,7 +140,7 @@ export class CodeSpellWriter {
     P.Tokenizer.forEachToken(tokens, (token) => {
       if (!(token instanceof P.JSXElementToken)) return
       const { tagName } = token
-      const isComponent = BARE_NAME.test(tagName) && !SPELL_BLOCK_TAGS.has(tagName)
+      const isComponent = BARE_NAME.test(tagName) && !this.blocks.has(tagName)
       const tag = isComponent ? this.componentTag(tagName, token.start) : undefined
       const name = tag ?? tagName
       if (tag) edits.push({ start: token.start + 1, end: token.start + 1 + tagName.length, text: tag })
@@ -183,6 +187,8 @@ const BARE_NAME = /^\p{Ll}+$/u
 /**
  * Spell's own blocks in a drawing, the same words in code spell:  never a pack's component (`<ui-markdown>`).
  * - `<markdown>`:  raw text, drawn as markdown;  `<html>`:  markup as written (P18)
+ * - and the language's example word (`<example>`, `ExampleBlock`), added per file:  since epic `ui-gaps` P14 Spell
+ *   UI has an `<ui-example>`, which a bare `example` would otherwise name
  */
 const SPELL_BLOCK_TAGS: ReadonlySet<string> = new Set(["markdown", "html"])
 

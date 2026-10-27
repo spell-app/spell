@@ -43,6 +43,16 @@ describe("CodeSpellWriter", () => {
     })
     expect(card).toContain("\t\t<game-card />")
   })
+
+  test("the language's example word stays an example, though a pack has a component by that name (`<ui-example>`)", () => {
+    const text = '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
+    const written = SX.CodeSpellWriter.write(text, {
+      componentTag: (word) => (word === "example" ? "ui-example" : word === "text" ? "ui-text" : undefined)
+    })
+    expect(written).toContain('\t\t<example "one">')
+    expect(written).not.toContain("ui-example")
+    expect(written).toContain("<ui-text>hi</ui-text>")
+  })
 })
 
 /** Pair fixture `name`'s text. */
