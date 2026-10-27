@@ -87,15 +87,15 @@ describe("<NotebookPage>", () => {
 
   test("\"On this page\":  the docs site's contents in a column, hidden by its Hide;  else a flyout under the title row's icon", async () => {
     const { host, controller } = await mount({ width: 1000 })
-    const column = () => host.querySelector<HTMLElement>(".NotebookAside")
+    const column = () => host.querySelector<HTMLElement>(".NotebookAside:not(.hidden)")
     const button = () => host.querySelector<HTMLElement>(".NotebookMasthead .NotebookTocButton")
     const flyout = () => host.querySelector<HTMLElement>(".NotebookTocFlyout")
     const sectionLinks = (toc: Element | null | undefined) =>
       [...(toc?.shadowRoot?.querySelectorAll("[part~=section]") ?? [])].map((item) => item.textContent!.trim())
-    await until(() => sectionLinks(column()?.querySelector("ui-docs-toc")).length === 2)
-    // room for the column:  Spell UI's `<ui-docs-toc>`, headed by the page's title;  no icon
-    expect(sectionLinks(column()!.querySelector("ui-docs-toc"))).toEqual(["Try it", "Two of them"])
-    expect(column()!.querySelector("ui-docs-toc")!.getAttribute("header")).toBe("A counter")
+    await until(() => sectionLinks(column()?.querySelector("ui-toc")).length === 2)
+    // room for the column:  Spell UI's `<ui-toc>`, headed by the page's title;  no icon
+    expect(sectionLinks(column()!.querySelector("ui-toc"))).toEqual(["Try it", "Two of them"])
+    expect(column()!.querySelector("ui-toc")!.getAttribute("heading")).toBe("A counter")
     expect(button()).toBeNull()
     // its Hide:  the icon gets it back, as a flyout
     column()!.querySelector<HTMLElement>(".NotebookTocHide")!.click()
@@ -106,7 +106,7 @@ describe("<NotebookPage>", () => {
     scroller.scrollTop = 40
     const before = scroller.scrollTop
     button()!.click()
-    await until(() => sectionLinks(flyout()?.querySelector("ui-docs-toc")).length === 2)
+    await until(() => sectionLinks(flyout()?.querySelector("ui-toc")).length === 2)
     expect(scroller.scrollTop).toBe(before)
     // under the icon, never over the pane above the page
     expect(flyout()!.getBoundingClientRect().top).toBeGreaterThanOrEqual(host.getBoundingClientRect().top)
