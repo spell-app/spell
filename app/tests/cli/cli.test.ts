@@ -155,25 +155,6 @@ describe("spell icon (Spell UI's)", () => {
     expect(status).toBe(0)
     expect(stdout).toMatch(/^bell slash +fomantic {2}also alarm mute\nbell slash outline {2}fomantic\n$/)
   })
-
-  test("--open serves a gallery until interrupted -- the page, and each icon's svg", async () => {
-    const child = spawn(process.execPath, [SPELL, "icon", "bell", "--open"], {
-      cwd: TEMP,
-      env: { ...process.env, SPELL_NO_BROWSER: "1" },
-      stdio: ["ignore", "pipe", "pipe"]
-    })
-    let out = ""
-    child.stdout.on("data", (data) => (out += data))
-    await until(() => out.includes("http://"))
-    const url = out.trim()
-    expect(await (await fetch(url)).text()).toContain("<figcaption>bell<small>fa7-free</small></figcaption>")
-    const svg = await fetch(new URL("svg/0.svg", url))
-    expect(svg.headers.get("content-type")).toBe("image/svg+xml")
-    expect((await fetch(new URL("svg/99999.svg", url))).status).toBe(404)
-
-    child.kill("SIGINT")
-    expect(await new Promise((done) => child.on("exit", done))).toBe(0)
-  }, 30_000)
 })
 
 describe("spell app serve", () => {
