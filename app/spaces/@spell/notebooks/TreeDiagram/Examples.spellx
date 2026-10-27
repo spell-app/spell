@@ -5,12 +5,10 @@
 	</>
 	<tree-diagram-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,7 +18,7 @@
 		the Usage tab.
 	-->
 	<section label="Types">
-		<section label="Tree diagram" sticky collapsible dividing>
+		<section label="Tree diagram" sticky="stack" collapsible dividing>
 			<example description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`.">
 				<html>
 					<ui-tree-diagram>
@@ -62,7 +60,7 @@
 			</example>
 		</>
 
-		<section label="Labels only" sticky collapsible dividing>
+		<section label="Labels only" sticky="stack" collapsible dividing>
 			<example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
 				<html>
 					<ui-tree-diagram>
@@ -74,7 +72,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Detail" sticky collapsible dividing>
+		<section label="Detail" sticky="stack" collapsible dividing>
 			<example description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest.">
 				<html>
 					<ui-tree-diagram>
@@ -93,7 +91,7 @@
 			</example>
 		</>
 
-		<section label="Slot labels" sticky collapsible dividing>
+		<section label="Slot labels" sticky="stack" collapsible dividing>
 			<example description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills.">
 				<html>
 					<ui-tree-diagram>
@@ -112,7 +110,7 @@
 			</example>
 		</>
 
-		<section label="Hover text" sticky collapsible dividing>
+		<section label="Hover text" sticky="stack" collapsible dividing>
 			<example description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from.">
 				<html>
 					<ui-tree-diagram>
@@ -133,7 +131,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Wide trees" sticky collapsible dividing>
+		<section label="Wide trees" sticky="stack" collapsible dividing>
 			<example description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does).">
 				<html>
 					<ui-tree-diagram>

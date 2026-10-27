@@ -5,12 +5,10 @@
 	</>
 	<flag-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#definition">Definition</>
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#definition">Definition</>
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		`FLAG_ALIASES` (`UIFlag.types.ts`) / `UIT.SpecialFlags` with English region names.
 	-->
 	<section label="Definition">
-		<section label="Flag" sticky collapsible dividing>
+		<section label="Flag" sticky="stack" collapsible dividing>
 			<example description="A flag can use the two digit country code, the full name, or a common alias.">
 				<flag country="ae"/>
 				<flag country="france"/>
@@ -29,7 +27,7 @@
 			</example>
 		</>
 
-		<section label="Names" sticky collapsible dividing>
+		<section label="Names" sticky="stack" collapsible dividing>
 			<example description="Case, underscores and extra spaces don't matter:  `America`, `United_Kingdom`, `uk` all work.">
 				<flag country="fr"/>
 				<flag country="US"/>
@@ -41,7 +39,7 @@
 			</example>
 		</>
 
-		<section label="Other flags" sticky collapsible dividing>
+		<section label="Other flags" sticky="stack" collapsible dividing>
 			<example description="Flags that aren't a country:  `rainbow` (`pride`, `lgbt`), `transgender`, `pirate`, and the `england`, `scotland` and `wales` subdivision flags.">
 				<flag country="pride"/>
 				<flag country="transgender"/>
@@ -55,12 +53,10 @@
 
 	<section label="Types">
 		<message state="info" size="small">Flags are the Unicode flag emoji, as in Fomantic 2.9's default theme: no images, by design. Windows' Chrome and Edge have no flag emoji and show the two letters instead; a page that wants flags there loads a flag font (Theming tab, "A flag font").</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>famfamfam</> sprite theme -- flags are emoji only.</>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>@flags</> variable to trim the generated CSS -- there is no per-flag CSS to trim.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>famfamfam</> sprite theme -- flags are emoji only.</></>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>@flags</> variable to trim the generated CSS -- there is no per-flag CSS to trim.</></>
 
-		<section label="Flag list" sticky collapsible dividing>
+		<section label="Flag list" sticky="stack" collapsible dividing>
 			<html>
 				<ui-table selectable sortable client-sort padding="compact" celled appearance="striped" definition>
 					<table>
@@ -2193,17 +2189,16 @@
 	</>
 
 	<section label="Variations">
-		<section label="Size" sticky collapsible dividing>
-			<example>
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example description="A flag can vary in size.">
+				<message slot="description" size="small"><html>Sizes are ratios of the surrounding text, <code>small</code> (1.5em) ... <code>massive</code> (12em). <code>medium</code> is the default, the size of the text -- NOT Fomantic's fixed 3em.</html></message>
 				<html>
-					<p slot="description">A flag can vary in size.</p>
-					<ui-message slot="description" size="small">Sizes are ratios of the surrounding text, <code>small</code> (1.5em) ... <code>massive</code> (12em). <code>medium</code> is the default, the size of the text -- NOT Fomantic's fixed 3em.</ui-message>
 					<ui-segment appearance="basic"><ui-flag country="de" size="small"></ui-flag> Small <br /> <ui-flag country="fr" size="medium"></ui-flag> Medium <br /> <ui-flag country="li" size="large"></ui-flag> Large <br /> <ui-flag country="jp" size="big"></ui-flag> Big <br /> <ui-flag country="gb" size="huge"></ui-flag> Huge <br /> <ui-flag country="un" size="massive"></ui-flag> Massive</ui-segment>
 				</html>
 			</example>
 		</>
 
-		<section label="Autosizing" sticky collapsible dividing>
+		<section label="Autosizing" sticky="stack" collapsible dividing>
 			<example description="If no specific size is given, every flag is sized by the current element's font size.">
 				<segment appearance="basic">
 					<header size="small">Within a header <flag country="us"/></header>

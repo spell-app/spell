@@ -1,17 +1,15 @@
 <spell-notebook "theme-editor usage">
 	<header level="1">
 		Theme Editor
-		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</>
+		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.</>
 	</>
 	<theme-editor-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#use-this-theme">Use this theme</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#use-this-theme">Use this theme</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
 		</>
 	</>
 
@@ -20,19 +18,19 @@
 		<markdown>
 			A `<ui-theme-editor>` makes a theme by CHANGING one:  its base, `fruity` unless the page wears another.
 
-			- The inspector, on the left:  the theme's name and base, then Color, Type and Shape.
-			  Each choice starts as the base's own;  its Reset button (or Start over) puts it back.
-			- The preview:  a sample app of real elements, once light and once dark.
-			- The stylesheet:  every choice as tokens on `:root`, in `@layer ui.app`, so it wins over the base theme however each arrives.
-			  Apply the base first, then this sheet:  that's the whole theme.
+			- The side column:  the Basics (the theme's name and base, then Color, Type and Shape), then every token a theme sets, in its file's groups, light and dark side by side.
+			  Each starts as the base's own;  its Reset button (or Start over) puts it back.  A token set by hand wins over the Basics.
+			- The preview:  a sample app of real elements, once light and once dark;  or the real pages it's handed (`pages`), each in a frame.
+			- What it makes is a theme FILE, `extends` its base:  Copy changes copies its JSON5.
+			  Its sheet (`el.css`) is the file's values on `:root`, in `@layer ui.app`:  apply the base first, then the sheet.
 			- While it's on a page, the WHOLE page wears the theme it edits:
 			  a token set on one element can't change what the page works out from it at `:root`.
 			  Take it off the page and the page's own theme comes back.
 			- `value` starts it from a theme you made before (`{"primary": "pink", "corners": "soft"}`);
 			  `base` from another base.
-			- Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` from Copy CSS,
+			- Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` (`{ text }`) from Copy changes,
 			  `ui-saved` from Use this theme and Stop using.
-			- Script:  `el.theme` (every choice now), `el.css` (the stylesheet).
+			- Script:  `el.theme` (every choice now), `el.css` (the sheet), `el.changes` (the theme file).
 		</>
 		<markdown>
 			```js

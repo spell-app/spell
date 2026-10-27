@@ -5,12 +5,10 @@
 	</>
 	<property-editor-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#controls-choices-and-rules">Controls, choices and rules</>
-				<ui-item link="#accessibility">Accessibility</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#controls-choices-and-rules">Controls, choices and rules</>
+			<item link="#accessibility">Accessibility</>
 		</>
 	</>
 

@@ -5,13 +5,11 @@
 	</>
 	<card-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -24,11 +22,10 @@
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
 	-->
 	<section label="Types">
-		<section label="Card" sticky collapsible dividing>
-			<example>
+		<section label="Card" sticky="stack" collapsible dividing>
+			<example description="A single card.">
+				<message slot="description" state="warning" size="small"><html>To ensure cards are equal height use the plural, <code>&lt;ui-cards&gt;</code>: a group lays its cards out with flex, so cards in the same row match heights.</html></message>
 				<html>
-					<p slot="description">A single card.</p>
-					<ui-message slot="description" state="warning" size="small">To ensure cards are equal height use the plural, <code>&lt;ui-cards&gt;</code>: a group lays its cards out with flex, so cards in the same row match heights.</ui-message>
 					<ui-card>
 						<img src="/components/ui/images/avatar2/large/kristy.png" alt="Kristy" />
 						<ui-content>
@@ -68,11 +65,10 @@
 			</example>
 		</>
 
-		<section label="Cards" sticky collapsible dividing>
-			<example>
+		<section label="Cards" sticky="stack" collapsible dividing>
+			<example description="A group of cards: `<ui-cards>`.">
+				<message slot="description" state="info" size="small"><html>Cards are designed to be flexible to your content: <code>&lt;ui-content&gt;</code> blocks can include any custom elements related to your content.</html></message>
 				<html>
-					<p slot="description">A group of cards: <code>&lt;ui-cards&gt;</code>.</p>
-					<ui-message slot="description" state="info" size="small">Cards are designed to be flexible to your content: <code>&lt;ui-content&gt;</code> blocks can include any custom elements related to your content.</ui-message>
 					<ui-cards>
 						<ui-card>
 							<ui-content>
@@ -143,7 +139,7 @@
 
 	<section label="Content">
 		<!-- GAP I128:  the sub header draws as the card header (large), not Fomantic's small sub header. -->
-		<section label="Content Block" sticky collapsible dividing>
+		<section label="Content Block" sticky="stack" collapsible dividing>
 			<example description="A card can contain blocks of content:  `<ui-content>`.">
 				<html>
 					<ui-card>
@@ -179,11 +175,8 @@
 		</>
 
 		<!-- GAP I126:  a <ui-reveal> (or a dimmed image) isn't laid out as the card's image;  the plain image shows. -->
-		<section label="Image" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A card can contain an image: a slotted <code>&lt;img&gt;</code> spans the card's width.</p>
-				</html>
+		<section label="Image" sticky="stack" collapsible dividing>
+			<example description="A card can contain an image: a slotted `<img>` spans the card's width.">
 				<message slot="description" state="info" size="small">Fomantic's cards use a reveal or a dimmer to show more on hover; ours can't yet (see the notes below), so this card shows the plain image.</message>
 				<html>
 					<ui-card>
@@ -199,11 +192,9 @@
 				</html>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: a dimmer over a card's image (Fomantic's <code>blurring dimmable image</> special cards) -- left out of the card sheet on purpose (dimmer looks inside cards), and <code>&lt;ui-image&gt;</> holds no dimmer (I55).</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: a dimmer over a card's image (Fomantic's <code>blurring dimmable image</> special cards) -- left out of the card sheet on purpose (dimmer looks inside cards), and <code>&lt;ui-image&gt;</> holds no dimmer (I55).</></>
 
-		<section label="Header" sticky collapsible dividing>
+		<section label="Header" sticky="stack" collapsible dividing>
 			<example description="A card can contain a header.">
 				<cards>
 					<card>
@@ -231,11 +222,10 @@
 			</example>
 		</>
 
-		<section label="Metadata" sticky collapsible dividing>
-			<example>
+		<section label="Metadata" sticky="stack" collapsible dividing>
+			<example description="A card can contain content metadata.">
+				<message slot="description" state="info" size="small"><html>You can include any amount of metadata, in your own markup: the children of a <code>&lt;ui-meta&gt;</code> are spaced for you.</html></message>
 				<html>
-					<p slot="description">A card can contain content metadata.</p>
-					<ui-message slot="description" state="info" size="small">You can include any amount of metadata, in your own markup: the children of a <code>&lt;ui-meta&gt;</code> are spaced for you.</ui-message>
 					<ui-card>
 						<ui-content>
 							<ui-header>Cute Dog</ui-header>
@@ -251,11 +241,8 @@
 		</>
 
 		<!-- GAP I126:  an image link (`<a class="image" href>`) isn't laid out as the card's image;  the image is plain. -->
-		<section label="Link" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A card can contain links as images, headers, or inside content.</p>
-				</html>
+		<section label="Link" sticky="stack" collapsible dividing>
+			<example description="A card can contain links as images, headers, or inside content.">
 				<message slot="description" state="info" size="small">To make the entire content of a card a link, see the Link Card variation below.</message>
 				<html>
 					<ui-card>
@@ -271,12 +258,9 @@
 			</example>
 		</>
 
-		<section label="Buttons" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A card can contain buttons.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Not ported: a button attached to the card's bottom edge (<code>.ui.card &gt; .button</code>). A <code>&lt;ui-button&gt;</code> element has no box for the card to widen:  put a fluid button in a <code>&lt;ui-extra&gt;</code>.</ui-message>
-				</html>
+		<section label="Buttons" sticky="stack" collapsible dividing>
+			<example description="A card can contain buttons.">
+				<message slot="description" size="small" class="site-not-ported"><html>Not ported: a button attached to the card's bottom edge (<code>.ui.card &gt; .button</code>). A <code>&lt;ui-button&gt;</code> element has no box for the card to widen:  put a fluid button in a <code>&lt;ui-extra&gt;</code>.</html></message>
 				<cards>
 					<card>
 						<content>
@@ -309,12 +293,9 @@
 			</example>
 		</>
 
-		<section label="Approval" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A card can contain a like or star action.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Not ported: the <code>like</code> / <code>star</code> icons that colour on hover -- left out of the card sheet on purpose; use real buttons, which take focus and say what they do.</ui-message>
-				</html>
+		<section label="Approval" sticky="stack" collapsible dividing>
+			<example description="A card can contain a like or star action.">
+				<message slot="description" size="small" class="site-not-ported"><html>Not ported: the <code>like</code> / <code>star</code> icons that colour on hover -- left out of the card sheet on purpose; use real buttons, which take focus and say what they do.</html></message>
 				<card>
 					<content>
 						<header>Cute Dog</header>
@@ -332,7 +313,7 @@
 			</example>
 		</>
 
-		<section label="Description" sticky collapsible dividing>
+		<section label="Description" sticky="stack" collapsible dividing>
 			<example description="A card can contain a description with one or more paragraphs.">
 				<html>
 					<ui-card>
@@ -349,7 +330,7 @@
 			</example>
 		</>
 
-		<section label="Extra Content" sticky collapsible dividing>
+		<section label="Extra Content" sticky="stack" collapsible dividing>
 			<example description="A card can contain extra content meant to be formatted separately from the main content.">
 				<html>
 					<ui-card>
@@ -367,7 +348,7 @@
 			</example>
 		</>
 
-		<section label="Shorthand" sticky collapsible dividing>
+		<section label="Shorthand" sticky="stack" collapsible dividing>
 			<example description="The `image`, `header`, `meta`, `description` and `extra` attributes render the same parts without any markup;  `alt` describes the image.">
 				<card image="../images/avatar2/large/kristy.png" alt="Kristy" heading="Kristy" meta="Joined in 2013" description="Kristy is an art director living in New York." extra="22 Friends"/>
 			</example>
@@ -375,7 +356,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A card may show its content is disabled.">
 				<html>
 					<ui-card disabled>
@@ -392,7 +373,7 @@
 			</example>
 		</>
 
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="A card may show its content is being loaded.">
 				<html>
 					<ui-card loading>
@@ -427,7 +408,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Fluid Card" sticky collapsible dividing>
+		<section label="Fluid Card" sticky="stack" collapsible dividing>
 			<example description="A fluid card takes up the width of its container.">
 				<html>
 					<ui-grid columns="3">
@@ -460,7 +441,7 @@
 			</example>
 		</>
 
-		<section label="Centered Card" sticky collapsible dividing>
+		<section label="Centered Card" sticky="stack" collapsible dividing>
 			<example description="A card can center itself inside its container.">
 				<html>
 					<ui-card align="center">
@@ -516,7 +497,7 @@
 			</example>
 		</>
 
-		<section label="Raised Card" sticky collapsible dividing>
+		<section label="Raised Card" sticky="stack" collapsible dividing>
 			<example description="A card may be formatted to raise above the page.">
 				<card appearance="raised">
 					<content>
@@ -543,7 +524,7 @@
 			</example>
 		</>
 
-		<section label="Link Card" sticky collapsible dividing>
+		<section label="Link Card" sticky="stack" collapsible dividing>
 			<example description="A card can be formatted so that the entire contents link to another page:  `link`.">
 				<card link="#card-dog">
 					<content>
@@ -571,7 +552,7 @@
 		</>
 
 		<!-- GAP I125:  only <ui-header> / <ui-content> float;  the meta's time and the author sit in line. -->
-		<section label="Content at the Right" sticky collapsible dividing>
+		<section label="Content at the Right" sticky="stack" collapsible dividing>
 			<example description="Content has no `floated` any more:  a `<ui-stack>` puts the meta's time and the author at the right.">
 				<html>
 					<ui-card>
@@ -597,7 +578,7 @@
 			</example>
 		</>
 
-		<section label="Text Alignment" sticky collapsible dividing>
+		<section label="Text Alignment" sticky="stack" collapsible dividing>
 			<example description="Any element inside a card can have its text alignment specified:  `align`.">
 				<html>
 					<ui-card>
@@ -613,7 +594,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="Card's colors can be inverted.">
 				<html>
 					<ui-segment inverted>
@@ -651,7 +632,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A card can specify a color:  a line along its bottom edge.">
 				<html>
 					<ui-cards columns="4">
@@ -705,7 +686,7 @@
 			</example>
 		</>
 
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A basic card does not have a border, and a coloured one gets a full colour background.">
 				<html>
 					<ui-cards columns="4" appearance="basic">
@@ -759,13 +740,13 @@
 			</example>
 		</>
 
-		<section label="Dashed" sticky collapsible dividing>
+		<section label="Dashed" sticky="stack" collapsible dividing>
 			<example description="Ours, not Fomantic's:  a dashed card is a flat placeholder, its border dashed in `--ui-card-border-color`.">
 				<card heading="Current, for comparison" description="Where the next one will go." appearance="dashed"/>
 			</example>
 		</>
 
-		<section label="Column Count" sticky collapsible dividing>
+		<section label="Column Count" sticky="stack" collapsible dividing>
 			<example description="A group of cards can set how many cards should exist in a row:  `columns`.">
 				<html>
 					<ui-cards columns="4">
@@ -806,7 +787,7 @@
 			</example>
 		</>
 
-		<section label="Stackable" sticky collapsible dividing>
+		<section label="Stackable" sticky="stack" collapsible dividing>
 			<example description="A group of cards can automatically stack rows to a single column on mobile devices.">
 				<html>
 					<ui-cards columns="3" stackable>
@@ -833,7 +814,7 @@
 			</example>
 		</>
 
-		<section label="Doubling" sticky collapsible dividing>
+		<section label="Doubling" sticky="stack" collapsible dividing>
 			<example description="A group of cards can double its column width for mobile.">
 				<html>
 					<ui-cards columns="6" doubling>
@@ -860,7 +841,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A card's text can vary in size:  `size`.">
 				<cards columns="3">
 					<card size="mini">

@@ -5,11 +5,9 @@
 	</>
 	<components-tab-bar showing="api"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#attributes">Attributes</>
-				<ui-item link="#states">States</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#states">States</>
 		</>
 	</>
 

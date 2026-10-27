@@ -5,12 +5,10 @@
 	</>
 	<popup-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,19 +19,17 @@
 		`GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
 	-->
 	<section label="Types">
-		<section label="Popup element" sticky collapsible dividing>
-			<html>
-				<ui-message size="small" state="info">Popup comes as an element, <code>&lt;ui-popup&gt;</>, with the full feature set (any markup, triggers, events, flipping), and as a CSS-only <code>data-tooltip</> attribute, which needs no script and suits pages with many short hints.</>
-			</>
+		<section label="Popup element" sticky="stack" collapsible dividing>
+			<message size="small" state="info"><html>Popup comes as an element, <code>&lt;ui-popup&gt;</>, with the full feature set (any markup, triggers, events, flipping), and as a CSS-only <code>data-tooltip</> attribute, which needs no script and suits pages with many short hints.</></>
 
-			<section label="Popup" sticky collapsible dividing>
+			<section label="Popup" sticky="stack" collapsible dividing>
 				<example description="An element can specify popup content to appear.  With no `for`, the popup attaches to the element just before it.">
 					<button icon="plus" aria-label="Add users"/>
 					<popup label="Add users to your feed"/>
 				</example>
 			</>
 
-			<section label="Titled" sticky collapsible dividing>
+			<section label="Titled" sticky="stack" collapsible dividing>
 				<example description="An element can specify popup content with a title:  `header`.">
 					<image avatar src="/components/ui/images/avatar/small/elliot.jpg" alt="Elliot Fu"/>
 					<popup heading="Elliot Fu" label="Elliot has been a member since July 2012"/>
@@ -44,7 +40,7 @@
 				</example>
 			</>
 
-			<section label="HTML" sticky collapsible dividing>
+			<section label="HTML" sticky="stack" collapsible dividing>
 				<example description="An element can specify HTML for a popup:  slotted `<ui-header>` / `<ui-content>` and any other markup.  Hover the card.">
 					<html>
 						<ui-card>
@@ -69,10 +65,9 @@
 			</>
 
 			<section label="Pre-Existing" sticky collapsible dividing>
-				<example>
+				<example description="An element can display a popup that is already included in the page.">
+					<message slot="description" size="small" state="info"><html>Every <code>&lt;ui-popup&gt;</code> is markup already in the page: there is no <code>data-html</code> string to build one from.</html></message>
 					<html>
-						<p slot="description">An element can display a popup that is already included in the page.</p>
-						<ui-message slot="description" size="small" state="info">Every <code>&lt;ui-popup&gt;</code> is markup already in the page: there is no <code>data-html</code> string to build one from.</ui-message>
 						<ui-card>
 							<img src="/components/ui/images/movies/watchmen-horizontal.jpg" alt="" />
 							<ui-content>
@@ -91,7 +86,7 @@
 				</example>
 			</>
 
-			<section label="On click" sticky collapsible dividing>
+			<section label="On click" sticky="stack" collapsible dividing>
 				<example description="`open-on=\"click\"` makes the popup a small non-modal dialog that toggles on click, for content you interact with;  `flowing` lets it be as wide as its content.">
 					<button id="popup-types-plan">Choose a plan</button>
 					<html>
@@ -114,13 +109,10 @@
 			</>
 		</>
 
-		<section label="No JavaScript" sticky collapsible dividing>
-			<section label="Tooltip" sticky collapsible dividing>
-				<example>
-					<html>
-						<p slot="description">An element can specify a simple tooltip that can appear without JavaScript via the <code>data-tooltip</code> attribute. If the tooltip should be shown inverted, also add the <code>data-inverted</code> attribute.</p>
-						<ui-message slot="description" size="small" state="warning">Tooltips use an element's <code>::before</code> and <code>::after</code> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <code>&lt;ui-popup&gt;</code> for anything that matters.</ui-message>
-					</html>
+		<section label="No JavaScript" sticky="stack" collapsible dividing>
+			<section label="Tooltip" sticky="stack" collapsible dividing>
+				<example description="An element can specify a simple tooltip that can appear without JavaScript via the `data-tooltip` attribute. If the tooltip should be shown inverted, also add the `data-inverted` attribute.">
+					<message slot="description" size="small" state="warning"><html>Tooltips use an element's <code>::before</code> and <code>::after</code> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <code>&lt;ui-popup&gt;</code> for anything that matters.</html></message>
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed"/>
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed" data-inverted/>
 				</example>
@@ -160,11 +152,8 @@
 			</>
 
 			<section label="Tooltip Size" sticky collapsible dividing>
-				<example>
-					<html>
-						<p slot="description">A tooltip can vary in size via the <code>data-variation</code> attribute.</p>
-						<ui-message slot="description" size="small" state="info">The <code>data-variation</code> attribute takes several words, just like a class would:  sizes, basic, fixed, multiline, visible and colours.</ui-message>
-					</html>
+				<example description="A tooltip can vary in size via the `data-variation` attribute.">
+					<message slot="description" size="small" state="info"><html>The <code>data-variation</code> attribute takes several words, just like a class would:  sizes, basic, fixed, multiline, visible and colours.</html></message>
 					<button data-tooltip="Add users to your feed" data-variation="mini">Mini</button>
 					<button data-tooltip="Add users to your feed" data-variation="tiny">Tiny</button>
 					<button data-tooltip="Add users to your feed" data-variation="small">Small</button>
@@ -191,11 +180,8 @@
 			</>
 
 			<section label="Multiline Tooltip" sticky collapsible dividing>
-				<example>
-					<html>
-						<p slot="description">A tooltip can show multiple lines via line breaks in the attribute and adding <code>multiline</code> to the <code>data-variation</code> attribute.</p>
-						<ui-message slot="description" size="small" state="warning">Line breaks in the attribute become tooltip line breaks; a non-breaking space must be the U+A0 character itself, not <code>&amp;nbsp;</code>.</ui-message>
-					</html>
+				<example description="A tooltip can show multiple lines via line breaks in the attribute and adding `multiline` to the `data-variation` attribute.">
+					<message slot="description" size="small" state="warning"><html>Line breaks in the attribute become tooltip line breaks; a non-breaking space must be the U+A0 character itself, not <code>&amp;nbsp;</code>.</html></message>
 					<button data-tooltip="Look, I have multiple lines!
                   -one
                   -two
@@ -232,7 +218,7 @@
 	</>
 
 	<section label="States">
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="A popup may show its content is being loaded:  a spinner over faded content.">
 				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
 				<popup position="bottom left" loading heading="Matt" label="Matt has been a member since July 2014"/>
@@ -255,19 +241,16 @@
 	</>
 
 	<section label="Variations">
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A popup can provide more basic formatting:  no pointing arrow.">
 				<button icon="plus" aria-label="Add"/>
 				<popup appearance="basic" label="The default theme's basic popup removes the pointing arrow."/>
 			</example>
 		</>
 
-		<section label="Width" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A popup can be extra wide to allow for longer content: <code>wide</code>, <code>wide="very"</code>.</p>
-					<ui-message slot="description" size="small" state="info">A popup's width is capped by its maximum width, so short content stays narrow even when it is <code>wide</code>. Add <code>fixed</code> to make it always that wide;  the CSS-only tooltip takes these in its <code>data-variation</code>:  fixed, wide fixed and very wide fixed.</ui-message>
-				</html>
+		<section label="Width" sticky="stack" collapsible dividing>
+			<example description="A popup can be extra wide to allow for longer content: `wide`, `wide=\"very\"`.">
+				<message slot="description" size="small" state="info"><html>A popup's width is capped by its maximum width, so short content stays narrow even when it is <code>wide</code>. Add <code>fixed</code> to make it always that wide;  the CSS-only tooltip takes these in its <code>data-variation</code>:  fixed, wide fixed and very wide fixed.</html></message>
 				<icon name="heart" aria-label="Wide" appearance="circular link"/>
 				<popup wide label="Hello. This is a wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."/>
 				<icon name="heart" aria-label="Very wide" appearance="circular link"/>
@@ -275,12 +258,9 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A fluid popup takes up the entire width of its target.</p>
-					<ui-message slot="description" size="small" state="info">Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as wide as the popup should be (here a <code>fluid</code> button).</ui-message>
-				</html>
+		<section label="Fluid" sticky="stack" collapsible dividing>
+			<example description="A fluid popup takes up the entire width of its target.">
+				<message slot="description" size="small" state="info"><html>Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as wide as the popup should be (here a <code>fluid</code> button).</html></message>
 				<button fluid>Show fluid popup</button>
 				<popup fluid position="bottom left">
 					<grid columns="4" divided align="center">
@@ -293,7 +273,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A popup can vary in size.">
 				<icon name="heart" aria-label="Mini" appearance="circular link"/>
 				<popup size="mini" label="Hello. This is a mini popup"/>
@@ -308,7 +288,7 @@
 			</example>
 		</>
 
-		<section label="Flowing" sticky collapsible dividing>
+		<section label="Flowing" sticky="stack" collapsible dividing>
 			<example description="A popup can have no maximum width and continue to flow to fit its content.">
 				<button>Show flowing popup</button>
 				<html>
@@ -335,7 +315,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A popup can have its colors inverted.">
 				<icon name="heart" aria-label="Inverted" appearance="circular link"/>
 				<popup inverted label="Hello. This is an inverted popup"/>
@@ -343,7 +323,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A popup can have different colors.">
 				<button>Red</button>
 				<popup color="red" label="Red"/>
@@ -374,7 +354,7 @@
 			</example>
 		</>
 
-		<section label="Position" sticky collapsible dividing>
+		<section label="Position" sticky="stack" collapsible dividing>
 			<example description="A popup can be positioned around its target.  These are `open` from the start (`open-on=\"manual\"`);  each flips to the other side when there is no room.">
 				<segment padding="lg" appearance="basic">
 					<button id="popup-variations-top">Top right</button>
@@ -387,7 +367,7 @@
 			</example>
 		</>
 
-		<section label="Every position" sticky collapsible dividing>
+		<section label="Every position" sticky="stack" collapsible dividing>
 			<example description="Fomantic's eight positions, plus four of ours:  `left top`, `left bottom`, `right top` and `right bottom` sit beside the target, lined up with its top or bottom edge.  Word order matters:  `top left` is above.  Hover each button.">
 				<button>Top left</button>
 				<popup position="top left" label="top left"/>
@@ -416,7 +396,7 @@
 			</example>
 		</>
 
-		<section label="Hoverable" sticky collapsible dividing>
+		<section label="Hoverable" sticky="stack" collapsible dividing>
 			<example description="A hover popup stays open while the pointer is over it (WCAG 1.4.13).  `hoverable=\"false\"` is Fomantic's default:  it closes as the pointer leaves the target.">
 				<button>Hoverable (default)</button>
 				<popup hide-delay="200" label="Move the pointer onto me"/>

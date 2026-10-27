@@ -5,12 +5,10 @@
 	</>
 	<shape-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#more-examples">More Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
+			<item link="#more-examples">More Examples</>
 		</>
 	</>
 
@@ -20,7 +18,7 @@
 		...):  no script.
 	-->
 	<section label="Types">
-		<section label="Shape" sticky collapsible dividing>
+		<section label="Shape" sticky="stack" collapsible dividing>
 			<example description="A shape is a three dimensional object including any flat content as a side: one `<ui-side>` per face, in order.">
 				<html>
 					<ui-shape id="shape-people">
@@ -68,7 +66,7 @@
 			</example>
 		</>
 
-		<section label="Cube" sticky collapsible dividing>
+		<section label="Cube" sticky="stack" collapsible dividing>
 			<example description="A cube shape is formatted so that each side is the face of a cube:  `cube`.">
 				<shape id="shape-cube" cube>
 					<side>1</side>
@@ -94,11 +92,8 @@
 			</example>
 		</>
 
-		<section label="Text" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A text shape is formatted to allow for sides of text to be displayed: <code>text</code>.</p>
-				</html>
+		<section label="Text" sticky="stack" collapsible dividing>
+			<example description="A text shape is formatted to allow for sides of text to be displayed: `text`.">
 				<message slot="description" state="info" size="small" heading="Using Shapes">A shape's sides should have a set width and height, or text may reflow while it turns. Under reduced motion the sides swap at once.</message>
 				<shape id="shape-text" text>
 					<side>
@@ -135,7 +130,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Direction" sticky collapsible dividing>
+		<section label="Direction" sticky="stack" collapsible dividing>
 			<example description="`direction` says which way `--next`, `--previous`, `next()` and `previous()` turn:  `up`, `down`, `left` (the default), `right`, `over` or `back`.">
 				<buttons>
 					<button commandfor="shape-dice" command="--previous" labeled icon="chevron left">Previous</button>
@@ -151,7 +146,7 @@
 			</example>
 		</>
 
-		<section label="Duration" sticky collapsible dividing>
+		<section label="Duration" sticky="stack" collapsible dividing>
 			<example description="`duration` sets the length of a flip:  ms or a CSS time;  Fomantic's 0.6s by default.">
 				<button commandfor="shape-slow" command="--next" icon="long arrow alternate right">Slow flip</button>
 				<divider spacer/>
@@ -164,11 +159,8 @@
 	</>
 
 	<section label="More Examples">
-		<section label="Shape Types" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Shapes do not have to be regular or have their sides match up in length and width to animate correctly.</p>
-				</html>
+		<section label="Shape Types" sticky="stack" collapsible dividing>
+			<example description="Shapes do not have to be regular or have their sides match up in length and width to animate correctly.">
 				<message slot="description" size="small" class="site-not-ported">Not ported: the demo's Auto / Square / Irregular switch -- it swaps classes from Fomantic's docs stylesheet, not the shape's own.</message>
 				<shape id="shape-leaves">
 					<side>

@@ -5,16 +5,14 @@
 	</>
 	<progress-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#task-completion">Task completion</>
-				<ui-item link="#custom-labels">Custom labels</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#behaviors">Behaviors</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#task-completion">Task completion</>
+			<item link="#custom-labels">Custom labels</>
+			<item link="#events">Events</>
+			<item link="#behaviors">Behaviors</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
@@ -65,7 +63,7 @@
 			- `{left}` -- distance to the total, or the percentage left
 		</>
 
-		<section label="Templated label" sticky collapsible dividing>
+		<section label="Templated label" sticky="stack" collapsible dividing>
 			<example description="`label=\"Adding {value} of {total} photos\"`, filled in as the value changes.">
 				<html>
 					<ui-progress indicating value="7" total="20" label="Adding {value} of {total} photos"></ui-progress>
@@ -74,16 +72,14 @@
 			</example>
 		</>
 
-		<section label="Translation" sticky collapsible dividing>
+		<section label="Translation" sticky="stack" collapsible dividing>
 			<example description="The label is yours, so write it in the page's language;  the bar texts (`45%`, `9 of 20`) are the vocabulary's `progressPercent` / `progressRatio` texts, which a translation replaces.">
 				<html>
 					<ui-progress value="15" total="20" label="{value} de {total}: carga de archivos"></ui-progress>
 				</html>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic <code>label: 'ratio'</> switch. One <code>label</> template covers both:  swap it on <code>ui-completed</> when the finished bar should say something else.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic <code>label: 'ratio'</> switch. One <code>label</> template covers both:  swap it on <code>ui-completed</> when the finished bar should say something else.</></>
 	</>
 
 	<section label="Events">

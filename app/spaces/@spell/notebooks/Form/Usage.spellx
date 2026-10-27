@@ -5,17 +5,15 @@
 	</>
 	<form-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#submission">Submission</>
-				<ui-item link="#validation">Validation</>
-				<ui-item link="#binding">Binding</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#submission">Submission</>
+			<item link="#validation">Validation</>
+			<item link="#binding">Binding</>
+			<item link="#events">Events</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
@@ -74,7 +72,7 @@
 			- Each `<ui-field rules>` adds its own rules to the form&apos;s.
 		</>
 
-		<section label="Validation" sticky collapsible dividing>
+		<section label="Validation" sticky="stack" collapsible dividing>
 			<example description="No script:  the controls' own `required` / `type=\"email\"` constraints.  Submit it empty, or tab through the fields (`validate=\"on leave\"`).">
 				<html>
 					<ui-form validate="on leave">
@@ -168,7 +166,7 @@
 			- Without `value`, nothing is bound.
 		</>
 
-		<section label="Bound form" sticky collapsible dividing>
+		<section label="Bound form" sticky="stack" collapsible dividing>
 			<example description="No script:  `value` as JSON text.  Type into the fields, or tick the box, and watch the Bound object box below them change.">
 				<html>
 					<ui-form debug value="{\"name\": \"Ada\", \"email\": \"ada@example.com\", \"newsletter\": true}">
@@ -192,7 +190,7 @@
 			</example>
 		</>
 
-		<section label="When a field writes" sticky collapsible dividing>
+		<section label="When a field writes" sticky="stack" collapsible dividing>
 			<example description="Each field says when it takes an edit:  `apply=\"delayed\"` after a pause in typing (300ms;  `delayed 100` for 100ms), `apply=\"on leave\"` once the cursor leaves it.  Type, and watch the Bound object box.">
 				<html>
 					<ui-form debug value="{\"title\": \"Spell\", \"slug\": \"spell\"}">
@@ -209,7 +207,7 @@
 			</example>
 		</>
 
-		<section label="Save and Cancel" sticky collapsible dividing>
+		<section label="Save and Cancel" sticky="stack" collapsible dividing>
 			<example description="`apply=\"on save\"` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-applying` / `ui-applied`, `ui-cancelling` / `ui-cancelled`.">
 				<html>
 					<ui-form debug apply="on save" value="{\"name\": \"Ada\", \"role\": \"Engineer\"}">
@@ -228,7 +226,7 @@
 			</example>
 		</>
 
-		<section label="Many things" sticky collapsible dividing>
+		<section label="Many things" sticky="stack" collapsible dividing>
 			<example description="A list as `value` edits every thing in it:  a field shows the value they agree on;  where they don't, it shows blank and `Mixed`.  Typing sets it on all of them.">
 				<html>
 					<ui-form debug value="\[{\"size\": \"md\", \"font\": \"Inter\"}, {\"size\": \"md\", \"font\": \"Lora\"}, {\"size\": \"md\", \"font\": \"Inter\"}]">
@@ -247,7 +245,7 @@
 			</example>
 		</>
 
-		<section label="Repeat" sticky collapsible dividing>
+		<section label="Repeat" sticky="stack" collapsible dividing>
 			<markdown>
 				`<ui-repeat name="tasks">` shows its children once per item of the list in the property `tasks`, and binds
 				each row's controls to its own item.

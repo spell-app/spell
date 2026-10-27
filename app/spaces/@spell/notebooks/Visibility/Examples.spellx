@@ -5,12 +5,10 @@
 	</>
 	<visibility-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#usage">Usage</>
-				<ui-item link="#callbacks">Callbacks</>
-				<ui-item link="#examples">Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#usage">Usage</>
+			<item link="#callbacks">Callbacks</>
+			<item link="#examples">Examples</>
 		</>
 	</>
 
@@ -23,11 +21,10 @@
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
 	-->
 	<section label="Usage">
-		<section label="How To Use" sticky collapsible dividing>
-			<example>
+		<section label="How To Use" sticky="stack" collapsible dividing>
+			<example description="Visibility reports an element's position on screen: wrap the content in `<ui-visibility>` and listen for its events, each with the calculations as `detail`. Scroll the page and watch the table: it updates at every check.">
+				<message slot="description" state="info" size="small"><html>Checks happen when something crosses (the element entering or leaving, an edge crossing the screen's top or bottom), not on every scrolled pixel: visibility runs on <code>IntersectionObserver</code>, with no scroll listener. The table beside the demo is filled by this page's script from the events.</html></message>
 				<html>
-					<p slot="description">Visibility reports an element's position on screen: wrap the content in <code>&lt;ui-visibility&gt;</code> and listen for its events, each with the calculations as <code>detail</code>. Scroll the page and watch the table: it updates at every check.</p>
-					<ui-message slot="description" state="info" size="small">Checks happen when something crosses (the element entering or leaving, an edge crossing the screen's top or bottom), not on every scrolled pixel: visibility runs on <code>IntersectionObserver</code>, with no scroll listener. The table beside the demo is filled by this page's script from the events.</ui-message>
 					<ui-grid columns="2" stackable>
 						<ui-column>
 							<ui-visibility id="visibility-demo" once="false" continuous>
@@ -132,10 +129,9 @@
 	</>
 
 	<section label="Callbacks">
-		<section label="Standard Events" sticky collapsible dividing>
-			<example>
+		<section label="Standard Events" sticky="stack" collapsible dividing>
+			<example description="Events occur at the first check where their conditions turn true, each Fomantic's callback as a `ui-*` event. The log below shows the demo's events as you scroll past it.">
 				<html>
-					<p slot="description">Events occur at the first check where their conditions turn true, each Fomantic's callback as a <code>ui-*</code> event. The log below shows the demo's events as you scroll past it.</p>
 					<ui-table slot="description" celled definition padding="compact">
 						<table>
 							<thead>
@@ -229,11 +225,9 @@
 		</>
 
 		<!-- GAP I112:  no grouped `onPassed` thresholds (pixels / percentages);  shown as a note. -->
-		<html>
-			<ui-message size="small" class="site-not-ported">Not yet: Grouped Events -- Fomantic's <code>onPassed: &#123; 40: fn, "80%": fn &#125;</>, callbacks after a distance into the element. There is no event or <code>UI.observeVisibility()</> option for them.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not yet: Grouped Events -- Fomantic's <code>onPassed: &#123; 40: fn, "80%": fn &#125;</>, callbacks after a distance into the element. There is no event or <code>UI.observeVisibility()</> option for them.</></>
 
-		<section label="Reverse Events" sticky collapsible dividing>
+		<section label="Reverse Events" sticky="stack" collapsible dividing>
 			<example description="Reverse events occur under the same conditions, but as the user scrolls back up the page: `UI.observeVisibility(element, options)` takes Fomantic's `...Reverse` callbacks (the element has no events for them). The log shows this demo's reverse callbacks.">
 				<segment id="visibility-reversed">
 					<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
@@ -369,12 +363,10 @@
 				</html>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Gradual Changes, per-pixel <code>onPassing</> updates (checks happen at crossings only). For a style that follows the scroll, use CSS scroll-driven animations (<code>animation-timeline: view()</>), which need no script at all.</>
-			<ui-message size="small" class="site-not-ported">Not ported: Fixing Content To Viewport (<code>type: 'fixed'</>) -- that's <a href="/components/ui/ui-sticky.html"><code>&lt;ui-sticky&gt;</></>, on CSS <code>position: sticky</> with no placeholder element.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Gradual Changes, per-pixel <code>onPassing</> updates (checks happen at crossings only). For a style that follows the scroll, use CSS scroll-driven animations (<code>animation-timeline: view()</>), which need no script at all.</></>
+		<message size="small" class="site-not-ported"><html>Not ported: Fixing Content To Viewport (<code>type: 'fixed'</>) -- that's <a href="/components/ui/ui-sticky.html"><code>&lt;ui-sticky&gt;</></>, on CSS <code>position: sticky</> with no placeholder element.</></>
 
-		<section label="Infinite Scroll" sticky collapsible dividing>
+		<section label="Infinite Scroll" sticky="stack" collapsible dividing>
 			<example description="As an alternative to pagination, listen for `ui-bottom-in-view` with `once=\"false\"` and load more content when the bottom of a container is reached. Here the page's script adds three items each time, up to twelve.">
 				<visibility id="visibility-infinite" once="false">
 					<segment>

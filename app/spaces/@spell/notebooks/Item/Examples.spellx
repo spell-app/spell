@@ -5,13 +5,11 @@
 	</>
 	<item-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		own family;  the owners' pages show them in full.
 	-->
 	<section label="Types">
-		<section label="In a dropdown" sticky collapsible dividing>
+		<section label="In a dropdown" sticky="stack" collapsible dividing>
 			<example description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself.">
 				<dropdown selection placeholder="Fruit">
 					<item value="apple">Apple</item>
@@ -31,7 +29,7 @@
 			</example>
 		</>
 
-		<section label="In a list" sticky collapsible dividing>
+		<section label="In a list" sticky="stack" collapsible dividing>
 			<example description="Inside a list an item is a list row.">
 				<list divided>
 					<item icon="users">Friends</item>
@@ -41,7 +39,7 @@
 			</example>
 		</>
 
-		<section label="In a menu" sticky collapsible dividing>
+		<section label="In a menu" sticky="stack" collapsible dividing>
 			<example description="Inside a menu an item is a menu item.">
 				<menu appearance="pointing" aria-label="Item in a menu demo">
 					<item link="#inbox" selected>Inbox</item>
@@ -51,7 +49,7 @@
 			</example>
 		</>
 
-		<section label="In an Items view" sticky collapsible dividing>
+		<section label="In an Items view" sticky="stack" collapsible dividing>
 			<example description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra.">
 				<html>
 					<ui-items>
@@ -84,7 +82,7 @@
 			</example>
 		</>
 
-		<section label="Icon and image" sticky collapsible dividing>
+		<section label="Icon and image" sticky="stack" collapsible dividing>
 			<example description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar.">
 				<list>
 					<item icon="star">Icon attribute</item>
@@ -94,7 +92,7 @@
 			</example>
 		</>
 
-		<section label="Content parts" sticky collapsible dividing>
+		<section label="Content parts" sticky="stack" collapsible dividing>
 			<example description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look.">
 				<list spacing="lg">
 					<item icon="github">
@@ -142,7 +140,7 @@
 	</>
 
 	<section label="States">
-		<section label="Selected" sticky collapsible dividing>
+		<section label="Selected" sticky="stack" collapsible dividing>
 			<example description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus.">
 				<menu appearance="secondary" aria-label="Selected demo">
 					<item link="#selected" selected>selected</item>
@@ -155,7 +153,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A disabled item can't be chosen or followed.">
 				<list appearance="link">
 					<item link="#disabled">Enabled</item>
@@ -170,7 +168,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="In a menu, an item's `color` tints it while selected.">
 				<menu appearance="pointing" aria-label="Colored item demo">
 					<item link="#colored" color="red" selected>Red</item>
@@ -180,7 +178,7 @@
 			</example>
 		</>
 
-		<section label="Position" sticky collapsible dividing>
+		<section label="Position" sticky="stack" collapsible dividing>
 			<example description="In a menu, `position=\"right\"` pushes an item (and those after it) to the far end.">
 				<menu aria-label="Positioned item demo">
 					<item link="#position">Home</item>
@@ -189,7 +187,7 @@
 			</example>
 		</>
 
-		<section label="Fitted" sticky collapsible dividing>
+		<section label="Fitted" sticky="stack" collapsible dividing>
 			<example description="In a menu, `padding=\"none\"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.">
 				<menu aria-label="Fitted item demo">
 					<item link="#fitted" padding="none">No padding</item>

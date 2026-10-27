@@ -6,11 +6,9 @@
 	</>
 	<rail-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -24,7 +22,7 @@
 
 	<section label="Types">
 		<!-- GAP I33:  a rail is a fixed 300px with no attribute to narrow it, so Fomantic's two-rail examples don't fit the docs column:  one rail per example. -->
-		<section label="Rail" sticky collapsible dividing>
+		<section label="Rail" sticky="stack" collapsible dividing>
 			<example description="A rail can be presented on the left or right side of a container.">
 				<grid>
 					<column width="8"/>
@@ -52,7 +50,7 @@
 			</example>
 		</>
 
-		<section label="Internal" sticky collapsible dividing>
+		<section label="Internal" sticky="stack" collapsible dividing>
 			<example description="A rail can attach itself to the inside of a container.">
 				<segment padding="lg">
 					<rail position="left" internal>
@@ -65,7 +63,7 @@
 			</example>
 		</>
 
-		<section label="Dividing" sticky collapsible dividing>
+		<section label="Dividing" sticky="stack" collapsible dividing>
 			<example description="A rail can create a division between itself and a container.">
 				<grid>
 					<column width="8"/>
@@ -95,7 +93,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Attached" sticky collapsible dividing>
+		<section label="Attached" sticky="stack" collapsible dividing>
 			<example description="A rail can appear attached to the main viewport.">
 				<grid>
 					<column width="8"/>
@@ -133,7 +131,7 @@
 			</example>
 		</>
 
-		<section label="Close" sticky collapsible dividing>
+		<section label="Close" sticky="stack" collapsible dividing>
 			<example description="A rail can appear closer to the main viewport:  `close`, or `close=\"very\"`.">
 				<grid>
 					<column width="8"/>
@@ -161,7 +159,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A rail can have different sizes:  `size` scales its text.">
 				<grid>
 					<column width="8">

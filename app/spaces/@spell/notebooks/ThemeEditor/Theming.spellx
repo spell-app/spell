@@ -1,15 +1,13 @@
 <spell-notebook "theme-editor theming">
 	<header level="1">
 		Theme Editor
-		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</>
+		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.</>
 	</>
 	<theme-editor-tab-bar showing="theming"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#tokens">Tokens</>
-				<ui-item link="#themes">Themes</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
 		</>
 	</>
 

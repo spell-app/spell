@@ -5,13 +5,11 @@
 	</>
 	<dimmer-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#examples">Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#examples">Examples</>
 		</>
 	</>
 
@@ -22,7 +20,7 @@
 		  no script.  Always-visible examples are `closedby="none"`, so a stray click doesn't hide them.
 	-->
 	<section label="Types">
-		<section label="Dimmer" sticky collapsible dividing>
+		<section label="Dimmer" sticky="stack" collapsible dividing>
 			<example description="A simple dimmer displays no content:  it covers its parent, `visible` shows it, and a click on the dimmer hides it. The buttons show and hide it with `command=\"--show\"` / `\"--close\"`.">
 				<segment>
 					<header level="3">Overlayable Section</header>
@@ -41,7 +39,7 @@
 			</example>
 		</>
 
-		<section label="Content Dimmer" sticky collapsible dividing>
+		<section label="Content Dimmer" sticky="stack" collapsible dividing>
 			<example description="A dimmer can display content, centred over what it dims. A dark dimmer is the dark scheme for its content, so a plain header reads light.">
 				<segment>
 					<header level="3">Overlayable Section</header>
@@ -62,7 +60,7 @@
 			</example>
 		</>
 
-		<section label="Page Dimmer" sticky collapsible dividing>
+		<section label="Page Dimmer" sticky="stack" collapsible dividing>
 			<example description="A dimmer can be formatted to be fixed to the page: `page` covers the whole viewport, as a modal dialog, so the page behind it can't be reached. A click anywhere, or Escape, brings the page back.">
 				<button icon="plus" commandfor="dimmer-page" command="--show">Show</button>
 				<dimmer id="dimmer-page" page aria-label="Page dimmer">Hello</dimmer>
@@ -71,7 +69,7 @@
 	</>
 
 	<section label="States">
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="An active dimmer will dim its parent container.">
 				<segment>
 					<dimmer visible closedby="none"/>
@@ -81,7 +79,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A disabled dimmer cannot be activated, even while `visible`.">
 				<segment>
 					<dimmer disabled visible/>
@@ -93,12 +91,9 @@
 	</>
 
 	<section label="Variations">
-		<section label="Blurring" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A dimmer can blur its contents: <code>blurring</code> blurs and greys what's behind it.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Fomantic puts <code>blurring</code> on the dimmable parent (<code>ui blurring segment</code>). Ours goes on the dimmer, which blurs through <code>backdrop-filter</code>.</ui-message>
-				</html>
+		<section label="Blurring" sticky="stack" collapsible dividing>
+			<example description="A dimmer can blur its contents: `blurring` blurs and greys what's behind it.">
+				<message slot="description" size="small" class="site-not-ported"><html>Fomantic puts <code>blurring</code> on the dimmable parent (<code>ui blurring segment</code>). Ours goes on the dimmer, which blurs through <code>backdrop-filter</code>.</html></message>
 				<segment>
 					<dimmer id="dimmer-blurring" blurring/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -147,7 +142,7 @@
 			</example>
 		</>
 
-		<section label="Simple Dimmer" sticky collapsible dividing>
+		<section label="Simple Dimmer" sticky="stack" collapsible dividing>
 			<example description="A dimmer can be controlled without JavaScript. On the element, `simple` looks the same: `visible` shows it.">
 				<segment>
 					<dimmer appearance="simple" visible closedby="none"/>
@@ -157,7 +152,7 @@
 			</example>
 		</>
 
-		<section label="Inverted Dimmer" sticky collapsible dividing>
+		<section label="Inverted Dimmer" sticky="stack" collapsible dividing>
 			<example description="A dimmer can be formatted to have its colors inverted.">
 				<segment>
 					<dimmer id="dimmer-inverted" inverted/>
@@ -171,12 +166,9 @@
 			</example>
 		</>
 
-		<section label="Dimmer Shades" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A dimmer can be formatted to have a different depth of background shading: <code>shade</code> is medium, light or very light.</p>
-					<ui-message slot="description" state="info" size="small">Also works in combination with <code>inverted</code>.</ui-message>
-				</html>
+		<section label="Dimmer Shades" sticky="stack" collapsible dividing>
+			<example description="A dimmer can be formatted to have a different depth of background shading: `shade` is medium, light or very light.">
+				<message slot="description" state="info" size="small"><html>Also works in combination with <code>inverted</code>.</html></message>
 				<segment>
 					<dimmer shade="medium" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -195,15 +187,13 @@
 				</segment>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Partially Dimmer (a top, center or bottom dimmer, a caption as tall as its content). It's deferred, in <code title="guides/ui/notes/status.md">the status checklist</>:  use <code>vertical-align</> on a full dimmer meanwhile.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Partially Dimmer (a top, center or bottom dimmer, a caption as tall as its content). It's deferred, in <code title="guides/ui/notes/status.md">the status checklist</>:  use <code>vertical-align</> on a full dimmer meanwhile.</></>
 	</>
 
 	<section label="Examples">
 		<!-- GAP I55:  `<ui-image>` holds no children, so a dimmer can't sit in Fomantic's `ui medium image` wrapper;  a compact basic segment stands in, and the circular variant is left out. -->
 		<!-- GAP I56:  `size="medium"` is the natural size, not 300px;  `large` here. -->
-		<section label="Dimmer Events" sticky collapsible dividing>
+		<section label="Dimmer Events" sticky="stack" collapsible dividing>
 			<example description="A dimmer can trigger a visibility change on an event: `show-on=\"hover\"` shows it while the pointer is over its parent, or keyboard focus is inside it (Tab reaches its buttons).">
 				<segment padding="compact" appearance="basic">
 					<image size="large" src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -216,7 +206,7 @@
 			</example>
 		</>
 
-		<section label="On click" sticky collapsible dividing>
+		<section label="On click" sticky="stack" collapsible dividing>
 			<example description="`show-on=\"click\"` shows the dimmer when its parent is clicked;  a click on the dimmer hides it again.">
 				<segment>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>

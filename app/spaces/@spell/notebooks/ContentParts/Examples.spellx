@@ -6,14 +6,12 @@
 	</>
 	<content-parts-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#parts">Parts</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#parts">Parts</>
 		</>
 	</>
 
@@ -26,12 +24,9 @@
 		- Fomantic's `images/icons/school.png` / `plugin.png` aren't in `site/images/`:  `book.png` / `lab.png` instead.
 	-->
 	<section label="Types">
-		<section label="Page Headers" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Headers may be oriented to give the hierarchy of a section in the context of the page: <code>level</code> renders an h1 ... h6.</p>
-					<ui-message slot="description" state="info" size="small">Page headings are sized from <code>--ui-font-size</code> by level and are not affected by surrounding content size.</ui-message>
-				</html>
+		<section label="Page Headers" sticky="stack" collapsible dividing>
+			<example description="Headers may be oriented to give the hierarchy of a section in the context of the page: `level` renders an h1 ... h6.">
+				<message slot="description" state="info" size="small"><html>Page headings are sized from <code>--ui-font-size</code> by level and are not affected by surrounding content size.</html></message>
 				<header level="1">First header</header>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				<header level="2">Second header</header>
@@ -45,12 +40,9 @@
 			</example>
 		</>
 
-		<section label="Content Headers" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Headers may be oriented to give the importance of a section in the context of the content that surrounds it: <code>size</code>.</p>
-					<ui-message slot="description" state="info" size="small">Content headings are sized with <code>em</code> and are based on the font-size of their container.</ui-message>
-				</html>
+		<section label="Content Headers" sticky="stack" collapsible dividing>
+			<example description="Headers may be oriented to give the importance of a section in the context of the content that surrounds it: `size`.">
+				<message slot="description" state="info" size="small"><html>Content headings are sized with <code>em</code> and are based on the font-size of their container.</html></message>
 				<segment appearance="vertical">
 					<header size="huge">Huge Header</header>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -70,7 +62,7 @@
 			</example>
 		</>
 
-		<section label="Icon Headers" sticky collapsible dividing>
+		<section label="Icon Headers" sticky="stack" collapsible dividing>
 			<example description="A header can be formatted to emphasize an icon.">
 				<header level="2" icon>
 					<icon name="settings"/>
@@ -83,7 +75,7 @@
 			</example>
 		</>
 
-		<section label="Sub Headers" sticky collapsible dividing>
+		<section label="Sub Headers" sticky="stack" collapsible dividing>
 			<example description="Headers may be formatted to label smaller or de-emphasized content:  `sub`.">
 				<header level="2" sub>Price</header>
 				<html>
@@ -107,7 +99,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="A header may contain an image.">
 				<html>
 					<ui-header level="2">
@@ -136,7 +128,7 @@
 			</example>
 		</>
 
-		<section label="Icon" sticky collapsible dividing>
+		<section label="Icon" sticky="stack" collapsible dividing>
 			<example description="A header may contain an icon, with the text in a `<ui-content>`.">
 				<header level="2">
 					<icon name="plug"/>
@@ -153,7 +145,7 @@
 			</example>
 		</>
 
-		<section label="Subheader" sticky collapsible dividing>
+		<section label="Subheader" sticky="stack" collapsible dividing>
 			<example description="Headers may contain subheaders:  a nested `<ui-header sub>`.">
 				<header level="2">Account Settings <header sub>Manage your account settings and set e-mail preferences.</header></header>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -169,7 +161,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A header can show that it is inactive.">
 				<header disabled>Disabled Header</header>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -178,7 +170,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Dividing" sticky collapsible dividing>
+		<section label="Dividing" sticky="stack" collapsible dividing>
 			<example description="A header can be formatted to divide itself from the content below it.">
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				<header level="3" dividing>Dividing Header</header>
@@ -186,14 +178,14 @@
 			</example>
 		</>
 
-		<section label="Block" sticky collapsible dividing>
+		<section label="Block" sticky="stack" collapsible dividing>
 			<example description="A header can be formatted to appear inside a content block.">
 				<header level="3" block>Block Header</header>
 				<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
 			</example>
 		</>
 
-		<section label="Attached" sticky collapsible dividing>
+		<section label="Attached" sticky="stack" collapsible dividing>
 			<example description="A header can be attached to other content, like a segment.">
 				<header level="3" attach="top">Top Attached</header>
 				<segment attach="both">
@@ -229,7 +221,7 @@
 			</example>
 		</>
 
-		<section label="Left and Right" sticky collapsible dividing>
+		<section label="Left and Right" sticky="stack" collapsible dividing>
 			<example description="A header has no `floated` any more:  a `<ui-stack>` puts one header at the left and one at the right.">
 				<segment>
 					<stack direction="horizontal" justify="between">
@@ -240,7 +232,7 @@
 			</example>
 		</>
 
-		<section label="Text Alignment" sticky collapsible dividing>
+		<section label="Text Alignment" sticky="stack" collapsible dividing>
 			<example description="A header can have its text aligned to a side.">
 				<segment>
 					<header level="3" align="right">Right</header>
@@ -251,7 +243,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A header can be formatted with different colors.">
 				<header level="4" color="primary">Primary</header>
 				<header level="4" color="secondary">Secondary</header>
@@ -270,11 +262,8 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A header can have its colors inverted for contrast.</p>
-				</html>
+		<section label="Inverted" sticky="stack" collapsible dividing>
+			<example description="A header can have its colors inverted for contrast.">
 				<message slot="description" state="info" size="small">Inverted headers use light versions of the site's colours, adapted to have more contrast on a dark background.</message>
 				<segment inverted>
 					<header level="4" color="red" inverted>Red</header>
@@ -293,14 +282,14 @@
 			</example>
 		</>
 
-		<section label="Fitted" sticky collapsible dividing>
+		<section label="Fitted" sticky="stack" collapsible dividing>
 			<example description="A header can drop its padding.">
 				<header level="3" padding="none" block>Fitted block header</header>
 				<header level="3" block>Block header</header>
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="With `link` a header renders a link styled as a header.">
 				<header link="#link">Link header</header>
 			</example>
@@ -308,11 +297,9 @@
 	</>
 
 	<section label="Parts">
-		<html>
-			<ui-message size="small" state="info">The other content parts style themselves by their OWNER: the same <code>&lt;ui-meta&gt;</> reads differently in a card, an item, a feed and a comment;  outside any owner, they are unstyled blocks. Each part has its own page too (linked above), and the owners' pages (card, items, comment, feed, statistic, step, label) show every owner in full.</>
-		</>
+		<message size="small" state="info"><html>The other content parts style themselves by their OWNER: the same <code>&lt;ui-meta&gt;</> reads differently in a card, an item, a feed and a comment;  outside any owner, they are unstyled blocks. Each part has its own page too (linked above), and the owners' pages (card, items, comment, feed, statistic, step, label) show every owner in full.</></>
 
-		<section label="Content" sticky collapsible dividing>
+		<section label="Content" sticky="stack" collapsible dividing>
 			<example description="`<ui-content>` is the main content block of a card, item, event, comment, modal, message, list item or step.">
 				<card>
 					<content>
@@ -335,7 +322,7 @@
 			</example>
 		</>
 
-		<section label="Header" sticky collapsible dividing>
+		<section label="Header" sticky="stack" collapsible dividing>
 			<example description="Inside an owner, `<ui-header>` is the owner's header:  here a card's, an item's and a list item's.">
 				<card>
 					<content>
@@ -364,7 +351,7 @@
 			</example>
 		</>
 
-		<section label="Meta" sticky collapsible dividing>
+		<section label="Meta" sticky="stack" collapsible dividing>
 			<example description="`<ui-meta>` holds metadata about the content, e.g. a date or a category:  the same markup in a card, an item, a feed event and a comment.">
 				<html>
 					<ui-card>
@@ -410,7 +397,7 @@
 			</example>
 		</>
 
-		<section label="Description" sticky collapsible dividing>
+		<section label="Description" sticky="stack" collapsible dividing>
 			<example description="`<ui-description>` describes the content:  a card's or item's text, a comment's text (Fomantic's comment `text`), a step's line.">
 				<card>
 					<content>
@@ -429,7 +416,7 @@
 			</example>
 		</>
 
-		<section label="Extra" sticky collapsible dividing>
+		<section label="Extra" sticky="stack" collapsible dividing>
 			<example description="`<ui-extra>` is extra content, set apart from the main content:  a card's footer, an item's extra line, a feed event's extra text.">
 				<html>
 					<ui-card>
@@ -452,7 +439,7 @@
 			</example>
 		</>
 
-		<section label="Actions" sticky collapsible dividing>
+		<section label="Actions" sticky="stack" collapsible dividing>
 			<example description="`<ui-actions>` holds the actions a user can take:  a comment's reply links, a modal's or toast's buttons.">
 				<html>
 					<ui-comments>
@@ -472,7 +459,7 @@
 			</example>
 		</>
 
-		<section label="Avatar and Author" sticky collapsible dividing>
+		<section label="Avatar and Author" sticky="stack" collapsible dividing>
 			<example description="`<ui-avatar>` is a small picture of a person, `<ui-author>` who wrote a comment or did a feed event (Fomantic's feed `user`).">
 				<html>
 					<ui-comments>
@@ -498,7 +485,7 @@
 			</example>
 		</>
 
-		<section label="Summary and Date" sticky collapsible dividing>
+		<section label="Summary and Date" sticky="stack" collapsible dividing>
 			<example description="`<ui-summary>` is a feed event's summary line;  `<ui-date>` says when, inline and small inside it (`datetime` makes it a real `<time>`).">
 				<feed>
 					<event>
@@ -516,7 +503,7 @@
 			</example>
 		</>
 
-		<section label="Title" sticky collapsible dividing>
+		<section label="Title" sticky="stack" collapsible dividing>
 			<example description="`<ui-title>` is a step's, an accordion panel's or a search result's title.">
 				<steps>
 					<step icon="truck">
@@ -529,7 +516,7 @@
 			</example>
 		</>
 
-		<section label="Value" sticky collapsible dividing>
+		<section label="Value" sticky="stack" collapsible dividing>
 			<example description="`<ui-value>` is a statistic's value (a number, a word, an icon or image), with `<ui-label>` naming it.">
 				<statistics>
 					<statistic>
@@ -548,7 +535,7 @@
 			</example>
 		</>
 
-		<section label="Detail" sticky collapsible dividing>
+		<section label="Detail" sticky="stack" collapsible dividing>
 			<example description="`<ui-detail>` is a label's dimmer second value, e.g. a count.">
 				<label>Dogs<detail>214</detail></label>
 				<label color="blue">Veronika<detail>Friend</detail></label>

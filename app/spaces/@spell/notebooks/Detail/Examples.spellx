@@ -5,11 +5,9 @@
 	</>
 	<detail-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -19,7 +17,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Label" sticky collapsible dividing>
+		<section label="Label" sticky="stack" collapsible dividing>
 			<example description="A label's detail:  a dimmer second value after its text.">
 				<label icon="mail">Mail<detail>23</detail></label>
 				<label>Dogs<detail>214</detail></label>
@@ -29,7 +27,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="With `link`, the detail is a link of its own.">
 				<label color="teal">Tag<detail link="#tags">See all</detail></label>
 			</example>

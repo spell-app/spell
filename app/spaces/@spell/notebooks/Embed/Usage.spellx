@@ -6,16 +6,14 @@
 	</>
 	<embed-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#privacy">Privacy</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#behaviors">Behaviors</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#privacy">Privacy</>
+			<item link="#events">Events</>
+			<item link="#behaviors">Behaviors</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
@@ -41,9 +39,7 @@
 			frame at once; here the placeholder is a real `<button>`, and only a click (or **Enter** / **Space**) loads the
 			`<iframe>`. YouTube videos play from `youtube-nocookie.com`.
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: custom sources (<code>$.fn.embed.settings.sources</>), and Fomantic's per-source hd and color settings. Give any other player its <code>url</>, and its options through <code>parameters</>.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: custom sources (<code>$.fn.embed.settings.sources</>), and Fomantic's per-source hd and color settings. Give any other player its <code>url</>, and its options through <code>parameters</>.</></>
 	</>
 
 	<section label="Events">

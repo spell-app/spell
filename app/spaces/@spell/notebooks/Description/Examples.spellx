@@ -5,10 +5,8 @@
 	</>
 	<description-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
 		</>
 	</>
 
@@ -18,7 +16,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Card" sticky collapsible dividing>
+		<section label="Card" sticky="stack" collapsible dividing>
 			<example description="A card's description:  muted text under its header and meta.">
 				<html>
 					<ui-card>
@@ -34,7 +32,7 @@
 			</example>
 		</>
 
-		<section label="Item" sticky collapsible dividing>
+		<section label="Item" sticky="stack" collapsible dividing>
 			<example description="An item's description:  its body text.">
 				<html>
 					<ui-items>
@@ -51,7 +49,7 @@
 			</example>
 		</>
 
-		<section label="Comment" sticky collapsible dividing>
+		<section label="Comment" sticky="stack" collapsible dividing>
 			<example description="A comment's text (Fomantic's comment `text`).">
 				<comments>
 					<comment>
@@ -65,7 +63,7 @@
 			</example>
 		</>
 
-		<section label="List" sticky collapsible dividing>
+		<section label="List" sticky="stack" collapsible dividing>
 			<example description="A list item's description:  a second line under its header.">
 				<list>
 					<item icon="map marker">
@@ -78,7 +76,7 @@
 			</example>
 		</>
 
-		<section label="Step" sticky collapsible dividing>
+		<section label="Step" sticky="stack" collapsible dividing>
 			<example description="A step's description:  a smaller line under its title.">
 				<steps>
 					<step icon="payment">

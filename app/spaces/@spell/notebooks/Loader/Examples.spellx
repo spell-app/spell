@@ -5,24 +5,19 @@
 	</>
 	<loader-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
 	<!-- EXAMPLES:  Fomantic's loader page, section by section, in its order (Types, States, Variations). -->
 	<section label="Types">
 		<!-- GAP I43:  an active <ui-dimmer> neither shows nor inverts its <ui-loader>:  every loader in a dimmer says `visible` (and `inverted` in a dark one). -->
-		<section label="Loader" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A loader.</p>
-					<ui-message slot="description" state="info" size="small">Loaders are hidden unless <code>visible</code>, even inside a <code>&lt;ui-dimmer&gt;</code>.</ui-message>
-				</html>
+		<section label="Loader" sticky="stack" collapsible dividing>
+			<example description="A loader.">
+				<message slot="description" state="info" size="small"><html>Loaders are hidden unless <code>visible</code>, even inside a <code>&lt;ui-dimmer&gt;</code>.</html></message>
 				<segment>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 					<dimmer visible>
@@ -32,7 +27,7 @@
 			</example>
 		</>
 
-		<section label="Text Loader" sticky collapsible dividing>
+		<section label="Text Loader" sticky="stack" collapsible dividing>
 			<example description="A loader can contain text:  add `text` and put the words inside.">
 				<segment>
 					<dimmer visible>
@@ -53,7 +48,7 @@
 	</>
 
 	<section label="States">
-		<section label="Indeterminate" sticky collapsible dividing>
+		<section label="Indeterminate" sticky="stack" collapsible dividing>
 			<example description="A loader can show it's unsure of how long a task will take.">
 				<segment>
 					<dimmer visible>
@@ -64,12 +59,9 @@
 			</example>
 		</>
 
-		<section label="Active" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A loader can be active (<code>visible</code>).</p>
-					<ui-message slot="description" state="info" size="small">An active loader may not be easy to see without a <code>&lt;ui-dimmer&gt;</code>.</ui-message>
-				</html>
+		<section label="Active" sticky="stack" collapsible dividing>
+			<example description="A loader can be active (`visible`).">
+				<message slot="description" state="info" size="small"><html>An active loader may not be easy to see without a <code>&lt;ui-dimmer&gt;</code>.</html></message>
 				<segment>
 					<loader visible/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -77,7 +69,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A loader can be disabled or hidden, even while `visible`.">
 				<segment>
 					<loader visible disabled/>
@@ -88,19 +80,19 @@
 	</>
 
 	<section label="Variations">
-		<section label="Inline" sticky collapsible dividing>
+		<section label="Inline" sticky="stack" collapsible dividing>
 			<example description="Loaders can appear inline with content.">
 				<loader visible inline/>
 			</example>
 		</>
 
-		<section label="Inline Center" sticky collapsible dividing>
+		<section label="Inline Center" sticky="stack" collapsible dividing>
 			<example description="Loaders can appear inline centered with content.">
 				<loader visible align="center" inline/>
 			</example>
 		</>
 
-		<section label="Speed" sticky collapsible dividing>
+		<section label="Speed" sticky="stack" collapsible dividing>
 			<example description="Loaders can appear slow, normal or fast:  `speed=\"slow\"`, `speed=\"fast\"`.">
 				<loader visible inline speed="slow"/>
 				<loader visible inline/>
@@ -108,7 +100,7 @@
 			</example>
 		</>
 
-		<section label="Colors" sticky collapsible dividing>
+		<section label="Colors" sticky="stack" collapsible dividing>
 			<example description="Loaders can be different colors.">
 				<loader visible inline color="primary"/>
 				<loader visible inline color="secondary"/>
@@ -128,7 +120,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="Loaders can have different sizes.">
 				<segment>
 					<dimmer visible>
@@ -190,16 +182,14 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="Loaders can have their colors inverted.">
 				<segment inverted padding="lg">
 					<loader visible inverted/>
 				</segment>
 			</example>
 			<example>
-				<html>
-					<ui-message slot="description" state="info" size="small">Inside an <code>inverted</code> (light) dimmer a loader keeps its normal colours: no <code>inverted</code> on the loader.</ui-message>
-				</html>
+				<message slot="description" state="info" size="small"><html>Inside an <code>inverted</code> (light) dimmer a loader keeps its normal colours: no <code>inverted</code> on the loader.</html></message>
 				<segment>
 					<dimmer visible inverted>
 						<loader visible size="mini" text>Loading</loader>
@@ -230,7 +220,7 @@
 			</example>
 		</>
 
-		<section label="Styles" sticky collapsible dividing>
+		<section label="Styles" sticky="stack" collapsible dividing>
 			<example description="Loaders can also appear in `double` or `elastic` animation style.  Can be combined with any color or speed.">
 				<segment padding="lg">
 					<loader visible double color="green" speed="slow"/>

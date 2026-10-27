@@ -5,12 +5,10 @@
 	</>
 	<placeholder-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,12 +18,9 @@
 		`-paragraph`, `-line`, `-image`.
 	-->
 	<section label="Types">
-		<section label="Placeholder" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A placeholder is used to reserve space for content that soon will appear in a layout.</p>
-					<ui-message slot="description" state="info" size="small">Placeholders can include <code>&lt;ui-placeholder-paragraph&gt;</code>, <code>&lt;ui-placeholder-header&gt;</code> (<code>image</code> for an image header) and <code>&lt;ui-placeholder-image&gt;</code> to let you format the placeholder to emulate the content being loaded.</ui-message>
-				</html>
+		<section label="Placeholder" sticky="stack" collapsible dividing>
+			<example description="A placeholder is used to reserve space for content that soon will appear in a layout.">
+				<message slot="description" state="info" size="small"><html>Placeholders can include <code>&lt;ui-placeholder-paragraph&gt;</code>, <code>&lt;ui-placeholder-header&gt;</code> (<code>image</code> for an image header) and <code>&lt;ui-placeholder-image&gt;</code> to let you format the placeholder to emulate the content being loaded.</html></message>
 				<placeholder>
 					<placeholder-header image>
 						<placeholder-line/>
@@ -155,12 +150,9 @@
 	</>
 
 	<section label="Content">
-		<section label="Lines" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A placeholder can contain lines of text.</p>
-					<ui-message slot="description" state="info" size="small">By default, repeated lines appear varied in width. It may be useful to give an exact <code>length</code> to make them match up with the content more closely.</ui-message>
-				</html>
+		<section label="Lines" sticky="stack" collapsible dividing>
+			<example description="A placeholder can contain lines of text.">
+				<message slot="description" state="info" size="small"><html>By default, repeated lines appear varied in width. It may be useful to give an exact <code>length</code> to make them match up with the content more closely.</html></message>
 				<placeholder>
 					<placeholder-line/>
 					<placeholder-line/>
@@ -171,11 +163,8 @@
 			</example>
 		</>
 
-		<section label="Headers" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A placeholder can contain a header.</p>
-				</html>
+		<section label="Headers" sticky="stack" collapsible dividing>
+			<example description="A placeholder can contain a header.">
 				<message slot="description" state="info" size="small">Header lines are slightly taller than paragraph lines.</message>
 				<placeholder>
 					<placeholder-header image>
@@ -194,11 +183,8 @@
 			</example>
 		</>
 
-		<section label="Paragraph" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A placeholder can contain a paragraph.</p>
-				</html>
+		<section label="Paragraph" sticky="stack" collapsible dividing>
+			<example description="A placeholder can contain a paragraph.">
 				<message slot="description" state="info" size="small">Paragraphs are used to group lines together.</message>
 				<placeholder>
 					<placeholder-paragraph>
@@ -218,16 +204,14 @@
 		</>
 
 		<!-- GAP I50:  Fomantic sizes this image placeholder with style="width:150px;height:150px";  no attribute does, so it keeps the default fixed height at the placeholder's width. -->
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="A placeholder can contain an image.">
 				<placeholder>
 					<placeholder-image/>
 				</placeholder>
 			</example>
 			<example>
-				<html>
-					<ui-message slot="description" state="info" size="small">Using <code>square</code> (1:1) or <code>rectangular</code> (4:3) embeds an aspect ratio into the image placeholder, so it keeps its shape in responsive layouts.</ui-message>
-				</html>
+				<message slot="description" state="info" size="small"><html>Using <code>square</code> (1:1) or <code>rectangular</code> (4:3) embeds an aspect ratio into the image placeholder, so it keeps its shape in responsive layouts.</html></message>
 				<cards columns="3">
 					<card>
 						<content>
@@ -281,7 +265,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Line Length" sticky collapsible dividing>
+		<section label="Line Length" sticky="stack" collapsible dividing>
 			<example description="A line can specify how long its contents should appear:  `length` is `full`, `very long`, `long`, `medium`, `short` or `very short`.">
 				<placeholder>
 					<placeholder-line length="full"/>
@@ -306,7 +290,7 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A fluid placeholder takes up the width of its container, instead of stopping at 30em.">
 				<placeholder fluid>
 					<placeholder-header image>
@@ -322,7 +306,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A placeholder can have its colors inverted.">
 				<segment inverted>
 					<placeholder inverted>

@@ -5,11 +5,9 @@
 	</>
 	<value-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -19,7 +17,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Statistic" sticky collapsible dividing>
+		<section label="Statistic" sticky="stack" collapsible dividing>
 			<example description="A statistic's value, above its label.">
 				<statistics>
 					<statistic>
@@ -36,7 +34,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Text Value" sticky collapsible dividing>
+		<section label="Text Value" sticky="stack" collapsible dividing>
 			<example description="`text` makes a word value, smaller and bold.">
 				<html>
 					<ui-statistic>
@@ -47,7 +45,7 @@
 			</example>
 		</>
 
-		<section label="Icon and Image" sticky collapsible dividing>
+		<section label="Icon and Image" sticky="stack" collapsible dividing>
 			<example description="A value can hold an icon or an image beside the number.">
 				<statistics>
 					<statistic>

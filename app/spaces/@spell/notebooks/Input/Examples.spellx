@@ -5,12 +5,10 @@
 	</>
 	<input-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,13 +18,13 @@
 		Every field is named with `aria-label`;  in a form a `<label for>` does the same job.
 	-->
 	<section label="Types">
-		<section label="Input" sticky collapsible dividing>
+		<section label="Input" sticky="stack" collapsible dividing>
 			<example description="A standard input.">
 				<input placeholder="Search..." aria-label="Search"/>
 			</example>
 		</>
 
-		<section label="Native types" sticky collapsible dividing>
+		<section label="Native types" sticky="stack" collapsible dividing>
 			<example description="`type` passes through to the native input:  password, e-mail, number, date and the rest.">
 				<input type="password" placeholder="Password" aria-label="Password"/>
 				<input type="email" placeholder="E-mail" aria-label="E-mail"/>
@@ -39,18 +37,15 @@
 			</example>
 		</>
 
-		<section label="File Input" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A file input: <code>type="file"</code>.</p>
-					<ui-message slot="description" size="small">For a trigger button with your own text or an icon, use a <a href="#examples-variations-file-action">File Action</a> input.</ui-message>
-				</html>
+		<section label="File Input" sticky="stack" collapsible dividing>
+			<example description="A file input: `type=\"file\"`.">
+				<message slot="description" size="small"><html>For a trigger button with your own text or an icon, use a <a href="#examples-variations-file-action">File Action</a> input.</html></message>
 				<input type="file" aria-label="Upload"/>
 			</example>
 		</>
 
 		<!-- GAP I95:  no invisible file input that a separate `<label for>` (a button, a placeholder segment) triggers;  left out. -->
-		<section label="Textarea" sticky collapsible dividing>
+		<section label="Textarea" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A <code>&lt;ui-textarea&gt;</code> allows extended user input. Its states, variations and the rest are on the <a href="/components/ui/ui-textarea.html">Textarea</a> page.</p>
@@ -61,15 +56,10 @@
 	</>
 
 	<section label="States">
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>focus</> class, which draws the focused look on an unfocused input -- the look follows real focus (<code>:focus-visible</>), so click or tab into any field.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>focus</> class, which draws the focused look on an unfocused input -- the look follows real focus (<code>:focus-visible</>), so click or tab into any field.</></>
 
-		<section label="Loading" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An icon input field can show that it is currently loading data.</p>
-				</html>
+		<section label="Loading" sticky="stack" collapsible dividing>
+			<example description="An icon input field can show that it is currently loading data.">
 				<message slot="description" size="small">Loading inputs automatically turn their icon into a spinner while loading.</message>
 				<input loading icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
 			</example>
@@ -79,7 +69,7 @@
 		</>
 
 		<!-- GAP I96:  Fomantic's `purple double loading` and `red fast elastic loading` inputs have no attributes;  left out. -->
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="An input field can show that it is disabled.">
 				<input disabled placeholder="Search..." aria-label="Search"/>
 			</example>
@@ -88,7 +78,7 @@
 			</example>
 		</>
 
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="An input field can show the data contains errors:  `state=\"error\"`.">
 				<input state="error" placeholder="Search..." aria-label="Search"/>
 			</example>
@@ -109,12 +99,9 @@
 	</>
 
 	<section label="Variations">
-		<section label="Icon" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An input can be formatted with an icon: <code>icon</code>, at the end by default.</p>
-					<ui-message slot="description" size="small">Input icons don't receive pointer events unless they're <code>link</code> icons (the <code>icon</code> slot).</ui-message>
-				</html>
+		<section label="Icon" sticky="stack" collapsible dividing>
+			<example description="An input can be formatted with an icon: `icon`, at the end by default.">
+				<message slot="description" size="small"><html>Input icons don't receive pointer events unless they're <code>link</code> icons (the <code>icon</code> slot).</html></message>
 				<input icon="search" placeholder="Search..." aria-label="Search"/>
 			</example>
 			<example description="`icon-position=\"left\"` puts it at the start.">
@@ -132,7 +119,7 @@
 			</example>
 		</>
 
-		<section label="Labeled" sticky collapsible dividing>
+		<section label="Labeled" sticky="stack" collapsible dividing>
 			<example description="An input can be formatted with a label:  `label` is its text, and `labeled` says where it sits.">
 				<input label="https://" placeholder="mysite.com" aria-label="Site"/>
 			</example>
@@ -171,7 +158,7 @@
 		</>
 
 		<!-- GAP I98:  a label joins only a text field, not a `<ui-dropdown selection>` (Fomantic's `I am a [Developer]` / `[1-5] Persons`);  left out. -->
-		<section label="Action" sticky collapsible dividing>
+		<section label="Action" sticky="stack" collapsible dividing>
 			<example description="An input can be formatted to alert the user to an action they may perform:  buttons go in the `action` slot.">
 				<input placeholder="Search..." aria-label="Search">
 					<button slot="action">Search</button>
@@ -215,13 +202,13 @@
 		</>
 
 		<!-- GAP I100:  a `file` input's trigger is the native choose-file button:  no custom content (Fomantic's File Action label button). -->
-		<section label="File Action" sticky collapsible dividing id="variations-file-action">
+		<section label="File Action" sticky="stack" collapsible dividing id="variations-file-action">
 			<example description="A file input's choose-file button takes a `color`.">
 				<input type="file" color="blue" aria-label="Choose wisely"/>
 			</example>
 		</>
 
-		<section label="Transparent" sticky collapsible dividing>
+		<section label="Transparent" sticky="stack" collapsible dividing>
 			<example description="A transparent input has no background.">
 				<input appearance="transparent" placeholder="Search..." aria-label="Search"/>
 			</example>
@@ -234,7 +221,7 @@
 		</>
 
 		<!-- GAP I103:  an inverted input takes the dark surface with no border, so the field itself doesn't show. -->
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="An input can be formatted to appear on dark backgrounds.">
 				<segment inverted>
 					<input inverted placeholder="Search..." aria-label="Search"/>
@@ -246,7 +233,7 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="An input can take the size of its container.">
 				<input fluid icon="search" placeholder="Search a very wide input..." aria-label="Search"/>
 				<divider spacer/>
@@ -256,11 +243,8 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An input can vary in size.</p>
-				</html>
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example description="An input can vary in size.">
 				<message slot="description" state="info" size="small">Inputs size themselves unless you give them a width.</message>
 				<input size="mini" icon="search" placeholder="Search mini..." aria-label="Search"/>
 			</example>

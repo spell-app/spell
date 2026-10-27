@@ -5,19 +5,17 @@
 	</>
 	<table-of-contents-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -29,7 +27,7 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Table of contents" sticky collapsible dividing>
+		<section label="Table of contents" sticky="stack" collapsible dividing>
 			<example description="A table of contents lists the sections it follows (`for`, else the page's `main`) as links:  level 2 headings and top-level `<ui-section>`s, with their examples and level 3 headings under them.  The section in view is lit, and opens.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">
@@ -49,7 +47,7 @@
 			</example>
 		</>
 
-		<section label="Examples" sticky collapsible dividing>
+		<section label="Examples" sticky="stack" collapsible dividing>
 			<example description="A `<ui-example heading>` is an entry of the section it's in:  a components page's contents list every example.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">
@@ -74,7 +72,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Heading" sticky collapsible dividing>
+		<section label="Heading" sticky="stack" collapsible dividing>
 			<example description="`heading`:  a title above the links, e.g. the page's name.  Without it, the toggle sits alone in the header row.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">
@@ -99,7 +97,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Expanded" sticky collapsible dividing>
+		<section label="Expanded" sticky="stack" collapsible dividing>
 			<example description="`expanded`:  every section's entries show, not only the one in view's.  The viewer's own folds, and the header's toggle, still win.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">
@@ -117,7 +115,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="`size`:  `mini` ... `massive`;  `small` by default.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">

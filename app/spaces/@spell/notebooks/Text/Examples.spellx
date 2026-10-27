@@ -5,12 +5,10 @@
 	</>
 	<text-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -19,12 +17,9 @@
 		Inverted).  Fomantic's Text example is a code preview;  here it is live.
 	-->
 	<section label="Types">
-		<section label="Text" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A text is always used inline and uses one color from the palette.</p>
-					<ui-message slot="description" state="info" size="small">Fomantic limits <code>ui text</code> to <code>&lt;span&gt;</code> tags, so it can't clash with other colourable elements. <code>&lt;ui-text&gt;</code> is its own tag, so there is nothing to clash with.</ui-message>
-				</html>
+		<section label="Text" sticky="stack" collapsible dividing>
+			<example description="A text is always used inline and uses one color from the palette.">
+				<message slot="description" state="info" size="small"><html>Fomantic limits <code>ui text</code> to <code>&lt;span&gt;</code> tags, so it can't clash with other colourable elements. <code>&lt;ui-text&gt;</code> is its own tag, so there is nothing to clash with.</html></message>
 				<segment>This is <text color="red">red</text> inline text and this is <text color="blue">blue</text> inline text and this is <text color="purple">purple</text> inline text</segment>
 				<segment inverted>This is <text inverted color="red">red</text> inline text and this is <text inverted color="blue">blue</text> inline text and this is <text inverted color="purple">purple</text> inline text</segment>
 				<segment>This is <text state="info">info</text> inline text and this is <text state="success">success</text> inline text and this is <text state="warning">warning</text> inline text and this is <text state="error">error</text> inline text</segment>
@@ -32,7 +27,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A text can take any colour of the palette, plus `primary` and `secondary`.">
 				<segment>
 					<text color="primary">Primary</text>
@@ -54,19 +49,19 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing id="types-link">
+		<section label="Link" sticky="stack" collapsible dividing id="types-link">
 			<example description="A text with a `link` is a link in running text:  a real link, which the keyboard reaches.  `target` opens it elsewhere, as a link's does.">
 				<segment>Read <text link="#examples-types-link">the guide</text> first, or open <text link="https://fomantic-ui.com" target="_blank">Fomantic's docs</text> in a new tab.</segment>
 			</example>
 		</>
 
-		<section label="Link tag" sticky collapsible dividing id="types-link-tag">
+		<section label="Link tag" sticky="stack" collapsible dividing id="types-link-tag">
 			<example description="`<ui-link>` is the same link as a tag of its own, for a drawing's sentence.  `disabled` fades it, and it's no longer a link.">
 				<segment>See <link link="#examples-types-link-tag">the pricing</link>, or the <link link="#examples-types-link-tag" disabled>archived pricing</link>.</segment>
 			</example>
 		</>
 
-		<section label="Paragraph" sticky collapsible dividing>
+		<section label="Paragraph" sticky="stack" collapsible dividing>
 			<example description="`paragraph` makes a text a paragraph (`<p>`):  a block, with the body's line height and a line's space under it.  `font` and `link` still work inside it.">
 				<segment>
 					<text paragraph>A paragraph holds a few sentences about one thing. It wraps at the edge of its box, and the next paragraph starts a line's space below it.</text>
@@ -75,7 +70,7 @@
 			</example>
 		</>
 
-		<section label="Letter styles" sticky collapsible dividing>
+		<section label="Letter styles" sticky="stack" collapsible dividing>
 			<example description="`font` says how the letters look, several words at once:  each is drawn as its HTML element, so screen readers hear it.">
 				<segment>It's <text font="bold">free</text>, <text font="italic">today</text> only. Run <text font="code">yarn review</text> first; <text font="highlight">nothing is saved</text> until then. <text font="strikethrough">Was 10</text> now 5. H<text font="subscript">2</text>O, E = mc<text font="superscript">2</text>, <text font="bold italic underline">all three</text>.</segment>
 			</example>
@@ -83,7 +78,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A text can show that it is disabled.">
 				<segment>This is <text disabled>disabled inline text</text> and <text color="red" disabled>disabled red inline text</text>.</segment>
 			</example>
@@ -91,7 +86,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="Text can vary in the same sizes as icons, relative to the text around it.">
 				<html>
 					<ui-segment>
@@ -108,7 +103,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A text can be formatted to appear on dark backgrounds.">
 				<segment inverted>
 					<text inverted color="red">Red</text>

@@ -5,16 +5,14 @@
 	</>
 	<form-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#form-states">Form States</>
-				<ui-item link="#field-states">Field States</>
-				<ui-item link="#form-variations">Form Variations</>
-				<ui-item link="#field-variations">Field Variations</>
-				<ui-item link="#group-variations">Group Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#form-states">Form States</>
+			<item link="#field-states">Field States</>
+			<item link="#form-variations">Form Variations</>
+			<item link="#field-variations">Field Variations</>
+			<item link="#group-variations">Group Variations</>
 		</>
 	</>
 
@@ -26,11 +24,8 @@
 		The site's root says `stack-with="page"`:  rows stack below 768px of the SCREEN, as Fomantic's.
 	-->
 	<section label="Types">
-		<section label="Form" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A form: <code>&lt;ui-form&gt;</code> around a native <code>&lt;form&gt;</code>.</p>
-				</html>
+		<section label="Form" sticky="stack" collapsible dividing>
+			<example description="A form: `<ui-form>` around a native `<form>`.">
 				<message slot="description" state="warning" size="small">Looking for validation? It is built in: see Validation on the Usage tab.</message>
 				<html>
 					<ui-form>
@@ -189,7 +184,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Field" sticky collapsible dividing>
+		<section label="Field" sticky="stack" collapsible dividing>
 			<example description="A field is a form element containing a label and an input.">
 				<html>
 					<ui-form>
@@ -204,7 +199,7 @@
 			</example>
 		</>
 
-		<section label="Label Row" sticky collapsible dividing>
+		<section label="Label Row" sticky="stack" collapsible dividing>
 			<example description="A field can draw its own label row:  the label, an output at its end and a tip behind an info icon;  a hint goes under the control.">
 				<html>
 					<ui-form>
@@ -218,7 +213,7 @@
 			</example>
 		</>
 
-		<section label="Actions" sticky collapsible dividing>
+		<section label="Actions" sticky="stack" collapsible dividing>
 			<example description="Small buttons in the label row's actions slot;  a taller one never grows the row.">
 				<html>
 					<ui-form>
@@ -233,7 +228,7 @@
 			</example>
 		</>
 
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="A field shows its error as a line under the control;  the form's validation shows its own there.">
 				<html>
 					<ui-form>
@@ -247,11 +242,10 @@
 			</example>
 		</>
 
-		<section label="Fields" sticky collapsible dividing>
-			<example>
+		<section label="Fields" sticky="stack" collapsible dividing>
+			<example description="A set of fields can appear grouped together: `<ui-fields>`.">
+				<message slot="description" state="positive" size="small"><html>Field groups automatically receive responsive styling, swapping to one field per row below 768px of the FORM's width, or of the screen with <code>stack-with="page"</code> (as on this site). Add <code>unstackable</code> to keep a row.</html></message>
 				<html>
-					<p slot="description">A set of fields can appear grouped together: <code>&lt;ui-fields&gt;</code>.</p>
-					<ui-message slot="description" state="positive" size="small">Field groups automatically receive responsive styling, swapping to one field per row below 768px of the FORM's width, or of the screen with <code>stack-with="page"</code> (as on this site). Add <code>unstackable</code> to keep a row.</ui-message>
 					<ui-form>
 						<form method="dialog">
 							<ui-fields>
@@ -316,11 +310,13 @@
 			</example>
 		</>
 
-		<section label="Text Area" sticky collapsible dividing>
+		<section label="Text Area" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A <a href="/components/ui/ui-textarea.html" target="src-spell-app-dev-ui-components-ui-textarea-html">textarea</a> can be used to allow for extended user input: <code>&lt;ui-textarea&gt;</code>.</p>
-					<ui-message slot="description" state="info" size="small">To specify an approximate text area size use the <code>rows</code> attribute.</ui-message>
+				</html>
+				<message slot="description" state="info" size="small"><html>To specify an approximate text area size use the <code>rows</code> attribute.</html></message>
+				<html>
 					<ui-form>
 						<form method="dialog">
 							<ui-field>
@@ -337,7 +333,7 @@
 			</example>
 		</>
 
-		<section label="Checkbox" sticky collapsible dividing>
+		<section label="Checkbox" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A form can contain a <a href="/components/ui/ui-checkbox.html" target="src-spell-app-dev-ui-components-ui-checkbox-html">checkbox</a>.</p>
@@ -361,7 +357,7 @@
 			</example>
 		</>
 
-		<section label="Radio Checkbox" sticky collapsible dividing>
+		<section label="Radio Checkbox" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A form can include a <a href="/components/ui/ui-radio.html" target="src-spell-app-dev-ui-components-ui-radio-html">radio checkbox</a>: <code>&lt;ui-radio&gt;</code>.</p>
@@ -403,11 +399,13 @@
 			</example>
 		</>
 
-		<section label="Dropdown" sticky collapsible dividing>
+		<section label="Dropdown" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A form can contain a <a href="/components/ui/ui-dropdown.html" target="src-spell-app-dev-ui-components-ui-dropdown-html">dropdown</a>.</p>
-					<ui-message slot="description" state="info" size="small">A <code>&lt;ui-dropdown&gt;</code> is form-associated: its name and value submit with the form, no hidden input needed.</ui-message>
+				</html>
+				<message slot="description" state="info" size="small"><html>A <code>&lt;ui-dropdown&gt;</code> is form-associated: its name and value submit with the form, no hidden input needed.</html></message>
+				<html>
 					<ui-form>
 						<form method="dialog">
 							<ui-field>
@@ -456,7 +454,7 @@
 			</example>
 		</>
 
-		<section label="Multiple Select" sticky collapsible dividing>
+		<section label="Multiple Select" sticky="stack" collapsible dividing>
 			<example description="A multiple select is used to include several choices with one form field.">
 				<html>
 					<ui-form>
@@ -492,7 +490,7 @@
 			</example>
 		</>
 
-		<section label="HTML Select" sticky collapsible dividing>
+		<section label="HTML Select" sticky="stack" collapsible dividing>
 			<example description="If a script-driven dropdown is not a viable option, `<ui-select>` styles the browser's own select element.">
 				<html>
 					<ui-form>
@@ -509,7 +507,7 @@
 			</example>
 		</>
 
-		<section label="Calendar" sticky collapsible dividing>
+		<section label="Calendar" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A form can contain a <a href="/components/ui/ui-calendar.html" target="src-spell-app-dev-ui-components-ui-calendar-html">calendar</a>.</p>
@@ -525,11 +523,13 @@
 			</example>
 		</>
 
-		<section label="Message" sticky collapsible dividing>
+		<section label="Message" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A form can contain a <a href="/components/ui/ui-message.html" target="src-spell-app-dev-ui-components-ui-message-html">message</a>.</p>
-					<ui-message slot="description" state="info" size="small">A message inside a form is hidden until the form is in its state: info, error, success or warning. A message with no <code>state</code> always shows.</ui-message>
+				</html>
+				<message slot="description" state="info" size="small"><html>A message inside a form is hidden until the form is in its state: info, error, success or warning. A message with no <code>state</code> always shows.</html></message>
+				<html>
 					<ui-form>
 						<form method="dialog">
 							<ui-message heading="We had some issues">
@@ -547,7 +547,7 @@
 
 	<section label="Form States">
 		<!-- GAP I124:  Fomantic's second form, `ui blue double loading form`, has no colour or loader style. -->
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="If a form is in loading state, it will automatically show a loading indicator.">
 				<html>
 					<ui-form loading>
@@ -563,7 +563,7 @@
 			</example>
 		</>
 
-		<section label="Success" sticky collapsible dividing>
+		<section label="Success" sticky="stack" collapsible dividing>
 			<example description="If a form is in an success state, it will automatically show any success message blocks.">
 				<html>
 					<ui-form state="success">
@@ -582,7 +582,7 @@
 			</example>
 		</>
 
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="If a form is in an error state, it will automatically show any error message blocks.">
 				<html>
 					<ui-form state="error">
@@ -601,7 +601,7 @@
 			</example>
 		</>
 
-		<section label="Warning" sticky collapsible dividing>
+		<section label="Warning" sticky="stack" collapsible dividing>
 			<example description="If a form is in warning state, it will automatically show any warning message block.">
 				<html>
 					<ui-form state="warning">
@@ -622,7 +622,7 @@
 			</example>
 		</>
 
-		<section label="Info" sticky collapsible dividing>
+		<section label="Info" sticky="stack" collapsible dividing>
 			<example description="If a form is in informational state, it will automatically show any info message block.">
 				<html>
 					<ui-form state="info">
@@ -646,7 +646,7 @@
 
 	<section label="Field States">
 		<!-- GAP I130:  the field's state tints its label and input, not the dropdown or the checkbox. -->
-		<section label="Field Error" sticky collapsible dividing>
+		<section label="Field Error" sticky="stack" collapsible dividing>
 			<example description="Individual fields may display an error state.">
 				<html>
 					<ui-form>
@@ -678,7 +678,7 @@
 		</>
 
 		<!-- GAP I130:  the field's state tints its label and input, not the dropdown or the checkbox. -->
-		<section label="Field Warning" sticky collapsible dividing>
+		<section label="Field Warning" sticky="stack" collapsible dividing>
 			<example description="Individual fields may display a warning state.">
 				<html>
 					<ui-form>
@@ -710,7 +710,7 @@
 		</>
 
 		<!-- GAP I130:  the field's state tints its label and input, not the dropdown or the checkbox. -->
-		<section label="Field Success" sticky collapsible dividing>
+		<section label="Field Success" sticky="stack" collapsible dividing>
 			<example description="Individual fields may display a success state.">
 				<html>
 					<ui-form>
@@ -742,7 +742,7 @@
 		</>
 
 		<!-- GAP I130:  the field's state tints its label and input, not the dropdown or the checkbox. -->
-		<section label="Field Info" sticky collapsible dividing>
+		<section label="Field Info" sticky="stack" collapsible dividing>
 			<example description="Individual fields may display an informational state.">
 				<html>
 					<ui-form>
@@ -773,7 +773,7 @@
 			</example>
 		</>
 
-		<section label="Disabled Field" sticky collapsible dividing>
+		<section label="Disabled Field" sticky="stack" collapsible dividing>
 			<example description="Individual fields may be disabled.">
 				<html>
 					<ui-form>
@@ -817,7 +817,7 @@
 	</>
 
 	<section label="Form Variations">
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A form can vary in size.">
 				<html>
 					<ui-form size="mini">
@@ -988,7 +988,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A form on a dark background may have to invert its color scheme.">
 				<html>
 					<ui-segment inverted>
@@ -1017,7 +1017,7 @@
 	</>
 
 	<section label="Field Variations">
-		<section label="Inline Field" sticky collapsible dividing>
+		<section label="Inline Field" sticky="stack" collapsible dividing>
 			<example description="A field can have its label next to instead of above it.">
 				<html>
 					<ui-form>
@@ -1032,7 +1032,7 @@
 			</example>
 		</>
 
-		<section label="Width" sticky collapsible dividing>
+		<section label="Width" sticky="stack" collapsible dividing>
 			<example description="A field can specify its width in grid columns:  `width` takes columns of 16.">
 				<html>
 					<ui-form>
@@ -1079,11 +1079,10 @@
 			</example>
 		</>
 
-		<section label="Required" sticky collapsible dividing>
-			<example>
+		<section label="Required" sticky="stack" collapsible dividing>
+			<example description="A field can show that input is mandatory.">
+				<message slot="description" state="info" size="small"><html><code>required</code> on a <code>&lt;ui-field&gt;</code> only draws the asterisk. To enforce it, put <code>required</code> on the control too, or a <code>notEmpty</code> rule.</html></message>
 				<html>
-					<p slot="description">A field can show that input is mandatory.</p>
-					<ui-message slot="description" state="info" size="small"><code>required</code> on a <code>&lt;ui-field&gt;</code> only draws the asterisk. To enforce it, put <code>required</code> on the control too, or a <code>notEmpty</code> rule.</ui-message>
 					<ui-form>
 						<form method="dialog">
 							<ui-field required>

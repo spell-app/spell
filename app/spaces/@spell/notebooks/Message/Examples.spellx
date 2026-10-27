@@ -5,13 +5,11 @@
 	</>
 	<message-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		`heading` attribute is the shorthand.
 	-->
 	<section label="Types">
-		<section label="Message" sticky collapsible dividing>
+		<section label="Message" sticky="stack" collapsible dividing>
 			<example description="A basic message.">
 				<html>
 					<ui-message>
@@ -32,7 +30,7 @@
 			</example>
 		</>
 
-		<section label="List Message" sticky collapsible dividing>
+		<section label="List Message" sticky="stack" collapsible dividing>
 			<example description="A message with a list.  `heading` is the shorthand for a header.">
 				<html>
 					<ui-message heading="New Site Features">
@@ -45,7 +43,7 @@
 			</example>
 		</>
 
-		<section label="Icon Message" sticky collapsible dividing>
+		<section label="Icon Message" sticky="stack" collapsible dividing>
 			<example description="A message can contain an icon:  the `icon` attribute takes a name, the `icon` slot any markup.">
 				<html>
 					<ui-message icon="inbox" heading="Have you heard about our mailing list?">
@@ -63,11 +61,10 @@
 			</example>
 		</>
 
-		<section label="Dismissable Block" sticky collapsible dividing>
-			<example>
+		<section label="Dismissable Block" sticky="stack" collapsible dividing>
+			<example description="A message that the user can choose to hide: `dismissible` adds a close button.">
+				<message slot="description" state="info" size="small"><html>Unlike Fomantic's, the close button works by itself: it fires the cancelable <code>ui-closing</code>, then the message sets <code>hidden</code> on itself (see the Usage tab). Reload the page to bring it back.</html></message>
 				<html>
-					<p slot="description">A message that the user can choose to hide: <code>dismissible</code> adds a close button.</p>
-					<ui-message slot="description" state="info" size="small">Unlike Fomantic's, the close button works by itself: it fires the cancelable <code>ui-closing</code>, then the message sets <code>hidden</code> on itself (see the Usage tab). Reload the page to bring it back.</ui-message>
 					<ui-message dismissible heading="Welcome back!">
 						<p>This is a special notification which you can dismiss if you're bored with it.</p>
 					</ui-message>
@@ -77,7 +74,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Header" sticky collapsible dividing>
+		<section label="Header" sticky="stack" collapsible dividing>
 			<example description="A message can contain a header:  a slotted `<ui-header>`.">
 				<html>
 					<ui-message>
@@ -88,7 +85,7 @@
 			</example>
 		</>
 
-		<section label="List" sticky collapsible dividing>
+		<section label="List" sticky="stack" collapsible dividing>
 			<example description="A message can contain a list of items:  a plain `<ul>`.">
 				<html>
 					<ui-message>
@@ -103,7 +100,7 @@
 	</>
 
 	<section label="States">
-		<section label="Hidden" sticky collapsible dividing>
+		<section label="Hidden" sticky="stack" collapsible dividing>
 			<example description="A message can be hidden:  the standard `hidden` attribute.  The message below is in the example, unseen.">
 				<html>
 					<ui-message hidden>
@@ -113,11 +110,10 @@
 			</example>
 		</>
 
-		<section label="Visible" sticky collapsible dividing>
-			<example>
+		<section label="Visible" sticky="stack" collapsible dividing>
+			<example description="A message can be set to visible to force itself to be shown.">
+				<message size="small" slot="description" class="site-not-ported"><html>Not ported: the <code>visible</code> class -- a message without <code>hidden</code> is always shown.</html></message>
 				<html>
-					<p slot="description">A message can be set to visible to force itself to be shown.</p>
-					<ui-message size="small" slot="description" class="site-not-ported">Not ported: the <code>visible</code> class -- a message without <code>hidden</code> is always shown.</ui-message>
 					<ui-message>
 						<p>You can always see me</p>
 					</ui-message>
@@ -127,7 +123,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Center Aligned" sticky collapsible dividing>
+		<section label="Center Aligned" sticky="stack" collapsible dividing>
 			<example description="A message can be displayed center aligned:  `text-align=\"center\"`.">
 				<html>
 					<ui-message align="center" heading="New Version is available!">
@@ -137,7 +133,7 @@
 			</example>
 		</>
 
-		<section label="Right Aligned" sticky collapsible dividing>
+		<section label="Right Aligned" sticky="stack" collapsible dividing>
 			<example description="A message can be displayed right aligned:  `text-align=\"right\"`.">
 				<html>
 					<ui-message align="right" heading="New Version is available!">
@@ -147,7 +143,7 @@
 			</example>
 		</>
 
-		<section label="Centered" sticky collapsible dividing>
+		<section label="Centered" sticky="stack" collapsible dividing>
 			<example description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
 				<html>
 					<ui-message centered icon="envelope" heading="Centered icon">
@@ -157,7 +153,7 @@
 			</example>
 		</>
 
-		<section label="Floating" sticky collapsible dividing>
+		<section label="Floating" sticky="stack" collapsible dividing>
 			<example description="A message can float above content that it is related to.">
 				<html>
 					<ui-message floating>
@@ -167,7 +163,7 @@
 			</example>
 		</>
 
-		<section label="Compact" sticky collapsible dividing>
+		<section label="Compact" sticky="stack" collapsible dividing>
 			<example description="A message can only take up the width of its content.">
 				<html>
 					<ui-message padding="compact">
@@ -177,7 +173,7 @@
 			</example>
 		</>
 
-		<section label="Attached" sticky collapsible dividing>
+		<section label="Attached" sticky="stack" collapsible dividing>
 			<example description="A message can be formatted to attach itself to other content:  `attach=\"both\"` or `attach=\"top\"` joins the content below, `attach=\"bottom\"` the content above.">
 				<html>
 					<ui-message attach="both" heading="Welcome to our site!">
@@ -211,18 +207,18 @@
 							</form>
 						</ui-form>
 					</ui-segment>
-					<ui-message attach="bottom" state="warning" icon="help">Already signed up? <a href="#login">Login here</a> instead.</ui-message>
 				</html>
+				<message attach="bottom" state="warning" icon="help"><html>Already signed up? <a href="#login">Login here</a> instead.</html></message>
 			</example>
 		</>
 
-		<section label="Warning" sticky collapsible dividing>
+		<section label="Warning" sticky="stack" collapsible dividing>
 			<example description="A message may be formatted to display warning messages:  `state=\"warning\"`.">
 				<message state="warning" dismissible heading="You must register before you can do that!">Visit our registration page, then try again</message>
 			</example>
 		</>
 
-		<section label="Info" sticky collapsible dividing>
+		<section label="Info" sticky="stack" collapsible dividing>
 			<example description="A message may be formatted to display information.">
 				<html>
 					<ui-message state="info" dismissible heading="Was this what you wanted?">
@@ -236,10 +232,7 @@
 		</>
 
 		<section label="Positive / Success" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A message may be formatted to display a positive message.</p>
-				</html>
+			<example description="A message may be formatted to display a positive message.">
 				<message slot="description" state="info" size="small" icon="attention">Positive / success and negative / error messages use the same colours by default, but each has its own colour token that a theme can tell apart.</message>
 				<html>
 					<ui-message state="positive" dismissible heading="You are eligible for a reward">
@@ -256,7 +249,7 @@
 			</example>
 		</>
 
-		<section label="Negative / Error" sticky collapsible dividing>
+		<section label="Negative / Error" sticky="stack" collapsible dividing>
 			<example description="A message may be formatted to display a negative message.">
 				<html>
 					<ui-message state="negative" dismissible heading="We're sorry we can't apply that discount">
@@ -276,7 +269,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A message can be formatted to be different colors.">
 				<message color="red">Red</message>
 				<message color="orange">Orange</message>
@@ -293,7 +286,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A message can have different sizes.">
 				<message size="mini">This is a mini message.</message>
 				<message size="tiny">This is a tiny message.</message>
@@ -305,7 +298,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A message can use the dark scheme;  a coloured one keeps its hue in the text.">
 				<html>
 					<ui-message inverted heading="Inverted">

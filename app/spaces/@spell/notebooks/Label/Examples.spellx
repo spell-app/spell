@@ -5,14 +5,12 @@
 	</>
 	<label-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#groups">Groups</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#groups">Groups</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		plus our Active state and Prompt content.  `<ui-labels>` (the group) lives on this page too.
 	-->
 	<section label="Types">
-		<section label="Label" sticky collapsible dividing>
+		<section label="Label" sticky="stack" collapsible dividing>
 			<example description="A label.">
 				<label icon="mail">23</label>
 			</example>
@@ -69,7 +67,7 @@
 			</example>
 		</>
 
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="A label can be formatted to emphasize an image:  `image` is the photo's URL.">
 				<label link="#label" image="../images/avatar/small/joe.jpg">Joe</label>
 				<label link="#label" image="../images/avatar/small/elliot.jpg">Elliot</label>
@@ -87,7 +85,7 @@
 			</example>
 		</>
 
-		<section label="Pointing" sticky collapsible dividing>
+		<section label="Pointing" sticky="stack" collapsible dividing>
 			<example description="A label can point to content next to it:  `pointing` (above), `below`, `left` or `right`.">
 				<html>
 					<ui-form>
@@ -144,12 +142,9 @@
 			</example>
 		</>
 
-		<section label="Corner" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A label can position itself in the corner of an element.</p>
-					<ui-message slot="description" state="warning" size="small">A corner label sits in the corner of its owner, the nearest positioned box around it: a <code>&lt;ui-segment&gt;</code> is one, and clips the label to its rounded corner.</ui-message>
-				</html>
+		<section label="Corner" sticky="stack" collapsible dividing>
+			<example description="A label can position itself in the corner of an element.">
+				<message slot="description" state="warning" size="small"><html>A corner label sits in the corner of its owner, the nearest positioned box around it: a <code>&lt;ui-segment&gt;</code> is one, and clips the label to its rounded corner.</html></message>
 				<grid columns="2">
 					<column>
 						<segment>
@@ -167,7 +162,7 @@
 			</example>
 		</>
 
-		<section label="Tag" sticky collapsible dividing>
+		<section label="Tag" sticky="stack" collapsible dividing>
 			<example description="A label can appear as a tag.">
 				<label link="#label" tag>New</label>
 				<label link="#label" color="red" tag>Upcoming</label>
@@ -175,7 +170,7 @@
 			</example>
 		</>
 
-		<section label="Ribbon" sticky collapsible dividing>
+		<section label="Ribbon" sticky="stack" collapsible dividing>
 			<example description="A label can appear as a ribbon attaching itself to an element:  `ribbon`, or `ribbon=\"right\"`.">
 				<html>
 					<ui-grid columns="2">
@@ -229,11 +224,8 @@
 
 		<!-- GAP I75:  no `bottom` / `center` ribbon, so Fomantic's Bottom and Center Ribbon example (2.9.3) is left out. -->
 		<!-- GAP I77:  attached labels overlay the paragraph:  the segment doesn't pad the content after them. -->
-		<section label="Attached" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A label can attach to a content segment.</p>
-				</html>
+		<section label="Attached" sticky="stack" collapsible dividing>
+			<example description="A label can attach to a content segment.">
 				<message slot="description" state="warning" size="small">Attached labels try to pad the other content in the owner to make room, but may not get it right in every case; then correct the padding of the other content yourself.</message>
 				<grid columns="3">
 					<column>
@@ -276,7 +268,7 @@
 			</example>
 		</>
 
-		<section label="Horizontal" sticky collapsible dividing>
+		<section label="Horizontal" sticky="stack" collapsible dividing>
 			<example description="A horizontal label is formatted to label content along-side it horizontally.">
 				<list divided selection>
 					<item link="#label"><label color="red" direction="horizontal">Fruit</label>Kumquats</item>
@@ -287,11 +279,8 @@
 			</example>
 		</>
 
-		<section label="Floating" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A label can float above or below another element.</p>
-				</html>
+		<section label="Floating" sticky="stack" collapsible dividing>
+			<example description="A label can float above or below another element.">
 				<message slot="description" state="warning" size="small">A floating label sits on the corner of its owner, the nearest positioned box around it: a menu item is one.</message>
 				<menu padding="compact">
 					<item link="#label" icon="mail">Messages<label color="red" floating>22</label></item>
@@ -315,7 +304,7 @@
 			</example>
 		</>
 
-		<section label="Floating left" sticky collapsible dividing>
+		<section label="Floating left" sticky="stack" collapsible dividing>
 			<example description="Floating labels can be positioned to the left also.">
 				<menu padding="compact">
 					<item link="#label" icon="mail">Messages<label color="red" floating="left">22</label></item>
@@ -330,7 +319,7 @@
 		</>
 
 		<!-- GAP I76:  no `left aligned` / `right aligned` floating label;  shown with plain `floating`. -->
-		<section label="Floating aligned" sticky collapsible dividing>
+		<section label="Floating aligned" sticky="stack" collapsible dividing>
 			<example description="Floating labels containing large text can be aligned to the left or right.">
 				<menu padding="compact">
 					<item link="#label" icon="mail">Messages from Fomantic-UI-Users<label color="red" floating>22 Mails unread</label></item>
@@ -339,7 +328,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="All variants of label can be inverted.">
 				<segment inverted>
 					<label color="primary" inverted>Primary</label>
@@ -396,13 +385,13 @@
 	</>
 
 	<section label="Content">
-		<section label="Detail" sticky collapsible dividing>
+		<section label="Detail" sticky="stack" collapsible dividing>
 			<example description="A label can contain a detail:  the `detail` shorthand, or a `<ui-detail>` child.">
 				<label detail="214">Dogs</label>
 			</example>
 		</>
 
-		<section label="Icon" sticky collapsible dividing>
+		<section label="Icon" sticky="stack" collapsible dividing>
 			<example description="A label can include an icon.">
 				<label icon="mail">Mail</label>
 				<label icon="checkmark">Test Passed</label>
@@ -424,14 +413,14 @@
 			</example>
 		</>
 
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="A label can include an image.">
 				<label link="#label"><image avatar spacing="right" src="/components/ui/images/avatar/small/elliot.jpg" alt=""/>Elliot</label>
 				<label link="#label"><image avatar src="/components/ui/images/avatar/small/stevie.jpg" alt=""/>Stevie</label>
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="A label can be a link (`link`) or contain an item that links.">
 				<label link="#label" icon="mail">23</label>
 			</example>
@@ -442,7 +431,7 @@
 			</example>
 		</>
 
-		<section label="Prompt" sticky collapsible dividing>
+		<section label="Prompt" sticky="stack" collapsible dividing>
 			<example description="A prompt label points at an invalid field.  Give it `role=\"alert\"` and tie it to the field with `aria-describedby`.">
 				<field>
 					<input type="email" placeholder="E-mail" aria-describedby="label-prompt-email"/>
@@ -453,14 +442,14 @@
 	</>
 
 	<section label="States">
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="A label can show it is the current selection.">
 				<label link="#label" selected>Active</label>
 				<label link="#label">Inactive</label>
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A label can show it is currently unable to be interacted with.">
 				<label link="#label" disabled>Disabled Label</label>
 			</example>
@@ -468,19 +457,19 @@
 	</>
 
 	<section label="Variations">
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A label can take the width of its container.">
 				<label fluid>Fits container</label>
 			</example>
 		</>
 
-		<section label="Centered" sticky collapsible dividing>
+		<section label="Centered" sticky="stack" collapsible dividing>
 			<example description="Text can be shown centered.">
 				<label fluid align="center">Fits container</label>
 			</example>
 		</>
 
-		<section label="Circular" sticky collapsible dividing>
+		<section label="Circular" sticky="stack" collapsible dividing>
 			<example description="A label can be circular.">
 				<label color="red" link="#label" appearance="circular">2</label>
 				<label color="orange" link="#label" appearance="circular">2</label>
@@ -513,7 +502,7 @@
 			</example>
 		</>
 
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A label can reduce its complexity.">
 				<label link="#label" appearance="basic">Basic</label>
 				<label link="#label" pointing appearance="basic">Pointing</label>
@@ -523,7 +512,7 @@
 			</example>
 		</>
 
-		<section label="Tinted" sticky collapsible dividing>
+		<section label="Tinted" sticky="stack" collapsible dividing>
 			<example description="Ours, not Fomantic's:  a tinted label is soft, the colour's tint as the fill and its text colour as the text (a pill or badge).">
 				<label color="primary" appearance="tinted">Live</label>
 				<label color="green" appearance="tinted">Done</label>
@@ -532,7 +521,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A label can have different colors.">
 				<label color="primary" link="#label">Primary</label>
 				<label color="secondary" link="#label">Secondary</label>
@@ -573,7 +562,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A label can be small or large.">
 				<label size="mini">Mini</label>
 				<label size="tiny">Tiny</label>
@@ -588,7 +577,7 @@
 	</>
 
 	<section label="Groups">
-		<section label="Labels" sticky collapsible dividing>
+		<section label="Labels" sticky="stack" collapsible dividing>
 			<example description="Label groups also have a vertical margin to make sure labels don't appear attached together when wrapped:  `<ui-labels>`.">
 				<labels>
 					<label>One</label>
@@ -625,7 +614,7 @@
 			</example>
 		</>
 
-		<section label="Group Size" sticky collapsible dividing>
+		<section label="Group Size" sticky="stack" collapsible dividing>
 			<example description="Labels can share sizes together.">
 				<labels size="huge">
 					<label>Fun</label>
@@ -636,7 +625,7 @@
 			</example>
 		</>
 
-		<section label="Colored Group" sticky collapsible dividing>
+		<section label="Colored Group" sticky="stack" collapsible dividing>
 			<example description="Labels can share colors together.">
 				<labels color="blue">
 					<label link="#label" removable>Fun</label>
@@ -648,7 +637,7 @@
 			</example>
 		</>
 
-		<section label="Basic Group" sticky collapsible dividing>
+		<section label="Basic Group" sticky="stack" collapsible dividing>
 			<example description="Labels can share their style together.">
 				<labels appearance="basic">
 					<label link="#label" removable>Fun</label>
@@ -660,7 +649,7 @@
 			</example>
 		</>
 
-		<section label="Tag Group" sticky collapsible dividing>
+		<section label="Tag Group" sticky="stack" collapsible dividing>
 			<example description="Labels can share tag formatting.">
 				<labels tag>
 					<label link="#label">$10.00</label>
@@ -672,7 +661,7 @@
 			</example>
 		</>
 
-		<section label="Circular Group" sticky collapsible dividing>
+		<section label="Circular Group" sticky="stack" collapsible dividing>
 			<example description="Labels can share shapes.">
 				<labels appearance="circular">
 					<label link="#label">11</label>

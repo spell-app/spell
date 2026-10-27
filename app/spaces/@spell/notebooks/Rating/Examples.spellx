@@ -5,13 +5,11 @@
 	</>
 	<rating-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#more-examples">More Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#more-examples">More Examples</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		(`aria-label`, or a `<label for>`), as a real form would be.
 	-->
 	<section label="Types">
-		<section label="Rating" sticky collapsible dividing>
+		<section label="Rating" sticky="stack" collapsible dividing>
 			<example description="A basic rating.  Fomantic's default is 4 icons;  `max-rating` changes it, here to one.">
 				<rating max-rating="1" aria-label="Favourite"/>
 			</example>
@@ -30,7 +28,7 @@
 			</example>
 		</>
 
-		<section label="Icon" sticky collapsible dividing>
+		<section label="Icon" sticky="stack" collapsible dividing>
 			<example description="You can use any available icon as rating indicator:  `icon` takes an icon name.">
 				<rating color="yellow" icon="star" value="2" aria-label="Stars"/>
 				<html>
@@ -60,7 +58,7 @@
 			</example>
 		</>
 
-		<section label="Color" sticky collapsible dividing>
+		<section label="Color" sticky="stack" collapsible dividing>
 			<example description="You can specify any color of the palette with `color`.">
 				<rating color="red" value="1" max-rating="7" aria-label="Red"/>
 				<html>
@@ -114,12 +112,9 @@
 			</example>
 		</>
 
-		<section label="Partial Ratings" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">You can use decimal values for showing partially filled ratings.</p>
-					<ui-message slot="description" state="info" size="small">A fractional <code>value</code> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</ui-message>
-				</html>
+		<section label="Partial Ratings" sticky="stack" collapsible dividing>
+			<example description="You can use decimal values for showing partially filled ratings.">
+				<message slot="description" state="info" size="small"><html>A fractional <code>value</code> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</html></message>
 				<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
 				<html>
 					<br />
@@ -154,13 +149,13 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A rating can be non-interactive with `disabled`:  it shows its value, can't be focused and isn't submitted.">
 				<rating color="yellow" disabled value="3" max-rating="5" aria-label="Disabled"/>
 			</example>
 		</>
 
-		<section label="Read-only" sticky collapsible dividing>
+		<section label="Read-only" sticky="stack" collapsible dividing>
 			<example description="A `readonly` rating shows its value and can't be changed, but is still focusable and submitted.  A `<label for>` names it.">
 				<html>
 					<label for="rating-readonly">Read-only</label>
@@ -171,7 +166,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A rating can vary in size.">
 				<rating size="mini" color="yellow" value="3" aria-label="Mini"/>
 				<html>

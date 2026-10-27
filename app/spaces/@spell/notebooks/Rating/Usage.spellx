@@ -5,15 +5,13 @@
 	</>
 	<rating-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#forms">Forms</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#events">Events</>
+			<item link="#forms">Forms</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
@@ -62,7 +60,7 @@
 			- A fractional `value` (`3.5`) only DRAWS a partial icon: no radio is chosen until the user rates.
 		</>
 
-		<section label="In a form" sticky collapsible dividing>
+		<section label="In a form" sticky="stack" collapsible dividing>
 			<example description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value.">
 				<html>
 					<ui-form>

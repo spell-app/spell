@@ -5,10 +5,8 @@
 	</>
 	<title-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
 		</>
 	</>
 
@@ -18,7 +16,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Step" sticky collapsible dividing>
+		<section label="Step" sticky="stack" collapsible dividing>
 			<example description="A step's title:  its main line.">
 				<steps>
 					<step icon="truck">
@@ -37,7 +35,7 @@
 			</example>
 		</>
 
-		<section label="Accordion" sticky collapsible dividing>
+		<section label="Accordion" sticky="stack" collapsible dividing>
 			<example description="An accordion's titles:  each toggles the panel after it.">
 				<html>
 					<ui-accordion appearance="styled">

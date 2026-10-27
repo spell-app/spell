@@ -5,13 +5,11 @@
 	</>
 	<search-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#more-examples">More Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#more-examples">More Examples</>
 		</>
 	</>
 
@@ -23,26 +21,23 @@
 	-->
 	<section label="Types">
 		<!-- GAP I37:  Fomantic's bare prompt (no icon);  ours always draws the search icon. -->
-		<section label="Standard" sticky collapsible dividing>
+		<section label="Standard" sticky="stack" collapsible dividing>
 			<example description="A search can display a set of results.">
 				<html>
 					<ui-search placeholder="Github Repositories..." source="/components/ui/\[%7B%22title%22:%22Fomantic-UI%22,%22description%22:%22Fomantic%20empowers%20designers%20and%20developers%20by%20creating%20a%20shared%20vocabulary%20for%20UI.%22%7D,%7B%22title%22:%22Fomantic-UI-Docs%22,%22description%22:%22Docs%20for%20Fomantic-UI%22%7D,%7B%22title%22:%22Fomantic-UI-CSS%22,%22description%22:%22CSS%20only%20distribution%22%7D,%7B%22title%22:%22Fomantic-UI-LESS%22,%22description%22:%22LESS%20only%20distribution%22%7D,%7B%22title%22:%22create-fomantic-icons%22,%22description%22:%22Create%20Fomantic%20icons%20from%20Font%20Awesome%22%7D]"></ui-search>
 				</html>
 			</example>
 			<example>
+				<message slot="description" state="info" size="small"><html>Every <code>&lt;ui-search&gt;</code> is drawn as Fomantic's <code>ui icon input</code>, so the icon input needs no extra markup. The <code>icon</code> slot swaps the magnifying glass.</html></message>
 				<html>
-					<ui-message slot="description" state="info" size="small">Every <code>&lt;ui-search&gt;</code> is drawn as Fomantic's <code>ui icon input</code>, so the icon input needs no extra markup. The <code>icon</code> slot swaps the magnifying glass.</ui-message>
 					<ui-search placeholder="Github Repositories..." source="\[{\"title\":\"Fomantic-UI\"},{\"title\":\"Fomantic-UI-Docs\"},{\"title\":\"Fomantic-UI-CSS\"},{\"title\":\"Fomantic-UI-LESS\"}]"></ui-search>
 				</html>
 			</example>
 		</>
 
 		<!-- GAP I38:  no `clearable` remove icon;  Escape clears the text instead. -->
-		<section label="Clearable" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A search can show a remove icon to be able to cancel a previous search term.</p>
-				</html>
+		<section label="Clearable" sticky="stack" collapsible dividing>
+			<example description="A search can show a remove icon to be able to cancel a previous search term.">
 				<message slot="description" size="small">Not yet: there is no remove icon. Escape closes the results, and a second Escape clears the text.</message>
 				<html>
 					<ui-search placeholder="Github Repositories..." value="fomantic" source="\[{\"title\":\"Fomantic-UI\"},{\"title\":\"Fomantic-UI-Docs\"},{\"title\":\"Fomantic-UI-CSS\"},{\"title\":\"Fomantic-UI-LESS\"}]">
@@ -52,7 +47,7 @@
 			</example>
 		</>
 
-		<section label="Category" sticky collapsible dividing>
+		<section label="Category" sticky="stack" collapsible dividing>
 			<example description="A search can display results ordered by categories:  `category`, with each result's `category`.">
 				<html>
 					<ui-search category placeholder="Search people..." source="\[{\"category\":\"Designers\",\"title\":\"Elliot Fu\",\"description\":\"Film buff\"},{\"category\":\"Designers\",\"title\":\"Helen Troy\",\"description\":\"Wizard\"},{\"category\":\"Developers\",\"title\":\"Jenny Hess\",\"description\":\"Student\"},{\"category\":\"Developers\",\"title\":\"Matt Giampietro\",\"description\":\"Coach\"},{\"category\":\"Writers\",\"title\":\"Stevie Feliciano\",\"description\":\"Library\"},{\"category\":\"Writers\",\"title\":\"Christian Rocha\",\"description\":\"Mixologist\"}]"></ui-search>
@@ -68,11 +63,10 @@
 			</example>
 		</>
 
-		<section label="Local Search" sticky collapsible dividing>
-			<example>
+		<section label="Local Search" sticky="stack" collapsible dividing>
+			<example description="A search can look for results inside a static local source.">
+				<message slot="description" state="info" size="small"><html>Results that begin with the query come first, then content that matches the query anywhere inside. To match word starts only, set <code>full-text-search="prefix"</code> (Fomantic's <code>fullTextSearch: false</code>).</html></message>
 				<html>
-					<p slot="description">A search can look for results inside a static local source.</p>
-					<ui-message slot="description" state="info" size="small">Results that begin with the query come first, then content that matches the query anywhere inside. To match word starts only, set <code>full-text-search="prefix"</code> (Fomantic's <code>fullTextSearch: false</code>).</ui-message>
 					<ui-search placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
 				</html>
 			</example>
@@ -113,7 +107,7 @@
 
 	<section label="States">
 		<!-- GAP I39:  Fomantic's second and third rows (`blue loading double`, `slow elastic pink loading`) have no attribute value. -->
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="A search can show a loading indicator.  It also spins while a remote query runs.">
 				<search loading placeholder="Search..."/>
 			</example>
@@ -121,28 +115,24 @@
 	</>
 
 	<section label="Variations">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A search can show it is currently unable to be interacted with:  it's dimmed and left out of the form.">
 				<search disabled category placeholder="Search animals..."/>
 			</example>
 		</>
 
-		<section label="Scrolling" sticky collapsible dividing>
-			<example>
+		<section label="Scrolling" sticky="stack" collapsible dividing>
+			<example description="A search can have its results scroll.">
+				<message slot="description" state="info" size="small"><html>The scroll height depends on the viewport: 4 results' height, 6 / 8 / 12 from 768px / 992px / 1920px. <code>--ui-search-results-max-height</code> replaces it at every width.</html></message>
+				<message slot="description" size="small"><html>Add <code>resizable</code> to <code>scrolling</code> and a native resize handle appears at the bottom right of the results.</html></message>
 				<html>
-					<p slot="description">A search can have its results scroll.</p>
-					<ui-message slot="description" state="info" size="small">The scroll height depends on the viewport: 4 results' height, 6 / 8 / 12 from 768px / 992px / 1920px. <code>--ui-search-results-max-height</code> replaces it at every width.</ui-message>
-					<ui-message slot="description" size="small">Add <code>resizable</code> to <code>scrolling</code> and a native resize handle appears at the bottom right of the results.</ui-message>
 					<ui-search scrolling max-results="0" placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
 				</html>
 			</example>
 		</>
 
-		<section label="Height" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A search can be <code>very-short</code> (0.75x of the default height) so that more results can be glanced. Or it can be short, long (2x) or very-long.</p>
-				</html>
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example description="A search can be `very-short` (0.75x of the default height) so that more results can be glanced. Or it can be short, long (2x) or very-long.">
 				<message slot="description" state="info" size="small">The default height is the height of one result times the number of results shown at the current breakpoint.</message>
 				<html>
 					<ui-search length="very-short" max-results="0" placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
@@ -155,7 +145,7 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A search can have its results take up the width of its container.">
 				<html>
 					<ui-search fluid category placeholder="Search animals..." source="\[{\"category\":\"Mammals\",\"title\":\"Cat\"},{\"category\":\"Mammals\",\"title\":\"Dog\"},{\"category\":\"Birds\",\"title\":\"Crow\"},{\"category\":\"Birds\",\"title\":\"Owl\"}]"></ui-search>
@@ -163,7 +153,7 @@
 			</example>
 		</>
 
-		<section label="Aligned" sticky collapsible dividing>
+		<section label="Aligned" sticky="stack" collapsible dividing>
 			<example description="A search can have its results aligned to its left or right container edge:  `align=\"right\"` extends them to the left.">
 				<html>
 					<ui-search align="right" category placeholder="Search animals..." source="\[{\"category\":\"Mammals\",\"title\":\"Cat\",\"description\":\"Aligned to the right edge\"},{\"category\":\"Mammals\",\"title\":\"Dog\"},{\"category\":\"Birds\",\"title\":\"Crow\"},{\"category\":\"Birds\",\"title\":\"Owl\"}]"></ui-search>
@@ -172,7 +162,7 @@
 		</>
 
 		<!-- GAP I37:  Fomantic's sizes are bare prompts;  ours keep the search icon. -->
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A search can vary in size.">
 				<search size="mini" placeholder="Mini search..."/>
 				<search size="tiny" placeholder="Tiny search..."/>
@@ -199,10 +189,7 @@
 
 		<!-- GAP I40:  no `onResponse` hook to regroup a third-party answer. -->
 		<section label="Using API Settings" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Fomantic's <code>apiSettings.onResponse</code> regroups GitHub's answer by language. Ours: a <code>category</code> search over results that carry a <code>category</code>, here a local source.</p>
-				</html>
+			<example description="Fomantic's `apiSettings.onResponse` regroups GitHub's answer by language. Ours: a `category` search over results that carry a `category`, here a local source.">
 				<message slot="description" state="warning" size="small" heading="Be careful with foreign remote API services">Results are rendered as TEXT, never HTML, so a hostile title or description can't inject markup.</message>
 				<html>
 					<ui-search category min-characters="3" placeholder="Search GitHub" source="\[{\"category\":\"JavaScript\",\"title\":\"Fomantic-UI\",\"description\":\"A shared vocabulary for UI\"},{\"category\":\"JavaScript\",\"title\":\"create-fomantic-icons\",\"description\":\"Create Fomantic icons from Font Awesome\"},{\"category\":\"CSS\",\"title\":\"Fomantic-UI-CSS\",\"description\":\"CSS only distribution\"},{\"category\":\"Less\",\"title\":\"Fomantic-UI-LESS\",\"description\":\"LESS only distribution\"}]">

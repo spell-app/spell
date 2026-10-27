@@ -6,11 +6,9 @@
 	</>
 	<rail-tab-bar showing="theming"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#tokens">Tokens</>
-				<ui-item link="#themes">Themes</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
 		</>
 	</>
 

@@ -5,13 +5,11 @@
 	</>
 	<table-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,11 +19,10 @@
 		keep Fomantic's class words (`positive`, `right aligned`, `collapsing`);  only the table's own words are attributes.
 	-->
 	<section label="Types">
-		<section label="Table" sticky collapsible dividing>
-			<example>
+		<section label="Table" sticky="stack" collapsible dividing>
+			<example description="A standard table:  `<ui-table>` around a native `<table>`. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.">
+				<message slot="description" state="positive" size="small"><html>Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <code>unstackable</code>, or <code>stackable="tablet"</code> to allow responsive adjustments for tablet.</html></message>
 				<html>
-					<p slot="description">A standard table:  <code>&lt;ui-table&gt;</code> around a native <code>&lt;table&gt;</code>. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.</p>
-					<ui-message slot="description" state="positive" size="small">Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <code>unstackable</code>, or <code>stackable="tablet"</code> to allow responsive adjustments for tablet.</ui-message>
 					<ui-table celled>
 						<table>
 							<thead>
@@ -209,11 +206,10 @@
 			</example>
 		</>
 
-		<section label="Definition" sticky collapsible dividing>
-			<example>
+		<section label="Definition" sticky="stack" collapsible dividing>
+			<example description="A table may be formatted to emphasize a first column that defines a rows content.">
+				<message slot="description" state="info" size="small"><html>Definition tables are designed to display on a single background color. You can adjust this with the <code>--ui-table-definition-page-background</code> token, or by giving the first cell a background.</html></message>
 				<html>
-					<p slot="description">A table may be formatted to emphasize a first column that defines a rows content.</p>
-					<ui-message slot="description" state="info" size="small">Definition tables are designed to display on a single background color. You can adjust this with the <code>--ui-table-definition-page-background</code> token, or by giving the first cell a background.</ui-message>
 					<ui-table definition>
 						<table>
 							<thead>
@@ -317,10 +313,9 @@
 			</example>
 		</>
 
-		<section label="Structured" sticky collapsible dividing>
-			<example>
+		<section label="Structured" sticky="stack" collapsible dividing>
+			<example description="A table can be formatted to display complex structured data">
 				<html>
-					<p slot="description">A table can be formatted to display complex structured data</p>
 					<ui-message slot="description" state="info" size="small">
 						<p>Tables use <code>border-collapse: separate</code> to allow for tables to receive styles that cannot usually be applied to tables like <code>border-radius</code>. However this can cause some cell borders to appear missing with complex layouts that use <code>rowspan</code> or <code>colspan</code> and rows with varying column count.</p>
 						<p>A <code>structured</code> table does not support some style features, but can correctly display all valid HTML table content.</p>
@@ -388,7 +383,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Rows and cells" sticky collapsible dividing>
+		<section label="Rows and cells" sticky="stack" collapsible dividing>
 			<example description="`<ui-row>`s of `<ui-cell>`s, with no native table:  `header` on a row makes its cells the column headers, on a cell the row's name;  `footer` is a footer row;  `span` covers columns.  Click a header to sort.">
 				<table celled appearance="striped" sortable client-sort caption="Team members">
 					<row header>
@@ -458,7 +453,7 @@
 			</example>
 		</>
 
-		<section label="Row spanned" sticky collapsible dividing>
+		<section label="Row spanned" sticky="stack" collapsible dividing>
 			<example description="A `rowspanned` cell is a hidden stand-in for a cell spanning down from the row above, so every row keeps a full set of cells (and stacks right on phones).">
 				<html>
 					<ui-table celled>
@@ -530,7 +525,7 @@
 			</example>
 		</>
 
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="A cell or row may call attention to an error or a negative value.">
 				<html>
 					<ui-table celled>
@@ -570,7 +565,7 @@
 			</example>
 		</>
 
-		<section label="Warning" sticky collapsible dividing>
+		<section label="Warning" sticky="stack" collapsible dividing>
 			<example description="A cell or row may warn a user.">
 				<html>
 					<ui-table celled>
@@ -610,7 +605,7 @@
 			</example>
 		</>
 
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="A cell or row can be active or selected by a user.">
 				<html>
 					<ui-table celled>
@@ -650,7 +645,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A cell can be disabled.">
 				<html>
 					<ui-table celled>
@@ -690,7 +685,7 @@
 			</example>
 		</>
 
-		<section label="Colored Cells" sticky collapsible dividing>
+		<section label="Colored Cells" sticky="stack" collapsible dividing>
 			<example description="A cell can be styled by the central color palette colors.">
 				<html>
 					<ui-table celled>
@@ -730,11 +725,10 @@
 			</example>
 		</>
 
-		<section label="Marked" sticky collapsible dividing>
-			<example>
+		<section label="Marked" sticky="stack" collapsible dividing>
+			<example description="A cell or row can be marked by a colored left or right border.">
+				<message slot="description" state="warning" size="small"><html>Follow the class order: first the color name, then <code>marked</code>. This is to support <a href="#examples-states-colored-and-marked">colored and marked</a> cells.</html></message>
 				<html>
-					<p slot="description">A cell or row can be marked by a colored left or right border.</p>
-					<ui-message slot="description" state="warning" size="small">Follow the class order: first the color name, then <code>marked</code>. This is to support <a href="#examples-states-colored-and-marked">colored and marked</a> cells.</ui-message>
 					<ui-table celled>
 						<table>
 							<thead>
@@ -800,7 +794,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Single Line" sticky collapsible dividing id="variations-single-line">
+		<section label="Single Line" sticky="stack" collapsible dividing id="variations-single-line">
 			<example description="A table can specify that its cell contents should remain on a single line, and not wrap.">
 				<html>
 					<ui-table single-line>
@@ -839,7 +833,7 @@
 			</example>
 		</>
 
-		<section label="Fixed" sticky collapsible dividing>
+		<section label="Fixed" sticky="stack" collapsible dividing>
 			<example>
 				<html>
 					<p slot="description">A table can use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout"><code>table-layout: fixed</code></a>, a special faster form of table rendering that does not resize table cells based on content.</p>
@@ -874,8 +868,8 @@
 				</html>
 			</example>
 			<example>
+				<message slot="description" state="info" size="small"><html>Fixed <code>single-line</code> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</html></message>
 				<html>
-					<ui-message slot="description" state="info" size="small">Fixed <code>single-line</code> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</ui-message>
 					<ui-table single-line fixed celled>
 						<table>
 							<thead>
@@ -908,7 +902,7 @@
 			</example>
 		</>
 
-		<section label="Stacking" sticky collapsible dividing>
+		<section label="Stacking" sticky="stack" collapsible dividing>
 			<example description="A table can specify how it stacks table content responsively.">
 				<html>
 					<ui-table unstackable>
@@ -971,7 +965,7 @@
 			</example>
 		</>
 
-		<section label="Selectable Row" sticky collapsible dividing>
+		<section label="Selectable Row" sticky="stack" collapsible dividing>
 			<example description="A table can have its rows appear selectable.">
 				<html>
 					<ui-table selectable celled>
@@ -1053,11 +1047,10 @@
 			</example>
 		</>
 
-		<section label="Selectable Cell" sticky collapsible dividing>
-			<example>
+		<section label="Selectable Cell" sticky="stack" collapsible dividing>
+			<example description="A table cell can be selectable.">
+				<message slot="description" state="info" size="small"><html>Using an <code>a</code> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</html></message>
 				<html>
-					<p slot="description">A table cell can be selectable.</p>
-					<ui-message slot="description" state="info" size="small">Using an <code>a</code> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</ui-message>
 					<ui-table celled>
 						<table>
 							<thead>
@@ -1147,7 +1140,7 @@
 			</example>
 		</>
 
-		<section label="Text Alignment" sticky collapsible dividing>
+		<section label="Text Alignment" sticky="stack" collapsible dividing>
 			<example description="A table header, row, or cell can adjust its text alignment.">
 				<html>
 					<ui-table appearance="striped">
@@ -1182,7 +1175,7 @@
 			</example>
 		</>
 
-		<section label="Striped" sticky collapsible dividing id="variations-striped">
+		<section label="Striped" sticky="stack" collapsible dividing id="variations-striped">
 			<example description="A table can stripe alternate rows of content with a darker color to increase contrast.">
 				<html>
 					<ui-table appearance="striped">
@@ -1251,7 +1244,7 @@
 			</example>
 		</>
 
-		<section label="Celled" sticky collapsible dividing>
+		<section label="Celled" sticky="stack" collapsible dividing>
 			<example description="A table may be divided each row into separate cells.">
 				<html>
 					<ui-table celled>
@@ -1293,7 +1286,7 @@
 			</example>
 		</>
 
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A table can reduce its complexity to increase readability.">
 				<html>
 					<ui-table appearance="basic">
@@ -1327,8 +1320,8 @@
 				</html>
 			</example>
 			<example>
+				<message slot="description" state="info" size="small"><html>Very basic tables have loose padding unless they are also <a href="#examples-variations-sortable"><code>sortable</code></a> or <a href="#examples-variations-striped"><code>striped</code></a>.</html></message>
 				<html>
-					<ui-message slot="description" state="info" size="small">Very basic tables have loose padding unless they are also <a href="#examples-variations-sortable"><code>sortable</code></a> or <a href="#examples-variations-striped"><code>striped</code></a>.</ui-message>
 					<ui-table appearance="very-basic">
 						<table>
 							<thead>
@@ -1361,11 +1354,10 @@
 			</example>
 		</>
 
-		<section label="Collapsing Cell" sticky collapsible dividing>
-			<example>
+		<section label="Collapsing Cell" sticky="stack" collapsible dividing>
+			<example description="A cell can be collapsing so that it only uses as much space as required.">
+				<message slot="description" state="warning" size="small" icon="warning"><html>To ensure icons don't wrap to a separate line you must either specify <code>collapsing</code> on the widest row in the collapsing column, or on all rows.</html></message>
 				<html>
-					<p slot="description">A cell can be collapsing so that it only uses as much space as required.</p>
-					<ui-message slot="description" state="warning" size="small" icon="warning">To ensure icons don't wrap to a separate line you must either specify <code>collapsing</code> on the widest row in the collapsing column, or on all rows.</ui-message>
 					<ui-table>
 						<table>
 							<tbody>
@@ -1391,7 +1383,7 @@
 			</example>
 		</>
 
-		<section label="Column Count" sticky collapsible dividing>
+		<section label="Column Count" sticky="stack" collapsible dividing>
 			<example description="A table can specify its column count to divide its content evenly:  `columns=\"5\"`.">
 				<html>
 					<ui-table columns="5">
@@ -1443,11 +1435,10 @@
 			</example>
 		</>
 
-		<section label="Column Width" sticky collapsible dividing id="variations-column-width">
-			<example>
+		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
+			<example description="A table can specify the width of individual columns independently.">
+				<message slot="description" state="info" size="small"><html>Tables use a 16 column grid similar to <a href="/components/ui/ui-grid.html">the grid</a>: <code>class="ten wide"</code> on a header cell.</html></message>
 				<html>
-					<p slot="description">A table can specify the width of individual columns independently.</p>
-					<ui-message slot="description" state="info" size="small">Tables use a 16 column grid similar to <a href="/components/ui/ui-grid.html">the grid</a>: <code>class="ten wide"</code> on a header cell.</ui-message>
 					<ui-table>
 						<table>
 							<thead>
@@ -1482,7 +1473,7 @@
 			</example>
 		</>
 
-		<section label="Collapsing" sticky collapsible dividing>
+		<section label="Collapsing" sticky="stack" collapsible dividing>
 			<example description="A table can be collapsing, taking up only as much space as its rows.">
 				<html>
 					<ui-table collapsing>
@@ -1524,7 +1515,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A table can be given a color to distinguish it from other tables.">
 				<html>
 					<ui-table color="red">
@@ -1807,7 +1798,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A table's colors can be inverted.">
 				<html>
 					<ui-table inverted>
@@ -2129,11 +2120,10 @@
 			</example>
 		</>
 
-		<section label="Sortable" sticky collapsible dividing id="variations-sortable">
-			<example>
+		<section label="Sortable" sticky="stack" collapsible dividing id="variations-sortable">
+			<example description="A table may allow a user to sort contents by clicking on a table header.">
+				<message slot="description" state="info" size="small"><html>No plugin needed:  a header click (or Enter / Space) fires <code>ui-sorting</code>, and marks the column with sort-column, sort-direction and aria-sort. <code>client-sort</code> also reorders the rows; click a header to try it.</html></message>
 				<html>
-					<p slot="description">A table may allow a user to sort contents by clicking on a table header.</p>
-					<ui-message slot="description" state="info" size="small">No plugin needed:  a header click (or Enter / Space) fires <code>ui-sorting</code>, and marks the column with sort-column, sort-direction and aria-sort. <code>client-sort</code> also reorders the rows; click a header to try it.</ui-message>
 					<ui-table sortable celled client-sort>
 						<table>
 							<thead>
@@ -2236,7 +2226,7 @@
 			</example>
 		</>
 
-		<section label="Padded" sticky collapsible dividing>
+		<section label="Padded" sticky="stack" collapsible dividing>
 			<example description="A table may sometimes need to be more padded for legibility.">
 				<html>
 					<ui-table padding="md">
@@ -2293,7 +2283,7 @@
 			</example>
 		</>
 
-		<section label="Compact" sticky collapsible dividing>
+		<section label="Compact" sticky="stack" collapsible dividing>
 			<example description="A table may sometimes need to be more compact to make more rows visible at a time.">
 				<html>
 					<ui-table padding="compact">
@@ -2419,7 +2409,7 @@
 			</example>
 		</>
 
-		<section label="Attached" sticky collapsible dividing>
+		<section label="Attached" sticky="stack" collapsible dividing>
 			<example description="A table can be attached to other content on a page:  `attach=\"top\"`, `attach=\"both\"` (the middle) or `attach=\"bottom\"`.">
 				<html>
 					<ui-table attach="top">
@@ -2459,7 +2449,7 @@
 			</example>
 		</>
 
-		<section label="Table alignment" sticky collapsible dividing>
+		<section label="Table alignment" sticky="stack" collapsible dividing>
 			<example description="A table's cells can all share one text alignment (`align`);  `vertical-align` does the same vertically.">
 				<html>
 					<ui-table align="center" celled>
@@ -2489,7 +2479,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A table can also be small or large.">
 				<html>
 					<ui-table size="small">
@@ -2570,12 +2560,11 @@
 			</example>
 		</>
 
-		<section label="Scrolling" sticky collapsible dividing>
-			<example>
+		<section label="Scrolling" sticky="stack" collapsible dividing>
+			<example description="A table body can scroll vertically: `scrolling`, with the head and foot stuck.">
+				<message slot="description" state="warning" size="small"><html>Some table variants like <a href="#examples-variations-column-width">column width</a> or <a href="#examples-variations-single-line">single line</a> do not work with a scrolling table. If you need such combinations use a <a href="#examples-variations-stuck">stuck table</a> instead.</html></message>
+				<message slot="description" state="info" size="small"><html>Add <code>resizable</code> and a native resize drag handler will appear to the bottom right of the table body.</html></message>
 				<html>
-					<p slot="description">A table body can scroll vertically: <code>scrolling</code>, with the head and foot stuck.</p>
-					<ui-message slot="description" state="warning" size="small">Some table variants like <a href="#examples-variations-column-width">column width</a> or <a href="#examples-variations-single-line">single line</a> do not work with a scrolling table. If you need such combinations use a <a href="#examples-variations-stuck">stuck table</a> instead.</ui-message>
-					<ui-message slot="description" state="info" size="small">Add <code>resizable</code> and a native resize drag handler will appear to the bottom right of the table body.</ui-message>
 					<ui-table unstackable celled scrolling aria-label="People">
 						<table>
 							<thead>
@@ -2804,7 +2793,7 @@
 			</example>
 		</>
 
-		<section label="Overflowing" sticky collapsible dividing>
+		<section label="Overflowing" sticky="stack" collapsible dividing>
 			<example description="A table can scroll both ways when its content is too wide or too tall, with nothing stuck.  It takes the same height steps as `scrolling`.">
 				<html>
 					<ui-table overflowing="short" celled aria-label="Overflowing cells">
@@ -2927,12 +2916,10 @@
 			</example>
 		</>
 
-		<section label="Stuck" sticky collapsible dividing id="variations-stuck">
-			<example>
+		<section label="Stuck" sticky="stack" collapsible dividing id="variations-stuck">
+			<example description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
+				<message slot="description" state="info" size="small"><html>A stuck table possibly needs to be wrapped into an overflowing container like a <a href="/components/ui/ui-container.html">scrolling container</a> or <a href="/components/ui/ui-segment.html">scrolling segment</a>. If you don't want an extra wrapper, use <code>overflowing</code> on the table; this only works if the table's columns exceed the available width.</html></message>
 				<html>
-					<p slot="description">A table can scroll horizontally, with its head, foot, first or last column staying stuck (<code>stuck</code>).</p>
-					<p slot="description">You can freely stick any combination like <code>stuck="head first"</code>, <code>"foot first last"</code>, <code>"head foot first"</code>, <code>"first last"</code>, etc.</p>
-					<ui-message slot="description" state="info" size="small">A stuck table possibly needs to be wrapped into an overflowing container like a <a href="/components/ui/ui-container.html">scrolling container</a> or <a href="/components/ui/ui-segment.html">scrolling segment</a>. If you don't want an extra wrapper, use <code>overflowing</code> on the table; this only works if the table's columns exceed the available width.</ui-message>
 					<ui-container scrolling="short">
 						<ui-table stuck="head foot first last" unstackable celled aria-label="Jobs">
 							<table>

@@ -5,19 +5,17 @@
 	</>
 	<section-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#heading-levels">Heading levels</>
-				<ui-item link="#opening-and-closing">Opening and closing</>
-				<ui-item link="#content-from-a-file">Content from a file</>
-				<ui-item link="#sticky-titles">Sticky titles</>
-				<ui-item link="#slots">Slots</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#heading-levels">Heading levels</>
+			<item link="#opening-and-closing">Opening and closing</>
+			<item link="#content-from-a-file">Content from a file</>
+			<item link="#sticky-titles">Sticky titles</>
+			<item link="#slots">Slots</>
+			<item link="#events">Events</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 

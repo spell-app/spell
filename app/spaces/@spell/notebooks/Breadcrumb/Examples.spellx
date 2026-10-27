@@ -5,13 +5,11 @@
 	</>
 	<breadcrumb-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		name on a page are ambiguous.  `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
 	-->
 	<section label="Types">
-		<section label="Breadcrumb" sticky collapsible dividing>
+		<section label="Breadcrumb" sticky="stack" collapsible dividing>
 			<example description="A standard breadcrumb. Each `<ui-breadcrumb>` draws its own divider, so there is nothing to write between them.">
 				<breadcrumbs aria-label="Standard breadcrumb">
 					<breadcrumb link="#home">Home</breadcrumb>
@@ -40,7 +38,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Divider" sticky collapsible dividing>
+		<section label="Divider" sticky="stack" collapsible dividing>
 			<example description="A breadcrumb can contain a divider to show the relationship between sections, this can be formatted as an icon or text:  `divider` sets the text (`/` when unset), `divider-icon` an icon.">
 				<breadcrumbs aria-label="Text divider" divider="/">
 					<breadcrumb link="#home">Home</breadcrumb>
@@ -79,7 +77,7 @@
 			</example>
 		</>
 
-		<section label="Section" sticky collapsible dividing>
+		<section label="Section" sticky="stack" collapsible dividing>
 			<example description="A breadcrumb can contain sections that can either be formatted as a link (`link`) or text.">
 				<breadcrumbs aria-label="Text sections">
 					<breadcrumb>Home</breadcrumb>
@@ -88,7 +86,7 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="A section may be linkable or contain a link.">
 				<html>
 					<ui-breadcrumbs aria-label="Section holding a link">
@@ -101,7 +99,7 @@
 	</>
 
 	<section label="States">
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="A section can be active:  the current page, bold, never a link, with `aria-current=\"page\"`.">
 				<breadcrumbs aria-label="Active section">
 					<breadcrumb link="#products">Products</breadcrumb>
@@ -112,7 +110,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A breadcrumb can be inverted.">
 				<segment inverted>
 					<breadcrumbs inverted aria-label="Inverted links" divider-icon="chevron right">
@@ -130,7 +128,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A breadcrumb can vary in size.">
 				<breadcrumbs size="mini" aria-label="Mini" divider-icon="chevron right">
 					<breadcrumb link="#home">Home</breadcrumb>

@@ -5,16 +5,14 @@
 	</>
 	<nag-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#remembering-the-dismissal">Remembering the dismissal</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#behaviors">Behaviors</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#remembering-the-dismissal">Remembering the dismissal</>
+			<item link="#events">Events</>
+			<item link="#behaviors">Behaviors</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
@@ -63,9 +61,7 @@
 			nag.show() // ... and show it again
 			```
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings. The nag stays where it is written:  store the dismissal on a server from <code>ui-closed</>.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings. The nag stays where it is written:  store the dismissal on a server from <code>ui-closed</>.</></>
 	</>
 
 	<section label="Events">

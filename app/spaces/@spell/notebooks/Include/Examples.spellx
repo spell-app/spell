@@ -6,12 +6,10 @@
 	</>
 	<include-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,13 +18,13 @@
 		Page included:  `site/examples/release-notes.html`.
 	-->
 	<section label="Types">
-		<section label="Include" sticky collapsible dividing>
+		<section label="Include" sticky="stack" collapsible dividing>
 			<example description="An include fetches `source` (a page of THIS site) and shows its `<body>`, in its own shadow root:  the page's CSS stays out, inherited fonts, colours and tokens come in.  Its children show until it loads.">
 				<include source="/components/ui/examples/release-notes.html">Loading the release notes...</include>
 			</example>
 		</>
 
-		<section label="One part" sticky collapsible dividing>
+		<section label="One part" sticky="stack" collapsible dividing>
 			<example description="`select` shows only the first element a CSS selector matches.">
 				<include source="/components/ui/examples/release-notes.html" selector="#notes"/>
 			</example>
@@ -34,7 +32,7 @@
 	</>
 
 	<section label="States">
-		<section label="Another site" sticky collapsible dividing>
+		<section label="Another site" sticky="stack" collapsible dividing>
 			<example description="Only this site's pages can be included:  any other URL shows an error, and nothing is fetched.">
 				<include source="https://example.com/"/>
 			</example>
@@ -42,7 +40,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Page styles" sticky collapsible dividing>
+		<section label="Page styles" sticky="stack" collapsible dividing>
 			<example description="`page-styles` puts the included markup in the element's light DOM, where the page's stylesheets style it.">
 				<include source="/components/ui/examples/release-notes.html" selector="#notes" page-styles/>
 			</example>

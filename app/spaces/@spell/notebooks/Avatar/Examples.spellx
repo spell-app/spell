@@ -5,11 +5,9 @@
 	</>
 	<avatar-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-				<ui-item link="#content">Content</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#content">Content</>
 		</>
 	</>
 
@@ -19,7 +17,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Comment" sticky collapsible dividing>
+		<section label="Comment" sticky="stack" collapsible dividing>
 			<example description="A comment's avatar sits beside its content.">
 				<html>
 					<ui-comments>
@@ -38,7 +36,7 @@
 			</example>
 		</>
 
-		<section label="Card" sticky collapsible dividing>
+		<section label="Card" sticky="stack" collapsible dividing>
 			<example description="In a card, an avatar is a small round image before a name.">
 				<card>
 					<content><avatar src="/components/ui/images/avatar/small/jenny.jpg"/> Jenny Hess</content>
@@ -46,7 +44,7 @@
 			</example>
 		</>
 
-		<section label="Item" sticky collapsible dividing>
+		<section label="Item" sticky="stack" collapsible dividing>
 			<example description="In an item, a round image before a name.">
 				<items>
 					<item>
@@ -58,7 +56,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="`src` renders the image;  or slot your own `<img>`.">
 				<html>
 					<ui-comments>

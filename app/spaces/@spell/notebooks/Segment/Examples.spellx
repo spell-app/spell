@@ -5,13 +5,11 @@
 	</>
 	<segment-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#groups">Groups</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#groups">Groups</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,7 +18,7 @@
 		- Fomantic's `<img class="ui wireframe image">` => `<ui-image src>`.
 	-->
 	<section label="Types">
-		<section label="Segment" sticky collapsible dividing>
+		<section label="Segment" sticky="stack" collapsible dividing>
 			<example description="A segment of content.">
 				<segment>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -37,9 +35,7 @@
 				</segment>
 			</example>
 			<example>
-				<html>
-					<ui-message slot="description" state="info" size="small">To put buttons side by side in a placeholder (Fomantic's <code>inline</code> wrapper), group them in a <code>&lt;ui-buttons&gt;</code>.</ui-message>
-				</html>
+				<message slot="description" state="info" size="small"><html>To put buttons side by side in a placeholder (Fomantic's <code>inline</code> wrapper), group them in a <code>&lt;ui-buttons&gt;</code>.</html></message>
 				<segment placeholder="">
 					<header icon><icon name="search"/> We don't have any documents matching your query</header>
 					<buttons spacing="md">
@@ -69,7 +65,7 @@
 			</example>
 		</>
 
-		<section label="Raised" sticky collapsible dividing>
+		<section label="Raised" sticky="stack" collapsible dividing>
 			<example description="A segment may be formatted to raise above the page.">
 				<html>
 					<ui-segment appearance="raised">
@@ -79,7 +75,7 @@
 			</example>
 		</>
 
-		<section label="Stacked" sticky collapsible dividing>
+		<section label="Stacked" sticky="stack" collapsible dividing>
 			<example description="A segment can be formatted to show it contains multiple pages:  `appearance=\"tall-stacked\"` shows two.">
 				<html>
 					<ui-segment appearance="stacked">
@@ -96,11 +92,10 @@
 			</example>
 		</>
 
-		<section label="Piled" sticky collapsible dividing>
-			<example>
+		<section label="Piled" sticky="stack" collapsible dividing>
+			<example description="A segment can be formatted to look like a pile of pages.">
+				<message slot="description" state="info" size="small"><html>Fomantic's piled segments need a <code>z-index</code> on their offset container; a <code>&lt;ui-segment appearance="piled"&gt;</code> makes its own host the stacking context the pages sit behind, so nothing is needed.</html></message>
 				<html>
-					<p slot="description">A segment can be formatted to look like a pile of pages.</p>
-					<ui-message slot="description" state="info" size="small">Fomantic's piled segments need a <code>z-index</code> on their offset container; a <code>&lt;ui-segment appearance="piled"&gt;</code> makes its own host the stacking context the pages sit behind, so nothing is needed.</ui-message>
 					<ui-segment appearance="piled">
 						<ui-header level="4">A header</ui-header>
 						<p>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</p>
@@ -111,7 +106,7 @@
 			</example>
 		</>
 
-		<section label="Vertical Segment" sticky collapsible dividing>
+		<section label="Vertical Segment" sticky="stack" collapsible dividing>
 			<example description="A vertical segment formats content to be aligned as part of a vertical group.">
 				<segment appearance="vertical">
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -127,7 +122,7 @@
 	</>
 
 	<section label="Groups">
-		<section label="Segments" sticky collapsible dividing>
+		<section label="Segments" sticky="stack" collapsible dividing>
 			<example description="A group of segments can be formatted to appear together:  `<ui-segments>`.">
 				<html>
 					<ui-segments>
@@ -205,7 +200,7 @@
 			</example>
 		</>
 
-		<section label="Nested Segments" sticky collapsible dividing>
+		<section label="Nested Segments" sticky="stack" collapsible dividing>
 			<example description="A group of segments can be nested in another group of segments.">
 				<html>
 					<ui-segments>
@@ -306,7 +301,7 @@
 			</example>
 		</>
 
-		<section label="Raised Segments" sticky collapsible dividing>
+		<section label="Raised Segments" sticky="stack" collapsible dividing>
 			<example description="A group of segments can be raised.">
 				<html>
 					<ui-segments appearance="raised">
@@ -324,7 +319,7 @@
 			</example>
 		</>
 
-		<section label="Stacked Segments" sticky collapsible dividing>
+		<section label="Stacked Segments" sticky="stack" collapsible dividing>
 			<example description="A group of segments can be stacked.">
 				<html>
 					<ui-segments appearance="stacked">
@@ -342,7 +337,7 @@
 			</example>
 		</>
 
-		<section label="Piled Segments" sticky collapsible dividing>
+		<section label="Piled Segments" sticky="stack" collapsible dividing>
 			<example description="A group of segments can be piled.">
 				<html>
 					<ui-segments appearance="piled">
@@ -362,7 +357,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A segment may show its content is disabled.">
 				<segment disabled>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -370,7 +365,7 @@
 			</example>
 		</>
 
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="A segment may show its content is being loaded.">
 				<segment loading>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -387,7 +382,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A segment can have its colors inverted for contrast.">
 				<html>
 					<ui-segment inverted>
@@ -397,11 +392,10 @@
 			</example>
 		</>
 
-		<section label="Attached" sticky collapsible dividing>
-			<example>
+		<section label="Attached" sticky="stack" collapsible dividing>
+			<example description="A segment can be attached to other content on a page.">
+				<message slot="description" state="info" size="small"><html>Attached segments are designed to be used with other attached variations, like an attached <code>&lt;ui-header&gt;</code> or an attached <code>&lt;ui-message&gt;</code>.</html></message>
 				<html>
-					<p slot="description">A segment can be attached to other content on a page.</p>
-					<ui-message slot="description" state="info" size="small">Attached segments are designed to be used with other attached variations, like an attached <code>&lt;ui-header&gt;</code> or an attached <code>&lt;ui-message&gt;</code>.</ui-message>
 					<ui-segment attach="top">
 						<p>This segment is on top</p>
 					</ui-segment>
@@ -451,7 +445,7 @@
 			</example>
 		</>
 
-		<section label="Padded" sticky collapsible dividing>
+		<section label="Padded" sticky="stack" collapsible dividing>
 			<example description="A segment can increase its padding.">
 				<segment padding="md">
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -464,7 +458,7 @@
 			</example>
 		</>
 
-		<section label="Fitted" sticky collapsible dividing>
+		<section label="Fitted" sticky="stack" collapsible dividing>
 			<example description="A segment can remove its padding, vertically or horizontally.">
 				<html>
 					<ui-segment padding="none">
@@ -480,7 +474,7 @@
 			</example>
 		</>
 
-		<section label="Compact" sticky collapsible dividing>
+		<section label="Compact" sticky="stack" collapsible dividing>
 			<example description="A segment may take up only as much space as is necessary.">
 				<html>
 					<ui-segment padding="compact">
@@ -502,7 +496,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A segment can be colored.">
 				<segment color="red">Red</segment>
 				<segment color="orange">Orange</segment>
@@ -535,7 +529,7 @@
 			</example>
 		</>
 
-		<section label="Emphasis" sticky collapsible dividing>
+		<section label="Emphasis" sticky="stack" collapsible dividing>
 			<example description="A segment can be formatted to appear more or less noticeable.">
 				<html>
 					<ui-segment>
@@ -579,12 +573,9 @@
 			</example>
 		</>
 
-		<section label="Circular" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A segment can be circular.</p>
-					<ui-message slot="description" state="info" size="small">A circular segment will most likely have to have its content manually sized to be equal width and height, otherwise it will flow to the size of your content. The host is <code>display: contents</code>, so size the box through <code>::part(segment)</code> (see the Usage tab).</ui-message>
-				</html>
+		<section label="Circular" sticky="stack" collapsible dividing>
+			<example description="A segment can be circular.">
+				<message slot="description" state="info" size="small"><html>A circular segment will most likely have to have its content manually sized to be equal width and height, otherwise it will flow to the size of your content. The host is <code>display: contents</code>, so size the box through <code>::part(segment)</code> (see the Usage tab).</html></message>
 				<segment appearance="circular">
 					<header level="2">Buy Now <header>$10.99</header></header>
 				</segment>
@@ -594,7 +585,7 @@
 			</example>
 		</>
 
-		<section label="Clearing" sticky collapsible dividing>
+		<section label="Clearing" sticky="stack" collapsible dividing>
 			<example description="A segment can clear floated content, such as a floated image.">
 				<segment clearing>
 					<image floated="right" size="tiny" src="/components/ui/images/wireframe/square-image.png" alt=""/>
@@ -602,7 +593,7 @@
 			</example>
 		</>
 
-		<section label="Left and Right" sticky collapsible dividing>
+		<section label="Left and Right" sticky="stack" collapsible dividing>
 			<example description="A segment has no `floated` any more:  a `<ui-stack>` puts one segment at the left and one at the right.">
 				<html>
 					<ui-stack direction="horizontal" justify="between">
@@ -617,7 +608,7 @@
 			</example>
 		</>
 
-		<section label="Text Alignment" sticky collapsible dividing>
+		<section label="Text Alignment" sticky="stack" collapsible dividing>
 			<example description="A segment can have its text aligned to a side.">
 				<segment align="right">Right</segment>
 				<segment align="left">Left</segment>
@@ -625,7 +616,7 @@
 			</example>
 		</>
 
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A basic segment has no special formatting.">
 				<html>
 					<ui-segment appearance="basic">
@@ -635,11 +626,10 @@
 			</example>
 		</>
 
-		<section label="Scrolling" sticky collapsible dividing>
-			<example>
+		<section label="Scrolling" sticky="stack" collapsible dividing>
+			<example description="A scrolling segment has a predefined height to allow its content to be scrollable.">
+				<message slot="description" size="small"><html>Add <code>resizable</code> to a scrolling segment and a native resize handle appears at its bottom right.</html></message>
 				<html>
-					<p slot="description">A scrolling segment has a predefined height to allow its content to be scrollable.</p>
-					<ui-message slot="description" size="small">Add <code>resizable</code> to a scrolling segment and a native resize handle appears at its bottom right.</ui-message>
 					<ui-segment scrolling>
 						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 						<p>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</p>
@@ -664,7 +654,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A segment can vary in size.">
 				<segment size="mini">Mini</segment>
 				<segment size="tiny">Tiny</segment>

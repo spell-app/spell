@@ -5,10 +5,8 @@
 	</>
 	<meta-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
 		</>
 	</>
 
@@ -18,7 +16,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Card" sticky collapsible dividing>
+		<section label="Card" sticky="stack" collapsible dividing>
 			<example description="A card's meta:  small and muted, under its header.">
 				<html>
 					<ui-card>
@@ -34,7 +32,7 @@
 			</example>
 		</>
 
-		<section label="Item" sticky collapsible dividing>
+		<section label="Item" sticky="stack" collapsible dividing>
 			<example description="An item's meta:  each piece spaced apart.">
 				<html>
 					<ui-items>
@@ -52,7 +50,7 @@
 			</example>
 		</>
 
-		<section label="Feed" sticky collapsible dividing>
+		<section label="Feed" sticky="stack" collapsible dividing>
 			<example description="A feed event's meta:  a small line under its summary.">
 				<html>
 					<ui-feed>
@@ -69,7 +67,7 @@
 			</example>
 		</>
 
-		<section label="Comment" sticky collapsible dividing>
+		<section label="Comment" sticky="stack" collapsible dividing>
 			<example description="A comment's metadata:  inline after the author.">
 				<html>
 					<ui-comments>

@@ -5,13 +5,11 @@
 	</>
 	<icon-picker-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#its-icons">Its icons</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#its-icons">Its icons</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
 		</>
 	</>
 
