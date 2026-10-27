@@ -132,6 +132,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
     compares what it prints (epic `readme` P16;  WWOD §6)
+  - `yarn readme:pictures` (`spell readme pictures [page...]`) draws each `html example` block they show, light and
+    dark, into a picture under it;  the check fails a stale one (epic `ui-gaps` P14, from epic `epic-engine` Q28)
   - `yarn mermaid:pretty` styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md))
 - Three ways to make a repo do something:  the `spell` CLI, Claude skills, yarn scripts.
   - Their map, one row per operation:  [the commands page](spell.epics/guides/dev/commands/commands.html).
@@ -490,6 +492,14 @@ The kit is always there, so no `needs` names it.
     - A merge untracks any `main` still commits.
   - It reports snapshot entries with a value NEITHER side had:
     new behaviour nobody reviewed;  show them to Owen.
+  - Then it renames the old Spell UI names the branch still writes (`<ui-docs-toc>` => `<ui-toc>`):
+    `spell ui rename --write` over the branch's files, once every repo is merged (epic `epic-engine` I143).
+    - The branch's files:  what the merged branch differs from `main` in;  `main`'s own were renamed on `main`.
+    - Each repo's run is the WORKTREE's kit (`node bin/spell.mjs`), never main's.
+    - Committed on its own in each repo:  "merge-main:  old Spell UI names renamed (spell ui rename)".
+    - Never generated files, never the content folder.
+    - Listed under "renamed old names in N file(s)";  a kit with no `ui rename`, or a failure, is one line,
+      and the merge stands.
   - NOT `merge=ours`:  it drops the other side's changes silently,
     and GitHub ignores merge drivers anyway.
 - Shelve a session's work while another session changes what it depends on:

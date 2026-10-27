@@ -238,14 +238,18 @@ and a new one fails it until it's added there:  every exception is seen in revie
 ([LintPatterns.test.ts](https://github.com/spell-app/spell-ui/blob/main/tests/tools/LintPatterns.test.ts)).
 Not yet elsewhere:  spell-epic's three exceptions get only the report of an unused one, and spell-app has none.
 
-Even this page is linted, and its examples run, by three scripts at the kit's root:
+Even this page is linted, and its examples run, by four scripts at the kit's root:
 - `yarn readme:check` ([readme-check.ts](tools/readme-check.ts)) follows every link to its file and heading,
   wants an italic caption under every picture, and fails stale names.
 - `yarn readme:test` ([readme-test.ts](tools/readme-test.ts)) runs every command a page shows with its output,
   and fails one that prints something else.
 - `yarn mermaid:pretty` ([mermaid-pretty.ts](tools/mermaid-pretty.ts)) gives every Mermaid picture the Spell look,
   in place;  the check fails a picture it hasn't styled.
-- The first two are `spell readme check` and `spell readme test` too;  both take page paths, from the kit's root.
+- `yarn readme:pictures` ([readme-pictures.ts](tools/readme-pictures.ts)) draws every `html example` block,
+  headlessly in light and dark, and writes the picture under it:  GitHub runs no custom elements, so it shows that.
+  The check fails a picture older than its markup.
+- Three of them are `spell readme check`, `spell readme test` and `spell readme pictures` too;
+  each takes page paths, from the kit's root.
 
 A tested example is an `sh` block, then a fold titled Output holding a `text` block,
 the way `yarn vp --version` is shown above:
