@@ -36679,6 +36679,424 @@
       "page": false
     },
     {
+      "tag": "ui-docs-theme-bench",
+      "name": "Docs theme bench",
+      "folder": "ui-docs-theme-bench",
+      "topics": [
+        "documentation",
+        "forms",
+        "views"
+      ],
+      "aka": [
+        "theme bench",
+        "theme workbench",
+        "look tuner",
+        "token tuner",
+        "theme playground",
+        "design tokens"
+      ],
+      "description": "A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file.",
+      "noun": "theme bench",
+      "attributes": [
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "bench",
+          "description": "The whole bench:  the bar, the pages and the tuning."
+        },
+        {
+          "name": "bar",
+          "description": "The top bar:  its title, the theme menu, the layout and the titles' scroll."
+        },
+        {
+          "name": "pages",
+          "description": "The pages' grid."
+        },
+        {
+          "name": "page",
+          "description": "One page:  its title row and its frame."
+        },
+        {
+          "name": "tuning",
+          "description": "The tuning column:  every token, by group, and the changes."
+        },
+        {
+          "name": "token",
+          "description": "One token's row:  its name, its control, every theme's value, who reads it."
+        }
+      ],
+      "states": [
+        {
+          "name": "tuned",
+          "description": "Some token of the theme shown is tuned."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "label",
+          "text": "Theme bench",
+          "description": "The bench's title, and its accessible name."
+        },
+        {
+          "key": "lede",
+          "text": "Every place in one theme.  Tune a token and watch them all follow.",
+          "description": "The line under the title."
+        },
+        {
+          "key": "layout",
+          "text": "Show",
+          "description": "Accessible name of the layout's menu."
+        },
+        {
+          "key": "grid",
+          "text": "All four",
+          "description": "The layout showing every page."
+        },
+        {
+          "key": "epic",
+          "text": "Epic page",
+          "description": "The epic page's title."
+        },
+        {
+          "key": "ui",
+          "text": "Spell UI",
+          "description": "Spell UI's docs page's title."
+        },
+        {
+          "key": "notebook",
+          "text": "Notebook",
+          "description": "The notebook's title."
+        },
+        {
+          "key": "editor",
+          "text": "Editor",
+          "description": "The editor's title."
+        },
+        {
+          "key": "titles",
+          "text": "Section titles",
+          "description": "Accessible name of the titles' scroll menu."
+        },
+        {
+          "key": "rest",
+          "text": "At rest",
+          "description": "Scroll each page to its top, its titles at rest."
+        },
+        {
+          "key": "stuck",
+          "text": "Stuck",
+          "description": "Scroll each page so its section titles stick."
+        },
+        {
+          "key": "reload",
+          "text": "Reload",
+          "description": "Reload a page, or all of them."
+        },
+        {
+          "key": "open",
+          "text": "Open in a tab",
+          "description": "Open a page in a tab of its own."
+        },
+        {
+          "key": "noEditor",
+          "text": "The editor isn't running:  it starts with the page server.",
+          "description": "Shown in an editor page's frame when the editor app can't be reached."
+        },
+        {
+          "key": "find",
+          "text": "Find a token",
+          "description": "Placeholder of the token filter."
+        },
+        {
+          "key": "loadingPage",
+          "text": "Loading the page…",
+          "description": "Over a page's frame until it's drawn in the theme."
+        },
+        {
+          "key": "loading",
+          "text": "Reading the theme files…",
+          "description": "Shown while the theme files load."
+        },
+        {
+          "key": "failed",
+          "text": "The theme files didn't load:  {error}",
+          "description": "Shown when they can't."
+        },
+        {
+          "key": "groupSurfaces",
+          "text": "Surfaces",
+          "description": "Group:  the page, panels and bars (`surfaces`)."
+        },
+        {
+          "key": "groupBar",
+          "text": "Bars",
+          "description": "Group:  bars over the page (`components.bar`)."
+        },
+        {
+          "key": "groupMenu",
+          "text": "Menus and page tabs",
+          "description": "Group:  `components.menu`."
+        },
+        {
+          "key": "groupSection",
+          "text": "Section titles",
+          "description": "Group:  `components.section`."
+        },
+        {
+          "key": "groupOwn",
+          "text": "The theme's own",
+          "description": "Group:  the theme's private tokens (`own`)."
+        },
+        {
+          "key": "groupRadii",
+          "text": "Corners",
+          "description": "Group:  `radii`."
+        },
+        {
+          "key": "groupShadows",
+          "text": "Shadows",
+          "description": "Group:  `shadows`."
+        },
+        {
+          "key": "groupBorders",
+          "text": "Borders",
+          "description": "Group:  `borders`."
+        },
+        {
+          "key": "groupDocsNav",
+          "text": "Docs side column",
+          "description": "Group:  `components.docs-nav`."
+        },
+        {
+          "key": "groupEditor",
+          "text": "The editor's own",
+          "description": "Group:  the editor app's tokens (`--spell-*`), in its own sheet, not a theme file."
+        },
+        {
+          "key": "themesRow",
+          "text": "Every theme",
+          "description": "Accessible name of a token's row of theme values."
+        },
+        {
+          "key": "readBy",
+          "text": "Read by",
+          "description": "Accessible name of a token's row of the places that read it."
+        },
+        {
+          "key": "readsTip",
+          "text": "{place} reads it",
+          "description": "A reader's tip:  the page reads the token."
+        },
+        {
+          "key": "overridesTip",
+          "text": "{place} reads it, and sets its own on some of its elements:  a tuning doesn't reach those",
+          "description": "A reader's tip:  the page also sets the token below the page's root."
+        },
+        {
+          "key": "notReadTip",
+          "text": "{place} doesn't read it",
+          "description": "A reader's tip:  the page never reads it."
+        },
+        {
+          "key": "unknownTip",
+          "text": "{place} hasn't loaded yet",
+          "description": "A reader's tip:  no answer from the page yet."
+        },
+        {
+          "key": "notSet",
+          "text": "not set:  the base theme's",
+          "description": "A theme that doesn't set the token."
+        },
+        {
+          "key": "reset",
+          "text": "Reset",
+          "description": "Put a token back to the theme's own value."
+        },
+        {
+          "key": "resetAll",
+          "text": "Reset all",
+          "description": "Put every token of the theme shown back."
+        },
+        {
+          "key": "alpha",
+          "text": "Opacity",
+          "description": "Accessible name of a colour's opacity slider."
+        },
+        {
+          "key": "value",
+          "text": "Value",
+          "description": "Accessible name of a token's text field."
+        },
+        {
+          "key": "changes",
+          "text": "Changes",
+          "description": "The section of what's tuned, to copy into the files."
+        },
+        {
+          "key": "noChanges",
+          "text": "Nothing tuned in {theme} yet.",
+          "description": "The changes section, while nothing is tuned in the theme shown."
+        },
+        {
+          "key": "copy",
+          "text": "Copy",
+          "description": "Copy the changes."
+        },
+        {
+          "key": "copied",
+          "text": "Copied",
+          "description": "Shown for a moment after a copy."
+        },
+        {
+          "key": "tunedIn",
+          "text": "Tuned in {scheme}",
+          "description": "A token's tip:  its tuned value applies to this scheme only."
+        }
+      ],
+      "mainTag": "ui-docs-theme-bench",
+      "main": true,
+      "page": false
+    },
+    {
       "tag": "ui-docs-toc",
       "name": "Docs toc",
       "folder": "ui-docs-toc",
@@ -39229,6 +39647,18 @@
           "type": "color"
         }
       ]
+    },
+    "ui-docs-theme-bench": {
+      "folder": "ui-docs-theme-bench",
+      "mainTag": "ui-docs-theme-bench",
+      "title": "Docs theme bench",
+      "summary": "A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file.",
+      "status": "done",
+      "docs": true,
+      "tags": [
+        "ui-docs-theme-bench"
+      ],
+      "tokens": []
     },
     "ui-docs-toc": {
       "folder": "ui-docs-toc",

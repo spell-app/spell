@@ -156,6 +156,12 @@
       ]
     },
     {
+      "path": "theme-bench.html",
+      "title": "Theme bench",
+      "summary": "Spell's real pages side by side in one theme:  tune the tokens behind their tabs, section titles and surfaces, live.",
+      "sections": []
+    },
+    {
       "path": "theming.html",
       "title": "Theming",
       "summary": "Tokens, layers, the app stylesheet and Fomantic's themes:  restyle everything from CSS.",
