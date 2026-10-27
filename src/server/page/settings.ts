@@ -327,20 +327,29 @@ export function engineRoutes(settings: PageServerSettings): EngineRoute[] {
  */
 export const BESIDE_PREFIX = "/_beside"
 
+/** A level further up than the checkout's parent, in a `BESIDE_PREFIX` URL (`folderUrl()`). */
+const UP = "_up"
+
 /**
  * The URL path a settings folder (relative to the checkout) is served at, no trailing `/`:  inside the checkout its
  * own path (`app/docs` => `/app/docs`), beside it under `BESIDE_PREFIX` (`../ui/docs` => `/_beside/ui/docs`).
  * - the checkout itself:  `""`
- * - throws a `TypeError` for one further up than the checkout's parent (`../../x`)
+ * - further up than the checkout's parent, an `_up/` a level (`../../x` => `/_beside/_up/x`):  each is mounted on its
+ *   own, so its URL only has to be unique
  */
 export function folderUrl(folder: string): string {
   const path = posix.normalize(folder.replace(/^\/+/, "")).replace(/\/+$/, "")
   if (path === "." || path === "") return ""
   if (path === ".." || !path.startsWith("../")) return path === ".." ? BESIDE_PREFIX : `/${path}`
-  const beside = path.slice("../".length)
-  if (beside === ".." || beside.startsWith("../"))
-    throw new TypeError(`folderUrl():  '${folder}' is above the checkout's parent;  only a folder beside it is served`)
-  return `${BESIDE_PREFIX}/${beside}`
+  // each level further up than the parent is an `_up/` (a project beside the kit, from a kit worktree:
+  // `../../spell-brand.worktrees/x` => `/_beside/_up/spell-brand.worktrees/x`;  epic `repo-split` P20)
+  let beside = path.slice("../".length)
+  let up = ""
+  while (beside === ".." || beside.startsWith("../")) {
+    up += `${UP}/`
+    beside = beside === ".." ? "" : beside.slice("../".length)
+  }
+  return `${BESIDE_PREFIX}/${up}${beside}`.replace(/\/$/, "")
 }
 
 /** Is settings folder `folder` outside the checkout (`../ui/docs`)? */

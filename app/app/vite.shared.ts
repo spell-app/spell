@@ -179,7 +179,7 @@ export const SHARED_DEFAULTS: Readonly<Record<string, string>> = { [H_PACKAGE]: 
 const SHARED_H = "\0spell-shared-h"
 
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
-const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell-ui|spell\/element)(\/|$)/
+const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
 /**
  * For a build that takes Solid and `spell-ui` from `SHARED_SOLID`'s files beside it, instead of bundling its own:

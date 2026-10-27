@@ -531,7 +531,7 @@ describe("PageServer", () => {
       "/_beside/ui/docs",
       ""
     ])
-    expect(() => folderUrl("../../x")).toThrow(/above the checkout's parent/)
+    expect(folderUrl("../../x/y")).toBe("/_beside/_up/x/y")
   })
 
   it("serves no component sets and no engine routes when its root's settings name none", () => {
