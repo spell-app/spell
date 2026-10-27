@@ -103,15 +103,33 @@ export class ActionMenus {
     ActionMenus.closeOpenMenu = undefined
   }
 
-  /** A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups. */
+  /**
+   * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups.
+   * - An action's shortcut goes on as its `shortcut` attribute, in Spell UI's words (`shortcutForUI()`).
+   */
   static itemsFor(items: readonly MenuItem[]): HTMLElement[] {
     return items.map((item) => {
       const element = document.createElement(item.kind === "action" ? ACTION_TAG : ITEM_TAG)
       element.setAttribute(MADE, "")
       if (item.kind === "separator") element.setAttribute("type", "divider")
-      else Object.assign(element, { action: item })
+      else {
+        Object.assign(element, { action: item })
+        if (item.shortcut) element.setAttribute(SHORTCUT, ActionMenus.shortcutForUI(item.shortcut))
+      }
       return element
     })
+  }
+
+  /**
+   * A spell shortcut (`meta+D`) in Spell UI's words (`mod+D`).
+   * - Spell's `meta` is Command on a Mac and Control elsewhere (epic `elemental-spell` Q31);
+   *   Spell UI's is the Meta key itself, and its `mod` is spell's `meta` (epic `coherence`, sweep 2).
+   */
+  static shortcutForUI(shortcut: string): string {
+    return shortcut
+      .split("+")
+      .map((key) => (SPELL_META.test(key.trim()) ? "mod" : key))
+      .join("+")
   }
 
   ////////////////
@@ -155,6 +173,12 @@ const CONTEXT_MENU = "context-menu"
 
 /** Marks the elements made here, so a menu filled again takes them away first. */
 const MADE = "data-spell-action-menu"
+
+/** `<ui-action>`'s own shortcut, which wins over its action's. */
+const SHORTCUT = "shortcut"
+
+/** Spell's Command-or-Control key, in a shortcut:  `meta`. */
+const SPELL_META = /^meta$/i
 
 /** The tags a menu is drawn with. */
 const MENU_TAG = "ui-menu"
