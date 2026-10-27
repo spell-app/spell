@@ -22,6 +22,9 @@ import { worktreeHref } from "spell/server/liveClient"
  *     the lit tab says where the page is, the page's own title what it is
  *   - narrow (720px or less:  VS Code's side bar, a phone):  the tabs scroll sideways;
  *     the pages' own eyebrow crumbs hide at that width
+ *     - a `‹` / `›` at each end while there's more that way, over the row (as Spell UI's `<ui-toolbar>`):
+ *       a click scrolls most of a row;  out of the Tab order, the tabs themselves are what a keyboard reaches
+ *       (epic `epic-engine` I138:  the row stopped at Epic/UI, nothing saying more was past it)
  *   - the checkout serving it:  `⎇ <worktree or branch>` (served pages only)
  *   - "open in VS Code":  a `vscode://file/...` link to the page's source
  *   - edit mode (pages the page server serves):  hover a section, edit its source in place -- `<spell-section-editor>`
@@ -91,6 +94,9 @@ export class SiteHeader extends HTMLElement {
    */
   private stopWatchingScheme?: () => void
 
+  /** follows the tabs' row while connected:  its size and its tabs', for the `‹` / `›` (`showScrollKeys()`) */
+  private readonly tabsResize = new ResizeObserver(() => this.showScrollKeys())
+
   /** the scheme the icon shows now, so `<html>` class changes that keep it re-draw nothing */
   private drawnScheme?: ColorSchemeName
 
@@ -127,6 +133,7 @@ export class SiteHeader extends HTMLElement {
     this.stopWatchingScheme = undefined
     this.pageScheme.disconnect()
     this.ownChildren.disconnect()
+    this.tabsResize.disconnect()
   }
 
   /** a compact row inside the page's own chrome, not the fixed bar (the `docked` attribute) */
@@ -217,7 +224,11 @@ export class SiteHeader extends HTMLElement {
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
   <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
-  <nav part="nav" aria-label="Site">${links}</nav>
+  <div class="tabs">
+    <button class="scroll" data-scroll="-1" tabindex="-1" aria-hidden="true" title="${SCROLL_BACK}">‹</button>
+    <nav part="nav" aria-label="Site">${links}</nav>
+    <button class="scroll" data-scroll="1" tabindex="-1" aria-hidden="true" title="${SCROLL_ON}">›</button>
+  </div>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
   <slot name="${THEME_SLOT}"></slot>${scheme}
@@ -226,6 +237,34 @@ export class SiteHeader extends HTMLElement {
     if (schemeButton) schemeButton.onclick = () => this.flipScheme()
     const editButton = shadow.querySelector<HTMLButtonElement>(`[data-action="edit"]`)
     if (editButton) editButton.onclick = () => this.toggleEdit()
+    this.wireScrollKeys()
+  }
+
+  /**
+   * The tabs' `‹` / `›`:  each scrolls the row by most of its width;  shown while there's more that way.
+   * - SIDE EFFECT:  the lit tab scrolled into the row, once drawn
+   * - never `docked`:  its tabs wrap, or the page's own bar scrolls them
+   */
+  private wireScrollKeys(): void {
+    const nav = this.shadowRoot!.querySelector<HTMLElement>("nav")
+    if (!nav || this.docked) return
+    nav.onscroll = () => this.showScrollKeys()
+    for (const key of this.shadowRoot!.querySelectorAll<HTMLButtonElement>("[data-scroll]"))
+      key.onclick = () =>
+        nav.scrollBy({ left: Number(key.dataset.scroll) * nav.clientWidth * SCROLL_SHARE, behavior: "smooth" })
+    this.tabsResize.disconnect()
+    this.tabsResize.observe(nav)
+    nav.querySelector<HTMLElement>(`[aria-current="page"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" })
+    this.showScrollKeys()
+  }
+
+  /** Show `‹` while the tabs' row can scroll back, `›` while it can scroll on (`data-more` on `.tabs`). */
+  private showScrollKeys(): void {
+    const nav = this.shadowRoot?.querySelector<HTMLElement>("nav")
+    const tabs = nav?.parentElement
+    if (!nav || !tabs) return
+    const more = [nav.scrollLeft > 1 && "start", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 1 && "end"]
+    tabs.dataset.more = more.filter(Boolean).join(" ")
   }
 
   /**
@@ -284,6 +323,13 @@ const THEME_SLOT = "theme"
 
 /** This tab's preferences:  edit mode, `spell-site:edit`. */
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
+
+/** How much of the tabs' row one `‹` / `›` click scrolls:  most of it, so the tab cut at its end shows whole. */
+const SCROLL_SHARE = 0.8
+
+/** The `‹` / `›` buttons' tooltips. */
+const SCROLL_BACK = "Scroll the tabs back"
+const SCROLL_ON = "More tabs"
 
 /** Edit mode on, as kept:  `1`, as it always was. */
 const EDIT_ON = 1
@@ -363,6 +409,8 @@ header {
   display: flex; align-items: center; gap: 12px; padding: 0 16px;
   font: 500 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: light-dark(#1d1d22, #ececf1);
+  /* the fill under the tabs' ‹ / ›, which hide the tab they sit on:  the page's, else opaque */
+  --_fill: var(--ui-bar-background, var(--spell-site-header-fill, light-dark(#fff, #18181c)));
   background: var(--ui-bar-background, var(--spell-site-header-fill, light-dark(rgb(255 255 255 / 0.86), rgb(24 24 28 / 0.86))));
   backdrop-filter: var(--ui-bar-filter, saturate(1.4) blur(10px));
   -webkit-backdrop-filter: var(--ui-bar-filter, saturate(1.4) blur(10px));
@@ -373,6 +421,19 @@ a { color: inherit; text-decoration: none; }
 .brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
 .brand svg { display: block; height: 26px; width: auto; }
 nav { display: flex; gap: 2px; }
+.tabs { position: relative; display: flex; min-width: 0; }
+/* the tabs' ‹ / ›:  over the row's ends, the row fading out under them;  only while there's more that way */
+.scroll {
+  position: absolute; inset-block: 0; z-index: 1; display: none; place-items: center; width: 26px; padding: 0;
+  border: 0; color: inherit; font-size: 18px; font-weight: 600; line-height: 1; cursor: pointer;
+}
+.scroll[data-scroll="-1"] {
+  left: 0; background: linear-gradient(to right, var(--_fill) 55%, transparent);
+}
+.scroll[data-scroll="1"] {
+  right: 0; background: linear-gradient(to left, var(--_fill) 55%, transparent);
+}
+.tabs[data-more~="start"] > .scroll[data-scroll="-1"], .tabs[data-more~="end"] > .scroll[data-scroll="1"] { display: grid; }
 .tab { padding: 7px 10px; border-radius: 999px; color: light-dark(#55555f, #a9a9b6); white-space: nowrap; }
 .tab:hover { background: var(--ui-menu-hover-background, light-dark(#f0eef8, #2c2a38)); color: inherit; }
 .tab[aria-current="page"] {
@@ -405,6 +466,7 @@ nav { display: flex; gap: 2px; }
   font-size: 13px; background: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none;
 }
 :host([docked]) nav { flex-wrap: wrap; }
+:host([docked]) .tabs { display: contents; }
 :host([docked]) .brand svg { height: 20px; }
 :host([docked]) .tab { padding: 5px 8px; }
 :host([docked]) .tool { width: 26px; height: 26px; }
@@ -413,6 +475,7 @@ nav { display: flex; gap: 2px; }
    the pages' own eyebrow crumbs hide at the same width (spell-doc.css, <epic-page>'s Crumbs.css) */
 @media (max-width: 720px) {
   header { gap: 6px; padding: 0 8px; }
+  .tabs { flex: 1; }
   nav { overflow-x: auto; flex: 1; scrollbar-width: none; }
   .spacer { display: none; }
   .tab { padding: 7px 8px; }
