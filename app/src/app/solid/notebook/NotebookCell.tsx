@@ -19,7 +19,8 @@ import type { PageCell } from "./NotebookPageCells"
  *   example's frame (`<ExampleCode>`).
  * - `html`, `member`:  their code;  an `<html>` block's drawing under it.
  * - Its errors, from its last edit, under its code:  what's drawn stays the last good drawing.
- * - Clicked, or tabbed into:  selected, ringed, what the pane header's ⋯ menu acts on.
+ * - Clicked, or tabbed into:  selected, what the pane header's ⋯ menu acts on;  no ring round it (Owen, 2026-10-27:
+ *   "focus ring is distracting")
  ****************/
 export function NotebookCell(props: {
   controller: NotebookController
