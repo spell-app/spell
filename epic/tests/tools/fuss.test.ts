@@ -169,8 +169,8 @@ describe("jargon", () => {
   })
 
   test("never inside a code span;  in HTML pages too", () => {
-    expect(found("/kit/spell-ui/a.md", "Made by `the fork` itself.\n")).toEqual([])
-    expect(found("/kit/spell-ui/a.html", "<p>Made by the fork.</p>\n")).toEqual([[1, "jargon"]])
+    expect(found("/kit/ui/a.md", "Made by `the fork` itself.\n")).toEqual([])
+    expect(found("/kit/ui/a.html", "<p>Made by the fork.</p>\n")).toEqual([[1, "jargon"]])
   })
 })
 
