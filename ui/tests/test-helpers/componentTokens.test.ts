@@ -45,7 +45,13 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-message-radius": "a box shown in the frame rounds less than the frame's ring:  its corner, less the padding",
     "--ui-code-border": "the code pane's `<ui-code>` sits on the frame's own card:  no border of its own",
     "--ui-code-background": "the code pane's `<ui-code>` sits on the frame's own card:  no fill of its own",
-    "--ui-code-padding": "the code pane's `<ui-code>`:  room on the right for its copy icon"
+    "--ui-code-padding": "the code pane's `<ui-code>`:  room on the right for its copy icon",
+    "--ui-example-tool-size":
+      "the `tools` row hands the code button's look down to the page's buttons slotted in it, for them to read",
+    "--ui-example-tool-radius":
+      "the `tools` row hands the code button's look down to the page's buttons slotted in it, for them to read",
+    "--ui-example-tool-background":
+      "the `tools` row hands the code button's look down to the page's buttons slotted in it, for them to read"
   },
   "ui-toc/UIToc.css": {
     "--ui-header-margin-top": "its heading shares the head row with the toggle:  the nested header's own margins go",
