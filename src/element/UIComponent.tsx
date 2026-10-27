@@ -348,6 +348,15 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
+   * The shared `target`:  where the element's `link` opens (`_blank`, a window's name).
+   * - A family that draws its own `<a>` for `link` gives it this `target`.
+   * - `undefined` without one, or where the family declares its own `target`.
+   */
+  get sharedTarget(): string | undefined {
+    return this.sharedText(TARGET)
+  }
+
+  /**
    * The words of the shared `font` (`bold italic`), as `:state(font-<word>)`s:  every word its spec lists, on or off.
    * - Empty where the family declares its own `font`.
    */
@@ -396,7 +405,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const path = event.composedPath()
     const inside = path.slice(0, Math.max(0, path.indexOf(this.domElement)))
     if (inside.some((node) => (node as Element).matches?.(OWN_CONTROLS))) return
-    this.followLink(link, this.sharedText(TARGET))
+    this.followLink(link, this.sharedTarget)
   }
 
   /**

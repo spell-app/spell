@@ -385,7 +385,9 @@ What a component, or a page built on Spell UI, reaches for first.
   - Fine:  `UICalendar`'s grid and the icon picker's, on purpose:  they step by rows of a grid.
   - Fine:  the dropdown's and the search's arrows move a highlight, not focus ("The highlighted option", below);
     the slider's change its value.
-  - Not swept yet:  the docs' search and the theme menu (`UIDocsSearch`, `UIThemeMenu`), the brand's `BrandColorSet`.
+  - Taking it since epic `coherence` P17:  the theme menu's scheme control and list
+    (`spell-ui/src/components/ui-theme-menu/`), a shrinkable menu's overflow menu (`UIMenu`).
+  - Not swept yet:  the docs' search (`UIDocsSearch`);  the brand's `BrandColorSet`, left for after repo-split P20.
 
 ### The highlighted option of a list
 
@@ -427,6 +429,18 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `new CustomEvent` in a `*.fallback.ts`
 - **Score:**  `new CustomEvent` · in `**.fallback.ts` · home `spell-ui/src/elements/NativeFallback.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Spell UI's nine fallbacks, the brand's two)
+
+### A fallback's form value and validity
+
+- **It is:**  `NativeFallback.syncForm({ value, control })` (`spell-ui/src/elements/NativeFallback.ts`;  epic `coherence`
+  P17):  the form value (none without a `name`, a `FormData` for several) and the native control's validity, anchored
+  on it;  the fallback's `sync()` hands it its own, run once attached and on each change.
+  `nameFromPlaceholder()` names a control by `placeholder`.
+- **Use it when:**  a form control's native fallback reports to its form.
+- **Flag:**  `setFormValue\(|setValidity\(` in a `*.fallback.ts`
+- **Score:**  `\.(setFormValue|setValidity)\(` · in `**.fallback.ts` · home `spell-ui/src/elements/NativeFallback.ts`
+  · not `spell-ui/src/components/ui-button/UIButton.fallback.ts`
+- **Copies:**  `--` since P17 (Spell UI's nine fallbacks, the brand's two;  the button's submit value is its own)
 
 ### A form control's attributes
 
@@ -610,7 +624,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
   - a component holds one as a field, handed what differs:  where the state lives (a member, `kept`, its own),
     the event detail, what opening resets;  its public names stay its own (`collapsed`, `visible`, `open`)
   - on it:  Spell UI's `PopoverPanel` (`spell-ui/src/elements/PopoverPanel.ts`):  the popover, its `UI.overlays`
-    entry and its anchor, written inline, for the dropdown, calendar, search and icon picker
+    entry and its anchor, written inline, for the dropdown, calendar, search and icon picker, and a shrinkable menu's
+    overflow menu (in `spell-ui/core` since P17:  a menu has no value)
   - on it:  spell-epic's `Fold` (`spell-epic/src/components/epic-item/Fold.tsx`):  a box an epic element folds by
     itself, and THE fold button (`fold.button()`):  every card's band and every panel's title;
     fold-all and open-all (`foldAllUnder()`, `expandAllUnder()`) close and open each block's
@@ -618,8 +633,9 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **Flag:**  `requestChange\("is(Open|Visible|Collapsed)|"ui-opening"|beforematch|aria-expanded=\{this\.is`
 - **Score:**  `requestChange\("is(Open|Visible|Collapsed)"|addEventListener\("beforematch"|aria-expanded=\{this\.isOpen`
   · home `src/element/Disclosure.ts`
-- **Copies:**  taking it today:  the four popovers, the six overlays (the dialog's two, dimmer, popup, sidebar,
-  nag, toast), `<ui-section>`, `<ui-docs-example>`, spell-epic's `EpicFold`, `EpicItem` and `Fold`.  Left:
+- **Copies:**  taking it today:  the five popovers (the menu's overflow since P17), the six overlays (the dialog's two,
+  dimmer, popup, sidebar, nag, toast), `<ui-section>`, `<ui-docs-example>`, `<ui-zoom>` (P17), spell-epic's `EpicFold`,
+  `EpicItem` and `Fold`.  Left:
   - `spell-ui/src/components/ui-accordion/UIAccordion.tsx`:  many panels in one `open` (`"0 2"`), on `<details>`,
     which keeps its own `aria-expanded` and find-in-page;  an exclusive open closes another in the same change
   - `<ui-nag>`'s `ui-opening`:  sent as it has slid in, not as a request
