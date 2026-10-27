@@ -92,6 +92,27 @@ export class ThemeFile {
   }
 
   /**
+   * The theme as a sheet WORN OVER what it extends, already on the page:  its own values on `:root`, in
+   * `@layer ui.app`, and no imports.
+   * - What the theme editor makes (`<ui-theme-editor>`, epic `debut` P24):  the page applies the base theme
+   *   (`UI.themes.apply()`), then this.
+   * - `ui.app`, not `ui.theme`:  a later layer wins however the sheets arrive (the base's may load after it).
+   * - `important`:  every value `!important`, for a page whose own sheets set tokens outside any layer
+   *   (the theme editor's framed pages, the editor app).
+   * - `comments`:  lines for the comment at its top (the theme's name, its base).
+   * - Nothing of its own:  `comments` alone, no rule.
+   * - throws a `TypeError` on a mistake in the file (see the class docs)
+   */
+  overlayCss({ important = false, comments = [] }: { important?: boolean; comments?: readonly string[] } = {}): string {
+    const declarations = this.declarations()
+    const head = comments.length ? `/* ${comments.join("\n   ")} */\n` : ""
+    if (!declarations.length) return head
+    const mark = important ? " !important" : ""
+    const body = declarations.map(([token, value]) => `    ${token}: ${value}${mark};`).join("\n")
+    return `${head}@layer ui.app {\n  :root {\n${body}\n  }\n}\n`
+  }
+
+  /**
    * Its sheet's `@import`s, relative to the sheet, in order:  what it extends, its palette, its rules sheets.
    * - throws a `TypeError` when the theme it extends or its palette has no file
    */
