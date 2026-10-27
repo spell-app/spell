@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { MemoryStorage, StoragePlace, WaitedOnPlace } from "spell/util"
-import { App, core, Thing } from "spell-parser/core"
+import { App, core, Thing } from "spell/parser/core"
 
 /** `a solitaire is an app`, with `its theme as one of light, dark, remembered`. */
 class Solitaire extends App {

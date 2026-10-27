@@ -4,9 +4,9 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `events.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
-import { Synonyms } from "spell-parser/spell/rules/expressions"
+import { Synonyms } from "spell/parser/spell/rules/expressions"
 
 import { events } from "./events.parser"
 import { DeclareEvent } from "./DeclareEvent"

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { CORE_MESSAGES, type CoreMessageKey } from "spell-parser/core/core.types"
-import { SP } from "spell-parser/spell"
+import { CORE_MESSAGES, type CoreMessageKey } from "spell/parser/core/core.types"
+import { SP } from "spell/parser/spell"
 
 /** Each `{placeholder}` in `message`, sorted. */
 function placeholdersOf(message: string): string[] {

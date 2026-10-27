@@ -1,6 +1,6 @@
 import { elementTagFor, proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"

@@ -1,10 +1,10 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { WithPropsArg } from "spell-parser/spell/rules/methods"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { WithPropsArg } from "spell/parser/spell/rules/methods"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `declare_event` rule:  says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).

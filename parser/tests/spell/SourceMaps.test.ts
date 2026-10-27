@@ -1,8 +1,8 @@
 import { readFileSync, readdirSync } from "fs"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { compiledSpellProject, registerTestComponentPack } from "spell-parser/spell/test"
+import { P } from "spell/parser/parser"
+import { compiledSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
  * Source maps (epic `elemental-spell` P14):  each line of compiled javascript back to the spell line it came from.

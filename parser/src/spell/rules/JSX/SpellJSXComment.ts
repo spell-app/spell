@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `jsxComment` rule:  a comment among markup's children, never drawn (epic `elemental-spell`, Owen 2026-10-26).

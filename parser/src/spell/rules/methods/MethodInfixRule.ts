@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { InfixOperatorSuffix, Precedence, SuffixLeft } from "spell-parser/spell/rules/expressions"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { InfixOperatorSuffix, Precedence, SuffixLeft } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 import type { MethodOperatorRuleProps, MethodRuleDeclared, OperatorOperands } from "./methods.shared"
 
 /**

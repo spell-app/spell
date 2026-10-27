@@ -1,8 +1,8 @@
 import { readFileSync } from "fs"
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { parseSpellProject, registerTestComponentPack } from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
+import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
 
 /** spell's spellx pairs:  each `X.spellx` beside the `X.spell` it means (`tests/spell/spellx/`). */
 const PAIRS = ["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"]

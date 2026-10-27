@@ -1,4 +1,4 @@
-# spell_core:  the Python twin of `spell-parser/core`, what Python compiled from spell imports.
+# spell_core:  the Python twin of `spell/parser/core`, what Python compiled from spell imports.
 # - Run from the repo root:
 #   - its tests:  `uv run --directory src/py/core pytest`
 #   - the terminal study's (not in the run above):  `uv run --directory src/py/core --group study pytest experiments/terminal`

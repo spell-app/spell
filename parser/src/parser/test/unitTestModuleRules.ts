@@ -17,7 +17,7 @@ import isEqual from "lodash/isEqual"
 
 import { showWhitespace } from "spell/util"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import type only:  loaded only when blessing, as it reads and writes files
 import type { BlessedTest } from "./RuleTestSource"
 

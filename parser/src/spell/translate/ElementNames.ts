@@ -1,5 +1,5 @@
 import { camelCase, elementTagFor } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import type { TranslationNames } from "./TranslationNames"
 import type { MissingName, UIVocabulary } from "./translate.types"
 

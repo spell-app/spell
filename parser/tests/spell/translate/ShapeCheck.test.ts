@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-parser/spell/test"
-import { ShapeCheck, shapeOf } from "spell-parser/spell/translate/ShapeCheck"
-import type { SourceFile } from "spell-parser/spell/translate/translate.types"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { ShapeCheck, shapeOf } from "spell/parser/spell/translate/ShapeCheck"
+import type { SourceFile } from "spell/parser/spell/translate/translate.types"
 
 /**
  * The shape check (epic `spanish` P26):  each translated line against its source line, compiled, names and texts aside.

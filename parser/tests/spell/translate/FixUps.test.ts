@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { FixUps, type FixUpFile } from "spell-parser/spell/translate/FixUps"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import type { ClaudeOptions, ClaudeRunner } from "spell-parser/spell/translate/translate.types"
+import { SP } from "spell/parser/spell"
+import { FixUps, type FixUpFile } from "spell/parser/spell/translate/FixUps"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import type { ClaudeOptions, ClaudeRunner } from "spell/parser/spell/translate/translate.types"
 
 /**
  * One round of fix-ups (epic `spanish` P25):  the lines asked about, shown in context, and what `claude` answers

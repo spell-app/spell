@@ -5,8 +5,8 @@
  * - Registered in the same order as `draw.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { DrawItems } from "./DrawItems"
 import { DrawThing } from "./DrawThing"

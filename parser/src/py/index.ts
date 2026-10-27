@@ -1,5 +1,5 @@
 /**
- * `spell-parser/py` (`spell-parser/py`, `PY`):  everything spell has for Python (epic `python-target` P21).
+ * `spell/parser/py` (`spell/parser/py`, `PY`):  everything spell has for Python (epic `python-target` P21).
  * - Here, in `ts/`:  the TypeScript that writes Python, and Python's page and app.
  *   - `PY.PyWriter`:  the `py` target's writer, `<Project>.spell.py`, on asyncio
  *   - `PY.PyBaseWriter`:  what it builds on, all but waiting
@@ -8,7 +8,7 @@
  *   - `PY.quartApp()`:  a program's web app, `<Project>.app.py`
  * - Beside it, a uv project of its own, `core/`:  `spell_core`, what compiled Python imports.
  *   - `spell_quart`, which serves a program on Quart, is spell-app's, in its spaces' Python side.
- * - Imports `spell-parser/parser` (`P`) only:  `spell` imports this, for its targets.
+ * - Imports `spell/parser/parser` (`P`) only:  `spell` imports this, for its targets.
  */
 export * as PY from "./"
 

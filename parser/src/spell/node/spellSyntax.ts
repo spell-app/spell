@@ -2,10 +2,10 @@ import { readdirSync, readFileSync } from "fs"
 import { join, relative, resolve } from "path"
 import { parseSync } from "vite-plus"
 
-import { P } from "spell-parser/parser"
-import { PY } from "spell-parser/py"
-import { core } from "spell-parser/core"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
+import { core } from "spell/parser/core"
+import { SP } from "spell/parser/spell"
 
 /**
  * The spell syntax table of one human language:  every rule class of the base spell language, what it's for,

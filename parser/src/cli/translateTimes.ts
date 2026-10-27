@@ -20,8 +20,8 @@ import { tmpdir } from "node:os"
 import { basename, join } from "node:path"
 
 import { CLI } from "spell/cli"
-import type { TranslateOptions, TranslateTimeOptions } from "spell-parser/cli"
-import { askingFor, type TranslationResult } from "spell-parser/cli/translateProject"
+import type { TranslateOptions, TranslateTimeOptions } from "spell/parser/cli"
+import { askingFor, type TranslationResult } from "spell/parser/cli/translateProject"
 
 /**
  * What a timed run starts from:

@@ -3,7 +3,7 @@
 
 import { proto } from "spell/util"
 import { Derivative } from "spell/util/spell/Derivative"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * # Rule base class
@@ -312,7 +312,7 @@ export abstract class Rule<
     const { rulexParser } = P.Parser
     if (!rulexParser) {
       throw new TypeError(
-        'Rulex parser is not installed.  Use `import "spell-parser/parser/rulex"` to import it and try again.'
+        'Rulex parser is not installed.  Use `import "spell/parser/parser/rulex"` to import it and try again.'
       )
     }
     const compiled = rulexParser.compile(syntax)

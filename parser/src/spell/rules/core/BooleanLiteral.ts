@@ -1,5 +1,5 @@
 import { assert, proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `boolean` rule:  boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.

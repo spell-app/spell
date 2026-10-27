@@ -3,7 +3,7 @@
  * and the syntax `variable` and `known_variable` share.
  */
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /** Syntax shared by `variable` and `known_variable`:  identifier with optional `the`, e.g. `the thing`. */
 export const VARIABLE_SYNTAX = "the? {identifier}"

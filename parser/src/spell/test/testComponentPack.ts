@@ -1,5 +1,5 @@
 import { withoutAccents } from "spell/util"
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 /**
  * A few of Spell UI's components, as spellx names them bare (`<text>`, `<botón>`), for spell-parser's own tests:

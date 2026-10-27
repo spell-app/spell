@@ -2,11 +2,11 @@
  * Export all public `parser` code as a barrel.
  *
  * Prefer importing like so when possible.
- * - `import type { P } from "spell-parser/parser"`  (safer)
- * - `import { P } from "spell-parser/parser"` (if you need class or functions from `P`)
+ * - `import type { P } from "spell/parser/parser"`  (safer)
+ * - `import { P } from "spell/parser/parser"` (if you need class or functions from `P`)
  *
  * NOTE: `RulexParser` itself is NOT included here -- only its `type` is, via `parser.types`.
- * It's an optional sub-system:  opt in with `import "spell-parser/parser/rulex"` to register `Parser.rulexParser`.
+ * It's an optional sub-system:  opt in with `import "spell/parser/parser/rulex"` to register `Parser.rulexParser`.
  */
 export * as P from "./"
 

@@ -1,11 +1,11 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { getKnownType } from "spell-parser/spell/rules/types"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { getKnownType } from "spell/parser/spell/rules/types"
+import { Wording } from "spell/parser/spell/rules/expressions"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
 /**

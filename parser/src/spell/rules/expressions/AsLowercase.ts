@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
 

@@ -1,10 +1,10 @@
 import { JSON5File, TaskList, Task, getDier } from "spell/util"
-import { P } from "spell-parser/parser"
-import { PY } from "spell-parser/py"
-// Import directly, NOT through the `spell-parser/core` barrel:  a project MUST NOT load `core` itself --
+import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
+// Import directly, NOT through the `spell/parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
-import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell-parser/core/core.types"
-import { SP } from "spell-parser/spell"
+import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
+import { SP } from "spell/parser/spell"
 
 /**
  * One spell project, e.g. `owen@spell/myProject`:  its files, and reading, compiling and saving them.
@@ -700,7 +700,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
    *   e.g. `Card.move_to_$pile` from `Pile.spell` goes in `Card.spell`'s `class Card`.
    *   Each file's own were moved in by `SP.Block`.
-   * - Also how a fixture compiles -- see `compiledFixture()` in spell-app's `spell-app/spaces/test`.
+   * - Also how a fixture compiles -- see `compiledFixture()` in spell-app's `spell/app/spaces/test`.
    * - `writer`:  the target's, javascript's by default -- see `SP.TARGETS`.
    *   It sees the whole project first (`P.ProgramWriter.forProject()`),
    *   and finishes the module last (`P.Writer.module()`).
@@ -1145,7 +1145,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/owen@spell/cards"`
    * - Why:  compiled spell reaches everything it didn't declare through `import`s -- NO globals.
    * - A runner rewrites each specifier onto the module it means:
-   *   see `runCompiled()` in `spell-app/app/runner/runCompiled`.
+   *   see `runCompiled()` in `spell/app/app/runner/runCompiled`.
    * - A `source` import needs none:  its files compile into our output.
    * - `writer`:  the target's, which spells them in its language -- see `P.ProgramWriter.importsHeader()`.
    */

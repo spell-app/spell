@@ -13,12 +13,12 @@ import {
   typedJSON,
   type PropInfo
 } from "spell/util"
-import { registerThing, noteItems, noteSetting, core } from "spell-parser/core/core"
-import type { CollectionIterationCallback } from "spell-parser/core/collection-other"
-import type { Drawing } from "spell-parser/core/drawing"
-import type { PropCheck } from "spell-parser/core/core.types"
-import { zeroIndexOf } from "spell-parser/core/positions"
-import { declareAction, type ActionInfo } from "spell-parser/core/undoing"
+import { registerThing, noteItems, noteSetting, core } from "spell/parser/core/core"
+import type { CollectionIterationCallback } from "spell/parser/core/collection-other"
+import type { Drawing } from "spell/parser/core/drawing"
+import type { PropCheck } from "spell/parser/core/core.types"
+import { zeroIndexOf } from "spell/parser/core/positions"
+import { declareAction, type ActionInfo } from "spell/parser/core/undoing"
 
 import { ID_PROP } from "./ids"
 

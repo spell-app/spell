@@ -1,4 +1,4 @@
-import type { P } from "spell-parser/parser"
+import type { P } from "spell/parser/parser"
 
 /**
  * Collects what a half-typed statement could go on with, while `collect()` parses it in "expecting" mode.

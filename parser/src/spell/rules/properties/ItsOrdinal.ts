@@ -1,6 +1,6 @@
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { itsObject, type ItsMatchData } from "./properties.shared"
 
 /**

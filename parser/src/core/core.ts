@@ -11,7 +11,7 @@ import isEqual from "lodash/isEqual"
 
 import { brokenRule, flushCells, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
-// `spell-parser/core/model` loads this file, and must not load drawing (Solid)
+// `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
 import { defineCoreModule, type PropCheck, type Core } from "./core.types"
 import { ParkMiller } from "./ParkMiller"
@@ -53,7 +53,7 @@ export const core = new (class core {})() as Core
 
 /**
  * The running program's things, `core.things` (`things.ts`), for the Thing Explorer.
- * - `undefined` under `spell-parser/core/model`, which leaves them out:
+ * - `undefined` under `spell/parser/core/model`, which leaves them out:
  *   a thing made there, e.g. a `Person` the server loads, belongs to no running program.
  * - So code the model loads asks here, never `core.things` itself.
  */

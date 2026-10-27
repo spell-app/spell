@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * Fallback rule matched (via `scope.parser.parse(tokens, "parse_error", scope)`) over tokens that no other

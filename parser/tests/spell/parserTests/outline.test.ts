@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, runSpellFiles, type RunOptions } from "spell-parser/spell/test"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, runSpellFiles, type RunOptions } from "spell/parser/spell/test"
 
 /**
  * The OUTLINE style (epic page `outline-spell`):  a type's heading, `a card is a thing where:`, then a bulleted

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { buildTsx } from "spell-parser/spell/node/buildTsx"
-import { solidSample } from "spell-parser/spell/test"
+import { buildTsx } from "spell/parser/spell/node/buildTsx"
+import { solidSample } from "spell/parser/spell/test"
 
 /**
  * `buildTsx()`:  Solid TypeScript, as the `ts/solid` target writes it, into JavaScript that runs.

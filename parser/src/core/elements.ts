@@ -10,7 +10,7 @@
  * - Compiled TypeScript also writes each type's element class, and hands it over (P10):
  *   `core.useElement(Card, CardElement)`.
  *   The page builds the tag on that class.
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 
 import { dedent, elementTagFor, schemaOf, type Schema } from "spell/util"

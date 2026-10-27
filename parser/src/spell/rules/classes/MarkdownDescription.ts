@@ -1,10 +1,10 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { MARKDOWN_TAG, rawTextOf } from "spell-parser/spell/rules/JSX/JSX.shared"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { MARKDOWN_TAG, rawTextOf } from "spell/parser/spell/rules/JSX/JSX.shared"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `markdown_description` rule:  a type's description, as markdown, in its outline (epic `drawable-thing`, P14).

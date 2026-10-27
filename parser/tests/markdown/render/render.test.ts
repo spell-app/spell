@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { MD } from "spell-parser/markdown"
+import { MD } from "spell/parser/markdown"
 
 /** `markdown` rendered with `ui-*` elements, as HTML. */
 function ui(markdown: string, options = {}) {

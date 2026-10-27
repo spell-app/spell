@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 
 /**
  * `min` rule:  `the smallest` [thing] `of`/`in` {expression}, e.g. `smallest of prices`.

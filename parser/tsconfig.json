@@ -1,14 +1,14 @@
 {
   // spell-parser's TypeScript settings for its browser-safe code:  parser, markdown, core, py's writers, spell and spellx.
-  // - Every import is a package name, spell-parser's own too (`spell-parser/parser/rules/Rule`, epic `repo-split` Q47):
-  //   NO `paths`.  `spell-parser-source` reads this repo's names as its source, through `package.json`'s `exports`;
+  // - Every import is a package name, spell-parser's own too (`spell/parser/parser/rules/Rule`, epic `repo-split` Q47):
+  //   NO `paths`.  `spell-source` reads this repo's names as its source, through `package.json`'s `exports`;
   //   another repo's (`spell/util` ...) as its declarations, its `types`.
   // - The node-only parts are `tsconfig.node.json`'s:  the cli, spell's `node/`, the test helpers, core's
   //   declarations writer.
   // - spell-types builds both into `dist-types/` (`"spellTypes"` in `package.json`).
   "extends": "spell/toolchain/tsconfig.base.json",
   "compilerOptions": {
-    "customConditions": ["spell-parser-source"],
+    "customConditions": ["spell-source"],
     "allowJs": true,
     "target": "ES2020",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],

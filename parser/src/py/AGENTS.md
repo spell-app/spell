@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/py/` of the `spell-parser` package (`spell-parser/py`).
+when working with code in this folder, `src/py/` of the `spell-parser` package (`spell/parser/py`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -10,16 +10,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## Overview
 
 - Everything spell has for Python, in one place (epic `python-target` P21):
-  - its TypeScript ([index.ts](index.ts) ...):  what writes Python, `spell-parser/py` (`PY`)
+  - its TypeScript ([index.ts](index.ts) ...):  what writes Python, `spell/parser/py` (`PY`)
   - [core/](core/pyproject.toml):  `spell_core`, what compiled Python imports
   - NOT here:  `spell_quart`, Python's web server, which serves a program as a web app on Quart.
-    It's in the spaces package, [its Python side](../../../spell-app/src/spaces/server/py/pyproject.toml)
-    ([spaces' AGENTS.md](../../../spell-app/src/spaces/AGENTS.md);  epic `people-and-orgs` P14).
-- A folder of the `spell-parser` package, its entry `spell-parser/py`:
+    It's in the spaces package, [its Python side](../../../app/src/spaces/server/py/pyproject.toml)
+    ([spaces' AGENTS.md](../../../app/src/spaces/AGENTS.md);  epic `people-and-orgs` P14).
+- A folder of the `spell-parser` package, its entry `spell/parser/py`:
   no `package.json` of its own (epic `repo-split` P11).
   - Its TypeScript is the folder's own files (`index.ts`, `PyWriter.ts` ...), as every folder's.
   - `core/` is a uv project of its own, beside them:  yarn, TypeScript, oxlint and oxfmt don't look in it.
-- It imports only `spell-parser/parser` and `spell/util`.
+- It imports only `spell/parser/parser` and `spell/util`.
   - The parser's helpers the writers share come through its barrel, `P`:
     - `P.ProgramWriter`
     - `P.JSWriter`
@@ -80,7 +80,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - What spell compiled to Python imports, for what Python has no word of its own for.
   - Compiled code imports `core`, and the classes it extends:  `from spell_core import core, Thing, List, App, prop, h`.
   - That `core` has the JavaScript core's methods, snake_cased, e.g. `random_item_of()`.
-  - Each module is the twin of one in `spell-parser/core`,
+  - Each module is the twin of one in `spell/parser/core`,
     e.g. `positions.py` of [positions.ts](../core/positions.ts).
   - `core` stands in for the running program's own core (`using_core()`):  one per web visitor.
   - Standard library only (decision Q33):  any standard module is fine;  a package from outside it, ask Owen first.
@@ -95,7 +95,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     ```
 
 - It runs a compiled program with `python -m spell_core.run <program> --seed n`.
-  - cli's [`runPython()`](../../../spell-app/src/cli/commands/runCommand.ts) runs it through uv in this project.
+  - cli's [`runPython()`](../../../app/src/cli/commands/runCommand.ts) runs it through uv in this project.
   - Its flags:
     - `--no-pauses`:  a pause doesn't wait
     - `--page`:  print what it drew, as HTML
@@ -136,7 +136,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - state by id:  both write and read [stateById.expected.json5](../../tests/core/stateById.expected.json5)
   - saved by id:  both write and read [savedById.expected.json5](../../tests/core/savedById.expected.json5)
   - Those three are with the JavaScript core's tests (`tests/core/`).
-  - the core contract (cli's [contract.test.ts](../../../spell-app/tests/cli/contract.test.ts)):
+  - the core contract (cli's [contract.test.ts](../../../app/tests/cli/contract.test.ts)):
     a compiled program prints exactly what javascript prints
 - The terminal-drawing study (P15) is in `core/experiments/terminal`.
   - Its tests need their own uv group, `study`, so the runs above leave them out.
@@ -145,4 +145,4 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 As WWOD §8, plus our self-namespace:
 
-- `PY` ~== `spell-parser/py`
+- `PY` ~== `spell/parser/py`

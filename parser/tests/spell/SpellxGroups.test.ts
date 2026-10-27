@@ -1,7 +1,7 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { SX } from "spell-parser/spellx"
-import { parseSpellProject, registerTestComponentPack } from "spell-parser/spell/test"
+import { SX } from "spell/parser/spellx"
+import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
  * GROUPS of a template's members, and a property's `alias=` with no body (epic `elemental-spell` P16, Owen 2026-10-25).

@@ -11,10 +11,10 @@
  *   and a missing one is a line of code to write.
  *   - So it sees `<parser>.addRule(<Rule>, { ... })` calls, wherever they are:
  *     a loop's registrations count once, as written.
- * - Node-free:  the `spell translate check|fix` commands (`spell-parser/cli/packsCommand`) read the files and print.
- * - Imported by path, `spell-parser/spell/languages/packs`:  the barrel leaves it out, as only the commands need it.
+ * - Node-free:  the `spell translate check|fix` commands (`spell/parser/cli/packsCommand`) read the files and print.
+ * - Imported by path, `spell/parser/spell/languages/packs`:  the barrel leaves it out, as only the commands need it.
  */
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 ////////////////
 // ## Checking
@@ -276,7 +276,7 @@ function newModuleFile(module: string, lang: string, parser: string): string {
     ` * The \`${module}\` rules in language \`${lang}\`:  each rule's syntax and its tests (epic \`spanish\` P7).`,
     ` * - Written by \`spell translate fix\`:  translate each \`TODO\`, then import it into the language's \`parser.ts\`.`,
     " */",
-    'import { SpellParser } from "spell-parser/spell/SpellParser"',
+    'import { SpellParser } from "spell/parser/spell/SpellParser"',
     "",
     `/** \`${module}\`'s rules in language \`${lang}\`. */`,
     `export const ${parser} = new SpellParser({ module: "${module}" })`,

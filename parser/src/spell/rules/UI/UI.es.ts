@@ -6,8 +6,8 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - A keyword with a written accent is accepted without it too:  `(información|informacion)`.
  */
-import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"

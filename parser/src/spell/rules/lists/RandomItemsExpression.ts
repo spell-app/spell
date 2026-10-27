@@ -1,6 +1,6 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 
 /**
  * `random_items_expression` rule:  pick a unique set of random items from list, returning an array.

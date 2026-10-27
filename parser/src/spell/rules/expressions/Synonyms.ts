@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * A WORD RULE whose forms all mean the same to spell, e.g. `is_or_are`, `(is|are)` (epic `spanish` P3).

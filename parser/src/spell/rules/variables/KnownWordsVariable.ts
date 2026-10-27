@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 import { KnownVariable } from "./KnownVariable"
 
 /**

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { PY } from "spell-parser/py"
+import { PY } from "spell/parser/py"
 
 /**
  * `PY.quartApp()`:  a Python spell program's web app, `<Project>.app.py`;

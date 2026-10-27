@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { NewThing } from "spell-parser/spell/rules/classes"
+import { P } from "spell/parser/parser"
+import { NewThing } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { AssignmentStatement } from "./AssignmentStatement"
 
 /**

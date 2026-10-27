@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { InfixOperatorSuffix, Precedence } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { InfixOperatorSuffix, Precedence } from "spell/parser/spell/rules/expressions"
 
 /**
  * `divided_by` rule:  `/` / `divided by`, e.g. `price / taxRate` -- `Precedence.product`, same as `*`.

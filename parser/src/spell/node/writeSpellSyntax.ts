@@ -9,8 +9,8 @@
 import { writeFileSync } from "fs"
 import { resolve } from "path"
 
-import { SP } from "spell-parser/spell"
-import { spellSyntax, spellSyntaxFileFor } from "spell-parser/spell/node/spellSyntax"
+import { SP } from "spell/parser/spell"
+import { spellSyntax, spellSyntaxFileFor } from "spell/parser/spell/node/spellSyntax"
 
 for (const language of SP.Language.all.values()) {
   const path = resolve(import.meta.dirname, "..", spellSyntaxFileFor(language))

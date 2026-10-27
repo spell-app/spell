@@ -1,9 +1,9 @@
 import { clockTime, escapeRegExp } from "spell/util"
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
-import type { NamesPass } from "spell-parser/spell/translate/NamesPass"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import type { MissingName, NamesKind, SourceFile, TranslatedType } from "spell-parser/spell/translate/translate.types"
+import type { NamesPass } from "spell/parser/spell/translate/NamesPass"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import type { MissingName, NamesKind, SourceFile, TranslatedType } from "spell/parser/spell/translate/translate.types"
 
 /****************
  * ### `NamesReview`

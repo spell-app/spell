@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `bracketed_list` rule:  bracketed list (array) literal, e.g. `[1,2 , true,false ]`.

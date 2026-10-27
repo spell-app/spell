@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-parser/spell/test"
-import { SP } from "spell-parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { SP } from "spell/parser/spell"
 
 /**
  * A view type defines its element as its class is declared (epic `drawable-thing`, P5):

@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.

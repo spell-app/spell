@@ -6,8 +6,8 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - `it` stays `it`:  it's the name of the variable `obtener` declares, which spell's code shares.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { AssignmentStatement, setupAssignmentStatement } from "./AssignmentStatement"
 import { Get } from "./Get"

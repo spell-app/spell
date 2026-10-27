@@ -1,9 +1,9 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SpellConstant } from "spell-parser/spell/rules/constants"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
 /**

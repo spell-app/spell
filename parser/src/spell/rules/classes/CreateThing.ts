@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `create_thing` rule:  `create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { shapeOf } from "spell-parser/spell/translate/ShapeCheck"
-import { Translator } from "spell-parser/spell/translate/Translator"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import type { NamesData } from "spell-parser/spell/translate/translate.types"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { shapeOf } from "spell/parser/spell/translate/ShapeCheck"
+import { Translator } from "spell/parser/spell/translate/Translator"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import type { NamesData } from "spell/parser/spell/translate/translate.types"
 
 /**
  * The translator (epic `spanish` P24):  a project written in English, written again in Spanish, rule by rule.

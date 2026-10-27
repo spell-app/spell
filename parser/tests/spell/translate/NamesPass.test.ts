@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { NamesPass } from "spell-parser/spell/translate/NamesPass"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
+import { SP } from "spell/parser/spell"
+import { NamesPass } from "spell/parser/spell/translate/NamesPass"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
 import type {
   ClaudeOptions,
   ClaudeRunner,
   DeclarationStatement,
   MissingName
-} from "spell-parser/spell/translate/translate.types"
+} from "spell/parser/spell/translate/translate.types"
 
 /**
  * The names pass (epic `spanish` P25-P26):  every name a project declares, and what its lines lack -- the types first,

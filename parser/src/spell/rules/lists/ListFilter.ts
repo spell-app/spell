@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**

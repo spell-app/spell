@@ -1,14 +1,14 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
 import {
   incrementalSpellProject,
   parseSpellProject,
   registerTestComponentPack,
   summarize,
   summarizeIncremental
-} from "spell-parser/spell/test"
+} from "spell/parser/spell/test"
 
 /**
  * A NOTEBOOK in spellx (epic `elemental-spell` P16):  `<spell-notebook "...">`, a page made from spell's built-in

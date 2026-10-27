@@ -5,7 +5,7 @@ import groupBy from "lodash/groupBy"
 import sum from "lodash/sum"
 
 import { Derivative, showWhitespace } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * Parser for a language ~== named `rules` plus a `tokenizer`, used to `parse()` input into a `Match` tree
@@ -525,7 +525,7 @@ export class Parser extends Derivative {
    * `RulexParser`, used to create rules from regex-like syntax.
    * - To avoid circular import problems, we don't link to this by default.
    * - If you have a language which needs rulex functionality, inject it with
-   *   `import spell-parser/parser/rulex`.
+   *   `import spell/parser/parser/rulex`.
    */
   static rulexParser: P.RulexParser | undefined
 

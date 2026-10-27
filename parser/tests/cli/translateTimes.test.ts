@@ -5,9 +5,9 @@ import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
-import type { TranslateOptions } from "spell-parser/cli"
-import type { TranslationResult } from "spell-parser/cli/translateProject"
-import { editOneLine, timeTranslations, type TimingReport } from "spell-parser/cli/translateTimes"
+import type { TranslateOptions } from "spell/parser/cli"
+import type { TranslationResult } from "spell/parser/cli/translateProject"
+import { editOneLine, timeTranslations, type TimingReport } from "spell/parser/cli/translateTimes"
 
 /**
  * `spell translate speedtest`'s work (epic `spanish` P29), with a fake translation:

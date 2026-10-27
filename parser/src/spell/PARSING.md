@@ -103,7 +103,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `{space}` / `{spaces}` set the next part's
     - a symbol touching its flag repeats as a run (`#+`)
 - Cost, warm:
-  - Measured by a `BENCH=1` run of [the project tests](../../../spell-app/tests/spell/SpellProject.test.ts) (spell-app's), 2026-10-04,
+  - Measured by a `BENCH=1` run of [the project tests](../../../app/tests/spell/SpellProject.test.ts) (spell-app's), 2026-10-04,
     after P3 of precedence-and-types halved it.
   - Card.spell (121 lines) ~12ms;  Solitaire.spell (259 lines) ~32ms;  the whole Solitaire project ~55ms
   - the whole project, after later phases:
@@ -307,7 +307,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - A `MethodPostfixRule` checks nothing.
   - Declarations need nothing new:  `of` / `params` are the method record's, in the same comment.
     Loading hands `specialize()` the whole of it.
-- Probe ledger ([grammar.probes.test.ts](../../../spell-app/tests/spell/grammar.probes.test.ts), spell-app's), "datatypes":
+- Probe ledger ([grammar.probes.test.ts](../../../app/tests/spell/grammar.probes.test.ts), spell-app's), "datatypes":
   what a set of expressions and sinks are.
 
 ## Adding an expression rule
@@ -329,7 +329,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - Leave it unset unless a probe shows a tie going wrong.
   - Then set it from the `Priority` table ([rules.types.ts](rules/rules.types.ts)), with a one-line why.
 - Always NAME a slot, so `match.groups` keeps its key.
-- Add one mixed-operator line to the probe ledger, spell-app's [grammar.probes.test.ts](../../../spell-app/tests/spell/grammar.probes.test.ts).
+- Add one mixed-operator line to the probe ledger, spell-app's [grammar.probes.test.ts](../../../app/tests/spell/grammar.probes.test.ts).
 
 ## Type names:  `a bank account aka account is a thing`
 
@@ -1243,7 +1243,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   a `.es.spellx` file is a Spanish code-spell file's twin, its words the language's.
 - Its tests:  each pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same and has no
   errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
-- A file's CHUNK TREE (`SX.SpellxView`, `spell-parser/spellx`) is built from these same tokens, for the editor, the
+- A file's CHUNK TREE (`SX.SpellxView`, `spell/parser/spellx`) is built from these same tokens, for the editor, the
   notebook and agents:  no rules, nothing compiled (J30).
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
@@ -1481,12 +1481,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 ## Projects
 
 - Projects come in GROUPS (project roots), and the groups are spaces', not spell's:
-  `SPACES.PROJECT_GROUPS`, in [projectGroups.ts](../../../spell-app/src/spaces/models/projectGroups.ts).
+  `SPACES.PROJECT_GROUPS`, in [projectGroups.ts](../../../app/src/spaces/models/projectGroups.ts).
   - Spell's registry, `SpellSetup`, starts empty:  loading spaces' groups registers them there.
   - So every program that reads a spell path loads them first, through one of:
-    - `spell-app/spaces`
+    - `spell/app/spaces`
     - spaces' disk reader
-    - `spell-app/spaces/models/projectGroups` alone, as `<spell-viewer>` does
+    - `spell/app/spaces/models/projectGroups` alone, as `<spell-viewer>` does
   - Spell never imports spaces.
 - Everything is named by its ADDRESS (epic `people-and-orgs` P4, [SpellLocation](SpellLocation.ts)):
   - a group, e.g. `@spell/examples`
@@ -1503,7 +1503,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A `@local/<folder>` group is added at runtime for a folder an editor opened.
   - No other form is read:  not `@system:examples:Solitaire`, not `@examples/Solitaire` (decision Q30).
 - On disk, by address ([SpellUrls](SpellUrls.ts)'s `folderFor()`, then `serverPathForRoot()` in spaces'
-  [project-utils.ts](../../../spell-app/src/spaces/server/node/projects/project-utils.ts)):
+  [project-utils.ts](../../../app/src/spaces/server/node/projects/project-utils.ts)):
   - spaces' built-ins, committed:
     - `@spell/examples/...`, `@spell/library/...`
     - in spell-app's `spaces/@spell/<group>/<Project>/`
@@ -1516,7 +1516,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - One folder for main and every worktree;  `SPELL_SPACES_DIR` sets it.
     - A person's space is inside their org's, so `@` says what each folder is.
   - A `@local/<folder>` group says where itself, with its `serverPath`.
-  - The folders are spaces' `environment` ([environment.ts](../../../spell-app/src/spaces/server/node/environment.ts)), its `spaceFolders`:
+  - The folders are spaces' `environment` ([environment.ts](../../../app/src/spaces/server/node/environment.ts)), its `spaceFolders`:
     - `builtins` and `spaces`
     - Tests point them at temporary folders, with environment variables:
 
@@ -1560,7 +1560,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - under spell-app:  `spaces/@spell/examples/drawable-solitaire` => `build/spaces/@spell/examples/drawable-solitaire`
       - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
     - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
-    - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../spell-app/src/spaces/AGENTS.md), "Projects".
+    - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../app/src/spaces/AGENTS.md), "Projects".
   - The files:  its compiled code, its scope pack, its declarations and its words, in every language.
 
     ```text
@@ -1578,7 +1578,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 
   - Every reader asks for a file by project and name, as for any file.
     - ONE mapping decides where it is on disk:  the server's `serverPath`.
-    - It's `isBuiltFile()` and `buildFolderFor()`, in spaces' [project-utils.ts](../../../spell-app/src/spaces/server/node/projects/project-utils.ts).
+    - It's `isBuiltFile()` and `buildFolderFor()`, in spaces' [project-utils.ts](../../../app/src/spaces/server/node/projects/project-utils.ts).
   - A project anywhere else keeps them beside its source:
     a temp `@local/<folder>` group, a VS Code workspace elsewhere.
   - Built when needed, so a fresh checkout or worktree needs nothing run by hand:
@@ -1588,7 +1588,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - spaces' routes:  a request for a built file that isn't there compiles its project first, then serves it
       - e.g. `/spaces/<project>/<project>.spell.js`, `.scopes.js`, `.declarations.json5` ...
       - one compile per project at a time, a request waits at most a minute
-    - Both are `ProjectBuild`, in the editor's server ([ProjectBuild.ts](../../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts)),
+    - Both are `ProjectBuild`, in the editor's server ([ProjectBuild.ts](../../../app/src/spaces/server/node/routes/ProjectBuild.ts)),
       running the checkout's own `spell compile` as a child.
     - The `spell` command:  a project it parses compiles first each import with no `.spell.js` or declarations
       (`CliSession.compileImports()`).
@@ -1622,7 +1622,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - every URL starts `/spaces/` or `/api/`, and is written whole, never relative
   - They go through `LoadableFile.fetch`.
     A node host swaps that for spaces' disk reader, to answer the same URLs from disk:
-    [`diskFetch()`](../../../spell-app/src/spaces/server/node/projects/disk-fetch.ts), by `installDiskFetch()`.
+    [`diskFetch()`](../../../app/src/spaces/server/node/projects/disk-fetch.ts), by `installDiskFetch()`.
 - A project's FILE create, copy, rename and delete are spaces', not `SpellProject`'s (decision Q20):
   `SPACES.ProjectFiles`, which the editor calls.
   - `SpellProject` reads, compiles and saves.
@@ -1675,7 +1675,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - NO source line numbers.
       - A page with no sources matches the code to a scope pack's entry by what it declares,
         e.g. `property: "suit", of: "Card"` for `.../type:Card/property:suit`.
-      - It finds the code by `codeLines`:  see `ScopesSource`, in [lsp's source](../../../spell-app/src/lsp/).
+      - It finds the code by `codeLines`:  see `ScopesSource`, in [lsp's source](../../../app/src/lsp/).
     - `kind` + `name`:  what its rule's `getDeclaration()` says, for editors.
       - e.g. `name: "draw (a card)"`
       - Unless a key already says, e.g. `type`.
@@ -1731,13 +1731,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - top-level vars:  `export let`
   - see "Classes" under Compile, for what goes in a class's body
   - NO import map:  every runner (the app, VS Code's, `<spell-viewer>`) runs compiled code from a `blob:` URL.
-    - Its specifiers are rewritten (`runCompiled()` / `linkModule()`, in [the app's runner](../../../spell-app/src/app/runner/)):
+    - Its specifiers are rewritten (`runCompiled()` / `linkModule()`, in [the app's runner](../../../app/src/app/runner/)):
       - `@spell/core` => the runtime it runs on (`spellRuntime.ts`)
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
 - The editor calls `project.updateText(file, text)` on every keystroke
-  (`onInputChanged`, in [the app's editor](../../../spell-app/src/app/editor.ts)).
+  (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts)).
   - That calls `updatedContentsFor(file)`.
   - `project.incremental.update()` re-parses what changed right away, and hands changed files their new match.
   - If that couldn't cope, `updateText()` parses from scratch straight away.
@@ -1811,12 +1811,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
-- spell-app's [IncrementalProject.test.ts](../../../spell-app/tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire
+- spell-app's [IncrementalProject.test.ts](../../../app/tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire
   file, on ONE project.
   - Over projects written inline:  spell-parser's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).
   - every line, with `INCREMENTAL_FULL=1`
   - After each edit, and after undoing it, it checks output, errors and token positions against a full parse.
-- spell-app's [ParseJournal.test.ts](../../../spell-app/tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
+- spell-app's [ParseJournal.test.ts](../../../app/tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
 
 ## Compile
 
@@ -1831,7 +1831,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `ts/lib`, by `P.LibraryWriter` (epic `people-and-orgs` P3):
       a LIBRARY, the project's classes alone, for other code to import
       - one TypeScript file, `<Project>.lib.ts`, its own types, checked by `tsc`
-      - no drawing, none of its top-level steps, the core with no Solid (`spell-parser/core/model`)
+      - no drawing, none of its top-level steps, the core with no Solid (`spell/parser/core/model`)
   - Each writes a file of its own, e.g. `Solitaire.spell.py`:  see each target's `suffix`.
   - A project lists the others it wants in its project file, e.g. `"targets": ["ts/solid", "py"]`.
   - What every program's writer shares is `P.ProgramWriter`, which the javascript and Python writers extend.
@@ -1922,7 +1922,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Everything else stays put too.
   - A project then does the same across ALL its files (`SpellProject.combineCompiled()`).
     - So `Card.move_to_$pile` from `Pile.spell` ends up in `Card.spell`'s class.
-    - So does `compiledFixture()`, spell-app's (`spell-app/spaces/test`).
+    - So does `compiledFixture()`, spell-app's (`spell/app/spaces/test`).
     - It NEVER mutates an AST:  a class which gets members is a NEW `P.ASTClassDeclaration` (`withMembers()`).
   - An AUTO-declared property (see "Scope:  who changes it") compiles ONCE,
     in the file of the `set` that declared it.
@@ -1938,9 +1938,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 
 ## Language server
 
-- [lsp's source](../../../spell-app/src/lsp/) (`LSP`) runs as `yarn lsp:start`, in spell-app.
-  - Or from the VS Code extension, in spell-app's [vscode/](../../../spell-app/vscode/).
-  - The extension spawns the repo's own `tsx` on [the server's entry](../../../spell-app/src/lsp/server.ts).
+- [lsp's source](../../../app/src/lsp/) (`LSP`) runs as `yarn lsp:start`, in spell-app.
+  - Or from the VS Code extension, in spell-app's [vscode/](../../../app/vscode/).
+  - The extension spawns the repo's own `tsx` on [the server's entry](../../../app/src/lsp/server.ts).
   - `stdioGuard.ts` sends `console.*` to stderr first:  stdout is the protocol.
 - It hosts the SAME `SpellProject` / `SpellFile` the app uses, and takes everything from them:
   - `project.spellFiles`, `file.isActive`, `project.parseError`
@@ -1948,7 +1948,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - All `SpellLanguageService` adds is `LSP.FileAddresses`:  the editor's URI for each file.
 - It's used twice:
   - by VS Code, over stdio
-  - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../spell-app/src/app/ui/monaco/))
+  - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../app/src/app/ui/monaco/))
     - its `SpellModels` keep one Monaco model per file in step with `file.contents`.
       Edits go through `updateText()`.
     - its `SpellLanguageFeatures` call the service, and convert its answers with `LspToMonaco`
@@ -1959,8 +1959,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - it loads from disk, via `LoadableFile.fetch` (above)
   - it maps a `.spell` file to its project (the nearest `project.json`)
   - it parses the project on first sight, and reacts to disk changes
-  - It's node-only, so it's NOT in the `spell-app/lsp` barrel, which MUST stay browser-safe
-    ([barrel.test.ts](../../../spell-app/tests/lsp/barrel.test.ts)).
+  - It's node-only, so it's NOT in the `spell/app/lsp` barrel, which MUST stay browser-safe
+    ([barrel.test.ts](../../../app/tests/lsp/barrel.test.ts)).
 - `SpellLanguageService` answers from each file's current `match`, never re-parsing:
   - diagnostics:  its parse errors, then its warnings (`SP.SpellWarnings.in()`) as `DiagnosticSeverity.Warning`
   - positions from match / token OFFSETS, never `token.line` / `ch`:
@@ -1981,7 +1981,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     in hover and completion (see "Built-in types")
     - hovering a built-in rule shows the member it spells
     - the Type Explorer's built-in types come from the table too (`ScopeExplorer.addBuiltIns()`)
-- A type's `<css>` blocks are CSS, not spell ([SpellCSS.ts](../../../spell-app/src/lsp/SpellCSS.ts)):
+- A type's `<css>` blocks are CSS, not spell ([SpellCSS.ts](../../../app/src/lsp/SpellCSS.ts)):
   - found in the text, line by line:  `<css>` alone on a line opens one, `</css>` closes it
   - completion, hover and errors inside one come from VS Code's own CSS service, `vscode-css-languageservice`
     - each block is checked as a CSS document of the whole file, everything else blanked to spaces,
@@ -2049,8 +2049,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Helpers parse + compile a project headlessly, exactly as `SpellProject` does:
   - [`parseSpellProject()`](test/parseSpellProject.ts), a project written in the test
   - `summarize()`:  the "same as a full parse" reference
-  - spell-app's `loadFixtureProject()` (`spell-app/spaces/test`):  a frozen test project's files
-- spell-app's [SpellProject.test.ts](../../../spell-app/tests/spell/SpellProject.test.ts) snapshots Solitaire's compiled output + errors,
+  - spell-app's `loadFixtureProject()` (`spell/app/spaces/test`):  a frozen test project's files
+- spell-app's [SpellProject.test.ts](../../../app/tests/spell/SpellProject.test.ts) snapshots Solitaire's compiled output + errors,
   and benchmarks with `BENCH=1`.
 - Every fixture project compiles to every target it can, against the snapshots beside it, in spell-app:
   the "Projects live in spaces" bullet in [AGENTS.md](AGENTS.md) lists them, and how to refresh them.

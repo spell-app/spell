@@ -2,7 +2,7 @@
  * Types for translating a spell project into another language (epic `spanish` P24-P25):  see `Translator`.
  * - Type-only:  imports no values.
  */
-import type { P } from "spell-parser/parser"
+import type { P } from "spell/parser/parser"
 
 /**
  * What a project's names dictionary holds, `<Project>.<lang>.names.json5`:
@@ -176,7 +176,7 @@ export type UIVocabulary = {
 
 /**
  * Asks Claude `prompt`, and answers what it said (epic `spanish` P25-P27):  every pass asks through one of these.
- * - Two of them, the command picks (`spell-parser/cli/claudeRunners`):
+ * - Two of them, the command picks (`spell/parser/cli/claudeRunners`):
  *   - the Claude API, straight, when `ANTHROPIC_API_KEY` is set:  no program to start for each call
  *   - `claude -p` otherwise, signed in as the person
  * - Injected, so a test can answer with a fake.

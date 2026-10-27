@@ -1,8 +1,8 @@
 import { readFileSync } from "fs"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { parseSpellProject, registerTestComponentPack } from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
+import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
 
 /**
  * A `.spell` file written as spellx (epic `elemental-spell` P12):  `SX.SpellxWriter`.

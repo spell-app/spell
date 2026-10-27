@@ -1,12 +1,12 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import type { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { getKnownType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { getKnownType } from "spell/parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt } from "spell-parser/spell/rules/classes"
+import { DrawIt } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `has_parts` rule:  a view's PARTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56).

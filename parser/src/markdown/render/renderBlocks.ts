@@ -1,5 +1,5 @@
 import { clamp, slug } from "spell/util"
-import { MD } from "spell-parser/markdown"
+import { MD } from "spell/parser/markdown"
 
 /**
  * An `MD.Block` tree => `MD.Markup`:  PLAIN HTML tags (what the GFM spec expects), or `ui-*` elements (`ui: true`).

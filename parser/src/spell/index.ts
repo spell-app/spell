@@ -1,11 +1,11 @@
 /**
  * Master import file for spell language.
  * - All other files MUST only import from here (or a direct peer file):
- *   reaching into a leaf file from outside `spell-parser/spell` risks circular import problems.
+ *   reaching into a leaf file from outside `spell/parser/spell` risks circular import problems.
  * - NOTE: this barrel is also pulled into the server:
- *   spaces' `project-utils.ts` does `import { SP } from "spell-parser/spell"`,
+ *   spaces' `project-utils.ts` does `import { SP } from "spell/parser/spell"`,
  *   and calls `SP.SpellLocation...` / `SP.spellParser.compile()` directly.
- * - NOTE: its project groups are spaces' (`spell-app/spaces`):  load them before reading a path -- see `SpellSetup`.
+ * - NOTE: its project groups are spaces' (`spell/app/spaces`):  load them before reading a path -- see `SpellSetup`.
  *   - So nothing reachable from here can rely on browser-only globals at module-evaluation time.
  *   - Methods that only run client-side are fine:  the server just never calls them.
  * - NOTE: nothing here imports `core`'s code -- only its types file.
@@ -15,7 +15,7 @@
 
 /**
  * All SpellParser code as `SP` barrel.
- * - Prefer importing as `import { SP } from "spell-parser/spell"` when possible.
+ * - Prefer importing as `import { SP } from "spell/parser/spell"` when possible.
  */
 export * as SP from "./"
 

@@ -14,8 +14,8 @@ import {
   TextToken,
   WhitespaceToken,
   WordToken
-} from "spell-parser/parser/tokenizer/Tokens"
-import { Tokenizer } from "spell-parser/parser/tokenizer/Tokenizer"
+} from "spell/parser/parser/tokenizer/Tokens"
+import { Tokenizer } from "spell/parser/parser/tokenizer/Tokenizer"
 
 // Turn off tokenizer warnings in the console
 // Tokenizer.prototype.logger.setDebugLevel("ERROR")

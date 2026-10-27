@@ -5,9 +5,9 @@
  * - The actual rule definitions (`symbol`, `keyword`, `subrule`, `list`, `choices`, `sequence`, ...) live in
  *   `rulex.ts`; this file only holds the parser class and its helper methods.
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { Parser } from "spell-parser/parser/Parser"
+import { Parser } from "spell/parser/parser/Parser"
 import { RulexTokenizer } from "./RulexTokenizer"
 
 export class RulexParser extends Parser {

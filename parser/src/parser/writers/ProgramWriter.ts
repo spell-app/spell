@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { Writer } from "./Writer"
 import {
@@ -19,7 +19,7 @@ import { type Naming, type NameKind } from "./Naming"
  * ### `ProgramWriter`
  * What every writer of a PROGRAM shares, whatever language it writes (epic `python-target` P4):
  * what it knows of the project, and so what each value is.
- * - `P.JSWriter` (and `P.TSWriter` on it) and `spell-parser/py`'s `PY.PyBaseWriter` (and `PY.PyWriter` on it) extend it.
+ * - `P.JSWriter` (and `P.TSWriter` on it) and `spell/parser/py`'s `PY.PyBaseWriter` (and `PY.PyWriter` on it) extend it.
  *   It writes no code itself.
  * - What the whole project says, before writing any of it:  `forProject()`, a `WriterProject`.
  * - What a value is, as far as writing it goes:  `kindOf()` -- text, a number, a choice, a list, a class.

@@ -7,7 +7,7 @@
  */
 import pluralize from "pluralize"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /** English's inflector:  see the file's docstring. */
 export const englishInflector = new P.Inflector({

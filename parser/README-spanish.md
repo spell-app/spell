@@ -15,7 +15,7 @@ It's a Spell program, written in Spanish, and it compiles:
   }
 ```
 
-_Line 9 of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Carta.es.spell),
+_Line 9 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
 `- "es una figura" si su rango es jota, dama o rey`, as the compiler writes it (below, "Try it")._
 
 Spanish is Spell's second human language.
@@ -26,7 +26,7 @@ the same editor.
 The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `class Fundación`.
 
 The proof is a whole game.
-[Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/) is the Solitaire example
+[Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, line for line, cards and all, as Solitaire was in the outline style before it was spellx:
 it deals, plays and passes six tests, two of them its jokers', which Solitaire has since dropped.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
@@ -271,9 +271,9 @@ espadas
   built-in types are Spanish's.
 - `si no:` and `de lo contrario` go back out a level, as `otherwise` does, and an accented word is one word to double-click.
 - The editor speaks the PAGE's language, the document's `lang`, else the browser's:
-  "Guardar" where an English browser gets "Save" ([README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md)).
+  "Guardar" where an English browser gets "Save" ([README-app](https://github.com/spell-app/spell/blob/main/app/README-app.md)).
 - The language server's labels (hover, completion, the Define fix, the Type Explorer) speak the FILE's:
-  `declarado en`, in any editor ([README-lsp](https://github.com/spell-app/spell-app/blob/main/README-lsp.md)).
+  `declarado en`, in any editor ([README-lsp](https://github.com/spell-app/spell/blob/main/app/README-lsp.md)).
 
 ### Spell UI in Spanish
 
@@ -290,14 +290,14 @@ devolver <es-contenedor>
 			<es-elemento onClick={jugar solo}>Jugar solo</es-elemento>
 ```
 
-_From [Solitario.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Solitario.es.spell),
+_From [Solitario.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spell),
 its `para dibujarlo`._
 
 - Tag and attribute names are plain ASCII, `es-boton`, `tamano`;  values keep their accents,
   and are found without them too:  `pequeno` finds `pequeño`.
 - All 104 components have their Spanish beside their English, `UIButton.es.ts` beside `UIButton.en.ts`,
   and only a Spanish page loads it.
-- How the names work, and the page that checks them:  [Spell UI's runtime page](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md#vocabularies-and-localization).
+- How the names work, and the page that checks them:  [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#vocabularies-and-localization).
 
 ## How it works:  one set of rules, two sets of words
 
@@ -465,15 +465,15 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 | the translator | its passes in [src/spell/translate/](src/spell/translate/);  the command in [translateProject.ts](src/cli/translateProject.ts), its review page in [NamesReview.ts](src/cli/NamesReview.ts), Claude in [claudeRunners.ts](src/cli/claudeRunners.ts), the timing in [translateTimes.ts](src/cli/translateTimes.ts) |
 | the Spanish glossary of names, shared by every project | [glossary.json5](src/spell/languages/es/glossary.json5) |
 | the runtime's messages | [core's messages.ts](src/core/messages.ts), and `spell_core`'s [messages.py](src/py/core/spell_core/messages.py) |
-| the Spanish example | [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/), and its snapshots in [tests/spell/__examples__/](https://github.com/spell-app/spell-app/tree/main/tests/spell/__examples__/) |
-| Spell UI's Spanish | `UI<Name>.es.ts` beside each component, and [components.es.ts](https://github.com/spell-app/spell-ui/blob/main/src/components/components.es.ts) for what many share |
-| the editor's and the language server's words | [AppTexts.es.ts](https://github.com/spell-app/spell-app/blob/main/src/app/ui/AppTexts.es.ts), [LspTexts.es.ts](https://github.com/spell-app/spell-app/blob/main/src/lsp/LspTexts.es.ts) |
+| the Spanish example | [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/), and its snapshots in [tests/spell/__examples__/](https://github.com/spell-app/spell/tree/main/app/tests/spell/__examples__/) |
+| Spell UI's Spanish | `UI<Name>.es.ts` beside each component, and [components.es.ts](https://github.com/spell-app/spell/blob/main/ui/src/components/components.es.ts) for what many share |
+| the editor's and the language server's words | [AppTexts.es.ts](https://github.com/spell-app/spell/blob/main/app/src/app/ui/AppTexts.es.ts), [LspTexts.es.ts](https://github.com/spell-app/spell/blob/main/app/src/lsp/LspTexts.es.ts) |
 
 ## See also
 
 - [README-parser](README-parser.md#spell-in-another-human-language):  one rule's code in both languages, and how a third starts
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
-- [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
+- [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
 - [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
-- [Spell UI's runtime page](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
+- [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
 - [spell-parser's README](README.md):  the language, its pipeline, and every page of the repo

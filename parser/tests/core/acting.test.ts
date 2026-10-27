@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { App, core, List, View } from "spell-parser/core"
-import { shortcutMatches } from "spell-parser/core/acting"
+import { App, core, List, View } from "spell/parser/core"
+import { shortcutMatches } from "spell/parser/core/acting"
 
 /**
  * Running actions (`acting.ts`, epic `elemental-spell` P10):  the one way every key, click and menu item runs one,

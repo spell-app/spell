@@ -1,7 +1,7 @@
 import flattenDeep from "lodash/flattenDeep"
 
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { Rule } from "./Rule"
 

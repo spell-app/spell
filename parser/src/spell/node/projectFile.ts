@@ -1,7 +1,7 @@
 import { existsSync } from "fs"
 import { resolve } from "path"
 
-import { PROJECT_FILE, PROJECT_FILES } from "spell-parser/spell/spell.types"
+import { PROJECT_FILE, PROJECT_FILES } from "spell/parser/spell/spell.types"
 
 /**
  * A project's file on disk, by whichever name it has:  `__project.json5`, or an old `project.json`

@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `shortcut_keys` rule:  ONE keyboard shortcut, written as its keys joined by `+`, no spaces:

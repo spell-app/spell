@@ -1,5 +1,5 @@
 import { assert, proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `inline_whitespace` rule:  inline whitespace only, e.g. spaces/tabs between tokens on same line.

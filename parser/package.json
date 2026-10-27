@@ -8,57 +8,57 @@
   "type": "module",
   "exports": {
     "./parser": {
-      "spell-parser-source": "./src/parser/index.ts",
+      "spell-source": "./src/parser/index.ts",
       "types": "./dist-types/src/parser/index.d.ts",
       "default": "./src/parser/index.ts"
     },
     "./parser/rulex": {
-      "spell-parser-source": "./src/parser/rulex/index.ts",
+      "spell-source": "./src/parser/rulex/index.ts",
       "types": "./dist-types/src/parser/rulex/index.d.ts",
       "default": "./src/parser/rulex/index.ts"
     },
     "./parser/test": {
-      "spell-parser-source": "./src/parser/test/index.ts",
+      "spell-source": "./src/parser/test/index.ts",
       "types": "./dist-types/src/parser/test/index.d.ts",
       "default": "./src/parser/test/index.ts"
     },
     "./markdown": {
-      "spell-parser-source": "./src/markdown/index.ts",
+      "spell-source": "./src/markdown/index.ts",
       "types": "./dist-types/src/markdown/index.d.ts",
       "default": "./src/markdown/index.ts"
     },
     "./core": {
-      "spell-parser-source": "./src/core/index.ts",
+      "spell-source": "./src/core/index.ts",
       "types": "./dist-types/src/core/index.d.ts",
       "default": "./src/core/index.ts"
     },
     "./py": {
-      "spell-parser-source": "./src/py/index.ts",
+      "spell-source": "./src/py/index.ts",
       "types": "./dist-types/src/py/index.d.ts",
       "default": "./src/py/index.ts"
     },
     "./spell": {
-      "spell-parser-source": "./src/spell/index.ts",
+      "spell-source": "./src/spell/index.ts",
       "types": "./dist-types/src/spell/index.d.ts",
       "default": "./src/spell/index.ts"
     },
     "./spell/test": {
-      "spell-parser-source": "./src/spell/test/index.ts",
+      "spell-source": "./src/spell/test/index.ts",
       "types": "./dist-types/src/spell/test/index.d.ts",
       "default": "./src/spell/test/index.ts"
     },
     "./spellx": {
-      "spell-parser-source": "./src/spellx/index.ts",
+      "spell-source": "./src/spellx/index.ts",
       "types": "./dist-types/src/spellx/index.d.ts",
       "default": "./src/spellx/index.ts"
     },
     "./cli": {
-      "spell-parser-source": "./src/cli/index.ts",
+      "spell-source": "./src/cli/index.ts",
       "types": "./dist-types/src/cli/index.d.ts",
       "default": "./src/cli/index.ts"
     },
     "./*": {
-      "spell-parser-source": [
+      "spell-source": [
         "./src/*.ts",
         "./src/*.tsx",
         "./src/*/index.ts",
@@ -72,7 +72,7 @@
       "default": "./src/*"
     },
     "./*.ts": {
-      "spell-parser-source": "./src/*.ts",
+      "spell-source": "./src/*.ts",
       "types": "./dist-types/src/*.d.ts",
       "default": "./src/*.ts"
     },

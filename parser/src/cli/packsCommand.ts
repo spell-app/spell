@@ -1,7 +1,7 @@
 /**
  * `spell translate check|fix`:  is a language pack complete, against English?
  * - `fix` writes stubs for what it lacks (epic `spanish` P7).
- * - The checking and the stub writing are `spell-parser/spell/languages/packs` (node-free, on text);
+ * - The checking and the stub writing are `spell/parser/spell/languages/packs` (node-free, on text);
  *   this file reads and writes the rule files, asks `claude` for drafts, and prints.
  * - Their work is HERE, not behind spell-app's `"language"` hook:  it needs no project, only spell-parser's own files.
  * - Loaded only when one of them runs (`commands.ts` imports it dynamically):  it loads all of spell.
@@ -12,8 +12,8 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { CLI } from "spell/cli"
-import { SP } from "spell-parser/spell"
-import type { PacksOptions } from "spell-parser/cli"
+import { SP } from "spell/parser/spell"
+import type { PacksOptions } from "spell/parser/cli"
 import {
   AI_MARKER,
   checkPack,
@@ -24,7 +24,7 @@ import {
   type PackReport,
   type PackSources,
   type PackStub
-} from "spell-parser/spell/languages/packs"
+} from "spell/parser/spell/languages/packs"
 
 /**
  * `spell translate check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.

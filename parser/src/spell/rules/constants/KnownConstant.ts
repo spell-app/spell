@@ -1,5 +1,5 @@
 import { NONE, proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import { SpellConstant } from "./SpellConstant"
 
 /**

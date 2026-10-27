@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
 
 /**
  * The spellx view (epic `elemental-spell` P6, J30):  a `.spellx` file's chunk tree, built from the tokens spell's

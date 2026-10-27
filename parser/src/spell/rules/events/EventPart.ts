@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-parser/spell/rules/expressions/SpellExpression"
+import { SpellExpression } from "spell/parser/spell/rules/expressions/SpellExpression"
 
 /**
  * `event_part` rule:  in an event's handler, who it concerns (epic `elemental-spell` P9, Q26).

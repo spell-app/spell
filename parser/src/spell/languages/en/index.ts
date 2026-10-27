@@ -3,7 +3,7 @@
  * - Its rules' syntax and tests are each rule module's `<module>.en.ts`, assembled into `spellParser` (`rules/index.ts`).
  * - The default:  a project that names no language is English.
  */
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 import { englishAgreement } from "./agreement"
 import { englishInflector } from "./inflector"

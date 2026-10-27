@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { PY } from "spell-parser/py"
-import { SP } from "spell-parser/spell"
+import { PY } from "spell/parser/py"
+import { SP } from "spell/parser/spell"
 
 /** Declarations holding just `statements`, as a project's would. */
 function declarationsOf(...statements: SP.SpellDeclaration[]): SP.SpellDeclarationsData {

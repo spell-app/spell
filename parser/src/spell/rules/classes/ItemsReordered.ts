@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `items_reordered` rule:  people may reorder a list's items on the page, by dragging them (epic `outline-spell` P30).

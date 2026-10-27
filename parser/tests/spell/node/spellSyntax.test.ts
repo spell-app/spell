@@ -2,14 +2,14 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 import {
   SPELL_SYNTAX_FILE,
   purposeOf,
   spellSyntax,
   spellSyntaxFileFor,
   withoutComments
-} from "spell-parser/spell/node/spellSyntax"
+} from "spell/parser/spell/node/spellSyntax"
 
 /** Where `yarn spell:gen:syntax` writes the spell syntax tables. */
 const SYNTAX_FOLDER = resolve(import.meta.dirname, "../../../src/spell")

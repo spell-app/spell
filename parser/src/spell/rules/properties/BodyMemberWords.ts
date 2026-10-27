@@ -1,6 +1,6 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SubjectRule } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SubjectRule } from "spell/parser/spell/rules/types"
 import { MemberWords } from "./MemberWords"
 
 /**

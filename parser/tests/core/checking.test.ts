@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { checkEntry, jsonSchemaFor, kindOf, List, Saver, Thing } from "spell-parser/core"
+import { checkEntry, jsonSchemaFor, kindOf, List, Saver, Thing } from "spell/parser/core"
 
 /**
  * A saved entry checked against its class, and the JSON Schema VS Code checks the same file with

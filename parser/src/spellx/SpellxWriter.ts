@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * A `.spell` file written as SPELLX (epic `elemental-spell` P12, Q19):
@@ -20,7 +20,7 @@ import { SP } from "spell-parser/spell"
  *   - So is a member whose drawing has the web's own elements, `<div>`, `<button>` (J83):  `drawsBareTags()`.
  * - Comments and blank lines stay as they are;  so do a body's lines.
  * - NEVER throws:  a line it can't write as a tag goes in a `<spell>` chunk.
- * - Above `spell-parser/spell` in the import graph, as the rest of `SX`.
+ * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
 export class SpellxWriter {
   /**

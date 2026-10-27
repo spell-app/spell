@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/cli/` of the `spell-parser` package (`spell-parser/cli`).
+when working with code in this folder, `src/cli/` of the `spell-parser` package (`spell/parser/cli`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -28,7 +28,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It MUST load fast:  `spell help` loads every repo's list.  It imports nothing of spell.
   - The kit's `spell commands` check reads its TEXT:  keep each name a literal at its `spell.command("...")` call.
 - Their WORK is NOT here yet:
-  it comes through the `"language"` hook, which [spell-app's hooks](../../../spell-app/src/cli/hooks.ts) provide.
+  it comes through the `"language"` hook, which [spell-app's hooks](../../../app/src/cli/hooks.ts) provide.
   - Why:  every one finds projects the app's way:
     addresses like `@spell/examples/solitaire`, groups, the editor's language service.
   - Without spell-app, each says "clone spell-app" and exits 2 (`CLI.needHook()`).
@@ -79,7 +79,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [translateTimes.ts](translateTimes.ts), here, copies each project to a scratch folder (without its own lists),
     runs it in each mode (`cold`, `glossary`, `update`) and tier, prints a table of min, median and max, writes
     `--json`, and deletes every scratch folder, a failed run's too
-- [index.ts](index.ts) (`spell-parser/cli`, here and from every other repo):  TYPES only, today.
+- [index.ts](index.ts) (`spell/parser/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape
     - each command's flags:  `CompileOptions`, `LintOptions` ...
@@ -91,7 +91,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 As WWOD §20, plus:
 
 - In the repo's [tests/cli/](../../tests/cli/):  the command list's names and help.
-- The commands themselves run end to end in [spell-app's tests](../../../spell-app/tests/cli/cli.test.ts):
+- The commands themselves run end to end in [spell-app's tests](../../../app/tests/cli/cli.test.ts):
   their work is spell-app's.
 - `spell translate check|fix`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
 - `spell translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
@@ -103,4 +103,4 @@ As WWOD §20, plus:
   in the same file;
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
-  the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).
+  the command end to end, spell-app's [cli.test.ts](../../../app/tests/cli/cli.test.ts).
