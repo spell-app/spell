@@ -18,8 +18,7 @@
     .what { font-size: 12.5px; fill: #4A4D5C; text-anchor: middle; }
     .soon { font-size: 15px; font-weight: 700; text-anchor: middle; fill: #3D5A2A; }
     .soonwhat { font-size: 12.5px; fill: #4F7037; text-anchor: middle; font-style: italic; }
-    .tree { font-size: 17px; font-weight: 700; text-anchor: middle; fill: #FFFFFF; }
-    .treesub { font-size: 12px; text-anchor: middle; fill: #E4DFFA; }
+    .tree { font-size: 30px; font-weight: 700; text-anchor: middle; fill: #FFFFFF; }
     .box { fill: #EFECFB; stroke: #6550CA; stroke-width: 2; }
     .coming { fill: #F2F7EE; stroke: #7BA05B; stroke-width: 2; stroke-dasharray: 6 4; }
     .edge { fill: none; stroke: #6550CA; stroke-width: 1.8; }
@@ -59,8 +58,7 @@
 
   <!-- the tree -->
   <circle cx="400" cy="236" r="78" fill="#6550CA" stroke="#4A3AA0" stroke-width="2.5"/>
-  <text class="tree" x="400" y="232">the Spell tree</text>
-  <text class="treesub" x="400" y="252">one, in the middle</text>
+  <text class="tree" x="400" y="246">Spell</text>
 
   <!-- out -->
   <rect class="box" x="560" y="116" width="200" height="48" rx="12"/>
