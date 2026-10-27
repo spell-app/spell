@@ -37241,6 +37241,31 @@
           "description": "Scroll each page so its section titles stick."
         },
         {
+          "key": "schemes",
+          "text": "Schemes",
+          "description": "Accessible name of the schemes' menu."
+        },
+        {
+          "key": "both",
+          "text": "Light & dark",
+          "description": "Show each page in light and dark, side by side."
+        },
+        {
+          "key": "one",
+          "text": "One scheme",
+          "description": "Show each page once, in the scheme picked."
+        },
+        {
+          "key": "light",
+          "text": "Light",
+          "description": "The light half of a page's pair."
+        },
+        {
+          "key": "dark",
+          "text": "Dark",
+          "description": "The dark half of a page's pair."
+        },
+        {
           "key": "reload",
           "text": "Reload",
           "description": "Reload a page, or all of them."
@@ -37342,18 +37367,18 @@
         },
         {
           "key": "overridesTip",
-          "text": "{place} reads it, and sets its own on some of its elements:  a tuning doesn't reach those",
-          "description": "A reader's tip:  the page also sets the token below the page's root."
+          "text": "{place} reads it (also set on its own elements)",
+          "description": "A reader's tip:  the page also sets the token below the page's root, where a tuning doesn't reach."
         },
         {
-          "key": "notReadTip",
-          "text": "{place} doesn't read it",
-          "description": "A reader's tip:  the page never reads it."
+          "key": "overridesLegend",
+          "text": "the page also sets it on its own elements",
+          "description": "The legend's half dot:  what it marks on an icon."
         },
         {
-          "key": "unknownTip",
-          "text": "{place} hasn't loaded yet",
-          "description": "A reader's tip:  no answer from the page yet."
+          "key": "overridesLegendTip",
+          "text": "The page also sets it on its own elements:  a tuning doesn't reach those",
+          "description": "The legend's half dot's tip."
         },
         {
           "key": "notSet",
