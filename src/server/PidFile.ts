@@ -53,14 +53,8 @@ export class PidFile {
     const info = this.read()
     if (!info) return undefined
     const base = `http://127.0.0.1:${info.port}`
-    try {
-      const answer = (await (
-        await fetch(`${base}${SERVER_API}`, { signal: AbortSignal.timeout(1000) })
-      ).json()) as ServerInfo
-      return answer.root === this.root ? { ...answer, base } : undefined
-    } catch {
-      return undefined
-    }
+    const answer = await serverAt(base)
+    return answer?.root === this.root ? { ...answer, base } : undefined
   }
 
   /**
@@ -133,6 +127,23 @@ export class PidFile {
       return
     }
     await endProcess(info.pid, STOP_WAIT_MS)
+  }
+}
+
+/**
+ * What the server at `base` (`http://127.0.0.1:<port>`) says of itself at `SERVER_API`:  its `ServerInfo`;
+ * `undefined` when nothing answers within a second, or the answer isn't a server's info (it has no `root`).
+ * - any server's, not only a pid file's:  `PidFile.status()` asks its file's, then checks it serves this root;
+ *   spell-epic's VS Code extension asks the one a page came from (its epic server answers more:  `EpicServerInfo`)
+ * - NEVER throws
+ */
+export async function serverAt(base: string): Promise<ServerInfo | undefined> {
+  try {
+    const answer = await fetch(`${base}${SERVER_API}`, { signal: AbortSignal.timeout(1000) })
+    const info = (await answer.json()) as Partial<ServerInfo> | null
+    return typeof info?.root === "string" ? (info as ServerInfo) : undefined
+  } catch {
+    return undefined
   }
 }
 

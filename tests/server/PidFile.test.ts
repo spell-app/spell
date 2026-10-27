@@ -5,6 +5,30 @@ import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
+import { serveHandler } from "spell/server/test/serve"
+
+describe("serverAt():  what the server at an address says of itself", () => {
+  it("its info;  undefined for an answer that isn't a server's info, or nothing there", async () => {
+    const info = { pid: 1, port: 2, root: "/somewhere", started: "2026-10-26T00:00:00.000Z" }
+    const server = await serveHandler(
+      new SRV.Router().get(SRV.SERVER_API, (_request, reply) => reply.json(info)).handle
+    )
+    // a server with no such call:  a 404, its `{ error }` as JSON
+    const other = await serveHandler(
+      new SRV.Router().all("*", () => {
+        throw new SRV.HttpError(404, "no such call")
+      }).handle
+    )
+    try {
+      expect(await SRV.serverAt(server.base)).toEqual(info)
+      expect(await SRV.serverAt(other.base)).toBeUndefined()
+    } finally {
+      await server.close()
+      await other.close()
+    }
+    expect(await SRV.serverAt(server.base)).toBeUndefined()
+  })
+})
 
 describe("newestChange()", () => {
   let folder: string

@@ -175,7 +175,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A process that's running, or gone
 
-- **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`)
+- **It is:**  `PidFile`, `isProcessAlive()`, `newestChange()` (`spell/server`);  `serverAt(base)`, what any server
+  says of itself at `/api/server` (epic `coherence` P24)
 - **Use it when:**  recording a background process to find, stop or restart it later.
 - **Flag:**  `process\.kill\(\w+, 0\)`
 - **Score:**  `process\.kill\(\w+, 0\)` · home `src/server/PidFile.ts`
@@ -184,6 +185,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - `spell-epic/src/window.mjs`, `spell-epic/src/command/CheckoutServers.ts`, `spell-epic/src/tools/AskListeners.ts`
   - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7.
   - Fine:  `spell-epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
+  - spell-epic's VS Code extension on `isProcessAlive()` and `serverAt()` since P24;  the same read of
+    `/api/server` left in the kit's `src/server/mainServer.ts` (`liveInfo()`) and spell-epic's
+    `spell-epic/src/server/EpicServer.ts` (`epicServerOn()`)
 
 ### A free port, a server that stops cleanly
 
@@ -192,6 +196,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `\.listen\(0|address\(\)\.port`
 - **Score:**  `\.listen\(0\b` · home `src/server/ports.ts`
 - **Copies:**  `--`
+
+### A server's requests and answers
+
+- **It is:**  `Router`, `toListener()` (its answer when nothing answers, or a handler fails), `HttpError` (a status,
+  answered as `{ error }`), `readBody()` / `parseBodies()`:  `spell/server`, each by its file where a bundle must stay
+  lean (`spell/server/Router` ...)
+- **Use it when:**  any HTTP server, the smallest too:  its failures answered as every Spell server's are.
+- **Flag:**  `writeHead\(|createServer\(\((req|request)\b`
+- **Copies:**  `--`:  spell-epic's extension's window bridge on them since epic `coherence` P24
 
 ### A path a request asked for
 
@@ -227,6 +240,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Moved from spell-epic in epic `coherence` P7, with about 20 git runners, 10 checkout finders and 9 real-path
     helpers across spell-epic and the kit;  Spell UI's design export (`DesignExport.readGit()`) since P23.
   - Fine:  a test's own scratch repo (`spawnSync("git", ...)` in a test);  `spell-epic/src/tool/InboxPoller.mjs`.
+  - spell-app's VS Code extension asks `checkoutOf()` whether a window's checkout is a worktree since epic
+    `coherence` P24 (its `.git` FILE alone took a submodule for one)
 
 ### The shared content folder
 
@@ -318,6 +333,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - `spell-epic/src/tools/AskListeners.ts`, `spell-epic/src/tools/_assets/spell-doc-comments.js`
   - sweep 1 found about 30 more:  the docs pages' runtime and comments, Spell UI's site, the app's runner and
     editor, the parser's command line (sleeps:  `await after(0.25)` instead)
+  - the VS Code extensions:  spell-epic's views wait for their page server on `waitUntil()` since epic `coherence`
+    P24;  left:  spell-app's three debounces (`extension.ts`, `ElementsHelp.ts`, `RunnerPanel.ts`, sweep 2's
+    quiet wait) and the window bridge's close-window delay (`WindowBridge.ts`)
 
 ### Once, however often asked
 
@@ -338,6 +356,19 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `from ["'](esbuild|vite|vite-plus)["']` outside a config:  a build of its own
 - **Score:**  `import \{[^}]*\bbuild\b[^}]*\} from "esbuild"|\b(vite|esbuild)\.build\(` · home `src/server/Bundle.ts`
 - **Copies:**  `--`
+
+### A VS Code extension's build
+
+- **It is:**  `buildExtension({ folder, external, constants, tsconfig, logOverride })` (`spell/toolchain/buildExtension`,
+  `src/toolchain/buildExtension.ts`;  epic `coherence` P24):  an extension's entry bundled into one CommonJS file
+  for node 20, `vscode` left out, every name found by `sourceNames()`;  then LOADED once with `vscode` stubbed, so a
+  crash as it loads fails the build
+- **Use it when:**  building a VS Code extension;  its `build.mjs` keeps its own steps around it.
+- **Flag:**  `external: \["vscode"`
+- **Copies:**  `--` since P24:  `spell-app/vscode/build.mjs` and `spell-epic/vscode/build.mjs` (only spell-epic's
+  checked that its bundle loads)
+  - Fine:  `src/toolchain/buildExtension.ts` imports esbuild's `build()`, which "Building a bundle on demand"'s Score
+    counts:  it IS this mechanism's home
 
 ### Pages linking each other
 
@@ -412,6 +443,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `catch \{\s*\}|catch \(\w+\) \{\s*\}|^\s*window\.(?!name\b)\w+ = ` · home `src/util/spell/safely.ts`
   · not `spell-epic/src/demo/`, `spell-ui/src/tools/`
 - **Copies:**  `--`
+  - left (epic `coherence` P24):  spell-app's extension's `ElementsHelp.safely()`:  the kit's `Logger` is a class
+    VS Code's output channel isn't, and that channel prints an error as its message alone, without its stack
 - **History:**  WWOD named all four for months before any existed (epic `coherence` I2).
 
 ### Logging
@@ -797,6 +830,7 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
   TocIndex's apostrophe rule (its ids are saved);  `InboxPoller.mjs` (node's built-ins only)
   - the docs pages' heading ids on `slug()` since epic `coherence` P22 (the runtime's `headingSlug()`, cut at 48), and
     the toolbar's access letters on `withoutAccents()`
+  - spell-epic's VS Code extension's `escapeAttribute()` on `escapeHTML()` since P24
   - Fine:  `spell-epic/src/tools/_assets/spell-doc-toolbar.js`:  its `titleWithKey()` takes a title apart (`NFD`) to
     mark the letter in place, it folds nothing
 
