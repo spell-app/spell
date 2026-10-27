@@ -46,7 +46,7 @@ describe("<ui-docs-theme-bench>", () => {
     for (const page of root.querySelectorAll("figure.page")) expect(page.querySelectorAll(".frame")).toHaveLength(2)
     component.schemes = "one"
     await ElementFixture.settle()
-    expect(component.frameKeys).toEqual(["epic:shown", "ui:shown", "notebook:shown", "editor:shown"])
+    expect(component.frameKeys).toEqual(["editor:shown", "epic:shown", "ui:shown", "notebook:shown"])
     for (const page of root.querySelectorAll("figure.page")) expect(page.querySelectorAll(".frame")).toHaveLength(1)
   })
 

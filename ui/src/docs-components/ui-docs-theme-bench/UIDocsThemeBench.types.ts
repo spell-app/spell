@@ -24,8 +24,11 @@ export type ThemeBenchText = (key: ThemeBenchTextKey, params?: Record<string, st
 // ## The places
 ////////////////
 
-/** The four places the bench shows, in its grid's order. */
-export const BenchPlaceIds = ["epic", "ui", "notebook", "editor"] as const
+/**
+ * The four places the bench shows, in its grid's order, two by two (Owen):
+ * the editor and the epic page on top, Spell UI and the notebook under them.
+ */
+export const BenchPlaceIds = ["editor", "epic", "ui", "notebook"] as const
 
 /** One of them. */
 export type BenchPlaceId = (typeof BenchPlaceIds)[number]
